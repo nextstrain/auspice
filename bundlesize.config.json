@@ -9,16 +9,16 @@
       "maxSize": "75 kB"
     },
     {
-      "path": "./dist/auspice.chunk.core-vendors.bundle.08ffc3a769477339a352.js",
+      "path": "./dist/auspice.chunk.core-vendors.bundle.9b6a9c4b675fe63ec02a.js",
       "maxSize": "220 kB"
     },
     {
-      "path": "./dist/auspice.chunk.other-vendors.bundle.fb028f17c0ac14d133af.js",
-      "maxSize": "100 kB"
+      "path": "./dist/auspice.chunk.other-vendors.bundle.99f3458f271574f53feb.js",
+      "maxSize": "60 kB"
     },
     {
       "path": "./dist/auspice.chunk.locales.bundle.*.js",
-      "maxSize": "50 kB"
+      "maxSize": "100 kB"
     }
   ]
 }

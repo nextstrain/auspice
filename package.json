@@ -89,6 +89,7 @@
     "leaflet-gesture-handling": "^1.1.8",
     "linspace": "^1.0.0",
     "lodash": "^4.17.15",
+    "lodash-webpack-plugin": "^0.11.5",
     "marked": "^0.7.0",
     "mousetrap": "^1.6.2",
     "node-fetch": "^2.1.2",

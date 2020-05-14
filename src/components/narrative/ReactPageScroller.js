@@ -3,7 +3,7 @@
 
 import React from "react";
 import PropTypes from "prop-types"
-import _ from "lodash";
+import {isNull, isNil, isEqual} from "lodash";
 
 const previousTouchMove = Symbol();
 const scrolling = Symbol();
@@ -55,7 +55,7 @@ export default class ReactPageScroller extends React.Component {
         };
 
         this[touchMove] = (event) => {
-            if (!_.isNull(this[previousTouchMove])) {
+            if (!isNull(this[previousTouchMove])) {
                 if (event.touches[0].clientY > this[previousTouchMove]) {
                     this[scrollWindowUp](SCROLL_THRESHOLD);
                 } else {
@@ -67,10 +67,10 @@ export default class ReactPageScroller extends React.Component {
         };
 
         this[keyPress] = (event) => {
-            if (_.isEqual(event.keyCode, KEY_UP)) {
+            if (isEqual(event.keyCode, KEY_UP)) {
                 this[scrollWindowUp](SCROLL_THRESHOLD);
             }
-            if (_.isEqual(event.keyCode, KEY_DOWN)) {
+            if (isEqual(event.keyCode, KEY_DOWN)) {
                 this[scrollWindowDown](SCROLL_THRESHOLD);
             }
         };
@@ -82,14 +82,14 @@ export default class ReactPageScroller extends React.Component {
         this[addNextComponent] = (onMountedComponents) => {
             let componentsToRender = [];
 
-            if (!_.isNil(onMountedComponents)) {
+            if (!isNil(onMountedComponents)) {
                 componentsToRender = [...onMountedComponents];
             }
 
             componentsToRender = [...componentsToRender, ...this.state.componentsToRender];
 
             if (!componentsToRender[this.state.componentIndex + 1]) {
-                if (!_.isNil(this.props.children[this.state.componentIndex + 1])) {
+                if (!isNil(this.props.children[this.state.componentIndex + 1])) {
                     componentsToRender.push(
                         <div key={this.state.componentIndex + 1}
                              ref={c => this["container_" + (this.state.componentIndex + 1)] = c}
@@ -103,7 +103,7 @@ export default class ReactPageScroller extends React.Component {
         };
 
         this[scrollWindowUp] = (amount) => {
-            if (!_.isNil(this["container_" + (this.state.componentIndex - 1)]) && !this[scrolling]) {
+            if (!isNil(this["container_" + (this.state.componentIndex - 1)]) && !this[scrolling]) {
 
                 var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
                 if (element.scrollTop === 0 && amount >= SCROLL_THRESHOLD) {
@@ -128,7 +128,7 @@ export default class ReactPageScroller extends React.Component {
         };
 
         this[scrollWindowDown] = (amount) => {
-            if (!_.isNil(this["container_" + (this.state.componentIndex + 1)]) && !this[scrolling]) {
+            if (!isNil(this["container_" + (this.state.componentIndex + 1)]) && !this[scrolling]) {
 
                 var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
                 if (element.scrollTop === element.scrollHeight - element.clientHeight && amount >= SCROLL_THRESHOLD) {
@@ -166,7 +166,7 @@ export default class ReactPageScroller extends React.Component {
       /* add the first component (react element) to be rendered */
       const componentsToRender = [];
 
-      if (!_.isNil(this.props.children[this.state.componentIndex])) {
+      if (!isNil(this.props.children[this.state.componentIndex])) {
         componentsToRender.push(
           <div
             key={this.state.componentIndex}
@@ -208,9 +208,9 @@ export default class ReactPageScroller extends React.Component {
 
         const componentsToRender = [...this.state.componentsToRender];
 
-        if (!!_.isEqual(componentIndex, number)) return;
+        if (!!isEqual(componentIndex, number)) return;
 
-        if (!_.isNil(this["container_" + (number)]) && !this[scrolling]) {
+        if (!isNil(this["container_" + (number)]) && !this[scrolling]) {
 
             this[scrolling] = true;
             this._pageContainer.style.transform = `translate3d(0, ${(number) * -100}%, 0)`;
@@ -219,7 +219,7 @@ export default class ReactPageScroller extends React.Component {
                 pageOnChange(number + 1);
             }
 
-            if (_.isNil(this["container_" + (number + 1)]) && !_.isNil(children[number + 1]))
+            if (isNil(this["container_" + (number + 1)]) && !isNil(children[number + 1]))
                 componentsToRender.push(
                     <div key={number + 1}
                             ref={c => this["container_" + (number + 1)] = c}
@@ -235,7 +235,7 @@ export default class ReactPageScroller extends React.Component {
                 });
             }, this.props.animationTimer + ANIMATION_TIMER)
 
-        } else if (!this[scrolling] && !_.isNil(children[number])) {
+        } else if (!this[scrolling] && !isNil(children[number])) {
 
             const componentsLength = componentsToRender.length;
 
@@ -248,7 +248,7 @@ export default class ReactPageScroller extends React.Component {
                     </div>
                 );
             }
-            if (!_.isNil(children[number + 1])) {
+            if (!isNil(children[number + 1])) {
                 componentsToRender.push(
                     <div key={number + 1}
                             ref={c => this["container_" + (number + 1)] = c}

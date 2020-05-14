@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const WebpackChunkHash = require('webpack-chunk-hash');
+const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 /* Webpack config generator */
 
@@ -64,12 +65,14 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     cleanStaleWebpackAssets: true
   });
   const plugins = devMode ? [
+    new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
     new webpack.NoEmitOnErrorsPlugin(),
     pluginHtml,
     cleanWebpackPlugin
   ] : [
+    new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
     new webpack.HashedModuleIdsPlugin({}),
     new WebpackChunkHash({algorithm: 'md5'}),
@@ -118,7 +121,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "redux",
     "leaflet(-gesture-handling)?",
     "i18next",
-    "lodash",
     "styled-components",
     "stylis",
     "@emotion"
@@ -132,7 +134,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
    * a check error if it is unadvertently changed.
    */
   const bigVendors = [
-    "d3-.*",
+    "d3-.*", // d3 is imported selectively, new usages may change the bundle
+    "lodash", // lodash is imported selectively using the lodash plugin, new usages may change the bundle
     "awesomplete",
     "react-transition-group",
     "react-icons",
