@@ -24,18 +24,12 @@ class ChooseDatasetSelect extends React.Component {
     }
     this.props.dispatch(changePage({path: newPath}));
   }
-  getDatasetOptions() {
-    return this.props.options ?
-      this.props.options.map((opt) => typeof opt === "object" ? opt : ({ value: opt, label: opt })) :
-      {};
-  }
   render() {
-    const datasetOptions = this.getDatasetOptions();
     return (
       <div style={{width: controlsWidth, fontSize: 14}}>
         <Select
           value={this.props.selected}
-          options={datasetOptions}
+          options={this.props.options || []}
           clearable={false}
           searchable={false}
           multi={false}

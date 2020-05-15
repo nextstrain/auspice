@@ -38,11 +38,8 @@ class ChooseDataset extends React.Component {
       .replace(/\/$/, '')
       .split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
-    const options = [
-      [
-        {value: displayedDataset[0], label: displayedDataset[0]}
-      ]
-    ];
+    const options = displayedDataset
+      .map((pathFragment) => [{ value: pathFragment, label: pathFragment }]);
 
     this.props.available.datasets.forEach((d) => {
       const firstField = d.request.split("/")[0];
@@ -51,17 +48,15 @@ class ChooseDataset extends React.Component {
       }
     });
 
-
     for (let idx=1; idx<displayedDataset.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
-      options[idx] = [];
       this.props.available.datasets.forEach((singleAvailableOption) => {
         /* if the parents (and their parents etc) of this choice match,
         then we add that as a valid option */
         const fields = singleAvailableOption.request.split("/");
-        if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
-          options[idx].push(fields[idx]);
+        if (checkEqualityOfArrays(fields, displayedDataset, idx) && !options[idx].find((o) => o.label === fields[idx])) {
+          options[idx].push({value: fields.slice(idx).join("/"), label: fields[idx]});
         }
       });
     }
@@ -71,7 +66,7 @@ class ChooseDataset extends React.Component {
         <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
-            key={option}
+            key={displayedDataset[optionIdx]}
             dispatch={this.props.dispatch}
             choice_tree={displayedDataset.slice(0, optionIdx)}
             selected={displayedDataset[optionIdx]}
