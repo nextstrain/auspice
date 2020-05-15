@@ -38,12 +38,13 @@ class ChooseDataset extends React.Component {
       .replace(/\/$/, '')
       .split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
-    const options = [[]];
+    const options = [[displayedDataset[0]]];
 
     this.props.available.datasets.forEach((d) => {
       const firstField = d.request.split("/")[0];
-      if (!options[0].includes(firstField)) {
-        options[0].push(firstField);
+      if (firstField == displayedDataset[0]) return;
+      if (!options[0].find((o) => o.label === firstField)) {
+        options[0].push({value: d.request, label: firstField});
       }
     });
 

@@ -26,7 +26,7 @@ class ChooseDatasetSelect extends React.Component {
   }
   getDatasetOptions() {
     return this.props.options ?
-      this.props.options.map((opt) => ({value: opt, label: opt})) :
+      this.props.options.map((opt) => typeof opt === "object" ? opt : ({ value: opt, label: opt })) :
       {};
   }
   render() {
@@ -39,7 +39,11 @@ class ChooseDatasetSelect extends React.Component {
           clearable={false}
           searchable={false}
           multi={false}
-          onChange={(opt) => {this.changeDataset(this.createDataPath(opt.value));}}
+          onChange={(opt) => {
+            if (opt.value !== this.props.selected) {
+              this.changeDataset(this.createDataPath(opt.value));
+            }
+          }}
         />
       </div>
     );
