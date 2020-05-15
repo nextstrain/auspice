@@ -47,18 +47,25 @@ const interpretRequest = (req) => {
 
 /**
  * Given a request, does the dataset exist?
- * In the future, if there is no exact match but a partial one we
- * should extend this. E.g. `["flu"]` -> `["flu", "h3n2", "ha", "3y"]`
- * In that case, we should utilise `res.redirect` as we do in the nextstrain.org server
- * @throws
  */
-const extendDataPathsToMatchAvailable = (info, availableDatasets) => {
-  const requestStrToMatch = info.parts.join("/"); // TO DO
-  /* TODO currently there must be an _exact_ match in the available datasets */
-  if (!availableDatasets.map((d) => d.request).includes(requestStrToMatch)) {
-    throw new Error(`${requestStrToMatch} not in available datasets`);
+const extendDataPathsToMatchAvailable = (res, info, availableDatasets) => {
+  let matchingDatasets = availableDatasets;
+  let i;
+  const matchDatasetRequest = (d) => d.request.split("/")[i] === info.parts[i];
+  // Filter gradually by path fragment, starting from the root
+  for (i = 0; i < info.parts.length; i++) {
+    const newMatchingDatasets = matchingDatasets.filter(matchDatasetRequest);
+    if (!newMatchingDatasets.length) break;
+    matchingDatasets = newMatchingDatasets;
   }
-  /* what we want to do is modify `info.parts` to match the available dataset, if possible */
+  // If root fragment does cannot be matched, throw
+  if (!i) throw new Error(`${info.parts.join("/")} not in available datasets`);
+  // If best match is not equal to path requested, redirect
+  if (matchingDatasets[0].request !== info.parts.join("/")) {
+    res.redirect(`./getDataset?prefix=/${matchingDatasets[0].request}`);
+    return false;
+  }
+  return true;
 };
 
 /**
