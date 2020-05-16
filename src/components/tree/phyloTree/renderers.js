@@ -172,7 +172,7 @@ export const drawBranches = function drawBranches() {
   if (!("branchTee" in this.groups)) {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
   }
-  if (this.layout === "clock" || this.layout === "unrooted" || params.isTreeSplitByTrait) {
+  if (this.layout === "clock" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
   } else {
     this.groups.branchTee
