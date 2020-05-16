@@ -126,14 +126,48 @@ const collectSubtrees = (startNode, subtree, trait, currentTraitValue, subtreeSt
   }
 }
 
+const getYValueOfNodeInSubtree = (node, trait, traitValue, currentMaxY) => {
+  if (!node.n.children) return ++currentMaxY;
+
+  // children are added to the stack before their parents, 
+  // so they should all have a y value already
+  const qualifiedChildren = node.n.children.filter(c => 
+    getTraitFromNode(c, trait) === traitValue);
+
+  return qualifiedChildren.reduce((acc, d) => acc + d.yvalue, 0) / qualifiedChildren.length;
+}
+
+const getYValueOfFirstSameTraitChild = (node, trait, traitValue) => {
+  if (!node.n.children) return node.n.yvalue;
+
+  for (const c of node.n.children) {
+    if (getTraitFromNode(c, trait) === traitValue) {
+      return c.yvalue;
+    }
+  }
+
+  return node.n.yvalue;
+}
+
+const getYValueOfLastSameTraitChild = (node, trait, traitValue) => {
+  if (!node.n.children) return node.n.yvalue;
+
+  for (const c of node.n.children.reverse()) {
+    if (getTraitFromNode(c, trait) === traitValue) {
+      return c.yvalue;
+    }
+  }
+
+  return node.n.yvalue;
+}
+
 /**
  * setSplitTreeYValues - works similarly to setYValues above,
  * but splits the tree by the given trait, grouping nodes with the
  * same trait value together 
  */
 export const setSplitTreeYValues = (nodes, trait) => {
-  // todo: this could just be a dictionary with the traitvalue as the key
-  const subtreeStack = [{subtreeNodes: [nodes[0]], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
+  const subtreeStack = [{subtreeNodes: [], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
 
   // collect all the subtrees for a given trait, and group them together
   collectSubtrees(nodes[0], subtreeStack[0], trait, subtreeStack[0].traitValue, subtreeStack);  
@@ -143,7 +177,7 @@ export const setSplitTreeYValues = (nodes, trait) => {
     return 0;
   });
 
-  // todo: sort the subtrees by num_date
+  // sort the subtrees by num_date
   subtreeStack.sort((a, b) => {
     if (a.traitValue == b.traitValue)
       return 0;
@@ -160,7 +194,12 @@ export const setSplitTreeYValues = (nodes, trait) => {
   let currentMaxY = 0;
   while (subtreeStack.length) {
     const nextSubtree = subtreeStack.shift();
-    nextSubtree.subtreeNodes.forEach(node => node.n.yvalue = currentMaxY++)
+    nextSubtree.subtreeNodes.forEach(node => {
+      node.n.yvalue = getYValueOfNodeInSubtree(node, trait, nextSubtree.traitValue, currentMaxY);
+      if (!node.n.children) currentMaxY = node.n.yvalue;      
+      node.yRange = [getYValueOfFirstSameTraitChild(node, trait, nextSubtree.traitValue),
+        getYValueOfLastSameTraitChild(node, trait, nextSubtree.traitValue)];
+    });
   }
 }
 
