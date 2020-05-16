@@ -37,7 +37,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d.tipStroke = tipStroke[i];
     d.fill = tipFill[i];
     d.visibility = visibility[i];
-/*    d["stroke-width"] = branchThickness[i]; */
+    /* d["stroke-width"] = branchThickness[i]; */
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
 
@@ -111,11 +111,11 @@ export const drawTips = function drawTips() {
     .on("mouseover", this.callbacks.onTipHover)
     .on("mouseout", this.callbacks.onTipLeave)
     .on("click", this.callbacks.onTipClick)
-/*    .style("pointer-events", "auto") */
+    /* .style("pointer-events", "auto") */
     .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
     .style("fill", (d) => d.fill || params.tipFill)
     .style("stroke", (d) => d.tipStroke || params.tipStroke)
-/*    .style("stroke-width", () => params.tipStrokeWidth)  don't want branch thicknesses applied */
+    /* .style("stroke-width", () => params.tipStrokeWidth)  don't want branch thicknesses applied */
     .style("cursor", "pointer");
 
   timerEnd("drawTips");
@@ -184,9 +184,9 @@ export const drawBranches = function drawBranches() {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-/*      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth) */
+      /* .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth) */
       .style("fill", "none")
-/*      .style("pointer-events", "auto") */
+      /* .style("pointer-events", "auto") */
       .on("mouseover", this.callbacks.onBranchHover)
       .on("mouseout", this.callbacks.onBranchLeave)
       .on("click", this.callbacks.onBranchClick);
@@ -218,8 +218,8 @@ export const drawBranches = function drawBranches() {
       if (!d.branchStroke) return params.branchStroke;
       return strokeForBranch(d, "S");
     })
-/*    .style("stroke-linecap", "round") */
-/*    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth) */
+    /* .style("stroke-linecap", "round") */
+    /* .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth) */
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
     .style("pointer-events", "auto")
