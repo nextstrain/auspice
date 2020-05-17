@@ -288,6 +288,24 @@ export const change = function change({
   /* use modifySVGInStages rather than modifySVG. Not used often. */
   const useModifySVGInStages = newLayout || splitTreeByTrait !== null || resetTreeYValues; 
 
+  if (resetTreeYValues) {
+    // unset the visibility changes performed in setSplitTreeYValues
+    changeVisibility = true;
+    visibility = this.nodes.map(n => {
+      if (!n.hideInSplitTree) return n.visibility;
+      return NODE_VISIBLE;
+    });
+    nodePropsToModify.inView = this.nodes.map(n => {
+      if (!n.hideInSplitTree) return n.inView;
+      return NODE_VISIBLE;
+    });
+    nodePropsToModify.hideInSplitTree = this.nodes.map(n => false);
+    // todo: move this to function?
+    this.nodes.forEach(node => {
+      if (node.n.node_attrs && node.hideInSplitTree) node.n.node_attrs.hidden = "";
+    })
+  }
+
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
@@ -322,7 +340,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || splitTreeByTrait) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || splitTreeByTrait || resetTreeYValues) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -355,11 +373,11 @@ export const change = function change({
 
   /* if the tree is being split by colored-by trait, update y values */
   // todo: this is fairly slow: show something to show recalculating? or, get the d3 transition working?
+  // (also doesn't look as nice on set as it does on unset)
   if (splitTreeByTrait) {
     setSplitTreeYValues(this.nodes, splitTreeByTrait);
   }
-  else if (resetTreeYValues)
-  {
+  else if (resetTreeYValues) {
     setYValues(this.nodes);
   }
 

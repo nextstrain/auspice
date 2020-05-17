@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
+import { NODE_NOT_VISIBLE } from "../../../util/globals";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -166,16 +167,34 @@ const getYValueOfLastSameTraitChild = (node, trait, traitValue) => {
  * but splits the tree by the given trait, grouping nodes with the
  * same trait value together 
  */
-export const setSplitTreeYValues = (nodes, trait) => {
+export const setSplitTreeYValues = (nodes, trait, visibility) => {
   const subtreeStack = [{subtreeNodes: [], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
 
   // collect all the subtrees for a given trait, and group them together
   collectSubtrees(nodes[0], subtreeStack[0], trait, subtreeStack[0].traitValue, subtreeStack);  
+  subtreeStack[0].subtreeNodes.push(nodes[0]); // finally, add the root node  
+
   subtreeStack.sort((a, b) => {
-    if (a.traitValue < b.traitValue) return -1;
-    if (a.traitValue > b.traitValue) return 1;
+    if (!a.traitValue || a.traitValue < b.traitValue) return -1;
+    if (!b.traitValue || a.traitValue > b.traitValue) return 1;
     return 0;
   });
+
+  // if there is a subtree for nodes with no trait value, 
+  // remove it, and mark all the nodes as hidden
+  // it'll always be subtree 0, because it has been sorted to the front
+  // todo: also hide branches
+  if (!subtreeStack[0].traitValue) {
+    subtreeStack[0].subtreeNodes.forEach(node => {
+      node.hideInSplitTree = true;
+      node.n.node_attrs.hidden = "always";
+      node.inView = NODE_NOT_VISIBLE;
+      node.visibility = NODE_NOT_VISIBLE;
+      node.n.yvalue = 0;
+      node.yRange = [0, 0];
+    });
+    subtreeStack.shift();
+  }
 
   // sort the subtrees by num_date
   subtreeStack.sort((a, b) => {
