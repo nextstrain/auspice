@@ -167,7 +167,7 @@ const getYValueOfLastSameTraitChild = (node, trait, traitValue) => {
  * but splits the tree by the given trait, grouping nodes with the
  * same trait value together 
  */
-export const setSplitTreeYValues = (nodes, trait, visibility) => {
+export const setSplitTreeYValues = (nodes, trait) => {
   const subtreeStack = [{subtreeNodes: [], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
 
   // collect all the subtrees for a given trait, and group them together
@@ -183,7 +183,6 @@ export const setSplitTreeYValues = (nodes, trait, visibility) => {
   // if there is a subtree for nodes with no trait value, 
   // remove it, and mark all the nodes as hidden
   // it'll always be subtree 0, because it has been sorted to the front
-  // todo: also hide branches
   if (!subtreeStack[0].traitValue) {
     subtreeStack[0].subtreeNodes.forEach(node => {
       node.hideInSplitTree = true;
