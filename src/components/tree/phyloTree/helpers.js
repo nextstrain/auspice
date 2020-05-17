@@ -135,6 +135,8 @@ const getYValueOfNodeInSubtree = (node, trait, traitValue, currentMaxY) => {
   const qualifiedChildren = node.n.children.filter(c => 
     getTraitFromNode(c, trait) === traitValue);
 
+  if (qualifiedChildren.length === 0) return ++currentMaxY;
+
   return qualifiedChildren.reduce((acc, d) => acc + d.yvalue, 0) / qualifiedChildren.length;
 }
 
