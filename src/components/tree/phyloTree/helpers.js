@@ -107,38 +107,35 @@ const collectSubtrees = (startNode, subtree, trait, currentTraitValue, subtreeSt
   if (!startNode.children) return;
 
   for (let i = startNode.children.length-1; i >= 0; i--) {
-    let currentNode = startNode.children[i];
-    let thisNodeTraitValue = getTraitFromNode(currentNode.n, trait);
-    // todo: nodes with no trait value? should they be grouped together?
+    const currentNode = startNode.children[i];
+    const thisNodeTraitValue = getTraitFromNode(currentNode.n, trait);
     if (thisNodeTraitValue !== currentTraitValue) { // doesn't belong on this subtree
-      let matchingSubtree = subtreeStack.find(s => s.traitValue === thisNodeTraitValue);
+      let matchingSubtree = subtreeStack.find((s) => s.traitValue === thisNodeTraitValue);
       if (!matchingSubtree) {
         matchingSubtree = { subtreeNodes: [], traitValue: thisNodeTraitValue };
         subtreeStack.push(matchingSubtree);
       }
       collectSubtrees(currentNode, matchingSubtree, trait, thisNodeTraitValue, subtreeStack);
       matchingSubtree.subtreeNodes.push(currentNode);
-    }
-    else
-    {
+    } else {
       collectSubtrees(currentNode, subtree, trait, currentTraitValue, subtreeStack);
       subtree.subtreeNodes.push(currentNode);
-    }    
+    }
   }
-}
+};
 
 const getYValueOfNodeInSubtree = (node, trait, traitValue, currentMaxY) => {
   if (!node.n.children) return ++currentMaxY;
 
-  // children are added to the stack before their parents, 
+  // children are added to the stack before their parents,
   // so they should all have a y value already
-  const qualifiedChildren = node.n.children.filter(c => 
+  const qualifiedChildren = node.n.children.filter((c) =>
     getTraitFromNode(c, trait) === traitValue);
 
   if (qualifiedChildren.length === 0) return ++currentMaxY;
 
   return qualifiedChildren.reduce((acc, d) => acc + d.yvalue, 0) / qualifiedChildren.length;
-}
+};
 
 const getYValueOfFirstSameTraitChild = (node, trait, traitValue) => {
   if (!node.n.children) return node.n.yvalue;
@@ -150,7 +147,7 @@ const getYValueOfFirstSameTraitChild = (node, trait, traitValue) => {
   }
 
   return node.n.yvalue;
-}
+};
 
 const getYValueOfLastSameTraitChild = (node, trait, traitValue) => {
   if (!node.n.children) return node.n.yvalue;
@@ -162,19 +159,19 @@ const getYValueOfLastSameTraitChild = (node, trait, traitValue) => {
   }
 
   return node.n.yvalue;
-}
+};
 
 /**
  * setSplitTreeYValues - works similarly to setYValues above,
  * but splits the tree by the given trait, grouping nodes with the
- * same trait value together 
+ * same trait value together
  */
 export const setSplitTreeYValues = (nodes, trait) => {
-  const subtreeStack = [{subtreeNodes: [], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
+  const subtreeStack = [{subtreeNodes: [], traitValue: getTraitFromNode(nodes[0].n, trait)}];
 
   // collect all the subtrees for a given trait, and group them together
-  collectSubtrees(nodes[0], subtreeStack[0], trait, subtreeStack[0].traitValue, subtreeStack);  
-  subtreeStack[0].subtreeNodes.push(nodes[0]); // finally, add the root node  
+  collectSubtrees(nodes[0], subtreeStack[0], trait, subtreeStack[0].traitValue, subtreeStack);
+  subtreeStack[0].subtreeNodes.push(nodes[0]); // finally, add the root node
 
   subtreeStack.sort((a, b) => {
     if (!a.traitValue || a.traitValue < b.traitValue) return -1;
@@ -182,11 +179,11 @@ export const setSplitTreeYValues = (nodes, trait) => {
     return 0;
   });
 
-  // if there is a subtree for nodes with no trait value, 
+  // if there is a subtree for nodes with no trait value,
   // remove it, and mark all the nodes as hidden
   // it'll always be subtree 0, because it has been sorted to the front
   if (!subtreeStack[0].traitValue) {
-    subtreeStack[0].subtreeNodes.forEach(node => {
+    subtreeStack[0].subtreeNodes.forEach((node) => {
       node.hideInSplitTree = true;
       node.n.node_attrs.hidden = "always";
       node.inView = NODE_NOT_VISIBLE;
@@ -199,11 +196,10 @@ export const setSplitTreeYValues = (nodes, trait) => {
 
   // sort the subtrees by num_date
   subtreeStack.sort((a, b) => {
-    if (a.traitValue == b.traitValue)
-      return 0;
+    if (a.traitValue === b.traitValue) {return 0;}
 
-    let aDate = getTraitFromNode(a.subtreeNodes[0].n, "num_date");
-    let bDate = getTraitFromNode(b.subtreeNodes[0].n, "num_date");
+    const aDate = getTraitFromNode(a.subtreeNodes[0].n, "num_date");
+    const bDate = getTraitFromNode(b.subtreeNodes[0].n, "num_date");
     if (aDate < bDate) return -1;
     if (bDate > aDate) return 1;
     return 0;
@@ -214,14 +210,14 @@ export const setSplitTreeYValues = (nodes, trait) => {
   let currentMaxY = 0;
   while (subtreeStack.length) {
     const nextSubtree = subtreeStack.shift();
-    nextSubtree.subtreeNodes.forEach(node => {
+    for (const node of nextSubtree.subtreeNodes) {
       node.n.yvalue = getYValueOfNodeInSubtree(node, trait, nextSubtree.traitValue, currentMaxY);
-      if (!node.n.children) currentMaxY = node.n.yvalue;      
+      if (!node.n.children) currentMaxY = node.n.yvalue;
       node.yRange = [getYValueOfFirstSameTraitChild(node, trait, nextSubtree.traitValue),
         getYValueOfLastSameTraitChild(node, trait, nextSubtree.traitValue)];
-    });
+    }
   }
-}
+};
 
 
 export const formatDivergence = (divergence) => {
