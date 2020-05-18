@@ -286,31 +286,25 @@ export const change = function change({
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
 
   /* use modifySVGInStages rather than modifySVG. Not used often. */
-  const useModifySVGInStages = newLayout || splitTreeByTrait !== null || resetTreeYValues; 
-
-  if (resetTreeYValues) {
-    // unset the visibility changes performed in setSplitTreeYValues
-    changeVisibility = true;
-    visibility = this.nodes.map(n => {
-      if (!n.hideInSplitTree) return n.visibility;
-      return NODE_VISIBLE;
-    });
-    nodePropsToModify.inView = this.nodes.map(n => {
-      if (!n.hideInSplitTree) return n.inView;
-      return NODE_VISIBLE;
-    });
-    nodePropsToModify.hideInSplitTree = this.nodes.map(n => false);
-    // todo: move this to function?
-    this.nodes.forEach(node => {
-      if (node.n.node_attrs && node.hideInSplitTree) node.n.node_attrs.hidden = "";
-    })
-  }
+  const useModifySVGInStages = newLayout || splitTreeByTrait !== null || resetTreeYValues;
 
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
   if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
     transitionTime = 0;
+  }
+
+  if (resetTreeYValues) {
+    nodePropsToModify.inView = this.nodes.map((n) => {
+      if (!n.hideInSplitTree) return n.inView;
+      return NODE_VISIBLE;
+    });
+    nodePropsToModify.hideInSplitTree = this.nodes.map(() => false);
+    // todo: move this to function?
+    this.nodes.forEach((node) => {
+      if (node.n.node_attrs && node.hideInSplitTree) node.n.node_attrs.hidden = "";
+    });
   }
 
   /* the logic of converting what react is telling us to change
@@ -323,12 +317,20 @@ export const change = function change({
     nodePropsToModify.tipStroke = tipStroke;
     nodePropsToModify.fill = fill;
   }
-  if (changeVisibility) {
+  if (changeVisibility || resetTreeYValues) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
     elemsToUpdate.add(".tip").add(".tipLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
-    nodePropsToModify.visibility = visibility;
+
+    if (resetTreeYValues) {
+      nodePropsToModify.visibility = this.nodes.map((n) => {
+        if (!n.hideInSplitTree) return n.visibility;
+        return NODE_VISIBLE;
+      });
+    } else {
+      nodePropsToModify.visibility = visibility;
+    }
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
@@ -376,24 +378,22 @@ export const change = function change({
   // (also doesn't look as nice on set as it does on unset)
   if (splitTreeByTrait) {
     setSplitTreeYValues(this.nodes, splitTreeByTrait);
-  }
-  else if (resetTreeYValues) {
+  } else if (resetTreeYValues) {
     setYValues(this.nodes);
   }
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
-  
+
   /* layout (must run after distance) */
   /* also used to split by traits */
-  if (newDistance || newLayout || updateLayout || splitTreeByTrait || resetTreeYValues)
-    this.setLayout(newLayout || this.layout);
-  
+  if (newDistance || newLayout || updateLayout || splitTreeByTrait || resetTreeYValues) {this.setLayout(newLayout || this.layout);}
+
   /* show confidences - set this param which actually adds the svg paths for
     confidence intervals when mapToScreen() gets called below */
   if (showConfidences) this.params.confidence = true;
-  
+
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||

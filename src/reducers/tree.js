@@ -79,7 +79,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
     case types.TOGGLE_SPLIT_TREE:
       // todo: what if nothing is colored-by? can that happen?
       // note that there's no reason technically not to split by a state that isn't the colored-by
-      // state, it just doesn't make as much UI sense  
+      // state, it just doesn't make as much UI sense
       return Object.assign({}, state, {
         splitTreeByTrait: action.splitTreeByTrait
       });
