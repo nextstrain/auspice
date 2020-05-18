@@ -114,7 +114,7 @@ export const drawTips = function drawTips() {
     /* .style("pointer-events", "auto") */
     .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
     .style("fill", (d) => d.fill || params.tipFill)
-    /* .style("stroke", (d) => d.tipStroke || params.tipStroke)*/
+    /* .style("stroke", (d) => d.tipStroke || params.tipStroke) */
     /* .style("stroke-width", () => params.tipStrokeWidth)  don't want branch thicknesses applied */
     .style("cursor", "pointer");
 
