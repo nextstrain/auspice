@@ -631,7 +631,18 @@ class Map extends React.Component {
     // window.L available because leaflet() was called in componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     const maxZoom = this.getMaxZoomForFittingMapToData();
-    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
+    // first, clear any existing timeout
+    if (this.bounds_timeout) {
+      window.clearTimeout(this.bounds_timeout);
+    }
+    // delay to change map bounds
+    this.bounds_timeout = window.setTimeout(
+      (map) => {
+        map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
+      },
+      this.props.narrativeMode ? 100 : 750,
+      this.state.map
+    );
   }
   getStyles = () => {
     const activeResetZoomButton = true;
