@@ -32,9 +32,21 @@ class ColorBy extends React.Component {
       positionSelected: ""
     };
 
-    this.state = this.newState({
-      colorBySelected: props.colorBy
-    });
+    if (isColorByGenotype(props.colorBy)) {
+      const genotype = decodeColorByGenotype(props.colorBy);
+
+      if (genotype) {
+        this.state = this.newState({
+          colorBySelected: "gt",
+          geneSelected: genotype.gene,
+          positionSelected: genotype.positions.join(",")
+        });
+      }
+    } else {
+      this.state = this.newState({
+        colorBySelected: props.colorBy
+      });
+    }
   }
   static propTypes = {
     colorBy: PropTypes.string.isRequired,
