@@ -75,7 +75,7 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
  * @returns {Array} [0] {string} url, modified as needed to represent main dataset
  *                  [1] {string | undefined} secondTreeUrl, if applicable
  */
-const collectDatasetFetchUrls = (url) => {
+export const collectDatasetFetchUrls = (url) => {
   let secondTreeUrl;
   if (url.includes(":")) {
     const parts = url.replace(/^\//, '')
@@ -255,26 +255,11 @@ const loadMultipleBlocks = (blocks) => async (dispatch) => {
       // eslint-disable-next-line no-await-in-loop
       if (!jsons[namesTreeToo[i]]) {jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();}
     }
-
-    const state = createStateFromQueryOrJSONs({
-      json: jsons[namesMainTree[i]],
-      secondTreeDataset: jsons[namesTreeToo[i]] || false,
-      mainTreeName: namesMainTree[i],
-      secondTreeName: namesTreeToo[i] || false,
-      narrativeBlocks: blocks,
-      query: { n: i },
-      dispatch
-    });
-
-    if (i === 0) {
-      dispatch({
-        type: types.CLEAN_START,
-        pathnameShouldBe: window.location.pathname,
-        ...state
-      });
-    }
   }
-
+  dispatch({
+    type: types.CACHE_JSONS,
+    jsons
+  });
 };
 
 

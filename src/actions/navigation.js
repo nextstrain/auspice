@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { collectDatasetFetchUrls } from "./loadData";
 
 /* Given a URL, what "page" should be displayed?
  * "page" means the main app, splash page, status page etc
@@ -46,7 +47,8 @@ export const changePage = ({
   query = undefined,
   queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
   push = true,
-  changeDataset = true
+  changeDataset = true,
+  usedCachedJSON = false
 } = {}) => (dispatch, getState) => {
   const oldState = getState();
   // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
@@ -69,8 +71,23 @@ export const changePage = ({
     return;
   }
 
-  /* the path (dataset) remains the same... but the state may be modulated by the query */
-  const newState = createStateFromQueryOrJSONs({ oldState, query: { ...queryToDisplay, ...query }, dispatch, changePage: true });
+  let newState;
+  if (usedCachedJSON) {
+    if (!path || !oldState.jsonCache) throw Error("Need a dataset path as key to cached JSON. Do we expect this to ever happen?");
+    const [mainTreeName, secondTreeName] = collectDatasetFetchUrls(path);
+    newState = createStateFromQueryOrJSONs({
+      json: oldState.jsonCache.jsons[path],
+      secondTreeDataset: oldState.jsonCache.jsons[secondTreeName] || false,
+      mainTreeName,
+      secondTreeName: secondTreeName || false,
+      narrativeBlocks: oldState.narrative.blocks,
+      dispatch
+    });
+
+  } else {
+    /* the path (dataset) remains the same... but the state may be modulated by the query */
+    newState = createStateFromQueryOrJSONs({ oldState, query: { ...queryToDisplay, ...query }, dispatch, changePage: true });
+  }
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
     ...newState,

@@ -658,7 +658,6 @@ export const createStateFromQueryOrJSONs = ({
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
   mainTreeName = false,
-  changePage = false,
   secondTreeName = false,
   query,
   dispatch
@@ -690,12 +689,6 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
-    if (changePage) { // Reload Saved State if you can
-      const baseState = window[`allBaseStates.${query.n || 0}`];
-      if (baseState) {
-        return baseState;
-      }
-    }
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
     entropy = {...oldState.entropy};
@@ -713,7 +706,11 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);
+    // TODO do we need to add some logic (like this or otherwise here
+    // to stop from adding a duplicate EONarrative when we call this
+    // again with the same narrative blocks but a new dataset?
+    // if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);
+    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -799,9 +796,6 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (narrativeBlocks) { // Save state if it's a created-from-scratch state
-    window[`allBaseStates.${query.n}`] = { tree, treeToo, metadata, entropy, controls, narrative, frequencies, query };
-  }
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };

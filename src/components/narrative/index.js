@@ -39,6 +39,7 @@ const explanationParagraph=`
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {pageIdx: null};
     this.exitNarrativeMode = () => {
       this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
     };
@@ -52,15 +53,18 @@ class Narrative extends React.Component {
         }));
         return;
       }
-
-      this.props.dispatch(changePage({
-        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+      const change = {
         changeDataset: false,
         query: queryString.parse(this.props.blocks[idx].query),
         queryToDisplay: {n: idx},
         push: true
-      }));
-
+      };
+      if (this.state.pageIdx === null || this.props.blocks[idx].dataset !== this.props.blocks[this.state[this.state.pageIdx]].dataset) {
+        change.path = this.props.blocks[idx].dataset;
+        change.useCachedJSON = true;
+      }
+      this.props.dispatch(changePage(change));
+      this.setState({pageIdx: idx});
     };
     this.goToNextSlide = () => {
       if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op
@@ -78,6 +82,8 @@ class Narrative extends React.Component {
     /* if the query has defined a block to be shown (that's not the first)
     then we must scroll to that block */
     if (this.props.currentInFocusBlockIdx !== 0) {
+      // TODO verify that this triggers above changeAppStateViaBlock
+      // TODO do we need to dispatch a CLEAN_START here (or somewhere) with the dataset for the page we land on?
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
     /* bind arrow keys to move around in narrative */
