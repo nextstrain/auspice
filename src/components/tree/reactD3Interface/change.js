@@ -101,6 +101,10 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
       args.newLayout = newProps.layout;
       args.resetTreeYValues = true;
     }
+  } 
+  /* if the tree is already split, and the color-by trait is changing, re-split */
+  else if (oldProps.tree.splitTreeByTrait && args.changeColorBy) {
+    args.splitTreeByTrait = newProps.colorBy;
   }
 
   const change = Object.keys(args).length;
