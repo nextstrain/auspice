@@ -245,7 +245,7 @@ class Footer extends React.Component {
       return true;
     } else if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
       return true;
-    } else if (Object.keys(this.props.activeFilters)) {
+    } else if (Object.keys(this.props.activeFilters).length > 0) {
       for (const name of this.props.activeFilters) {
         if (this.props.activeFilters[name] !== nextProps.activeFilters[name]) {
           return true;
