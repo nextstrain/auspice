@@ -93,16 +93,24 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
   /* split tree by colored-by trait */
-  /* just copies into tree; will be null/empty string/not defined if no trait */
-  if (newProps.tree.splitTreeByTrait !== oldProps.tree.splitTreeByTrait) {
+  /* if the tree is split, but layout no longer supports it, unsplit */
+  if (newProps.layout !== "rect") {
+    args.resetTreeYValues = true;
+    args.splitTreeByTrait = null;
+  }
+  /* otherwise, check for a split, and copy any split value (or lack thereof) to tree */
+  else if (newProps.tree.splitTreeByTrait !== oldProps.tree.splitTreeByTrait) {
     args.splitTreeByTrait = newProps.tree.splitTreeByTrait;
-    if (args.splitTreeByTrait == null) {// if the split is being unset, reset the layout
+    /* if the split is being unset, reset the layout */
+    if (args.splitTreeByTrait == null) {
     // todo: could use updateLayout instead?
       args.newLayout = newProps.layout;
       args.resetTreeYValues = true;
     }
   } 
-  /* if the tree is already split, and the color-by trait is changing, re-split */
+  /* if the tree is already split, and the color-by trait is changing, re-split
+     note that there's no reason technically not to split by a state that isn't the colored-by
+     state, it just doesn't make as much UI sense */
   else if (oldProps.tree.splitTreeByTrait && args.changeColorBy) {
     args.splitTreeByTrait = newProps.colorBy;
   }

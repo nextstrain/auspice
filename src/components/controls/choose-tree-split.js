@@ -3,18 +3,21 @@ import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import Toggle from "./toggle";
 import { TOGGLE_SPLIT_TREE } from "../../actions/types";
-// todo: connect if needed
 
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
-    splitTreeByTrait: state.tree.splitTreeByTrait
+    splitTreeByTrait: state.tree.splitTreeByTrait,
+    layout: state.controls.layout
   };
 })
 /* Implements a button which splits the tree into visual trees per strain. */
 class ChooseTreeSplit extends React.Component {
   render() {
     const { t } = this.props;
+
+    if (this.props.layout !== "rect") return(null);
+
     return (
       <div style={{margin: 5}}>
         <Toggle
