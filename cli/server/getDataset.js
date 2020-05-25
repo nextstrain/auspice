@@ -6,7 +6,8 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
     try {
       const availableDatasets = await getAvailable.getAvailableDatasets(datasetsPath);
       const info = helpers.interpretRequest(req, datasetsPath);
-      if (!helpers.extendDataPathsToMatchAvailable(res, info, availableDatasets)) return;
+      const redirected = helpers.redirectIfDatapathMatchFound(res, info, availableDatasets);
+      if (redirected) return;
       helpers.makeFetchAddresses(info, datasetsPath, availableDatasets);
       await helpers.sendJson(res, info);
     } catch (err) {

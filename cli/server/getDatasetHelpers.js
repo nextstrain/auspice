@@ -46,9 +46,12 @@ const interpretRequest = (req) => {
 };
 
 /**
- * Given a request, does the dataset exist?
+ * Given a request, if the dataset does not exist then either
+ * (a) redirect to an appropriate dataset if possible & return `true`
+ * (b) throw.
+ * If the dataset existed then return `false` as no redirect necessary.
  */
-const extendDataPathsToMatchAvailable = (res, info, availableDatasets) => {
+const redirectIfDatapathMatchFound = (res, info, availableDatasets) => {
   let matchingDatasets = availableDatasets;
   let i;
   const matchDatasetRequest = (d) => d.request.split("/")[i] === info.parts[i];
@@ -63,9 +66,9 @@ const extendDataPathsToMatchAvailable = (res, info, availableDatasets) => {
   // If best match is not equal to path requested, redirect
   if (matchingDatasets[0].request !== info.parts.join("/")) {
     res.redirect(`./getDataset?prefix=/${matchingDatasets[0].request}`);
-    return false;
+    return true;
   }
-  return true;
+  return false;
 };
 
 /**
@@ -164,7 +167,7 @@ const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls)
 
 module.exports = {
   interpretRequest,
-  extendDataPathsToMatchAvailable,
+  redirectIfDatapathMatchFound,
   makeFetchAddresses,
   handleError,
   sendJson,
