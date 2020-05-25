@@ -24,7 +24,7 @@ export const RowContainer = styled.div`
   return {
     layout: state.controls.layout,
     showTreeToo: state.controls.showTreeToo,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
 })
 class ChooseLayout extends React.Component {
@@ -58,7 +58,7 @@ class ChooseLayout extends React.Component {
       this.props.dispatch({
         type: CHANGE_LAYOUT,
         data: userSelectedLayout
-      });          
+      });
     }
   }
 

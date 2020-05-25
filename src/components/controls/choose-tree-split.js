@@ -16,7 +16,7 @@ class ChooseTreeSplit extends React.Component {
   render() {
     const { t } = this.props;
 
-    if (this.props.layout !== "rect") return(null);
+    if (this.props.layout !== "rect") return (null);
 
     return (
       <div style={{margin: 5}}>
