@@ -6,6 +6,7 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+import { createVisibleLegendValues } from "../util/colorScale";
 
 
 export const applyInViewNodesToTree = (idx, tree) => {
@@ -138,6 +139,15 @@ export const updateVisibleTipsAndBranchThicknesses = (
       }
       dispatch(dispatchRadii);
     }
+    /* Changes in visibility require a recomputation of which legend items we wish to display */
+    dispatchObj.visibleLegendValues = createVisibleLegendValues({
+      colorBy: controls.colorBy,
+      scaleType: controls.colorScale.type,
+      legendValues: controls.colorScale.legendValues,
+      legendBounds: controls.colorScale.legendBounds,
+      nodes: tree.nodes,
+      visibility: data.visibility
+    });
 
     /* D I S P A T C H */
     dispatch(dispatchObj);
@@ -187,6 +197,16 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
     }
+
+    /* Changes in visibility require a recomputation of which legend items we wish to display */
+    dispatchObj.visibleLegendValues = createVisibleLegendValues({
+      colorBy: controls.colorBy,
+      scaleType: controls.colorScale.type,
+      legendValues: controls.colorScale.legendValues,
+      legendBounds: controls.colorScale.legendBounds,
+      nodes: tree.nodes,
+      visibility: data.visibility
+    });
 
     /* D I S P A T C H */
     dispatch(dispatchObj);
