@@ -19,7 +19,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const coreDeps = [
     "react",
     "react-hot-loader",
-    "react-dom:@hot-loader/react-dom"
+    "react-dom"
   ];
 
   // Actively searches for the "good" root starting from auspice dir and going backwards
@@ -88,9 +88,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry =
-    (devMode ? ["react-hot-loader/patch", "webpack-hot-middleware/client"] : [])
-      .concat(["babel-polyfill", "./src/index"]);
+  const entry = [...(devMode ? ["webpack-hot-middleware/client"] : []), "babel-polyfill", "./src/index"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
