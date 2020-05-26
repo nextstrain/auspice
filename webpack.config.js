@@ -109,7 +109,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry = devMode ? ["webpack-hot-middleware/client", "./src/index"] : ["./src/index"];
+  const entry = devMode ? ["webpack-hot-middleware/client", "./src/indexAsync"] : ["./src/indexAsync"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
@@ -184,7 +184,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     entry,
     output: {
       path: outputPath,
-      filename: `auspice.bundle${!devMode ? ".[chunkhash]" : ""}.js`,
+      filename: `auspice.bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
       publicPath: "/dist/"
     },
