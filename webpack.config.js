@@ -14,16 +14,37 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   /* which directories should be parsed by babel and other loaders? */
   const directoriesToTransform = [path.join(__dirname, 'src')];
 
+  // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
+  // Format is either "libName" or "libName:libPath"
+  const coreDeps = [
+    "react",
+    "react-hot-loader",
+    "react-dom:@hot-loader/react-dom"
+  ];
+
+  // Actively searches for the "good" root starting from auspice dir and going backwards
+  let baseDir = __dirname;
+  let foundNodeModules = false;
+  while (!foundNodeModules) {
+    foundNodeModules = true;
+    for (const coreDep of coreDeps) {
+      const modulePath = path.join(baseDir, "node_modules", coreDep.split(":")[1] || coreDep);
+      foundNodeModules = foundNodeModules && fs.existsSync(modulePath);
+    }
+    baseDir = foundNodeModules ? baseDir : path.resolve(baseDir, "..");
+  }
+  const libDir = path.join(baseDir, "node_modules");
+
   /* webpack alias' used in code import / require statements */
   const aliasesToResolve = {
     "@extensions": '.', /* must provide a default, else it won't compile */
     "@auspice": path.join(__dirname, 'src'),
-    "@libraries": path.join(__dirname, 'node_modules'),
-    // Pins all react stuff to auspice dir, and uses hot loader's dom (can be used safely in production)
-    "react": path.join(__dirname, 'node_modules/react'), // eslint-disable-line quote-props
-    "react-hot-loader": path.join(__dirname, 'node_modules/react-hot-loader'),
-    'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom')
+    "@libraries": libDir
   };
+  for (const coreDep of coreDeps) {
+    const modParts = coreDep.split(":");
+    aliasesToResolve[modParts[0] || coreDep] = path.join(libDir, modParts[1] || coreDep);
+  }
 
   let extensionData;
   if (extensionPath) {
