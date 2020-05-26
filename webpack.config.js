@@ -17,18 +17,41 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   /* which directories should be parsed by babel and other loaders? */
   const directoriesToTransform = [path.join(__dirname, 'src')];
 
+  // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
+  // Format is either "libName" or "libName:libPath"
+  const coreDeps = [
+    "react",
+    "react-hot-loader",
+    "react-dom:@hot-loader/react-dom",
+    "regenerator-runtime",
+    "core-js",
+    "styled-components"
+  ];
+
+  // Actively searches for the "good" root starting from auspice dir and going backwards
+  // In 99.9% of practical cases these should all resolve wrt the node_modules in the root project,
+  // but if there are conflict they will preferentially resolve to auspice's node_modules
+  let baseDir = __dirname;
+  let foundNodeModules = false;
+  const resolvedCoreDeps = {};
+  while (!foundNodeModules) {
+    foundNodeModules = true;
+    for (const coreDep of coreDeps) {
+      const coreDepParts = coreDep.split(":");
+      if (!resolvedCoreDeps[coreDepParts[0] || coreDep]) {
+        const modulePath = path.join(baseDir, "node_modules", coreDepParts[1] || coreDep);
+        foundNodeModules = foundNodeModules && fs.existsSync(modulePath);
+        if (foundNodeModules) resolvedCoreDeps[coreDepParts[0] || coreDep] = modulePath;
+      }
+    }
+    baseDir = foundNodeModules ? baseDir : path.resolve(baseDir, "..");
+  }
+
   /* webpack alias' used in code import / require statements */
   const aliasesToResolve = {
     "@extensions": path.join(__dirname, '.null'), /* must provide a default, else it won't compile */
     "@auspice": path.join(__dirname, 'src'),
-    "@libraries": path.join(__dirname, 'node_modules'),
-    // Pins all react stuff to auspice dir, and uses hot loader's dom (can be used safely in production)
-    "react": path.join(__dirname, 'node_modules/react'), // eslint-disable-line quote-props
-    "react-hot-loader": path.join(__dirname, 'node_modules/react-hot-loader'),
-    'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom'),
-    'regenerator-runtime': path.join(__dirname, 'node_modules/regenerator-runtime'),
-    'core-js': path.join(__dirname, 'node_modules/core-js'),
-    'styled-components': path.join(__dirname, 'node_modules/styled-components')
+    ...resolvedCoreDeps
   };
 
   let extensionData;
@@ -86,9 +109,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry = devMode
-    ? ["webpack-hot-middleware/client", "./src/index"]
-    : ["./src/index"];
+  const entry = devMode ? ["webpack-hot-middleware/client", "./src/index"] : ["./src/index"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
