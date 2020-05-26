@@ -42,9 +42,10 @@ class ChooseDataset extends React.Component {
     const options = displayedDataset.map((_, i) =>
       Array.from(
         new Set(
-          this.props.available.datasets.filter((ds) =>
-            checkEqualityOfArrays(ds.request.split("/"), displayedDataset, i)
-          ).map((ds) => ds.request.split("/")[i]))
+          this.props.available.datasets
+            .filter((ds) => checkEqualityOfArrays(ds.request.split("/"), displayedDataset, i))
+            .map((ds) => ds.request.split("/")[i])
+        )
       ).map((opt) => ({
         value: displayedDataset.slice(0, i).concat(opt).join("/"),
         label: opt
@@ -58,7 +59,6 @@ class ChooseDataset extends React.Component {
           <ChooseDatasetSelect
             key={displayedDataset[optionIdx]}
             dispatch={this.props.dispatch}
-            choice_tree={displayedDataset.slice(0, optionIdx)}
             selected={displayedDataset.slice(0, optionIdx + 1).join("/")}
             options={option}
           />
