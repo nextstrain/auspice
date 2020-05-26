@@ -50,7 +50,7 @@ class ChooseDataset extends React.Component {
         label: opt
       }))
     );
-    
+
     return (
       <>
         <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
