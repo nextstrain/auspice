@@ -44,7 +44,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         if (foundNodeModules) resolvedCoreDeps[coreDepParts[0] || coreDep] = modulePath;
       }
     }
-    baseDir = foundNodeModules ? baseDir : path.resolve(baseDir, "..");
+    baseDir = path.resolve(baseDir, "..");
   }
 
   /* webpack alias' used in code import / require statements */
