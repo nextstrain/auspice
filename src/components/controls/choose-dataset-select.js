@@ -7,12 +7,6 @@ import { controlsWidth } from "../../util/globals";
 
 
 class ChooseDatasetSelect extends React.Component {
-  createDataPath(dataset) {
-    let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.choice_tree.join("/") + "/" + dataset;
-    p = p.replace(/\/+/, "/");
-    return p;
-  }
   changeDataset(newPath) {
     // 0 analytics (optional)
     analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
@@ -35,7 +29,7 @@ class ChooseDatasetSelect extends React.Component {
           multi={false}
           onChange={(opt) => {
             if (opt.value !== this.props.selected) {
-              this.changeDataset(this.createDataPath(opt.value));
+              this.changeDataset(`/${opt.value}`);
             }
           }}
         />
