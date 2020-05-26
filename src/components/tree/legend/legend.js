@@ -34,7 +34,7 @@ class Legend extends React.Component {
     if (this.props.legendOpen !== undefined) { return this.props.legendOpen; }
 
     // Our default state changes based on the size of the window or the number of items in the legend.
-    if (this.props.width < 600 || this.props.colorScale.legendValues.length > 32) {
+    if (this.props.width < 600 || this.props.colorScale.visibleLegendValues.length > 32) {
       return false;
     }
     return true;
@@ -44,7 +44,7 @@ class Legend extends React.Component {
     if (!this.showLegend()) {
       return 18;
     }
-    const nItems = this.props.colorScale.legendValues.length;
+    const nItems = this.props.colorScale.visibleLegendValues.length;
     const titlePadding = 20;
     return Math.ceil(nItems / 2) *
       (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
@@ -58,7 +58,7 @@ class Legend extends React.Component {
   }
 
   getTransformationForLegendItem(i) {
-    const count = this.props.colorScale.legendValues.length;
+    const count = this.props.colorScale.visibleLegendValues.length;
     const stack = Math.ceil(count / 2);
     const fromRight = Math.floor(i / stack);
     const fromTop = (i % stack);
@@ -141,7 +141,7 @@ class Legend extends React.Component {
   styleLabelText(label) {
     /* depending on the colorBy, we display different labels! */
     if (this.props.colorBy === "num_date") {
-      const legendValues = this.props.colorScale.legendValues;
+      const legendValues = this.props.colorScale.visibleLegendValues;
       if (
         (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */
         (legendValues[legendValues.length-1] - parseInt(label, 10) >= 10) /* current label (value) is more than 10 years from the most recent */
@@ -159,7 +159,7 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendItems() {
-    const items = this.props.colorScale.legendValues
+    const items = this.props.colorScale.visibleLegendValues
       .filter((d) => d !== undefined)
       .map((d, i) => {
         return (

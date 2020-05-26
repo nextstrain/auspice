@@ -3,7 +3,7 @@ import scaleLinear from "d3-scale/src/linear";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import { genericDomain, colors, genotypeColors, isValueValid } from "./globals";
+import { genericDomain, colors, genotypeColors, isValueValid, NODE_VISIBLE } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -43,6 +43,28 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   }
   const domain = sortedDomain(Array.from(stateCount.keys()).filter((x) => isValueValid(x)), attr, stateCount);
   return domain;
+};
+
+export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, legendBounds, nodes, visibility}) => {
+  console.log("createVisibleLegendValues", scaleType, legendValues, legendBounds, nodes, visibility);
+  // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
+  // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
+
+  if (!visibility) {
+    console.warn("to debug - race condition on loading");
+    return legendValues.slice();
+  }
+
+  if (scaleType === "categorical") {
+    const legendValuesObserved = new Set(
+      nodes.filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
+        .map((n) => getTraitFromNode(n, colorBy))
+    );
+    return legendValues.filter((v) => legendValuesObserved.has(v));
+  }
+
+  // for testing non-categorical scales, i'm just filtering the list into odd entries
+  return legendValues.filter((x, i) => i%2);
 };
 
 const createDiscreteScale = (domain, type) => {
@@ -274,6 +296,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     colorScale = () => unknownColor;
   }
 
+  // Would make more sense to calculate earlier in the function
+  const scaleType = genotype ? "categorical" : colorings[colorBy].type;
+
   return {
     scale: colorScale,
     continuous: continuous,
@@ -281,6 +306,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
     legendValues,
     legendBounds,
-    genotype
+    type: scaleType,
+    visibleLegendValues: createVisibleLegendValues({
+      colorBy, scaleType, legendValues, legendBounds, nodes: tree.nodes, visibility: tree.visibility
+    })
   };
 };
