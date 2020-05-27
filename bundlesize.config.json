@@ -2,7 +2,7 @@
   "files": [
     {
       "path": "./dist/auspice.bundle.*.js",
-      "maxSize": "60 kB"
+      "maxSize": "2 kB"
     },
     {
       "path": "./dist/auspice.chunk.+([0-9]).bundle.*.js",
