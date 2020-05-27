@@ -95,6 +95,14 @@ export const drawTips = function drawTips() {
   timerStart("drawTips");
   const params = this.params;
 
+  // Reduce the precision of cx and cy attributes.
+  // The xTip and yTip are full precision Javascript floats
+  // but when stored in the DOM in decimal text format
+  // they bloat the DOM and decimal to hex takes longer.
+  // This only matters when the number of tips is in 4 figures.
+  // So, need to do a Math.floor()
+  // Please test this on a Macbook, Apple does tricks with resolution
+
   if (!("tips" in this.groups)) {
     this.groups.tips = this.svg.append("g").attr("id", "tips");
   }
@@ -105,8 +113,8 @@ export const drawTips = function drawTips() {
     .append("circle")
     .attr("class", "tip")
     .attr("id", (d) => getDomId("tip", d.n.name))
-    .attr("cx", (d) => d.xTip)
-    .attr("cy", (d) => d.yTip)
+    .attr("cx", (d) => Math.floor(d.xTip))
+    .attr("cy", (d) => Math.floor(d.yTip))
     .attr("r", (d) => d.r)
     .on("mouseover", this.callbacks.onTipHover)
     .on("mouseout", this.callbacks.onTipLeave)
