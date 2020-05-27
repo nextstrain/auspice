@@ -35,8 +35,8 @@ const svgSetters = {
   attrs: {
     ".tip": {
       r: (d) => d.r,
-      cx: (d) => d.xTip,
-      cy: (d) => d.yTip
+      cx: (d) => Math.floor(d.xTip),
+      cy: (d) => Math.floor(d.yTip)
     },
     ".branch": {
     },
@@ -380,5 +380,5 @@ export const change = function change({
     this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
   }
   this.timeLastRenderRequested = Date.now();
-  timerEnd("phylotree.change()");
+  timerEnd("phylotree.change()"); 
 };
