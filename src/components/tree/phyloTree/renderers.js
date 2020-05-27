@@ -37,7 +37,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d.tipStroke = tipStroke[i];
     d.fill = tipFill[i];
     d.visibility = visibility[i];
-    d["stroke-width"] = branchThickness[i];
+    d["stroke-width"] = Math.round(branchThickness[i]);
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
 
@@ -192,7 +192,7 @@ export const drawBranches = function drawBranches() {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("stroke-width", (d) => Math.round(d['stroke-width'] || params.branchStrokeWidth))
       .style("fill", "none")
       .style("pointer-events", "auto")
       .on("mouseover", this.callbacks.onBranchHover)
@@ -227,7 +227,7 @@ export const drawBranches = function drawBranches() {
       return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => Math.round(d['stroke-width'] || params.branchStrokeWidth))
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
     .style("pointer-events", "auto")
