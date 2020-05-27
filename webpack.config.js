@@ -202,13 +202,13 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         minSize: 8192,
         cacheGroups: {
           coreVendors: {
-            test: new RegExp("\\/node_modules\\/(" + coreVendors.join("|") + ")\\/"),
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + coreVendors.join("|") + ")[\\\\/]"),
             name: "core-vendors",
             enforce: true,
             chunks: "all"
           },
           otherVendors: {
-            test: new RegExp("\\/node_modules\\/(" + bigVendors.join("|") + ")\\/"),
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + bigVendors.join("|") + ")[\\\\/]"),
             name: "other-vendors",
             enforce: true,
             chunks: "all"
@@ -218,7 +218,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
            * but it can be split further if it becomes huge
            */
           locales: {
-            test: /\/src\/locales\//,
+            test: /[\\/]src[\\/]locales[\\/]/,
             name: "locales",
             enforce: true,
             chunks: "all"
