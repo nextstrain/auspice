@@ -380,5 +380,5 @@ export const change = function change({
     this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
   }
   this.timeLastRenderRequested = Date.now();
-  timerEnd("phylotree.change()");
+  timerEnd("phylotree.change()"); 
 };
