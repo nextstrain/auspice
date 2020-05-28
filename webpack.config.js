@@ -218,7 +218,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
            * but it can be split further if it becomes huge
            */
           locales: {
-            test: /[\\/]src[\\/]locales[\\/]/,
+            test: /[\\/]src[\\/]locales[\\/](?!en)/,
             name: "locales",
             enforce: true,
             chunks: "all"

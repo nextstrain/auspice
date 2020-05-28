@@ -109,12 +109,12 @@ const exportIndexDotHtml = ({relative=false}) => {
     return;
   }
   const outputFilePath = path.join(process.cwd(), "index.html");
-  let data = fs.readFileSync(path.resolve(__dirname, "../index.html"), {encoding: "utf8"});
+  let data = fs.readFileSync(path.join(process.cwd(), "dist/index.html"), {encoding: "utf8"});
   verbose(`Writing ${outputFilePath}`);
   if (relative) {
     data = data
       .replace(/\/favicon/g, "favicon")
-      .replace(/\/dist\/bundle.js/, "dist/bundle.js");
+      .replace(/\/dist\/auspice\.bundle\.([0-9a-f]{20})\.js/, "dist/auspice.bundle.$1.js");
   }
   fs.writeFileSync(outputFilePath, data);
 };

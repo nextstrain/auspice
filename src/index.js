@@ -37,19 +37,24 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 initialiseGoogleAnalyticsIfRequired();
 
 i18n
-.use(initReactI18next)
-.init({
-  resources: {}, // eslint-disable-line
-  lng: "en",
-  fallbackLng: "en",
-  /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
-  (and this can be kept even after deployment if needed) */
-  debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
-  interpolation: {
-    escapeValue: false
-  },
-  defaultNS: 'translation'
-});
+  .use(initReactI18next)
+  .init({
+    resources: {}, // eslint-disable-line
+    lng: "en",
+    fallbackLng: "en",
+    /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
+    (and this can be kept even after deployment if needed) */
+    debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
+    interpolation: {
+      escapeValue: false
+    },
+    defaultNS: 'translation'
+  });
+
+for (const ns of ["language", "sidebar", "translation"]) {
+  import(/* webpackMode: "eager" */ `./locales/en/${ns}.json`)
+    .then((res) => i18n.addResourceBundle("en", ns, res.default));
+}
 
 const renderApp = () => {
   ReactDOM.render(
