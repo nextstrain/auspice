@@ -151,7 +151,6 @@ class DownloadModal extends React.Component {
     x.push(this.createSummaryWrapper());
     x.push("");
     x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
-    x.push(`Visualizations are licensed under CC-BY.`);
     x.push(`Relevant publications:`);
     this.getRelevantPublications().forEach((pub) => {
       x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
@@ -192,7 +191,7 @@ class DownloadModal extends React.Component {
         (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
     }
     buttons.push(
-      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format; CC-BY licensed.",
+      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format.",
         (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     );
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
