@@ -151,7 +151,7 @@ class DownloadModal extends React.Component {
     x.push(this.createSummaryWrapper());
     x.push("");
     x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
-    x.push(`License: CC-BY`);
+    x.push(`Visualizations are licensed under CC-BY.`);
     x.push(`Relevant publications:`);
     this.getRelevantPublications().forEach((pub) => {
       x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
