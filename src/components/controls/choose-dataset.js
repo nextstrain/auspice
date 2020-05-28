@@ -38,39 +38,28 @@ class ChooseDataset extends React.Component {
       .replace(/\/$/, '')
       .split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
-    const options = [[]];
 
-    this.props.available.datasets.forEach((d) => {
-      const firstField = d.request.split("/")[0];
-      if (!options[0].includes(firstField)) {
-        options[0].push(firstField);
-      }
-    });
-
-
-    for (let idx=1; idx<displayedDataset.length; idx++) {
-      /* going through the fields which comprise the current dataset
-      in order to create available alternatives for each field */
-      options[idx] = [];
-      this.props.available.datasets.forEach((singleAvailableOption) => {
-        /* if the parents (and their parents etc) of this choice match,
-        then we add that as a valid option */
-        const fields = singleAvailableOption.request.split("/");
-        if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
-          options[idx].push(fields[idx]);
-        }
-      });
-    }
+    const options = displayedDataset.map((_, i) =>
+      Array.from(
+        new Set(
+          this.props.available.datasets
+            .filter((ds) => checkEqualityOfArrays(ds.request.split("/"), displayedDataset, i))
+            .map((ds) => ds.request.split("/")[i])
+        )
+      ).map((opt) => ({
+        value: displayedDataset.slice(0, i).concat(opt).join("/"),
+        label: opt
+      }))
+    );
 
     return (
       <>
         <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
-            key={option}
+            key={displayedDataset[optionIdx]}
             dispatch={this.props.dispatch}
-            choice_tree={displayedDataset.slice(0, optionIdx)}
-            selected={displayedDataset[optionIdx]}
+            selected={displayedDataset.slice(0, optionIdx + 1).join("/")}
             options={option}
           />
         ))}
