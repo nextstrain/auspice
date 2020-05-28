@@ -191,7 +191,7 @@ class DownloadModal extends React.Component {
         (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
     }
     buttons.push(
-      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format; CC-BY-SA licensed.",
+      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format; CC-BY licensed.",
         (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     );
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
