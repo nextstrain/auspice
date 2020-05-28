@@ -40,8 +40,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       const coreDepParts = coreDep.split(":");
       if (!resolvedCoreDeps[coreDepParts[0] || coreDep]) {
         const modulePath = path.join(baseDir, "node_modules", coreDepParts[1] || coreDep);
-        foundNodeModules = foundNodeModules && fs.existsSync(modulePath);
-        if (foundNodeModules) resolvedCoreDeps[coreDepParts[0] || coreDep] = modulePath;
+        if (fs.existsSync(modulePath)) resolvedCoreDeps[coreDepParts[0] || coreDep] = modulePath;
+        else foundNodeModules = false;
       }
     }
     baseDir = path.resolve(baseDir, "..");
