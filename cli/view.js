@@ -114,7 +114,6 @@ const run = (args) => {
   utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir));
-  app.use(express.static(auspiceBuild.distDir));
 
   let handlerMsg = "";
   if (args.gh_pages) {
