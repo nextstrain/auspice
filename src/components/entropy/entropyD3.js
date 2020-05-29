@@ -1,7 +1,7 @@
 /* eslint no-underscore-dangle: off */
 import { select, event as d3event } from "d3-selection";
 import 'd3-transition';
-import { scaleLinear } from "d3-scale";
+import scaleLinear from "d3-scale/src/linear";
 import { axisBottom, axisLeft } from "d3-axis";
 import { format } from "d3-format";
 import { zoom } from "d3-zoom";

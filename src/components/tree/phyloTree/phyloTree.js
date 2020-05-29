@@ -1,4 +1,4 @@
-import { scaleLinear } from "d3-scale";
+import scaleLinear from "d3-scale/src/linear";
 import { createDefaultParams } from "./defaultParams";
 import { createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";

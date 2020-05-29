@@ -125,7 +125,7 @@ const run = (args) => {
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
   app.get("*", (req, res) => {
-    res.sendFile(path.join(auspiceBuild.baseDir, "index.html"));
+    res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"));
   });
 
   const server = app.listen(app.get('port'), app.get('host'), () => {

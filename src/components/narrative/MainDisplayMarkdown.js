@@ -1,8 +1,9 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { dataFont } from "../../globalStyles";
-import { parseMarkdown } from "../../util/parseMarkdown";
+
+const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
 /**
  * The following code borrows heavily from the Footer
@@ -102,15 +103,12 @@ const Container = styled.div`
 
 `;
 
-const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
-  const cleanHTML = parseMarkdown(narrativeBlock.mainDisplayMarkdown);
+const EXPERIMENTAL_MainDisplayMarkdown = ({ narrativeBlock, width, mobile }) => {
   return (
     <Container width={width} mobile={mobile}>
-      <div
-        dir="auto"
-        // eslint-disable-next-line react/no-danger
-        dangerouslySetInnerHTML={{ __html: cleanHTML }}
-      />
+      <Suspense>
+        <MarkdownDisplay dir="auto" mdstring={narrativeBlock.mainDisplayMarkdown} />
+      </Suspense>
     </Container>
   );
 };

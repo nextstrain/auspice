@@ -5,11 +5,19 @@ import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
 import Head from "./components/framework/head";
+import Notifications from "./components/notifications/notifications";
 
 const Main = lazy(() => import("./components/main"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
-const Notifications = lazy(() => import("./components/notifications/notifications"));
+
+/** Hot Reload is happening but components are not getting rerendered.
+ * This triggers a window resize which in turn triggers a general
+ * rerender. A bit ham-fisted but gets the job done for the time being
+ * */
+if (module.hot) {
+  setTimeout(() => window.dispatchEvent(new Event('resize')), 500);
+}
 
 @connect((state) => ({displayComponent: state.general.displayComponent}))
 class MainComponentSwitch extends React.Component {
@@ -48,9 +56,7 @@ const Root = () => {
     <div>
       <Head/>
       <Monitor/>
-      <Suspense fallback={null}>
-        <Notifications/>
-      </Suspense>
+      <Notifications/>
       <MainComponentSwitch/>
     </div>
   );

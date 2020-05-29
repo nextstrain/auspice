@@ -50,6 +50,14 @@ const run = (args) => {
   process.env.BABEL_ENV = "development";
   process.env.BABEL_EXTENSION_PATH = extensionPath;
 
+  /* Redirects / to webpack-generated index */
+  app.use((req, res, next) => {
+    if (!/^\/__webpack_hmr|^\/charon|\.[A-Za-z0-9]{1,4}$/.test(req.path)) {
+      req.url = webpackConfig.output.publicPath;
+    }
+    next();
+  });
+
   app.use((webpackDevMiddleware)(
     compiler,
     {logLevel: 'warn', publicPath: webpackConfig.output.publicPath}
@@ -66,10 +74,7 @@ const run = (args) => {
     handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
   }
 
-  /* this must be the last "get" handler, else the "*" swallows all other requests */
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(baseDir, "index.html"));
-  });
+  app.get("*", (req, res) => res.redirect("/"));
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
