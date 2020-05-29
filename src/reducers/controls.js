@@ -81,7 +81,8 @@ export const getDefaultControlsState = () => {
     sidebarOpen: initialSidebarState.sidebarOpen,
     treeLegendOpen: undefined,
     mapLegendOpen: undefined,
-    showOnlyPanels: false
+    showOnlyPanels: false,
+    showTransmissionLines: true
   };
 };
 
@@ -246,6 +247,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
         state.coloringsPresentOnTree.add(colorBy);
       }
       return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
+    case types.TOGGLE_TRANSMISSION_LINES:
+      return Object.assign({}, state, {showTransmissionLines: action.data});
     default:
       return state;
   }
