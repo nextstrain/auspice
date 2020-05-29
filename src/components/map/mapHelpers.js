@@ -166,7 +166,10 @@ export const drawDemesAndTransmissions = (
     .attr("stroke", (d) => { return d.color; })
     .attr("stroke-width", 1);
 
-  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
+  const visibleTips = nodes[0].tipCount;
+  const demeMultiplier =
+    demeCountMultiplier /
+    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
   let demes;
   // determine whether to draw pieChart or not (sensible for categorical data)
   if (pieChart) {
@@ -277,7 +280,10 @@ export const updateVisibility = (
     console.error("d3elems is not defined!");
     return;
   }
-  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
+  const visibleTips = nodes[0].tipCount;
+  const demeMultiplier =
+    demeCountMultiplier /
+    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
 
   if (pieChart) {
     const individualArcs = createArcsFromDemes(demeData);
