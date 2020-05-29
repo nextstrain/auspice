@@ -7,7 +7,7 @@ import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
 import * as icons from "../framework/svg-icons";
-import { CHANGE_LAYOUT } from "../../actions/types";
+import { CHANGE_LAYOUT, TOGGLE_SPLIT_TREE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 
@@ -46,6 +46,13 @@ class ChooseLayout extends React.Component {
         analyticsControlsEvent("change-layout-clock");
       } else {
         console.warn("Odd... controls/choose-layout.js tried to set a layout we don't offer...");
+      }
+
+      if (userSelectedLayout !== "rect") {
+        this.props.dispatch({
+          type: TOGGLE_SPLIT_TREE,
+          splitTreeByTrait: null
+        });
       }
 
       this.props.dispatch({

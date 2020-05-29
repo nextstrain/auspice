@@ -24,7 +24,8 @@ export const getDefaultTreeState = () => {
     totalStateCounts: {},
     availableBranchLabels: [],
     selectedStrain: undefined,
-    selectedClade: undefined
+    selectedClade: undefined,
+    splitTreeByTrait: null
   };
 };
 
@@ -75,6 +76,10 @@ const Tree = (state = getDefaultTreeState(), action) => {
         }
       });
       return state;
+    case types.TOGGLE_SPLIT_TREE:
+      return Object.assign({}, state, {
+        splitTreeByTrait: action.splitTreeByTrait
+      });
     default:
       return state;
   }

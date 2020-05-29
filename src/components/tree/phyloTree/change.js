@@ -1,6 +1,6 @@
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren } from "./helpers";
+import { applyToChildren, setSplitTreeYValues, setYValues } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
@@ -275,20 +275,36 @@ export const change = function change({
   fill = undefined,
   visibility = undefined,
   tipRadii = undefined,
-  branchThickness = undefined
+  branchThickness = undefined,
+  resetTreeYValues = false,
+  splitTreeByTrait = null
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
   const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
-  const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
+
+  /* use modifySVGInStages rather than modifySVG. Not used often. */
+  const useModifySVGInStages = newLayout || splitTreeByTrait !== null || resetTreeYValues;
 
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
   if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
     transitionTime = 0;
+  }
+
+  if (resetTreeYValues) {
+    nodePropsToModify.inView = this.nodes.map((n) => {
+      if (!n.hideInSplitTree) return n.inView;
+      return NODE_VISIBLE;
+    });
+    nodePropsToModify.hideInSplitTree = this.nodes.map(() => false);
+    // todo: move this to function?
+    this.nodes.forEach((node) => {
+      if (node.n.node_attrs && node.hideInSplitTree) node.n.node_attrs.hidden = "";
+    });
   }
 
   /* the logic of converting what react is telling us to change
@@ -301,12 +317,20 @@ export const change = function change({
     nodePropsToModify.tipStroke = tipStroke;
     nodePropsToModify.fill = fill;
   }
-  if (changeVisibility) {
+  if (changeVisibility || resetTreeYValues) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
     elemsToUpdate.add(".tip").add(".tipLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
-    nodePropsToModify.visibility = visibility;
+
+    if (resetTreeYValues) {
+      nodePropsToModify.visibility = this.nodes.map((n) => {
+        if (!n.hideInSplitTree) return n.visibility;
+        return NODE_VISIBLE;
+      });
+    } else {
+      nodePropsToModify.visibility = visibility;
+    }
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
@@ -318,7 +342,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || splitTreeByTrait || resetTreeYValues) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -349,14 +373,27 @@ export const change = function change({
     this.nodes.forEach((d) => {d.update = true;});
   }
 
+  /* if the tree is being split by colored-by trait, update y values */
+  // todo: this is fairly slow: show something to show recalculating? or, get the d3 transition working?
+  // (also doesn't look as nice on set as it does on unset)
+  if (splitTreeByTrait) {
+    setSplitTreeYValues(this.nodes, splitTreeByTrait);
+  } else if (resetTreeYValues) {
+    setYValues(this.nodes);
+  }
+
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
+
   /* layout (must run after distance) */
-  if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
+  /* also used to split by traits */
+  if (newDistance || newLayout || updateLayout || splitTreeByTrait || resetTreeYValues) {this.setLayout(newLayout || this.layout);}
+
   /* show confidences - set this param which actually adds the svg paths for
-     confidence intervals when mapToScreen() gets called below */
+    confidence intervals when mapToScreen() gets called below */
   if (showConfidences) this.params.confidence = true;
+
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -365,7 +402,9 @@ export const change = function change({
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||
-    showConfidences
+    showConfidences ||
+    splitTreeByTrait ||
+    resetTreeYValues
   ) {
     this.mapToScreen();
   }
