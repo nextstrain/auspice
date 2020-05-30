@@ -1,10 +1,8 @@
 const fs = require('fs');
 const path = require("path");
-const through = require('through2');
 const {PassThrough} = require('stream');
 const Engine = require('nedb');
 const fasta = require('bionode-fasta');
-const bodyParser = require('body-parser');
 
 const { promisify } = require('util');
 
@@ -35,7 +33,7 @@ const fetchRecords = (ids, dbPath) =>
         if (err) {
           console.log('EE');
           reject(err);
-        } else if (docs.length == 0) {
+        } else if (docs.length === 0) {
           console.log("No record found!");
           resolve(docs);
         } else {
@@ -54,11 +52,11 @@ const fetchRecords = (ids, dbPath) =>
 const getGenomeDB = (datasetsPath) => {
   return async (req, res) => { // eslint-disable-line consistent-return
     try {
-      let prefix = req.body.prefix
-          .replace(/^\//, '')
-          .replace(/\/$/, '')
-          .split("/")
-          .join("_");
+      const prefix = req.body.prefix
+            .replace(/^\//, '')
+            .replace(/\/$/, '')
+            .split("/")
+            .join("_");
       const dbPath = datasetsPath + '/genomeDbs/' + prefix + '.db';
       if (!req.body.ids || req.body.ids.length === 0) {
         res.setHeader('Content-Type', 'application/json');
@@ -70,8 +68,8 @@ const getGenomeDB = (datasetsPath) => {
         return;
       }
       res.setHeader('Content-Type', 'text/plain');
-      var db = await fetchRecords(req.body.ids, dbPath);
-      db.forEach(v=> {
+      const db = await fetchRecords(req.body.ids, dbPath);
+      db.forEach((v) => {
         const wrappedSeq = v.seq.match(/.{1,80}/g).join('\n') + '\n';
         res.write('>' + v.id + '\n');
         res.write(wrappedSeq);
@@ -81,27 +79,6 @@ const getGenomeDB = (datasetsPath) => {
       console.trace(err);
     }
   };
-};
-
-/**
-   @param {string} path Path to datasetDir so we can create database if corresponding fasta
-   files exists for aupsice input JSON file
-*/
-const prepareDbs = async (path) => {
-  try {
-    const files = await readdir(path);
-    const v2Files = files.filter((file) => (
-      file.endsWith(".fasta")
-    ));
-    v2Files.forEach((v) => {
-      makeDB(path, path + '/' + v);
-    });
-
-
-  } catch (err) {
-    // utils.warn(`Couldn't collect available dataset files (path searched: ${path})`);
-    // utils.verbose(err);
-  }
 };
 
 /**
@@ -129,7 +106,7 @@ const makeDB = (dbRoot, fastaPath) => new Promise((resolve, reject) => {
   let rc = 0;
 
   processRecord.on('data', (rec) => {
-    obj = JSON.parse(rec);
+    const obj = JSON.parse(rec);
     const outrec = {id: obj.id, seq: obj.seq, source: fastaPath};
     db.insert(outrec);
     rc++;
@@ -149,6 +126,28 @@ const makeDB = (dbRoot, fastaPath) => new Promise((resolve, reject) => {
     .pipe(processRecord);
 
 });
+
+/**
+   @param {string} path Path to datasetDir so we can create database if corresponding fasta
+   files exists for aupsice input JSON file
+*/
+const prepareDbs = async (localPath) => {
+  try {
+    const files = await readdir(localPath);
+    const v2Files = files.filter((file) => (
+      file.endsWith(".fasta")
+    ));
+    v2Files.forEach((v) => {
+      makeDB(localPath, localPath + '/' + v);
+    });
+
+
+  } catch (err) {
+    // utils.warn(`Couldn't collect available dataset files (path searched: ${locaPath})`);
+    // utils.verbose(err);
+  }
+};
+
 module.exports = {
   fetchRecords,
   getDbPath,

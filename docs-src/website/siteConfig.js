@@ -17,7 +17,7 @@ const siteConfig = {
 
   // Header links in the top nav bar
   headerLinks: [
-    {doc: 'introduction/overview', label: 'Docs'},
+    {doc: 'introduction/overview', label: 'Docs'}
     // {doc: 'tutorial/overview', label: 'Tutorial'}
   ],
 
