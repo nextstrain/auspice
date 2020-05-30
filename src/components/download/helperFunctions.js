@@ -3,7 +3,7 @@ import { infoNotification, warningNotification } from "../../actions/notificatio
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE, getServerAddress } from "../../util/globals";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -197,6 +197,35 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
+};
+
+/**
+ * Create & write a FASTA file containing genome sequences of strains in the tree
+ */
+export const strainGenome = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
+  console.log('strainGenome');
+  const tipGenomes = [];
+
+  for (const [i, node] of nodes.entries()) {
+    if (node.hasChildren) continue; /* we only consider tips */
+
+    if (selectedNodesOnly && nodeVisibilities &&
+        (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+    tipGenomes.push(node.name);
+
+  }
+  let path = `${getServerAddress()}/getGenomeData`;
+  const p = fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: tipGenomes, prefix: window.location.pathname})})
+        .then((res) => {
+          if (res.status !== 200) {
+            throw new Error(res.statusText);
+          }
+          res.text().then(body => {
+            const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}genomes.fasta`;
+            write(filename, MIME.text, body);
+            dispatch(infoNotification({message: `Genomes exported to ${filename}`}));
+          });
+        });
 };
 
 export const newick = (dispatch, filePrefix, root, temporal) => {

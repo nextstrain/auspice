@@ -13,6 +13,8 @@ import { getAcknowledgments} from "../framework/footer";
 import { createSummary, getNumSelectedTips } from "../info/info";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 
+import { getServerAddress } from "../../util/globals";
+
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
 const MetaIcon = withTheme(icons.Meta);
@@ -61,7 +63,8 @@ export const publications = {
   filters: state.controls.filters,
   visibility: state.tree.visibility,
   panelsToDisplay: state.controls.panelsToDisplay,
-  panelLayout: state.controls.panelLayout
+  panelLayout: state.controls.panelLayout,
+  isGenomeAvailable: state.controls.isGenomeAvailable
 }))
 class DownloadModal extends React.Component {
   constructor(props) {
@@ -109,6 +112,17 @@ class DownloadModal extends React.Component {
       };
     };
     this.dismissModal = this.dismissModal.bind(this);
+    let path = `${getServerAddress()}/getGenomeData`;
+    this.state = {isGenomeAvailable: false};
+    const p = fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: [], prefix: window.location.pathname})})
+          .then((res) => {
+            if (res.status !== 200) {
+              throw new Error(res.statusText);
+            }
+            res.json().then(json => {
+              this.setState({isGenomeAvailable: json.result});
+            });
+          });
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
@@ -188,6 +202,11 @@ class DownloadModal extends React.Component {
       buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,
           this.props.metadata.colorings, true, this.props.tree.visibility)]);
+      if (this.state.isGenomeAvailable) {
+        buttons.push(["Selected Genomes (fasta)", `Per-sample genome for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
+          (<MetaIcon width={iconWidth} selected />), () => helpers.strainGenome(this.props.dispatch, filePrefix, this.props.nodes,
+            this.props.metadata.colorings, true, this.props.tree.visibility)]);
+      }
     }
     if (helpers.areAuthorsPresent(this.props.tree)) {
       buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
