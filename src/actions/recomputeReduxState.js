@@ -706,7 +706,7 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    // TODO do we need to add some logic (like this or otherwise here
+    // TODO:1071: do we need to add some logic (like this or otherwise here
     // to stop from adding a duplicate EONarrative when we call this
     // again with the same narrative blocks but a new dataset?
     // if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);

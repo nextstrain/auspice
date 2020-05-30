@@ -240,26 +240,45 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
 };
 
 
-const loadMultipleBlocks = (blocks) => async (dispatch) => {
+const loadMultipleBlocks = async (dispatch, blocks, query) => {
   const jsons = {};
   const namesMainTree = [];
   const namesTreeToo = [];
-
+  const startingBlockIdx = query["n"] || 0;
+  let pathnameShouldBe;
+  const landingSlide = {
+    secondTreeDataset: false,
+    secondTreeName: false
+  };
   for (let i = 0; i < blocks.length; i++) {
     [namesMainTree[i], namesTreeToo[i]] = collectDatasetFetchUrls(blocks[i].dataset);
     if (namesMainTree[i]) {
-      // eslint-disable-next-line no-await-in-loop
-      if (!jsons[namesMainTree[i]]) {jsons[namesMainTree[i]] = await (await getDataset(namesMainTree[i])).json();}
+      if (!jsons[namesMainTree[i]]) {
+        // eslint-disable-next-line no-await-in-loop
+        jsons[namesMainTree[i]] = await (await getDataset(namesMainTree[i])).json();
+        if (i === startingBlockIdx) {
+          pathnameShouldBe = blocks[i].dataset;
+          landingSlide.json = jsons[namesMainTree[i]];
+          landingSlide.mainTreeName = namesMainTree[i];
+        }
+      }
     }
     if (namesTreeToo[i]) {
-      // eslint-disable-next-line no-await-in-loop
-      if (!jsons[namesTreeToo[i]]) {jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();}
+      if (!jsons[namesTreeToo[i]]) {
+        // eslint-disable-next-line no-await-in-loop
+        jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();
+        if (i === startingBlockIdx) {
+          landingSlide.secondTreeDataset = jsons[namesTreeToo[i]];
+          landingSlide.secondTreeName = namesTreeToo[i];
+        }
+      }
     }
   }
   dispatch({
     type: types.CACHE_JSONS,
     jsons
   });
+  return {blocks, pathnameShouldBe, landingSlide};
 };
 
 
@@ -279,12 +298,20 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       getDatasetFromCharon(url, {narrative: true})
         .then((res) => res.json())
         .then((blocks) => {
-          if (blocks.every((b) => b.dataset === blocks[0].dataset)) {
-            const firstURL = blocks[0].dataset;
-            const firstQuery = queryString.parse(blocks[0].query);
-            if (query.n) firstQuery.n = query.n;
-            return fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
-          } return dispatch(loadMultipleBlocks(blocks)).catch(console.warn);
+          console.log("load mult blocks")
+          return loadMultipleBlocks(dispatch, blocks, query).catch(console.warn);
+        })
+        .then(({blocks, pathnameShouldBe, landingSlide}) => {
+          dispatch({
+            type: types.CLEAN_START,
+            pathnameShouldBe,
+            ...createStateFromQueryOrJSONs({
+              ...landingSlide,
+              query,
+              narrativeBlocks: blocks,
+              dispatch
+            })
+          });
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);

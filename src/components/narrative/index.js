@@ -39,7 +39,6 @@ const explanationParagraph=`
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {pageIdx: null};
     this.exitNarrativeMode = () => {
       this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
     };
@@ -54,17 +53,16 @@ class Narrative extends React.Component {
         return;
       }
       const change = {
-        changeDataset: false,
         query: queryString.parse(this.props.blocks[idx].query),
         queryToDisplay: {n: idx},
         push: true
       };
-      if (this.state.pageIdx === null || this.props.blocks[idx].dataset !== this.props.blocks[this.state[this.state.pageIdx]].dataset) {
+      if (this.props.currentInFocusBlockIdx === null || this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
+        console.log("calling with changeDatasetOnly")
         change.path = this.props.blocks[idx].dataset;
-        change.useCachedJSON = true;
+        change.changeDatasetOnly = true;
       }
       this.props.dispatch(changePage(change));
-      this.setState({pageIdx: idx});
     };
     this.goToNextSlide = () => {
       if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op
@@ -197,6 +195,7 @@ class Narrative extends React.Component {
     );
   }
   componentWillUnmount() {
+    // TODO:1071 clear jsonCache??
     this.props.dispatch({
       type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
       pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
