@@ -112,17 +112,17 @@ class DownloadModal extends React.Component {
       };
     };
     this.dismissModal = this.dismissModal.bind(this);
-    let path = `${getServerAddress()}/getGenomeData`;
+    const path = `${getServerAddress()}/getGenomeData`;
     this.state = {isGenomeAvailable: false};
-    const p = fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: [], prefix: window.location.pathname})})
-          .then((res) => {
-            if (res.status !== 200) {
-              throw new Error(res.statusText);
-            }
-            res.json().then(json => {
-              this.setState({isGenomeAvailable: json.result});
-            });
-          });
+    fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: [], prefix: window.location.pathname})})
+      .then((res) => {
+        if (res.status !== 200) {
+          throw new Error(res.statusText);
+        }
+        res.json().then((json) => {
+          this.setState({isGenomeAvailable: json.result});
+        });
+      });
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
@@ -138,25 +138,25 @@ class DownloadModal extends React.Component {
   }
   formatPublications(pubs) {
     return (
-      <span>
+        <span>
         <ul>
-          {pubs.map((pub) => (
+        {pubs.map((pub) => (
             <li key={pub.href}>
-              <a href={pub.href} target="_blank" rel="noreferrer noopener">
-                {pub.author}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
-              </a>
+            <a href={pub.href} target="_blank" rel="noreferrer noopener">
+            {pub.author}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
+          </a>
             </li>
-          ))}
-        </ul>
-      </span>
+        ))}
+      </ul>
+        </span>
     );
   }
   getFilePrefix() {
     return "nextstrain_" +
       window.location.pathname
-          .replace(/^\//, '')       // Remove leading slashes
-          .replace(/:/g, '-')       // Change ha:na to ha-na
-          .replace(/\//g, '_');     // Replace slashes with spaces
+      .replace(/^\//, '')       // Remove leading slashes
+      .replace(/:/g, '-')       // Change ha:na to ha-na
+      .replace(/\//g, '_');     // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {
     const x = [];
@@ -176,7 +176,7 @@ class DownloadModal extends React.Component {
   }
   getNumUniqueAuthors(nodes) {
     const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
-      .filter((a) => a && a.value);
+          .filter((a) => a && a.value);
     const uniqueAuthors = new Set(authors.map((a) => a.value));
     return uniqueAuthors.size;
   }
@@ -233,21 +233,21 @@ class DownloadModal extends React.Component {
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
     const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
     return (
-      <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
+        <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
         <div style={{ width: "100%" }}>
-          {buttons.map((data) => (
+        {buttons.map((data) => (
             <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer' }}>
-              {data[2]}
-              <button style={buttonTextStyle} name={data[0]}>
-                {data[0]}
-              </button>
-              <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
-                <label style={buttonLabelStyle} htmlFor={data[0]}>{data[1]}</label>
-              </div>
+            {data[2]}
+            <button style={buttonTextStyle} name={data[0]}>
+            {data[0]}
+          </button>
+            <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
+            <label style={buttonLabelStyle} htmlFor={data[0]}>{data[1]}</label>
             </div>
-          ))}
-        </div>
+            </div>
+        ))}
       </div>
+        </div>
     );
   }
   dismissModal() {
@@ -279,42 +279,42 @@ class DownloadModal extends React.Component {
 
     const meta = this.props.metadata;
     return (
-      <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
+        <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
         <div style={panelStyle} onClick={(e) => stopProp(e)}>
-          <p style={infoPanelStyles.topRightMessage}>
-            ({t("click outside this box to return to the app")})
-          </p>
+        <p style={infoPanelStyles.topRightMessage}>
+        ({t("click outside this box to return to the app")})
+      </p>
 
-          <div style={infoPanelStyles.modalSubheading}>
-            {meta.title} ({t("last updated")} {meta.updated})
-          </div>
-
-          <div>
-            {this.createSummaryWrapper()}
-          </div>
-          <div style={infoPanelStyles.break}/>
-          {" " + t("A full list of sequence authors is available via the TSV files below")}
-          <div style={infoPanelStyles.break}/>
-          {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
-
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Data usage policy")}
-          </div>
-          {t("Data usage part 1") + " " + t("Data usage part 2")}
-
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
-          </div>
-          {this.formatPublications(this.getRelevantPublications())}
-
-
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Download data")}:
-          </div>
-          {this.downloadButtons()}
-
-        </div>
+        <div style={infoPanelStyles.modalSubheading}>
+        {meta.title} ({t("last updated")} {meta.updated})
       </div>
+
+        <div>
+        {this.createSummaryWrapper()}
+      </div>
+        <div style={infoPanelStyles.break}/>
+        {" " + t("A full list of sequence authors is available via the TSV files below")}
+        <div style={infoPanelStyles.break}/>
+        {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
+
+        <div style={infoPanelStyles.modalSubheading}>
+        {t("Data usage policy")}
+      </div>
+        {t("Data usage part 1") + " " + t("Data usage part 2")}
+
+        <div style={infoPanelStyles.modalSubheading}>
+        {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
+      </div>
+        {this.formatPublications(this.getRelevantPublications())}
+
+
+        <div style={infoPanelStyles.modalSubheading}>
+        {t("Download data")}:
+      </div>
+        {this.downloadButtons()}
+
+      </div>
+        </div>
     );
   }
 }
