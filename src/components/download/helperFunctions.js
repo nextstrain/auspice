@@ -416,3 +416,19 @@ export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings)
     writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
   }
 };
+
+export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
+  const lines = mutType === "nuc" ? ["base"] : ["gene\tposition"];
+  lines[0] += entropy.showCounts ? "\tevents" : "\tentropy";
+  entropy.bars.forEach((bar) => {
+    if (mutType === "nuc") {
+      lines.push(`${bar.x}\t${bar.y}`);
+    } else {
+      lines.push(`${bar.prot}\t${bar.codon}\t${bar.y}`);
+    }
+  });
+  /* write out information we've collected */
+  const filename = `${filePrefix}_diversity.tsv`;
+  write(filename, MIME.tsv, lines.join("\n"));
+  dispatch(infoNotification({message: `Diversity data exported to ${filename}`}));
+};

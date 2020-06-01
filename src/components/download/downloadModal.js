@@ -53,6 +53,8 @@ export const publications = {
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
   metadata: state.metadata,
+  entropy: state.entropy,
+  mutType: state.controls.mutType,
   tree: state.tree,
   nodes: state.tree.nodes,
   visibleStateCounts: state.tree.visibleStateCounts,
@@ -151,6 +153,7 @@ class DownloadModal extends React.Component {
     x.push(this.createSummaryWrapper());
     x.push("");
     x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+    x.push(`Visualizations are licensed under CC-BY.`);
     x.push(`Relevant publications:`);
     this.getRelevantPublications().forEach((pub) => {
       x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
@@ -190,8 +193,22 @@ class DownloadModal extends React.Component {
       buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
     }
+    if (this.props.entropy.loaded) {
+      let msg = `The data behind the diversity panel`;
+      msg += ` showing ${this.props.entropy.showCounts ? `a count of changes across the tree` : `normalised shannon entropy`}`;
+      msg += this.props.mutType === "nuc" ? " per nucleotide." : " per codon.";
+      if (selectedTipsCount !== this.props.metadata.mainTreeNumTips) {
+        msg += ` Restricted to strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`;
+      }
+      buttons.push([
+        "Genetic diversity data (TSV)",
+        msg,
+        (<MetaIcon width={iconWidth} selected />),
+        () => helpers.entropyTSV(this.props.dispatch, filePrefix, this.props.entropy, this.props.mutType)
+      ]);
+    }
     buttons.push(
-      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format.",
+      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format; CC-BY licensed.",
         (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     );
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });

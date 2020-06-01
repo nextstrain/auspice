@@ -1,6 +1,6 @@
 import { rgb, hsl } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
-import { scalePow } from "d3-scale";
+import scalePow from "d3-scale/src/pow";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 

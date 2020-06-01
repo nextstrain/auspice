@@ -137,7 +137,8 @@ export const drawDemesAndTransmissions = (
   numDateMax,
   pieChart, /* bool */
   geoResolution,
-  dispatch
+  dispatch,
+  showTransmissionLines
 ) => {
 
   // add transmission lines
@@ -164,9 +165,12 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-opacity", 0.6)
     .attr("stroke-linecap", "round")
     .attr("stroke", (d) => { return d.color; })
-    .attr("stroke-width", 1);
+    .attr("stroke-width", showTransmissionLines ? 1 : 0);
 
-  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
+  const visibleTips = nodes[0].tipCount;
+  const demeMultiplier =
+    demeCountMultiplier /
+    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
   let demes;
   // determine whether to draw pieChart or not (sensible for categorical data)
   if (pieChart) {
@@ -277,7 +281,10 @@ export const updateVisibility = (
     console.error("d3elems is not defined!");
     return;
   }
-  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
+  const visibleTips = nodes[0].tipCount;
+  const demeMultiplier =
+    demeCountMultiplier /
+    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
 
   if (pieChart) {
     const individualArcs = createArcsFromDemes(demeData);

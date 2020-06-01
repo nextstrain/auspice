@@ -1,8 +1,8 @@
-import Papa from "papaparse";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
 import { ADD_COLOR_BYS } from "../types";
 import { csv_file_types, is_csv_or_tsv } from "./constants";
 
+let Papa;
 
 /**
  * A promise-ified version of Papa.parse()
@@ -12,25 +12,28 @@ import { csv_file_types, is_csv_or_tsv } from "./constants";
  * to the config, which may work
  * @param {DataTransfer} file a DataTransfer object
  */
-const parseCsv = (file) => new Promise((resolve, reject) => {
-  if (!(is_csv_or_tsv(file))) {
-    reject(new Error("Cannot parse this filetype"));
-  }
-  Papa.parse(file, {
-    header: true,
-    complete: (results) => {
-      resolve(results);
-    },
-    error: (error) => {
-      reject(error);
-    },
-    encoding: "UTF-8",
-    comments: "#",
-    delimiter: (csv_file_types.includes(file.type)) ? "," : "\t",
-    skipEmptyLines: true,
-    dynamicTyping: false
+const parseCsv = async (file) => {
+  if (!Papa) Papa = (await import("papaparse")).default;
+  return new Promise((resolve, reject) => {
+    if (!(is_csv_or_tsv(file))) {
+      reject(new Error("Cannot parse this filetype"));
+    }
+    Papa.parse(file, {
+      header: true,
+      complete: (results) => {
+        resolve(results);
+      },
+      error: (error) => {
+        reject(error);
+      },
+      encoding: "UTF-8",
+      comments: "#",
+      delimiter: (csv_file_types.includes(file.type)) ? "," : "\t",
+      skipEmptyLines: true,
+      dynamicTyping: false
+    });
   });
-});
+};
 
 
 const handleMetadata = async (dispatch, getState, file) => {

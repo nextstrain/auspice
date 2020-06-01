@@ -81,7 +81,8 @@ export const getDefaultControlsState = () => {
     sidebarOpen: initialSidebarState.sidebarOpen,
     treeLegendOpen: undefined,
     mapLegendOpen: undefined,
-    showOnlyPanels: false
+    showOnlyPanels: false,
+    showTransmissionLines: true
   };
 };
 
@@ -250,6 +251,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const colorScale = {...state.colorScale, visibleLegendValues: action.visibleLegendValues};
       return {...state, colorScale};
+    case types.TOGGLE_TRANSMISSION_LINES:
+      return Object.assign({}, state, {showTransmissionLines: action.data});
     default:
       return state;
   }

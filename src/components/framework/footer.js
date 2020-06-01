@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
@@ -11,7 +11,8 @@ import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
-import { parseMarkdown } from "../../util/parseMarkdown";
+
+const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -137,19 +138,10 @@ export const getAcknowledgments = (metadata, dispatch) => {
    * Jover. December 2019.
   */
   if (metadata.description) {
-    let cleanDescription;
-    try {
-      cleanDescription = parseMarkdown(metadata.description);
-    } catch (error) {
-      console.error(`Error parsing footer description: ${error}`);
-      cleanDescription = '<p>There was an error parsing the footer description.</p>';
-    }
-
     return (
-      <div
-        className='acknowledgments'
-        dangerouslySetInnerHTML={{ __html: cleanDescription }} // eslint-disable-line react/no-danger
-      />
+      <Suspense fallback={<div />}>
+        <MarkdownDisplay className="acknowledgments" mdstring={metadata.description} />
+      </Suspense>
     );
   }
 

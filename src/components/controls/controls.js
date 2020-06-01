@@ -10,6 +10,7 @@ import ChooseSecondTree from "./choose-second-tree";
 import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
+import TransmissionLines from './transmission-lines';
 import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
@@ -45,6 +46,7 @@ function Controls({mapOn}) {
         <span style={{marginTop: "15px"}}>
           <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
           <GeoResolution/>
+          <TransmissionLines/>
           <MapAnimationControls/>
         </span>
       ) : null}
