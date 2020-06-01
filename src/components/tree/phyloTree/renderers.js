@@ -226,7 +226,7 @@ export const drawBranches = function drawBranches() {
       if (!d.branchStroke) return params.branchStroke;
       return strokeForBranch(d, "S");
     })
-    /*.style("stroke-linecap", "round") */
+    /* .style("stroke-linecap", "round") */
     .style("stroke-width", (d) => Math.round(d['stroke-width'] || params.branchStrokeWidth))
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
