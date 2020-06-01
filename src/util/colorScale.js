@@ -9,6 +9,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
+import { calcVisibility } from "./treeVisibilityHelpers";
 
 const unknownColor = "#AAAAAA";
 
@@ -44,26 +45,44 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   return domain;
 };
 
-export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, legendBounds, nodes, visibility}) => {
-  console.log("createVisibleLegendValues", scaleType, legendValues, legendBounds, nodes, visibility);
-  // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
-  // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
+/**
+ * Dynamically create legend values based on visibility for ordinal and categorical scale types.
+ */
+export const createVisibleLegendValues = (
+  {colorBy, type, legendValues, tree, treeToo = undefined, controls = undefined}
+) => {
+  let visibility = tree.visibility;
+  let visibilityToo = treeToo ? treeToo.visibility : undefined;
 
-  if (!visibility) {
-    console.warn("to debug - race condition on loading");
-    return legendValues.slice();
+  // Create visibility if undefined.
+  if (!visibility || !visibilityToo) {
+    const dates = {
+      dateMinNumeric: controls.dateMinNumeric,
+      dateMaxNumeric: controls.dateMaxNumeric
+    };
+    visibility = calcVisibility(tree, controls, dates);
+    if (treeToo && treeToo.nodes) {
+      visibilityToo = calcVisibility(treeToo, controls, dates);
+    }
   }
 
-  if (scaleType === "categorical") {
-    const legendValuesObserved = new Set(
-      nodes.filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
-        .map((n) => getTraitFromNode(n, colorBy))
-    );
+  // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
+  // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
+  if (type==="ordinal" || type==="categorical") {
+    let legendValuesObserved = tree.nodes
+      .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
+      .map((n) => getTraitFromNode(n, colorBy));
+    if (treeToo && visibilityToo) {
+      const legendValuesObservedToo = treeToo.nodes
+        .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
+        .map((n) => getTraitFromNode(n, colorBy));
+      legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
+    }
+    legendValuesObserved = new Set(legendValuesObserved);
     return legendValues.filter((v) => legendValuesObserved.has(v));
   }
 
-  // for testing non-categorical scales, i'm just filtering the list into odd entries
-  return legendValues.filter((x, i) => i%2);
+  return legendValues.slice();
 };
 
 const createDiscreteScale = (domain, type) => {
@@ -128,6 +147,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   // const colorOptions = metadata.colorOptions;
   const colorings = metadata.colorings;
   const treeTooNodes = treeToo ? treeToo.nodes : undefined;
+  const scaleType = genotype ? "categorical" : colorings[colorBy].type;
+
   let error = false;
   let continuous = false;
   let colorScale, legendValues, legendBounds;
@@ -177,11 +198,11 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           .range(range);
         legendValues = domain;
       }
-    } else if (colorings[colorBy].type === "categorical") {
+    } else if (scaleType === "categorical") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = createDiscreteScale(legendValues, "categorical");
-    } else if (colorings[colorBy].type === "ordinal") {
+    } else if (scaleType === "ordinal") {
       /* currently, ordinal scales are only implemented for those with integer values.
       TODO: we should be able to have non-numerical ordinal scales (e.g.
       `["small", "medium", "large"]`) however we currently cannot specify this ordering
@@ -216,11 +237,11 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         continuous = false;
         colorScale = createDiscreteScale(legendValues, "categorical");
       }
-    } else if (colorings[colorBy].type === "boolean") {
+    } else if (scaleType === "boolean") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = booleanColorScale;
-    } else if (colorings[colorBy].type === "continuous") {
+    } else if (scaleType === "continuous") {
       // console.log("making a continuous color scale for ", colorBy);
       continuous = true;
       switch (colorBy) {
@@ -281,7 +302,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       legendBounds = createLegendBounds(legendValues);
     } else {
-      console.error("ColorBy", colorBy, "invalid type --", colorings[colorBy].type);
+      console.error("ColorBy", colorBy, "invalid type --", scaleType);
       error = true;
     }
   } else {
@@ -295,9 +316,6 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     colorScale = () => unknownColor;
   }
 
-  // Would make more sense to calculate earlier in the function
-  const scaleType = genotype ? "categorical" : colorings[colorBy].type;
-
   return {
     scale: colorScale,
     continuous: continuous,
@@ -306,8 +324,6 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendValues,
     legendBounds,
     type: scaleType,
-    visibleLegendValues: createVisibleLegendValues({
-      colorBy, scaleType, legendValues, legendBounds, nodes: tree.nodes, visibility: tree.visibility
-    })
+    visibleLegendValues: createVisibleLegendValues({colorBy, type: scaleType, legendValues, tree, treeToo, controls})
   };
 };

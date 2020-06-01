@@ -248,7 +248,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
-      return {...state, ...{colorScale: {...state.colorScale, visibleLegendValues: action.visibleLegendValues}}};
+      const colorScale = {...state.colorScale, visibleLegendValues: action.visibleLegendValues};
+      return {...state, colorScale};
     default:
       return state;
   }
