@@ -113,8 +113,7 @@ const run = (args) => {
   utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
-  app.use("/dist", expressStaticGzip(auspiceBuild.distDir));
-  app.use(express.static(auspiceBuild.distDir));
+  app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
   let handlerMsg = "";
   if (args.gh_pages) {
@@ -125,7 +124,7 @@ const run = (args) => {
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
   app.get("*", (req, res) => {
-    res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"));
+    res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"), {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
