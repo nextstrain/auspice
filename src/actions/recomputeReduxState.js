@@ -192,11 +192,11 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string']; // eslint-disable-line no-multi-spaces
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              ]; // eslint-disable-line
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
-      if (metadata.displayDefaults[keysToCheckFor[i]]) {
+      if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
         if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
           if (keysToCheckFor[i] === "sidebar") {
             if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
@@ -631,10 +631,11 @@ const createMetadataStateFromJSON = (json) => {
       map_triplicate: "mapTriplicate",
       layout: "layout",
       sidebar: "sidebar",
-      panels: "panels"
+      panels: "panels",
+      transmission_lines: "showTransmissionLines"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
-      if (json.meta.display_defaults[jsonKey]) {
+      if (Object.prototype.hasOwnProperty.call(json.meta.display_defaults, jsonKey)) {
         metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
       }
     }
