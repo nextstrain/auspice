@@ -399,6 +399,7 @@ export const createDemeAndTransmissionData = (
   pieChart,
   legendValues,
   colorBy,
+  showTransmissionLines,
   dispatch
 ) => {
   /*
@@ -414,16 +415,21 @@ export const createDemeAndTransmissionData = (
     demeIndices
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy);
 
-  /* second time so that we can get Bezier */
-  const { transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
-    nodes,
-    visibility,
-    geoResolution,
-    nodeColors,
-    triplicate,
-    metadata,
-    map
-  );
+  let transmissionData = [];
+  let transmissionIndices = {};
+  let demesMissingLatLongs = new Set(); // TODO: this won't be filled in if we're not showing transmission lines...
+  if (showTransmissionLines) {
+    /* second time so that we can get Bezier */
+    ({ transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
+      nodes,
+      visibility,
+      geoResolution,
+      nodeColors,
+      triplicate,
+      metadata,
+      map
+    ));
+  }
 
   const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
     return value.toLowerCase() !== "unknown";

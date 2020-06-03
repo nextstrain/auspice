@@ -220,6 +220,7 @@ class Map extends React.Component {
         this.props.pieChart,
         this.props.legendValues,
         this.props.colorBy,
+        this.props.showTransmissionLines,
         this.props.dispatch
       );
 
@@ -385,6 +386,7 @@ class Map extends React.Component {
         nextProps.pieChart,
         nextProps.legendValues,
         nextProps.colorBy,
+        nextProps.showTransmissionLines,
         nextProps.dispatch
       );
       const d3elems = drawDemesAndTransmissions(
@@ -397,8 +399,7 @@ class Map extends React.Component {
         nextProps.dateMaxNumeric,
         nextProps.pieChart,
         nextProps.geoResolution,
-        nextProps.dispatch,
-        nextProps.showTransmissionLines
+        nextProps.dispatch
       );
       this.setState({
         d3elems,
