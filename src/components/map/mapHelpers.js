@@ -137,8 +137,7 @@ export const drawDemesAndTransmissions = (
   numDateMax,
   pieChart, /* bool */
   geoResolution,
-  dispatch,
-  showTransmissionLines
+  dispatch
 ) => {
 
   // add transmission lines
@@ -165,7 +164,7 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-opacity", 0.6)
     .attr("stroke-linecap", "round")
     .attr("stroke", (d) => { return d.color; })
-    .attr("stroke-width", showTransmissionLines ? 1 : 0);
+    .attr("stroke-width", 1);
 
   const visibleTips = nodes[0].tipCount;
   const demeMultiplier =
