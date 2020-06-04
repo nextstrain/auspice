@@ -57,41 +57,41 @@ export const onBranchHover = function onBranchHover(d) {
   });
 };
 
+/** Given a branch which we are zooming to, is there a branch label set which
+ * we should use in the URL? This will allow restoration of zoom state via
+ * the URL.
+ */
+const getBranchLabelForURLQuery = (node, availableBranchLabels) => {
+  // Does the branch have labels (excluding AA labels which we don't use for URL queries)
+  if (node.branch_attrs && node.branch_attrs.labels !== undefined) {
+    const legalBranchLabels = Object.keys(node.branch_attrs.labels).filter((label) => label !== "aa");
+    if (legalBranchLabels.length) {
+      // sort the possible branch labels by the order of those available on the tree
+      legalBranchLabels.sort((a, b) =>
+        availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
+      );
+      // then use the first!
+      const key = legalBranchLabels[0];
+      return `${key}:${node.branch_attrs.labels[key]}`;
+    }
+  }
+  return "";
+};
+
+
 export const onBranchClick = function onBranchClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
-  const root = [undefined, undefined];
-  let cladeSelected;
-  // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
-  // (The order of the drop-down on the menu)
-  // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
-  let legalBranchLabels;
-  // Check has some branch labels, and remove 'aa' ones.
-  // Check if the clicked branch is currently in view
-  // Determines whether to zoom into the clade or zoom out of it and whether to append or remove a clades label from the URL query
-  const isTargetBranchInView = (getIdxOfInViewRootNode(d.n) === d.n.arrayIdx);
-  if (d.n.branch_attrs &&
-    d.n.branch_attrs.labels !== undefined) {
-    legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
-  }
-  // If has some, then could be clade label - but sort first
-  if (legalBranchLabels && legalBranchLabels.length) {
-    const availableBranchLabels = this.props.tree.availableBranchLabels;
-    // sort the possible branch labels by the order of those available on the tree
-    legalBranchLabels.sort((a, b) =>
-      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
-    );
-    // then use the first!
-    const key = legalBranchLabels[0];
-    cladeSelected = isTargetBranchInView ? "" : `${key}:${d.n.branch_attrs.labels[key]}`;
-  }
-  /* Clicking on a branch means we want to zoom into the clade defined by that branch
-  _except_ when it's the "in-view" root branch, in which case we want to zoom out */
-  const arrayIdxToZoomTo = (isTargetBranchInView) ?
+  /* We have different behavior if we click on the root of the in-view sub-tree...
+  if the target branch is basal (in the current view) then we want to zoom out. Otherwise
+  we want to zoom in to the subtree defined by that branch */
+  const arrayIdxToZoomTo = (getIdxOfInViewRootNode(d.n) === d.n.arrayIdx) ?
     getParentBeyondPolytomy(d.n, this.props.distanceMeasure).arrayIdx :
     d.n.arrayIdx;
+  const root = [undefined, undefined];
   if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
   else root[1] = arrayIdxToZoomTo;
+  const cladeSelected = getBranchLabelForURLQuery(d.that.nodes[arrayIdxToZoomTo].n, this.props.tree.availableBranchLabels);
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
 };
 
