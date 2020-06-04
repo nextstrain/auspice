@@ -45,17 +45,12 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   return domain;
 };
 
-export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, legendBounds, nodes, visibility}) => {
-  console.log("createVisibleLegendValues", scaleType, legendValues, legendBounds, nodes, visibility);
-  // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
-  // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
-
+export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, nodes, visibility}) => {
   if (!visibility) {
-    console.warn("to debug - race condition on loading");
     return legendValues.slice();
   }
 
-  if (scaleType === "categorical") {
+  if (scaleType === "categorical" || scaleType === "ordinal") {
     const legendValuesObserved = new Set(
       nodes.filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
         .map((n) => getTraitFromNode(n, colorBy))
@@ -63,8 +58,8 @@ export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, leg
     return legendValues.filter((v) => legendValuesObserved.has(v));
   }
 
-  // for testing non-categorical scales, i'm just filtering the list into odd entries
-  return legendValues.filter((x, i) => i%2);
+  // for boolean / continuous scales we don't want to restrict the displayed legend
+  return legendValues.slice();
 };
 
 const createDiscreteScale = (domain, type) => {
@@ -308,7 +303,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendBounds,
     type: scaleType,
     visibleLegendValues: createVisibleLegendValues({
-      colorBy, scaleType, legendValues, legendBounds, nodes: tree.nodes, visibility: tree.visibility
+      colorBy, scaleType, legendValues, nodes: tree.nodes, visibility: tree.visibility
     })
   };
 };
