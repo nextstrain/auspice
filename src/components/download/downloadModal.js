@@ -13,6 +13,8 @@ import { getAcknowledgments} from "../framework/footer";
 import { createSummary, getNumSelectedTips } from "../info/info";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 
+import { getServerAddress } from "../../util/globals";
+
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
 const MetaIcon = withTheme(icons.Meta);
@@ -61,7 +63,8 @@ export const publications = {
   filters: state.controls.filters,
   visibility: state.tree.visibility,
   panelsToDisplay: state.controls.panelsToDisplay,
-  panelLayout: state.controls.panelLayout
+  panelLayout: state.controls.panelLayout,
+  isGenomeAvailable: state.controls.isGenomeAvailable
 }))
 class DownloadModal extends React.Component {
   constructor(props) {
@@ -109,6 +112,17 @@ class DownloadModal extends React.Component {
       };
     };
     this.dismissModal = this.dismissModal.bind(this);
+    const path = `${getServerAddress()}/getGenomeData`;
+    this.state = {isGenomeAvailable: false};
+    fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: [], prefix: window.location.pathname})})
+      .then((res) => {
+        if (res.status !== 200) {
+          throw new Error(res.statusText);
+        }
+        res.json().then((json) => {
+          this.setState({isGenomeAvailable: json.result});
+        });
+      });
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
@@ -140,9 +154,9 @@ class DownloadModal extends React.Component {
   getFilePrefix() {
     return "nextstrain_" +
       window.location.pathname
-          .replace(/^\//, '')       // Remove leading slashes
-          .replace(/:/g, '-')       // Change ha:na to ha-na
-          .replace(/\//g, '_');     // Replace slashes with spaces
+      .replace(/^\//, '')       // Remove leading slashes
+      .replace(/:/g, '-')       // Change ha:na to ha-na
+      .replace(/\//g, '_');     // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {
     const x = [];
@@ -162,7 +176,7 @@ class DownloadModal extends React.Component {
   }
   getNumUniqueAuthors(nodes) {
     const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
-      .filter((a) => a && a.value);
+          .filter((a) => a && a.value);
     const uniqueAuthors = new Set(authors.map((a) => a.value));
     return uniqueAuthors.size;
   }
@@ -188,6 +202,11 @@ class DownloadModal extends React.Component {
       buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,
           this.props.metadata.colorings, true, this.props.tree.visibility)]);
+      if (this.state.isGenomeAvailable) {
+        buttons.push(["Selected Genomes (fasta)", `Per-sample genome for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
+          (<MetaIcon width={iconWidth} selected />), () => helpers.strainGenome(this.props.dispatch, filePrefix, this.props.nodes,
+            this.props.metadata.colorings, true, this.props.tree.visibility)]);
+      }
     }
     if (helpers.areAuthorsPresent(this.props.tree)) {
       buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
@@ -263,7 +282,7 @@ class DownloadModal extends React.Component {
       <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
         <div style={panelStyle} onClick={(e) => stopProp(e)}>
           <p style={infoPanelStyles.topRightMessage}>
-            ({t("click outside this box to return to the app")})
+        ({t("click outside this box to return to the app")})
           </p>
 
           <div style={infoPanelStyles.modalSubheading}>

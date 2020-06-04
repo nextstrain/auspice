@@ -11,6 +11,7 @@ const utils = require("./utils");
 const version = require('../src/version').version;
 const chalk = require('chalk');
 const SUPPRESS = require('argparse').Const.SUPPRESS;
+const bodyParser = require('body-parser');
 
 
 const addParser = (parser) => {
@@ -58,12 +59,18 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
       .setUpGetDatasetHandler({datasetsPath});
     handlers.getNarrative = require("./server/getNarrative")
       .setUpGetNarrativeHandler({narrativesPath});
+    handlers.handleGenomeDbs = require("./server/handleGenomeDbs")
+      .prepareDbs(datasetsPath); /* use sanitized datasetPath */
+    handlers.handleGenomeDbs = require("./server/handleGenomeDbs")
+      .getGenomeDB(datasetsPath); /* use sanitized datasetPath */
   }
 
   /* apply handlers */
   app.get("/charon/getAvailable", handlers.getAvailable);
   app.get("/charon/getDataset", handlers.getDataset);
   app.get("/charon/getNarrative", handlers.getNarrative);
+  app.get("/charon/getGenomeData", handlers.handleGenomeDbs);
+  app.post("/charon/getGenomeData", handlers.handleGenomeDbs);
   app.get("/charon*", (req, res) => {
     res.statusMessage = "Query unhandled -- " + req.originalUrl;
     utils.warn(res.statusMessage);
@@ -102,7 +109,13 @@ const run = (args) => {
   const app = express();
   app.set('port', process.env.PORT || 4000);
   app.set('host', process.env.HOST || "localhost");
+  // parse application/json
+  app.use(bodyParser.json({limit: '20mb'}));
   app.use(compression());
+  // parse application/x-www-form-urlencoded
+  app.use(bodyParser.urlencoded({ extended: false }));
+
+
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
 
   if (args.customBuild) {

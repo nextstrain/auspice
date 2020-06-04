@@ -18,7 +18,7 @@
       // throttle
       return;
     }
-    timer = setTimeout(function() {
+    timer = setTimeout(function () {
       timer = null;
       let activeNavFound = false;
       const headings = findHeadings(); // toc nav anchors
@@ -48,7 +48,7 @@
           } else {
             console.error('Can not find header element', {
               id: next,
-              heading,
+              heading
             });
           }
         }
@@ -68,9 +68,9 @@
 
   document.addEventListener('scroll', onScroll);
   document.addEventListener('resize', onScroll);
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     // Cache the headings once the page has fully loaded.
     headingsCache = findHeadings();
     onScroll();
   });
-})();
+}());

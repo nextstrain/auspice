@@ -60,7 +60,7 @@ const makeFrontMatterBlock = (frontMatter) => {
       markdown.push(`#### License: ${license}`);
     }
   }
-  
+
   const block = new Proxy({}, blockProxyHandler);
   block.url = frontMatter.dataset;
   block.contents = markdown.join("\n");

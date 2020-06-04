@@ -3,13 +3,13 @@ import { infoNotification, warningNotification } from "../../actions/notificatio
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE, getServerAddress } from "../../util/globals";
 
 export const isPaperURLValid = (d) => {
   return (
     Object.prototype.hasOwnProperty.call(d, "paper_url") &&
-    !d.paper_url.endsWith('/') &&
-    d.paper_url !== "?"
+      !d.paper_url.endsWith('/') &&
+      d.paper_url !== "?"
   );
 };
 
@@ -109,7 +109,7 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
 export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
-  exactly which header fields we want until the tree has been traversed. */
+     exactly which header fields we want until the tree has been traversed. */
   const tipTraitValues = {};
   const headerFields = ["Strain"];
 
@@ -117,13 +117,13 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
     if (node.hasChildren) continue; /* we only consider tips */
 
     if (selectedNodesOnly && nodeVisibilities &&
-      (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+        (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
 
     tipTraitValues[node.name] = {Strain: node.name};
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
 
     /* collect values (as writable strings) of the same "traits" as can be viewed by the modal displayed
-    when clicking on tips. Note that "num_date", "author" and "vaccine" are considered seperately below */
+       when clicking on tips. Note that "num_date", "author" and "vaccine" are considered seperately below */
     const nodeAttrsToIgnore = ["author", "div", "num_date", "vaccine", "accession"];
     const traits = Object.keys(node.node_attrs).filter((k) => !nodeAttrsToIgnore.includes(k));
     for (const trait of traits) {
@@ -199,6 +199,34 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
 
+/**
+ * Create & write a FASTA file containing genome sequences of strains in the tree
+ */
+export const strainGenome = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
+  const tipGenomes = [];
+
+  for (const [i, node] of nodes.entries()) {
+    if (node.hasChildren) continue; /* we only consider tips */
+
+    if (selectedNodesOnly && nodeVisibilities &&
+        (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+    tipGenomes.push(node.name);
+
+  }
+  const path = `${getServerAddress()}/getGenomeData`;
+  fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ids: tipGenomes, prefix: window.location.pathname})})
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(res.statusText);
+      }
+      res.text().then((body) => {
+        const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}genomes.fasta`;
+        write(filename, MIME.text, body);
+        dispatch(infoNotification({message: `Genomes exported to ${filename}`}));
+      });
+    });
+};
+
 export const newick = (dispatch, filePrefix, root, temporal) => {
   const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
   const message = temporal ? "TimeTree" : "Tree";
@@ -228,7 +256,7 @@ const processXMLString = (input) => {
 };
 
 /* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
-as well as the offsets (x, y) to position panels appropriately within this */
+   as well as the offsets (x, y) to position panels appropriately within this */
 const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLinesOfText) => {
   const padding = 50;
   let width = 0;

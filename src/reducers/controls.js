@@ -12,7 +12,7 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 
 /* defaultState is a fn so that we can re-create it
-at any time, e.g. if we want to revert things (e.g. on dataset change)
+   at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 export const getDefaultControlsState = () => {
   const defaults = {
@@ -43,6 +43,8 @@ export const getDefaultControlsState = () => {
     region: null,
     search: null,
     strain: null,
+    gridFiltered: null,
+    isGenomeAvailable: false,
     geneLength: {},
     mutType: defaultMutType,
     temporalConfidence: {exists: false, display: false, on: false},
@@ -201,7 +203,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         geoResolution: action.data
       });
     case types.APPLY_FILTER: {
-      // values arrive as array
+    // values arrive as array
       const filters = Object.assign({}, state.filters, {});
       filters[action.trait] = action.values;
       return Object.assign({}, state, {
@@ -249,6 +251,10 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, {showTransmissionLines: action.data});
+    case 'GRID_FILTERED':
+      return Object.assign({}, state, {gridFiltered: action.data});
+    case 'GENOME_AVAILBLE':
+      return Object.assign({}, state, {isGenomeAvailable: action.data});
     default:
       return state;
   }
@@ -258,7 +264,7 @@ export default Controls;
 
 function getInitialSidebarState() {
   /* The following "hack" was present when `sidebarOpen` wasn't URL customisable. It can be removed
-  from here once the GISAID URLs (iFrames) are updated */
+     from here once the GISAID URLs (iFrames) are updated */
   if (window.location.pathname.includes("gisaid")) {
     return {sidebarOpen: false, setDefault: true};
   }
