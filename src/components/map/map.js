@@ -38,7 +38,7 @@ import "../../css/mapbox.css";
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
-    treeName: state.tree.name,
+    // treeName: state.tree.name,
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,

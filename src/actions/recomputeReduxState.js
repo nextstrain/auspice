@@ -44,6 +44,7 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  // console.log("modify state via URL query", query)
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -73,6 +74,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
+    console.log(state.panelsToDisplay)
     if (state.panelsToDisplay.indexOf("map") === -1 || state.panelsToDisplay.indexOf("tree") === -1) {
       state["panelLayout"] = "full";
     }
@@ -706,11 +708,6 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    // TODO:1071: do we need to add some logic (like this or otherwise here
-    // to stop from adding a duplicate EONarrative when we call this
-    // again with the same narrative blocks but a new dataset?
-    // if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);
-    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -796,7 +793,6 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
@@ -840,12 +836,3 @@ export const createTreeTooState = ({
   // }
   return {tree, treeToo, controls};
 };
-
-function addEndOfNarrativeBlock(narrativeBlocks) {
-  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
-  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
-    __html: undefined,
-    isEndOfNarrativeSlide: true
-  });
-  narrativeBlocks.push(endOfNarrativeSlide);
-}

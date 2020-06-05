@@ -239,6 +239,15 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
   dispatch({type: types.TREE_TOO_DATA, ...newState});
 };
 
+function addEndOfNarrativeBlock(narrativeBlocks) {
+  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
+  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
+    __html: undefined,
+    isEndOfNarrativeSlide: true
+  });
+  narrativeBlocks.push(endOfNarrativeSlide);
+  console.log("add EON")
+}
 
 const loadMultipleBlocks = async (dispatch, blocks, query) => {
   const jsons = {};
@@ -274,6 +283,7 @@ const loadMultipleBlocks = async (dispatch, blocks, query) => {
       }
     }
   }
+  addEndOfNarrativeBlock(blocks);
   dispatch({
     type: types.CACHE_JSONS,
     jsons
@@ -299,6 +309,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
         .then((res) => res.json())
         .then((blocks) => {
           console.log("load mult blocks")
+          // TODO:1071: does this need to use Promise.all to ensure all datasets have loaded and no race case is possible?
           return loadMultipleBlocks(dispatch, blocks, query).catch(console.warn);
         })
         .then(({blocks, pathnameShouldBe, landingSlide}) => {

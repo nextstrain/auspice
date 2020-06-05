@@ -27,8 +27,8 @@ export const chooseDisplayComponentFromURL = (url) => {
 
 // TODO:1071: write a docstring
 // async version doesnt work
-// const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
-const tryCacheThenFetch = (mainTreeName, secondTreeName, state) => {
+const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
+// const tryCacheThenFetch = (mainTreeName, secondTreeName, state) => {
   if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons !== null && state.jsonCache.jsons[mainTreeName] !== undefined) {
     // TODO:1071: do we need to make a deep copy when getting things from the cache?
     return {
@@ -90,6 +90,7 @@ export const changePage = ({
     const newState = createStateFromQueryOrJSONs(
       { oldState,
         query: queryToDisplay,
+        narrativeBlocks: oldState.narrative.blocks,
         dispatch }
     );
     // TODO:1071: dedup this dispatch with the one below
@@ -104,43 +105,47 @@ export const changePage = ({
     console.log("CASE 2")
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
     const [mainTreeName, secondTreeName] = collectDatasetFetchUrls(path);
-    const {json, secondJson} = tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
-    const newState = createStateFromQueryOrJSONs({
-      json,
-      secondTreeDataset: secondJson || false,
-      mainTreeName,
-      secondTreeName: secondTreeName || false,
-      narrativeBlocks: oldState.narrative.blocks,
-      query: queryToDisplay,
-      dispatch
-    });
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-      ...newState,
-      pushState: push,
-      query: queryToDisplay
-    });
+    // const {json, secondJson} = tryCacheThenFetch(mainTreeName, secondTreeName, oldState);
+    // // console.log("return value from tryCache", json, secondJson)
+    // const newState = createStateFromQueryOrJSONs({
+    //   json,
+    //   secondTreeDataset: secondJson || false,
+    //   mainTreeName,
+    //   secondTreeName: secondTreeName || false,
+    //   narrativeBlocks: oldState.narrative.blocks,
+    //   query: queryToDisplay,
+    //   dispatch
+    // });
+    // // console.log("return value from createState", newState)
+    // dispatch({
+    //   type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    //   ...newState,
+    //   pushState: push,
+    //   query: queryToDisplay
+    // });
     // async version doesnt work - componentWillUnmount is getting called for some reason
     // in the narratives component and there is an error wrt async stuff happening when
     // the component is unmounting. It shouldnt be unmounting when we swap datasets though.
-    // tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
-    //   .then(({json, secondJson}) => {
-    //     const newState = createStateFromQueryOrJSONs({
-    //       json,
-    //       secondTreeDataset: secondJson || false,
-    //       mainTreeName,
-    //       secondTreeName: secondTreeName || false,
-    //       // narrativeBlocks: oldState.narrative.blocks,
-    //       query: queryToDisplay,
-    //       dispatch
-    //     });
-    //     dispatch({
-    //       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-    //       ...newState,
-    //       pushState: push,
-    //       query: queryToDisplay
-    //     });
-    //   });
+    tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
+      .then(({json, secondJson}) => {
+        console.log("return value from tryCache", json, secondJson)
+        const newState = createStateFromQueryOrJSONs({
+          json,
+          secondTreeDataset: secondJson || false,
+          mainTreeName,
+          secondTreeName: secondTreeName || false,
+          narrativeBlocks: oldState.narrative.blocks,
+          query: queryToDisplay,
+          dispatch
+        });
+        console.log("return value from createState", newState)
+        dispatch({
+          type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+          ...newState,
+          pushState: push,
+          query: queryToDisplay
+        });
+      });
   } else {
     console.log("CASE 3")
     /* Case 3 (see docstring): the path (dataset) has changed and we want to change pages and set a new state according to the path */

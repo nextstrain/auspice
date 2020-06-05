@@ -62,6 +62,7 @@ class Narrative extends React.Component {
         change.path = this.props.blocks[idx].dataset;
         change.changeDatasetOnly = true;
       }
+      console.log("change slides using args: ", change)
       this.props.dispatch(changePage(change));
     };
     this.goToNextSlide = () => {
@@ -80,8 +81,6 @@ class Narrative extends React.Component {
     /* if the query has defined a block to be shown (that's not the first)
     then we must scroll to that block */
     if (this.props.currentInFocusBlockIdx !== 0) {
-      // TODO verify that this triggers above changeAppStateViaBlock
-      // TODO do we need to dispatch a CLEAN_START here (or somewhere) with the dataset for the page we land on?
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
     /* bind arrow keys to move around in narrative */
