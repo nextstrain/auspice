@@ -11,7 +11,7 @@ import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
-import { calcColorScale } from "../util/colorScale";
+import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
@@ -192,11 +192,11 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string']; // eslint-disable-line no-multi-spaces
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              ]; // eslint-disable-line
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
-      if (metadata.displayDefaults[keysToCheckFor[i]]) {
+      if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
         if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
           if (keysToCheckFor[i] === "sidebar") {
             if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
@@ -631,10 +631,11 @@ const createMetadataStateFromJSON = (json) => {
       map_triplicate: "mapTriplicate",
       layout: "layout",
       sidebar: "sidebar",
-      panels: "panels"
+      panels: "panels",
+      transmission_lines: "showTransmissionLines"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
-      if (json.meta.display_defaults[jsonKey]) {
+      if (Object.prototype.hasOwnProperty.call(json.meta.display_defaults, jsonKey)) {
         metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
       }
     }
@@ -766,6 +767,15 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
+
+  /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
+  controls.colorScale.visibleLegendValues = createVisibleLegendValues({
+    colorBy: controls.colorBy,
+    scaleType: controls.colorScale.type,
+    legendValues: controls.colorScale.legendValues,
+    tree,
+    treeToo
+  });
 
   /* calculate entropy in view */
   if (entropy.loaded) {

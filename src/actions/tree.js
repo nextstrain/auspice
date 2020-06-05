@@ -145,9 +145,8 @@ export const updateVisibleTipsAndBranchThicknesses = (
       colorBy: controls.colorBy,
       type: controls.colorScale.type,
       legendValues: controls.colorScale.legendValues,
-      tree: tree,
-      treeToo: treeToo,
-      controls: controls
+      tree,
+      treeToo
     });
 
     /* D I S P A T C H */
@@ -204,9 +203,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       colorBy: controls.colorBy,
       type: controls.colorScale.type,
       legendValues: controls.colorScale.legendValues,
-      tree: tree,
-      treeToo: treeToo,
-      controls: controls
+      tree,
+      treeToo
     });
 
     /* D I S P A T C H */

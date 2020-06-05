@@ -10,7 +10,6 @@ import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
-import { calcVisibility } from "./treeVisibilityHelpers";
 
 const unknownColor = "#AAAAAA";
 
@@ -49,38 +48,26 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
 /**
  * Dynamically create legend values based on visibility for ordinal and categorical scale types.
  */
-export const createVisibleLegendValues = (
-  {colorBy, type, legendValues, tree, treeToo = undefined, controls = undefined}
-) => {
-  let visibility = tree.visibility;
-  let visibilityToo = treeToo ? treeToo.visibility : undefined;
+export const createVisibleLegendValues = ({colorBy, type, legendValues, tree, treeToo}) => {
+  const visibility = tree.visibility;
+  const visibilityToo = treeToo ? treeToo.visibility : undefined;
 
-  // Create visibility if undefined.
-  if (!visibility || !visibilityToo) {
-    const dates = {
-      dateMinNumeric: controls.dateMinNumeric,
-      dateMaxNumeric: controls.dateMaxNumeric
-    };
-    visibility = calcVisibility(tree, controls, dates);
-    if (treeToo && treeToo.nodes) {
-      visibilityToo = calcVisibility(treeToo, controls, dates);
-    }
-  }
-
-  // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
-  // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
-  if (type==="ordinal" || type==="categorical") {
-    let legendValuesObserved = tree.nodes
-      .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
-      .map((n) => getTraitFromNode(n, colorBy));
-    if (treeToo && visibilityToo) {
-      const legendValuesObservedToo = treeToo.nodes
-        .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
+  if (visibility) {
+    // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
+    // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
+    if (type === "ordinal" || type === "categorical") {
+      let legendValuesObserved = tree.nodes
+        .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
         .map((n) => getTraitFromNode(n, colorBy));
-      legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
+      if (treeToo && visibilityToo) {
+        const legendValuesObservedToo = treeToo.nodes
+          .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
+          .map((n) => getTraitFromNode(n, colorBy));
+        legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
+      }
+      legendValuesObserved = new Set(legendValuesObserved);
+      return legendValues.filter((v) => legendValuesObserved.has(v));
     }
-    legendValuesObserved = new Set(legendValuesObserved);
-    return legendValues.filter((v) => legendValuesObserved.has(v));
   }
 
   return legendValues.slice();
@@ -325,6 +312,6 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendValues,
     legendBounds,
     type: scaleType,
-    visibleLegendValues: createVisibleLegendValues({colorBy, type: scaleType, legendValues, tree, treeToo, controls})
+    visibleLegendValues: createVisibleLegendValues({colorBy, type: scaleType, legendValues, tree, treeToo})
   };
 };
