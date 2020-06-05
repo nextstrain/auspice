@@ -11,7 +11,7 @@ import * as confidence from "./confidence";
 import * as labels from "./labels";
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
-const PhyloTree = function PhyloTree(reduxNodes, id) {
+const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = createDefaultParams();
@@ -40,7 +40,7 @@ const PhyloTree = function PhyloTree(reduxNodes, id) {
   setYValues(this.nodes);
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
-  this.zoomNode = this.nodes[0];
+  this.zoomNode = this.nodes[idxOfInViewRootNode];
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
