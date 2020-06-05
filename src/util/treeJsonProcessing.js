@@ -46,7 +46,11 @@ const processBranchLabelsInPlace = (nodes) => {
   nodes.forEach((n) => {
     if (n.branch_attrs && n.branch_attrs.labels) {
       Object.keys(n.branch_attrs.labels)
-        .forEach((labelName) => availableBranchLabels.add(labelName));
+        .forEach((labelName) => {
+          availableBranchLabels.add(labelName);
+          /* cast all branch label values to strings */
+          n.branch_attrs.labels[labelName] = String(n.branch_attrs.labels[labelName]);
+        });
     }
   });
   return ["none", ...availableBranchLabels];
