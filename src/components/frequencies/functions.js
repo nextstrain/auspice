@@ -37,7 +37,7 @@ export const normString = (normalized) => {
     return "normalized to 100% at each time point";
   }
   return "as a fraction of all sequences at each time point";
-}
+};
 
 const getOrderedCategories = (matrixCategories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
