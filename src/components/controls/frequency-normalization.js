@@ -21,8 +21,9 @@ class NormalizeFrequencies extends React.Component {
       <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
         <Toggle
           display
-          on={this.props.normalizeFrequencies}
+          on={this.props.controls.normalizeFrequencies}
           callback={() => {
+            const nextState = !this.props.controls.normalizeFrequencies;
             const matrix = computeMatrixFromRawData(
               this.props.frequencies.data,
               this.props.frequencies.pivots,
@@ -30,13 +31,13 @@ class NormalizeFrequencies extends React.Component {
               this.props.tree.visibility,
               this.props.controls.colorScale,
               this.props.controls.colorBy,
-              !this.props.controls.normalizeFrequencies
+              nextState
             );
-            this.props.dispatch({ type: FREQUENCY_MATRIX, matrix });
             this.props.dispatch({
               type: TOGGLE_NORMALIZE_FREQUENCIES,
-              data: !this.props.controls.normalizeFrequencies
+              data: nextState
             });
+            this.props.dispatch({ type: FREQUENCY_MATRIX, matrix });
           }}
           label={t("sidebar:Normalize frequencies")}
         />
