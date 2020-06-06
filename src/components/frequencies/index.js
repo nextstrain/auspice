@@ -5,7 +5,7 @@ import 'd3-transition';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, drawProjectionInfo,
-  areListsEqual, drawStream, processMatrix, parseColorBy } from "./functions";
+  areListsEqual, drawStream, processMatrix, parseColorBy, normString } from "./functions";
 import "../../css/entropy.css";
 
 @connect((state) => {
@@ -18,9 +18,11 @@ import "../../css/entropy.css";
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale,
-    colorOptions: state.metadata.colorings
+    colorOptions: state.metadata.colorings,
+    normalizeFrequencies: state.controls.normalizeFrequencies
   };
 })
+
 class Frequencies extends React.Component {
   constructor(props) {
     super(props);
@@ -100,7 +102,7 @@ class Frequencies extends React.Component {
   render() {
     const { t } = this.props;
     return (
-      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
+      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)} and ${t(normString(this.props.normalizeFrequencies))})`}>
         <div
           id="freqinfo"
           style={{

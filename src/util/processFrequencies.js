@@ -102,7 +102,8 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     tree.nodes,
     tree.visibility,
     controls.colorScale,
-    controls.colorBy
+    controls.colorBy,
+    controls.normalizeFrequencies
   );
   return {
     data,
