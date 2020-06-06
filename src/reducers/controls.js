@@ -99,19 +99,19 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { available: action.data });
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
-        selectedBranch: action.data,
+        selectedBranch: action.data
       });
     case types.BRANCH_MOUSELEAVE:
       return Object.assign({}, state, {
-        selectedBranch: null,
+        selectedBranch: null
       });
     case types.NODE_MOUSEENTER:
       return Object.assign({}, state, {
-        selectedNode: action.data,
+        selectedNode: action.data
       });
     case types.NODE_MOUSELEAVE:
       return Object.assign({}, state, {
-        selectedNode: null,
+        selectedNode: null
       });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
@@ -125,24 +125,24 @@ const Controls = (state = getDefaultControlsState(), action) => {
             state.distanceMeasure,
             action.data
           ),
-          on: false,
-        }),
+          on: false
+        })
       });
     case types.CHANGE_DISTANCE_MEASURE:
       const updatesToState = {
         distanceMeasure: action.data,
-        branchLengthsToDisplay: state.branchLengthsToDisplay,
+        branchLengthsToDisplay: state.branchLengthsToDisplay
       };
       if (
         shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)
       ) {
         updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {
-          display: true,
+          display: true
         });
       } else {
         updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {
           display: false,
-          on: false,
+          on: false
         });
       }
       return Object.assign({}, state, updatesToState);
@@ -161,37 +161,37 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CHANGE_ABSOLUTE_DATE_MIN:
       return Object.assign({}, state, {
         absoluteDateMin: action.data,
-        absoluteDateMinNumeric: calendarToNumeric(action.data),
+        absoluteDateMinNumeric: calendarToNumeric(action.data)
       });
     case types.CHANGE_ABSOLUTE_DATE_MAX:
       return Object.assign({}, state, {
         absoluteDateMax: action.data,
-        absoluteDateMaxNumeric: calendarToNumeric(action.data),
+        absoluteDateMaxNumeric: calendarToNumeric(action.data)
       });
     case types.CHANGE_ANIMATION_TIME:
       return Object.assign({}, state, {
-        mapAnimationDurationInMilliseconds: action.data,
+        mapAnimationDurationInMilliseconds: action.data
       });
     case types.CHANGE_ANIMATION_CUMULATIVE:
       return Object.assign({}, state, {
-        mapAnimationCumulative: action.data,
+        mapAnimationCumulative: action.data
       });
     case types.CHANGE_ANIMATION_LOOP:
       return Object.assign({}, state, {
-        mapAnimationShouldLoop: action.data,
+        mapAnimationShouldLoop: action.data
       });
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       return Object.assign({}, state, {
         quickdraw: action.data !== "Play",
-        animationPlayPauseButton: action.data,
+        animationPlayPauseButton: action.data
       });
     case types.CHANGE_ANIMATION_START:
       return Object.assign({}, state, {
-        mapAnimationStartDate: action.data,
+        mapAnimationStartDate: action.data
       });
     case types.CHANGE_PANEL_LAYOUT:
       return Object.assign({}, state, {
-        panelLayout: action.data,
+        panelLayout: action.data
       });
     case types.TREE_TOO_DATA:
       return action.controls;
@@ -201,52 +201,52 @@ const Controls = (state = getDefaultControlsState(), action) => {
         panelLayout: action.panelLayout,
         canTogglePanelLayout:
           action.panelsToDisplay.indexOf("tree") !== -1 &&
-          action.panelsToDisplay.indexOf("map") !== -1,
+          action.panelsToDisplay.indexOf("map") !== -1
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
         colorBy: action.colorBy,
         colorScale: action.colorScale,
-        colorByConfidence: doesColorByHaveConfidence(state, action.colorBy),
+        colorByConfidence: doesColorByHaveConfidence(state, action.colorBy)
       });
       return newState;
     }
     case types.CHANGE_GEO_RESOLUTION:
       return Object.assign({}, state, {
-        geoResolution: action.data,
+        geoResolution: action.data
       });
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
       filters[action.trait] = action.values;
       return Object.assign({}, state, {
-        filters,
+        filters
       });
     }
     case types.TOGGLE_MUT_TYPE:
       return Object.assign({}, state, {
-        mutType: action.data,
+        mutType: action.data
       });
     case types.TOGGLE_TEMPORAL_CONF:
       return Object.assign({}, state, {
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
-          on: !state.temporalConfidence.on,
-        }),
+          on: !state.temporalConfidence.on
+        })
       });
     case types.TRIGGER_DOWNLOAD_MODAL:
       return Object.assign({}, state, {
-        showDownload: true,
+        showDownload: true
       });
     case types.DISMISS_DOWNLOAD_MODAL:
       return Object.assign({}, state, {
-        showDownload: false,
+        showDownload: false
       });
     case types.REMOVE_TREE_TOO:
       return Object.assign({}, state, {
         showTreeToo: undefined,
         showTangle: false,
         canTogglePanelLayout: state.panelsAvailable.indexOf("map") !== -1,
-        panelsToDisplay: state.panelsAvailable.slice(),
+        panelsToDisplay: state.panelsAvailable.slice()
       });
     case types.TOGGLE_TANGLE:
       if (state.showTreeToo) {
