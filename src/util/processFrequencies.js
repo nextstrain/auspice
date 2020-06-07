@@ -60,9 +60,11 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   });
 
   if (normalizeFrequencies) {
+    const nCategories = Object.keys(matrix).length;
+    const minVal = 1e-10;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
-        matrix[cat][i] /= norm || matrix[cat][i] / norm;
+        matrix[cat][i] = (matrix[cat][i] + minVal) / (nCategories * minVal + norm);
       });
     });
   }
