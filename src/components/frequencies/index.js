@@ -13,6 +13,7 @@ import "../../css/entropy.css";
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
     matrix: state.frequencies.matrix,
+    nodes: state.tree.nodes,
     projection_pivot: state.frequencies.projection_pivot,
     version: state.frequencies.version,
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -101,8 +102,9 @@ class Frequencies extends React.Component {
   }
   render() {
     const { t } = this.props;
+    const {tipCount, fullTipCount} = this.props.nodes[0];
     return (
-      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)} and ${t(normString(this.props.normalizeFrequencies))})`}>
+      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)} ${t(normString(this.props.normalizeFrequencies, tipCount, fullTipCount))})`}>
         <div
           id="freqinfo"
           style={{
