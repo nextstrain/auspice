@@ -45,7 +45,7 @@ export const getDefaultControlsState = () => {
     strain: null,
     geneLength: {},
     mutType: defaultMutType,
-    temporalConfidence: {exists: false, display: false, on: false},
+    temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     distanceMeasure: defaults.distanceMeasure,
     dateMin,
@@ -57,7 +57,7 @@ export const getDefaultControlsState = () => {
     absoluteDateMax: dateMax,
     absoluteDateMaxNumeric: dateMaxNumeric,
     colorBy: defaults.colorBy,
-    colorByConfidence: {display: false, on: false},
+    colorByConfidence: { display: false, on: false },
     colorScale: undefined,
     selectedBranchLabel: "none",
     analysisSlider: false,
@@ -82,7 +82,8 @@ export const getDefaultControlsState = () => {
     treeLegendOpen: undefined,
     mapLegendOpen: undefined,
     showOnlyPanels: false,
-    showTransmissionLines: true
+    showTransmissionLines: true,
+    normalizeFrequencies: true
   };
 };
 
@@ -95,7 +96,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CLEAN_START:
       return action.controls;
     case types.SET_AVAILABLE:
-      return Object.assign({}, state, {available: action.data});
+      return Object.assign({}, state, { available: action.data });
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
         selectedBranch: action.data
@@ -113,28 +114,40 @@ const Controls = (state = getDefaultControlsState(), action) => {
         selectedNode: null
       });
     case types.CHANGE_BRANCH_LABEL:
-      return Object.assign({}, state, {selectedBranchLabel: action.value});
+      return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.data,
         /* temporal confidence can only be displayed for rectangular trees */
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
-          display: shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, action.data),
-          on: false})
+          display: shouldDisplayTemporalConfidence(
+            state.temporalConfidence.exists,
+            state.distanceMeasure,
+            action.data
+          ),
+          on: false
+        })
       });
     case types.CHANGE_DISTANCE_MEASURE:
       const updatesToState = {
         distanceMeasure: action.data,
         branchLengthsToDisplay: state.branchLengthsToDisplay
       };
-      if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)) {
-        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {display: true});
+      if (
+        shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)
+      ) {
+        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {
+          display: true
+        });
       } else {
-        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {display: false, on: false});
+        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {
+          display: false,
+          on: false
+        });
       }
       return Object.assign({}, state, updatesToState);
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      const newDates = {quickdraw: action.quickdraw};
+      const newDates = { quickdraw: action.quickdraw };
       if (action.dateMin) {
         newDates.dateMin = action.dateMin;
         newDates.dateMinNumeric = action.dateMinNumeric;
@@ -186,7 +199,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,
         panelLayout: action.panelLayout,
-        canTogglePanelLayout: action.panelsToDisplay.indexOf("tree") !== -1 && action.panelsToDisplay.indexOf("map") !== -1
+        canTogglePanelLayout:
+          action.panelsToDisplay.indexOf("tree") !== -1 &&
+          action.panelsToDisplay.indexOf("map") !== -1
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
@@ -235,20 +250,27 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.TOGGLE_TANGLE:
       if (state.showTreeToo) {
-        return Object.assign({}, state, {showTangle: !state.showTangle});
+        return Object.assign({}, state, { showTangle: !state.showTangle });
       }
       return state;
     case types.TOGGLE_SIDEBAR:
-      return Object.assign({}, state, {sidebarOpen: action.value});
+      return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
-      return Object.assign({}, state, {legendOpen: action.value});
+      return Object.assign({}, state, { legendOpen: action.value });
     case types.ADD_COLOR_BYS:
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);
       }
-      return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
+      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
     case types.TOGGLE_TRANSMISSION_LINES:
-      return Object.assign({}, state, {showTransmissionLines: action.data});
+      return Object.assign({}, state, { showTransmissionLines: action.data });
+
+    case types.FREQUENCY_MATRIX: {
+      if (Object.hasOwnProperty.call(action, "normalizeFrequencies")) {
+        return Object.assign({}, state, { normalizeFrequencies: action.normalizeFrequencies });
+      }
+      return state;
+    }
     default:
       return state;
   }

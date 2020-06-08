@@ -34,7 +34,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   return unassigned_label;
 };
 
-export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
+export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy, normalizeFrequencies) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
@@ -58,6 +58,16 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
       }
     }
   });
+
+  if (normalizeFrequencies) {
+    const nCategories = Object.keys(matrix).length;
+    const minVal = 1e-10;
+    Object.keys(matrix).forEach((cat) => {
+      debugPivotTotals.forEach((norm, i) => {
+        matrix[cat][i] = (matrix[cat][i] + minVal) / (nCategories * minVal + norm);
+      });
+    });
+  }
 
   if (matrix[unassigned_label].reduce((a, b) => a + b, 0) === 0) {
     delete matrix[unassigned_label];
@@ -94,7 +104,8 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     tree.nodes,
     tree.visibility,
     controls.colorScale,
-    controls.colorBy
+    controls.colorBy,
+    controls.normalizeFrequencies
   );
   return {
     data,
