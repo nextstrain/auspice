@@ -264,8 +264,13 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
-    case types.TOGGLE_NORMALIZE_FREQUENCIES:
-      return Object.assign({}, state, { normalizeFrequencies: action.data });
+
+    case types.FREQUENCY_MATRIX: {
+      if (Object.hasOwnProperty.call(action, "normalizeFrequencies")) {
+        return Object.assign({}, state, { normalizeFrequencies: action.normalizeFrequencies });
+      }
+      return state;
+    }
     default:
       return state;
   }
