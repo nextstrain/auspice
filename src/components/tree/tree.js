@@ -92,19 +92,6 @@ class Tree extends React.Component {
       this.tangleRef.drawLines();
     }
     if (Object.keys(newState).length) this.setState(newState);
-
-    // TODO:1071 what is the best way to update this and other components when changing datasets / trees in narrative mode 
-    // with respect to re-rendering?
-    // if (this.props.tree.name !== prevProps.tree.name) {
-    //   newState = {};
-    //   this.state.tree.clearSVG();
-    //   newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT");
-    //   renderTree(this, true, newState.tree, this.props);
-    //   if (this.props.showTreeToo) {
-    //     this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
-    //   }
-    //   this.setState(newState);
-    // }
   }
 
   getStyles = () => {

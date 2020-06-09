@@ -25,56 +25,59 @@ export const chooseDisplayComponentFromURL = (url) => {
   return "datasetLoader"; // fallthrough
 };
 
-// TODO:1071: write a docstring
-// async version doesnt work
+/* Try to get a JSON from the redux state where it may already have
+ * been cached. If it's not there, we should fetch it. The latter part
+ * has yet to be implemented since the only instance where we cache JSONs
+ * at this point fetches all needed JSONs by a given narrative before rendering.
+ * In the future, when we allow for more performative loading of JSONs in the backgroud,
+ * we won't be able to predict their existence in the cache and so will need to fetch
+ * here upon a "cache miss"
+ */
 const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
-// const tryCacheThenFetch = (mainTreeName, secondTreeName, state) => {
   if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons !== null && state.jsonCache.jsons[mainTreeName] !== undefined) {
-    // TODO:1071: do we need to make a deep copy when getting things from the cache?
     return {
       json: state.jsonCache.jsons[mainTreeName],
       secondJson: state.jsonCache.jsons[secondTreeName]
     };
   }
-  // TODO:1071: https://bedfordlab.slack.com/archives/D011E926D5E/p1590623415016400
+  // TODO:1071: fetching the dataset for the slide you land on,
+  // then fetching all the rest in the background so we can use them from the cache upon changing slides
+  // this presents the risk of a race (if you change pages faster than a dataset can be fetched)
+  // case so we are avoiding it for now.
   throw new Error("This should not happen given that we naively pre-fetch all datasets for any narrative before rendering");
 };
 
-// TODO:1071: update docstring
 /* changes the state of the page and (perhaps) the dataset displayed.
-This function is used throughout the app for all navigation to another page, (including braowserBackForward - see function below)
-The exception is for navigation requests that specify only the query changes, or that have an identical pathname to that selected.
+This function is used throughout the app for all navigation to another page,
 Note that this function is not pure, in that it may change the URL
 
-ARGUMENTS:
-(1) path - REQUIRED - the destination path - e.g. "zika" or "flu/..." (does not include query)
-(2) query - OPTIONAL (default: undefined) - see below
-(3) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
+The function allows these behaviors:
+Case 1. modify the current redux state via a URL query (used in narratives)
+Case 2. modify the current redux state by loading a new dataset, but don't reload the page (e.g. remain within the narrative view)
+Case 3. load new dataset & start fresh (used when changing dataset via the drop-down in the sidebar).
 
-UNDERSTANDING QUERY (SLIGHTLY CONFUSING)
+ARGUMENTS:
+path -              OPTIONAL (default: window.location.pathname) - the destination path - e.g. "zika" or "flu/..." (does not include query)
+query -             OPTIONAL (default: queryString.parse(window.location.search)) - see below
+queryToDisplay -    OPTIONAL (default: value of `query` argument) - doesn't affect state, only URL.
+push -              OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
+changeDatasetOnly - OPTIONAL (default: false) - enables changing datasets while keeping the tree, etc mounted to the DOM (e.g. whilst changing datasets in a narrative).
+
+Note about how this changes the URL and app state according to arguments:
 This function changes the pathname (stored in the datasets reducer) and modifies the URL pathname and query
 accordingly in the middleware. But the URL query is not processed further.
 Because the datasets reducer has changed, the <App> (or whichever display component we're on) will update.
 In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
 In this way, the URL query is "used".
-
-
-Basically the function should allow these brhaviors:
-1. modify the current redux state via a URL query (used in narratives)
-2. modify the current redux state by loading a new dataset, but remain within the narrative view (what we want to allow)
-3. load new dataset & start fresh (used when changing dataset via the drop-down in the sidebar). Instances:
-  - choose-dataset-select.js
-  - from narratives in exitNarrativeMode
 */
 export const changePage = ({
   path = undefined,
   query = undefined,
-  queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
+  queryToDisplay = undefined,
   push = true,
   changeDatasetOnly = false
 } = {}) => (dispatch, getState) => {
   const oldState = getState();
-  // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
 
   /* set some defaults */
   if (!path) path = window.location.pathname;  // eslint-disable-line
@@ -83,9 +86,7 @@ export const changePage = ({
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
 
-  // TODO:1071: https://bedfordlab.slack.com/archives/D011E926D5E/p1590623420016600
   if (!pathHasChanged) {
-    console.log("CASE 1")
     /* Case 1 (see docstring): the path (dataset) remains the same but the state may be modulated by the query */
     const newState = createStateFromQueryOrJSONs(
       { oldState,
@@ -93,8 +94,7 @@ export const changePage = ({
         narrativeBlocks: oldState.narrative.blocks,
         dispatch }
     );
-    // TODO:1071: dedup this dispatch with the one below
-    /* we use the state created from the query or JSON to update the state here */
+    // TODO:1071: dedup this dispatch with the one below in an action creator
     dispatch({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
       ...newState,
@@ -102,33 +102,10 @@ export const changePage = ({
       query: queryToDisplay
     });
   } else if (changeDatasetOnly) {
-    console.log("CASE 2")
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
     const [mainTreeName, secondTreeName] = collectDatasetFetchUrls(path);
-    // const {json, secondJson} = tryCacheThenFetch(mainTreeName, secondTreeName, oldState);
-    // // console.log("return value from tryCache", json, secondJson)
-    // const newState = createStateFromQueryOrJSONs({
-    //   json,
-    //   secondTreeDataset: secondJson || false,
-    //   mainTreeName,
-    //   secondTreeName: secondTreeName || false,
-    //   narrativeBlocks: oldState.narrative.blocks,
-    //   query: queryToDisplay,
-    //   dispatch
-    // });
-    // // console.log("return value from createState", newState)
-    // dispatch({
-    //   type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-    //   ...newState,
-    //   pushState: push,
-    //   query: queryToDisplay
-    // });
-    // async version doesnt work - componentWillUnmount is getting called for some reason
-    // in the narratives component and there is an error wrt async stuff happening when
-    // the component is unmounting. It shouldnt be unmounting when we swap datasets though.
     tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
       .then(({json, secondJson}) => {
-        console.log("return value from tryCache", json, secondJson)
         const newState = createStateFromQueryOrJSONs({
           json,
           secondTreeDataset: secondJson || false,
@@ -138,7 +115,6 @@ export const changePage = ({
           query: queryToDisplay,
           dispatch
         });
-        console.log("return value from createState", newState)
         dispatch({
           type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
           ...newState,
@@ -147,7 +123,6 @@ export const changePage = ({
         });
       });
   } else {
-    console.log("CASE 3")
     /* Case 3 (see docstring): the path (dataset) has changed and we want to change pages and set a new state according to the path */
     dispatch({
       type: PAGE_CHANGE,

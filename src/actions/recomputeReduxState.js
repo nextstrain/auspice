@@ -74,7 +74,6 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
-    console.log(state.panelsToDisplay)
     if (state.panelsToDisplay.indexOf("map") === -1 || state.panelsToDisplay.indexOf("tree") === -1) {
       state["panelLayout"] = "full";
     }
@@ -654,6 +653,16 @@ const createMetadataStateFromJSON = (json) => {
   return metadata;
 };
 
+export const getNarrativePageFromQuery = (query, narrative) => {
+  let n = parseInt(query.n, 10) || 0;
+  /* If the query has defined a block which doesn't exist then default to n=0 */
+  if (n >= narrative.length) {
+    console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+    n=0;
+  }
+  return n;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   secondTreeDataset = false,
@@ -709,12 +718,7 @@ export const createStateFromQueryOrJSONs = ({
   URL query this page defines via this information */
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
-    let n = parseInt(query.n, 10) || 0;
-    /* If the query has defined a block which doesn't exist then default to n=0 */
-    if (n >= narrative.length) {
-      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
-      n=0;
-    }
+    const n = getNarrativePageFromQuery(query, narrative);
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = n===0 ? {} : {n}; // eslint-disable-line
     /* If the narrative block in view defines a `mainDisplayMarkdown` section, we

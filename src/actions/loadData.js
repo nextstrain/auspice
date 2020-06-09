@@ -2,7 +2,7 @@ import queryString from "query-string";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
-import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
+import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
@@ -246,49 +246,44 @@ function addEndOfNarrativeBlock(narrativeBlocks) {
     isEndOfNarrativeSlide: true
   });
   narrativeBlocks.push(endOfNarrativeSlide);
-  console.log("add EON")
 }
 
-const loadMultipleBlocks = async (dispatch, blocks, query) => {
+const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   const jsons = {};
-  const namesMainTree = [];
-  const namesTreeToo = [];
-  const startingBlockIdx = query["n"] || 0;
+  const startingBlockIdx = getNarrativePageFromQuery(query, blocks);
   let pathnameShouldBe;
   const landingSlide = {
     secondTreeDataset: false,
     secondTreeName: false
   };
-  for (let i = 0; i < blocks.length; i++) {
-    [namesMainTree[i], namesTreeToo[i]] = collectDatasetFetchUrls(blocks[i].dataset);
-    if (namesMainTree[i]) {
-      if (!jsons[namesMainTree[i]]) {
-        // eslint-disable-next-line no-await-in-loop
-        jsons[namesMainTree[i]] = await (await getDataset(namesMainTree[i])).json();
-        if (i === startingBlockIdx) {
-          pathnameShouldBe = blocks[i].dataset;
-          landingSlide.json = jsons[namesMainTree[i]];
-          landingSlide.mainTreeName = namesMainTree[i];
-        }
-      }
-    }
-    if (namesTreeToo[i]) {
-      if (!jsons[namesTreeToo[i]]) {
-        // eslint-disable-next-line no-await-in-loop
-        jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();
-        if (i === startingBlockIdx) {
-          landingSlide.secondTreeDataset = jsons[namesTreeToo[i]];
-          landingSlide.secondTreeName = namesTreeToo[i];
-        }
-      }
-    }
-  }
-  addEndOfNarrativeBlock(blocks);
-  dispatch({
-    type: types.CACHE_JSONS,
-    jsons
+  return Promise.all(blocks.map((block, i) => {
+    const [treeName, secondTreeName] = collectDatasetFetchUrls(block.dataset);
+    // TODO:1071 also allow loading dataset for secondTreeName
+    return jsons[treeName] !== undefined ? jsons[treeName] :
+      getDataset(treeName)
+        .then((res) => res.json())
+        .then((json) => {
+          jsons[treeName] = json;
+          if (i === startingBlockIdx) {
+            pathnameShouldBe = block.dataset;
+            landingSlide.json = json;
+            landingSlide.mainTreeName = treeName;
+          }
+          return json;
+        });
+  })).then(() => {
+    // TODO:1071: this dispatch is an promise side effect which means we don't guarantee
+    // that jsons are cached before returning below. To be able to make such a guarantee,
+    // there are a number of accepted ways to do async action creator functions in redux
+    // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
+    dispatch({
+      type: types.CACHE_JSONS,
+      jsons
+    });
+    // We don't use the returned value of Promise.all above since we
+    // have already constructed the `jsons` object in order to avoid duplicate fetching.
+    return {blocks, pathnameShouldBe, landingSlide};
   });
-  return {blocks, pathnameShouldBe, landingSlide};
 };
 
 
@@ -308,9 +303,8 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       getDatasetFromCharon(url, {narrative: true})
         .then((res) => res.json())
         .then((blocks) => {
-          console.log("load mult blocks")
-          // TODO:1071: does this need to use Promise.all to ensure all datasets have loaded and no race case is possible?
-          return loadMultipleBlocks(dispatch, blocks, query).catch(console.warn);
+          addEndOfNarrativeBlock(blocks);
+          return fetchAndCacheNarrativeDatasets(dispatch, blocks, query).catch(console.warn);
         })
         .then(({blocks, pathnameShouldBe, landingSlide}) => {
           dispatch({

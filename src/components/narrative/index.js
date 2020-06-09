@@ -15,7 +15,7 @@ import {
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
-import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
+import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, CLEAR_JSON_CACHE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
@@ -40,7 +40,7 @@ class Narrative extends React.Component {
   constructor(props) {
     super(props);
     this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
+      this.props.dispatch(changePage({ path: this.props.blocks[this.props.currentInFocusBlockIdx].dataset, query: true }));
     };
     this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
       const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
@@ -58,11 +58,9 @@ class Narrative extends React.Component {
         push: true
       };
       if (this.props.currentInFocusBlockIdx === null || this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
-        console.log("calling with changeDatasetOnly")
         change.path = this.props.blocks[idx].dataset;
         change.changeDatasetOnly = true;
       }
-      console.log("change slides using args: ", change)
       this.props.dispatch(changePage(change));
     };
     this.goToNextSlide = () => {
@@ -194,7 +192,9 @@ class Narrative extends React.Component {
     );
   }
   componentWillUnmount() {
-    // TODO:1071 clear jsonCache??
+    this.props.dispatch({
+      type: CLEAR_JSON_CACHE
+    });
     this.props.dispatch({
       type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
       pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
