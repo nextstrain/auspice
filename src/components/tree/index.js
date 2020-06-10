@@ -20,7 +20,8 @@ const Tree = connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel,
   narrativeMode: state.narrative.display,
-  animationPlayPauseButton: state.controls.animationPlayPauseButton
+  animationPlayPauseButton: state.controls.animationPlayPauseButton,
+  resamplingCounter: state.controls.resamplingCounter
 }))(UnconnectedTree);
 
 export default Tree;

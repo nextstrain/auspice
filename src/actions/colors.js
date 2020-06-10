@@ -53,7 +53,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       colorScale,
       nodeColors,
       nodeColorsToo,
-      version: colorScale.version
+      nodeColorsVersion: tree.nodeColorsVersion+1
     });
 
     /* step 5 - frequency dispatch */

@@ -58,7 +58,8 @@ import "../../css/mapbox.css";
       state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
     ),
     legendValues: state.controls.colorScale.legendValues,
-    showTransmissionLines: state.controls.showTransmissionLines
+    showTransmissionLines: state.controls.showTransmissionLines,
+    resamplingCounter: state.controls.resamplingCounter
   };
 })
 
@@ -276,7 +277,8 @@ class Map extends React.Component {
     const transmissionLinesToggleChanged = this.props.showTransmissionLines !== nextProps.showTransmissionLines;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
     const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
-    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged || transmissionLinesToggleChanged)) {
+    const traitResampling = this.props.resamplingCounter !== nextProps.resamplingCounter;
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged || transmissionLinesToggleChanged || traitResampling)) {
       this.state.d3DOMNode.selectAll("*").remove();
       this.setState({
         d3elems: null,

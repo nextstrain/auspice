@@ -2,6 +2,7 @@ import Mousetrap from "mousetrap";
 import React from "react";
 import { connect } from "react-redux";
 import {changeToNextColorBy} from "../../actions/colors";
+import {sampleTraitFromUncertainty} from "../../actions/sample";
 
 /**
  * Here we have a react component which currently renders nothing.
@@ -19,16 +20,22 @@ import {changeToNextColorBy} from "../../actions/colors";
  */
 
 
-@connect(() => ({}))
+@connect((state) => ({
+  colorBy: state.controls.colorBy,
+  geoResolution: state.controls.geoResolution
+}))
 class KeyboardShortcuts extends React.Component {
   componentDidMount() {
-    Mousetrap.bind(['c'], () => {
-      console.log("c", this.dispatch);
-      this.props.dispatch(changeToNextColorBy());
+    Mousetrap.bind(['c'], () => {this.props.dispatch(changeToNextColorBy());});
+    Mousetrap.bind(['s c', 'S C', 's r', 'S R'], (e, combo) => {
+      this.props.dispatch(sampleTraitFromUncertainty({
+        trait: combo[2].toLowerCase() === 'c' ? this.props.colorBy : this.props.geoResolution,
+        returnToOriginal: combo[0]==="S"
+      }));
     });
   }
   componentWillUnmount() {
-    Mousetrap.unbind(['c']);
+    Mousetrap.unbind(['c', 's c', 'S C', 's r', 'S R']);
   }
   render() {
     return null;

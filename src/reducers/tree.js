@@ -60,8 +60,13 @@ const Tree = (state = getDefaultTreeState(), action) => {
     case types.NEW_COLORS:
       return Object.assign({}, state, {
         nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version
+        nodeColorsVersion: action.nodeColorsVersion
       });
+    case types.RESAMPLE:
+      if (action.nodeColors) {
+        return {...state, nodeColors: action.nodeColors, nodeColorsVersion: action.nodeColorsVersion};
+      }
+      return state;
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_COLOR_BYS:
