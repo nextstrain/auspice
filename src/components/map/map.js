@@ -38,7 +38,6 @@ import "../../css/mapbox.css";
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
-    // treeName: state.tree.name,
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
@@ -689,6 +688,10 @@ class Map extends React.Component {
         )}
       </Card>
     );
+  }
+  componentWillUnmount() {
+    this.state.map.off("moveend");
+    this.state.map.off("resize");
   }
 }
 
