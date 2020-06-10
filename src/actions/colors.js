@@ -64,3 +64,15 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     return null;
   };
 };
+
+
+export const changeToNextColorBy = () => {
+  return (dispatch, getState) => {
+    const {controls, metadata} = getState();
+    const current = controls.colorBy;
+    const available = Object.keys(metadata.colorings)
+      .filter((c) => c!=="gt"); // filter out genotypes
+    const nextColorBy = available[(available.indexOf(current)+1) % available.length];
+    dispatch(changeColorBy(nextColorBy));
+  };
+};
