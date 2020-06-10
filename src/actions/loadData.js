@@ -258,7 +258,9 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   };
   return Promise.all(blocks.map((block, i) => {
     const [treeName, secondTreeName] = collectDatasetFetchUrls(block.dataset);
-    // TODO:1071 also allow loading dataset for secondTreeName
+    // TODO:1071 
+    // 1. allow frequencies to be loaded for a narrative dataset here
+    // 2. allow loading dataset for secondTreeName
     return jsons[treeName] !== undefined ? jsons[treeName] :
       getDataset(treeName)
         .then((res) => res.json())

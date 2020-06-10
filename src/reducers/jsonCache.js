@@ -3,14 +3,15 @@ import * as types from "../actions/types";
 /* the store to cache pre-loaded JSONS */
 
 const jsonCache = (state = {
-  jsons: null
+  jsons: {} /* object with dataset names as keys and loaded dataset / narrative jsons as values */
 }, action) => {
   switch (action.type) {
-    // TODO add in a case where we clear the cache? E.g. when changing narratives or pages
     case types.CACHE_JSONS:
-      return {jsons: action.jsons};
+      /* Overwrite existing keys in state.jsons with values from
+         action.jsons and add new keys, values from action.jsons to state.jsons */
+      return {jsons: Object.assign(state.jsons, action.jsons)};
     case types.CLEAR_JSON_CACHE:
-      return {jsons: null};
+      return {jsons: {}};
     default:
       return state;
   }

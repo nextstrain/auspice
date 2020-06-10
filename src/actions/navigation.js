@@ -34,7 +34,7 @@ export const chooseDisplayComponentFromURL = (url) => {
  * here upon a "cache miss"
  */
 const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
-  if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons !== null && state.jsonCache.jsons[mainTreeName] !== undefined) {
+  if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons[mainTreeName] !== undefined) {
     return {
       json: state.jsonCache.jsons[mainTreeName],
       secondJson: state.jsonCache.jsons[secondTreeName]
@@ -94,7 +94,7 @@ export const changePage = ({
         narrativeBlocks: oldState.narrative.blocks,
         dispatch }
     );
-    // TODO:1071: dedup this dispatch with the one below in an action creator
+    // same dispatch as case 2 but the state comes from the query not from a JSON
     dispatch({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
       ...newState,
@@ -115,6 +115,7 @@ export const changePage = ({
           query: queryToDisplay,
           dispatch
         });
+        // same dispatch as case 1 but the state comes from a JSON
         dispatch({
           type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
           ...newState,

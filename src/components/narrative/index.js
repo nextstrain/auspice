@@ -57,7 +57,7 @@ class Narrative extends React.Component {
         queryToDisplay: {n: idx},
         push: true
       };
-      if (this.props.currentInFocusBlockIdx === null || this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
+      if (this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
         change.path = this.props.blocks[idx].dataset;
         change.changeDatasetOnly = true;
       }
