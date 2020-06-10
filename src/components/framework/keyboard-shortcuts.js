@@ -25,6 +25,10 @@ import {sampleTraitFromUncertainty} from "../../actions/sample";
   geoResolution: state.controls.geoResolution
 }))
 class KeyboardShortcuts extends React.Component {
+  constructor(props) {
+    super(props);
+    this.rafId = 0;
+  }
   componentDidMount() {
     Mousetrap.bind(['c'], () => {this.props.dispatch(changeToNextColorBy());});
     Mousetrap.bind(['s c', 'S C', 's r', 'S R'], (e, combo) => {
@@ -32,6 +36,20 @@ class KeyboardShortcuts extends React.Component {
         trait: combo[2].toLowerCase() === 'c' ? this.props.colorBy : this.props.geoResolution,
         returnToOriginal: combo[0]==="S"
       }));
+    });
+    Mousetrap.bind(['x', 'e'], (e, combo) => {
+      if (this.rafId) {
+        window.cancelAnimationFrame(this.rafId);
+        this.rafId = 0;
+        return;
+      }
+      const cb = () => {
+        this.props.dispatch(sampleTraitFromUncertainty({
+          trait: combo==="x" ? this.props.colorBy : this.props.geoResolution
+        }));
+        this.rafId = window.requestAnimationFrame(cb);
+      };
+      cb();
     });
   }
   componentWillUnmount() {
