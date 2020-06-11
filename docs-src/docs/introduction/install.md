@@ -4,7 +4,7 @@ title: Install Auspice
 
 ## Prerequisites
 Auspice is a JavaScript program, and requires [Node.js](https://nodejs.org/) to be installed on your system.
-For best results, please use Node.js version 10.
+We've had success running a range of different node versions between 10.8 and 13.
 
 We highly recommend using [Conda](https://conda.io/docs/) to manage environments, i.e. use Conda to create an environment with Node.js installed where you can use Auspice.
 It's possible to use other methods, but this documentation presupposes that you have Conda installed.
@@ -16,7 +16,7 @@ You can also use the Windows Subsystem Linux for a fuller Linux environment.
 
 ## Create a Conda Environment
 ```bash
-conda create --name auspice nodejs=10
+conda create --name auspice nodejs=12
 conda activate auspice
 ```
 
