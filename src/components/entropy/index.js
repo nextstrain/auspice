@@ -293,7 +293,7 @@ class Entropy extends React.Component {
   }
 
   componentWillUnmount() {
-    // TODO:1071 undo all listeners within EntropyChart (ie this.state.chart)
+    // TODO:1050 undo all listeners within EntropyChart (ie this.state.chart)
   }
 }
 

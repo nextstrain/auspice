@@ -256,13 +256,13 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     secondTreeDataset: false,
     secondTreeName: false
   };
-  // TODO:1071 A more performant fetching strategy would be fetching the dataset for the slide you land on,
+  // TODO:1050 A more performant fetching strategy would be fetching the dataset for the slide you land on,
   // then fetching all the rest in the background so we can use them from the cache upon changing slides.
   // Doing that presents the risk of a race case (if you change pages faster than a dataset can be fetched) so we are avoiding it for now.
   // Instead we use Promise.all to ensure all the datasets are fetched before we render.
   return Promise.all(blocks.map((block, i) => {
     const [treeName, secondTreeName] = collectDatasetFetchUrls(block.dataset);
-    // TODO:1071
+    // TODO:1050
     // 1. allow frequencies to be loaded for a narrative dataset here
     // 2. allow loading dataset for secondTreeName
     return jsons[treeName] !== undefined ? jsons[treeName] :
@@ -278,7 +278,7 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
           return json;
         });
   })).then(() => {
-    // TODO:1071: this dispatch is an promise side effect which means we don't guarantee
+    // TODO:1050: this dispatch is an promise side effect which means we don't guarantee
     // that jsons are cached before returning below. To be able to make such a guarantee,
     // there are a number of accepted ways to do async action creator functions in redux
     // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
