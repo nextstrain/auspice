@@ -142,7 +142,7 @@ class Main extends React.Component {
           }
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} key={this.props.treeName} /> : null}
-          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} key={this.props.treeName+"_map"}justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
+          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} key={this.props.treeName+"_map"} justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
               <Entropy width={chart.width} height={chart.height} key={this.props.treeName+"_entropy"}/>

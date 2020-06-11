@@ -40,10 +40,11 @@ const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
       secondJson: state.jsonCache.jsons[secondTreeName]
     };
   }
-  // TODO:1071: fetching the dataset for the slide you land on,
-  // then fetching all the rest in the background so we can use them from the cache upon changing slides
-  // this presents the risk of a race (if you change pages faster than a dataset can be fetched)
-  // case so we are avoiding it for now.
+  // TODO:1071 we should fetch a dataset here if it is not in the cache
+  // instead of throwing an error. As the error message suggests, the reason
+  // we throw is because our current fetching strategy should prevent a cache miss.
+  // We will want to implement a real fetch here when we move to a more performant
+  // fetching strategy (see actions/loadData.js)
   throw new Error("This should not happen given that we naively pre-fetch all datasets for any narrative before rendering");
 };
 

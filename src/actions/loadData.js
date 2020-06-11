@@ -256,9 +256,13 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     secondTreeDataset: false,
     secondTreeName: false
   };
+  // TODO:1071 A more performant fetching strategy would be fetching the dataset for the slide you land on,
+  // then fetching all the rest in the background so we can use them from the cache upon changing slides.
+  // Doing that presents the risk of a race case (if you change pages faster than a dataset can be fetched) so we are avoiding it for now.
+  // Instead we use Promise.all to ensure all the datasets are fetched before we render.
   return Promise.all(blocks.map((block, i) => {
     const [treeName, secondTreeName] = collectDatasetFetchUrls(block.dataset);
-    // TODO:1071 
+    // TODO:1071
     // 1. allow frequencies to be loaded for a narrative dataset here
     // 2. allow loading dataset for secondTreeName
     return jsons[treeName] !== undefined ? jsons[treeName] :
