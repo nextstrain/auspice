@@ -136,11 +136,11 @@ https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstran
   left: 0;
 }
 
-.notification-leave {
+.notification-exit {
   left: 0;
 }
 
-.notification-leave.notification-leave-active {
+.notification-exit.notification-exit-active {
   transition: 400ms ease-in;
   left: var(--width);
 }

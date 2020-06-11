@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { CSSTransitionGroup } from 'react-transition-group';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { REMOVE_NOTIFICATION } from "../../actions/types";
 
 const generateIcon = (notificationType) => {
@@ -68,27 +68,29 @@ class Notifications extends React.Component {
   }
   generateEl(d) {
     return (
-      <div key={d.id} className={d.classes.join(" ")}>
-        <div className="icon icon-main">
-          {generateIcon(d.notificationType)}
-        </div>
-        <div className="content">
-          <div className="message item">
-            {d.message}
+      <CSSTransition classNames="notification" timeout={500} key={d.id}>
+        <div className={d.classes.join(" ")}>
+          <div className="icon icon-main">
+            {generateIcon(d.notificationType)}
           </div>
-          <div className="detail item">
-            <div className="detail-content">
-              {typeof d.details === "string" ? d.details : d.details.map((el) => (
-                <div key={el}>
-                  {el}
-                </div>
-              ))}
+          <div className="content">
+            <div className="message item">
+              {d.message}
+            </div>
+            <div className="detail item">
+              <div className="detail-content">
+                {typeof d.details === "string" ? d.details : d.details.map((el) => (
+                  <div key={el}>
+                    {el}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
+          {d.notificationType === "error" ? this.closeIcon(d) : null}
+          {/* <div className="close icon icon-x"></div> */}
         </div>
-        {d.notificationType === "error" ? this.closeIcon(d) : null}
-        {/* <div className="close icon icon-x"></div> */}
-      </div>
+      </CSSTransition>
     );
   }
   removeNotificationCallback(id) {
@@ -100,14 +102,11 @@ class Notifications extends React.Component {
       return null;
     }
     return (
-      <CSSTransitionGroup className="notifications"
-        transitionName="notification"
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={500}
-        style={{zIndex: 20000}}
-      >
-        {this.props.stack.map((d) => this.generateEl(d))}
-      </CSSTransitionGroup>
+      <TransitionGroup>
+        <div className="notifications">
+          {this.props.stack.map((d) => this.generateEl(d))}
+        </div>
+      </TransitionGroup>
     );
   }
 }
