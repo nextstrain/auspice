@@ -1,4 +1,5 @@
 import queryString from "query-string";
+import _uniq from "lodash/uniq";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
@@ -251,32 +252,31 @@ function addEndOfNarrativeBlock(narrativeBlocks) {
 const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   const jsons = {};
   const startingBlockIdx = getNarrativePageFromQuery(query, blocks);
-  let pathnameShouldBe;
+  const startingDataset = blocks[startingBlockIdx].dataset;
+  const startingTreeName = collectDatasetFetchUrls(startingDataset)[0];
   const landingSlide = {
+    mainTreeName: startingTreeName,
     secondTreeDataset: false,
     secondTreeName: false
   };
+  const treeNames = _uniq(blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]));
   // TODO:1050 A more performant fetching strategy would be fetching the dataset for the slide you land on,
   // then fetching all the rest in the background so we can use them from the cache upon changing slides.
   // Doing that presents the risk of a race case (if you change pages faster than a dataset can be fetched) so we are avoiding it for now.
   // Instead we use Promise.all to ensure all the datasets are fetched before we render.
-  return Promise.all(blocks.map((block, i) => {
-    const [treeName, secondTreeName] = collectDatasetFetchUrls(block.dataset);
+  return Promise.all(treeNames.map((treeName) => {
     // TODO:1050
     // 1. allow frequencies to be loaded for a narrative dataset here
     // 2. allow loading dataset for secondTreeName
-    return jsons[treeName] !== undefined ? jsons[treeName] :
-      getDataset(treeName)
-        .then((res) => res.json())
-        .then((json) => {
-          jsons[treeName] = json;
-          if (i === startingBlockIdx) {
-            pathnameShouldBe = block.dataset;
-            landingSlide.json = json;
-            landingSlide.mainTreeName = treeName;
-          }
-          return json;
-        });
+    return getDataset(treeName)
+      .then((res) => res.json())
+      .then((json) => {
+        jsons[treeName] = json;
+        if (treeName === startingTreeName) {
+          landingSlide.json = json;
+        }
+        return json;
+      });
   })).then(() => {
     // TODO:1050: this dispatch is an promise side effect which means we don't guarantee
     // that jsons are cached before returning below. To be able to make such a guarantee,
@@ -288,7 +288,11 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     });
     // We don't use the returned value of Promise.all above since we
     // have already constructed the `jsons` object in order to avoid duplicate fetching.
-    return {blocks, pathnameShouldBe, landingSlide};
+    return {
+      blocks,
+      pathnameShouldBe: startingDataset,
+      landingSlide
+    };
   });
 };
 
