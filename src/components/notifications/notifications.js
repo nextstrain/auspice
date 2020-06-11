@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group";
+import { CSSTransitionGroup } from 'react-transition-group';
 import { REMOVE_NOTIFICATION } from "../../actions/types";
 
 const generateIcon = (notificationType) => {
@@ -100,14 +100,14 @@ class Notifications extends React.Component {
       return null;
     }
     return (
-      <ReactCSSTransitionGroup className="notifications"
+      <CSSTransitionGroup className="notifications"
         transitionName="notification"
         transitionEnterTimeout={500}
         transitionLeaveTimeout={500}
         style={{zIndex: 20000}}
       >
         {this.props.stack.map((d) => this.generateEl(d))}
-      </ReactCSSTransitionGroup>
+      </CSSTransitionGroup>
     );
   }
 }
