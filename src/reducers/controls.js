@@ -21,7 +21,8 @@ export const getDefaultControlsState = () => {
     geoResolution: defaultGeoResolution,
     filters: {},
     colorBy: defaultColorBy,
-    selectedBranchLabel: "none"
+    selectedBranchLabel: "none",
+    showTransmissionLines: true
   };
   // a default sidebarOpen status is only set via JSON, URL query
   // _or_ if certain URL keywords are triggered
