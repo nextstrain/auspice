@@ -97,7 +97,7 @@ class SearchStrains extends React.Component {
     });
     this.setState({awesomplete});
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.selectedStrain && !nextProps.selectedStrain) {
       this.ref.value = null;
       this.setState({show: false});

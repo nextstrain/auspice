@@ -25,7 +25,7 @@ class Language extends React.Component {
     }
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     if (!this.props.language || this.props.language === "en") return;
     await this.ensureLanguageResources(this.props.language);
     i18n.changeLanguage(this.props.language);

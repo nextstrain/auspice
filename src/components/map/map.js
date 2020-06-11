@@ -87,7 +87,7 @@ class Map extends React.Component {
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
@@ -123,7 +123,7 @@ class Map extends React.Component {
     }
     this.maybeInvalidateMapSize(this.props);
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */

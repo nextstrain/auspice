@@ -12,7 +12,7 @@ class DatasetLoader extends React.Component {
   constructor(props) {
     super(props);
   }
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     this.props.dispatch(loadJSONs()); // choose via URL
     this.props.dispatch({type: PAGE_CHANGE, displayComponent: "main"});
   }

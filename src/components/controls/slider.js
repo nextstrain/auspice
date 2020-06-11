@@ -281,7 +281,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   // Keep the internal `value` consistent with an outside `value` if present.
   // This basically allows the slider to be a controlled component.
-  componentWillReceiveProps(newProps) {
+  UNSAFE_componentWillReceiveProps(newProps) {
     const value = this._or(ensureArray(newProps.value), this.state.value);
 
     // ensure the array keeps the same size as `value`

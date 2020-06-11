@@ -182,7 +182,7 @@ class Entropy extends React.Component {
       this.setUp(this.props);
     }
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
