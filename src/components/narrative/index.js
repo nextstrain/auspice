@@ -193,9 +193,6 @@ class Narrative extends React.Component {
   }
   componentWillUnmount() {
     this.props.dispatch({
-      type: CLEAR_JSON_CACHE
-    });
-    this.props.dispatch({
       type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
       pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
       query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)

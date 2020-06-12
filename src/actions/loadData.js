@@ -278,21 +278,25 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
         return json;
       });
   })).then(() => {
-    // TODO:1050: this dispatch is an promise side effect which means we don't guarantee
-    // that jsons are cached before returning below. To be able to make such a guarantee,
-    // there are a number of accepted ways to do async action creator functions in redux
+    dispatch({
+      type: types.CLEAN_START,
+      pathnameShouldBe: startingDataset,
+      ...createStateFromQueryOrJSONs({
+        ...landingSlide,
+        query,
+        narrativeBlocks: blocks,
+        dispatch
+      })
+    });
+  }).then(() => {
+    // TODO:1050: does this introduce a race case still? That is, can the user,
+    // navigate to another slide before the redux reducer gets the cached jsons?
+    // If so, we may be able to resolve with async action creator functions in redux
     // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
     dispatch({
       type: types.CACHE_JSONS,
       jsons
     });
-    // We don't use the returned value of Promise.all above since we
-    // have already constructed the `jsons` object in order to avoid duplicate fetching.
-    return {
-      blocks,
-      pathnameShouldBe: startingDataset,
-      landingSlide
-    };
   });
 };
 
@@ -315,18 +319,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
         .then((blocks) => {
           addEndOfNarrativeBlock(blocks);
           return fetchAndCacheNarrativeDatasets(dispatch, blocks, query).catch(console.warn);
-        })
-        .then(({blocks, pathnameShouldBe, landingSlide}) => {
-          dispatch({
-            type: types.CLEAN_START,
-            pathnameShouldBe,
-            ...createStateFromQueryOrJSONs({
-              ...landingSlide,
-              query,
-              narrativeBlocks: blocks,
-              dispatch
-            })
-          });
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);

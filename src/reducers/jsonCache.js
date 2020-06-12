@@ -10,7 +10,7 @@ const jsonCache = (state = {
       /* Overwrite existing keys in state.jsons with values from
          action.jsons and add new keys, values from action.jsons to state.jsons */
       return {jsons: Object.assign(state.jsons, action.jsons)};
-    case types.CLEAR_JSON_CACHE:
+    case types.CLEAN_START:
       return {jsons: {}};
     default:
       return state;
