@@ -274,7 +274,8 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
       .catch((err) => {
         if (err.status === 404) {
           // Assuming block[0] is the one that was set properly for all legacy narratives
-          return getDataset(treeNames[0]);
+          return getDataset(treeNames[0])
+            .then((res) => res.json());
         } 
         throw err;
       });
