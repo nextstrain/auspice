@@ -21,14 +21,15 @@ import { hasExtension, getExtension } from "../util/extensions";
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
-  let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
+const getDatasetFromCharon = (prefix, { type, narrative = false } = {}) => {
+  let path = `${getServerAddress()}/${narrative ? "getNarrative" : "getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
   const p = fetch(path)
     .then((res) => {
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
-        throw new Error(res.statusText);
+        throw res;
       }
       return res;
     });
@@ -50,13 +51,14 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
+const getHardcodedData = (prefix, { type = "mainJSON" } = {}) => {
   const datapaths = getExtension("hardcodedDataPaths");
 
   const p = fetch(datapaths[type])
     .then((res) => {
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
-        throw new Error(res.statusText);
+        throw res;
       }
       return res;
     });
@@ -204,22 +206,22 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* do we have frequencies to display? */
   if (datasetJson.meta.panels && datasetJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
-      const frequencyData = await getDataset(mainDatasetUrl, {type: "tip-frequencies"})
+      const frequencyData = await getDataset(mainDatasetUrl, { type: "tip-frequencies" })
         .then((res) => res.json());
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {
       console.error("Failed to fetch frequencies", err.message);
-      dispatch(warningNotification({message: "Failed to fetch frequencies"}));
+      dispatch(warningNotification({ message: "Failed to fetch frequencies" }));
     }
   }
 
   /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
   try {
     const availableDatasets = await fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`);
-    dispatch({type: types.SET_AVAILABLE, data: availableDatasets});
+    dispatch({ type: types.SET_AVAILABLE, data: availableDatasets });
   } catch (err) {
     console.error("Failed to fetch available datasets", err.message);
-    dispatch(warningNotification({message: "Failed to fetch available datasets"}));
+    dispatch(warningNotification({ message: "Failed to fetch available datasets" }));
   }
   return undefined;
 };
@@ -231,16 +233,16 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
       .then((res) => res.json());
   } catch (err) {
     console.error("Failed to fetch additional tree", err.message);
-    dispatch(warningNotification({message: "Failed to fetch second tree"}));
+    dispatch(warningNotification({ message: "Failed to fetch second tree" }));
     return;
   }
   const oldState = getState();
-  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl, dispatch});
-  dispatch({type: types.TREE_TOO_DATA, ...newState});
+  const newState = createTreeTooState({ treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl, dispatch });
+  dispatch({ type: types.TREE_TOO_DATA, ...newState });
 };
 
 function addEndOfNarrativeBlock(narrativeBlocks) {
-  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
+  const lastContentSlide = narrativeBlocks[narrativeBlocks.length - 1];
   const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
     __html: undefined,
     isEndOfNarrativeSlide: true
@@ -265,12 +267,33 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   // 2. allow loading dataset for secondTreeName
 
   // We block and await for the landing dataset
-  jsons[startingTreeName] = landingSlide.json = await getDataset(startingTreeName).then(((res) => res.json()));
+  jsons[startingTreeName] = await
+  getDataset(startingTreeName)
+      .then((res) => res.json())
+      // If it's a 404 we fall back
+      .catch((err) => {
+        if (err.status === 404) {
+          // Assuming block[0] is the one that was set properly for all legacy narratives
+          return getDataset(treeNames[0])
+            .then((res) => res.json());
+        }
+        throw err;
+      });
+  landingSlide.json = jsons[startingTreeName];
 
   // The other datasets are fetched asynchronously
   for (const treeName of treeNames) {
-  // With this there's no need for Set above
-    jsons[treeName] = jsons[treeName] || getDataset(treeName).then((res) => res.json());
+    // With this there's no need for Set above
+    jsons[treeName] = jsons[treeName] ||
+      getDataset(treeName)
+        .then((res) => res.json())
+        .catch((err) => {
+          if (err.status === 404) {
+            // We fall back to the landing slide
+            return jsons[startingTreeName];
+          }
+          throw err;
+        });
   }
 
   dispatch({
@@ -291,11 +314,11 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
 };
 
 
-export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
+export const loadJSONs = ({ url = window.location.pathname, search = window.location.search } = {}) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.loaded) {
-      dispatch({type: types.DATA_INVALID});
+      dispatch({ type: types.DATA_INVALID });
     }
     const query = queryString.parse(search);
 
@@ -304,7 +327,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
-      getDatasetFromCharon(url, {narrative: true})
+      getDatasetFromCharon(url, { narrative: true })
         .then((res) => res.json())
         .then((blocks) => {
           addEndOfNarrativeBlock(blocks);
