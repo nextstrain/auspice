@@ -17,7 +17,7 @@
   "scripts": {
     "create-data-dir": "env bash ./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",
-    "view": "node auspice.js view --verbose",
+    "view": "node auspice.js view",
     "dev": "node auspice.js develop --verbose",
     "start": "npm run view",
     "server": "npm run view",

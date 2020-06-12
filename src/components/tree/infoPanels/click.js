@@ -2,7 +2,8 @@ import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
+  getAccessionFromNode, getUrlFromNode, getAllAttributesFromNode } from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -98,7 +99,6 @@ const AccessionAndUrl = ({node}) => {
   }
   return null;
 };
-
 
 const VaccineInfo = ({node, t}) => {
   const vaccineInfo = getVaccineFromNode(node);
@@ -200,6 +200,21 @@ const Trait = ({node, trait, colorings}) => {
   return isValueValid(value) ? item(name, value) : null;
 };
 
+const OtherFields = ({node, t}) => {
+  const others = getAllAttributesFromNode(node);
+  const exceptions = ["accession", "url", "vaccine", "div", "author", "num_date", "country"];
+  const itemsToRender = [];
+  others.forEach(([key, value]) => {
+      if (!exceptions.includes(key))
+        itemsToRender.push(<tr key={key + "_ex"}>
+          <th>{t(key[0].toUpperCase() + key.slice(1))}</th>
+          <td>{value}</td>
+        </tr>)
+    }
+  )
+  return itemsToRender;
+}
+
 /**
  * A React component to display information about a tree tip in a modal-overlay style
  * @param  {Object}   props
@@ -225,6 +240,7 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
               <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
             <AccessionAndUrl node={node}/>
+            <OtherFields node={node} t={t}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

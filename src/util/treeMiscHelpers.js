@@ -72,6 +72,20 @@ export const getAccessionFromNode = (node) => {
   return undefined;
 };
 
+export const getAttributeFromNodeByName = (node, attr) => {
+  if (node.node_attrs && Object.keys().includes(attr)) {
+    return node.node_attrs[attr];
+  }
+  return undefined;
+}
+
+export const getAllAttributesFromNode = (node) => {
+  if (node.node_attrs) {
+    return Object.entries(node.node_attrs);
+  }
+  return []
+}
+
 /* see comment at top of this file */
 export const getUrlFromNode = (node) =>
   (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
