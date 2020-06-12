@@ -27,8 +27,8 @@ export const chooseDisplayComponentFromURL = (url) => {
 
 /*
  * All the Fetch Promises are created before first render. When trying the cache we `await`.
- * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immeditaly return the result. 
- * For the landing dataset, no problem either because await on a value just returns the value. 
+ * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immeditaly return the result.
+ * For the landing dataset, no problem either because await on a value just returns the value.
  */
 const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
   if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons[mainTreeName] !== undefined) {

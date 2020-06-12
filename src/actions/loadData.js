@@ -27,7 +27,7 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   if (type) path += `&type=${type}`;
   const p = fetch(path)
     .then((res) => {
-      //throw the whole thing so we can check res.status
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
         throw res;
       }
@@ -56,7 +56,7 @@ const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
 
   const p = fetch(datapaths[type])
     .then((res) => {
-      //throw the whole thing so we can check res.status
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
         throw res;
       }
@@ -265,34 +265,36 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   // TODO:1050
   // 1. allow frequencies to be loaded for a narrative dataset here
   // 2. allow loading dataset for secondTreeName
-  
+
   // We block and await for the landing dataset
-  jsons[startingTreeName] = landingSlide.json = await
-    getDataset(startingTreeName)
-      .then(res => res.json())
-      // If it's a 404 we fall back 
+  jsons[startingTreeName] = await
+  getDataset(startingTreeName)
+      .then((res) => res.json())
+      // If it's a 404 we fall back
       .catch((err) => {
         if (err.status === 404) {
           // Assuming block[0] is the one that was set properly for all legacy narratives
           return getDataset(treeNames[0])
             .then((res) => res.json());
-        } 
+        }
         throw err;
       });
+  landingSlide.json = jsons[startingTreeName];
 
   // The other datasets are fetched asynchronously
-  for (const treeName of treeNames)
-    // With this there's no need for Set above
+  for (const treeName of treeNames) {
+  // With this there's no need for Set above
     jsons[treeName] = jsons[treeName] ||
       getDataset(treeName)
         .then((res) => res.json())
         .catch((err) => {
           if (err.status === 404) {
             // We fall back to the landing slide
-            return jsons[startingTreeName];  
+            return jsons[startingTreeName];
           }
           throw err;
-        });;
+        });
+  }
 
   // I don't think the below here is a real problem for any practical case (?)
 
