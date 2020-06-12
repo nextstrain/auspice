@@ -1,5 +1,4 @@
 import queryString from "query-string";
-import _uniq from "lodash/uniq";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
@@ -259,41 +258,36 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     secondTreeDataset: false,
     secondTreeName: false
   };
-  const treeNames = _uniq(blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]));
-  // TODO:1050 A more performant fetching strategy would be fetching the dataset for the slide you land on,
-  // then fetching all the rest in the background so we can use them from the cache upon changing slides.
-  // Doing that presents the risk of a race case (if you change pages faster than a dataset can be fetched) so we are avoiding it for now.
-  // Instead we use Promise.all to ensure all the datasets are fetched before we render.
-  return Promise.all(treeNames.map((treeName) => {
-    // TODO:1050
-    // 1. allow frequencies to be loaded for a narrative dataset here
-    // 2. allow loading dataset for secondTreeName
-    return getDataset(treeName)
-      .then((res) => res.json())
-      .then((json) => {
-        jsons[treeName] = json;
-        if (treeName === startingTreeName) {
-          landingSlide.json = json;
-        }
-        return json;
-      });
-  })).then(() => {
-    // TODO:1050: this dispatch is an promise side effect which means we don't guarantee
-    // that jsons are cached before returning below. To be able to make such a guarantee,
-    // there are a number of accepted ways to do async action creator functions in redux
-    // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
-    dispatch({
-      type: types.CACHE_JSONS,
-      jsons
-    });
-    // We don't use the returned value of Promise.all above since we
-    // have already constructed the `jsons` object in order to avoid duplicate fetching.
-    return {
-      blocks,
-      pathnameShouldBe: startingDataset,
-      landingSlide
-    };
+  const treeNames = blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]);
+
+  // TODO:1050
+  // 1. allow frequencies to be loaded for a narrative dataset here
+  // 2. allow loading dataset for secondTreeName
+  
+  // We block and await for the landing dataset
+  jsons[startingTreeName] = landingSlide.json = await getDataset(startingTreeName).then(((res) => res.json()));
+
+  // The other datasets are fetched asynchronously
+  for (const treeName of treeNames)
+  // With this there's no need for Set above
+    jsons[treeName] = jsons[treeName] || getDataset(treeName).then((res) => res.json());
+
+  // I don't think the below here is a real problem for any practical case (?)
+
+  // TODO:1050: this dispatch is an promise side effect which means we don't guarantee
+  // that jsons are cached before returning below. To be able to make such a guarantee,
+  // there are a number of accepted ways to do async action creator functions in redux
+  // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
+  dispatch({
+    type: types.CACHE_JSONS,
+    jsons
   });
+
+  return {
+    blocks,
+    pathnameShouldBe: startingDataset,
+    landingSlide
+  };
 };
 
 
