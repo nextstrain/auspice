@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Select from "react-select";
+import Select from "react-select/lib/Select";
 import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, nucleotide_gene } from "../../util/globals";
@@ -32,9 +32,21 @@ class ColorBy extends React.Component {
       positionSelected: ""
     };
 
-    this.state = this.newState({
-      colorBySelected: props.colorBy
-    });
+    if (isColorByGenotype(props.colorBy)) {
+      const genotype = decodeColorByGenotype(props.colorBy);
+
+      if (genotype) {
+        this.state = this.newState({
+          colorBySelected: "gt",
+          geneSelected: genotype.gene,
+          positionSelected: genotype.positions.join(",")
+        });
+      }
+    } else {
+      this.state = this.newState({
+        colorBySelected: props.colorBy
+      });
+    }
   }
   static propTypes = {
     colorBy: PropTypes.string.isRequired,

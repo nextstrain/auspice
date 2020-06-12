@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select";
+import Select from "react-select/lib/Select";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
@@ -7,12 +7,6 @@ import { controlsWidth } from "../../util/globals";
 
 
 class ChooseDatasetSelect extends React.Component {
-  createDataPath(dataset) {
-    let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.choice_tree.join("/") + "/" + dataset;
-    p = p.replace(/\/+/, "/");
-    return p;
-  }
   changeDataset(newPath) {
     // 0 analytics (optional)
     analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
@@ -24,22 +18,20 @@ class ChooseDatasetSelect extends React.Component {
     }
     this.props.dispatch(changePage({path: newPath}));
   }
-  getDatasetOptions() {
-    return this.props.options ?
-      this.props.options.map((opt) => ({value: opt, label: opt})) :
-      {};
-  }
   render() {
-    const datasetOptions = this.getDatasetOptions();
     return (
       <div style={{width: controlsWidth, fontSize: 14}}>
         <Select
           value={this.props.selected}
-          options={datasetOptions}
+          options={this.props.options || []}
           clearable={false}
           searchable={false}
           multi={false}
-          onChange={(opt) => {this.changeDataset(this.createDataPath(opt.value));}}
+          onChange={(opt) => {
+            if (opt.value !== this.props.selected) {
+              this.changeDataset(`/${opt.value}`);
+            }
+          }}
         />
       </div>
     );

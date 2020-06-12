@@ -1,6 +1,6 @@
 import { select, mouse } from "d3-selection";
 import 'd3-transition';
-import { scaleLinear } from "d3-scale";
+import scaleLinear from "d3-scale/src/linear";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
@@ -30,6 +30,16 @@ export const parseColorBy = (colorBy, colorOptions) => {
       : `Genotype at Nuc. ${genotype.positions.join(", ")}`;
   }
   return colorBy;
+};
+
+export const normString = (normalized, tipCount, fullTipCount) => {
+  if (tipCount<fullTipCount) {
+    if (normalized) {
+      return `and normalized to 100% at each time point for ${tipCount} out of a total of ${fullTipCount} tips`;
+    }
+    return `as a fraction of all sequences at each time point showing ${tipCount} out of a total of ${fullTipCount} tips`;
+  }
+  return "";
 };
 
 const getOrderedCategories = (matrixCategories, colorScale) => {

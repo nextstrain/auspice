@@ -50,6 +50,14 @@ const run = (args) => {
   process.env.BABEL_ENV = "development";
   process.env.BABEL_EXTENSION_PATH = extensionPath;
 
+  /* Redirects / to webpack-generated index */
+  app.use((req, res, next) => {
+    if (!/^\/__webpack_hmr|^\/charon|\.[A-Za-z0-9]{1,4}$/.test(req.path)) {
+      req.url = webpackConfig.output.publicPath;
+    }
+    next();
+  });
+
   app.use((webpackDevMiddleware)(
     compiler,
     {logLevel: 'warn', publicPath: webpackConfig.output.publicPath}
@@ -66,10 +74,7 @@ const run = (args) => {
     handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
   }
 
-  /* this must be the last "get" handler, else the "*" swallows all other requests */
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(baseDir, "index.html"));
-  });
+  app.get("*", (req, res) => res.redirect("/"));
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
@@ -80,11 +85,27 @@ const run = (args) => {
     utils.log(`Serving auspice version ${version}${args.extend ? " with extensions" : ""}.`);
     utils.log(handlerMsg);
     utils.log("---------------------------------------------------\n\n");
+  }).on('error', (error) => {
+    if (error.code === 'EADDRINUSE') {
+      utils.error(`Port ${app.get('port')} is currently in use by another program.
+      You must either close that program or specify a different port by setting the shell variable "$PORT". Note that on MacOS / Linux ${chalk.yellow(`lsof -n -i :${app.get('port')} | grep LISTEN`)} should identify the process currently using the port.`);
+    }
+
+    if (error.code === 'ENOTFOUND') {
+      utils.error(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
+
+      Example commands to fix:
+        ${chalk.yellow('HOST="localhost" auspice develop')}
+        ${chalk.yellow('HOST="localhost" npm run develop')}`);
+    }
+
+    utils.error(`Uncaught error in app.listen(). Code: ${error.code}`);
   });
+
 
 };
 
 module.exports = {
   addParser,
-  run,
+  run
 };

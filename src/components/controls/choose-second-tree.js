@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select";
+import Select from "react-select/lib/Select";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 

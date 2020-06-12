@@ -2,11 +2,41 @@
 title: Changelog
 ---
 
+## version 2.16.0 - 2020/05/29
+
+#### Features
+* Drastically improve how we bundle our JavaScript to improve loading times and allow more stable caching.
+[See PR 1126](https://github.com/nextstrain/auspice/pull/1126) for more.
+* Add a toggle for whether or not to show transmission lines on the map.
+[See PR 1147](https://github.com/nextstrain/auspice/pull/1147) and [PR 1103](https://github.com/nextstrain/auspice/pull/1147) for more.
+* Dynamically adjust deme circle size on the map when filtering. 
+[See PR 1135](https://github.com/nextstrain/auspice/pull/1135) for more.
+* Allow the genomic diversity data (the data behind the entropy panel) to be downloaded as a TSV.
+[See PR 1144](https://github.com/nextstrain/auspice/pull/1144) for more.
+* When running the auspice server incomplete URLs can now be expanded by the server.
+[See PR 1129](https://github.com/nextstrain/auspice/pull/1129) for more.
+
+
+#### Other
+* Temporarily disable integration tests from the GitHub CI. [See PR 1148](https://github.com/nextstrain/auspice/pull/1148) for more.
+* Add a CC-BY license for the downloaded SVG (screenshots) . [See PR 1140](https://github.com/nextstrain/auspice/pull/1140) for more.
+* Improvement in code which decides which footers to show. 
+[See PR 1118](https://github.com/nextstrain/auspice/pull/1118) for more.
+* Documentation improvements -- see [PR 1127](https://github.com/nextstrain/auspice/pull/1127) for more.
+* Fix an error in map positioning in some narrative slides. [See PR 958](https://github.com/nextstrain/auspice/pull/958) for more.
+* Rename test snapshots for Windows support. [See PR 1122](https://github.com/nextstrain/auspice/pull/1122) for more.
+* Certain errors preventing the server from running are now caught & helpful messages printed.
+[See PR 1140](https://github.com/nextstrain/auspice/pull/1112) for more.
+
 ## version 2.15.0 - 2020/05/06
+
+* Render "nice" dates for the frequency graph. [See PR 1096](https://github.com/nextstrain/auspice/pull/1096) for more.
+* Allow SVG in narrative markdown. [See PR 1087](https://github.com/nextstrain/auspice/pull/1087) for more.
+* Arabic translation. [See PR 1107](https://github.com/nextstrain/auspice/pull/1107) for more.
+* CSS fixes. See [PR 1092](https://github.com/nextstrain/auspice/pull/1094) and [PR 1094](https://github.com/nextstrain/auspice/pull/1094) for more.
 
 
 ## version 2.14.0 - 2020/04/24
-
 
 #### Testing
 * Add screenshot integration testing using puppeteer and jest-image-snapshot, and run this through the GitHub CI.

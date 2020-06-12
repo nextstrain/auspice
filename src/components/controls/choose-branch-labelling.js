@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select";
+import Select from "react-select/lib/Select";
 import { withTranslation } from 'react-i18next';
 
 import { CHANGE_BRANCH_LABEL } from "../../actions/types";

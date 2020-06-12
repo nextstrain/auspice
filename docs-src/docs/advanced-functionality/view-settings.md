@@ -37,6 +37,7 @@ For instance, if you set `display_defaults.color_by` to `country`, but load the 
 | `layout`            | Tree layout        | "rect", "radial", "clock" or "unrooted |
 | `branch_label`      | Which set of branch labels are to be displayed | "aa", "lineage" |
 | `panels`            | List of panels which (if available) are to be displayed  | ["tree", "map"] |
+| `transmission_lines`| Should transmission lines (if available) be rendered on the map?  | Boolean |
 
 
 Note that `meta.display_defaults.panels` (optional) differs from `meta.panels` (required), where the latter lists the possible panels that auspice may display for the dataset.

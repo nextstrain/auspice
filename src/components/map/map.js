@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import { GestureHandling } from "leaflet-gesture-handling";
+import "leaflet/dist/leaflet.css";
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import domtoimage from "dom-to-image";
@@ -55,7 +57,8 @@ import "../../css/mapbox.css";
       !state.controls.colorScale.continuous &&                           // continuous color scale = no pie chart
       state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
     ),
-    legendValues: state.controls.colorScale.legendValues
+    legendValues: state.controls.colorScale.legendValues,
+    showTransmissionLines: state.controls.showTransmissionLines
   };
 })
 
@@ -217,6 +220,7 @@ class Map extends React.Component {
         this.props.pieChart,
         this.props.legendValues,
         this.props.colorBy,
+        this.props.showTransmissionLines,
         this.props.dispatch
       );
 
@@ -239,7 +243,8 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart,
         this.props.geoResolution,
-        this.props.dispatch
+        this.props.dispatch,
+        this.props.showTransmissionLines,
       );
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
@@ -268,9 +273,10 @@ class Map extends React.Component {
   maybeRemoveAllDemesAndTransmissions(nextProps) {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+    const transmissionLinesToggleChanged = this.props.showTransmissionLines !== nextProps.showTransmissionLines;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
     const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
-    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged)) {
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged || transmissionLinesToggleChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
       this.setState({
         d3elems: null,
@@ -380,6 +386,7 @@ class Map extends React.Component {
         nextProps.pieChart,
         nextProps.legendValues,
         nextProps.colorBy,
+        nextProps.showTransmissionLines,
         nextProps.dispatch
       );
       const d3elems = drawDemesAndTransmissions(
@@ -631,7 +638,18 @@ class Map extends React.Component {
     // window.L available because leaflet() was called in componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     const maxZoom = this.getMaxZoomForFittingMapToData();
-    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
+    // first, clear any existing timeout
+    if (this.bounds_timeout) {
+      window.clearTimeout(this.bounds_timeout);
+    }
+    // delay to change map bounds
+    this.bounds_timeout = window.setTimeout(
+      (map) => {
+        map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
+      },
+      this.props.narrativeMode ? 100 : 750,
+      this.state.map
+    );
   }
   getStyles = () => {
     const activeResetZoomButton = true;

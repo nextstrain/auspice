@@ -29,8 +29,6 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 * `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
 
-> For customisation code which uses [React](https://reactjs.org/) components, you must import these as `import React from "@libraries/react";` to ensure that the version of react is the same as what Auspice uses.
-
 ---
 
 ## Sidebar Theme
