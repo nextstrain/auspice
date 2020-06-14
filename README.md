@@ -32,7 +32,8 @@ The following are helpful when beginning to use Auspice:
 ### Installation
 
 Install auspice for use as a global command.
-This requires nodejs 10+. We recommend using a conda environment, but this is not the only way.
+This requires nodejs.
+We recommend using a conda environment, but this is not the only way.
 (See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
 
 #### Install with conda (Recommended)
@@ -40,7 +41,7 @@ This requires nodejs 10+. We recommend using a conda environment, but this is no
 Create and activate a [conda](https://docs.conda.io) environment:
 
 ```bash
-conda create --name auspice nodejs=10
+conda create --name auspice nodejs=12
 conda activate auspice
 ```
 
