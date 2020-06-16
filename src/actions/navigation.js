@@ -25,27 +25,19 @@ export const chooseDisplayComponentFromURL = (url) => {
   return "datasetLoader"; // fallthrough
 };
 
-/* Try to get a JSON from the redux state where it may already have
- * been cached. If it's not there, we should fetch it. The latter part
- * has yet to be implemented since the only instance where we cache JSONs
- * at this point fetches all needed JSONs by a given narrative before rendering.
- * In the future, when we allow for more performative loading of JSONs in the backgroud,
- * we won't be able to predict their existence in the cache and so will need to fetch
- * here upon a "cache miss"
+/*
+ * All the Fetch Promises are created before first render. When trying the cache we `await`.
+ * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immeditaly return the result.
+ * For the landing dataset, no problem either because await on a value just returns the value.
  */
 const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
   if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons[mainTreeName] !== undefined) {
     return {
-      json: state.jsonCache.jsons[mainTreeName],
-      secondJson: state.jsonCache.jsons[secondTreeName]
+      json: await state.jsonCache.jsons[mainTreeName],
+      secondJson: await state.jsonCache.jsons[secondTreeName]
     };
   }
-  // TODO:1050 we should fetch a dataset here if it is not in the cache
-  // instead of throwing an error. As the error message suggests, the reason
-  // we throw is because our current fetching strategy should prevent a cache miss.
-  // We will want to implement a real fetch here when we move to a more performant
-  // fetching strategy (see actions/loadData.js)
-  throw new Error("This should not happen given that we naively pre-fetch all datasets for any narrative before rendering");
+  throw new Error("This should not happen given that we start fetching all datasets before rendering");
 };
 
 /* changes the state of the page and (perhaps) the dataset displayed.

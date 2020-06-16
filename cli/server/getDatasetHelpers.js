@@ -14,10 +14,10 @@ const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 const fs = require("fs");
 
-const handleError = (res, clientMsg, serverMsg="") => {
+const handleError = (res, clientMsg, serverMsg="", code = 500) => {
   res.statusMessage = clientMsg;
   utils.warn(`${clientMsg} -- ${serverMsg}`);
-  return res.status(500).end();
+  return res.status(code).end();
 };
 
 const splitPrefixIntoParts = (url) => url

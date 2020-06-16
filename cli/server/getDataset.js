@@ -12,7 +12,9 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
       await helpers.sendJson(res, info);
     } catch (err) {
       console.trace(err);
-      return helpers.handleError(res, `couldn't fetch JSONs`, err.message);
+      // Throw 404 when not available
+      const errorCode = err.message.endsWith("not in available datasets") ? 404 : 500;
+      return helpers.handleError(res, `couldn't fetch JSONs`, err.message, errorCode);
     }
   };
 };

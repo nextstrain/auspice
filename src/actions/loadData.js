@@ -1,5 +1,4 @@
 import queryString from "query-string";
-import _uniq from "lodash/uniq";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
@@ -28,8 +27,9 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   if (type) path += `&type=${type}`;
   const p = fetch(path)
     .then((res) => {
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
-        throw new Error(res.statusText);
+        throw res;
       }
       return res;
     });
@@ -56,8 +56,9 @@ const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
 
   const p = fetch(datapaths[type])
     .then((res) => {
+      // throw the whole thing so we can check res.status
       if (res.status !== 200) {
-        throw new Error(res.statusText);
+        throw res;
       }
       return res;
     });
@@ -259,44 +260,57 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     secondTreeDataset: false,
     secondTreeName: false
   };
-  const treeNames = _uniq(blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]));
-  // TODO:1050 A more performant fetching strategy would be fetching the dataset for the slide you land on,
-  // then fetching all the rest in the background so we can use them from the cache upon changing slides.
-  // Doing that presents the risk of a race case (if you change pages faster than a dataset can be fetched) so we are avoiding it for now.
-  // Instead we use Promise.all to ensure all the datasets are fetched before we render.
-  return Promise.all(treeNames.map((treeName) => {
-    // TODO:1050
-    // 1. allow frequencies to be loaded for a narrative dataset here
-    // 2. allow loading dataset for secondTreeName
-    return getDataset(treeName)
+  const treeNames = blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]);
+
+  // TODO:1050
+  // 1. allow frequencies to be loaded for a narrative dataset here
+  // 2. allow loading dataset for secondTreeName
+
+  // We block and await for the landing dataset
+  jsons[startingTreeName] = await
+  getDataset(startingTreeName)
       .then((res) => res.json())
-      .then((json) => {
-        jsons[treeName] = json;
-        if (treeName === startingTreeName) {
-          landingSlide.json = json;
+      // If it's a 404 we fall back
+      .catch((err) => {
+        if (err.status === 404) {
+          // Assuming block[0] is the one that was set properly for all legacy narratives
+          return getDataset(treeNames[0])
+            .then((res) => res.json());
         }
-        return json;
+        throw err;
       });
-  })).then(() => {
-    dispatch({
-      type: types.CLEAN_START,
-      pathnameShouldBe: startingDataset,
-      ...createStateFromQueryOrJSONs({
-        ...landingSlide,
-        query,
-        narrativeBlocks: blocks,
-        dispatch
-      })
-    });
-  }).then(() => {
-    // TODO:1050: does this introduce a race case still? That is, can the user,
-    // navigate to another slide before the redux reducer gets the cached jsons?
-    // If so, we may be able to resolve with async action creator functions in redux
-    // (https://redux.js.org/faq/actions#how-can-i-represent-side-effects-such-as-ajax-calls-why-do-we-need-things-like-action-creators-thunks-and-middleware-to-do-async-behavior)
-    dispatch({
-      type: types.CACHE_JSONS,
-      jsons
-    });
+  landingSlide.json = jsons[startingTreeName];
+  // Dispatch landing dataset
+  dispatch({
+    type: types.CLEAN_START,
+    pathnameShouldBe: startingDataset,
+    ...createStateFromQueryOrJSONs({
+      ...landingSlide,
+      query,
+      narrativeBlocks: blocks,
+      dispatch
+    })
+  });
+
+  // The other datasets are fetched asynchronously
+  for (const treeName of treeNames) {
+  // With this there's no need for Set above
+    jsons[treeName] = jsons[treeName] ||
+      getDataset(treeName)
+        .then((res) => res.json())
+        .catch((err) => {
+          if (err.status === 404) {
+            // We fall back to the landing slide
+            return jsons[startingTreeName];
+          }
+          throw err;
+        });
+  }
+  // Dispatch jsons object containing promises corresponding to each fetch to be stored in redux cache.
+  // They are potentially unresolved. We await them upon retreieving from the cache - see actions/navigation.js.
+  dispatch({
+    type: types.CACHE_JSONS,
+    jsons
   });
 };
 
@@ -312,8 +326,8 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     if (url.indexOf("narratives") === -1) {
       fetchDataAndDispatch(dispatch, url, query);
     } else {
-      /* we want to have an additional fetch to get the narrative JSON, which in turn
-      tells us which data JSON to fetch... */
+      /* we fetch to get the narrative JSON, which in turn
+      tells us which data JSON to fetch. */
       getDatasetFromCharon(url, {narrative: true})
         .then((res) => res.json())
         .then((blocks) => {
