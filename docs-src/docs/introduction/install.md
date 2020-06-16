@@ -62,9 +62,8 @@ auspice build
 auspice --version
 auspice --help
 
-# Obtain datasets & narratives to view locally (optional)
+# Obtain nextstrain.org datasets to view locally (optional)
 npm run get-data
-npm run get-narratives
 ```
 
 Updating Auspice should only require pulling the new version from GitHub -- it shouldn't require any `npm` commands.

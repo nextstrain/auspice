@@ -120,9 +120,9 @@ For narratives, please see [Writing a Narrative](narratives/how-to-write.md) for
 
 ## Obtaining a Set of Input Files
 
-If you'd like to download the datasets and narratives on [nextstrain.org](https://nextstrain.org) then there are two scripts which allow you to do this:
+If you'd like to download the dataset JSONs which are behind the core-datasets shown on [nextstrain.org](https://nextstrain.org), then you can run [this script](https://github.com/nextstrain/auspice/blob/master/scripts/get-data.sh) which will create a `./data` directory for you.
 
-* You can download the dataset JSONs by running [this script](https://github.com/nextstrain/auspice/blob/master/scripts/get-data.sh) which will create a `./data` directory for you.
-* You can download the narrative Markdown files by running [this script](https://github.com/nextstrain/auspice/blob/master/scripts/get-narratives.sh) which will create a `./narratives` directory for you.
+The nextstrain-maintained narratives are stored in the [nextstrain/narratives github repo](github.com/nextstrain/narratives).
+You can obtain these by cloning that repo.
 
-You can then run `auspice view --datasetDir data --narrativeDir narratives` to visualise all of the [nextstrain.org](https://nextstrain.org) datasets locally.
+You can then run `auspice view --datasetDir data --narrativeDir <path-to-narratives>` to visualise all of the [nextstrain.org](https://nextstrain.org) datasets locally.
