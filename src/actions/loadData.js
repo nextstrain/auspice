@@ -7,6 +7,7 @@ import { loadFrequencies } from "./frequencies";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
+import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
 
 
 /**
@@ -237,14 +238,26 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       fetchDataAndDispatch(dispatch, url, query);
     } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
-      tells us which data JSON to fetch... */
-      getDatasetFromCharon(url, {narrative: true})
-        .then((res) => res.json())
+      tells us which data JSON to fetch.
+      Note that up until v2.16 the client expected the narrative to have been converted
+      to JSON by the server. To facilitate backward compatibility (e.g. in the case where
+      the client is >2.16, but the client hasn't been updated) if the file doesn't look
+      like markdown we will attempt to parse it as JSON */
+      getDatasetFromCharon(url, {narrative: true, type: "json"})
+        .then((res) => res.text())
+        .then((res) => parseMarkdownNarrativeFile(res))
+        .catch((err) => {
+          // errors from `parseNarrative` indicating that the file doesn't look like markdown
+          // will have the fileContents attached to them
+          if (!err.fileContents) throw err;
+          console.error("Narrative file doesn't appear to be markdown! Attempting to parse as JSON.");
+          return JSON.parse(err.fileContents);
+        })
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
           const firstQuery = queryString.parse(blocks[0].query);
           if (query.n) firstQuery.n = query.n;
-          fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
+          return fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);
