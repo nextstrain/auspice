@@ -250,6 +250,18 @@ function addEndOfNarrativeBlock(narrativeBlocks) {
   narrativeBlocks.push(endOfNarrativeSlide);
 }
 
+const narrativeFetchingErrorNotification = (err, failedTreeName, fallbackTreeName) => {
+  return errorNotification({
+    message: `Error fetching one of the datasets.
+      Using the YAML-defined dataset (${fallbackTreeName}) instead.`,
+    details: `Could not fetch dataset "${failedTreeName}". Make sure this dataset exists
+      and is spelled correctly.
+      Error details:
+        status: ${err.status};
+        message: ${err.message}`
+  });
+};
+
 const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   const jsons = {};
   const startingBlockIdx = getNarrativePageFromQuery(query, blocks);
@@ -270,9 +282,9 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
   jsons[startingTreeName] = await
   getDataset(startingTreeName)
       .then((res) => res.json())
-      // If it's a 404 we fall back
       .catch((err) => {
-        if (err.status === 404) {
+        if (startingTreeName !== treeNames[0]) {
+          dispatch(narrativeFetchingErrorNotification(err, startingTreeName, treeNames[0]));
           // Assuming block[0] is the one that was set properly for all legacy narratives
           return getDataset(treeNames[0])
             .then((res) => res.json());
@@ -299,11 +311,9 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
       getDataset(treeName)
         .then((res) => res.json())
         .catch((err) => {
-          if (err.status === 404) {
-            // We fall back to the landing slide
-            return jsons[startingTreeName];
-          }
-          throw err;
+          dispatch(narrativeFetchingErrorNotification(err, treeName, treeNames[0]));
+          // We fall back to the first (YAML frontmatter) slide's dataset
+          return jsons[treeNames[0]];
         });
   }
   // Dispatch jsons object containing promises corresponding to each fetch to be stored in redux cache.
@@ -332,7 +342,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
         .then((res) => res.json())
         .then((blocks) => {
           addEndOfNarrativeBlock(blocks);
-          return fetchAndCacheNarrativeDatasets(dispatch, blocks, query).catch(console.warn);
+          return fetchAndCacheNarrativeDatasets(dispatch, blocks, query);
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);
