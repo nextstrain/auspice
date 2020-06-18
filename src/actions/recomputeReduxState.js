@@ -127,6 +127,13 @@ const modifyStateViaURLQuery = (state, query) => {
   if ("onlyPanels" in query) {
     state.showOnlyPanels = true;
   }
+  if (query.transmissions) {
+    if (query.transmissions === "show") {
+      state.showTransmissionLines = true;
+    } else if (query.transmissions === "hide") {
+      state.showTransmissionLines = false;
+    }
+  }
 
   return state;
 };
