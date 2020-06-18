@@ -8,6 +8,7 @@ import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
+import { parseMarkdown } from "../util/parseMarkdown"; // TODO: does this affect bundle structure
 
 
 /**
@@ -241,14 +242,14 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       tells us which data JSON to fetch.
       Note that up until v2.16 the client expected the narrative to have been converted
       to JSON by the server. To facilitate backward compatibility (e.g. in the case where
-      the client is >2.16, but the client hasn't been updated) if the file doesn't look
-      like markdown we will attempt to parse it as JSON */
-      getDatasetFromCharon(url, {narrative: true, type: "json"})
+      the client is >2.16, but the server is using an older version of the API)
+      if the file doesn't look like markdown we will attempt to parse it as JSON */
+      getDatasetFromCharon(url, {narrative: true, type: "md"})
         .then((res) => res.text())
-        .then((res) => parseMarkdownNarrativeFile(res))
+        .then((res) => parseMarkdownNarrativeFile(res, parseMarkdown))
         .catch((err) => {
-          // errors from `parseNarrative` indicating that the file doesn't look like markdown
-          // will have the fileContents attached to them
+          // errors from `parseMarkdownNarrativeFile` indicating that the file doesn't look
+          // like markdown will have the fileContents attached to them
           if (!err.fileContents) throw err;
           console.error("Narrative file doesn't appear to be markdown! Attempting to parse as JSON.");
           return JSON.parse(err.fileContents);

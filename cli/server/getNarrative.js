@@ -1,8 +1,19 @@
 const queryString = require("query-string");
-const parseNarrative = require('./parseNarrative').default;
 const path = require("path");
 const fs = require("fs");
 const utils = require("../utils");
+const marked = require('marked');
+const { parseMarkdownNarrativeFile } = require("../../src/util/parseNarrative");
+
+/**
+ * A thin wrapper around the client-side `parseMarkdownNarrativeFile` function.
+ * The main difference is that we pass in a different markdown parser
+ * than the client uses.
+ */
+const parseNarrative = (fileContents) => {
+  utils.verbose("Deprecation warning: Server-side parsing of narrative files is no longer needed!");
+  return parseMarkdownNarrativeFile(fileContents, marked);
+};
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -42,5 +53,6 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
 };
 
 module.exports = {
-  setUpGetNarrativeHandler
+  setUpGetNarrativeHandler,
+  parseNarrative
 };
