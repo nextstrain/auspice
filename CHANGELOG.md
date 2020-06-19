@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.17.0 - 2020/06/19
+
+
 * You can now toggle whether the data in the frequencies panel is normalized.
 See [PR 1158](https://github.com/nextstrain/auspice/pull/1158).
 * You can now set the starting state of the transmissions-line toggle via the JSON or a URL query.
