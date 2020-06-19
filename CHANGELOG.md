@@ -2,6 +2,25 @@
 title: Changelog
 ---
 
+* You can now toggle whether the data in the frequencies panel is normalized.
+See [PR 1158](https://github.com/nextstrain/auspice/pull/1158).
+* You can now set the starting state of the transmissions-line toggle via the JSON or a URL query.
+See [PR 1152](https://github.com/nextstrain/auspice/pull/1152) and [PR 1165](https://github.com/nextstrain/auspice/pull/1129).
+* Improve the caching settings for the auspice server.
+See [PR 1146](https://github.com/nextstrain/auspice/pull/1146).
+* The performance of Auspice is improved when transmission lines are not rendered.
+See [PR 1153](https://github.com/nextstrain/auspice/pull/1153).
+* The "narratives" folder is now part of this repo and contains a number of test narratives.
+See [PR 1170](https://github.com/nextstrain/auspice/pull/1170) for more details.
+* A bug was fixed where narrative slides would sometimes fail to update the tree as expected.
+See [PR 1169](https://github.com/nextstrain/auspice/pull/1169).
+* A bug was fixed where loading a tree zoomed to a clade would prevent zooming out.
+See [PR 1156](https://github.com/nextstrain/auspice/pull/1156).
+* A bug was fixed where numeric branch labels couldn't be used as URL queries.
+See [PR 1157](https://github.com/nextstrain/auspice/pull/1157).
+* The list of allowed nodejs versions was expanded.
+See [PR 1166](https://github.com/nextstrain/auspice/pull/1166).
+
 ## version 2.16.0 - 2020/05/29
 
 #### Features
