@@ -443,7 +443,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     this.brushed();
     /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
     if (d3event.sourceEvent instanceof MouseEvent) {
-      if(
+      if (
         !d3event.selection ||
         d3event.sourceEvent.target.id === "d3entropyParent" ||
         d3event.sourceEvent.target.id === ""
