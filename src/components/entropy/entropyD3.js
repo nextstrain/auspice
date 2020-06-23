@@ -442,12 +442,20 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushFinished = function brushFinished() {
     this.brushed();
     /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
-    if (d3event.sourceEvent instanceof MouseEvent && (!d3event.selection || d3event.sourceEvent.target.id === "d3entropyParent" ||
-        d3event.sourceEvent.target.id === "")) {
-      this.props.dispatch(changeZoom(this.zoomCoordinates));
-    } else {
-      /* If selected gene or clicked on entropy, hide zoom coords */
-      this.props.dispatch(changeZoom([undefined, undefined]));
+    if (d3event.sourceEvent instanceof MouseEvent) {
+      if(
+        !d3event.selection ||
+        d3event.sourceEvent.target.id === "d3entropyParent" ||
+        d3event.sourceEvent.target.id === ""
+      ) {
+        this.props.dispatch(changeZoom(this.zoomCoordinates));
+      } else if (
+        d3event.sourceEvent.target.id.match(/^prot/) ||
+        d3event.sourceEvent.target.id.match(/^nt/)
+      ) {
+        /* If selected gene or clicked on entropy, hide zoom coords */
+        this.props.dispatch(changeZoom([undefined, undefined]));
+      }
     }
   };
 
