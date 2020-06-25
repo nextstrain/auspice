@@ -32,7 +32,8 @@ The following are helpful when beginning to use Auspice:
 ### Installation
 
 Install auspice for use as a global command.
-This requires nodejs 10+. We recommend using a conda environment, but this is not the only way.
+This requires nodejs.
+We recommend using a conda environment, but this is not the only way.
 (See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
 
 #### Install with conda (Recommended)
@@ -40,7 +41,7 @@ This requires nodejs 10+. We recommend using a conda environment, but this is no
 Create and activate a [conda](https://docs.conda.io) environment:
 
 ```bash
-conda create --name auspice nodejs=10
+conda create --name auspice nodejs=12
 conda activate auspice
 ```
 
@@ -77,8 +78,15 @@ If you've installed auspice from source, we have helper scripts to make all the 
 ```bash
 # from the auspice src directory
 npm run get-data
-npm run get-narratives
 ```
+
+### Obtain narratives to view locally
+
+This repository contains a number of "test narratives" which serve both to provide examples of the capability of narratives, as well as being used to test functionality and fix bugs. 
+These should work out of the box, assuming you have obtained the necessary datasets via the above script.
+
+If you wish to view the [nextstrain-maintained narratives](https://nextstrain.org/docs/contributing/sharing-data), then this can be done by checking out the [nextstrain/narratives github repo](github.com/nextstrain/narratives) and telling `auspice` to look for narratives there via the `--narrativeDir` argument.
+
 
 ### Run auspice
 
