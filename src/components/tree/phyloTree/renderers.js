@@ -119,8 +119,10 @@ export const drawTips = function drawTips() {
     .on("mouseover", this.callbacks.onTipHover)
     .on("mouseout", this.callbacks.onTipLeave)
     .on("click", this.callbacks.onTipClick)
+
     /* .style("pointer-events", "auto") */
-    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
+    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "" : "hidden")
+
     .style("fill", (d) => d.fill || params.tipFill)
     .style("stroke", (d) => d.tipStroke || params.tipStroke)
     /* .style("stroke-width", () => params.tipStrokeWidth)  don't want branch thicknesses applied */
@@ -146,7 +148,7 @@ export const getBranchVisibility = (d) => {
   ) {
     return "hidden";
   }
-  return "visible";
+  return "";   /* the css default is "visible" so just clear this setting */
 };
 
 /** Calculate the stroke for a given branch. May return a hex or a `url` referring to
