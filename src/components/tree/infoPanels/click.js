@@ -202,7 +202,7 @@ const Trait = ({node, trait, colorings}) => {
 
 const OtherFields = ({node, t}) => {
   const others = getAllAttributesFromNode(node);
-  const exceptions = ["accession", "url", "vaccine", "div", "author", "num_date", "country"];
+  const exceptions = ["accession", "url", "vaccine", "div", "author", "num_date", "country", "region"];
   const itemsToRender = [];
   others.forEach(([key, value]) => {
       if (!exceptions.includes(key))
