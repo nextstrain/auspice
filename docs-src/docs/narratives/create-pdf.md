@@ -14,7 +14,7 @@ If you've followed the [auspice install instructions](../introduction/install) a
 If not, you can create the necessary conda environment via:
 
 ```bash
-conda create --name auspice nodejs=10
+conda create --name auspice nodejs=12
 ```
 
 Install Decktape via:

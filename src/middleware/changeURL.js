@@ -75,6 +75,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
     }
+    case types.TOGGLE_TRANSMISSION_LINES: {
+      if (action.data === state.controls.defaults.showTransmissionLines) query.transmissions = undefined;
+      else query.transmissions = action.data ? 'show' : 'hide';
+      break;
+    }
     case types.CHANGE_LANGUAGE: {
       query.lang = action.data === state.general.defaults.language ? undefined : action.data;
       break;

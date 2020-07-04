@@ -28,7 +28,8 @@ const updateFrequencyData = (dispatch, getState) => {
     tree.nodes,
     tree.visibility,
     controls.colorScale,
-    controls.colorBy
+    controls.colorBy,
+    controls.normalizeFrequencies
   );
   timerEnd("updateFrequencyData");
   dispatch({type: types.FREQUENCY_MATRIX, matrix});

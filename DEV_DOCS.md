@@ -48,7 +48,7 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 > For integration tests to work, you'll need to have `git-lfs` installed (see below) as it stores the images that the snapshot tests will use.
 
-1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+1. Fetch the datasets with `npm run get-data`.
 2. Ensure you are **not** currently running the site locally, then run `npm run integration-test:ci`.
 
 
@@ -60,7 +60,7 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 #### For smoke tests
 
-1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+1. Fetch the datasets with `npm run get-data`.
 2. Ensure you are **not** currently running the site locally, then run `npm run smoke-test:ci`.
 
 

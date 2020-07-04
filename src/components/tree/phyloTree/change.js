@@ -60,14 +60,9 @@ const svgSetters = {
     // only allow stroke to be set on individual branches
     ".branch": {
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
+      stroke: (d) => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
       cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default",
       visibility: getBranchVisibility
-    },
-    ".branch.S": {
-      stroke: (d) => strokeForBranch(d, "S")
-    },
-    ".branch.T": {
-      stroke: (d) => strokeForBranch(d, "T")
     }
   }
 };
@@ -123,7 +118,6 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
 export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
   let updateCall;
   const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
-
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
     const applyBranchPropsAlso = elemsToUpdate.has(".branch");
@@ -135,11 +129,6 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
           updateCall = (selection) => {
             createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
             selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
-          };
-        } else if (svgPropsToUpdate.has("stroke")) { /* we seed to set stroke differently on T and S branches */
-          updateCall = (selection) => {
-            createUpdateCall(`.branch${x}`, svgPropsToUpdate)(selection);
-            selection.attr("d", (d) => d.branch[STidx]);
           };
         } else {
           updateCall = (selection) => {
@@ -295,7 +284,7 @@ export const change = function change({
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
     /* check that fill & stroke are defined */
-    elemsToUpdate.add(".branch.S").add(".branch.T").add(".tip").add(".conf");
+    elemsToUpdate.add(".branch").add(".tip").add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.branchStroke = branchStroke;
     nodePropsToModify.tipStroke = tipStroke;

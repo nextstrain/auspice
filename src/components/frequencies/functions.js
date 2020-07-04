@@ -32,6 +32,16 @@ export const parseColorBy = (colorBy, colorOptions) => {
   return colorBy;
 };
 
+export const normString = (normalized, tipCount, fullTipCount) => {
+  if (tipCount<fullTipCount) {
+    if (normalized) {
+      return `and normalized to 100% at each time point for ${tipCount} out of a total of ${fullTipCount} tips`;
+    }
+    return `as a fraction of all sequences at each time point showing ${tipCount} out of a total of ${fullTipCount} tips`;
+  }
+  return "";
+};
+
 const getOrderedCategories = (matrixCategories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
   const orderedCategories = colorScale.legendValues

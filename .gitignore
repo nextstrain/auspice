@@ -6,7 +6,6 @@ big_flu
 /static/
 s3/
 /local_narratives/
-/narratives/
 /datasets/
 **/__diff_output__
 

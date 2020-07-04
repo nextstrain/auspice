@@ -127,6 +127,13 @@ const modifyStateViaURLQuery = (state, query) => {
   if ("onlyPanels" in query) {
     state.showOnlyPanels = true;
   }
+  if (query.transmissions) {
+    if (query.transmissions === "show") {
+      state.showTransmissionLines = true;
+    } else if (query.transmissions === "hide") {
+      state.showTransmissionLines = false;
+    }
+  }
 
   return state;
 };
@@ -192,8 +199,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines"];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              ]; // eslint-disable-line
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
@@ -796,7 +803,8 @@ export const createStateFromQueryOrJSONs = ({
       tree.nodes,
       tree.visibility,
       controls.colorScale,
-      controls.colorBy
+      controls.colorBy,
+      controls.normalizeFrequencies
     );
   }
 

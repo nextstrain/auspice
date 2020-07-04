@@ -1,14 +1,14 @@
 {
   "name": "auspice",
-  "version": "2.16.0",
+  "version": "2.17.1",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
   "repository": "github:nextstrain/auspice",
   "homepage": "https://www.npmjs.com/package/auspice",
   "engines": {
-    "node": "10.8.x",
-    "npm": "6.2.x"
+    "node": ">=10.8.0 <=13.14",
+    "npm": ">=6.2"
   },
   "bin": {
     "auspice": "./auspice.js"
@@ -26,8 +26,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "get-data": "env bash ./scripts/get-data.sh",
-    "get-narratives": "env bash ./scripts/get-narratives.sh",
-    "heroku-postbuild": "npm run build && npm run get-data && npm run get-narratives",
+    "heroku-postbuild": "npm run build && npm run get-data",
     "rebuild-docker-image": "env bash ./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'",
