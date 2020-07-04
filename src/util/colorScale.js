@@ -56,7 +56,7 @@ export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, tre
       let legendValuesObserved = treeNodes
         .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
         .map((n) => getTraitFromNode(n, colorBy));
-      
+
       // if the 2nd tree is enabled, compute visible legend values and merge the values.
       if (treeTooNodes && visibilityToo) {
         const legendValuesObservedToo = treeTooNodes
