@@ -265,8 +265,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
-      const colorScale = { ...state.colorScale, visibleLegendValues: action.visibleLegendValues };
-      return { ...state, colorScale };
+      const colorScale = Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues });
+      return Object.assign({}, state, { colorScale: colorScale });
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 

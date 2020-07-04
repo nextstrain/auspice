@@ -778,10 +778,12 @@ export const createStateFromQueryOrJSONs = ({
   /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
   controls.colorScale.visibleLegendValues = createVisibleLegendValues({
     colorBy: controls.colorBy,
-    scaleType: controls.colorScale.type,
+    scaleType: controls.colorScale.scaleType,
     legendValues: controls.colorScale.legendValues,
-    tree,
-    treeToo
+    treeNodes: tree.nodes,
+    treeTooNodes: treeToo ? treeToo.nodes : undefined,
+    visibility: tree.visibility,
+    visibilityToo: treeToo ? treeToo.visibilityToo : undefined
   });
 
   /* calculate entropy in view */

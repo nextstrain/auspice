@@ -143,10 +143,12 @@ export const updateVisibleTipsAndBranchThicknesses = (
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
-      type: controls.colorScale.type,
+      scaleType: controls.colorScale.scaleType,
       legendValues: controls.colorScale.legendValues,
-      tree,
-      treeToo
+      treeNodes: tree.nodes,
+      treeTooNodes: treeToo ? treeToo.nodes : undefined,
+      visibility: dispatchObj.visibility,
+      visibilityToo: dispatchObj.visibilityToo
     });
 
     /* D I S P A T C H */
@@ -201,10 +203,12 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
-      type: controls.colorScale.type,
+      scaleType: controls.colorScale.scaleType,
       legendValues: controls.colorScale.legendValues,
-      tree,
-      treeToo
+      treeNodes: tree.nodes,
+      treeTooNodes: treeToo ? treeToo.nodes : undefined,
+      visibility: dispatchObj.visibility,
+      visibilityToo: dispatchObj.visibilityToo
     });
 
     /* D I S P A T C H */

@@ -48,25 +48,26 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
 /**
  * Dynamically create legend values based on visibility for ordinal and categorical scale types.
  */
-export const createVisibleLegendValues = ({colorBy, type, legendValues, tree, treeToo}) => {
-  const visibility = tree.visibility;
-  const visibilityToo = treeToo ? treeToo.visibility : undefined;
-
+export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) => {
   if (visibility) {
     // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
     // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
-    if (type === "ordinal" || type === "categorical") {
-      let legendValuesObserved = tree.nodes
+    if (scaleType === "ordinal" || scaleType === "categorical") {
+      let legendValuesObserved = treeNodes
         .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
         .map((n) => getTraitFromNode(n, colorBy));
-      if (treeToo && visibilityToo) {
-        const legendValuesObservedToo = treeToo.nodes
+      
+      // if the 2nd tree is enabled, compute visible legend values and merge the values.
+      if (treeTooNodes && visibilityToo) {
+        const legendValuesObservedToo = treeTooNodes
           .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
           .map((n) => getTraitFromNode(n, colorBy));
         legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
       }
+
       legendValuesObserved = new Set(legendValuesObserved);
-      return legendValues.filter((v) => legendValuesObserved.has(v));
+      const visibleLegendValues = legendValues.filter((v) => legendValuesObserved.has(v));
+      return visibleLegendValues.slice();
     }
   }
 
@@ -111,7 +112,7 @@ const createLegendBounds = (legendValues) => {
  * @param {object} tree
  * @param {object} treeToo
  * @param {object} metadata
- * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array, genotype: null|object}}
+ * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array, genotype: null|object, scaleType: null|string, visibleLegendValues: Array}}
  */
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   if (colorBy === "none") {
@@ -123,7 +124,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues: ["unknown"],
       legendBounds: createLegendBounds(["unknown"]),
-      genotype: null
+      genotype: null,
+      scaleType: null,
+      visibleLegendValues: ["unknown"]
     };
   }
 
@@ -304,6 +307,16 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     colorScale = () => unknownColor;
   }
 
+  const visibleLegendValues = createVisibleLegendValues({
+    colorBy,
+    scaleType,
+    legendValues,
+    treeNodes: tree.nodes,
+    treeTooNodes,
+    visibility: tree.visibility,
+    visibilityToo: treeToo ? treeToo.visibility : undefined
+  });
+
   return {
     scale: colorScale,
     continuous: continuous,
@@ -311,7 +324,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
     legendValues,
     legendBounds,
-    type: scaleType,
-    visibleLegendValues: createVisibleLegendValues({colorBy, type: scaleType, legendValues, tree, treeToo})
+    genotype: genotype,
+    scaleType: scaleType,
+    visibleLegendValues: visibleLegendValues
   };
 };
