@@ -64,10 +64,9 @@ export const createVisibleLegendValues = ({colorBy, scaleType, legendValues, tre
           .map((n) => getTraitFromNode(n, colorBy));
         legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
       }
-
       legendValuesObserved = new Set(legendValuesObserved);
       const visibleLegendValues = legendValues.filter((v) => legendValuesObserved.has(v));
-      return visibleLegendValues.slice();
+      return visibleLegendValues;
     }
   }
 
