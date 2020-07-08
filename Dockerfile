@@ -11,7 +11,7 @@ RUN npm install \
     && npm run build
 
 # Set the command to start the node server.
-CMD [ "npm", "start" ]
+CMD [ "./auspice.js", "view", "--datasetDir", "data" ]
 
 # Tell Docker about the port we'll run on.
-EXPOSE 3000
+EXPOSE 4000

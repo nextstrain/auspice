@@ -10,7 +10,7 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 /* Webpack config generator */
 
-const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
+const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeBundle=false}) => {
   utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   /* which directories should be parsed by babel and other loaders? */
