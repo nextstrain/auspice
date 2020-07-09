@@ -21,9 +21,9 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
       utils.verbose("SUCCESS");
     } catch (err) {
-      res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
-      utils.warn(res.statusMessage);
-      res.status(500).end();
+      const errorMessage = `Narratives couldn't be served -- ${err.message}`;
+      utils.warn(errorMessage);
+      res.status(500).type("text/plain").send(errorMessage);
     }
   };
 };

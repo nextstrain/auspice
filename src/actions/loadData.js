@@ -4,7 +4,7 @@ import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
-import { fetchJSON } from "../util/serverInteraction";
+import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 
@@ -21,18 +21,11 @@ import { hasExtension, getExtension } from "../util/extensions";
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
+const getDatasetFromCharon = async (prefix, {type, narrative=false}={}) => {
   let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-  const p = fetch(path)
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
-  return p;
+  return await fetchWithErrorHandling(path);
 };
 
 /**
@@ -50,17 +43,9 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
+const getHardcodedData = async (prefix, {type="mainJSON"}={}) => {
   const datapaths = getExtension("hardcodedDataPaths");
-
-  const p = fetch(datapaths[type])
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
-  return p;
+  return await fetchWithErrorHandling(datapaths[type]);
 };
 
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;

@@ -15,9 +15,8 @@ const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 const fs = require("fs");
 
 const handleError = (res, clientMsg, serverMsg="") => {
-  res.statusMessage = clientMsg;
   utils.warn(`${clientMsg} -- ${serverMsg}`);
-  return res.status(500).end();
+  return res.status(500).type("text/plain").send(clientMsg);
 };
 
 const splitPrefixIntoParts = (url) => url
