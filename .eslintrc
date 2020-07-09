@@ -63,6 +63,7 @@ rules:
   implicit-arrow-linebreak: off
   jsx-quotes: off
   no-use-before-define: ["error", { "functions": false }]
+  no-return-await: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module
