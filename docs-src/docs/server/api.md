@@ -110,9 +110,9 @@ const getAvailable = (req, res) => {
     /* collect available data */
     res.json(data);
   } catch (err) {
-    res.statusMessage = `error message to display in client`;
-    console.log(res.statusMessage); /* printed by the server, not the client */
-    return res.status(500).end();
+    const errorMessage = `error message to display in client`;
+    console.log(errorMessage); /* printed by the server, not the client */
+    return res.status(500).type("text/plain").send(errorMessage);
   }
 };
 ```
