@@ -3,14 +3,15 @@ title: Changelog
 ---
 
 ## version 2.17.2 - 2020/07/13
+* (Bugfix) Send error messages in the (HTTP) response body, not the status line.
+See [PR 1181](https://github.com/nextstrain/auspice/pull/1181).
 
 
 ## version 2.17.1 - 2020/06/25
-
+* (Bugfix) Metadata from drag-and-drop CSVs now shows up in the color-by menu.
+See [PR 1177](https://github.com/nextstrain/auspice/pull/1177).
 
 ## version 2.17.0 - 2020/06/19
-
-
 * You can now toggle whether the data in the frequencies panel is normalized.
 See [PR 1158](https://github.com/nextstrain/auspice/pull/1158).
 * You can now set the starting state of the transmissions-line toggle via the JSON or a URL query.
