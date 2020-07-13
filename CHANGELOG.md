@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.17.2 - 2020/07/13
+
+
 ## version 2.17.1 - 2020/06/25
 
 
