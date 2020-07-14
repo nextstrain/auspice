@@ -82,7 +82,7 @@ const getAuspiceBuild = () => {
     cwd !== sourceDir &&
     fs.existsSync(path.join(cwd, "index.html")) &&
     fs.existsSync(path.join(cwd, "dist")) &&
-    fs.existsSync(path.join(cwd, "dist", "auspice.bundle.js"))
+    fs.readdirSync(path.join(cwd, "dist")).filter((fn) => fn.match(/^auspice.bundle.[a-z0-9]+.js$/)).length === 1
   ) {
     return {
       message: "Serving the auspice build which exists in this directory.",
