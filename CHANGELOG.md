@@ -3,6 +3,8 @@ title: Changelog
 ---
 
 ## version 2.17.3 - 2020/07/14
+* (Bugfix) Allow `auspice view` to serve custom auspice client if one exists.
+See [PR 1182](https://github.com/nextstrain/auspice/pull/1182).
 
 
 ## version 2.17.2 - 2020/07/13
