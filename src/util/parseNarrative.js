@@ -11,8 +11,9 @@
 
 /* eslint no-param-reassign: off */
 
-const { loadFront } = require('yaml-front-matter'); // TODO - check webpack bundling of this new library
+const { loadFront } = require('yaml-front-matter');
 const queryString = require("query-string");
+
 
 const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
   const frontMatter = loadFront(fileContents);

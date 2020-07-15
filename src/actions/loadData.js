@@ -8,7 +8,7 @@ import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
-import { parseMarkdown } from "../util/parseMarkdown"; // TODO: does this affect bundle structure
+import { parseMarkdown } from "../util/parseMarkdown";
 
 
 /**
