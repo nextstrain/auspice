@@ -1,7 +1,6 @@
 ### App specific ###
 /dist/
 big_flu
-/data/
 /releases/
 /static/
 s3/
