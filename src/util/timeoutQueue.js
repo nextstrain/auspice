@@ -1,9 +1,9 @@
 const timeouts = {};
 
-export const addTimeout = (component, fn, delay) => {
+export const addTimeout = (component, fn, delay, ...args) => {
   if (!timeouts[component]) timeouts[component] = [];
   const newTimeout = setTimeout(() => {
-    fn();
+    fn(...args);
     timeouts[component] = timeouts[component].filter((to) => to !== newTimeout);
   }, delay);
   timeouts[component].push(newTimeout);
@@ -18,8 +18,10 @@ export const removeTimeout = (component, timeout) => {
 };
 
 export const clearAllTimeouts = (component) => {
-  timeouts[component].forEach((to) => {
-    clearTimeout(to);
-  });
+  if (timeouts[component]) {
+    timeouts[component].forEach((to) => {
+      clearTimeout(to);
+    });
+  }
   timeouts[component] = [];
 };

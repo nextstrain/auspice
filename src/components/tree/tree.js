@@ -13,6 +13,7 @@ import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
+import { clearAllTimeouts } from "../../util/timeoutQueue";
 import { untangleTreeToo } from "./tangle/untangling";
 
 export const spaceBetweenTrees = 100;
@@ -178,6 +179,9 @@ class Tree extends React.Component {
         )}
       </Card>
     );
+  }
+  componentWillUnmount() {
+    clearAllTimeouts('tree');
   }
 }
 

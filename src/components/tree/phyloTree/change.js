@@ -2,6 +2,7 @@ import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { addTimeout } from "../../../util/timeoutQueue";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
@@ -221,7 +222,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     if (!--inProgress) { /* decrement counter. When hits 0 run block */
       const updateTips = createUpdateCall(".tip", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".tip", updateTips, transitionTimeMoveTips);
-      setTimeout(step3, transitionTimeMoveTips);
+      addTimeout('tree', step3, transitionTimeMoveTips);
     }
   };
 
