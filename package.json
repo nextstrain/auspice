@@ -31,6 +31,7 @@
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'",
     "test": "jest test/*.js",
+    "test:unit": "jest test/unit/*",
     "integration-test": "NODE_ENV=test ENV=dev jest ./test/integration/*.js --config puppeteer.config.js",
     "integration-test:ci": "start-server-and-test server http://localhost:4000 integration-test",
     "smoke-test": "NODE_ENV=test ENV=dev jest ./test/smoke-test/urls.test.js --config puppeteer.config.js",
