@@ -15,7 +15,11 @@ import {
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
 import { narrativeNavBarHeight } from "../../util/globals";
+<<<<<<< HEAD
 import {TOGGLE_NARRATIVE} from "../../actions/types";
+=======
+import { clearAllTimeouts } from '../../util/timeoutQueue';
+>>>>>>> replaced generic timeouts with queued in components
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -174,6 +178,7 @@ class Narrative extends React.Component {
   }
   componentWillUnmount() {
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
+    clearAllTimeouts('narrative');
   }
 }
 export default Narrative;

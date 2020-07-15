@@ -1,5 +1,6 @@
 import { timerFlush } from "d3-timer";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { addTimeout } from "../../../util/timeoutQueue";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   if ("tipLabels" in this.groups) {
@@ -29,7 +30,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
       fontSize = this.params.tipLabelFontSizeL2;
     }
 
-    window.setTimeout(() => {
+    addTimeout('tree', () => {
       this.groups.tipLabels
         .selectAll('.tipLabel')
         .data(inViewVisibleTips)

@@ -2,6 +2,7 @@
 import React from "react";
 import { select } from "d3-selection";
 import 'd3-transition';
+import { addTimeout, removeTimeout } from "../../../util/timeoutQueue";
 
 const makeTipPathGenerator = (props) => (idxs) => {
   const tip1 = props.leftNodes[idxs[0]].shell;
@@ -72,11 +73,11 @@ class Tangle extends React.Component {
   componentDidUpdate(prevProps) {
     if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
       if (this.timeout) {
-        window.clearTimeout(this.timeout);
+        removeTimeout(this.timeout);
       } else {
         select(this.d3ref).selectAll(".tangleLine").remove();
       }
-      this.timeout = window.setTimeout(this.drawLines.bind(this), 1000);
+      this.timeout = addTimeout('tree', this.drawLines.bind(this), 1000);
     }
   }
   render() {
