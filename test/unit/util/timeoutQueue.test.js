@@ -19,6 +19,15 @@ test('Add and execute timeouts', async () => {
   expect(b).toBe(true);
 });
 
+test('Timeouts can execute with arg', async () => {
+  let a = 1;
+  addTimeout('test', (val) => { a = val; }, 100, 2);
+  await wait(60);
+  expect(a).toBe(1);
+  await wait(60);
+  expect(a).toBe(2);
+});
+
 test('Added timeouts are recallable', async () => {
   let b = false;
   const toB = addTimeout('test', () => { b = true; }, 200);

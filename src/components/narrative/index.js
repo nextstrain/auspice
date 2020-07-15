@@ -17,6 +17,7 @@ import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
+import { clearAllTimeouts } from '../../util/timeoutQueue';
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -197,6 +198,7 @@ class Narrative extends React.Component {
       query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
     });
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
+    clearAllTimeouts('narrative');
   }
 }
 export default Narrative;
