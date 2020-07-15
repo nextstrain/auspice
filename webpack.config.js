@@ -186,7 +186,7 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
       path: outputPath,
       filename: `auspice.bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
-      publicPath: "/dist/"
+      publicPath: "/auspice/"
     },
     resolve: {
       alias: aliasesToResolve
