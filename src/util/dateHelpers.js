@@ -69,7 +69,6 @@ function isLeapYear(year) {
   return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
 }
 
-
 /**
  * Get the previous date closest to the provided one by the specified `unit` (e.g. day, week, month...)
  * Weeks are defined to start on a Monday (ISO week)

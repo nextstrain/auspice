@@ -23,4 +23,3 @@ Currently, the logic in `auspice view` is to match all datasets which:
 - contain the same first "part" of the URL -- interpreted here to represent the same pathogen.
 - have the same number of "parts" in the URL (parts are delimited by a `_` in the filename or a `/` in the URL).
 - differ from the currently selected dataset by only 1 part.
-

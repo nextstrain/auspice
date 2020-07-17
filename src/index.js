@@ -66,4 +66,3 @@ const renderApp = () => {
 };
 
 renderApp();
-

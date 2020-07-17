@@ -74,4 +74,5 @@ Please [get in touch (email)](mailto:hello@nextstrain.org) with any and all ques
 * Not all state is mirrored in the URLs (for instance, map bounds are not set in the URL).
 This limits what views can be defined by paragraphs in the narratives.
 
+* The frontmatter parsing will be extended to allow arrays of authors (etc).
 Take a look at the [GitHub issues tagged as related to narrative functionality](https://github.com/nextstrain/auspice/labels/narratives) for a potentially more up-to-date list of these.
