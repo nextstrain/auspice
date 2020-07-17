@@ -161,4 +161,3 @@ Each object has properties
 * `__html` -- the HTML to render in the sidebar to form the narrative
 * `dataset` -- the dataset associated with this block
 * `query` -- the query associated with this block
-
