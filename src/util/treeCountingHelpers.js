@@ -60,4 +60,3 @@ export const calcTotalTipsInTree = (nodes) => {
   });
   return count;
 };
-
