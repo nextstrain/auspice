@@ -120,15 +120,24 @@ function attributionLink(attribution, attributionLinkValue) {
  * Extract a code-block from the content, if it exists, tagged as auspiceMainDisplayMarkdown
  * Which we send to the client under a special key for parsing in the main display
  * This functionality is experimental, undocumented & subject to change.
- * The implementation relies on regex matching, which is not the best long term solution.
+ * The implementation relies exactly one opening string for auspiceMainDisplayMarkdown and exactly one
+ * closing string. Otherwise it will return the paragraph as is.
  */
 const extractAuspiceMainDisplayMarkdown = (paragraph) => {
-  const groups = paragraph.match(/([\s\S]*)```auspiceMainDisplayMarkdown\n([\s\S]+)\n```([\s\S]*)/);
-  if (!groups) return [paragraph, false];
+  const split1 = paragraph.split("```auspiceMainDisplayMarkdown\n");
+  if (split1.length !== 2) {
+    return [paragraph, false];
+  }
+  const [before, start] = split1;
+  const split2 = start.split("\n```")
+  if (split2.length !== 2) {
+    return [paragraph, false];
+  }
+  const [auspiceMainDisplayMarkdown, after] = split2;
 
   return [
-    groups[1]+groups[3], // the content above & below the auspiceMainDisplayMarkdown block
-    groups[2]            // the content within the auspiceMainDisplayMarkdown block
+    before+after,              // the content above & below the auspiceMainDisplayMarkdown block
+    auspiceMainDisplayMarkdown // the content within the auspiceMainDisplayMarkdown block
   ];
 };
 
@@ -142,7 +151,7 @@ const extractAuspiceMainDisplayMarkdown = (paragraph) => {
  */
 const parseNarrativeFile = (fileContents) => {
   const blocks = [];
-  const frontMatter = yamlFront.loadFront(fileContents);
+   const frontMatter = yamlFront.loadFront(fileContents);
 
   const titlesAndParagraphs = frontMatter.__content
     .replace(/\r\n/g, "\n")                 // handle files with CRLF endings (windows)
@@ -151,7 +160,6 @@ const parseNarrativeFile = (fileContents) => {
 
   /* process the frontmatter content */
   blocks.push(makeFrontMatterBlock(frontMatter));
-
   /* process the markdown content */
   const isTitle = (s) => s.match(/^\[.+?\]\(.+?\)$/);
   let idx = 0;
@@ -171,7 +179,6 @@ const parseNarrativeFile = (fileContents) => {
 
     let mainDisplayMarkdown;
     [paragraphContents, mainDisplayMarkdown] = extractAuspiceMainDisplayMarkdown(paragraphContents);
-
     const block = new Proxy({}, blockProxyHandler);
     block.url = matches[2];
     block.contents = paragraphContents;
