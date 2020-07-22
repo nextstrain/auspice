@@ -85,6 +85,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     }
   }
 
+  /* todo - this is too hacky */
+  if (newProps.distanceMeasure === "num_date" && newProps.colorBy === "num_date" && oldProps.resamplingCounter !== newProps.resamplingCounter) {
+    args.newDistance = true;
+  }
+
   if (oldProps.width !== newProps.width || oldProps.height !== newProps.height) {
     args.svgHasChangedDimensions = true;
   }

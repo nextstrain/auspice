@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { connect } from "react-redux";
 import { hot } from 'react-hot-loader/root';
 import Monitor from "./components/framework/monitor";
+import KeyboardShortcuts from "./components/framework/keyboard-shortcuts";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
 import Head from "./components/framework/head";
@@ -56,6 +57,7 @@ const Root = () => {
     <div>
       <Head/>
       <Monitor/>
+      <KeyboardShortcuts/>
       <Notifications/>
       <MainComponentSwitch/>
     </div>

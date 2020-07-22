@@ -84,7 +84,8 @@ export const getDefaultControlsState = () => {
     mapLegendOpen: undefined,
     showOnlyPanels: false,
     showTransmissionLines: true,
-    normalizeFrequencies: true
+    normalizeFrequencies: true,
+    resamplingCounter: 0,
   };
 };
 
@@ -114,6 +115,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         selectedNode: null
       });
+    case types.RESAMPLE:
+      return {...state, resamplingCounter: state.resamplingCounter+1};
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:

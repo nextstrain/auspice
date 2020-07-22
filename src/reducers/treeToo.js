@@ -45,7 +45,7 @@ const treeToo = (state = getDefaultTreeState(), action) => {
       if (action.nodeColorsToo) {
         return Object.assign({}, state, {
           nodeColors: action.nodeColorsToo,
-          nodeColorsVersion: action.version
+          nodeColorsVersion: action.nodeColorsVersion
         });
       }
       return state;
