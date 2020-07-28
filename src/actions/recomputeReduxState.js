@@ -1,4 +1,5 @@
 import queryString from "query-string";
+import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
@@ -696,8 +697,9 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
-    /* revisit this - but it helps prevent bugs */
-    controls = {...oldState.controls};
+    /* creating deep copies avoids references to (nested) objects remaining the same which
+    can affect props comparisons. Due to the size of some of the state, we only do this selectively */
+    controls = cloneDeep(oldState.controls);
     entropy = {...oldState.entropy};
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
