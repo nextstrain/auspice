@@ -40,7 +40,7 @@ class Narrative extends React.Component {
   constructor(props) {
     super(props);
     this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
+      this.props.dispatch(changePage({ path: this.props.blocks[this.props.currentInFocusBlockIdx].dataset, query: true }));
     };
     this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
       const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
@@ -52,15 +52,16 @@ class Narrative extends React.Component {
         }));
         return;
       }
-
-      this.props.dispatch(changePage({
-        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-        changeDataset: false,
+      const change = {
         query: queryString.parse(this.props.blocks[idx].query),
         queryToDisplay: {n: idx},
         push: true
-      }));
-
+      };
+      if (this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
+        change.path = this.props.blocks[idx].dataset;
+        change.changeDatasetOnly = true;
+      }
+      this.props.dispatch(changePage(change));
     };
     this.goToNextSlide = () => {
       if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op

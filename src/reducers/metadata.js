@@ -16,6 +16,7 @@ const Metadata = (state = {
       return Object.assign({}, state, {
         loaded: false
       });
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
     case types.CLEAN_START:
       return action.metadata;
     case types.ADD_COLOR_BYS:

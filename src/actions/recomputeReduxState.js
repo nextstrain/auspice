@@ -44,6 +44,7 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  // console.log("modify state via URL query", query)
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -590,7 +591,7 @@ const modifyControlsViaTreeToo = (controls, name) => {
 const convertColoringsListToDict = (coloringsList) => {
   const colorings = {};
   coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = coloring;
+    colorings[coloring.key] = { ...coloring };
     delete colorings[coloring.key].key;
   });
   return colorings;
@@ -659,6 +660,16 @@ const createMetadataStateFromJSON = (json) => {
   return metadata;
 };
 
+export const getNarrativePageFromQuery = (query, narrative) => {
+  let n = parseInt(query.n, 10) || 0;
+  /* If the query has defined a block which doesn't exist then default to n=0 */
+  if (n >= narrative.length) {
+    console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+    n=0;
+  }
+  return n;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   secondTreeDataset = false,
@@ -713,14 +724,8 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
-    let n = parseInt(query.n, 10) || 0;
-    /* If the query has defined a block which doesn't exist then default to n=0 */
-    if (n >= narrative.length) {
-      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
-      n=0;
-    }
+    const n = getNarrativePageFromQuery(query, narrative);
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = n===0 ? {} : {n}; // eslint-disable-line
     /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
@@ -842,12 +847,3 @@ export const createTreeTooState = ({
   // }
   return {tree, treeToo, controls};
 };
-
-function addEndOfNarrativeBlock(narrativeBlocks) {
-  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
-  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
-    __html: undefined,
-    isEndOfNarrativeSlide: true
-  });
-  narrativeBlocks.push(endOfNarrativeSlide);
-}

@@ -77,7 +77,7 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this._goToPage = (idx) => {
-
+      // TODO:1050 allow multiple dataset narratives on mobile
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
         this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
@@ -86,7 +86,6 @@ class MobileNarrativeDisplay extends React.Component {
         }));
       } else {
         this.props.dispatch(changePage({
-          changeDataset: false,
           query: queryString.parse(this.props.blocks[idx].query),
           queryToDisplay: {n: idx},
           push: true
