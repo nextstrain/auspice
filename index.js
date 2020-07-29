@@ -8,7 +8,7 @@
 
 
 const convertFromV1 = require("./cli/server/convertJsonSchemas").convertFromV1;
-const parseNarrativeFile = require("./cli/server/parseNarrative").default;
+const parseNarrativeFile = require("./cli/server/getNarrative").parseNarrative;
 
 module.exports = {
   convertFromV1,
