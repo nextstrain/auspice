@@ -42,17 +42,11 @@ class Narrative extends React.Component {
     this.exitNarrativeMode = () => {
       this.props.dispatch(changePage({ path: this.props.blocks[this.props.currentInFocusBlockIdx].dataset, query: true }));
     };
-    this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
-      const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
-      const change = {
-        query: {n: idx},
-        push: true
-      };
-      if (this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
-        change.path = this.props.blocks[idx].dataset;
-        change.changeDatasetOnly = true;
-      }
-      this.props.dispatch(changePage(change));
+    this.goToSlide = (reactPageScrollerIdx) => {
+      const newSlideIdx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
+      this.props.dispatch(changePage(
+        computeChangePageArgs(this.props.blocks, this.props.currentInFocusBlockIdx, newSlideIdx)
+      ));
     };
     this.goToNextSlide = () => {
       if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op
@@ -175,7 +169,7 @@ class Narrative extends React.Component {
         <ReactPageScroller
           ref={(c) => {this.reactPageScroller = c;}}
           containerHeight={this.props.height-progressHeight}
-          pageOnChange={this.changeAppStateViaBlock}
+          pageOnChange={this.goToSlide}
         >
           {this.renderBlocks()}
         </ReactPageScroller>
@@ -192,3 +186,12 @@ class Narrative extends React.Component {
   }
 }
 export default Narrative;
+
+export function computeChangePageArgs(blocks, currentSlideIdx, newSlideIdx) {
+  const args = {query: {n: newSlideIdx}, push: true};
+  if (blocks[currentSlideIdx].dataset !== blocks[newSlideIdx].dataset) {
+    args.path = blocks[newSlideIdx].dataset;
+    args.changeDatasetOnly = true;
+  }
+  return args;
+}
