@@ -732,8 +732,9 @@ export const createStateFromQueryOrJSONs = ({
 
   controls = modifyStateViaURLQuery(controls, query);
 
+  /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
   if (narrativeBlocks && narrative[narrativeSlideIdx].mainDisplayMarkdown) {
-    controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
+    controls.panelsToDisplay = ["MainDisplayMarkdown"];
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));

@@ -137,7 +137,7 @@ class Main extends React.Component {
           navBarHandler={this.toggleSidebar}
         />
         <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>
-          {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
+          {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("MainDisplayMarkdown") ?
             renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
           }
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
@@ -156,7 +156,7 @@ class Main extends React.Component {
             null
           }
           {this.props.displayNarrative|| this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
-          {this.props.displayNarrative && this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
+          {this.props.displayNarrative && this.props.panelsToDisplay.includes("MainDisplayMarkdown") ?
             <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
             null
           }

@@ -3,8 +3,7 @@
 
 import React from "react";
 import { connect } from "react-redux";
-import queryString from "query-string";
-import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
+import { changePage } from "../../actions/navigation";
 import {
   linkStyles,
   MobileBannerTop,
@@ -78,18 +77,7 @@ class MobileNarrativeDisplay extends React.Component {
 
     this._goToPage = (idx) => {
       // TODO:1050 allow multiple dataset narratives on mobile
-      // TODO: this `if` statement should be moved to the `changePage` function or similar
-      if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: {n: idx}
-        }));
-      } else {
-        this.props.dispatch(changePage({
-          query: {n: idx},
-          push: true
-        }));
-      }
-
+      this.props.dispatch(changePage({query: {n: idx}, push: true}));
       scrollToTop();
     };
     // TODO: bind down & up arrows (is this ok since we also have scollable content?)
@@ -119,7 +107,7 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderMainMarkdown() {
-    if (this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")) {
+    if (this.props.panelsToDisplay.includes("MainDisplayMarkdown")) {
       return <MainDisplayMarkdown width={window.innerWidth} mobile/>;
     }
     return null;

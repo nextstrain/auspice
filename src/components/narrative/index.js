@@ -14,7 +14,7 @@ import {
   ProgressButton
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
-import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
+import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
 
@@ -44,13 +44,6 @@ class Narrative extends React.Component {
     };
     this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
       const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
-
-      if (this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: {n: idx}
-        }));
-        return;
-      }
       const change = {
         query: {n: idx},
         push: true
