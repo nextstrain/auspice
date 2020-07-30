@@ -674,7 +674,7 @@ export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
-  narrativeBlocks = false,
+  narrativeBlocks = false, /* if in a narrative this argument is set */
   mainTreeName = false,
   secondTreeName = false,
   query,
@@ -717,24 +717,23 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
-
   /* For the creation of state, we want to parse out URL query parameters
   (e.g. ?c=country means we want to color-by country) and modify the state
   accordingly. For narratives, we _don't_ display these in the URL, instead
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
+  let narrativeSlideIdx;
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
-    const n = getNarrativePageFromQuery(query, narrative);
-    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
-    query = n===0 ? {} : {n}; // eslint-disable-line
-    /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
-    update `controls.panelsToDisplay` so this is displayed */
-    if (narrative[n].mainDisplayMarkdown) {
-      controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
-    }
-  } else {
-    controls = modifyStateViaURLQuery(controls, query);
+    narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
+    /* replace the query with the information which can guide the view */
+    query = queryString.parse(narrative[narrativeSlideIdx].query); // eslint-disable-line no-param-reassign
+  }
+
+  controls = modifyStateViaURLQuery(controls, query);
+
+  if (narrativeBlocks && narrative[narrativeSlideIdx].mainDisplayMarkdown) {
+    controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
@@ -803,6 +802,9 @@ export const createStateFromQueryOrJSONs = ({
       controls.normalizeFrequencies
     );
   }
+
+  /* if narratives then switch the query back to ?n=<SLIDE> for display */
+  if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };

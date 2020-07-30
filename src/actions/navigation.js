@@ -52,21 +52,13 @@ Case 3. load new dataset & start fresh (used when changing dataset via the drop-
 ARGUMENTS:
 path -              OPTIONAL (default: window.location.pathname) - the destination path - e.g. "zika" or "flu/..." (does not include query)
 query -             OPTIONAL (default: queryString.parse(window.location.search)) - see below
-queryToDisplay -    OPTIONAL (default: value of `query` argument) - doesn't affect state, only URL.
 push -              OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 changeDatasetOnly - OPTIONAL (default: false) - enables changing datasets while keeping the tree, etc mounted to the DOM (e.g. whilst changing datasets in a narrative).
 
-Note about how this changes the URL and app state according to arguments:
-This function changes the pathname (stored in the datasets reducer) and modifies the URL pathname and query
-accordingly in the middleware. But the URL query is not processed further.
-Because the datasets reducer has changed, the <App> (or whichever display component we're on) will update.
-In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
-In this way, the URL query is "used".
 */
 export const changePage = ({
   path = undefined,
   query = undefined,
-  queryToDisplay = undefined,
   push = true,
   changeDatasetOnly = false
 } = {}) => (dispatch, getState) => {
@@ -75,7 +67,6 @@ export const changePage = ({
   /* set some defaults */
   if (!path) path = window.location.pathname;  // eslint-disable-line
   if (!query) query = queryString.parse(window.location.search);  // eslint-disable-line
-  if (!queryToDisplay) queryToDisplay = query; // eslint-disable-line
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
 
@@ -83,7 +74,7 @@ export const changePage = ({
     /* Case 1 (see docstring): the path (dataset) remains the same but the state may be modulated by the query */
     const newState = createStateFromQueryOrJSONs(
       { oldState,
-        query: queryToDisplay,
+        query,
         narrativeBlocks: oldState.narrative.blocks,
         dispatch }
     );
@@ -92,7 +83,7 @@ export const changePage = ({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
       ...newState,
       pushState: push,
-      query: queryToDisplay
+      query
     });
   } else if (changeDatasetOnly) {
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
@@ -105,7 +96,7 @@ export const changePage = ({
           mainTreeName,
           secondTreeName: secondTreeName || false,
           narrativeBlocks: oldState.narrative.blocks,
-          query: queryToDisplay,
+          query,
           dispatch
         });
         // same dispatch as case 1 but the state comes from a JSON
@@ -113,7 +104,7 @@ export const changePage = ({
           type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
           ...newState,
           pushState: push,
-          query: queryToDisplay
+          query
         });
       });
   } else {
@@ -139,14 +130,15 @@ export const goTo404 = (errorMessage) => ({
 });
 
 
-export const EXPERIMENTAL_showMainDisplayMarkdown = ({query, queryToDisplay}) =>
+export const EXPERIMENTAL_showMainDisplayMarkdown = ({query}) =>
   (dispatch, getState) => {
-    const newState = createStateFromQueryOrJSONs({oldState: getState(), query, dispatch});
+    const oldState = getState();
+    const newState = createStateFromQueryOrJSONs({oldState, narrativeBlocks: oldState.narrative.blocks, query, dispatch});
     newState.controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
     dispatch({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
       ...newState,
       pushState: true,
-      query: queryToDisplay
+      query: query
     });
   };

@@ -81,13 +81,11 @@ class MobileNarrativeDisplay extends React.Component {
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
         this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
+          query: {n: idx}
         }));
       } else {
         this.props.dispatch(changePage({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx},
+          query: {n: idx},
           push: true
         }));
       }

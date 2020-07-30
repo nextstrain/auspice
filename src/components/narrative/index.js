@@ -47,14 +47,12 @@ class Narrative extends React.Component {
 
       if (this.props.blocks[idx].mainDisplayMarkdown) {
         this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
+          query: {n: idx}
         }));
         return;
       }
       const change = {
-        query: queryString.parse(this.props.blocks[idx].query),
-        queryToDisplay: {n: idx},
+        query: {n: idx},
         push: true
       };
       if (this.props.blocks[idx].dataset !== this.props.blocks[this.props.currentInFocusBlockIdx].dataset) {
