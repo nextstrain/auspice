@@ -84,7 +84,7 @@ The response depends on the `type` specified in the query.
 If a markdown format is requested, then the narrative file is sent to the client unmodified to be parsed on the client.
 
 If a JSON is requested then the narrative file is parsed into JSON format by the server.
-For Auspice versions <=XXX this was the only expected behavior.
+For Auspice versions prior to v2.18 this was the only expected behavior.
 The transformation from markdown (i.e. the narrative file itself) to JSON is via the `parseNarrativeFile()` function (see below for how this is exported from Auspice for use in other servers).
 Here, roughly, is the code we use in the auspice server for this transformation:
 
@@ -96,7 +96,7 @@ if (type === "json") {
 }
 ```
 
-> While the Auspice client (from vXXX onwards) always requests the `type=md`, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatable with servers which may be using an earlier API.
+> While the Auspice client (from v2.18 onwards) always requests the `type=md`, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatable with servers which may be using an earlier API.
 
 ---
 

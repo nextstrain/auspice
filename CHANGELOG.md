@@ -2,8 +2,24 @@
 title: Changelog
 ---
 
-## version 2.17.4 - 2020/07/21
+* Parse narratives client side.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193) and [PR 1172](https://github.com/nextstrain/auspice/pull/1172).
+This shifts the default client behavior to request a narrative in markdown format and parse it client-side.
+The server still retains the ability to parse narratives server-side and return narratives in JSON format, so there are no breaking changes.
 
+* Narratives can now contain multiple datasets.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193), [PR 1176](https://github.com/nextstrain/auspice/pull/1176) and [PR 1164](https://github.com/nextstrain/auspice/pull/1164).
+Narrative slides may now define their own unique datasets, with datasets preemptively fetched and cached to improve performance.
+Invalid datasets will show an error notification and fallback to the dataset defined by the frontmatter of the narrative.
+
+* (Bugfix) Zooming in the entropy panel by using shift/option + mouseWheel now appropriately updates the URL query.
+See [PR 1188](https://github.com/nextstrain/auspice/pull/1188)
+
+* (Bugfix) The animation occuring when zooming the phylogeny is now restored.
+See [PR 1192](https://github.com/nextstrain/auspice/pull/1192)
+
+## version 2.17.4 - 2020/07/21
+* (Bugfix) Improve parsing of narrative files where a regex on a large string (e.g. image encoded as a blob) would hang the server
 
 ## version 2.17.3 - 2020/07/14
 * (Bugfix) Allow `auspice view` to serve custom auspice client if one exists.
