@@ -456,8 +456,15 @@ EntropyChart.prototype._addBrush = function _addBrush() {
         /* If selected gene or clicked on entropy, hide zoom coords */
         this.props.dispatch(changeZoom([undefined, undefined]));
       }
+    } else if (_isZoomEvent(d3event)) {
+      this.props.dispatch(changeZoom(this.zoomCoordinates));
     }
   };
+
+  /* ZoomEvent is emitted by d3-zoom when shift/option + mouseWheel on the entropy panel. */
+  function _isZoomEvent(d3Event) {
+    return d3Event && d3Event.sourceEvent && d3Event.sourceEvent.type === 'zoom';
+  }
 
   /* zooms in by modifing the domain of xMain scale */
   this._zoom = function _zoom(start, end) {
