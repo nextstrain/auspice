@@ -57,15 +57,13 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
 
-  /* confidence intervals (on means in the SVG, display means shown in the sidebar)
-  This block used to include comparisons of oldProps to newProps. See:
-  https://github.com/nextstrain/auspice/commit/0713e69b0707c92df806a575796e7205f08332ff
-  for an explanation of why it no longer does. */
-  if (newProps.temporalConfidence.display === false) {
+  /* show / remove confidence intervals across the tree */
+  if (
+    (oldProps.temporalConfidence.display === true && newProps.temporalConfidence.display === false) ||
+    (oldProps.temporalConfidence.on === true && newProps.temporalConfidence.on === false)
+  ) {
     args.removeConfidences = true;
-  } else if (newProps.temporalConfidence.on === false) {
-    args.removeConfidences = true;
-  } else if (newProps.temporalConfidence.display === true && newProps.temporalConfidence.on === true) {
+  } else if (newProps.temporalConfidence.display === true && oldProps.temporalConfidence.on === false && newProps.temporalConfidence.on === true) {
     args.showConfidences = true;
   }
 
