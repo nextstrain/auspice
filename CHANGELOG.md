@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.18.0 - 2020/08/03
+
+
 * Parse narratives client side.
 See [PR 1193](https://github.com/nextstrain/auspice/pull/1193) and [PR 1172](https://github.com/nextstrain/auspice/pull/1172).
 This shifts the default client behavior to request a narrative in markdown format and parse it client-side.
