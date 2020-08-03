@@ -17,6 +17,7 @@ import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
 import { computeChangePageArgs } from "./index";
+import {TOGGLE_NARRATIVE} from "../../actions/types";
 
 const BANNER_HEIGHT = 50;
 const progressHeight = 25;
@@ -60,15 +61,10 @@ class MobileNarrativeDisplay extends React.Component {
       contentHeight: window.innerHeight - 2*BANNER_HEIGHT
     };
 
-    this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
-    };
-
     this.goToNextPage = () => {
       if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
         return; // no-op
       }
-
       this._goToPage(this.props.currentInFocusBlockIdx+1);
     };
 
@@ -153,7 +149,7 @@ class MobileNarrativeDisplay extends React.Component {
             </a>
             <br />
             <a style={{...linkStyles}}
-              onClick={this.exitNarrativeMode}
+              onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
             </a>

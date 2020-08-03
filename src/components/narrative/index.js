@@ -2,7 +2,6 @@
 /* eslint-disable react/no-array-index-key */
 import React from "react";
 import { connect } from "react-redux";
-import queryString from "query-string";
 import Mousetrap from "mousetrap";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import {
@@ -15,8 +14,8 @@ import {
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
-import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
+import {TOGGLE_NARRATIVE} from "../../actions/types";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -39,9 +38,6 @@ const explanationParagraph=`
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[this.props.currentInFocusBlockIdx].dataset, query: true }));
-    };
     this.goToSlide = (reactPageScrollerIdx) => {
       const newSlideIdx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
       this.props.dispatch(changePage(
@@ -126,7 +122,7 @@ class Narrative extends React.Component {
             </a>
             <br />
             <a style={{...linkStyles}}
-              onClick={this.exitNarrativeMode}
+              onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
             </a>
@@ -177,11 +173,6 @@ class Narrative extends React.Component {
     );
   }
   componentWillUnmount() {
-    this.props.dispatch({
-      type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
-      pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
-      query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
-    });
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
   }
 }

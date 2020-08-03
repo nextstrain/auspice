@@ -34,7 +34,7 @@ const narrative = (state = {
       return state;
     case types.TOGGLE_NARRATIVE:
       if (state.loaded) {
-        return Object.assign({}, state, {display: action.display});
+        return Object.assign({}, state, {display: action.narrativeOn});
       }
       console.warn("Attempted to toggle narrative that was not loaded");
       return state;
