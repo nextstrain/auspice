@@ -9,12 +9,12 @@
       "maxSize": "75 kB"
     },
     {
-      "path": "./dist/auspice.chunk.core-vendors.bundle.9b6a9c4b675fe63ec02a.js",
+      "path": "./dist/auspice.chunk.core-vendors.bundle.*.js",
       "maxSize": "220 kB"
     },
     {
-      "path": "./dist/auspice.chunk.other-vendors.bundle.99f3458f271574f53feb.js",
-      "maxSize": "60 kB"
+      "path": "./dist/auspice.chunk.other-vendors.bundle.*.js",
+      "maxSize": "80 kB"
     },
     {
       "path": "./dist/auspice.chunk.locales.bundle.*.js",

@@ -11,12 +11,12 @@ abstract: "A narrative to explore simultaneous changes to tree state. The aim is
 ---
 
 
-# [P1: Change color-by to num_date]("http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date)
+# [P1: Change color-by to num_date](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date)
 Check that both the branches and tips update.
 
-# [P2: Zoom into clade A1]("http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date&label=clade:A1)
+# [P2: Zoom into clade A1](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date&label=clade:A1)
 
-# [P3: Zoom into clade A1b _and_ change color]("http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&label=clade:A1b)
+# [P3: Zoom into clade A1b _and_ change color](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&label=clade:A1b)
 Check that the coloring of the branches and tips update as we zoom in.
 
 # [P4: Lots of simultaneous changes](http://localhost:4000/flu/seasonal/h3n2/ha/3y?c=lbi&d=tree&dmin=2017-01-01&f_region=North%20America&label=clade:3c2.A&m=div)

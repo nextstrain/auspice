@@ -2,7 +2,6 @@
 /* eslint-disable react/no-array-index-key */
 import React from "react";
 import { connect } from "react-redux";
-import queryString from "query-string";
 import Mousetrap from "mousetrap";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import {
@@ -14,9 +13,9 @@ import {
   ProgressButton
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
-import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
-import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
+import { changePage } from "../../actions/navigation";
 import { narrativeNavBarHeight } from "../../util/globals";
+import {TOGGLE_NARRATIVE} from "../../actions/types";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -39,28 +38,11 @@ const explanationParagraph=`
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
-    };
-    this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
-      const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
-
-      if (this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
-        }));
-        return;
-      }
-
-      this.props.dispatch(changePage({
-        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-        changeDataset: false,
-        query: queryString.parse(this.props.blocks[idx].query),
-        queryToDisplay: {n: idx},
-        push: true
-      }));
-
+    this.goToSlide = (reactPageScrollerIdx) => {
+      const newSlideIdx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
+      this.props.dispatch(changePage(
+        computeChangePageArgs(this.props.blocks, this.props.currentInFocusBlockIdx, newSlideIdx)
+      ));
     };
     this.goToNextSlide = () => {
       if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op
@@ -140,7 +122,7 @@ class Narrative extends React.Component {
             </a>
             <br />
             <a style={{...linkStyles}}
-              onClick={this.exitNarrativeMode}
+              onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
             </a>
@@ -183,7 +165,7 @@ class Narrative extends React.Component {
         <ReactPageScroller
           ref={(c) => {this.reactPageScroller = c;}}
           containerHeight={this.props.height-progressHeight}
-          pageOnChange={this.changeAppStateViaBlock}
+          pageOnChange={this.goToSlide}
         >
           {this.renderBlocks()}
         </ReactPageScroller>
@@ -191,12 +173,16 @@ class Narrative extends React.Component {
     );
   }
   componentWillUnmount() {
-    this.props.dispatch({
-      type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
-      pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
-      query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
-    });
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
   }
 }
 export default Narrative;
+
+export function computeChangePageArgs(blocks, currentSlideIdx, newSlideIdx) {
+  const args = {query: {n: newSlideIdx}, push: true};
+  if (blocks[currentSlideIdx].dataset !== blocks[newSlideIdx].dataset) {
+    args.path = blocks[newSlideIdx].dataset;
+    args.changeDatasetOnly = true;
+  }
+  return args;
+}
