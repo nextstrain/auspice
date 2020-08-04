@@ -60,7 +60,7 @@ export const NarrativeStyles = styled.div`
 
   div p {
     text-align: justify;
-    margin: 0;
+    margin: 10px 0px;
     font-weight: inherit;
     line-height: inherit;
   }
