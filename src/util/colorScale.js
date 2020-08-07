@@ -102,7 +102,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   let genotype;
   if (isColorByGenotype(colorBy) && controls.geneLength) {
     genotype = decodeColorByGenotype(colorBy, controls.geneLength);
-    setGenotype(tree.nodes, genotype.gene, genotype.positions); /* modifies nodes recursively */
+    setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
   }
   // const colorOptions = metadata.colorOptions;
   const colorings = metadata.colorings;

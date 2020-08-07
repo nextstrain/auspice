@@ -1,6 +1,6 @@
 import { getTraitFromNode } from "./treeMiscHelpers";
 
-export const setGenotype = (nodes, prot, positions) => {
+export const setGenotype = (nodes, prot, positions, rootSequence) => {
   // console.time("setGenotype")
   const nPositions = positions.length;
   const ancState = positions.map(() => undefined);
@@ -38,6 +38,25 @@ export const setGenotype = (nodes, prot, positions) => {
     }
   };
   recurse(nodes[0], positions.map(() => undefined));
+
+  /* If the root-sequence JSON is available, then we can get the ancestral nt/aa for each position.
+  If we know these from above we can use it as a check, if we don't (because it was a position
+  with no mutations) then we can use it to set the color-by */
+  if (rootSequence) {
+    ancState.forEach((inferredValue, i) => {
+      try {
+        const rootSeqValue = rootSequence[prot][positions[i]-1]; // -1 as JS is 0-indexed
+        if (!inferredValue) {
+          ancState[i] = rootSeqValue;
+        } else if (inferredValue!==rootSeqValue) {
+          console.error(`Mismatch between inferred ancestral state for ${prot}@${positions[i]} of ${inferredValue} and the root-sequence JSON value of ${rootSeqValue}`);
+        }
+      } catch (err) {
+        console.error("Error accessing the root-sequence data", err.message);
+      }
+    });
+  }
+
   for (let j = 0; j < nPositions; j++) {
     for (const node of ancNodes[j]) {
       node.currentGt[j] = ancState[j];

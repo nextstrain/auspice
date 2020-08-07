@@ -9,7 +9,7 @@ import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
 import { parseMarkdown } from "../util/parseMarkdown";
-
+import { updateColorByWithRootSequenceData } from "../actions/colors";
 
 /**
  * Sends a GET request to the `/charon` web API endpoint requesting data.
@@ -208,6 +208,18 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     console.error("Failed to fetch available datasets", err.message);
     dispatch(warningNotification({message: "Failed to fetch available datasets"}));
   }
+
+  /* Attempt to fetch the root-sequence JSON, which may or may not exist */
+  try {
+    const rootSequenceData = await getDataset(mainDatasetUrl, {type: "root-sequence"})
+      .then((res) => res.json());
+    dispatch({type: types.SET_ROOT_SEQUENCE, data: rootSequenceData});
+    dispatch(updateColorByWithRootSequenceData());
+  } catch (err) {
+    // We don't log anything as it's not unexpected to be missing the root-sequence JSON
+    // console.log("Failed to get the root-sequence JSON", err.message);
+  }
+
   return undefined;
 };
 

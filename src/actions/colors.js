@@ -1,4 +1,5 @@
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
+import { isColorByGenotype } from "../util/getGenotype";
 import { calcColorScale } from "../util/colorScale";
 import { timerStart, timerEnd } from "../util/perf";
 import { changeMutType } from "./entropy";
@@ -6,7 +7,7 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string */
-export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
+export const changeColorBy = (providedColorBy = undefined) => {
   return (dispatch, getState) => {
     timerStart("changeColorBy calculations");
     const { controls, tree, treeToo, metadata, frequencies } = getState();
@@ -61,6 +62,22 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       updateFrequencyDataDebounced(dispatch, getState);
     }
 
+    return null;
+  };
+};
+
+
+export const updateColorByWithRootSequenceData = () => {
+  return (dispatch, getState) => {
+    const { controls, metadata } = getState();
+    if (!metadata.rootSequence) {
+      console.error("Missing root sequence");
+      return null;
+    }
+    const colorBy = controls.colorBy;
+    if (isColorByGenotype(colorBy)) {
+      dispatch(changeColorBy(colorBy));
+    }
     return null;
   };
 };
