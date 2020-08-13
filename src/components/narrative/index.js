@@ -15,7 +15,10 @@ import {
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
 import { narrativeNavBarHeight } from "../../util/globals";
+<<<<<<< HEAD
 import {TOGGLE_NARRATIVE} from "../../actions/types";
+=======
+>>>>>>> db61cc05f1733a468fb2a837eb3313695f7cc4ab
 import { clearAllTimeouts } from '../../util/timeoutQueue';
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */

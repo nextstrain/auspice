@@ -643,7 +643,11 @@ class Map extends React.Component {
     const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
+<<<<<<< HEAD
       removeTimeout('map', this.bounds_timeout);
+=======
+      removeTimeout(this.bounds_timeout);
+>>>>>>> db61cc05f1733a468fb2a837eb3313695f7cc4ab
       this.bounds_timeout = null;
     }
     // delay to change map bounds
