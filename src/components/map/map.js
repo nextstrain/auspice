@@ -145,7 +145,7 @@ class Map extends React.Component {
     if (this.state.map && (this.props.width !== nextProps.width || this.props.height !== nextProps.height)) {
       // first, clear any existing timeout
       if (this.map_timeout) {
-        removeTimeout(this.map_timeout);
+        removeTimeout('map', this.map_timeout);
         this.map_timeout = null;
       }
       // delay to resize map (when complete, narrative will re-focus map on data)
@@ -643,7 +643,7 @@ class Map extends React.Component {
     const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
-      removeTimeout(this.bounds_timeout);
+      removeTimeout('map', this.bounds_timeout);
       this.bounds_timeout = null;
     }
     // delay to change map bounds
@@ -695,12 +695,7 @@ class Map extends React.Component {
     );
   }
   componentWillUnmount() {
-<<<<<<< HEAD
-    this.state.map.off("moveend");
-    this.state.map.off("resize");
-=======
     clearAllTimeouts('map');
->>>>>>> replaced generic timeouts with queued in components
   }
 }
 
