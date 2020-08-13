@@ -695,6 +695,8 @@ class Map extends React.Component {
     );
   }
   componentWillUnmount() {
+    this.state.map.off("moveend");
+    this.state.map.off("resize");
     clearAllTimeouts('map');
   }
 }

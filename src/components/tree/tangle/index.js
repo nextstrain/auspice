@@ -74,6 +74,7 @@ class Tangle extends React.Component {
     if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
       if (this.timeout) {
         removeTimeout('tree', this.timeout);
+        this.timeout = null;
       } else {
         select(this.d3ref).selectAll(".tangleLine").remove();
       }
