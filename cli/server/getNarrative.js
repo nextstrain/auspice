@@ -3,6 +3,7 @@ const parseNarrative = require('./parseNarrative').default;
 const path = require("path");
 const fs = require("fs");
 const utils = require("../utils");
+const logReport = utils.log;
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -14,7 +15,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       .concat(".md");                 // add .md suffix
 
     const pathName = path.join(narrativesPath, filename);
-    utils.log("trying to access & parse local narrative file: " + pathName);
+    logReport("trying to access & parse local narrative file: " + pathName);
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       const blocks = parseNarrative(fileContents);
