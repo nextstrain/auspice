@@ -14,6 +14,7 @@ const parseNarrative = (fileContents) => {
   utils.verbose("Deprecation warning: Server-side parsing of narrative files is no longer needed!");
   return parseMarkdownNarrativeFile(fileContents, marked);
 };
+const logReport = utils.log;
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -30,7 +31,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
     const type = query.type ? query.type.toLowerCase() : "json";
 
     const pathName = path.join(narrativesPath, filename);
-    utils.log("trying to access & parse local narrative file: " + pathName);
+    logReport("trying to access & parse local narrative file: " + pathName);
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       if (type === "md" || type === "markdown") {
