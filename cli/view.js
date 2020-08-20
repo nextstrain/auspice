@@ -11,8 +11,7 @@ const utils = require("./utils");
 const version = require('../src/version').version;
 const chalk = require('chalk');
 const SUPPRESS = require('argparse').Const.SUPPRESS;
-const logReport = utils.log;
-const errorReport = utils.error;
+const esapi = require("node-esapi");
 
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
@@ -33,7 +32,7 @@ const addParser = (parser) => {
 const serveRelativeFilepaths = ({app, dir}) => {
   app.get("*.json", (req, res) => {
     const filePath = path.join(dir, req.originalUrl);
-    logReport(`${req.originalUrl} -> ${filePath}`);
+    esapi.encoder().encodeForJS(`${req.originalUrl} -> ${filePath}`);
     res.sendFile(filePath);
   });
   return `JSON requests will be served relative to ${dir}.`;
@@ -138,12 +137,12 @@ const run = (args) => {
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {f
     if (error.code === 'EADDRINUSE') {
-      errorReport(`Port ${app.get('port')} is currently in use by another program.
+      esapi.encoder().encodeForJS(`Port ${app.get('port')} is currently in use by another program.
       You must either close that program or specify a different port by setting the shell variable "$PORT". Note that on MacOS / Linux ${chalk.yellow(`lsof -n -i :${app.get('port')} | grep LISTEN`)} should identify the process currently using the port.`);
     }
 
     if (error.code === 'ENOTFOUND') {
-      errorReport(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
+      esapi.encoder().encodeForJS(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
 
       Example commands to fix:
         ${chalk.yellow('HOST="localhost" auspice view')}

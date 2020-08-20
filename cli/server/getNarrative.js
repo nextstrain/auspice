@@ -15,6 +15,7 @@ const parseNarrative = (fileContents) => {
   return parseMarkdownNarrativeFile(fileContents, marked);
 };
 const logReport = utils.log;
+const esapi = require("node-esapi");
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -31,7 +32,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
     const type = query.type ? query.type.toLowerCase() : "json";
 
     const pathName = path.join(narrativesPath, filename);
-    logReport("trying to access & parse local narrative file: " + pathName);
+    esapi.encoder().encodeForJS("trying to access & parse local narrative file: " + pathName);
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       if (type === "md" || type === "markdown") {
