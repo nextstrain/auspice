@@ -15,7 +15,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       .concat(".md");                 // add .md suffix
 
     const pathName = path.join(narrativesPath, filename);
-    esapi.encoder().encodeForJS("trying to access & parse local narrative file: " + pathName);
+    utils.log(esapi.encoder().encodeForJS("trying to access & parse local narrative file: " + pathName));
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       const blocks = parseNarrative(fileContents);
