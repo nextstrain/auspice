@@ -18,7 +18,7 @@ import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { SidebarHeader, ControlsContainer } from "./styles";
-
+import FilterData from "./filter";
 
 function Controls({mapOn, frequenciesOn}) {
   const { t } = useTranslation();
@@ -32,6 +32,10 @@ function Controls({mapOn, frequenciesOn}) {
 
       <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
       <ColorBy />
+
+      <SidebarHeader>{t("sidebar:Filter Data")}</SidebarHeader>
+      <FilterData />
+
 
       <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
       <ChooseLayout />
