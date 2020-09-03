@@ -7,17 +7,17 @@ const esapi = require('node-esapi');
 
 const verbose = (msg) => {
   if (global.AUSPICE_VERBOSE) {
-    console.log(chalk.greenBright(`[verbose]\t${msg}`));
+    console.log(esapi.encoder().encodeForJavaScript(chalk.greenBright(`[verbose]\t${msg}`)));
   }
 };
 const log = (msg) => {
-  console.log(esapi.encoder().encodeForJS(chalk.blueBright(msg)));
+  console.log(esapi.encoder().encodeForJavaScript(chalk.blueBright(msg)));
 };
 const warn = (msg) => {
-  console.warn(esapi.encoder().encodeForJS(chalk.yellowBright(`[warning]\t${msg}`)));
+  console.warn(esapi.encoder().encodeForJavaScript(chalk.yellowBright(`[warning]\t${msg}`)));
 };
 const error = (msg) => {
-  console.error(esapi.encoder().encodeForJS(chalk.redBright(`[error]\t${msg}`)));
+  console.error(esapi.encoder().encodeForJavaScript(chalk.redBright(`[error]\t${msg}`)));
   process.exit(2);
 };
 
