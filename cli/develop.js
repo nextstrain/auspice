@@ -1,6 +1,9 @@
 /* eslint no-console: off */
 const path = require("path");
 const express = require("express");
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+const csrfProtection = csrf({cookie: true});
 const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
@@ -34,12 +37,13 @@ const addParser = (parser) => {
 const run = (args) => {
   /* Basic server set up */
   const app = express();
+  app.use(cookieParser());
   app.set('port', process.env.PORT || 4000);
   app.set('host', process.env.HOST || "localhost");
 
   const baseDir = path.resolve(__dirname, "..");
   utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
+  app.get("/favicon.png", csrfProtection, (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));{ req.csrfToken() }});
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;

@@ -4,6 +4,9 @@
 const path = require("path");
 const fs = require("fs");
 const express = require("express");
+const csrf = require('csurf');
+const cookieParser = require('cookie-parser');
+const csrfProtection = csrf({cookie: true});
 const expressStaticGzip = require("express-static-gzip");
 const compression = require('compression');
 const nakedRedirect = require('express-naked-redirect');
@@ -100,6 +103,7 @@ const getAuspiceBuild = () => {
 const run = (args) => {
   /* Basic server set up */
   const app = express();
+  app.use(cookieParser());
   app.set('port', process.env.PORT || 4000);
   app.set('host', process.env.HOST || "localhost");
   app.use(compression());
@@ -112,7 +116,7 @@ const run = (args) => {
   const auspiceBuild = getAuspiceBuild();
   utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
+  app.get("/favicon.png", csrfProtection, (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));{ req.csrfToken() }});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
   let handlerMsg = "";
