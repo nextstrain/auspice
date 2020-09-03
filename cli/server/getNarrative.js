@@ -32,7 +32,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
     const type = query.type ? query.type.toLowerCase() : "json";
 
     const pathName = path.join(narrativesPath, filename);
-    utils.log(esapi.encoder().encodeForJS("trying to access & parse local narrative file: " + pathName));
+    utils.log("trying to access & parse local narrative file: " + pathName);
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       if (type === "md" || type === "markdown") {
