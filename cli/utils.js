@@ -7,7 +7,7 @@ const esapi = require('node-esapi');
 
 const verbose = (msg) => {
   if (global.AUSPICE_VERBOSE) {
-    console.log(esapi.encoder().encodeForJS(chalk.greenBright(`[verbose]\t${msg}`)));
+    console.log(chalk.greenBright(`[verbose]\t${msg}`));
   }
 };
 const log = (msg) => {
