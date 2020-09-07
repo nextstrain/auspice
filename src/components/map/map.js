@@ -689,6 +689,10 @@ class Map extends React.Component {
       </Card>
     );
   }
+  componentWillUnmount() {
+    this.state.map.off("moveend");
+    this.state.map.off("resize");
+  }
 }
 
 const WithTranslation = withTranslation()(Map);

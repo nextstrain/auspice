@@ -1,4 +1,5 @@
 import queryString from "query-string";
+import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
@@ -44,6 +45,7 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  // console.log("modify state via URL query", query)
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -590,7 +592,7 @@ const modifyControlsViaTreeToo = (controls, name) => {
 const convertColoringsListToDict = (coloringsList) => {
   const colorings = {};
   coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = coloring;
+    colorings[coloring.key] = { ...coloring };
     delete colorings[coloring.key].key;
   });
   return colorings;
@@ -659,11 +661,21 @@ const createMetadataStateFromJSON = (json) => {
   return metadata;
 };
 
+export const getNarrativePageFromQuery = (query, narrative) => {
+  let n = parseInt(query.n, 10) || 0;
+  /* If the query has defined a block which doesn't exist then default to n=0 */
+  if (n >= narrative.length) {
+    console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+    n=0;
+  }
+  return n;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
-  narrativeBlocks = false,
+  narrativeBlocks = false, /* if in a narrative this argument is set */
   mainTreeName = false,
   secondTreeName = false,
   query,
@@ -696,8 +708,9 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
-    /* revisit this - but it helps prevent bugs */
-    controls = {...oldState.controls};
+    /* creating deep copies avoids references to (nested) objects remaining the same which
+    can affect props comparisons. Due to the size of some of the state, we only do this selectively */
+    controls = cloneDeep(oldState.controls);
     entropy = {...oldState.entropy};
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
@@ -706,30 +719,24 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
-
   /* For the creation of state, we want to parse out URL query parameters
   (e.g. ?c=country means we want to color-by country) and modify the state
   accordingly. For narratives, we _don't_ display these in the URL, instead
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
+  let narrativeSlideIdx;
   if (narrativeBlocks) {
-    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
-    let n = parseInt(query.n, 10) || 0;
-    /* If the query has defined a block which doesn't exist then default to n=0 */
-    if (n >= narrative.length) {
-      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
-      n=0;
-    }
-    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
-    query = n===0 ? {} : {n}; // eslint-disable-line
-    /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
-    update `controls.panelsToDisplay` so this is displayed */
-    if (narrative[n].mainDisplayMarkdown) {
-      controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
-    }
-  } else {
-    controls = modifyStateViaURLQuery(controls, query);
+    narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
+    /* replace the query with the information which can guide the view */
+    query = queryString.parse(narrative[narrativeSlideIdx].query); // eslint-disable-line no-param-reassign
+  }
+
+  controls = modifyStateViaURLQuery(controls, query);
+
+  /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
+  if (narrativeBlocks && narrative[narrativeSlideIdx].mainDisplayMarkdown) {
+    controls.panelsToDisplay = ["MainDisplayMarkdown"];
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
@@ -799,6 +806,9 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
+  /* if narratives then switch the query back to ?n=<SLIDE> for display */
+  if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
+
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
@@ -842,12 +852,3 @@ export const createTreeTooState = ({
   // }
   return {tree, treeToo, controls};
 };
-
-function addEndOfNarrativeBlock(narrativeBlocks) {
-  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
-  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
-    __html: undefined,
-    isEndOfNarrativeSlide: true
-  });
-  narrativeBlocks.push(endOfNarrativeSlide);
-}

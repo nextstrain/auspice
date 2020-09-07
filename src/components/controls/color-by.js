@@ -116,10 +116,11 @@ class ColorBy extends React.Component {
   /**
    * Avoids double invocation of change() method
    */
-  shouldComponentUpdate(_, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     if (this.state.colorBySelected === nextState.colorBySelected &&
         this.state.geneSelected === nextState.geneSelected &&
-        this.state.positionSelected === nextState.positionSelected) {
+        this.state.positionSelected === nextState.positionSelected &&
+        this.props.colorings === nextProps.colorings) {
       return false;
     }
     return true;

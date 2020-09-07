@@ -2,11 +2,13 @@ import queryString from "query-string";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
-import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
+import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
-import { fetchJSON } from "../util/serverInteraction";
+import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
+import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
+import { parseMarkdown } from "../util/parseMarkdown";
 
 
 /**
@@ -21,18 +23,11 @@ import { hasExtension, getExtension } from "../util/extensions";
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
+const getDatasetFromCharon = async (prefix, {type, narrative=false}={}) => {
   let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-  const p = fetch(path)
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
-  return p;
+  return await fetchWithErrorHandling(path);
 };
 
 /**
@@ -50,17 +45,9 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
+const getHardcodedData = async (prefix, {type="mainJSON"}={}) => {
   const datapaths = getExtension("hardcodedDataPaths");
-
-  const p = fetch(datapaths[type])
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
-  return p;
+  return await fetchWithErrorHandling(datapaths[type]);
 };
 
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
@@ -75,7 +62,7 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
  * @returns {Array} [0] {string} url, modified as needed to represent main dataset
  *                  [1] {string | undefined} secondTreeUrl, if applicable
  */
-const collectDatasetFetchUrls = (url) => {
+export const collectDatasetFetchUrls = (url) => {
   let secondTreeUrl;
   if (url.includes(":")) {
     const parts = url.replace(/^\//, '')
@@ -239,6 +226,89 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
   dispatch({type: types.TREE_TOO_DATA, ...newState});
 };
 
+function addEndOfNarrativeBlock(narrativeBlocks) {
+  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
+  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
+    __html: undefined,
+    isEndOfNarrativeSlide: true
+  });
+  narrativeBlocks.push(endOfNarrativeSlide);
+}
+
+const narrativeFetchingErrorNotification = (err, failedTreeName, fallbackTreeName) => {
+  return errorNotification({
+    message: `Error fetching one of the datasets.
+      Using the YAML-defined dataset (${fallbackTreeName}) instead.`,
+    details: `Could not fetch dataset "${failedTreeName}". Make sure this dataset exists
+      and is spelled correctly.
+      Error details:
+        status: ${err.status};
+        message: ${err.message}`
+  });
+};
+
+const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
+  const jsons = {};
+  const startingBlockIdx = getNarrativePageFromQuery(query, blocks);
+  const startingDataset = blocks[startingBlockIdx].dataset;
+  const startingTreeName = collectDatasetFetchUrls(startingDataset)[0];
+  const landingSlide = {
+    mainTreeName: startingTreeName,
+    secondTreeDataset: false,
+    secondTreeName: false
+  };
+  const treeNames = blocks.map((block) => collectDatasetFetchUrls(block.dataset)[0]);
+
+  // TODO:1050
+  // 1. allow frequencies to be loaded for a narrative dataset here
+  // 2. allow loading dataset for secondTreeName
+
+  // We block and await for the landing dataset
+  jsons[startingTreeName] = await
+  getDataset(startingTreeName)
+      .then((res) => res.json())
+      .catch((err) => {
+        if (startingTreeName !== treeNames[0]) {
+          dispatch(narrativeFetchingErrorNotification(err, startingTreeName, treeNames[0]));
+          // Assuming block[0] is the one that was set properly for all legacy narratives
+          return getDataset(treeNames[0])
+            .then((res) => res.json());
+        }
+        throw err;
+      });
+  landingSlide.json = jsons[startingTreeName];
+  // Dispatch landing dataset
+  dispatch({
+    type: types.CLEAN_START,
+    pathnameShouldBe: startingDataset,
+    ...createStateFromQueryOrJSONs({
+      ...landingSlide,
+      query,
+      narrativeBlocks: blocks,
+      dispatch
+    })
+  });
+
+  // The other datasets are fetched asynchronously
+  for (const treeName of treeNames) {
+  // With this there's no need for Set above
+    jsons[treeName] = jsons[treeName] ||
+      getDataset(treeName)
+        .then((res) => res.json())
+        .catch((err) => {
+          dispatch(narrativeFetchingErrorNotification(err, treeName, treeNames[0]));
+          // We fall back to the first (YAML frontmatter) slide's dataset
+          return jsons[treeNames[0]];
+        });
+  }
+  // Dispatch jsons object containing promises corresponding to each fetch to be stored in redux cache.
+  // They are potentially unresolved. We await them upon retreieving from the cache - see actions/navigation.js.
+  dispatch({
+    type: types.CACHE_JSONS,
+    jsons
+  });
+};
+
 
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
   return (dispatch, getState) => {
@@ -252,14 +322,24 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       fetchDataAndDispatch(dispatch, url, query);
     } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
-      tells us which data JSON to fetch... */
-      getDatasetFromCharon(url, {narrative: true})
-        .then((res) => res.json())
+      tells us which data JSON to fetch.
+      Note that up until v2.16 the client expected the narrative to have been converted
+      to JSON by the server. To facilitate backward compatibility (e.g. in the case where
+      the client is >2.16, but the server is using an older version of the API)
+      if the file doesn't look like markdown we will attempt to parse it as JSON */
+      getDatasetFromCharon(url, {narrative: true, type: "md"})
+        .then((res) => res.text())
+        .then((res) => parseMarkdownNarrativeFile(res, parseMarkdown))
+        .catch((err) => {
+          // errors from `parseMarkdownNarrativeFile` indicating that the file doesn't look
+          // like markdown will have the fileContents attached to them
+          if (!err.fileContents) throw err;
+          console.error("Narrative file doesn't appear to be markdown! Attempting to parse as JSON.");
+          return JSON.parse(err.fileContents);
+        })
         .then((blocks) => {
-          const firstURL = blocks[0].dataset;
-          const firstQuery = queryString.parse(blocks[0].query);
-          if (query.n) firstQuery.n = query.n;
-          fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
+          addEndOfNarrativeBlock(blocks);
+          return fetchAndCacheNarrativeDatasets(dispatch, blocks, query);
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);

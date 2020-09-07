@@ -33,8 +33,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* first switch: query change */
   switch (action.type) {
     case types.CLEAN_START: // fallthrough
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
-    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       query = action.query;
       if (query.n === 0) delete query.n;
       if (query.tt) delete query.tt;
@@ -163,8 +162,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.TOGGLE_NARRATIVE: {
-      if (action.display === true) {
+      if (action.narrativeOn === true) {
         query = {n: state.narrative.blockIdx};
+      } else if (action.narrativeOn === false) {
+        query = queryString.parse(state.narrative.blocks[state.narrative.blockIdx].query);
       }
       break;
     }
@@ -187,13 +188,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         }
       }
       break;
-    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
-      if (action.pathname) pathname = action.pathname;
-      break;
-    }
     case types.TOGGLE_NARRATIVE: {
-      if (action.display === true) {
+      if (action.narrativeOn === true) {
         pathname = state.narrative.pathname;
+      } else if (action.narrativeOn === false) {
+        pathname = state.narrative.blocks[state.narrative.blockIdx].dataset;
       }
       break;
     }

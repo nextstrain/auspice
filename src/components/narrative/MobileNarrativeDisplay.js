@@ -3,8 +3,7 @@
 
 import React from "react";
 import { connect } from "react-redux";
-import queryString from "query-string";
-import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
+import { changePage } from "../../actions/navigation";
 import {
   linkStyles,
   MobileBannerTop,
@@ -17,6 +16,8 @@ import {
 import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
+import { computeChangePageArgs } from "./index";
+import {TOGGLE_NARRATIVE} from "../../actions/types";
 
 const BANNER_HEIGHT = 50;
 const progressHeight = 25;
@@ -49,7 +50,8 @@ const explanationParagraph=`
   loaded: state.narrative.loaded,
   blocks: state.narrative.blocks,
   currentInFocusBlockIdx: state.narrative.blockIdx,
-  panelsToDisplay: state.controls.panelsToDisplay
+  panelsToDisplay: state.controls.panelsToDisplay,
+  treeName: state.tree.name
 }))
 class MobileNarrativeDisplay extends React.Component {
   constructor(props) {
@@ -59,15 +61,10 @@ class MobileNarrativeDisplay extends React.Component {
       contentHeight: window.innerHeight - 2*BANNER_HEIGHT
     };
 
-    this.exitNarrativeMode = () => {
-      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
-    };
-
     this.goToNextPage = () => {
       if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
         return; // no-op
       }
-
       this._goToPage(this.props.currentInFocusBlockIdx+1);
     };
 
@@ -77,22 +74,9 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this._goToPage = (idx) => {
-
-      // TODO: this `if` statement should be moved to the `changePage` function or similar
-      if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
-        }));
-      } else {
-        this.props.dispatch(changePage({
-          changeDataset: false,
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx},
-          push: true
-        }));
-      }
-
+      this.props.dispatch(changePage(
+        computeChangePageArgs(this.props.blocks, this.props.currentInFocusBlockIdx, idx)
+      ));
       scrollToTop();
     };
     // TODO: bind down & up arrows (is this ok since we also have scollable content?)
@@ -122,7 +106,7 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderMainMarkdown() {
-    if (this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")) {
+    if (this.props.panelsToDisplay.includes("MainDisplayMarkdown")) {
       return <MainDisplayMarkdown width={window.innerWidth} mobile/>;
     }
     return null;
@@ -141,9 +125,9 @@ class MobileNarrativeDisplay extends React.Component {
     return (
       <>
         {this.props.panelsToDisplay.includes("tree")
-          ? <Tree width={width} height={height} /> : null}
+          ? <Tree width={width} height={height} key={this.props.treeName} /> : null}
         {this.props.panelsToDisplay.includes("map")
-          ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} /> : null}
+          ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} key={this.props.treeName+"_map"} /> : null}
       </>
     );
   }
@@ -165,7 +149,7 @@ class MobileNarrativeDisplay extends React.Component {
             </a>
             <br />
             <a style={{...linkStyles}}
-              onClick={this.exitNarrativeMode}
+              onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
             </a>

@@ -60,15 +60,9 @@ If you've got a narrative working locally (i.e. running Auspice on your computer
 Narratives are now being used in various settings, however some bugs remain.
 Please [get in touch (email)](mailto:hello@nextstrain.org) with any and all questions about narratives, or [file an issue on GitHub](https://github.com/nextstrain/auspice/issues/new) 🙏
 
-* Datasets currently cannot be changed between paragraphs (i.e. the initial dataset is used for all subsequent paragraphs).
-
-* Text which is larger than the sidebar / page height is cut off.
-
 * Styling may be slightly off on different browsers.
 
 * Not all state is mirrored in the URLs (for instance, map bounds are not set in the URL).
 This limits what views can be defined by paragraphs in the narratives.
-
-* The frontmatter parsing will be extended to allow arrays of authors (etc).
 
 Take a look at the [GitHub issues tagged as related to narrative functionality](https://github.com/nextstrain/auspice/labels/narratives) for a potentially more up-to-date list of these.

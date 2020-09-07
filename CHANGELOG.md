@@ -2,9 +2,44 @@
 title: Changelog
 ---
 
+## version 2.18.1 - 2020/08/07
+* Add between-paragraph padding for text rendering in (non-mobile) narratives. 
+
+## version 2.18.0 - 2020/08/03
+* Parse narratives client side.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193) and [PR 1172](https://github.com/nextstrain/auspice/pull/1172).
+This shifts the default client behavior to request a narrative in markdown format and parse it client-side.
+The server still retains the ability to parse narratives server-side and return narratives in JSON format, so there are no breaking changes.
+
+* Narratives can now contain multiple datasets.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193), [PR 1176](https://github.com/nextstrain/auspice/pull/1176) and [PR 1164](https://github.com/nextstrain/auspice/pull/1164).
+Narrative slides may now define their own unique datasets, with datasets preemptively fetched and cached to improve performance.
+Invalid datasets will show an error notification and fallback to the dataset defined by the frontmatter of the narrative.
+
+* (Bugfix) Zooming in the entropy panel by using shift/option + mouseWheel now appropriately updates the URL query.
+See [PR 1188](https://github.com/nextstrain/auspice/pull/1188)
+
+* (Bugfix) The animation occuring when zooming the phylogeny is now restored.
+See [PR 1192](https://github.com/nextstrain/auspice/pull/1192)
+
+## version 2.17.4 - 2020/07/21
+* (Bugfix) Improve parsing of narrative files where a regex on a large string (e.g. image encoded as a blob) would hang the server
+
+## version 2.17.3 - 2020/07/14
+* (Bugfix) Allow `auspice view` to serve custom auspice client if one exists.
+See [PR 1182](https://github.com/nextstrain/auspice/pull/1182).
+
+
+## version 2.17.2 - 2020/07/13
+* (Bugfix) Send error messages in the (HTTP) response body, not the status line.
+See [PR 1181](https://github.com/nextstrain/auspice/pull/1181).
+
+
+## version 2.17.1 - 2020/06/25
+* (Bugfix) Metadata from drag-and-drop CSVs now shows up in the color-by menu.
+See [PR 1177](https://github.com/nextstrain/auspice/pull/1177).
+
 ## version 2.17.0 - 2020/06/19
-
-
 * You can now toggle whether the data in the frequencies panel is normalized.
 See [PR 1158](https://github.com/nextstrain/auspice/pull/1158).
 * You can now set the starting state of the transmissions-line toggle via the JSON or a URL query.

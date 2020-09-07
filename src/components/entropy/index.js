@@ -291,6 +291,10 @@ class Entropy extends React.Component {
       </Card>
     );
   }
+
+  componentWillUnmount() {
+    // TODO:1050 undo all listeners within EntropyChart (ie this.state.chart)
+  }
 }
 
 const WithTranslation = withTranslation()(Entropy);

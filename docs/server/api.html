@@ -106,16 +106,26 @@ Any other non-200 reponse behaves similarly but also displays a large &quot;erro
 <p><strong>URL query arguments:</strong></p>
 <ul>
 <li><code>prefix</code> (required) - the pathname of the requesting page in Auspice. Use this to determine which narrative to return.</li>
+<li><code>type</code> (optional) - the format of the data returned (see below for more information).
+Current valid values are &quot;json&quot; and &quot;md&quot;.
+If no type is specified the server will use &quot;json&quot; as a default (for backwards compatibility reasons).
+Requests to this API from the Auspice client are made with `type=md.</li>
 </ul>
-<p><strong>JSON Response (on success):</strong></p>
-<p>The output from the <a href="/auspice/server/api#parsenarrativefile">parseNarrativeFile</a> function defined below.
-For instance, here is the code from the default Auspice handler:</p>
+<p><strong>Response (on success):</strong></p>
+<p>The response depends on the <code>type</code> specified in the query.</p>
+<p>If a markdown format is requested, then the narrative file is sent to the client unmodified to be parsed on the client.</p>
+<p>If a JSON is requested then the narrative file is parsed into JSON format by the server.
+For Auspice versions prior to v2.18 this was the only expected behavior.
+The transformation from markdown (i.e. the narrative file itself) to JSON is via the <code>parseNarrativeFile()</code> function (see below for how this is exported from Auspice for use in other servers).
+Here, roughly, is the code we use in the auspice server for this transformation:</p>
 <pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> fileContents = fs.readFileSync(pathName, <span class="hljs-string">'utf8'</span>);
-<span class="hljs-keyword">const</span> blocks = parseNarrative(fileContents);
-res.send(<span class="hljs-built_in">JSON</span>.stringify(blocks).replace(<span class="hljs-regexp">/&lt;/g</span>, <span class="hljs-string">'\\u003c'</span>));
+<span class="hljs-keyword">if</span> (type === <span class="hljs-string">"json"</span>) {
+  <span class="hljs-keyword">const</span> blocks = parseNarrative(fileContents);
+  res.send(<span class="hljs-built_in">JSON</span>.stringify(blocks).replace(<span class="hljs-regexp">/&lt;/g</span>, <span class="hljs-string">'\\u003c'</span>));
+}
 </code></pre>
 <blockquote>
-<p>Note that in a future version of Auspice we plan to move the parsing of the narrative to the client.</p>
+<p>While the Auspice client (from v2.18 onwards) always requests the <code>type=md</code>, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatable with servers which may be using an earlier API.</p>
 </blockquote>
 <hr>
 <h2><a class="anchor" aria-hidden="true" id="suppling-custom-handlers-to-the-auspice-server"></a><a href="#suppling-custom-handlers-to-the-auspice-server" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Suppling custom handlers to the Auspice server</h2>
@@ -139,9 +149,9 @@ The provided JavaScript file must export three functions, each of which handles 
     <span class="hljs-comment">/* collect available data */</span>
     res.json(data);
   } <span class="hljs-keyword">catch</span> (err) {
-    res.statusMessage = <span class="hljs-string">`error message to display in client`</span>;
-    <span class="hljs-built_in">console</span>.log(res.statusMessage); <span class="hljs-comment">/* printed by the server, not the client */</span>
-    <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">500</span>).end();
+    <span class="hljs-keyword">const</span> errorMessage = <span class="hljs-string">`error message to display in client`</span>;
+    <span class="hljs-built_in">console</span>.log(errorMessage); <span class="hljs-comment">/* printed by the server, not the client */</span>
+    <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">500</span>).type(<span class="hljs-string">"text/plain"</span>).send(errorMessage);
   }
 };
 </code></pre>
@@ -161,6 +171,11 @@ For instance, the code to convert v1 dataset JSONs to v2 JSONs (which the client
 <p><strong>Returns:</strong></p>
 <p>An object representing the v2 JSON <a href="https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json">defined by this schema</a>.</p>
 <h3><a class="anchor" aria-hidden="true" id="parsenarrativefile"></a><a href="#parsenarrativefile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>parseNarrativeFile</code></h3>
+<blockquote>
+<p>This function is deprecated as of vXXX.
+You can now send the untransformed contents of the narrative file (markdown) for client-side parsing.
+See <a href="#charon-getnarrative">above</a> for more details.</p>
+</blockquote>
 <p><strong>Signature:</strong></p>
 <pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> blocks = parseNarrativeFile(fileContents);
 </code></pre>
@@ -173,4 +188,4 @@ Each object has properties</p>
 <li><code>dataset</code> -- the dataset associated with this block</li>
 <li><code>query</code> -- the query associated with this block</li>
 </ul>
-</span></div></article></div><div class="docLastUpdate"><em>Last updated on 22/03/2020</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/auspice/server/introduction"><span class="arrow-prev">← </span><span>Auspice servers</span></a><a class="docs-next button" href="/auspice/server/authentication"><span>Authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#auspice-client-requests">Auspice client requests</a><ul class="toc-headings"><li><a href="#charon-getavailable"><code>/charon/getAvailable</code></a></li><li><a href="#charon-getdataset"><code>/charon/getDataset</code></a></li><li><a href="#charon-getnarrative"><code>/charon/getNarrative</code></a></li></ul></li><li><a href="#suppling-custom-handlers-to-the-auspice-server">Suppling custom handlers to the Auspice server</a></li><li><a href="#importing-code-from-auspice">Importing code from Auspice</a><ul class="toc-headings"><li><a href="#convertfromv1"><code>convertFromV1</code></a></li><li><a href="#parsenarrativefile"><code>parseNarrativeFile</code></a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><a href="/auspice/"><img style="padding-left:20px" src="/auspice/img/logo-light.svg" alt="Auspice" width="66" height="58"/></a></div><div><h5>External Links</h5><a href="https://github.com/nextstrain/auspice">GitHub repo</a><a href="https://www.npmjs.com/package/auspice">NPM package</a><a href="https://nextstrain.org">Nextstrain</a></div><div><h5>Contact Us</h5><a href="mailto:hello@nextstrain.org">email</a><a href="https://twitter.com/hamesjadfield">twitter</a></div></section><section class="copyright">Website built by <a href="https://twitter.com/hamesjadfield">James Hadfield</a> using <a href="https://docusaurus.io">Docusaurus</a></section><section class="copyright">If you use auspice, please cite <a href="https://doi.org/10.1093/bioinformatics/bty407">Hadfield et al., 2018</a></section><section class="copyright">Copyright © 2014-2020 Richard Neher &amp; Trevor Bedford</section></footer></div></body></html>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 03/08/2020</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/auspice/server/introduction"><span class="arrow-prev">← </span><span>Auspice servers</span></a><a class="docs-next button" href="/auspice/server/authentication"><span>Authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#auspice-client-requests">Auspice client requests</a><ul class="toc-headings"><li><a href="#charon-getavailable"><code>/charon/getAvailable</code></a></li><li><a href="#charon-getdataset"><code>/charon/getDataset</code></a></li><li><a href="#charon-getnarrative"><code>/charon/getNarrative</code></a></li></ul></li><li><a href="#suppling-custom-handlers-to-the-auspice-server">Suppling custom handlers to the Auspice server</a></li><li><a href="#importing-code-from-auspice">Importing code from Auspice</a><ul class="toc-headings"><li><a href="#convertfromv1"><code>convertFromV1</code></a></li><li><a href="#parsenarrativefile"><code>parseNarrativeFile</code></a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><a href="/auspice/"><img style="padding-left:20px" src="/auspice/img/logo-light.svg" alt="Auspice" width="66" height="58"/></a></div><div><h5>External Links</h5><a href="https://github.com/nextstrain/auspice">GitHub repo</a><a href="https://www.npmjs.com/package/auspice">NPM package</a><a href="https://nextstrain.org">Nextstrain</a></div><div><h5>Contact Us</h5><a href="mailto:hello@nextstrain.org">email</a><a href="https://twitter.com/hamesjadfield">twitter</a></div></section><section class="copyright">Website built by <a href="https://twitter.com/hamesjadfield">James Hadfield</a> using <a href="https://docusaurus.io">Docusaurus</a></section><section class="copyright">If you use auspice, please cite <a href="https://doi.org/10.1093/bioinformatics/bty407">Hadfield et al., 2018</a></section><section class="copyright">Copyright © 2014-2020 Richard Neher &amp; Trevor Bedford</section></footer></div></body></html>

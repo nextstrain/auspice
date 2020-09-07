@@ -8,16 +8,16 @@
 *
 */
 
+
 const utils = require("../utils");
 const queryString = require("query-string");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 const fs = require("fs");
 
-const handleError = (res, clientMsg, serverMsg="") => {
-  res.statusMessage = clientMsg;
+const handleError = (res, clientMsg, serverMsg="", code=500) => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
-  return res.status(500).end();
+  return res.status(code).type("text/plain").send(clientMsg);
 };
 
 const splitPrefixIntoParts = (url) => url

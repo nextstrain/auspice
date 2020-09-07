@@ -72,18 +72,31 @@ Any other non-200 reponse behaves similarly but also displays a large "error" me
 **URL query arguments:**
 
 * `prefix` (required) - the pathname of the requesting page in Auspice. Use this to determine which narrative to return.
+* `type` (optional) - the format of the data returned (see below for more information).
+Current valid values are "json" and "md".
+If no type is specified the server will use "json" as a default (for backwards compatibility reasons).
+Requests to this API from the Auspice client are made with `type=md.
 
-**JSON Response (on success):**
+**Response (on success):**
 
-The output from the [parseNarrativeFile](server/api.md#parsenarrativefile) function defined below.
-For instance, here is the code from the default Auspice handler:
+The response depends on the `type` specified in the query.
+
+If a markdown format is requested, then the narrative file is sent to the client unmodified to be parsed on the client.
+
+If a JSON is requested then the narrative file is parsed into JSON format by the server.
+For Auspice versions prior to v2.18 this was the only expected behavior.
+The transformation from markdown (i.e. the narrative file itself) to JSON is via the `parseNarrativeFile()` function (see below for how this is exported from Auspice for use in other servers).
+Here, roughly, is the code we use in the auspice server for this transformation:
+
 ```js
 const fileContents = fs.readFileSync(pathName, 'utf8');
-const blocks = parseNarrative(fileContents);
-res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+if (type === "json") {
+  const blocks = parseNarrative(fileContents);
+  res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+}
 ```
 
-> Note that in a future version of Auspice we plan to move the parsing of the narrative to the client.
+> While the Auspice client (from v2.18 onwards) always requests the `type=md`, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatable with servers which may be using an earlier API.
 
 ---
 
@@ -110,9 +123,9 @@ const getAvailable = (req, res) => {
     /* collect available data */
     res.json(data);
   } catch (err) {
-    res.statusMessage = `error message to display in client`;
-    console.log(res.statusMessage); /* printed by the server, not the client */
-    return res.status(500).end();
+    const errorMessage = `error message to display in client`;
+    console.log(errorMessage); /* printed by the server, not the client */
+    return res.status(500).type("text/plain").send(errorMessage);
   }
 };
 ```
@@ -146,6 +159,10 @@ An object representing the v2 JSON [defined by this schema](https://github.com/n
 
 
 ### `parseNarrativeFile`
+
+> This function is deprecated as of vXXX.
+You can now send the untransformed contents of the narrative file (markdown) for client-side parsing.
+See [above](#charon-getnarrative) for more details.
 
 **Signature:**
 

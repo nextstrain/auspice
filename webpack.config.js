@@ -165,9 +165,14 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "react-input-autosize",
     "typeface-lato",
     // "papaparse", <= This is only for the drag-and-drop of files and can be separated
-    "dom-to-image"
-    // "marked",
-    // "dompurify", <= These two are only for MD display and can be separated
+    "dom-to-image",
+    // marked + dompurify are used for MD display of the footer in (most) datasets
+    "marked",
+    "dompurify",
+    // `yaml-front-matter` only used for narrative parsing, but included here to simplify the import code
+    // and avoid it being bundled with most of the Auspice code. It imports "js-yaml".
+    "yaml-front-matter",
+    "js-yaml"
   ];
 
   /**
@@ -251,6 +256,12 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         {
           test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
           use: "file-loader"
+        },
+        {
+          // esprima is a (large) dependency of js-yaml which is unnecessary in a browser
+          // see https://github.com/nodeca/js-yaml/issues/230
+          test: /node_modules\/esprima/,
+          use: 'null-loader'
         }
       ]
     }
