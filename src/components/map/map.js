@@ -434,9 +434,8 @@ class Map extends React.Component {
         nextProps.dateMaxNumeric,
         nextProps.pieChart
       );
-
       this.moveMapAccordingToData({
-        geoResolutionChanged: nextProps.geoResolution !== this.props.geoResolution,
+        geoResolutionChanged: false,
         visibilityChanged: nextProps.visibility !== this.props.visibility,
         demeData: newDemes,
         demeIndices: this.state.demeIndices
