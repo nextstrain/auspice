@@ -3,20 +3,21 @@ const fs = require('fs');
 const chalk = require('chalk');
 const path = require("path");
 const fetch = require('node-fetch');
+const esapi = require('node-esapi');
 
 const verbose = (msg) => {
   if (global.AUSPICE_VERBOSE) {
-    console.log(chalk.greenBright(`[verbose]\t${msg}`));
+    console.log(esapi.encoder().encodeForJavaScript(chalk.greenBright(`[verbose]\t${msg}`)));
   }
 };
 const log = (msg) => {
-  console.log(chalk.blueBright(msg));
+  console.log(esapi.encoder().encodeForJavaScript(chalk.blueBright(msg)));
 };
 const warn = (msg) => {
-  console.warn(chalk.yellowBright(`[warning]\t${msg}`));
+  console.warn(esapi.encoder().encodeForJavaScript(chalk.yellowBright(`[warning]\t${msg}`)));
 };
 const error = (msg) => {
-  console.error(chalk.redBright(`[error]\t${msg}`));
+  console.error(esapi.encoder().encodeForJavaScript(chalk.redBright(`[error]\t${msg}`)));
   process.exit(2);
 };
 
