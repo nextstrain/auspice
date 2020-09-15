@@ -1,12 +1,15 @@
 import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
 import { changeURLMiddleware } from "../middleware/changeURL";
+import { extraMetadataMiddleware } from "../middleware/extraMetadata";
+
 import rootReducer from "../reducers";
 import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-line no-unused-vars
 
 const configureStore = (initialState) => {
   const middleware = [
     thunk,
+    extraMetadataMiddleware,
     changeURLMiddleware, // eslint-disable-line comma-dangle
     // loggingMiddleware
   ];

@@ -76,3 +76,6 @@ do
 done
 
 echo "The local data directory ./data now contains up-to-date datasets from http://data.nextstrain.org"
+
+# TMP
+curl http://staging.nextstrain.org/zika-tutorial-metadata-via-api.json --compressed -o data/zika-tutorial-metadata-via-api.json
