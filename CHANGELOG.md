@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.18.2 - 2020/09/19
+
+
 ## version 2.18.1 - 2020/08/07
 * Add between-paragraph padding for text rendering in (non-mobile) narratives. 
 
