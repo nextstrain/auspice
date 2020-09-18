@@ -5,8 +5,9 @@ import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
  * Note that this cannot have any "special" characters
  */
 export const getDomId = (type, strain) => {
-  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, '') : strain;
-  return `${type}_${name}`;
+  // Replace non-alphanumeric characters with dashes (probably unnecessary)
+  const name = `${type}_${strain}`.replace(/(\W+)/g, '-');
+  return CSS.escape(name);
 };
 
 /**

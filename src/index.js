@@ -4,6 +4,7 @@
 import "whatwg-fetch"; // eslint-disable-line
 import "core-js";
 import "regenerator-runtime";
+import "css.escape";
 /* L I B R A R I E S */
 import "react-hot-loader";
 import React from "react";
