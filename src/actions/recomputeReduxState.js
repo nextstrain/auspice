@@ -7,6 +7,7 @@ import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickn
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
+import { getDefaultGeneralState } from "../reducers/general";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -170,7 +171,23 @@ const restoreQueryableStateToDefaults = (state) => {
   // console.log("state now", state);
   return state;
 };
+const modifyGeneralStateViaMetadata = (state, metadata) => {
+  if (metadata.displayDefaults) {
+    const keysToCheckFor = ["language"];
+    const expectedTypes =  ["string"]; // eslint-disable-line
 
+    for (let i = 0; i < keysToCheckFor.length; i += 1) {
+      if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
+        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+          state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+          state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+        } else {
+          console.error("Skipping 'display_default' for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
+        }
+      }
+    }
+  }
+};
 const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.date_range) {
     /* this may be useful if, e.g., one were to want to display an outbreak
@@ -602,6 +619,25 @@ const convertColoringsListToDict = (coloringsList) => {
  *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
+const createMetadataGeneralStateFromJSON = (json) => {
+  const metadata = {};
+  if (json.meta.display_defaults) {
+    metadata.displayDefaults = {};
+    const jsonKeyToAuspiceKey = {
+      language: "language"
+    };
+    for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
+      if (Object.prototype.hasOwnProperty.call(json.meta.display_defaults, jsonKey)) {
+        metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
+      }
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
+    console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+  }
+  metadata.loaded = true;
+  return metadata;
+};
 const createMetadataStateFromJSON = (json) => {
   const metadata = {};
   if (json.meta.colorings) {
@@ -707,6 +743,9 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
+    generalMetaData = createMetadataGeneralStateFromJSON();
+    general_state = getDefaultGeneralState();
+    general_state = modifyGeneralStateViaMetadata(general_state, generalMetaData);
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
     can affect props comparisons. Due to the size of some of the state, we only do this selectively */
@@ -716,6 +755,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
     frequencies = {...oldState.frequencies};
+    general = {...oldState.general}
     controls = restoreQueryableStateToDefaults(controls);
   }
 
@@ -809,7 +849,7 @@ export const createStateFromQueryOrJSONs = ({
   /* if narratives then switch the query back to ?n=<SLIDE> for display */
   if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
 
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, general};
 };
 
 export const createTreeTooState = ({
