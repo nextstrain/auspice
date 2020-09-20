@@ -755,7 +755,6 @@ export const createStateFromQueryOrJSONs = ({
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
     frequencies = {...oldState.frequencies};
-    general = {...oldState.general}
     controls = restoreQueryableStateToDefaults(controls);
   }
 
