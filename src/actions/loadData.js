@@ -63,18 +63,15 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
  *                  [1] {string | undefined} secondTreeUrl, if applicable
  */
 export const collectDatasetFetchUrls = (url) => {
-  // dual trees are defined via <pathA>:<pathB>. Note that pathA (and/or pathB) should be allowed
-  // to include http[s]:// (i.e. the colon there shouldn't split the string)
-  const re = /(?<!http[s]?):(?!\/\/)/;
-  if (url.search(re) !== -1) {
-    const treeUrls = url
-      .replace(/^\//, '') // strip leading forward slash
-      .replace(/\/$/, '') // strip trailing forward slash
-      .split(re);         // split on the `:` character
-    if (treeUrls.length > 2) console.warn("Splitting of the requested dataset URL resulted in more than 2 datasets!");
-    return treeUrls.splice(0, 2);
+  let secondTreeUrl;
+  if (url.includes(":")) {
+    const parts = url.replace(/^\//, '')
+      .replace(/\/$/, '')
+      .split(":");
+    url = parts[0]; // eslint-disable-line no-param-reassign
+    secondTreeUrl = parts[1];
   }
-  return [url, undefined];
+  return [url, secondTreeUrl];
 };
 
 /**
