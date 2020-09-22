@@ -4,6 +4,7 @@
 import React from "react";
 import PropTypes from "prop-types"
 import {isNull, isNil, isEqual} from "lodash";
+import { addTimeout } from '../../util/timeoutQueue';
 
 const previousTouchMove = Symbol();
 const scrolling = Symbol();
@@ -114,7 +115,9 @@ export default class ReactPageScroller extends React.Component {
                       this.props.pageOnChange(this.state.componentIndex);
                   }
 
-                  setTimeout(() => {
+                  addTimeout(
+                      'narrative',
+                      () => {
                       this.setState((prevState) => ({componentIndex: prevState.componentIndex - 1}), () => {
                           this[scrolling] = false;
                           this[previousTouchMove] = null;
@@ -139,7 +142,9 @@ export default class ReactPageScroller extends React.Component {
                       this.props.pageOnChange(this.state.componentIndex + 2);
                   }
 
-                  setTimeout(() => {
+                  addTimeout(
+                    'narrative',
+                    () => {
                       this.setState((prevState) => ({componentIndex: prevState.componentIndex + 1}), () => {
                           this[scrolling] = false;
                           this[previousTouchMove] = null;
@@ -228,7 +233,9 @@ export default class ReactPageScroller extends React.Component {
                     </div>
                 );
 
-            setTimeout(() => {
+            addTimeout(
+                'narrative',
+                () => {
                 this.setState({componentIndex: number, componentsToRender: componentsToRender}, () => {
                     this[scrolling] = false;
                     this[previousTouchMove] = null;
@@ -268,7 +275,9 @@ export default class ReactPageScroller extends React.Component {
                     pageOnChange(number + 1);
                 }
 
-                setTimeout(() => {
+                addTimeout(
+                    'narrative',
+                    () => {
                     this.setState({componentIndex: number}, () => {
                         this[scrolling] = false;
                         this[previousTouchMove] = null;

@@ -25,6 +25,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundry";
+import { addTimeout, removeTimeout, clearAllTimeouts } from "../../util/timeoutQueue";
 import Legend from "../tree/legend/legend";
 import "../../css/mapbox.css";
 
@@ -144,10 +145,12 @@ class Map extends React.Component {
     if (this.state.map && (this.props.width !== nextProps.width || this.props.height !== nextProps.height)) {
       // first, clear any existing timeout
       if (this.map_timeout) {
-        window.clearTimeout(this.map_timeout);
+        removeTimeout('map', this.map_timeout);
+        this.map_timeout = null;
       }
       // delay to resize map (when complete, narrative will re-focus map on data)
-      this.map_timeout = window.setTimeout(
+      this.map_timeout = addTimeout(
+        'map',
         this.invalidateMapSize.bind(this),
         this.props.narrativeMode ? 100 : 750
       );
@@ -302,7 +305,7 @@ class Map extends React.Component {
         and the map is ready before the data (??). It's imperitive that this method runs
         so if the data's not ready yet we try to rerun it after a short time.
         This could be improved */
-        window.setTimeout(() => this.respondToLeafletEvent(leafletEvent), 50);
+        addTimeout('map', () => this.respondToLeafletEvent(leafletEvent), 50);
         return;
       }
 
@@ -640,10 +643,12 @@ class Map extends React.Component {
     const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
-      window.clearTimeout(this.bounds_timeout);
+      removeTimeout('map', this.bounds_timeout);
+      this.bounds_timeout = null;
     }
     // delay to change map bounds
-    this.bounds_timeout = window.setTimeout(
+    this.bounds_timeout = addTimeout(
+      'map',
       (map) => {
         map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
       },
@@ -692,6 +697,7 @@ class Map extends React.Component {
   componentWillUnmount() {
     this.state.map.off("moveend");
     this.state.map.off("resize");
+    clearAllTimeouts('map');
   }
 }
 
