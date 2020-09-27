@@ -35,7 +35,7 @@
       "map"
     ],
     "display_defaults": {
-      "color_by": "country",
+      "color_by": "region",
       "language": "ja"
     },
     "geo_resolutions": [
