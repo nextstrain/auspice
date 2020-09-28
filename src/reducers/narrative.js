@@ -14,6 +14,7 @@ const narrative = (state = {
         loaded: false,
         display: false
       });
+    case "EXPERIMENTAL_NARRATIVE_CONTENT_CHANGE":
     case types.CLEAN_START:
       if (action.narrative) {
         const blocks = action.narrative;

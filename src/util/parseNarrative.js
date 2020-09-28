@@ -49,9 +49,14 @@ function createTitleSlideFromFrontmatter(frontMatter, markdownParser) {
   }
   const license = parseAttributions(frontMatter, "license", "licenseLink");
   if (license) markdown += `#### License: ${license}\n`;
+
+  const frontMatterObj = {...frontMatter};
+  delete frontMatterObj.__content;
+
   return {
     ...parseUrl(frontMatter.dataset),
-    __html: markdownParser(markdown)
+    __html: markdownParser(markdown),
+    frontMatter: frontMatterObj
   };
 }
 
@@ -95,7 +100,7 @@ function parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
       const { lineIndicatesNewSlide, title, urlString} = checkIfLineIndicatesNewSlide(currentLine);
       if (!slides.length && !lineIndicatesNewSlide) return slides; // content pre 1st slide title is ignored
       if (lineIndicatesNewSlide) {
-        return [...slides, {lines: [`# ${title}`], urlString}];
+        return [...slides, {lines: [`# ${title}`], urlString, title}];
       }
       slides[slides.length-1].lines.push(currentLine);
       return slides;
@@ -106,6 +111,8 @@ function parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
     .map((slide) => {
       const transformed = {
         ...parseUrl(slide.urlString, fallbackDataset),
+        title: slide.title,
+        sidebarDisplayMarkdown: slide.lines.slice(1).join("\n"),
         __html: markdownParser(slide.lines.join("\n"))
       };
       if (slide.mainMarkdownLines) {
