@@ -3,13 +3,15 @@ title: Changelog
 ---
 
 ## version 2.18.4 - 2020/09/28
-
+* (Bugfix) Update dependencies to restore behavior of the leaflet-scroll overlay.
+See [nextstrain.org PR #223](https://github.com/nextstrain/nextstrain.org/issues/223) for context, implemented in [PR 1214](https://github.com/nextstrain/auspice/pull/1214)
 
 ## version 2.18.3 - 2020/09/22
-
+This version reverts the change to URL parsing introduced in 2.18.2 which broke Auspice on Safari (and perhaps other browsers).
 
 ## version 2.18.2 - 2020/09/19
-
+* (Bugfix) Ensure generated SVG ids are escaped correctly. See [PR 1209](https://github.com/nextstrain/auspice/pull/1209).
+* Improve parsing of auspice URLs with colon characters in the pathname. See [PR 1210](https://github.com/nextstrain/auspice/pull/1210).
 
 ## version 2.18.1 - 2020/08/07
 * Add between-paragraph padding for text rendering in (non-mobile) narratives. 
