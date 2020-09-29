@@ -109,7 +109,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry = devMode ? ["webpack-hot-middleware/client", "./src/indexAsync"] : ["./src/indexAsync"];
+  const entry = devMode ? ["webpack-hot-middleware/client", "./src/indexAsync"] : ["core-js/es/promise", "./src/indexAsync"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
