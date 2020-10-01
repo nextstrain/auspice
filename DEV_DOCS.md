@@ -1,6 +1,4 @@
----
-title: Contributing to Auspice development
----
+# Contributing to Auspice development
 
 Thank you for helping us to improve Nextstrain!
 

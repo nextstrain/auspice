@@ -1,6 +1,4 @@
----
-title: Changelog
----
+# Changelog
 
 ## version 2.18.4 - 2020/09/28
 * (Bugfix) Update dependencies to restore behavior of the leaflet-scroll overlay.
