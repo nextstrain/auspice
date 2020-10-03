@@ -48,6 +48,7 @@ const general = (state = {
           language: action.metadata.displayDefaults.language
         });
       }
+      
       return Object.assign({}, state, {
         language: query.lang ? query.lang : defaults.language
       });
