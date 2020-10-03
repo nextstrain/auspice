@@ -26,7 +26,7 @@ const general = (state = {
   displayComponent: getFirstPageToDisplay(),
   errorMessage: undefined,
   pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
-  language: query.lang ? query.lang : defaults.lang
+  language: query.lang ? query.lang : defaults.language
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE:
@@ -43,9 +43,15 @@ const general = (state = {
         pathname: action.data
       });
     case types.CLEAN_START:
-      return Object.assign({}, state, {
-        language: action.metadata.displayDefaults.language
-      });
+      if (action.metadata.displayDefaults.language) {
+        return Object.assign({}, state, {
+          language: action.metadata.displayDefaults.language
+        });
+      } else {
+        return Object.assign({}, state, {
+          language: query.lang ? query.lang : defaults.language
+        });
+      }
     case types.CHANGE_LANGUAGE:
       return Object.assign({}, state, {
         language: action.data
