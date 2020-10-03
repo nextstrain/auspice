@@ -47,11 +47,11 @@ const general = (state = {
         return Object.assign({}, state, {
           language: action.metadata.displayDefaults.language
         });
-      } else {
-        return Object.assign({}, state, {
-          language: query.lang ? query.lang : defaults.language
-        });
       }
+      return Object.assign({}, state, {
+        language: query.lang ? query.lang : defaults.language
+      });
+
     case types.CHANGE_LANGUAGE:
       return Object.assign({}, state, {
         language: action.data
