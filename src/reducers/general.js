@@ -42,20 +42,13 @@ const general = (state = {
       return Object.assign({}, state, {
         pathname: action.data
       });
-    case types.CLEAN_START:
-      if (action.metadata.displayDefaults.language) {
-        return Object.assign({}, state, {
-          language: action.metadata.displayDefaults.language
-        });
-      }
-
-      return Object.assign({}, state, {
-        language: query.lang ? query.lang : defaults.language
-      });
-
     case types.CHANGE_LANGUAGE:
       return Object.assign({}, state, {
         language: action.data
+      });
+    case types.CLEAN_START:
+      return Object.assign({}, state, {
+        language: action.metadata.displayDefaults["language"] ? action.metadata.displayDefaults["language"] : state.language
       });
     default:
       return state;

@@ -2,7 +2,7 @@ import queryString from "query-string";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
-import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
+import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery, createMetadataStateFromJSON } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
