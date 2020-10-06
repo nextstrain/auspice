@@ -62,6 +62,4 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
    advanced-functionality/index
    customise-client/index
    server/index
-   narratives/index
    releases/index
-   contributing/index
