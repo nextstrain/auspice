@@ -62,3 +62,9 @@ html_theme_options = {
     'collapse_navigation': False,
     'titles_only': True,
 }
+
+# -- Cross-project references ------------------------------------------------
+
+intersphinx_mapping = {
+    'docs.nextstrain.org': ('https://docs.nextstrain.org/en/migrate/', None),
+}
