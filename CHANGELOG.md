@@ -3,6 +3,10 @@ title: Changelog
 ---
 
 ## version 2.19.0 - 2020/10/07
+* The auspice client now makes a request for the root-sequence JSON, which allows colouring of the tree by genotypes where there are no mutations.
+See [PR 1197](https://github.com/nextstrain/auspice/pull/1197).
+* polyfill `Promise` to avoid crashes in old browsers.
+See [PR 1217](https://github.com/nextstrain/auspice/pull/1217).
 
 
 ## version 2.18.4 - 2020/09/28
