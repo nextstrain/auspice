@@ -102,7 +102,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   let genotype;
   if (isColorByGenotype(colorBy) && controls.geneLength) {
     genotype = decodeColorByGenotype(colorBy, controls.geneLength);
-    setGenotype(tree.nodes, genotype.gene, genotype.positions); /* modifies nodes recursively */
+    setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
   }
   // const colorOptions = metadata.colorOptions;
   const colorings = metadata.colorings;
@@ -116,8 +116,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     error = true;
   } else if (genotype) { /* G E N O T Y P E */
     legendValues = orderOfGenotypeAppearance(tree.nodes, controls.mutType);
-    const trueValues = controls.mutType === "nuc" ? legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N") :
-      legendValues.filter((x) => x !== "X" && x !== "-");
+    const trueValues = controls.mutType === "nuc" ?
+      legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N" && x !== "") :
+      legendValues.filter((x) => x !== "X" && x !== "-" && x !== "");
     const domain = [undefined, ...legendValues];
     const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
     // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
