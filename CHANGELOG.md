@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.19.0 - 2020/10/07
+
+
 ## version 2.18.4 - 2020/09/28
 * (Bugfix) Update dependencies to restore behavior of the leaflet-scroll overlay.
 See [nextstrain.org PR #223](https://github.com/nextstrain/nextstrain.org/issues/223) for context, implemented in [PR 1214](https://github.com/nextstrain/auspice/pull/1214)
