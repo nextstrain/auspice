@@ -48,7 +48,7 @@ const general = (state = {
       });
     case types.CLEAN_START:
       return Object.assign({}, state, {
-        language: action.metadata.displayDefaults["language"] ? action.metadata.displayDefaults["language"] : state.language
+        language: query.lang ? query.lang : (action.metadata.displayDefaults["language"] ? action.metadata.displayDefaults["language"] : defaults.language)
       });
     default:
       return state;
