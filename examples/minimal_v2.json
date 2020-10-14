@@ -36,11 +36,7 @@
     ],
     "display_defaults": {
       "color_by": "country",
-<<<<<<< HEAD
       "language": "en"
-=======
-      "language": "ja"
->>>>>>> 533a9d42fa571b619f378ce39ea5c886420b4d79
     },
     "geo_resolutions": [
       {
