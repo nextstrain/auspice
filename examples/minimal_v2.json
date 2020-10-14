@@ -36,7 +36,7 @@
     ],
     "display_defaults": {
       "color_by": "country",
-      "language": "ja"
+      "language": "en"
     },
     "geo_resolutions": [
       {
