@@ -40,7 +40,7 @@ const general = (state = {
       return Object.assign({}, state, stateUpdate);
     case types.UPDATE_PATHNAME:
       return Object.assign({}, state, {
-        pathname: action.data
+        pathname: action.pathname
       });
     case types.CHANGE_LANGUAGE:
       return Object.assign({}, state, {
