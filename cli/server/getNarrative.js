@@ -47,8 +47,9 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       }
       utils.verbose("SUCCESS");
     } catch (err) {
-      const errorMessage = `Narratives couldn't be served -- ${err.message}`;
-      utils.warn(errorMessage);
+      const errorMessage = "Query unhandled -- " + req.originalUrl;
+      res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
+      utils.warn(esapi.encoder.encodeForJavaScript(res.statusMessage));
       res.status(500).type("text/plain").send(errorMessage);
     }
   };
