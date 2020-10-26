@@ -23,7 +23,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       utils.verbose("SUCCESS");
     } catch (err) {
       res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
-      utils.warn(res.statusMessage);
+      utils.warn(esapi.encoder.encodeForJavaScript(res.statusMessage));
       res.status(500).end();
     }
   };

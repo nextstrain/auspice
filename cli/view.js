@@ -69,7 +69,7 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
   app.get("/charon/getNarrative", handlers.getNarrative);
   app.get("/charon*", (req, res) => {
     res.statusMessage = "Query unhandled -- " + req.originalUrl;
-    utils.warn(res.statusMessage);
+    utils.warn(esapi.encoder.encodeForJavaScript(res.statusMessage));
     return res.status(500).end();
   });
 
