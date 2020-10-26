@@ -14,6 +14,7 @@ const queryString = require("query-string");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 const fs = require("fs");
+const esapi = require("node-esapi");
 
 const handleError = (res, clientMsg, serverMsg="", code=500) => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
@@ -110,7 +111,7 @@ const sendJson = async (res, info) => {
       readStream.pipe(res);
     });
     readStream.on('error', (err) => {
-      utils.warn(`Failed to read ${info.address}`);
+      utils.warn(esapi.encoder.encodeForJavaScript(`Failed to read ${info.address}`));
       utils.verbose(err);
       res.sendStatus(404);
     });
