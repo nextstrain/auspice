@@ -8,9 +8,8 @@ import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } 
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
-import { displayFilterValueAsButton } from "../framework/footer";
 import Byline from "./byline";
-
+import { FilterBadge } from "./filterBadge";
 
 const plurals = {
   country: "countries",
@@ -179,55 +178,37 @@ class Info extends React.Component {
 
   addFilteredDatesButton(buttons) {
     buttons.push(
-      <div key={"timefilter"} style={{display: "inline-block"}}>
-        <div
-          className={'boxed-item-icon'}
-          onClick={() => {
-            this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
-          }}
-          role="button"
-          tabIndex={0}
-        >
-          {'\xD7'}
-        </div>
-        <div className={"boxed-item active-with-icon"}>
-          {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
-        </div>
-      </div>
+      <FilterBadge
+        key="timefilter"
+        onRemove={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
+      >
+        {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
+      </FilterBadge>
     );
   }
   addNonAuthorFilterButton(buttons, filterName) {
     this.props.filters[filterName].sort().forEach((itemName) => {
-      const display = (
-        <span>
-          {itemName}
-          {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
-        </span>
+      buttons.push(
+        <FilterBadge key={itemName} onRemove={() => {this.props.dispatch(applyFilter("remove", filterName, [itemName]));}}>
+          <span>
+            {itemName}
+            {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
+          </span>
+        </FilterBadge>
       );
-      buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
     });
   }
   selectedStrainButton(strain) {
     return (
       <span>
         {"Showing a single strain "}
-        <div style={{display: "inline-block"}}>
-          <div
-            className={'boxed-item-icon'}
-            onClick={() => {
-              this.props.dispatch(
-                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
-              );
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {'\xD7'}
-          </div>
-          <div className={"boxed-item active-with-icon"}>
-            {strain}
-          </div>
-        </div>
+        <FilterBadge
+          onRemove={() => this.props.dispatch(
+            updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
+          )}
+        >
+          {strain}
+        </FilterBadge>
       </span>
     );
   }

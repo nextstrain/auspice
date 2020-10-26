@@ -11,6 +11,7 @@ import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
+import { SimpleFilter } from "../info/filterBadge";
 
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
@@ -161,64 +162,16 @@ const dispatchFilter = (dispatch, activeFilters, key, value) => {
   dispatch(applyFilter(mode, key, [value]));
 };
 
-export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
-  const active = activeFilters[filterName].indexOf(itemName) !== -1;
-  if (active && showX) {
-    return (
-      <div key={itemName} style={{display: "inline-block"}}>
-        <div
-          className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-          role="button"
-          tabIndex={0}
-        >
-          {'\xD7'}
-        </div>
-        <div className={"boxed-item active-with-icon"}>
-          {display}
-        </div>
-      </div>
-    );
-  }
-  if (active) {
-    return (
-      <div
-        className={"boxed-item active-clickable"}
-        key={itemName}
-        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-        role="button"
-        tabIndex={0}
-      >
-        {display}
-      </div>
-    );
-  }
-  return (
-    <div
-      className={"boxed-item inactive"}
-      key={itemName}
-      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-      role="button"
-      tabIndex={0}
-    >
-      {display}
-    </div>
-  );
-};
+const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => (
+  <SimpleFilter
+    active
+    extraStyles={{float: "right", margin: "0px 4px"}}
+    onClick={() => {filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));}}
+  >
+    {label}
+  </SimpleFilter>
+);
 
-const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
-  return (
-    <div
-      className={`${outerClassName} boxed-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));
-      }}
-    >
-      {label}
-    </div>
-  );
-};
 
 @connect((state) => {
   return {
@@ -261,14 +214,17 @@ class Footer extends React.Component {
               Array.from(totalStateCount.keys())
                 .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
                 .sort() // filters are sorted alphabetically
-                .map((itemName) => {
-                  const display = (
+                .map((itemName) => (
+                  <SimpleFilter
+                    key={itemName}
+                    active={this.props.activeFilters[filterName].indexOf(itemName) !== -1}
+                    onClick={() => dispatchFilter(this.props.dispatch, this.props.activeFilters, filterName, itemName)}
+                  >
                     <span>
                       {`${itemName} (${totalStateCount.get(itemName)})`}
                     </span>
-                  );
-                  return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-                })
+                  </SimpleFilter>
+                ))
             }
           </Flex>
         </div>

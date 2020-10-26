@@ -11,21 +11,9 @@ import "../../css/awesomplete.css";
 const Cross = ({onClick, show}) => {
   if (!show) return null;
   return (
-    <div
-      className="boxed-item-icon"
-      style={{
-        float: "right",
-        height: "23px",
-        width: "23px",
-        borderTopRightRadius: "2px",
-        borderBottomRightRadius: "2px",
-        borderRightWidth: "1px",
-        fontSize: 18
-      }}
-      onClick={onClick}
-    >
+    <IconContainer onClick={onClick}>
       {'\xD7'}
-    </div>
+    </IconContainer>
   );
 };
 
@@ -50,6 +38,34 @@ const Input = styled.input`
   padding-left: 7px;
   border-radius: 4px;
   border: 1px solid #ccc;
+`;
+
+/** IconContainer styled component is similar to that in `filterBadge.js`.
+ * As I have plans to add the <SearchStrains> functionality into the
+ * <FilterData> component, I prefer temporary duplication rather than
+ * imports with props used to modify behavior etc
+ */
+const IconContainer = styled.div`
+  cursor: pointer;
+  color: #5097BA;
+  border-radius: 2px;
+  border-width: 1px 1px 1px 1px;
+  border-style: solid;
+  border-color: #BDD8E5;
+  min-width: 15px;
+  background-color: #E9F2F6;
+  padding: 0px 0px 0px 2px;
+  margin: 1px 0px 1px 2px;
+  display: inline-block;
+  text-align: center;
+  float: right;
+  height: 23px;
+  width: 23px;
+  font-size: 18px;
+  &:hover, &:focus {
+    background-color: #d8eafd;
+    color: #0071e6;
+  }
 `;
 
 @connect((state) => ({
