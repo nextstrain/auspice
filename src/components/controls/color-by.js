@@ -232,4 +232,13 @@ class ColorBy extends React.Component {
   }
 }
 
+export const ColorByInfo = (
+  <>
+    Change the metadata field which the visualisation is coloured by.
+    <br/>
+    The phylogeny, map and frequencies panel (if available) will all be coloured
+    in a consistent fashion.
+  </>
+);
+
 export default ColorBy;

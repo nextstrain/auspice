@@ -75,4 +75,17 @@ class FilterData extends React.Component {
   }
 }
 
+export const FilterInfo = (
+  <>
+    {`Use this box to filter the displayed data based upon filtering criteria.
+    For instance, start typing a country's name to filter the data accordingly.`}
+    <br/>
+    Data is filtered by forming a union of selected values within each category, and then
+    taking the intersection between categories (if more than one category is selected).
+    <br/>
+    Scroll to the bottom of the main page (under the data visualisation)
+    to see an expanded display of filters and available values.
+  </>
+);
+
 export default FilterData;

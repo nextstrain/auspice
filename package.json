@@ -109,6 +109,7 @@
     "react-icons": "^3.9.0",
     "react-redux": "^5.1.0",
     "react-select": "^1.0.0-rc.5",
+    "react-tooltip": "^4.2.10",
     "react-tweet-embed": "^1.1.0",
     "redux": "^4.0.1",
     "redux-devtools": "^3.5.0",

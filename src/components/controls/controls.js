@@ -1,8 +1,8 @@
 import React from "react";
 import { useTranslation } from 'react-i18next';
 
-import ColorBy from "./color-by";
-import DateRangeInputs from "./date-range-inputs";
+import ColorBy, {ColorByInfo} from "./color-by";
+import DateRangeInputs, {DateRangeInfo} from "./date-range-inputs";
 import ChooseBranchLabelling from "./choose-branch-labelling";
 import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
@@ -17,27 +17,29 @@ import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
-import { SidebarHeader, ControlsContainer } from "./styles";
-import FilterData from "./filter";
+import { ControlsContainer } from "./styles";
+import FilterData, {FilterInfo} from "./filter";
+import {TreeOptionsInfo, MapOptionsInfo, PanelOptionsInfo, FrequencyInfo} from "./miscInfoText";
+import { AnnotatedHeader } from "./annotatedHeader";
 
-function Controls({mapOn, frequenciesOn}) {
+function Controls({mapOn, frequenciesOn, mobileDisplay}) {
   const { t } = useTranslation();
 
   return (
     <ControlsContainer>
       <ChooseDataset />
 
-      <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
+      <AnnotatedHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo} mobile={mobileDisplay}/>
       <DateRangeInputs />
 
-      <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
+      <AnnotatedHeader title={t("sidebar:Color By")} tooltip={ColorByInfo} mobile={mobileDisplay}/>
       <ColorBy />
 
-      <SidebarHeader>{t("sidebar:Filter Data")}</SidebarHeader>
+      <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
       <FilterData />
 
 
-      <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
+      <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
       <ChooseLayout />
       <ChooseMetric />
       <ChooseBranchLabelling />
@@ -47,7 +49,7 @@ function Controls({mapOn, frequenciesOn}) {
 
       {mapOn ? (
         <span style={{ marginTop: "15px" }}>
-          <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
+          <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo} mobile={mobileDisplay}/>
           <GeoResolution />
           <TransmissionLines />
           <MapAnimationControls />
@@ -56,13 +58,13 @@ function Controls({mapOn, frequenciesOn}) {
 
       {frequenciesOn ? (
         <span style={{ marginTop: "15px" }}>
-          <SidebarHeader>{t("sidebar:Frequency Options")}</SidebarHeader>
+          <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo} mobile={mobileDisplay}/>
           <NormalizeFrequencies />
         </span>
       ) : null}
 
       <span style={{ paddingTop: "10px" }} />
-      <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
+      <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} mobile={mobileDisplay}/>
       <PanelLayout />
       <PanelToggles />
       <Language />
