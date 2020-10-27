@@ -121,7 +121,7 @@ const run = (args) => {
   app.get("/favicon.png", csrfProtection, (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));{ req.csrfToken() }});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
-  let handlerMsg = (aes(""));
+  let handlerMsg = "";
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else {
@@ -139,7 +139,7 @@ const run = (args) => {
     const {port} = server.address();
     console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(auspiceBuild.message);
-    utils.log(handlerMsg);
+    utils.log(aes(handlerMsg));
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
