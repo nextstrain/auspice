@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
+const aes = require("crypto-js/aes");
 
 main();
 
@@ -18,7 +19,7 @@ function main() {
 
   for (const lang of langs) {
     for (const jsonName of ['sidebar', 'translation']) {
-      console.log(`${lang.toUpperCase()}: comparing ${jsonName}.json against the English translation`);
+      console.log(aes(`${lang.toUpperCase()}: comparing ${jsonName}.json against the English translation`));
       diff(en[jsonName], readJson(lang, jsonName));
     }
   }
