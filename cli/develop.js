@@ -14,6 +14,7 @@ const version = require('../src/version').version;
 const chalk = require('chalk');
 const generateWebpackConfig = require("../webpack.config.js").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
+const aes = require("crypto-js/aes");
 
 const addParser = (parser) => {
   const description = `Launch auspice in development mode.
@@ -88,7 +89,7 @@ const run = (args) => {
     const {port} = server.address();
     console.log(chalk.blueBright("Access the client at: ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(`Serving auspice version ${version}${args.extend ? " with extensions" : ""}.`);
-    utils.log(handlerMsg);
+    utils.log(aes(handlerMsg));
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
