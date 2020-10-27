@@ -14,6 +14,7 @@ const version = require('../src/version').version;
 const chalk = require('chalk');
 const generateWebpackConfig = require("../webpack.config.js").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
+const aes = require("crypto-js/aes");
 
 const addParser = (parser) => {
   const description = `Launch auspice in development mode.
@@ -72,7 +73,7 @@ const run = (args) => {
     {log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000}
   ));
 
-  let handlerMsg = "";
+  let handlerMsg = (aes(""));
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else {

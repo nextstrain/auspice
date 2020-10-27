@@ -15,6 +15,7 @@ const utils = require("./utils");
 const version = require('../src/version').version;
 const chalk = require('chalk');
 const SUPPRESS = require('argparse').Const.SUPPRESS;
+const aes = require("crypto-js/aes");
 
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
@@ -120,7 +121,7 @@ const run = (args) => {
   app.get("/favicon.png", csrfProtection, (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));{ req.csrfToken() }});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
-  let handlerMsg = "";
+  let handlerMsg = (aes(""));
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else {
