@@ -147,9 +147,11 @@ export const calcVisibility = (tree, controls, dates) => {
     // FILTERS
     let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
     const filters = [];
-    Object.keys(controls.filters).forEach((trait) => {
-      if (controls.filters[trait].length) {
-        filters.push({trait, values: controls.filters[trait]});
+
+    Object.entries(controls.filters).forEach(([name, items]) => {
+      const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
+      if (activeFilterItems.length) {
+        filters.push({trait: name, values: activeFilterItems});
       }
     });
     if (filters.length) {

@@ -180,30 +180,37 @@ class Info extends React.Component {
     buttons.push(
       <FilterBadge
         key="timefilter"
-        onRemove={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
+        remove={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
       >
         {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
       </FilterBadge>
     );
   }
-  addNonAuthorFilterButton(buttons, filterName) {
-    this.props.filters[filterName].sort().forEach((itemName) => {
-      buttons.push(
-        <FilterBadge key={itemName} onRemove={() => {this.props.dispatch(applyFilter("remove", filterName, [itemName]));}}>
+  createFilterBadges(filterName) {
+    return this.props.filters[filterName]
+      .sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
+      .map((item) => (
+        <FilterBadge
+          key={item.value}
+          remove={() => {this.props.dispatch(applyFilter("remove", filterName, [item.value]));}}
+          canMakeInactive
+          active={item.active}
+          activate={() => {this.props.dispatch(applyFilter("add", filterName, [item.value]));}}
+          inactivate={() => {this.props.dispatch(applyFilter("inactivate", filterName, [item.value]));}}
+        >
           <span>
-            {itemName}
-            {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
+            {item.value}
+            {` (${this.props.totalStateCounts[filterName].get(item.value)})`}
           </span>
         </FilterBadge>
-      );
-    });
+      ));
   }
   selectedStrainButton(strain) {
     return (
       <span>
         {"Showing a single strain "}
         <FilterBadge
-          onRemove={() => this.props.dispatch(
+          remove={() => this.props.dispatch(
             updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
           )}
         >
@@ -262,11 +269,13 @@ class Info extends React.Component {
       this.props.t
     );
 
-    /* part II - the active filters */
+    /* part II - the filters in play (both active and inactive) */
     const filters = [];
     Object.keys(this.props.filters)
-      .filter((n) => this.props.filters[n].length > 0)
-      .forEach((n) => this.addNonAuthorFilterButton(filters, n));
+      .filter((filterName) => this.props.filters[filterName].length > 0)
+      .forEach((filterName) => {
+        filters.push(...this.createFilterBadges(filterName));
+      });
     if (!datesMaxed) {this.addFilteredDatesButton(filters);}
 
     return (

@@ -231,9 +231,10 @@ export const updateTipRadii = (
 /**
  * Apply a filter to the current selection (i.e. filtered / "on" values associated with this trait)
  * Explanation of the modes:
- *    "add" -> add the values to the current selection (if any exists)
+ *    "add" -> add the values to the current selection (if any exists).
+ *    "inactivate" -> inactivate values (i.e. change active prop to false). To activate just use "add".
  *    "remove" -> remove the values from the current selection
- *    "set"  -> set the values of the filter to be those provided
+ *    "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
  * @param {string} mode allowed values: "set", "add", "remove"
  * @param {string} trait the trait name of the filter ("authors", "country" etcetera)
  * @param {Array of strings} values the values (see above)
@@ -243,31 +244,51 @@ export const applyFilter = (mode, trait, values) => {
     const { controls } = getState();
     const currentlyFilteredTraits = Object.keys(controls.filters);
     let newValues;
-    if (mode === "set") {
-      newValues = values;
-    } else if (mode === "add") {
-      if (currentlyFilteredTraits.indexOf(trait) === -1) {
-        newValues = values;
-      } else {
-        newValues = controls.filters[trait].concat(values);
-      }
-    } else if (mode === "remove") {
-      if (currentlyFilteredTraits.indexOf(trait) === -1) {
-        console.error("trying to remove values from an un-initialised filter!");
-        return;
-      }
-      newValues = controls.filters[trait].slice();
-      for (const item of values) {
-        const idx = newValues.indexOf(item);
-        if (idx !== -1) {
-          newValues.splice(idx, 1);
+    switch (mode) {
+      case "set":
+        newValues = values.map((value) => ({value, active: true}));
+        break;
+      case "add":
+        if (currentlyFilteredTraits.indexOf(trait) === -1) {
+          newValues = values.map((value) => ({value, active: true}));
         } else {
-          console.error("trying to remove filter value ", item, " which was not part of the filter selection");
+          newValues = controls.filters[trait].slice();
+          const currentItemNames = newValues.map((i) => i.value);
+          values.forEach((valueToAdd) => {
+            const idx = currentItemNames.indexOf(valueToAdd);
+            if (idx === -1) {
+              newValues.push({value: valueToAdd, active: true});
+            } else {
+              /* it's already there, ensure it's active */
+              newValues[idx].active = true;
+            }
+          });
         }
-      }
-    } else {
-      console.error(`applyFilter called with invalid mode: ${mode}`);
-      return; // don't dispatch
+        break;
+      case "remove": // fallthrough
+      case "inactivate":
+        if (currentlyFilteredTraits.indexOf(trait) === -1) {
+          console.error(`trying to ${mode} values from an un-initialised filter!`);
+          return;
+        }
+        newValues = controls.filters[trait].slice();
+        const currentItemNames = newValues.map((i) => i.value);
+        for (const item of values) {
+          const idx = currentItemNames.indexOf(item);
+          if (idx !== -1) {
+            if (mode==="remove") {
+              newValues.splice(idx, 1);
+            } else {
+              newValues[idx].active = false;
+            }
+          } else {
+            console.error(`trying to ${mode} filter value ${item} which was not part of the filter selection`);
+          }
+        }
+        break;
+      default:
+        console.error(`applyFilter called with invalid mode: ${mode}`);
+        return; // don't dispatch
     }
     dispatch({type: types.APPLY_FILTER, trait, values: newValues});
     dispatch(updateVisibleTipsAndBranchThicknesses());

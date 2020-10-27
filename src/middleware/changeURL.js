@@ -60,7 +60,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.APPLY_FILTER: {
-      query[`f_${action.trait}`] = action.values.join(',');
+      query[`f_${action.trait}`] = action.values
+        .filter((item) => item.active) // only active filters in the URL
+        .map((item) => item.value)
+        .join(',');
       break;
     }
     case types.CHANGE_LAYOUT: {

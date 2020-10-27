@@ -39,9 +39,10 @@ class FilterData extends React.Component {
     const options = [];
     Object.keys(this.props.activeFilters)
       .forEach((filterName) => {
+        const filterValuesCurrentlyActive = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
         Array.from(this.props.totalStateCounts[filterName].keys())
           .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
-          .filter((itemName) => !this.props.activeFilters[filterName].includes(itemName)) // remove already enabled filters
+          .filter((itemName) => !filterValuesCurrentlyActive.includes(itemName)) // remove already enabled filters
           .sort() // filters are sorted alphabetically - probably not necessary for a select component
           .forEach((itemName) => {
             options.push({
@@ -53,7 +54,7 @@ class FilterData extends React.Component {
     return options;
   }
   selectionMade = (sel) => {
-    this.props.dispatch(applyFilter("add", sel.value[0], sel.value[1]));
+    this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
   }
   render() {
     const styles = this.getStyles();

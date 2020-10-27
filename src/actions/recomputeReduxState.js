@@ -88,7 +88,8 @@ const modifyStateViaURLQuery = (state, query) => {
     state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
   }
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
-    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
+    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
+      .map((value) => ({value, active: true})); /* all filters in the URL are "active" */
   }
   if (query.animate) {
     const params = query.animate.split(',');
@@ -193,9 +194,12 @@ const modifyStateViaMetadata = (state, metadata) => {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
   if (metadata.filters) {
+    /* the `meta -> filters` JSON spec should define which filters are displayed in the footer.
+    Note that this UI may change, and if so then we can change this state name. */
+    state.filtersInFooter = [...metadata.filters];
+    /* TODO - these will be searchable => all available traits should be added and this block shifted up */
     metadata.filters.forEach((v) => {
       state.filters[v] = [];
-      state.defaults.filters[v] = [];
     });
   } else {
     console.warn("JSON did not include any filters");
@@ -489,19 +493,19 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     }
   }
 
-  /* are filters valid? */
-  const activeFilters = Object.keys(state.filters).filter((f) => f.length);
-  const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
-  for (const filterType of activeFilters) {
-    const validValues = state.filters[filterType]
-      .filter((filterValue) => stateCounts[filterType].has(filterValue));
-    state.filters[filterType] = validValues;
-    if (!validValues.length) {
-      delete query[`f_${filterType}`];
+  /* ensure selected filters (via the URL query) are valid. If not, modify state + URL. */
+  const filterNames = Object.keys(state.filters).filter((filterName) => state.filters[filterName].length);
+  const stateCounts = countTraitsAcrossTree(tree.nodes, filterNames, false, true);
+  filterNames.forEach((filterName) => {
+    const validItems = state.filters[filterName]
+      .filter((item) => stateCounts[filterName].has(item.value));
+    state.filters[filterName] = validItems;
+    if (!validItems.length) {
+      delete query[`f_${filterName}`];
     } else {
-      query[`f_${filterType}`] = validValues.join(",");
+      query[`f_${filterName}`] = validItems.map((x) => x.value).join(",");
     }
-  }
+  });
 
   /* can we display branch length by div or num_date? */
   if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
