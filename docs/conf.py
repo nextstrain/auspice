@@ -57,11 +57,11 @@ html_theme = 'nextstrain-sphinx-theme'
 html_static_path = ['_static']
 
 html_theme_options = {
-    'display_version': False,
-    'logo_only': True,
-    'collapse_navigation': False,
-    'titles_only': True,
+    'logo_only': False, # if True, don't display project name at top of the sidebar
+    'collapse_navigation': False, # if True, no [+] icons in sidebar
+    'titles_only': True, # if True, page subheadings not included in nav
 }
+
 
 # -- Cross-project references ------------------------------------------------
 
