@@ -2,10 +2,9 @@
 Introduction
 ======================================
 
-This page shouldn't be rendered & should jump to the first TOC entry instead. TODO.
+See below for the pages explaining the basics of Auspice:
 
 .. toctree::
-   :hidden:
    :maxdepth: 0
    :titlesonly:
 
