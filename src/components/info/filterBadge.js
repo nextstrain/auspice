@@ -72,7 +72,7 @@ const SelectedFilterTextContainer = styled(BaseContainer)`
  */
 export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children}) => {
   return (
-    <div style={{display: "inline-block"}}>
+    <div style={{display: "inline-block", fontSize: 14}}>
       <IconContainer onClick={remove} role="button" tabIndex={0}>
         <FaTrash/>
       </IconContainer>

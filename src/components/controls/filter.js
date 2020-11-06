@@ -3,6 +3,9 @@ import { connect } from "react-redux";
 import Select from "react-select/lib/Select";
 import { controlsWidth, isValueValid, strainSymbol} from "../../util/globals";
 import { applyFilter } from "../../actions/tree";
+import { FilterBadge } from "../info/filterBadge";
+import { SidebarSubtitle } from "./styles";
+
 
 /**
  * <FilterData> is a (keyboard)-typing based search box intended to
@@ -67,8 +70,21 @@ class FilterData extends React.Component {
   selectionMade = (sel) => {
     this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
   }
+  summariseFilters = () => {
+    const filterNames = Reflect.ownKeys(this.props.activeFilters)
+      .filter((filterName) => this.props.activeFilters[filterName].length > 0);
+    return filterNames.map((filterName) => {
+      const n = this.props.activeFilters[filterName].filter((f) => f.active).length;
+      return {
+        filterName,
+        displayName: (filterName===strainSymbol ? "samples" : filterName) + ` (n=${n})`,
+        remove: () => {this.props.dispatch(applyFilter("set", filterName, []));}
+      };
+    });
+  }
   render() {
     const styles = this.getStyles();
+    const inUseFilters = this.summariseFilters();
     return (
       <div style={styles.base}>
         <Select
@@ -83,6 +99,18 @@ class FilterData extends React.Component {
           valueKey="label"
           onChange={this.selectionMade}
         />
+        {inUseFilters.length ? (
+          <>
+            <SidebarSubtitle spaceAbove>
+              {`${inUseFilters.length} type${inUseFilters.length===1?'':'s'} of filter${inUseFilters.length===1?'':'s'} currently active:`}
+            </SidebarSubtitle>
+            {inUseFilters.map((filter) => (
+              <FilterBadge active key={filter.displayName} remove={filter.remove}>
+                {filter.displayName}
+              </FilterBadge>
+            ))}
+          </>
+        ) : null}
       </div>
     );
   }
