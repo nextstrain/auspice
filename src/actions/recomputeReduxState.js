@@ -1,11 +1,10 @@
 import queryString from "query-string";
 import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
-import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
@@ -91,6 +90,9 @@ const modifyStateViaURLQuery = (state, query) => {
     state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
       .map((value) => ({value, active: true})); /* all filters in the URL are "active" */
   }
+  if (query.s) {   // selected strains are a filter too
+    state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
+  }
   if (query.animate) {
     const params = query.animate.split(',');
     // console.log("start animation!", params);
@@ -137,7 +139,6 @@ const modifyStateViaURLQuery = (state, query) => {
       state.showTransmissionLines = false;
     }
   }
-
   return state;
 };
 
@@ -204,6 +205,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   } else {
     console.warn("JSON did not include any filters");
   }
+  state.filters[strainSymbol] = [];
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
@@ -506,6 +508,13 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
       query[`f_${filterName}`] = validItems.map((x) => x.value).join(",");
     }
   });
+  if (state.filters[strainSymbol]) {
+    const validNames = tree.nodes.map((n) => n.name);
+    state.filters[strainSymbol] = state.filters[strainSymbol]
+      .filter((strainFilter) => validNames.includes(strainFilter.value));
+    query.s = state.filters[strainSymbol].map((f) => f.value).join(",");
+    if (!query.s) delete query.s;
+  }
 
   /* can we display branch length by div or num_date? */
   if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
@@ -525,30 +534,23 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelected, controlsState, dispatch) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsState, dispatch) => {
   /* calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0;
-  /* check if the query defines a strain to be selected */
   let newIdxRoot = oldState.idxOfInViewRootNode;
-  if (tipSelected) {
-    tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
-    oldState.selectedStrain = tipSelected;
-  }
   if (zoomSelected) {
     // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
     const [labelName, labelValue] = zoomSelected.split(":");
     const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     oldState.selectedClade = zoomSelected;
-    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
+    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
   } else {
     oldState.selectedClade = undefined;
-    newIdxRoot = applyInViewNodesToTree(0, oldState); // tipSelectedIdx, oldState);
+    newIdxRoot = applyInViewNodesToTree(0, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
-    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx}
+    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric}
   );
 
   const newState = Object.assign({}, oldState, visAndThicknessData);
@@ -557,10 +559,6 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelecte
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
   newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
 
-  if (tipSelectedIdx) { /* i.e. query.s was set */
-    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
-    newState.tipRadiiVersion = 1;
-  }
   return newState;
 };
 
@@ -776,12 +774,12 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   /* if query.label is undefined then we intend to zoom to the root */
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, query.label, controls, dispatch);
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
 
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls, dispatch);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
@@ -833,7 +831,7 @@ export const createTreeTooState = ({
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
   controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls, dispatch);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);
@@ -850,9 +848,5 @@ export const createTreeTooState = ({
     tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
   );
 
-  // if (tipSelectedIdx) { /* i.e. query.s was set */
-  //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
-  //   tree.tipRadiiVersion = 1;
-  // }
   return {tree, treeToo, controls};
 };

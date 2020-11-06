@@ -35,31 +35,6 @@ export const applyInViewNodesToTree = (idx, tree) => {
   return validIdxRoot;
 };
 
-const processSelectedTip = (d, tree, treeToo) => {
-  if (!d) {
-    return [undefined, undefined, undefined];
-  }
-  if (d.clear) {
-    return [undefined, undefined, undefined];
-  }
-  if (d.treeIdx) {
-    const name = tree.nodes[d.treeIdx].name;
-    const idx2 = treeToo ? strainNameToIdx(treeToo.nodes, name) : undefined;
-    return [d.treeIdx, idx2, name];
-  }
-  if (d.treeTooIdx) {
-    const name = treeToo.nodes[d.treeTooIdx].name;
-    const idx1 = strainNameToIdx(tree.nodes, name);
-    return [idx1, d.treeTooIdx, name];
-  }
-  if (tree.selectedStrain) {
-    const idx1 = strainNameToIdx(tree.nodes, tree.selectedStrain);
-    const idx2 = treeToo ? strainNameToIdx(treeToo.nodes, tree.selectedStrain) : undefined;
-    return [idx1, idx2, tree.selectedStrain];
-  }
-  return [undefined, undefined, undefined];
-};
-
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
  * filtering etc will "turn off" branches, etc etc
@@ -73,7 +48,7 @@ const processSelectedTip = (d, tree, treeToo) => {
  * @return {function} a function to be handled by redux (thunk)
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
+  {root = [undefined, undefined], cladeSelected = undefined} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
@@ -86,13 +61,11 @@ export const updateVisibleTipsAndBranchThicknesses = (
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
     const rootIdxTree1 = applyInViewNodesToTree(root[0], tree);
-    const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
 
     const data = calculateVisiblityAndBranchThickness(
       tree,
       controls,
-      {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1}
+      {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -103,8 +76,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       idxOfInViewRootNode: rootIdxTree1,
       cladeName: cladeSelected,
       selectedClade: cladeSelected,
-      stateCountAttrs: Object.keys(controls.filters),
-      selectedStrain: tipName
+      stateCountAttrs: Object.keys(controls.filters)
     };
 
     if (controls.showTreeToo) {
@@ -113,7 +85,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2}
+        // {tipSelectedIdx: tipIdx2}
       );
       dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
       dispatchObj.visibilityToo = dataToo.visibility;
@@ -122,21 +94,6 @@ export const updateVisibleTipsAndBranchThicknesses = (
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
       /* tip selected is the same as the first tree - the reducer uses that */
-    }
-
-    /* I think this fixes bug of not resizing tipradii if in URL then deselected */
-    if (tipSelected) {
-      const newTipRadii = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: tree});
-      const newTipRadiiVersion = tree.tipRadiiVersion + 1;
-      const dispatchRadii = {
-        type: types.UPDATE_TIP_RADII,
-        data: newTipRadii,
-        version: newTipRadiiVersion
-      };
-      if (controls.showTreeToo) {
-        dispatchRadii.dataToo = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: treeToo});
-      }
-      dispatch(dispatchRadii);
     }
 
     /* D I S P A T C H */
@@ -242,7 +199,7 @@ export const updateTipRadii = (
 export const applyFilter = (mode, trait, values) => {
   return (dispatch, getState) => {
     const { controls } = getState();
-    const currentlyFilteredTraits = Object.keys(controls.filters);
+    const currentlyFilteredTraits = Reflect.ownKeys(controls.filters);
     let newValues;
     switch (mode) {
       case "set":

@@ -4,10 +4,10 @@ import { withTranslation } from 'react-i18next';
 
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import { applyFilter, changeDateFilter } from "../../actions/tree";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { months, NODE_VISIBLE } from "../../util/globals";
+import { months, NODE_VISIBLE, strainSymbol } from "../../util/globals";
 import Byline from "./byline";
 import { FilterBadge } from "./filterBadge";
 
@@ -118,7 +118,6 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
-    selectedStrain: state.tree.selectedStrain,
     selectedClade: state.tree.selectedClade,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
@@ -200,24 +199,10 @@ class Info extends React.Component {
         >
           <span>
             {item.value}
-            {` (${this.props.totalStateCounts[filterName].get(item.value)})`}
+            {filterName!==strainSymbol && ` (${this.props.totalStateCounts[filterName].get(item.value)})`}
           </span>
         </FilterBadge>
       ));
-  }
-  selectedStrainButton(strain) {
-    return (
-      <span>
-        {"Showing a single strain "}
-        <FilterBadge
-          remove={() => this.props.dispatch(
-            updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
-          )}
-        >
-          {strain}
-        </FilterBadge>
-      </span>
-    );
   }
   clearFilterButton(field) {
     return (
@@ -271,7 +256,7 @@ class Info extends React.Component {
 
     /* part II - the filters in play (both active and inactive) */
     const filters = [];
-    Object.keys(this.props.filters)
+    Reflect.ownKeys(this.props.filters)
       .filter((filterName) => this.props.filters[filterName].length > 0)
       .forEach((filterName) => {
         filters.push(...this.createFilterBadges(filterName));
@@ -285,7 +270,6 @@ class Info extends React.Component {
           <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
           <div width={this.props.width} style={styles.n}>
             {animating ? t("Animation in progress") + ". " : null}
-            {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
             {/* part 1 - the summary */}
             {showExtended ? summary : null}
             {/* part 2 - the filters */}

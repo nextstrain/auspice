@@ -2,6 +2,7 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
+import { strainSymbol } from "../util/globals";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -60,7 +61,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.APPLY_FILTER: {
-      query[`f_${action.trait}`] = action.values
+      /* for historical reasons, strains get stored under the `s` query key */
+      const queryKey = action.trait === strainSymbol ? 's' : `f_${action.trait}`;
+      query[queryKey] = action.values
         .filter((item) => item.active) // only active filters in the URL
         .map((item) => item.value)
         .join(',');
@@ -137,7 +140,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      query.s = action.selectedStrain ? action.selectedStrain : undefined;
+      // query.s = action.selectedStrain ? action.selectedStrain : undefined;
       query.label = action.cladeName ? action.cladeName : undefined;
       break;
     }

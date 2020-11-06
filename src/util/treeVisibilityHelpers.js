@@ -147,11 +147,11 @@ export const calcVisibility = (tree, controls, dates) => {
     // FILTERS
     let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
     const filters = [];
-
-    Object.entries(controls.filters).forEach(([name, items]) => {
+    Reflect.ownKeys(controls.filters).forEach((filterName) => {
+      const items = controls.filters[filterName];
       const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
       if (activeFilterItems.length) {
-        filters.push({trait: name, values: activeFilterItems});
+        filters.push({trait: filterName, values: activeFilterItems});
       }
     });
     if (filters.length) {
@@ -197,8 +197,8 @@ export const calcVisibility = (tree, controls, dates) => {
   return NODE_VISIBLE;
 };
 
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {tipSelectedIdx = 0} = {}) => {
-  const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
+export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
+  const visibility = calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
   /* re-calculate branchThickness (inline) */

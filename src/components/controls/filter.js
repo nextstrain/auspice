@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Select from "react-select/lib/Select";
-import { controlsWidth, isValueValid } from "../../util/globals";
+import { controlsWidth, isValueValid, strainSymbol} from "../../util/globals";
 import { applyFilter } from "../../actions/tree";
 
 /**
@@ -13,7 +13,8 @@ import { applyFilter } from "../../actions/tree";
 @connect((state) => {
   return {
     activeFilters: state.controls.filters,
-    totalStateCounts: state.tree.totalStateCounts
+    totalStateCounts: state.tree.totalStateCounts,
+    nodes: state.tree.nodes
   };
 })
 class FilterData extends React.Component {
@@ -51,6 +52,16 @@ class FilterData extends React.Component {
             });
           });
       });
+    if (strainSymbol in this.props.activeFilters) {
+      this.props.nodes
+        .filter((n) => !n.hasChildren)
+        .forEach((n) => {
+          options.push({
+            label: `sample → ${n.name}`,
+            value: [strainSymbol, n.name]
+          });
+        });
+    }
     return options;
   }
   selectionMade = (sel) => {
@@ -69,6 +80,7 @@ class FilterData extends React.Component {
           clearable={false}
           searchable
           multi={false}
+          valueKey="label"
           onChange={this.selectionMade}
         />
       </div>
