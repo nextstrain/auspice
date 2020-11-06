@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { FaTrash, FaRegEyeSlash, FaRegEye } from "react-icons/fa";
 
 /**
- * React Components for the badges displayed when a filter is selected (e.g. [X|USA])
+ * React Components for the badges displayed when a filter is selected
  */
 
 const BaseContainer = styled.div`
@@ -19,22 +19,22 @@ const TextContainer = styled(BaseContainer)`
   background-color: #E9F2F6;
   border: 1px solid #BDD8E5;
   border-width: 1;
-  border-radius: 0px 2px 2px 0px;
-  margin: 0px 2px 0px 0px;
+  border-radius: 2px 0px 0px 2px;
+  margin: 0px 0px 0px 2px;
   text-decoration: ${(props) => props.active ? "none" : "line-through"};
 `;
 
 const IconContainer = styled.div`
   cursor: pointer;
   color: #5097BA;
-  border-radius: ${(props) => props.internal ? "0px" : "2px 0px 0px 2px"};
-  border-width: 1px 0px 1px 1px;
+  border-radius: ${(props) => props.rhs ? "0px 2px 2px 0px" : "0px"};
+  border-width: 1px 1px 1px 0px;
   border-style: solid;
   border-color: #BDD8E5;
   min-width: 20px;
   background-color: #E9F2F6;
   padding: 0px 0px 0px 2px;
-  margin: ${(props) => props.internal ? "1px 0px" : "1px 0px 1px 2px"};
+  margin: ${(props) => props.rhs ? "1px 2px 1px 0px" : "1px 0px 1px 0px"};
   display: inline-block;
   text-align: center;
   &:hover, &:focus {
@@ -73,17 +73,17 @@ const SelectedFilterTextContainer = styled(BaseContainer)`
 export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children}) => {
   return (
     <div style={{display: "inline-block", fontSize: 14}}>
-      <IconContainer onClick={remove} role="button" tabIndex={0}>
-        <FaTrash/>
-      </IconContainer>
-      {canMakeInactive && (
-        <IconContainer internal onClick={active ? inactivate : activate} role="button" tabIndex={0}>
-          {active ? <FaRegEye/> : <FaRegEyeSlash/>}
-        </IconContainer>
-      )}
       <TextContainer active={canMakeInactive ? active : true}>
         {children}
       </TextContainer>
+      {canMakeInactive && (
+        <IconContainer onClick={active ? inactivate : activate} role="button" tabIndex={0}>
+          {active ? <FaRegEye/> : <FaRegEyeSlash/>}
+        </IconContainer>
+      )}
+      <IconContainer rhs onClick={remove} role="button" tabIndex={0}>
+        <FaTrash/>
+      </IconContainer>
     </div>
   );
 };
