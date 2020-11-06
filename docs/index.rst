@@ -13,15 +13,6 @@ Auspice: An Open-source Interactive Tool for Visualising Phylogenomic Data
 --------------------------------------------------------------------------------------------
 
 
-.. warning::
-   This site is currently only a stub, to show what's possible with Read The Docs for an umbrella documentation project.
-   For the real documentation entry point, please go to `nextstrain.github.io/auspice/ <https://nextstrain.github.io/auspice/>`__.
-
-   This is the augur project's reference documentation. For the general Nextstrain docs, go here: :doc:`docs.nextstrain.org:index`
-
-
-
-
 .. image:: assets/splash.png
 
 *Auspice being used to show the spread of influenza H7N9 virus across Asia.*

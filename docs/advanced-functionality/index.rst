@@ -2,10 +2,9 @@
 Advanced Functionality
 ======================================
 
-This page shouldn't be rendered & should jump to the first TOC entry instead. TODO.
+See below for the pages explaining more advanced usage of Auspice:
 
 .. toctree::
-   :hidden:
    :maxdepth: 0
    :titlesonly:
 

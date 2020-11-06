@@ -29,7 +29,7 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 
 ---
 
-## Sidebar Theme
+### Sidebar Theme
 
 The appearence of the sidebar can be customised by specifing a theme in the config JSON used to build Auspice.
 This theme is then available (via [styled-components](https://www.styled-components.com/)) to the components rendered in the sidebar.
@@ -61,7 +61,7 @@ For instance, here is the customisation used by nextstrain.org:
 
 
 
-# Components
+## Components
 
 One way to extend Auspice is by replacing React components with your own custom components.
 These custom components will receive props defined here, which can be used to update the rendering of the component using the normal react lifecycle methods.
@@ -70,7 +70,7 @@ Right now this is only available for the splash page and nav-bar components, who
 Each component must be the default export of a javascript file which is specified in the (client) config JSON passed to Auspice at build time (`auspice build` or `auspice develop`).
 
 
-## Nav-bar Component
+### Nav-bar Component
 
 **Build config:**
 ```json
@@ -92,7 +92,7 @@ Where the javascript file contains a default export of a React component.
 
 
 
-## Splash component
+### Splash component
 
 Define a custom splash page for Auspice. Please note that this is extremely expirimental and the interface is expected to change.
 
@@ -117,7 +117,7 @@ Where the javascript file contains a default export of a React component.
 
 ---
 
-## Specifying the API server address
+### Specifying the API server address
 
 By default, the client makes API requests ([as detailed here](requests.md)) to "/charon/getAvailable", "/charon/getDataset" etc.
 This is using the default server address of "/charon".
