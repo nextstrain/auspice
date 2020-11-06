@@ -9,7 +9,7 @@ import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE, strainSymbol } from "../../util/globals";
 import Byline from "./byline";
-import { FilterBadge } from "./filterBadge";
+import { FilterBadge, Tooltip } from "./filterBadge";
 
 const plurals = {
   country: "countries",
@@ -175,10 +175,11 @@ class Info extends React.Component {
     };
   }
 
-  addFilteredDatesButton(buttons) {
-    buttons.push(
+  makeFilteredDatesButton() {
+    return (
       <FilterBadge
         key="timefilter"
+        id="timefilter"
         remove={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
       >
         {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
@@ -191,6 +192,7 @@ class Info extends React.Component {
       .map((item) => (
         <FilterBadge
           key={item.value}
+          id={item.value}
           remove={() => {this.props.dispatch(applyFilter("remove", filterName, [item.value]));}}
           canMakeInactive
           active={item.active}
@@ -255,13 +257,15 @@ class Info extends React.Component {
     );
 
     /* part II - the filters in play (both active and inactive) */
-    const filters = [];
+    const filtersByCategory = [];
     Reflect.ownKeys(this.props.filters)
       .filter((filterName) => this.props.filters[filterName].length > 0)
       .forEach((filterName) => {
-        filters.push(...this.createFilterBadges(filterName));
+        filtersByCategory.push(this.createFilterBadges(filterName));
       });
-    if (!datesMaxed) {this.addFilteredDatesButton(filters);}
+    if (!datesMaxed) {
+      filtersByCategory.push([this.makeFilteredDatesButton()]);
+    }
 
     return (
       <Card center infocard>
@@ -273,12 +277,14 @@ class Info extends React.Component {
             {/* part 1 - the summary */}
             {showExtended ? summary : null}
             {/* part 2 - the filters */}
-            {showExtended && filters.length ? (
-              <span>
+            {showExtended && filtersByCategory.length ? (
+              <>
                 {t("Filtered to") + " "}
-                {filters.map((d) => d)}
+                {filtersByCategory.map((filters, idx) => (
+                  <Brackets idx={idx} badges={filters}/>
+                ))}
                 {". "}
-              </span>
+              </>
             ) : null}
           </div>
         </div>
@@ -286,6 +292,28 @@ class Info extends React.Component {
     );
   }
 }
+
+const Intersect = ({id}) => (
+  <span style={{fontSize: "2rem", padding: "0px 4px 0px 2px", cursor: 'help'}} data-tip data-for={id}>
+    ∩
+    <Tooltip id={id}>{`Groups of filters are combined by taking the intersect`}</Tooltip>
+  </span>
+);
+
+const Brackets = ({badges, idx}) => (
+  <span style={{fontSize: "2rem", padding: "0px 2px"}}>
+    {idx!==0 && <Intersect id={'intersect'+idx}/>}
+    {badges.length === 1 ? null : `{`}
+    {badges.map((b, i) => (
+      <>
+        {b}
+        {i!==badges.length-1 ? ", " : null}
+      </>
+    ))}
+    {badges.length === 1 ? null : `}`}
+  </span>
+);
+
 
 const WithTranslation = withTranslation()(Info);
 export default WithTranslation;

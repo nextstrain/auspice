@@ -105,7 +105,7 @@ class FilterData extends React.Component {
               {`${inUseFilters.length} type${inUseFilters.length===1?'':'s'} of filter${inUseFilters.length===1?'':'s'} currently active:`}
             </SidebarSubtitle>
             {inUseFilters.map((filter) => (
-              <FilterBadge active key={filter.displayName} remove={filter.remove}>
+              <FilterBadge active key={filter.displayName} id={filter.displayName} remove={filter.remove}>
                 {filter.displayName}
               </FilterBadge>
             ))}

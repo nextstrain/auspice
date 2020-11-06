@@ -1,6 +1,7 @@
 import React from "react";
 import styled from 'styled-components';
 import { FaTrash, FaRegEyeSlash, FaRegEye } from "react-icons/fa";
+import ReactTooltip from 'react-tooltip';
 
 /**
  * React Components for the badges displayed when a filter is selected
@@ -15,7 +16,7 @@ const BaseContainer = styled.div`
 
 const TextContainer = styled(BaseContainer)`
   display: inline-block;
-  cursor: auto;
+  cursor: help;
   margin: 0px 0px 0px 2px;
 `;
 
@@ -72,23 +73,47 @@ const BadgeContainer = styled.div`
   border-color: #BDD8E5;
 `;
 
+
+const StyledTooltip = styled(ReactTooltip)`
+  max-width: 30vh;
+  font-weight: 400;
+  white-space: normal;
+  line-height: 1.2;
+  padding: 4px !important; /* override ReactTooltip's internal styling */
+  & > br {
+    margin-bottom: 10px;
+  }
+`;
+
+export const Tooltip = ({id, children}) => (
+  <StyledTooltip place="bottom" type="dark" effect="solid" delayShow={300} id={id}>
+    {children}
+  </StyledTooltip>
+);
+
+
 /**
  * React component to display a selected filter with associated
  * icons to remove filter. More functionality to be added!
  */
-export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children}) => {
+export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children, id}) => {
   return (
     <BadgeContainer striped={canMakeInactive && !active}>
-      <TextContainer active={canMakeInactive ? active : true}>
+      <TextContainer active={canMakeInactive ? active : true} data-tip data-for={id}>
         {children}
       </TextContainer>
+      <Tooltip id={id}>
+        {canMakeInactive && !active ? `This filter is currently inactive` : `The visible data is being filtered by this`}
+      </Tooltip>
       {canMakeInactive && (
-        <IconContainer onClick={active ? inactivate : activate} role="button" tabIndex={0}>
+        <IconContainer onClick={active ? inactivate : activate} role="button" tabIndex={0} data-tip data-for={id+'active'}>
           {active ? <FaRegEye/> : <FaRegEyeSlash/>}
+          <Tooltip id={id+'active'}>{active ? 'Inactivate this filter' : 'Re-activate this filter'}</Tooltip>
         </IconContainer>
       )}
       <IconContainer onClick={remove} role="button" tabIndex={0}>
-        <FaTrash/>
+        <FaTrash data-tip data-for={id+'remove'}/>
+        <Tooltip id={id+'remove'}>{'Remove this filter'}</Tooltip>
       </IconContainer>
     </BadgeContainer>
   );

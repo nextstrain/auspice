@@ -91,7 +91,7 @@ export const SidebarSubtitle = styled.div`
 // );
 
 export const StyledTooltip = styled(ReactTooltip)`
-  max-width: 20vh;
+  max-width: 30vh;
   white-space: normal;
   line-height: 1.2;
   padding: 21px !important; /* override internal styling */
