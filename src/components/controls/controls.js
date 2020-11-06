@@ -14,7 +14,6 @@ import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
-import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
@@ -43,7 +42,6 @@ function Controls({mapOn, frequenciesOn, mobileDisplay}) {
       <ChooseLayout />
       <ChooseMetric />
       <ChooseBranchLabelling />
-      <SearchStrains />
       <ChooseSecondTree />
       <ToggleTangle />
 
