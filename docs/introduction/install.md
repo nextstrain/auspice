@@ -29,7 +29,7 @@ npm install --global auspice
 ```
 Auspice should now be available as a command-line program -- check by running `auspice --help`.
 
-If you look at the [release notes](../releases/changelog.md) you can see the changes that have been made to Auspice (see your version of Auspice via `auspice --version`).
+If you look at the [release notes](https://docs.nextstrain.org/projects/auspice/en/migrate-docs/releases/changelog.html) you can see the changes that have been made to Auspice (see your version of Auspice via `auspice --version`).
 To upgrade, you can run
 
 ```bash
