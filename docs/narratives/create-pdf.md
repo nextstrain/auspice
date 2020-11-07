@@ -49,7 +49,7 @@ auspice view --datasetDir <path-to-datasets> --narrativeDir <path-to-narratives>
 ```
 
 You should now be able to view your narrative at [localhost:4000](http://localhost:4000).
-For the purposes of this guide, i'll assume that we've followed the [Writing a Narrative](how-to-write) guide, and thus have a narrative describing mumps in North America available at [localhost:4000/narratives/example](http://localhost:4000/narratives/example).
+For the purposes of this guide, i'll assume that we've followed the [Writing a Narrative](../../tutorials/narratives-how-to-write.md) guide, and thus have a narrative describing mumps in North America available at [localhost:4000/narratives/example](http://localhost:4000/narratives/example).
 
 In a separate terminal window, run
 ```bash
