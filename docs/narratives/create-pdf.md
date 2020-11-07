@@ -8,7 +8,7 @@ If you run into any bugs, please [get in contact with us (email)](mailto:hello@n
 ## Prerequisites
 
 This requires [Decktape](https://github.com/astefanutti/decktape) to be installed, which itself requires Node.js.
-If you've followed the [auspice install instructions](../introduction/install) and are using a conda environment then this is straightforward.
+If you've followed the [auspice install instructions](../../guides/install/auspice-install.md) and are using a conda environment then this is straightforward.
 If not, you can create the necessary conda environment via:
 
 ```bash
@@ -40,7 +40,7 @@ Feel free to play around with the different options available to decktape (run `
 ## Saving a local narrative to PDF
 
 If you have a local narrative then the concept is similar to saving an online narrative, except we need to start a auspice server locally to display our narrative & allow it to be accessed by decktape.
-These instructions assume you have installed auspice into a conda enviornment as per the [auspice install instructions](../introduction/install).
+These instructions assume you have installed auspice into a conda enviornment as per the [auspice install instructions](../../guides/install/auspice-install.md).
 
 Start up auspice locally, sourcing your own datasets & narratives via:
 ```bash
