@@ -29,7 +29,7 @@ Here's another example written to show the various Auspice views you can utilise
 
 **Example #2**: [Exploring the narrative functionality using the ongoing mumps epidemic in North America (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives).
 
-We'll go through this in more detail in the [writing a narrative](how-to-write.md) docs.
+We'll go through this in more detail in the [writing a narrative](../../tutorials/narratives-how-to-write.md) docs.
 
 
 
@@ -40,7 +40,7 @@ We'll go through this in more detail in the [writing a narrative](how-to-write.m
 If you have a dataset that you (or anyone else) created then you can write a narrative to enhance it 💫
 
 Behind the scenes a narrative is a single Markdown file written in a particular format -- i.e. each of the example narratives linked above comprises a single Markdown file.
-The [writing a narrative](how-to-write.md) tutorial will use the mumps example from above to explain how you can write your own narrative.
+The [writing a narrative](../../tutorials/narratives-how-to-write.md) tutorial will use the mumps example from above to explain how you can write your own narrative.
 
 
 
@@ -48,8 +48,8 @@ The [writing a narrative](how-to-write.md) tutorial will use the mumps example f
 
 If you've got a narrative working locally (i.e. running Auspice on your computer) and want to share the results then you have two options:
 
-1. Use the community functionality of nextstrain.org (the easier option, detailed in [writing a narrative](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone)).
-2. Implement an Auspice server yourself (the harder option, see [the server documentation](../server/introduction.md)).
+1. Use the community functionality of nextstrain.org (the easier option, detailed in [writing a narrative](../../tutorials/narratives-how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone)).
+2. Implement an Auspice server yourself (the harder option, see [the server documentation](https://docs.nextstrain.org/projects/auspice/en/migrate-docs/server/index.html)).
 
 
 
