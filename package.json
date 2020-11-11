@@ -37,6 +37,9 @@
     "smoke-test:ci": "start-server-and-test server http://localhost:4000 smoke-test",
     "diff-lang": "./scripts/diff-lang.js"
   },
+  "jest": {
+    "transformIgnorePatterns": []
+  },
   "dependencies": {
     "@babel/core": "^7.3.4",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
