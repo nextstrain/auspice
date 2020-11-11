@@ -49,7 +49,7 @@ This is needed in three cases:
 1. You have installed Auspice from source, or updated the source code.
 1. You are editing the source code and need to rebuild the client
 1. You wish to build a customised version of the Auspice client.
-See [Customising Auspice](../customise-client/introduction.md) for more info.
+See [Customising Auspice](../customise-client/index) for more info.
 
 
 ## `auspice develop`
@@ -112,7 +112,7 @@ This format includes:
 
 
 ### Narratives
-For narratives, please see [Writing a Narrative](../narratives/how-to-write) for a description of the file format.
+For narratives, please see [Writing a Narrative](https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html) for a description of the file format.
 
 
 ## Obtaining a Set of Input Files

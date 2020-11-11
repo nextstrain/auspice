@@ -39,7 +39,7 @@ abstract: "This narrative is going to test the potential of the Auspice narrativ
 ```
 
 The really important bit here is the `dataset` line -- this references the dataset we downloaded above.
-(A [current limitation](narratives/introduction.md##nown-bugs-limitations) of narratives is that they cannot change the dataset.)
+(A [current limitation](../guides/communicate/narratives-intro.html#known-bugs-limitations) of narratives is that they cannot change the dataset.)
 
 
 ## Step 3: View the Narrative so Far
@@ -116,7 +116,7 @@ have a Methionine (`M`) at this position, while aqua nodes indicate Isoleucine (
 
 ## Step 6: Upload Your Example to the Nextstrain Community to Share with Everyone
 
-In the [narratives introduction](http://localhost:3000/auspice/narratives/introduction#sharing-narratives) we introduced the possibility of using the community functionality of Nextstrain to share your narratives.
+In the [narratives introduction](../guides/communicate/narratives-intro.html#sharing-narratives) we introduced the possibility of using the community functionality of Nextstrain to share your narratives.
 
 
 > A quick reminder of the difference between Auspice & nextstrain.org is warranted.
