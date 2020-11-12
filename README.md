@@ -21,11 +21,11 @@ Auspice may be used to explore datasets locally or run as a server to share resu
 
 ## Documentation
 
-Full documentation may be found at: [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice).
-The following are helpful when beginning to use Auspice:
+The main Nextstrain documentation is available at [docs.nextstrain.org](https://docs.nextstrain.org/en/latest/index.html). This includes tutorials, how-to guides, and explanations of concepts to help you get started and answer common questions to achieve your goal(s) with Auspice and other Nextstrain tools.
 
-* [Overview of how Auspice fits together with other Nextstrain tools](https://nextstrain.org/docs/getting-started/introduction#open-source-tools-for-the-community)  
-* [Auspice documentation](https://nextstrain.github.io/auspice/introduction/overview)
+When getting started with Auspice, it may be helpful to read our [overview of how Auspice fits together with other Nextstrain tools](https://docs.nextstrain.org/en/latest/learn/about-nextstrain.html#open-source-tools-for-the-community).
+
+For more detailed technical information how Auspice works and reference guides describing specific Auspice features, check out the Auspice reference-guide documentation at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/latest/index.html).
 
 ## Quickstart
 
