@@ -1,3 +1,9 @@
-# Auspice built documentation to be served by GitHub pages.
+# Auspice 'Read The Docs' Documentation.
 
-Files in this folder should not be modified by hand -- they are generated from within the `docs-src` directory.
+Very much a work-in-progress!
+
+```
+make clean
+make html
+open _build/html/index.html
+```
