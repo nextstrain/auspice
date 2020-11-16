@@ -115,7 +115,7 @@ const computeDivergenceGridPoints = (xmin, xmax, layout, minorTicks) => {
  */
 const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
   const [majorStep, minorStep] = [{unit: "DAY", n: 1}, {unit: "DAY", n: 0}];
-  const minPxBetweenMajorGrid = (pxAvailable < 1200 ? 200 : 300);
+  const minPxBetweenMajorGrid = (pxAvailable < 1000 ? 130 : 180);
   const timeBetweenMajorGrids = timeRange/(Math.floor(pxAvailable / minPxBetweenMajorGrid));
   const levels = {
     CENTURY: {t: 100, max: undefined},
