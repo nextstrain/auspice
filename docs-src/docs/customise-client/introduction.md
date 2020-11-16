@@ -20,6 +20,3 @@ auspice build --extend <JSON>
 
 
 See the [client customisation API](customise-client/api.md) for the available options.
-
-
-
