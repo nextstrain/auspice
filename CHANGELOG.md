@@ -1,6 +1,9 @@
-# Changelog
+---
+title: Changelog
+---
 
-* Add a UI in the sidebar to select filters by typing, improve how selected filters are displayed, and allow filters to be "inactivated".
+## version 2.20.0 - 2020/11/18
+
 See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
 * Add on-hover tooltips to the sidebar to better convey the functionality available.
 See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
