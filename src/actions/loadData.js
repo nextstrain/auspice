@@ -8,15 +8,18 @@ import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
+import { NoContentError } from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
 
 /**
  * Sends a GET request to the `/charon` web API endpoint requesting data.
- * Throws an `Error` if the response is not successful or is not a redirect.
  *
- * Returns a `Promise` containing the `Response` object. JSON data must be
- * accessed from the `Response` object using the `.json()` method.
+ * If the request is successful then the `Response` object is returned.
+ * Note that a redirected response can still be successful.
+ *
+ * Unsuccessful responses result in an `Error` being thrown.
+ * If the response is 204 then a `NoContentError` is thrown.
  *
  * @param {String} prefix: the main dataset information pertaining to the query,
  *  e.g. 'flu'
@@ -175,7 +178,8 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     });
 
   } catch (err) {
-    if (err.message === "No Content") { // status code 204
+    /* No Content (204) errors are special cases where there is no dataset, but the URL is valid */
+    if (err instanceof NoContentError) {
       /* TODO: add more helper functions for moving between pages in auspice */
       return dispatch({
         type: types.PAGE_CHANGE,
