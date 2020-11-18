@@ -1,9 +1,11 @@
 import styled from 'styled-components';
+import ReactTooltip from 'react-tooltip';
 
 /* All of these styled components are for the controls, which is part of the sidebar.
  * The sidebar is is wrapped by a <ThemeProvider> so you can access
  * props.theme.x
  */
+
 
 export const ControlsContainer = styled.div`
   display: flex;
@@ -19,8 +21,9 @@ export const ControlsContainer = styled.div`
   padding: 0px 20px 20px 20px;
 `;
 
-
-export const SidebarHeader = styled.span`
+export const HeaderContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
   font-family: ${(props) => props.theme["font-family"]};
   font-size: 16px;
   line-height: 28px;
@@ -28,6 +31,12 @@ export const SidebarHeader = styled.span`
   margin-bottom: 5px;
   font-weight: 500;
   color: ${(props) => props.theme.color};
+`;
+
+export const HeaderIconContainer = styled.span`
+  padding-top: 4px;
+  padding-right: 3px;
+  cursor: help;
 `;
 
 export const SidebarButton = styled.button`
@@ -80,3 +89,14 @@ export const SidebarSubtitle = styled.div`
 // export const Select = (props) => (
 //   <ReactSelect styles={customReactSelectStyles} {...props}/>
 // );
+
+export const StyledTooltip = styled(ReactTooltip)`
+  max-width: 30vh;
+  white-space: normal;
+  line-height: 1.2;
+  padding: 21px !important; /* override internal styling */
+  z-index: 1001 !important; /* on top of viz legend */
+  & > br {
+    margin-bottom: 10px;
+  }
+`;

@@ -109,4 +109,12 @@ class DateRangeInputs extends React.Component {
   }
 }
 
+export const DateRangeInfo = (
+  <>
+    Use this slider to filter the data based on the sample date.
+    This may include inferred dates for ancestral nodes in the tree,
+    and thus the date range here can be wider than the sample collection range.
+  </>
+);
+
 export default DateRangeInputs;

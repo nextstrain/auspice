@@ -23,7 +23,6 @@ import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/static.css";
 import "./css/notifications.css";
-import "./css/boxed.css";
 import "./css/select.css";
 
 /* FONTS */

@@ -93,19 +93,6 @@ const makeParentVisible = (visArray, node) => {
   makeParentVisible(visArray, node.parent);
 };
 
-/**
- * Create a visibility array to show the path through the tree to the selected tip
- * @param  {array} nodes redux tree nodes
- * @param  {int} tipIdx idx of the selected tip
- * @return {array} visibility array (values in {0, 1, 2})
- */
-const identifyPathToTip = (nodes, tipIdx) => {
-  const visibility = new Array(nodes.length).fill(false);
-  visibility[tipIdx] = true;
-  makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? NODE_VISIBLE : NODE_NOT_VISIBLE);
-};
-
 /* calcVisibility
 USES:
 inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
@@ -147,9 +134,11 @@ export const calcVisibility = (tree, controls, dates) => {
     // FILTERS
     let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
     const filters = [];
-    Object.keys(controls.filters).forEach((trait) => {
-      if (controls.filters[trait].length) {
-        filters.push({trait, values: controls.filters[trait]});
+    Reflect.ownKeys(controls.filters).forEach((filterName) => {
+      const items = controls.filters[filterName];
+      const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
+      if (activeFilterItems.length) {
+        filters.push({trait: filterName, values: activeFilterItems});
       }
     });
     if (filters.length) {
@@ -195,8 +184,8 @@ export const calcVisibility = (tree, controls, dates) => {
   return NODE_VISIBLE;
 };
 
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {tipSelectedIdx = 0} = {}) => {
-  const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
+export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
+  const visibility = calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
   /* re-calculate branchThickness (inline) */

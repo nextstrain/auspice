@@ -1,5 +1,5 @@
-import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
-import { NODE_VISIBLE } from "../../../util/globals";
+import { updateVisibleTipsAndBranchThicknesses, applyFilter } from "../../../actions/tree";
+import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 
@@ -20,16 +20,11 @@ export const onTipHover = function onTipHover(d) {
 export const onTipClick = function onTipClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
-  // console.log("tip click", d)
   this.setState({
     hovered: null,
     selectedTip: d
   });
-  /* are we clicking from tree1 or tree2? */
-  const tipSelected = d.that.params.orientation[0] === 1 ?
-    {treeIdx: d.n.arrayIdx} :
-    {treeTooIdx: d.n.arrayIdx};
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected, cladeSelected: this.props.tree.selectedClade}));
+  this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
 
@@ -130,22 +125,5 @@ export const clearSelectedTip = function clearSelectedTip(d) {
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses(
-    {tipSelected: {clear: true}, cladeSelected: this.props.tree.selectedClade}
-  ));
-};
-
-/**
- * @param  {node} d tree node object
- * @param  {int} n total number of nodes in current view
- * @return {int} font size of the tip label
- */
-export const tipLabelSize = (d, n) => {
-  if (n > 70) {
-    return 0;
-  } else if (n < 20) {
-    return 14;
-  }
-  const fs = 6 + 8 * (70 - n) / (70 - 20);
-  return fs;
+  this.props.dispatch(applyFilter("remove", strainSymbol, [d.n.name]));
 };

@@ -4,13 +4,12 @@ import { withTranslation } from 'react-i18next';
 
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import { applyFilter, changeDateFilter } from "../../actions/tree";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { months, NODE_VISIBLE } from "../../util/globals";
-import { displayFilterValueAsButton } from "../framework/footer";
+import { months, NODE_VISIBLE, strainSymbol } from "../../util/globals";
 import Byline from "./byline";
-
+import { FilterBadge, Tooltip } from "./filterBadge";
 
 const plurals = {
   country: "countries",
@@ -119,7 +118,6 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
-    selectedStrain: state.tree.selectedStrain,
     selectedClade: state.tree.selectedClade,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
@@ -177,59 +175,38 @@ class Info extends React.Component {
     };
   }
 
-  addFilteredDatesButton(buttons) {
-    buttons.push(
-      <div key={"timefilter"} style={{display: "inline-block"}}>
-        <div
-          className={'boxed-item-icon'}
-          onClick={() => {
-            this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
-          }}
-          role="button"
-          tabIndex={0}
+  makeFilteredDatesButton() {
+    return ([
+      'timeFilter',
+      <FilterBadge
+        key="timefilter"
+        id="timefilter"
+        remove={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
+      >
+        {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
+      </FilterBadge>
+    ]);
+  }
+  createFilterBadges(filterName) {
+    return this.props.filters[filterName]
+      .sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
+      .map((item) => ([
+        item.value,
+        <FilterBadge
+          key={item.value}
+          id={item.value}
+          remove={() => {this.props.dispatch(applyFilter("remove", filterName, [item.value]));}}
+          canMakeInactive
+          active={item.active}
+          activate={() => {this.props.dispatch(applyFilter("add", filterName, [item.value]));}}
+          inactivate={() => {this.props.dispatch(applyFilter("inactivate", filterName, [item.value]));}}
         >
-          {'\xD7'}
-        </div>
-        <div className={"boxed-item active-with-icon"}>
-          {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
-        </div>
-      </div>
-    );
-  }
-  addNonAuthorFilterButton(buttons, filterName) {
-    this.props.filters[filterName].sort().forEach((itemName) => {
-      const display = (
-        <span>
-          {itemName}
-          {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
-        </span>
-      );
-      buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
-    });
-  }
-  selectedStrainButton(strain) {
-    return (
-      <span>
-        {"Showing a single strain "}
-        <div style={{display: "inline-block"}}>
-          <div
-            className={'boxed-item-icon'}
-            onClick={() => {
-              this.props.dispatch(
-                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
-              );
-            }}
-            role="button"
-            tabIndex={0}
-          >
-            {'\xD7'}
-          </div>
-          <div className={"boxed-item active-with-icon"}>
-            {strain}
-          </div>
-        </div>
-      </span>
-    );
+          <span>
+            {item.value}
+            {filterName!==strainSymbol && ` (${this.props.totalStateCounts[filterName].get(item.value)})`}
+          </span>
+        </FilterBadge>
+      ]));
   }
   clearFilterButton(field) {
     return (
@@ -281,12 +258,16 @@ class Info extends React.Component {
       this.props.t
     );
 
-    /* part II - the active filters */
-    const filters = [];
-    Object.keys(this.props.filters)
-      .filter((n) => this.props.filters[n].length > 0)
-      .forEach((n) => this.addNonAuthorFilterButton(filters, n));
-    if (!datesMaxed) {this.addFilteredDatesButton(filters);}
+    /* part II - the filters in play (both active and inactive) */
+    const filtersByCategory = [];
+    Reflect.ownKeys(this.props.filters)
+      .filter((filterName) => this.props.filters[filterName].length > 0)
+      .forEach((filterName) => {
+        filtersByCategory.push({name: filterName===strainSymbol?'strain':filterName, badges: this.createFilterBadges(filterName)});
+      });
+    if (!datesMaxed) {
+      filtersByCategory.push({name: 'temporal', badges: [this.makeFilteredDatesButton()]});
+    }
 
     return (
       <Card center infocard>
@@ -295,16 +276,17 @@ class Info extends React.Component {
           <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
           <div width={this.props.width} style={styles.n}>
             {animating ? t("Animation in progress") + ". " : null}
-            {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
             {/* part 1 - the summary */}
             {showExtended ? summary : null}
             {/* part 2 - the filters */}
-            {showExtended && filters.length ? (
-              <span>
+            {showExtended && filtersByCategory.length ? (
+              <>
                 {t("Filtered to") + " "}
-                {filters.map((d) => d)}
+                {filtersByCategory.map((filter, idx) => (
+                  <Brackets idx={idx} badges={filter.badges} key={filter.name}/>
+                ))}
                 {". "}
-              </span>
+              </>
             ) : null}
           </div>
         </div>
@@ -312,6 +294,28 @@ class Info extends React.Component {
     );
   }
 }
+
+const Intersect = ({id}) => (
+  <span style={{fontSize: "2rem", padding: "0px 4px 0px 2px", cursor: 'help'}} data-tip data-for={id}>
+    ∩
+    <Tooltip id={id}>{`Groups of filters are combined by taking the intersect`}</Tooltip>
+  </span>
+);
+
+const Brackets = ({badges, idx}) => (
+  <span style={{fontSize: "2rem", padding: "0px 2px"}}>
+    {idx!==0 && <Intersect id={'intersect'+idx}/>}
+    {badges.length === 1 ? null : `{`}
+    {badges.map(([name, badge], i) => (
+      <span key={name}>
+        {badge}
+        {i!==badges.length-1 ? ", " : null}
+      </span>
+    ))}
+    {badges.length === 1 ? null : `}`}
+  </span>
+);
+
 
 const WithTranslation = withTranslation()(Info);
 export default WithTranslation;
