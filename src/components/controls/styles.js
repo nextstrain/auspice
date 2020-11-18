@@ -37,6 +37,7 @@ export const HeaderIconContainer = styled.span`
   padding-top: 4px;
   padding-right: 3px;
   cursor: help;
+  color: #888;
 `;
 
 export const SidebarButton = styled.button`
