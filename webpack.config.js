@@ -159,6 +159,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "lodash", // lodash is imported selectively using the lodash plugin, new usages may change the bundle
     "react-transition-group",
     "react-icons",
+    "react-tooltip",
     "create-react-class",
     "mousetrap",
     "react-input-autosize",
