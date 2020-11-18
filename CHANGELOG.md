@@ -1,5 +1,18 @@
 # Changelog
 
+* Add a UI in the sidebar to select filters by typing, improve how selected filters are displayed, and allow filters to be "inactivated".
+See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
+* Add on-hover tooltips to the sidebar to better convey the functionality available.
+See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
+* Improve how we space temporal grid lines (phylogeny & frequencies panels).
+See [PR 1229](https://github.com/nextstrain/auspice/pull/1229).
+* Fix a bug in how we detected HTTP status codes.
+See [PR 1226](https://github.com/nextstrain/auspice/pull/1226).
+* Auspice documentation is now switched to the Read The Docs platform, and available at https://docs.nextstrain.org/projects/auspice.
+Redirects have been added for the old GitHub pages site, and can be found in the [redirect-documentation](https://github.com/nextstrain/auspice/tree/redirect-documentation) branch.
+See [PR 1220](https://github.com/nextstrain/auspice/pull/1220).
+
+
 ## version 2.19.0 - 2020/10/07
 * The auspice client now makes a request for the root-sequence JSON, which allows colouring of the tree by genotypes where there are no mutations.
 See [PR 1197](https://github.com/nextstrain/auspice/pull/1197).
