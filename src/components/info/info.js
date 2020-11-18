@@ -176,7 +176,8 @@ class Info extends React.Component {
   }
 
   makeFilteredDatesButton() {
-    return (
+    return ([
+      'timeFilter',
       <FilterBadge
         key="timefilter"
         id="timefilter"
@@ -184,12 +185,13 @@ class Info extends React.Component {
       >
         {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
       </FilterBadge>
-    );
+    ]);
   }
   createFilterBadges(filterName) {
     return this.props.filters[filterName]
       .sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
-      .map((item) => (
+      .map((item) => ([
+        item.value,
         <FilterBadge
           key={item.value}
           id={item.value}
@@ -204,7 +206,7 @@ class Info extends React.Component {
             {filterName!==strainSymbol && ` (${this.props.totalStateCounts[filterName].get(item.value)})`}
           </span>
         </FilterBadge>
-      ));
+      ]));
   }
   clearFilterButton(field) {
     return (
@@ -261,10 +263,10 @@ class Info extends React.Component {
     Reflect.ownKeys(this.props.filters)
       .filter((filterName) => this.props.filters[filterName].length > 0)
       .forEach((filterName) => {
-        filtersByCategory.push(this.createFilterBadges(filterName));
+        filtersByCategory.push({name: filterName===strainSymbol?'strain':filterName, badges: this.createFilterBadges(filterName)});
       });
     if (!datesMaxed) {
-      filtersByCategory.push([this.makeFilteredDatesButton()]);
+      filtersByCategory.push({name: 'temporal', badges: [this.makeFilteredDatesButton()]});
     }
 
     return (
@@ -280,8 +282,8 @@ class Info extends React.Component {
             {showExtended && filtersByCategory.length ? (
               <>
                 {t("Filtered to") + " "}
-                {filtersByCategory.map((filters, idx) => (
-                  <Brackets idx={idx} badges={filters}/>
+                {filtersByCategory.map((filter, idx) => (
+                  <Brackets idx={idx} badges={filter.badges} key={filter.name}/>
                 ))}
                 {". "}
               </>
@@ -304,11 +306,11 @@ const Brackets = ({badges, idx}) => (
   <span style={{fontSize: "2rem", padding: "0px 2px"}}>
     {idx!==0 && <Intersect id={'intersect'+idx}/>}
     {badges.length === 1 ? null : `{`}
-    {badges.map((b, i) => (
-      <>
-        {b}
+    {badges.map(([name, badge], i) => (
+      <span key={name}>
+        {badge}
         {i!==badges.length-1 ? ", " : null}
-      </>
+      </span>
     ))}
     {badges.length === 1 ? null : `}`}
   </span>

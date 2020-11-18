@@ -4,7 +4,7 @@ import React from "react";
 export const TreeOptionsInfo = (
   <>
     Change various options relating to how the tree is displayed.
-    The exact options available depend on the dataset and specific analysis performed.    
+    The exact options available depend on the dataset and specific analysis performed.
     <br/>
     If <em>Branch Length</em> is available, you can choose to display the tree branches in terms of (nucleotide) divergence or (inferred) time.
     It is often helpful to toggle on <em>confidence intervals</em> to guage the uncertainty in the reconstruction of internal node dates.

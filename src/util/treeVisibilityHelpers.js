@@ -93,19 +93,6 @@ const makeParentVisible = (visArray, node) => {
   makeParentVisible(visArray, node.parent);
 };
 
-/**
- * Create a visibility array to show the path through the tree to the selected tip
- * @param  {array} nodes redux tree nodes
- * @param  {int} tipIdx idx of the selected tip
- * @return {array} visibility array (values in {0, 1, 2})
- */
-const identifyPathToTip = (nodes, tipIdx) => {
-  const visibility = new Array(nodes.length).fill(false);
-  visibility[tipIdx] = true;
-  makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? NODE_VISIBLE : NODE_NOT_VISIBLE);
-};
-
 /* calcVisibility
 USES:
 inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView

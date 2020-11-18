@@ -77,7 +77,7 @@ class FilterData extends React.Component {
       const n = this.props.activeFilters[filterName].filter((f) => f.active).length;
       return {
         filterName,
-        displayName: (filterName===strainSymbol ? "samples" : filterName) + ` (n=${n})`,
+        displayName: `${n} x ${filterName===strainSymbol ? "samples" : filterName}`,
         remove: () => {this.props.dispatch(applyFilter("set", filterName, []));}
       };
     });
@@ -102,12 +102,14 @@ class FilterData extends React.Component {
         {inUseFilters.length ? (
           <>
             <SidebarSubtitle spaceAbove>
-              {`${inUseFilters.length} type${inUseFilters.length===1?'':'s'} of filter${inUseFilters.length===1?'':'s'} currently active:`}
+              {`Currently selected filter categories:`}
             </SidebarSubtitle>
             {inUseFilters.map((filter) => (
-              <FilterBadge active key={filter.displayName} id={filter.displayName} remove={filter.remove}>
-                {filter.displayName}
-              </FilterBadge>
+              <div style={{display: 'inline-block', margin: '2px'}} key={filter.displayName}>
+                <FilterBadge active id={filter.displayName} remove={filter.remove}>
+                  {filter.displayName}
+                </FilterBadge>
+              </div>
             ))}
           </>
         ) : null}
