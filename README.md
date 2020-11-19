@@ -25,7 +25,7 @@ The main Nextstrain documentation is available at [docs.nextstrain.org](https://
 
 When getting started with Auspice, it may be helpful to read our [overview of how Auspice fits together with other Nextstrain tools](https://docs.nextstrain.org/en/latest/learn/about-nextstrain.html#open-source-tools-for-the-community).
 
-For more detailed technical information how Auspice works and reference guides describing specific Auspice features, check out the Auspice reference-guide documentation at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/latest/index.html).
+For more detailed technical information how Auspice works and reference guides describing specific Auspice features, check out the Auspice reference-guide documentation at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/stable/index.html).
 
 ## Quickstart
 
