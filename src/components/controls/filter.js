@@ -1,11 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Async from "react-select/lib/Async";
+import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol} from "../../util/globals";
 import { applyFilter } from "../../actions/tree";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
 
+const DEBOUNCE_TIME = 200;
 
 /**
  * <FilterData> is a (keyboard)-typing based search box intended to
@@ -83,16 +85,21 @@ class FilterData extends React.Component {
     });
   }
   render() {
+    // options only need to be calculated a single time per render, and by adding a debounce
+    // to `loadOptions` we don't slow things down by comparing queries to a large number of options
+    const options = this.makeOptions();
+    const loadOptions = debounce((input, callback) => callback(null, {options}), DEBOUNCE_TIME);
     const styles = this.getStyles();
     const inUseFilters = this.summariseFilters();
     return (
       <div style={styles.base}>
-        <Select
+        <Async
           name="filterQueryBox"
           placeholder="Type filter query here..."
           value={undefined}
           arrowRenderer={null}
-          options={this.makeOptions()}
+          loadOptions={loadOptions}
+          ignoreAccents={false}
           clearable={false}
           searchable
           multi={false}
