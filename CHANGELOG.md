@@ -2,6 +2,8 @@
 title: Changelog
 ---
 
+* Small bugfixes and performance improvements relatingo to the features introduced in 2.20.0
+
 ## version 2.20.0 - 2020/11/18
 
 See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
