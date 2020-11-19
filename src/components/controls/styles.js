@@ -27,6 +27,7 @@ export const HeaderContainer = styled.div`
   font-family: ${(props) => props.theme["font-family"]};
   font-size: 16px;
   line-height: 28px;
+  min-height: 28px; /* needed for safari, else the div height is 0 */
   margin-top: 15px;
   margin-bottom: 5px;
   font-weight: 500;
@@ -37,6 +38,7 @@ export const HeaderIconContainer = styled.span`
   padding-top: 4px;
   padding-right: 3px;
   cursor: help;
+  color: #888;
 `;
 
 export const SidebarButton = styled.button`
