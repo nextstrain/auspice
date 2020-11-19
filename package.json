@@ -1,6 +1,6 @@
 {
   "name": "auspice",
-  "version": "2.19.0",
+  "version": "2.20.1",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
@@ -37,6 +37,9 @@
     "smoke-test:ci": "start-server-and-test server http://localhost:4000 smoke-test",
     "diff-lang": "./scripts/diff-lang.js"
   },
+  "jest": {
+    "transformIgnorePatterns": []
+  },
   "dependencies": {
     "@babel/core": "^7.3.4",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
@@ -47,7 +50,6 @@
     "@babel/preset-react": "^7.0.0",
     "@hot-loader/react-dom": "^16.13.0",
     "argparse": "^1.0.10",
-    "awesomplete": "^1.1.2",
     "babel-loader": "^8.0.4",
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-strip-function-call": "^1.0.2",
@@ -109,6 +111,7 @@
     "react-icons": "^3.9.0",
     "react-redux": "^5.1.0",
     "react-select": "^1.0.0-rc.5",
+    "react-tooltip": "^4.2.10",
     "react-tweet-embed": "^1.1.0",
     "redux": "^4.0.1",
     "redux-devtools": "^3.5.0",

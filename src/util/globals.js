@@ -204,3 +204,4 @@ export const isValueValid = (value) => {
   // booleans, valid strings & numbers are valid.
   return true;
 };
+export const strainSymbol = Symbol('strain');

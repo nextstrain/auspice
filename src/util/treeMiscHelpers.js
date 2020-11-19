@@ -1,4 +1,4 @@
-import { isValueValid } from "./globals";
+import { isValueValid, strainSymbol } from "./globals";
 
 /* --- TO IMPROVE -----
 These "getter" functions for node-related data require knowledge of
@@ -29,7 +29,10 @@ export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}=
   if (!node.node_attrs) return undefined;
 
   if (!entropy && !confidence) {
-    if (!node.node_attrs[trait]) return undefined;
+    if (!node.node_attrs[trait]) {
+      if (trait === strainSymbol) return node.name;
+      return undefined;
+    }
     const value = node.node_attrs[trait].value;
     if (!isValueValid(value)) return undefined;
     return value;
