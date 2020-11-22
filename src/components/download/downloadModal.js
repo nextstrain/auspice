@@ -12,6 +12,7 @@ import * as icons from "../framework/svg-icons";
 import { getAcknowledgments} from "../framework/footer";
 import { createSummary, getNumSelectedTips } from "../info/info";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
+import { isColorByGenotype } from "../../util/getGenotype";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -52,6 +53,7 @@ export const publications = {
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
+  colorings: state.metadata.colorings,
   metadata: state.metadata,
   entropy: state.entropy,
   mutType: state.controls.mutType,
@@ -176,14 +178,27 @@ class DownloadModal extends React.Component {
     const uniqueAuthorCount = this.getNumUniqueAuthors(this.props.nodes);
     const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
-    const buttons = [
-      ["Tree", "Phylogenetic tree in Newick format with branch lengths in units of divergence.",
-        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
-      ["TimeTree", "Phylogenetic tree in Newick format with branch lengths measured in years.",
-        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["All Metadata (TSV)", `Per-sample metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}).`,
-        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)]
-    ];
+    let colorByLabel = "";
+    if (isColorByGenotype(this.props.colorBy)) {
+      colorByLabel = this.props.colorBy.replace("gt-", "genotype at ").replace("_", " site ");
+    } else {
+      colorByLabel = this.props.colorings[this.props.colorBy] === undefined ? this.props.colorBy : this.props.colorings[this.props.colorBy].title;
+    }
+    const buttons = [];
+    // only download labeled newick if colorBy is not "num_date" or "author"
+    if (!["num_date", "author"].includes(this.props.colorBy)) {
+      buttons.push(["Tree", "Phylogeny in Newick format with branch lengths in divergence and labeled by " + colorByLabel + ".",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false, this.props.colorBy)]);
+      buttons.push(["TimeTree", "Phylogeny in Newick format with branch lengths in years and labeled by " + colorByLabel + ".",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true, this.props.colorBy)]);
+    } else {
+      buttons.push(["Tree", "Phylogeny in Newick format with branch lengths in divergence.",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false, null)]);
+      buttons.push(["TimeTree", "Phylogeny in Newick format with branch lengths in years.",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true, null)]);
+    }
+    buttons.push(["All Metadata (TSV)", `Per-sample metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}).`,
+      (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)]);
     if (selectedTipsCount > 0) {
       buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,

@@ -3,6 +3,7 @@ import { infoNotification, warningNotification } from "../../actions/notificatio
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
+import { isColorByGenotype } from "../../util/getGenotype";
 import { NODE_VISIBLE } from "../../util/globals";
 
 export const isPaperURLValid = (d) => {
@@ -23,10 +24,51 @@ const treeToNewick = (root, temporal) => {
         const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
         children.push(subsubtree);
       });
-      subtree += "(" + children.join(",") + ")" + node.name + ":";
+      subtree += "(" + children.join(",") + "):";
       subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
     } else { /* terminal node */
       let leaf = node.name + ":";
+      leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
+      subtree += leaf;
+    }
+    return subtree;
+  }
+  return recurse(root, 0) + ";";
+};
+
+/**
+ * Create node label conforming with BEAST export format, e.g.
+ * [&country="Thailand"]
+ * [&region="SoutheastAsia"]
+ * [&lbi=0.3355275145752664]
+ * [&gt-NS1_349="M"]
+ * This removes whitespace from strings and only includes labels for where colorBy is defined
+ */
+const nodeLabel = (node, colorBy) => {
+  let colorByValue = isColorByGenotype(colorBy) ? node.currentGt : getTraitFromNode(node, colorBy);
+  let label = "";
+  if (colorByValue != null) {
+    if (typeof colorByValue === 'string' || colorByValue instanceof String) {
+      colorByValue = "\"" + colorByValue.replace(/\s/g, "") + "\"";
+    }
+    label = "[&" + colorBy + "=" + colorByValue + "]";
+  }
+  return label;
+};
+
+const treeToNewickLabeled = (root, temporal, colorBy) => {
+  function recurse(node, parentX) {
+    let subtree = "";
+    if (node.hasChildren) {
+      const children = [];
+      node.children.forEach((child) => {
+        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
+        children.push(subsubtree);
+      });
+      subtree += "(" + children.join(",") + ")" + nodeLabel(node, colorBy) + ":";
+      subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
+    } else { /* terminal node */
+      let leaf = "'" + node.name + "'" + nodeLabel(node, colorBy) + ":";
       leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
       subtree += leaf;
     }
@@ -199,10 +241,14 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
 
-export const newick = (dispatch, filePrefix, root, temporal) => {
+export const newick = (dispatch, filePrefix, root, temporal, colorBy) => {
   const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
   const message = temporal ? "TimeTree" : "Tree";
-  write(fName, MIME.text, treeToNewick(root, temporal));
+  if (colorBy) {
+    write(fName, MIME.text, treeToNewickLabeled(root, temporal, colorBy));
+  } else {
+    write(fName, MIME.text, treeToNewick(root, temporal));
+  }
   dispatch(infoNotification({message: message + " written to " + fName}));
 };
 
