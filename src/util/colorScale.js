@@ -145,17 +145,19 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         error = true;
       } else {
         continuous = false; /* colorMaps can't (yet) be continuous */
+        const colorMap = new Map(scale);
         let domain = scale.map((x) => x[0]);
-        let range = scale.map((x) => x[1]);
+        /* create shades of grey for values in the tree which weren't defined in the provided scale */
         const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, domain);
-        if (extraVals.length) { // we must add these to the domain + provide a value in the range
+        if (extraVals.length) { // we must add these to the domain + provide a color value
           domain = domain.concat(extraVals);
-          range = range.concat(createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]));
+          const extraColors = createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]);
+          extraVals.forEach((val, idx) => {
+            colorMap.set(val, extraColors[idx]);
+          });
         }
-        colorScale = scaleOrdinal()
-          .domain(domain)
-          .range(range);
         legendValues = domain;
+        colorScale = (val) => (colorMap.get(val) || unknownColor);
       }
     } else if (colorings[colorBy].type === "categorical") {
       continuous = false;

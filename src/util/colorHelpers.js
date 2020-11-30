@@ -3,6 +3,7 @@ import { interpolateRgb } from "d3-interpolate";
 import scalePow from "d3-scale/src/pow";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { isValueValid } from "./globals";
 
 /**
  * Average over the visible colours for a given location
@@ -48,7 +49,9 @@ export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
     nodesToo.forEach((n) => valsInTree.push(getTraitFromNode(n, colorBy)));
   }
   valsInTree = [...new Set(valsInTree)];
-  return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
+  return valsInTree
+    .filter((x) => providedVals.indexOf(x) === -1)
+    .filter((x) => isValueValid(x));
 };
 
 
