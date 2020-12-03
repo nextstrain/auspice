@@ -138,7 +138,7 @@ const run = (args) => {
     const {port} = server.address();
     console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(auspiceBuild.message);
-    utils.log(aes.decrypt(handlerMsg));
+    utils.log(aes(handlerMsg).toString());
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
