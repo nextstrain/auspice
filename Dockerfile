@@ -1,4 +1,4 @@
-FROM node:12.10.0-alpine
+FROM quay.io/cdis/node:12.10.0-alpine
 
 # The base node image sets a very verbose log level.
 ENV NPM_CONFIG_LOGLEVEL info
