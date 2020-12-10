@@ -11,7 +11,7 @@ import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
 
-const unknownColor = "#AAAAAA";
+export const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
@@ -138,27 +138,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     let minMax;
     /* Is the scale set in the provided colorings object? */
     if (colorings[colorBy].scale) {
-      // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
-      const scale = colorings[colorBy].scale;
-      if (!Array.isArray(colorings[colorBy].scale)) {
-        console.error(`${colorBy} has a scale which wasn't an array`);
-        error = true;
-      } else {
-        continuous = false; /* colorMaps can't (yet) be continuous */
-        const colorMap = new Map(scale);
-        let domain = scale.map((x) => x[0]);
-        /* create shades of grey for values in the tree which weren't defined in the provided scale */
-        const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, domain);
-        if (extraVals.length) { // we must add these to the domain + provide a color value
-          domain = domain.concat(extraVals);
-          const extraColors = createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]);
-          extraVals.forEach((val, idx) => {
-            colorMap.set(val, extraColors[idx]);
-          });
-        }
-        legendValues = domain;
-        colorScale = (val) => (colorMap.get(val) || unknownColor);
-      }
+      ({error, continuous, legendValues, colorScale} =
+        createScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
     } else if (colorings[colorBy].type === "categorical") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
@@ -287,3 +268,28 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     genotype
   };
 };
+
+export function createScaleFromProvidedScaleMap(colorBy, providedScale, t1nodes, t2nodes) {
+  // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
+  if (!Array.isArray(providedScale)) {
+    console.error(`${colorBy} has defined a scale which wasn't an array`);
+    return {error: true};
+  }
+  const colorMap = new Map(providedScale);
+  let domain = providedScale.map((x) => x[0]);
+  /* create shades of grey for values in the tree which weren't defined in the provided scale */
+  const extraVals = getExtraVals(t1nodes, t2nodes, colorBy, domain);
+  if (extraVals.length) { // we must add these to the domain + provide a color value
+    domain = domain.concat(extraVals);
+    const extraColors = createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]);
+    extraVals.forEach((val, idx) => {
+      colorMap.set(val, extraColors[idx]);
+    });
+  }
+  return {
+    error: false,
+    continuous: false, /* colorMaps can't (yet) be continuous */
+    legendValues: domain,
+    colorScale: (val) => (colorMap.get(val) || unknownColor)
+  };
+}
