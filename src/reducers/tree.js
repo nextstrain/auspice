@@ -74,7 +74,18 @@ const Tree = (state = getDefaultTreeState(), action) => {
           }
         }
       });
-      return state;
+      // add the new colorings to visibleStateCounts & totalStateCounts so that they can function as filters
+      return {
+        ...state,
+        visibleStateCounts: {
+          ...state.visibleStateCounts,
+          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), state.visibility, true)
+        },
+        totalStateCounts: {
+          ...state.totalStateCounts,
+          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
+        }
+      };
     default:
       return state;
   }

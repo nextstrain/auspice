@@ -194,7 +194,7 @@ class Info extends React.Component {
         item.value,
         <FilterBadge
           key={item.value}
-          id={item.value}
+          id={String(item.value)}
           remove={() => {this.props.dispatch(applyFilter("remove", filterName, [item.value]));}}
           canMakeInactive
           active={item.active}

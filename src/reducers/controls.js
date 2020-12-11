@@ -260,9 +260,10 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { legendOpen: action.value });
     case types.ADD_EXTRA_METADATA:
       for (const colorBy of Object.keys(action.newColorings)) {
+        state.filters[colorBy] = [];
         state.coloringsPresentOnTree.add(colorBy);
       }
-      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
+      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 

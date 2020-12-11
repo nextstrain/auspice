@@ -22,7 +22,7 @@ const handleMetadata = async (dispatch, getState, file) => {
     /* For each coloring, extract values defined in each row etc */
     const newNodeAttrs = {};
     const newColorings = {};
-    processColorings(newNodeAttrs, newColorings, coloringInfo, rows); // modifies `newNodeAttrs` and `newColorings`
+    processColorings(newNodeAttrs, newColorings, coloringInfo, rows, fileName); // modifies `newNodeAttrs` and `newColorings`
 
     /* TODO - process lat/longs, if present */
 
@@ -90,7 +90,11 @@ function processHeader(fields) {
   return {coloringInfo, header: fields, strainKey, ignoredFields};
 }
 
-function processColorings(newNodeAttrs, newColorings, coloringInfo, rows) {
+/**
+ * Add colorings defined by the CSV header (`coloringInfo`) and specified in each CSV
+ * row (`rows`) to the nodes (`newNodeAttrs`) and the `newColorings` object.
+ */
+function processColorings(newNodeAttrs, newColorings, coloringInfo, rows, fileName) {
   for (const info of coloringInfo) {
     const scaleMap = new Map(); // will only be populated if coloringInfo.scaleKey is defined
 
@@ -113,6 +117,13 @@ function processColorings(newNodeAttrs, newColorings, coloringInfo, rows) {
     };
     if (scaleMap.size) newColorings[info.name].scale = makeScale(info.name, scaleMap);
   }
+  /* Add a boolean scale for presence/absence in this file */
+  newColorings[fileName] = {title: fileName, type: 'boolean'};
+  Object.keys(rows).forEach((strain) => {
+    if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
+    /* Ideally the value here would be `true` but this causes UI issues in <Info> */
+    newNodeAttrs[strain][fileName] = {value: `Strains in ${fileName}`};
+  });
 }
 
 function makeScale(colorBy, scaleMap) {
