@@ -20,7 +20,7 @@ const Metadata = (state = {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
     case types.CLEAN_START:
       return action.metadata;
-    case types.ADD_COLOR_BYS:
+    case types.ADD_EXTRA_METADATA:
       const colorings = Object.assign({}, state.colorings, action.newColorings);
       return Object.assign({}, state, {colorings});
     case types.SET_AVAILABLE:

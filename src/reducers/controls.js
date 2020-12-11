@@ -258,7 +258,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
-    case types.ADD_COLOR_BYS:
+    case types.ADD_EXTRA_METADATA:
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);
       }
