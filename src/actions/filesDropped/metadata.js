@@ -1,6 +1,8 @@
+import { rgb } from "d3-color";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
 import { ADD_EXTRA_METADATA } from "../types";
 import { parseCsvTsv } from "./parseCsvTsv";
+
 
 const handleMetadata = async (dispatch, getState, file) => {
   const fileName = file.name;
@@ -62,32 +64,76 @@ function processHeader(fields) {
         ignoredFields.add(fieldName);
         return null;
       }
-      const name = fieldName;
+      let name = fieldName;
       const lookupKey = fieldName;
-      const definesScale = false; // TODO -- if name includes `__colour` then this should be true
       const scaleType = "categorical"; // TODO
-      return {name, lookupKey, definesScale, scaleType};
+      /* interpret column names using microreact-style syntax */
+      if (fieldName.includes("__")) {
+        const [prefix, suffix] = fieldName.split("__");
+        if (["shape", "colour"].includes(suffix)) {
+          ignoredFields.add(fieldName);
+          return null;
+        }
+        if (suffix === "autocolour") {
+          name = prefix; /* MicroReact uses this to colour things, but we do this by default */
+        }
+      }
+      return {name, lookupKey, scaleKey: undefined, scaleType};
     })
-    .filter((x) => !!x); // filter out undefined
-
+    .filter((x) => !!x)
+    .map((data) => {
+      if (fields.includes(`${data.name}__colour`)) {
+        data.scaleKey = `${data.name}__colour`;
+      }
+      return data;
+    });
   return {coloringInfo, header: fields, strainKey, ignoredFields};
 }
 
 function processColorings(newNodeAttrs, newColorings, coloringInfo, rows) {
   for (const info of coloringInfo) {
+    const scaleMap = new Map(); // will only be populated if coloringInfo.scaleKey is defined
+
     for (const [strain, row] of Object.entries(rows)) {
       const value = row[info.lookupKey];
       if (value) { // ignore empty strings (which arise from an empty CSV field)
         if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
         newNodeAttrs[strain][info.name] = {value};
+
+        if (info.scaleKey && row[info.scaleKey] && row[info.scaleKey].match(/^#[A-Fa-f0-9]{6}$/)) {
+          if (!scaleMap.has(value)) scaleMap.set(value, []);
+          scaleMap.get(value).push(row[info.scaleKey]);
+        }
+
       }
     }
     newColorings[info.name] = {
       title: info.name,
       type: info.scaleType /* TODO - attempt to guess this if no info supplied */
-      /* TODO - `scale` */
     };
+    if (scaleMap.size) newColorings[info.name].scale = makeScale(info.name, scaleMap);
   }
+}
+
+function makeScale(colorBy, scaleMap) {
+  const scale = [];
+  for (const [traitValue, colors] of scaleMap) {
+    if (new Set(colors).size===1) {
+      scale.push([traitValue, colors[0]]);
+    } else {
+      // console.log(`Averaging colours for ${traitValue}`);
+      let r=0, g=0, b=0; // same algorithm as `getAverageColorFromNodes`
+      colors.forEach((c) => {
+        const tmpRGB = rgb(c);
+        r += tmpRGB.r;
+        g += tmpRGB.g;
+        b += tmpRGB.b;
+      });
+      const total = colors.length;
+      scale.push([traitValue, rgb(r/total, g/total, b/total).toString()]);
+    }
+  }
+  return scale;
 }
 
 function checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName) {
