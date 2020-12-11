@@ -15,6 +15,13 @@ test("Test that a JSON-provided scale results in nodes using the correct colours
   expect(colorScale(undefined)).toEqual(unknownColor); // check `undefined` case returns the unknownColor
 });
 
+test("Test that a misformatted JSON-provided scale throws an error", () => {
+  const nodes = makeNodes(50, {country: ['A', 'B', 'D', undefined]});
+  const providedScale = {A: 'AMBER', B: 'BLUE', C: "CYAN"};
+  expect(() => {createScaleFromProvidedScaleMap("country", providedScale, nodes, undefined);})
+    .toThrow(/has defined a scale which wasn't an array/);
+});
+
 
 /** for the purposes of generating colorScales, the linking between nodes isn't used
  * so we can simply create a list of nodes with values attached.
