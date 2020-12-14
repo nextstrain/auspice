@@ -22,7 +22,12 @@ const Metadata = (state = {
       return action.metadata;
     case types.ADD_EXTRA_METADATA:
       const colorings = Object.assign({}, state.colorings, action.newColorings);
-      return Object.assign({}, state, {colorings});
+      let geoResolutions = state.geoResolutions;
+      if (action.newGeoResolution) {
+        if (!geoResolutions) geoResolutions = [action.newGeoResolution]; /* case where no geoRes in JSON */
+        else geoResolutions = [...geoResolutions, action.newGeoResolution];
+      }
+      return Object.assign({}, state, {colorings, geoResolutions});
     case types.SET_AVAILABLE:
       if (state.buildUrl) {
         return state; // do not use data from getAvailable to overwrite a buildUrl set from a dataset JSON

@@ -14,27 +14,24 @@ const handleMetadata = async (dispatch, getState, file) => {
       console.error(errors);
       throw new Error(errors.map((e) => e.message).join(", "));
     }
-
-    const {coloringInfo, strainKey, ignoredFields} = processHeader(meta.fields);
+    const {coloringInfo, strainKey, latLongKeys, ignoredFields} = processHeader(meta.fields);
     const rows = {};
     data.forEach((d) => {rows[d[strainKey]]=d;});
 
     /* For each coloring, extract values defined in each row etc */
     const newNodeAttrs = {};
-    const newColorings = {};
-    processColorings(newNodeAttrs, newColorings, coloringInfo, rows, fileName); // modifies `newNodeAttrs` and `newColorings`
-
-    /* TODO - process lat/longs, if present */
-
+    const newColorings = processColorings(newNodeAttrs, coloringInfo, rows, fileName); // modifies `newNodeAttrs`
+    const newGeoResolution = latLongKeys ? processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) : undefined;
     /* Fix errors in data & dispatch warnings here, as we cannot dispatch in the reducers */
     const ok = checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName);
     if (!ok) return undefined;
 
-    dispatch({type: ADD_EXTRA_METADATA, newColorings, newNodeAttrs});
+    dispatch({type: ADD_EXTRA_METADATA, newColorings, newGeoResolution, newNodeAttrs});
     return dispatch(successNotification({
       message: `Adding metadata from ${fileName}`,
       details: `${Object.keys(newColorings).length} new coloring${Object.keys(newColorings).length > 1 ? "s" : ""} for ${Object.keys(newNodeAttrs).length} node${Object.keys(newNodeAttrs).length > 1 ? "s" : ""}`
     }));
+
   } catch (err) {
     return dispatch(errorNotification({
       message: `Parsing of ${fileName} failed`,
@@ -55,13 +52,16 @@ function processHeader(fields) {
   /* There are a number of "special case" columns we currently ignore */
   const fieldsToIgnore = new Set(["name", "div", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
   fieldsToIgnore.add("num_date").add("year").add("month").add("date"); /* TODO - implement date parsing */
-  fieldsToIgnore.add("latitude").add("longitude"); /* TODO - implement lat/long parsing */
+  const latLongFields = new Set(["__latitude", "__longitude", "latitude", "longitude"]);
   const ignoredFields = new Set();
 
   const coloringInfo = fields.slice(1)
     .map((fieldName) => {
       if (fieldsToIgnore.has(fieldName)) {
         ignoredFields.add(fieldName);
+        return null;
+      }
+      if (latLongFields.has(fieldName)) {
         return null;
       }
       let name = fieldName;
@@ -89,14 +89,23 @@ function processHeader(fields) {
       }
       return data;
     });
-  return {coloringInfo, header: fields, strainKey, ignoredFields};
+
+  /* check for the presense of lat/long fields */
+  const latLongKeys = (fields.includes("latitude") && fields.includes("longitude")) ?
+    {latitude: "latitude", longitude: "longitude"} :
+    (fields.includes("__latitude") && fields.includes("__longitude")) ?
+      {latitude: "__latitude", longitude: "__longitude"} :
+      undefined;
+
+  return {coloringInfo, header: fields, strainKey, latLongKeys, ignoredFields};
 }
 
 /**
  * Add colorings defined by the CSV header (`coloringInfo`) and specified in each CSV
- * row (`rows`) to the nodes (`newNodeAttrs`) and the `newColorings` object.
+ * row (`rows`) to the nodes (`newNodeAttrs`) and returns a `newColorings` object.
  */
-function processColorings(newNodeAttrs, newColorings, coloringInfo, rows, fileName) {
+function processColorings(newNodeAttrs, coloringInfo, rows, fileName) {
+  const newColorings = {};
   for (const info of coloringInfo) {
     const scaleMap = new Map(); // will only be populated if coloringInfo.scaleKey is defined
 
@@ -126,6 +135,7 @@ function processColorings(newNodeAttrs, newColorings, coloringInfo, rows, fileNa
     /* Ideally the value here would be `true` but this causes UI issues in <Info> */
     newNodeAttrs[strain][fileName] = {value: `Strains in ${fileName}`};
   });
+  return newColorings;
 }
 
 function makeScale(colorBy, scaleMap) {
@@ -147,6 +157,38 @@ function makeScale(colorBy, scaleMap) {
     }
   }
   return scale;
+}
+
+/**
+ * Metadata defines lat-longs _per-sample_ which is orthogonal to Nextstrain's approach
+ * (where we associate coords to a metadata trait). The approach here is to create a new
+ * `node_attr` which represents the unique lat/longs provided here.
+ */
+function processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) {
+  const coordsStrains = new Map();
+  /* Collect groups of strains with identical lat/longs */
+  Object.entries(rows).forEach(([strain, row]) => {
+    const [latitude, longitude] = [Number(row[latLongKeys.latitude]), Number(row[latLongKeys.longitude])];
+    if (isNaN(latitude) || isNaN(longitude) || latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) return;
+    const strKey = String(row[latLongKeys.latitude])+String(row[latLongKeys.longitude]);
+    if (!coordsStrains.has(strKey)) {
+      coordsStrains.set(strKey, {latitude, longitude, strains: new Set()});
+    }
+    coordsStrains.get(strKey).strains.add(strain);
+  });
+  /* invert map to link each strain to a dummy value with lat/longs */
+  const traitName = fileName+"_geo"; /* dummy trait name, but will be visible to the user! */
+  const newGeoResolution = {key: traitName, demes: {}};
+  let counter = 0;
+  coordsStrains.values().forEach(({latitude, longitude, strains}) => {
+    const traitValue = `deme_${counter++}`;/* dummy variable, but will be visible to the user! */
+    newGeoResolution.demes[traitValue] = {latitude, longitude};
+    strains.forEach((strain) => {
+      if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
+      newNodeAttrs[strain][traitName] = {value: traitValue};
+    });
+  });
+  return newGeoResolution;
 }
 
 function checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName) {

@@ -263,7 +263,17 @@ const Controls = (state = getDefaultControlsState(), action) => {
         state.filters[colorBy] = [];
         state.coloringsPresentOnTree.add(colorBy);
       }
-      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
+      let newState = Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
+      if (action.newGeoResolution && !state.panelsAvailable.includes("map")) {
+        newState = {
+          ...newState,
+          geoResolution: action.newGeoResolution.key,
+          canTogglePanelLayout: true,
+          panelsAvailable: [...state.panelsAvailable, "map"],
+          panelsToDisplay: [...state.panelsToDisplay, "map"]
+        };
+      }
+      return newState;
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 
