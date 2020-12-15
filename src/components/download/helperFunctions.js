@@ -4,6 +4,7 @@ import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
+import { createSummary } from "../info/info";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -408,7 +409,30 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings) => {
+export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleStateCounts, filePrefix, panelsInDOM, panelLayout, publications) => {
+  /* make the text strings */
+  const textStrings = [];
+  textStrings.push(metadata.title);
+  textStrings.push(`Last updated ${metadata.updated}`);
+  const address = window.location.href.replace(/&/g, '&amp;');
+  textStrings.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
+  textStrings.push(createSummary(
+    metadata.mainTreeNumTips,
+    nodes,
+    filters,
+    visibility,
+    visibleStateCounts,
+    undefined, // param is `branchLengthsToDisplay`,
+    t
+  ));
+  textStrings.push("");
+  textStrings.push(`${t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+  textStrings.push(`Visualizations are licensed under CC-BY.`);
+  textStrings.push(`Relevant publications:`);
+  publications.forEach((pub) => {
+    textStrings.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
+  });
+
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
     window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
@@ -432,3 +456,4 @@ export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
   write(filename, MIME.tsv, lines.join("\n"));
   dispatch(infoNotification({message: `Diversity data exported to ${filename}`}));
 };
+
