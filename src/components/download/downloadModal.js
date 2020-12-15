@@ -2,13 +2,12 @@ import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
-import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
+import { TRIGGER_DOWNLOAD_MODAL, DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
-import * as helpers from "./helperFunctions";
 import { getAcknowledgments} from "../framework/footer";
 import { createSummary } from "../info/info";
-import { DownloadButtons, getFilePrefix } from "./downloadButtons";
+import { DownloadButtons } from "./downloadButtons";
 
 
 // const dataUsage = [
@@ -106,19 +105,7 @@ class DownloadModal extends React.Component {
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
-      helpers.SVG(
-        this.props.dispatch,
-        this.props.t,
-        this.props.metadata,
-        this.props.nodes,
-        this.props.filters,
-        this.props.visibility,
-        this.props.visibleStateCounts,
-        getFilePrefix(),
-        this.props.panelsToDisplay,
-        this.props.panelLayout,
-        this.getRelevantPublications()
-      );
+      this.props.dispatch({type: this.props.show ? DISMISS_DOWNLOAD_MODAL : TRIGGER_DOWNLOAD_MODAL});
     });
   }
   getRelevantPublications() {

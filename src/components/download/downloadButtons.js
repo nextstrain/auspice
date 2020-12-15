@@ -123,7 +123,7 @@ function getNumUniqueAuthors(nodes) {
   return uniqueAuthors.size;
 }
 
-export function getFilePrefix() {
+function getFilePrefix() {
   return "nextstrain_" +
     window.location.pathname
         .replace(/^\//, '')       // Remove leading slashes
