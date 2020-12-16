@@ -1,6 +1,7 @@
 import React from "react";
 import { withTheme } from 'styled-components';
 import * as icons from "../framework/svg-icons";
+import { NODE_VISIBLE } from "../../util/globals";
 import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
 import { getNumSelectedTips } from "../info/info";
@@ -9,95 +10,85 @@ import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
 const MetaIcon = withTheme(icons.Meta);
+const iconWidth = 25;
 
-export const DownloadButtons = ({dispatch, t, tree, nodes, entropy, metadata, mutType, panelsToDisplay, panelLayout, filters, visibility, visibleStateCounts, relevantPublications}) => {
-  // and with the check done to make sure the node is visible in strainTSV(),
-  // so if speed becomes a concern, getNumUniqueAuthorscould alter this to just generate the list of selected nodes once,
-  // on modal creation, and add it as a property on the modal
-  const selectedTipsCount = getNumSelectedTips(nodes, tree.visibility);
-  // likewise, this is somewhat redundant with authorTSV()
-  const uniqueAuthorCount = getNumUniqueAuthors(nodes);
+/**
+ * A React Component displaying buttons which trigger data-downloads. Intended for display within the
+ * larger Download modal component
+ */
+export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, mutType, panelsToDisplay, panelLayout, filters, visibility, visibleStateCounts, relevantPublications}) => {
+  const totalTipCount = metadata.mainTreeNumTips;
+  const selectedTipsCount = getNumSelectedTips(tree.nodes, tree.visibility);
+  const partialData = selectedTipsCount !== totalTipCount;
   const filePrefix = getFilePrefix();
-  const iconWidth = 25;
-  const buttons = [
-    <Button
-      name="Tree (Newick)"
-      description="Phylogenetic tree in Newick format with branch lengths in units of divergence."
-      icon={<RectangularTreeIcon width={iconWidth} selected />}
-      onClick={() => helpers.newick(dispatch, filePrefix, nodes[0], false)}
-    />,
-    <Button
-      name="TimeTree (Newick)"
-      description="Phylogenetic tree in Newick format with branch lengths measured in years."
-      icon={<RectangularTreeIcon width={iconWidth} selected />}
-      onClick={() => helpers.newick(dispatch, filePrefix, nodes[0], true)}
-    />,
-    <Button
-      name="All Metadata (TSV)"
-      description={`Per-sample metadata for all samples in the dataset (n = ${metadata.mainTreeNumTips}).`}
-      icon={<MetaIcon width={iconWidth} selected />}
-      onClick={() => helpers.strainTSV(dispatch, filePrefix, nodes, metadata.colorings, false, null)}
-    />
-  ];
-  if (selectedTipsCount > 0) {
-    buttons.push(
+
+  return (
+    <>
+      <div style={{fontWeight: 500, marginTop: "0px", marginBottom: "20px"}}>
+        {partialData ?
+          `The current view is displaying data for ${selectedTipsCount}/${totalTipCount} tips. Downloaded data is representative of this (i.e. it is a subset of the entire dataset).` :
+          `Download data for the entire dataset (${totalTipCount} tips).`
+        }
+      </div>
       <Button
-        name="Selected Metadata (TSV)"
-        description={`Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${metadata.mainTreeNumTips}).`}
-        icon={<MetaIcon width={iconWidth} selected />}
-        onClick={() => helpers.strainTSV(dispatch, filePrefix, nodes, metadata.colorings, true, tree.visibility)}
+        name="Tree (Newick)"
+        description="Phylogenetic tree in Newick format with branch lengths in units of divergence."
+        icon={<RectangularTreeIcon width={iconWidth} selected />}
+        onClick={() => helpers.newick(dispatch, filePrefix, tree.nodes[0], false)}
       />
-    );
-  }
-  if (helpers.areAuthorsPresent(tree)) {
-    buttons.push(
       <Button
-        name="Author Metadata (TSV)"
-        description={`Metadata for all samples in the dataset (n = ${metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`}
-        icon={<MetaIcon width={iconWidth} selected />}
-        onClick={() => helpers.authorTSV(dispatch, filePrefix, tree)}
+        name="TimeTree (Newick)"
+        description="Phylogenetic tree in Newick format with branch lengths measured in years."
+        icon={<RectangularTreeIcon width={iconWidth} selected />}
+        onClick={() => helpers.newick(dispatch, filePrefix, tree.nodes[0], true)}
       />
-    );
-  }
-  if (entropy.loaded) {
-    let description = `The data behind the diversity panel`;
-    description += ` showing ${entropy.showCounts ? `a count of changes across the tree` : `normalised shannon entropy`}`;
-    description += mutType === "nuc" ? " per nucleotide." : " per codon.";
-    if (selectedTipsCount !== metadata.mainTreeNumTips) {
-      description += ` Restricted to strains which are currently displayed (n = ${selectedTipsCount}/${metadata.mainTreeNumTips}).`;
-    }
-    buttons.push(
       <Button
-        name="Genetic diversity data (TSV)"
-        description={description}
+        name="Metadata (TSV)"
+        description={`Per-sample metadata (n = ${selectedTipsCount}).`}
         icon={<MetaIcon width={iconWidth} selected />}
-        onClick={() => helpers.entropyTSV(dispatch, filePrefix, entropy, mutType)}
+        onClick={() => helpers.strainTSV(dispatch, filePrefix, tree.nodes, metadata.colorings, tree.visibility)}
       />
-    );
-  }
-  buttons.push(
-    <Button
-      name="Screenshot (SVG)"
-      description="Screenshot of the current nextstrain display in SVG format; CC-BY licensed."
-      icon={<PanelsGridIcon width={iconWidth} selected />}
-      onClick={() => helpers.SVG(
-        dispatch,
-        t,
-        metadata,
-        nodes,
-        filters,
-        visibility,
-        visibleStateCounts,
-        getFilePrefix(),
-        panelsToDisplay,
-        panelLayout,
-        relevantPublications
+      {helpers.areAuthorsPresent(tree) && (
+        <Button
+          name="Author Metadata (TSV)"
+          description={`Metadata for ${selectedTipsCount} samples grouped by their ${getNumUniqueAuthors(tree.nodes, tree.visibility)} authors.`}
+          icon={<MetaIcon width={iconWidth} selected />}
+          onClick={() => helpers.authorTSV(dispatch, filePrefix, tree)}
+        />
       )}
-    />
+      {entropy.loaded && (
+        <Button
+          name="Genetic diversity data (TSV)"
+          description={`The data behind the diversity panel showing ${entropy.showCounts?`a count of changes across the tree`:`normalised shannon entropy`} per ${mutType==="nuc"?"nucleotide":"codon"}.`}
+          icon={<MetaIcon width={iconWidth} selected />}
+          onClick={() => helpers.entropyTSV(dispatch, filePrefix, entropy, mutType)}
+        />
+      )}
+      <Button
+        name="Screenshot (SVG)"
+        description="Screenshot of the current nextstrain display in SVG format; CC-BY licensed."
+        icon={<PanelsGridIcon width={iconWidth} selected />}
+        onClick={() => helpers.SVG(
+          dispatch,
+          t,
+          metadata,
+          tree.nodes,
+          filters,
+          visibility,
+          visibleStateCounts,
+          getFilePrefix(),
+          panelsToDisplay,
+          panelLayout,
+          relevantPublications
+        )}
+      />
+    </>
   );
-  return buttons;
 };
 
+/**
+ * React Component for an individual button
+ */
 function Button({name, description, icon, onClick}) {
   const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
   const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
@@ -116,11 +107,14 @@ function Button({name, description, icon, onClick}) {
   );
 }
 
-function getNumUniqueAuthors(nodes) {
-  const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
-    .filter((a) => a && a.value);
-  const uniqueAuthors = new Set(authors.map((a) => a.value));
-  return uniqueAuthors.size;
+function getNumUniqueAuthors(nodes, nodeVisibilities) {
+  const authors = new Set(nodes
+    .filter((n, i) => nodeVisibilities[i] === NODE_VISIBLE && n.inView)
+    .map((n) => getFullAuthorInfoFromNode(n))
+    .filter((a) => a && a.value)
+    .map((a) => a.value)
+  );
+  return authors.size;
 }
 
 function getFilePrefix() {

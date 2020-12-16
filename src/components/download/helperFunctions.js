@@ -76,25 +76,27 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   const filename = filePrefix + "_authors.tsv";
   const UNKNOWN = "unknown";
   const info = {};
-  tree.nodes.filter((n) => !n.hasChildren).forEach((n) => {
-    const author = getFullAuthorInfoFromNode(n);
-    if (!author) return;
-    if (info[author.value]) {
-      /* this author has been seen before */
-      info[author.value].count += 1;
-      info[author.value].strains.push(n.name);
-    } else {
-      /* author as-yet unseen */
-      info[author.value] = {
-        author: author.value,
-        title: author.title || UNKNOWN,
-        journal: author.journal || UNKNOWN,
-        url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
-        count: 1,
-        strains: [n.name]
-      };
-    }
-  });
+  tree.nodes
+    .filter((n, i) => tree.visibility[i] === NODE_VISIBLE && n.inView)
+    .filter((n) => !n.hasChildren).forEach((n) => {
+      const author = getFullAuthorInfoFromNode(n);
+      if (!author) return;
+      if (info[author.value]) {
+        /* this author has been seen before */
+        info[author.value].count += 1;
+        info[author.value].strains.push(n.name);
+      } else {
+        /* author as-yet unseen */
+        info[author.value] = {
+          author: author.value,
+          title: author.title || UNKNOWN,
+          journal: author.journal || UNKNOWN,
+          url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
+          count: 1,
+          strains: [n.name]
+        };
+      }
+    });
   Object.values(info).forEach((v) => {
     lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"));
   });
@@ -105,9 +107,10 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
 
 /**
  * Create & write a TSV file where each row is a strain in the tree,
- * with the relevent information (accession, traits, etcetera)
+ * with the relevent information (accession, traits, etcetera).
+ * Only visible nodes (tips) will be included in the file.
  */
-export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
+export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
@@ -117,8 +120,9 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
 
-    if (selectedNodesOnly && nodeVisibilities &&
-      (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView) {
+      continue;
+    }
 
     tipTraitValues[node.name] = {Strain: node.name};
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
@@ -195,7 +199,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   }
 
   /* write out information we've collected */
-  const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}metadata.tsv`;
+  const filename = `${filePrefix}_metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
