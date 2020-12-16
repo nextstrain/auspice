@@ -7,7 +7,6 @@ import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../ut
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
-import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
@@ -16,6 +15,7 @@ import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
+import { updateEntropyVisibility } from "./entropy";
 
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -786,12 +786,11 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate entropy in view */
   if (entropy.loaded) {
-    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
-    entropy.bars = entropyBars;
-    entropy.maxYVal = entropyMaxYVal;
+    entropy.loaded = false;
     entropy.zoomMax = controls["zoomMax"];
     entropy.zoomMin = controls["zoomMin"];
     entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
+    setImmediate(() => dispatch(updateEntropyVisibility));
   }
 
   /* update frequencies if they exist (not done for new JSONs) */

@@ -3,14 +3,14 @@ import { calcEntropyInView } from "../util/entropy";
 import * as types from "./types";
 
 /* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
-export const updateEntropyVisibility = debounce((dispatch, getState) => {
+export const updateEntropyVisibility = debounce(async (dispatch, getState) => {
   const { entropy, controls, tree } = getState();
   if (!tree.nodes ||
     !tree.visibility ||
     !entropy.geneMap ||
     controls.animationPlayPauseButton !== "Play"
   ) {return;}
-  const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+  const [data, maxYVal] = await calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
   dispatch({type: types.ENTROPY_DATA, data, maxYVal});
 }, 500, { leading: true, trailing: true });
 
@@ -25,6 +25,8 @@ export const showCountsNotEntropy = (showCounts) => (dispatch, getState) => {
 };
 
 export const changeZoom = (zoomc) => (dispatch, getState) => {
+  const { entropy: {zoomMin, zoomMax} } = getState();
+  if (zoomMin === zoomc[0] && zoomMax === zoomc[1]) return;
   dispatch({type: types.CHANGE_ZOOM, zoomc});
   updateEntropyVisibility(dispatch, getState);
 };
