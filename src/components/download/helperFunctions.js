@@ -15,25 +15,28 @@ export const isPaperURLValid = (d) => {
 };
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
-const treeToNewick = (root, temporal) => {
+const treeToNewick = (tree, temporal) => {
+  const getXVal = temporal ? (n) => getTraitFromNode(n, "num_date") : getDivFromNode;
+
   function recurse(node, parentX) {
-    let subtree = "";
-    if (node.hasChildren) {
-      const children = [];
-      node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
-        children.push(subsubtree);
-      });
-      subtree += "(" + children.join(",") + ")" + node.name + ":";
-      subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
-    } else { /* terminal node */
-      let leaf = node.name + ":";
-      leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
-      subtree += leaf;
+    if (!node.inView || tree.visibility[node.arrayIdx]!==NODE_VISIBLE) {
+      return "";
     }
-    return subtree;
+    if (node.hasChildren) {
+      const childSubtrees = node.children.map((child) => {
+        const subtree = recurse(child, getXVal(node));
+        return subtree;
+      });
+      return `(${childSubtrees.filter((t) => !!t).join(",")})${node.name}:${getXVal(node) - parentX}`;
+    }
+    /* terminal node */
+    const leaf = `${node.name}:${getXVal(node) - parentX}`;
+    return leaf;
   }
-  return recurse(root, 0) + ";";
+
+  const rootNode = tree.nodes[tree.idxOfInViewRootNode];
+  const rootXVal = getXVal(rootNode);
+  return recurse(rootNode, rootXVal) + ";";
 };
 
 const MIME = {
@@ -204,11 +207,11 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibiliti
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
 
-export const newick = (dispatch, filePrefix, root, temporal) => {
+export const newick = (dispatch, filePrefix, tree, temporal) => {
   const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
-  const message = temporal ? "TimeTree" : "Tree";
-  write(fName, MIME.text, treeToNewick(root, temporal));
-  dispatch(infoNotification({message: message + " written to " + fName}));
+  const treeString = treeToNewick(tree, temporal);
+  write(fName, MIME.text, treeString);
+  dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
 };
 
 const processXMLString = (input) => {

@@ -34,13 +34,13 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, mutType, 
         name="Tree (Newick)"
         description="Phylogenetic tree in Newick format with branch lengths in units of divergence."
         icon={<RectangularTreeIcon width={iconWidth} selected />}
-        onClick={() => helpers.newick(dispatch, filePrefix, tree.nodes[0], false)}
+        onClick={() => helpers.newick(dispatch, filePrefix, tree, false)}
       />
       <Button
         name="TimeTree (Newick)"
         description="Phylogenetic tree in Newick format with branch lengths measured in years."
         icon={<RectangularTreeIcon width={iconWidth} selected />}
-        onClick={() => helpers.newick(dispatch, filePrefix, tree.nodes[0], true)}
+        onClick={() => helpers.newick(dispatch, filePrefix, tree, true)}
       />
       <Button
         name="Metadata (TSV)"
