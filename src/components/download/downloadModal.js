@@ -45,6 +45,7 @@ export const publications = {
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
+  distanceMeasure: state.controls.distanceMeasure,
   metadata: state.metadata,
   entropy: state.entropy,
   mutType: state.controls.mutType,
