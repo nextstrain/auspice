@@ -5,6 +5,7 @@ import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccine
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
 import { createSummary } from "../info/info";
+import { isColorByGenotype } from "../../util/getGenotype";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -15,7 +16,7 @@ export const isPaperURLValid = (d) => {
 };
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
-const treeToNewick = (tree, temporal) => {
+const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=() => "") => {
   const getXVal = temporal ? (n) => getTraitFromNode(n, "num_date") : getDivFromNode;
 
   function recurse(node, parentX) {
@@ -27,10 +28,11 @@ const treeToNewick = (tree, temporal) => {
         const subtree = recurse(child, getXVal(node));
         return subtree;
       });
-      return `(${childSubtrees.filter((t) => !!t).join(",")})${node.name}:${getXVal(node) - parentX}`;
+      return `(${childSubtrees.filter((t) => !!t).join(",")})` +
+        `${internalNodeNames?node.name:""}${nodeAnnotation(node)}:${getXVal(node) - parentX}`;
     }
     /* terminal node */
-    const leaf = `${node.name}:${getXVal(node) - parentX}`;
+    const leaf = `${node.name}${nodeAnnotation(node)}:${getXVal(node) - parentX}`;
     return leaf;
   }
 
@@ -46,6 +48,54 @@ const MIME = {
   svg: "image/svg+xml;charset=utf-8"
 };
 
+const treeToNexus = (tree, colorings, colorBy, temporal) => {
+  /**
+   * Create a NEXUS-type node-annotation conforming with BEAST export format
+   * For example:
+   * [&country=Thailand,region=SoutheastAsia,lbi=0.3355275145752664,gt-NS1_349=M]
+   * Simple key+value pairs look like `key=value` (value can be string or numeric & doesn't need to be quoted.
+   * Ranges can be included like `key={v1,v2}` (v1,v2 are usually numeric)
+   * Square brackets cannot be in the key or value, neither can curly brackets (except as noted above)
+   * not can commas or equals signs, except as noted above.
+   * We also strip non-latin characters, which cause issues for FigTree
+   *
+   * We export all node_attrs which are colorings, as well as divergence if the tree is temporally scaled.
+   * If the current color-by is a genotype, we export this.
+   */
+  const makeNodeAnnotation = () => {
+    const t = (x) => String(x).replace(/[[\]{}=,]/g, '').replace(/[\u0250-\ue007]/g, '');
+    const genotype = isColorByGenotype(colorBy) ? t(colorBy.replace(/,/g, '/')) : undefined;
+    return (node) => {
+      const annotations = [];
+      Object.keys(colorings).forEach((c) => {
+        if (c.includes("_lab") || c.includes("author")) return;
+        const v = getTraitFromNode(node, c);
+        if (v) {
+          annotations.push(`${t(c)}=${t(v)}`);
+          const conf = getTraitFromNode(node, c, {confidence: true});
+          if (Array.isArray(conf) && conf.length===2) {
+            annotations.push(`${t(c)}_CI={${conf.map((cv) => t(cv)).join(",")}}`);
+          }
+        }
+      });
+      if (genotype) {
+        annotations.push(`${genotype}=${t(node.currentGt.replace(/\s/g, ""))}`);
+      }
+      if (temporal) { // if temporal metric, export `div` as an attr if it exists
+        const div = getDivFromNode(node);
+        if (div!==undefined) annotations.push(`div=${div}`);
+      }
+      if (!annotations.length) return ``;
+      return `[&${annotations.join(',')}]`;
+    };
+  };
+  return [
+    '#nexus',
+    'begin trees;',
+    "  tree one = "+treeToNewick(tree, temporal, true, makeNodeAnnotation()),
+    "end;"
+  ].join("\n");
+};
 
 const write = (filename, type, content) => {
   /* https://stackoverflow.com/questions/18848860/javascript-array-to-csv/18849208#comment59677504_18849208 */
@@ -207,11 +257,16 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibiliti
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
 
-export const newick = (dispatch, filePrefix, tree, temporal) => {
-  const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
-  const treeString = treeToNewick(tree, temporal);
-  write(fName, MIME.text, treeString);
-  dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
+export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colorings, colorBy}) => {
+  try {
+    const fName = `${filePrefix}_${temporal?'timetree':'tree'}.${isNewick?'nwk':'nexus'}`;
+    const treeString = isNewick ? treeToNewick(tree, temporal) : treeToNexus(tree, colorings, colorBy, temporal);
+    write(fName, MIME.text, treeString);
+    dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
+  } catch (err) {
+    console.error(err);
+    dispatch(warningNotification({message: "Error saving tree!"}));
+  }
 };
 
 const processXMLString = (input) => {
