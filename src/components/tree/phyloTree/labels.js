@@ -1,5 +1,7 @@
 import { timerFlush } from "d3-timer";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { numericToDateObject, prettifyDate } from "../../../util/dateHelpers";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   if ("tipLabels" in this.groups) {
@@ -147,4 +149,19 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     .style("font-weight", fontWeight)
     .style("font-size", labelSize)
     .text((d) => d.n.branch_attrs.labels[key]);
+};
+
+/**
+ * A helper factory to create the tip label function.
+ * This (returned function) is typically set elsewhere
+ * and stored on `this.callbacks.tipLabel` which is used
+ * in the `updateTipLabels` function.
+ */
+export const makeTipLabelFunc = (tipLabelKey) => {
+  /* special-case `num_date`. In the future we may wish to examine
+  `metadata.colorings` and special case other scale types */
+  if (tipLabelKey === "num_date") {
+    return (d) => prettifyDate("DAY", numericToDateObject(getTraitFromNode(d.n, "num_date")));
+  }
+  return (d) => getTraitFromNode(d.n, tipLabelKey);
 };

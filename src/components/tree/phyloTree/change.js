@@ -5,6 +5,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
+import { makeTipLabelFunc } from "./labels";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -253,11 +254,12 @@ export const change = function change({
   zoomIntoClade = false,
   svgHasChangedDimensions = false,
   animationInProgress = false,
-  /* change these things to provided value */
+  /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
   updateLayout = undefined,
   newBranchLabellingKey = undefined,
+  newTipLabelKey = undefined,
   /* arrays of data (the same length as nodes) */
   branchStroke = undefined,
   tipStroke = undefined,
@@ -357,6 +359,11 @@ export const change = function change({
     showConfidences
   ) {
     this.mapToScreen();
+  }
+  /* tip label key change -> update callback used */
+  if (newTipLabelKey) {
+    this.callbacks.tipLabel = makeTipLabelFunc(newTipLabelKey);
+    elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
   }
 
   /* Finally, actually change the SVG elements themselves */

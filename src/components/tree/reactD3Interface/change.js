@@ -51,11 +51,13 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newDistance = newProps.distanceMeasure;
   }
 
-  /* change in key used to define branch labels (e.g. aa, clade...) */
+  /* change in key used to define branch labels, tip labels */
   if (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
-
+  if (oldProps.tipLabelKey !== newProps.tipLabelKey) {
+    args.newTipLabelKey = newProps.tipLabelKey;
+  }
 
   /* show / remove confidence intervals across the tree */
   if (

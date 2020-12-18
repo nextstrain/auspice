@@ -129,6 +129,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.p = action.panelLayout;
       break;
     }
+    case types.CHANGE_TIP_LABEL_KEY: {
+      query.tl = action.key===strainSymbol ? undefined : action.key;
+      break;
+    }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
         query.dmin = undefined;
