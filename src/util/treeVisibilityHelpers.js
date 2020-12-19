@@ -93,6 +93,21 @@ const makeParentVisible = (visArray, node) => {
   makeParentVisible(visArray, node.parent);
 };
 
+/* Recursively hide nodes that do not have more than one child node in
+ * the param visArray.
+ * Relies on visArray having been updated by `makeParentVisible` */
+const hideNodeIfOnlyOneChildVisible = (visArray, node) => {
+  if (!node.hasChildren) {
+    return; // Terminal node without children
+  }
+  const visibleChildren = node.children.filter((child) => visArray[child.arrayIdx]);
+  if (visibleChildren.length > 1) {
+    return; // This is the common ancestor of visible children
+  }
+  visArray[node.arrayIdx] = false;
+  visibleChildren.forEach((child) => hideNodeIfOnlyOneChildVisible(visArray, child));
+};
+
 /* calcVisibility
 USES:
 inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
@@ -154,6 +169,9 @@ export const calcVisibility = (tree, controls, dates) => {
       for (let i = 0; i < idxsOfFilteredTips.length; i++) {
         makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
       }
+      /* Recursivley hide ancestor nodes that are not the last common
+       * ancestor of selected nodes, starting from the root of the tree */
+      hideNodeIfOnlyOneChildVisible(filtered, tree.nodes[0]);
     }
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
