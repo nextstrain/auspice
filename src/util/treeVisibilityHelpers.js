@@ -96,7 +96,7 @@ const makeParentVisible = (visArray, node) => {
 /* Recursively hide nodes that do not have more than one child node in
  * the param visArray.
  * Relies on visArray having been updated by `makeParentVisible` */
-const hideNodeIfOnlyOneChildVisible = (visArray, node) => {
+const hideNodesAboveVisibleCommonAncestor = (visArray, node) => {
   if (!node.hasChildren) {
     return; // Terminal node without children
   }
@@ -105,7 +105,7 @@ const hideNodeIfOnlyOneChildVisible = (visArray, node) => {
     return; // This is the common ancestor of visible children
   }
   visArray[node.arrayIdx] = false;
-  visibleChildren.forEach((child) => hideNodeIfOnlyOneChildVisible(visArray, child));
+  visibleChildren.forEach((child) => hideNodesAboveVisibleCommonAncestor(visArray, child));
 };
 
 /* calcVisibility
@@ -171,7 +171,7 @@ export const calcVisibility = (tree, controls, dates) => {
       }
       /* Recursivley hide ancestor nodes that are not the last common
        * ancestor of selected nodes, starting from the root of the tree */
-      hideNodeIfOnlyOneChildVisible(filtered, tree.nodes[0]);
+      hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
     }
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
