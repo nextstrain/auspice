@@ -798,6 +798,7 @@ export const createStateFromQueryOrJSONs = ({
   controls.colorScale.visibleLegendValues = createVisibleLegendValues({
     colorBy: controls.colorBy,
     scaleType: controls.colorScale.scaleType,
+    genotype: controls.colorScale.genotype,
     legendValues: controls.colorScale.legendValues,
     treeNodes: tree.nodes,
     treeTooNodes: treeToo ? treeToo.nodes : undefined,

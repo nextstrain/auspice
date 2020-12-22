@@ -100,6 +100,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
+      genotype: controls.colorScale.genotype,
       scaleType: controls.colorScale.scaleType,
       legendValues: controls.colorScale.legendValues,
       treeNodes: tree.nodes,
@@ -161,6 +162,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
       scaleType: controls.colorScale.scaleType,
+      genotype: controls.colorScale.genotype,
       legendValues: controls.colorScale.legendValues,
       treeNodes: tree.nodes,
       treeTooNodes: treeToo ? treeToo.nodes : undefined,

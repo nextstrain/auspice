@@ -68,6 +68,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const visibleLegendValues = createVisibleLegendValues({
       colorBy,
       scaleType,
+      genotype,
       legendValues,
       treeNodes: tree.nodes,
       treeTooNodes,
@@ -292,20 +293,19 @@ function getDiscreteValuesFromTree(nodes, nodesToo, attr) {
 /**
  * Dynamically create legend values based on visibility for ordinal and categorical scale types.
  */
-export function createVisibleLegendValues({colorBy, scaleType, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) {
+export function createVisibleLegendValues({colorBy, scaleType, genotype, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) {
   if (visibility) {
     // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
     // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
     if (scaleType === "ordinal" || scaleType === "categorical") {
       let legendValuesObserved = treeNodes
         .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
-        .map((n) => getTraitFromNode(n, colorBy));
-
+        .map((n) => genotype ? n.currentGt : getTraitFromNode(n, colorBy));
       // if the 2nd tree is enabled, compute visible legend values and merge the values.
       if (treeTooNodes && visibilityToo) {
         const legendValuesObservedToo = treeTooNodes
           .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
-          .map((n) => getTraitFromNode(n, colorBy));
+          .map((n) => genotype ? n.currentGt : getTraitFromNode(n, colorBy));
         legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
       }
       legendValuesObserved = new Set(legendValuesObserved);
