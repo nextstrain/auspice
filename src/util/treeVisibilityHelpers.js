@@ -93,19 +93,25 @@ const makeParentVisible = (visArray, node) => {
   makeParentVisible(visArray, node.parent);
 };
 
-/* Recursively hide nodes that do not have more than one child node in
- * the param visArray.
- * Relies on visArray having been updated by `makeParentVisible` */
+/* Recursively hide nodes that do not have more than one child node by updating
+ * the boolean values in the param visArray.
+ * Relies on visArray having been updated by `makeParentVisible`
+ * Returns the index of the visible commonn ancestor. */
 const hideNodesAboveVisibleCommonAncestor = (visArray, node) => {
   if (!node.hasChildren) {
-    return; // Terminal node without children
+    return node.arrayIdx; // Terminal node without children
   }
   const visibleChildren = node.children.filter((child) => visArray[child.arrayIdx]);
   if (visibleChildren.length > 1) {
-    return; // This is the common ancestor of visible children
+    return node.arrayIdx; // This is the common ancestor of visible children
   }
   visArray[node.arrayIdx] = false;
-  visibleChildren.forEach((child) => hideNodesAboveVisibleCommonAncestor(visArray, child));
+  for (let i = 0; i < visibleChildren.length; i++) {
+    const commonAncestorIdx = hideNodesAboveVisibleCommonAncestor(visArray, visibleChildren[i]);
+    if (commonAncestorIdx) return commonAncestorIdx;
+  }
+  // If there is no visible common ancestor, then return null
+  return null;
 };
 
 /* calcVisibility
