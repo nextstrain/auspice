@@ -137,17 +137,19 @@ const getInView = (tree) => {
 };
 
 /* Gets all active filters and checks if each tree.node matches the filters.
- * Returns an array of filtered booleans.
+ * Returns an array of filtered booleans and the index of the least common
+ * ancestor node of the filtered nodes.
  * FILTERS:
  * - controls.filters (redux) is a dict of trait name -> values
  * - filters (in this code) is a list of filters to apply
  *   e.g. [{trait: "country", values: [...]}, ...] */
-const getFiltered = (tree, controls, inView) => {
+const getFilteredAndIdxOfFilteredRoot = (tree, controls, inView) => {
   if (!tree.nodes) {
     console.error("getFiltered() ran without tree.nodes");
     return null;
   }
   let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
+  let idxOfFilteredRoot; // index of last common ancestor of filtered nodes.
   const filters = [];
   Reflect.ownKeys(controls.filters).forEach((filterName) => {
     const items = controls.filters[filterName];
@@ -172,16 +174,16 @@ const getFiltered = (tree, controls, inView) => {
     }
     /* Recursivley hide ancestor nodes that are not the last common
      * ancestor of selected nodes, starting from the root of the tree */
-    hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
+    idxOfFilteredRoot = hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
   }
-  return filtered;
+  return {filtered, idxOfFilteredRoot};
 };
 
 /* calcVisibility
 USES:
 - use dates NOT controls.dateMin & controls.dateMax
 - uses inView array returned by getInView()
-- uses filtered array returned by getFilteredAndFilteredRootIdx()
+- uses filtered array returned by getFilteredAndIdxOfFilteredRoot()
 
 RETURNS:
 visibility: array of integers in {0, 1, 2}
@@ -229,7 +231,7 @@ export const calcVisibility = (tree, controls, dates, inView, filtered) => {
 
 export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
   const inView = getInView(tree);
-  const filtered = getFiltered(tree, controls, inView);
+  const {filtered, idxOfFilteredRoot} = getFilteredAndIdxOfFilteredRoot(tree, controls, inView) || {};
   const visibility = calcVisibility(tree, controls, dates, inView, filtered);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
@@ -238,6 +240,7 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
     branchThickness: calcBranchThickness(tree.nodes, visibility),
-    branchThicknessVersion: tree.branchThicknessVersion + 1
+    branchThicknessVersion: tree.branchThicknessVersion + 1,
+    idxOfFilteredRoot: idxOfFilteredRoot
   };
 };

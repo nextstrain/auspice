@@ -97,14 +97,32 @@ class Tree extends React.Component {
   getStyles = () => {
     const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
       this.props.treeToo.idxOfInViewRootNode !== 0;
+
+    const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
+      this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
+    const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
+      this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
+    const activeZoomButton = filteredTree || filteredTreeToo;
+
     return {
-      resetTreeButton: {
+      treeButtonsDiv: {
         zIndex: 100,
         position: "absolute",
         right: 5,
-        top: 0,
+        top: 0
+      },
+      resetTreeButton: {
+        zIndex: 100,
+        display: "inline-block",
         cursor: activeResetTreeButton ? "pointer" : "auto",
         color: activeResetTreeButton ? darkGrey : lightGrey
+      },
+      zoomToSelectedButton: {
+        zIndex: 100,
+        dispaly: "inline-block",
+        cursor: activeZoomButton ? "pointer" : "auto",
+        color: activeZoomButton ? darkGrey : lightGrey,
+        pointerEvents: activeZoomButton ? "auto" : "none"
       }
     };
   };
@@ -120,6 +138,12 @@ class Tree extends React.Component {
       />
     );
   }
+
+  zoomToSelected = () => {
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+      root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
+    }));
+  };
 
   render() {
     const { t } = this.props;
@@ -169,12 +193,20 @@ class Tree extends React.Component {
           null
         }
         {this.props.narrativeMode ? null : (
-          <button
-            style={{...tabSingle, ...styles.resetTreeButton}}
-            onClick={this.redrawTree}
-          >
-            {t("Reset Layout")}
-          </button>
+          <div style={{...styles.treeButtonsDiv}}>
+            <button
+              style={{...tabSingle, ...styles.zoomToSelectedButton}}
+              onClick={this.zoomToSelected}
+            >
+              {t("Zoom to Selected")}
+            </button>
+            <button
+              style={{...tabSingle, ...styles.resetTreeButton}}
+              onClick={this.redrawTree}
+            >
+              {t("Reset Layout")}
+            </button>
+          </div>
         )}
       </Card>
     );
