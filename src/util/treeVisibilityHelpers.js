@@ -114,12 +114,74 @@ const hideNodesAboveVisibleCommonAncestor = (visArray, node) => {
   return null;
 };
 
+/* Gets the inView attribute of phyloTree.nodes, accessed through
+ * redux.tree.nodes[idx].shell.inView Bool. The inView attribute is set by
+ * phyloTree and determines if the tip is within the view.
+ * Returns the array of inView booleans. */
+const getInView = (tree) => {
+  if (!tree.nodes) {
+    console.error("getInView() ran without tree.nodes");
+    return null;
+  }
+  /* inView represents nodes that are within the current view window (i.e. not off the screen) */
+  let inView;
+  try {
+    inView = tree.nodes.map((d) => d.shell.inView);
+  } catch (e) {
+    /* edge case: this fn may be called before the shell structure of the nodes
+     * has been created (i.e. phyloTree's not run yet). In this case, it's
+     * safe to assume that everything's in view */
+    inView = tree.nodes.map((d) => d.inView !== undefined ? d.inView : true);
+  }
+  return inView;
+};
+
+/* Gets all active filters and checks if each tree.node matches the filters.
+ * Returns an array of filtered booleans.
+ * FILTERS:
+ * - controls.filters (redux) is a dict of trait name -> values
+ * - filters (in this code) is a list of filters to apply
+ *   e.g. [{trait: "country", values: [...]}, ...] */
+const getFiltered = (tree, controls, inView) => {
+  if (!tree.nodes) {
+    console.error("getFiltered() ran without tree.nodes");
+    return null;
+  }
+  let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
+  const filters = [];
+  Reflect.ownKeys(controls.filters).forEach((filterName) => {
+    const items = controls.filters[filterName];
+    const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
+    if (activeFilterItems.length) {
+      filters.push({trait: filterName, values: activeFilterItems});
+    }
+  });
+
+  if (filters.length) {
+    /* find the terminal nodes that were (a) already visibile and (b) match the filters */
+    filtered = tree.nodes.map((d, idx) => (
+      !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
+    ));
+    const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
+      if (e) {a.push(i);}
+      return a;
+    }, []);
+    /* for each visibile tip, make the parent nodes visible (recursively) */
+    for (let i = 0; i < idxsOfFilteredTips.length; i++) {
+      makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
+    }
+    /* Recursivley hide ancestor nodes that are not the last common
+     * ancestor of selected nodes, starting from the root of the tree */
+    hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
+  }
+  return filtered;
+};
+
 /* calcVisibility
 USES:
-inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
-  Bool. Set by phyloTree, determines if the tip is within the view.
-controls.filters
-use dates NOT controls.dateMin & controls.dateMax
+- use dates NOT controls.dateMin & controls.dateMax
+- uses inView array returned by getInView()
+- uses filtered array returned by getFilteredAndFilteredRootIdx()
 
 RETURNS:
 visibility: array of integers in {0, 1, 2}
@@ -130,55 +192,12 @@ visibility: array of integers in {0, 1, 2}
 ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
  - inView filtering (reflects tree zooming): Nodes which are not inView always have visibility=0
  - time filtering is simple - all nodes (internal + terminal) not within (tmin, tmax) are excluded.
-- filters are a bit more tricky - the visibile tips are calculated, and the parent
+ - filters are a bit more tricky - the visibile tips are calculated, and the parent
     branches back to the MRCA are considered visibile. This is then intersected with
     the time & inView visibile stuff
-
-FILTERS:
- - controls.filters (redux) is a dict of trait name -> values
- - filters (in this code) is a list of filters to apply
-   e.g. [{trait: "country", values: [...]}, ...]
 */
-export const calcVisibility = (tree, controls, dates) => {
+export const calcVisibility = (tree, controls, dates, inView, filtered) => {
   if (tree.nodes) {
-    /* inView represents nodes that are within the current view window (i.e. not off the screen) */
-    let inView;
-    try {
-      inView = tree.nodes.map((d) => d.shell.inView);
-    } catch (e) {
-      /* edge case: this fn may be called before the shell structure of the nodes
-       * has been created (i.e. phyloTree's not run yet). In this case, it's
-       * safe to assume that everything's in view */
-      inView = tree.nodes.map((d) => d.inView !== undefined ? d.inView : true);
-    }
-
-    // FILTERS
-    let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
-    const filters = [];
-    Reflect.ownKeys(controls.filters).forEach((filterName) => {
-      const items = controls.filters[filterName];
-      const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
-      if (activeFilterItems.length) {
-        filters.push({trait: filterName, values: activeFilterItems});
-      }
-    });
-    if (filters.length) {
-      /* find the terminal nodes that were (a) already visibile and (b) match the filters */
-      filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
-      ));
-      const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
-        if (e) {a.push(i);}
-        return a;
-      }, []);
-      /* for each visibile tip, make the parent nodes visible (recursively) */
-      for (let i = 0; i < idxsOfFilteredTips.length; i++) {
-        makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
-      }
-      /* Recursivley hide ancestor nodes that are not the last common
-       * ancestor of selected nodes, starting from the root of the tree */
-      hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
-    }
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
       if (inView[idx] && (filtered ? filtered[idx] : true)) {
@@ -209,7 +228,9 @@ export const calcVisibility = (tree, controls, dates) => {
 };
 
 export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
-  const visibility = calcVisibility(tree, controls, dates);
+  const inView = getInView(tree);
+  const filtered = getFiltered(tree, controls, inView);
+  const visibility = calcVisibility(tree, controls, dates, inView, filtered);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
   /* re-calculate branchThickness (inline) */
