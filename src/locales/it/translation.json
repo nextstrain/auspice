@@ -1,0 +1,92 @@
+{
+  "__Header//Byline__": "########################################",
+  "Maintained by": "Mantenuto da",
+  "using data from": "utilizzo dei dati da",
+  "Built with": "Sviluppato con",
+
+
+  "__Header//Info__": "########################################",
+  "Showing {{x}} of {{y}} genomes": "Visualizzazione di {{x}} di {{y}} genomi",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Visualizzazione di {{x}} di {{y}} genomi campionati tra {{from}} e {{to}}",
+  "Comprising": "Composto da",
+  "Animation in progress": "Animazione in corso",
+  "Filtered to": "Sottolineando",
+
+
+  "__Download Modal__": "########################################",
+  "click outside this box to return to the app": "clicca fuori da questa casella per tornare all'app",
+  "last updated": "ultimo aggiornamento",
+  "A full list of sequence authors is available via the TSV files below": "Un elenco completo degli autori di sequenze è disponibile tramite i file TSV di seguito",
+  "Data usage policy": "Politica sull'utilizzo dei dati",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Si prega di citare gli autori che hanno contribuito ai dati genomici, nonché",
+  "Download data": "Scarica i dati",
+  "Data usage part 1": "I dati qui presentati sono destinati alla rapida diffusione di analisi per importanti agenti patogeni. I dati non pubblicati sono inclusi con il permesso dei generatori di dati e non pregiudicano il loro diritto di pubblicazione. ",
+  "Data usage part 2": "Si prega di contattare i rispettivi autori (disponibili di seguito nei file TSV) se si intende effettuare ulteriori ricerche utilizzando i loro dati. I dati derivati, come le filogenesi, possono essere scaricati di seguito - si prega di contattare autori interessati. ",
+
+
+  "__Entropy Panel__": "########################################",
+  "Diversity": "Diversità",
+  "entropy": "entropia",
+  "events": "eventi",
+  "Codon {{codon}} in protein {{protein}}": "Codone {{codon}} nella proteina {{protein}}",
+  "Nucleotide {{nuc}}": "Nucleotide {{nuc}}",
+  "Nuc positions {{a}} to {{b}}": "Posizione dei nucleotidi {{a}} a {{b}}",
+  "Num mutations": "Numero di mutazioni",
+  "Negative strand": "Filamento negativo",
+  "Positive strand": "Filamento positivo",
+  "Click to color tree & map": "Clicca per colorare l'albero e la mappa",
+
+
+  "__Footer__": "########################################",
+  "Filter by {{filterTitle}}": "Filtrare per {{filterTitle}}",
+  "Data updated": "Dati aggiornati",
+
+
+  "__Map panel__": "########################################",
+  "Transmissions": "Trasmissioni",
+  "Geography": "Geografia",
+  "reset zoom": "ripristinare lo zoom",
+  "Reset": "Ripristinare",
+  "Play": "Riprodurre",
+  "Pause": "Mettere in pausa",
+
+
+  "__Tree (Phylogeny) panel__": "########################################",
+  "Phylogeny": "Filogenesi",
+  "Reset Layout": "Ripristina layout",
+  "Click on tip to display more info": "Clicca sulla punta dell'albero per ulteriori informazioni",
+  "Click to zoom into clade": "Clicca per ingrandire il clade",
+  "Click to zoom out to parent clade": "Clicca per rimpicciolire al clade genitore",
+  "Branch leading to": "Ramo che porta a",
+  "Number of descendants": "Numero di discendenti",
+  "Nucleotide mutations": "Mutazioni nucleotidiche",
+  "AA mutations": "Mutazioni di AA",
+  "protein mutations truncated": "mutazioni proteiche troncate",
+  "Gaps": "Lacune",
+  "{{x}} more": "{{x}} più",
+  "No nucleotide mutations": "Nessuna mutazione nucleotidica",
+  "No amino acid mutations": "Nessuna mutazione dell'amminoacido",
+  "Divergence": "Divergenza",
+  "Date": "Data",
+  "Collection date": "Data di raccolta",
+  "Inferred collection date": "Data di ritiro dedotta",
+  "Inferred Date": "Data dedotta",
+  "Date Confidence Interval": "Intervallo di confidenza della data",
+  "Vaccine selected": "Vaccino selezionato",
+  "Vaccine start date": "Data di inizio del vaccino",
+  "Vaccine end date": "Data di fine del vaccino",
+  "Serum strain": "Ceppo di siero",
+  "Click outside this box to go back to the tree": "Clicca fuori da questa casella per tornare all'albero",
+  "Authors": "Autori",
+  "Title": "Titolo",
+  "Journal": "Rivista",
+
+
+  "__Frequencies panel__": "########################################",
+  "Frequencies": "Frequenze",
+  "colored by": "colore assegnato da",
+  "Projection": "Proiezione",
+  "Time point": "Punto temporale",
+  "Frequency": "Frequenza",
+  "Projected frequency": "Frequenza prevista"
+}
