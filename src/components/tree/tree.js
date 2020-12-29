@@ -114,6 +114,7 @@ class Tree extends React.Component {
       resetTreeButton: {
         zIndex: 100,
         display: "inline-block",
+        marginLeft: 4,
         cursor: activeResetTreeButton ? "pointer" : "auto",
         color: activeResetTreeButton ? darkGrey : lightGrey
       },
