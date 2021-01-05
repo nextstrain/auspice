@@ -70,7 +70,7 @@ function processHeader(fields) {
       /* interpret column names using microreact-style syntax */
       if (fieldName.includes("__")) {
         const [prefix, suffix] = fieldName.split("__");
-        if (["shape", "colour"].includes(suffix)) {
+        if (["shape", "colour", "color"].includes(suffix)) {
           ignoredFields.add(fieldName);
           return null;
         }
@@ -84,6 +84,8 @@ function processHeader(fields) {
     .map((data) => {
       if (fields.includes(`${data.name}__colour`)) {
         data.scaleKey = `${data.name}__colour`;
+      } else if (fields.includes(`${data.name}__color`)) {
+        data.scaleKey = `${data.name}__color`;
       }
       return data;
     });
