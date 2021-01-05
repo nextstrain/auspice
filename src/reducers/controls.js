@@ -258,11 +258,22 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
-    case types.ADD_COLOR_BYS:
+    case types.ADD_EXTRA_METADATA:
       for (const colorBy of Object.keys(action.newColorings)) {
+        state.filters[colorBy] = [];
         state.coloringsPresentOnTree.add(colorBy);
       }
-      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
+      let newState = Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
+      if (action.newGeoResolution && !state.panelsAvailable.includes("map")) {
+        newState = {
+          ...newState,
+          geoResolution: action.newGeoResolution.key,
+          canTogglePanelLayout: true,
+          panelsAvailable: [...state.panelsAvailable, "map"],
+          panelsToDisplay: [...state.panelsToDisplay, "map"]
+        };
+      }
+      return newState;
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 

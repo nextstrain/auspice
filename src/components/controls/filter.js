@@ -91,8 +91,11 @@ class FilterData extends React.Component {
     const loadOptions = debounce((input, callback) => callback(null, {options}), DEBOUNCE_TIME);
     const styles = this.getStyles();
     const inUseFilters = this.summariseFilters();
+    /* When filter categories were dynamically created (via metadata drag&drop) the `options` here updated but `<Async>`
+    seemed to use a cached version of all values & wouldn't update. Changing the key forces a rerender, but it's not ideal */
+    const divKey = String(Object.keys(this.props.activeFilters).length);
     return (
-      <div style={styles.base}>
+      <div style={styles.base} key={divKey}>
         <Async
           name="filterQueryBox"
           placeholder="Type filter query here..."
