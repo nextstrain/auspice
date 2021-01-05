@@ -159,7 +159,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
         newDates.dateMax = action.dateMax;
         newDates.dateMaxNumeric = action.dateMaxNumeric;
       }
-      return Object.assign({}, state, newDates);
+      const colorScale = {...state.colorScale, visibleLegendValues: action.visibleLegendValues};
+      return {...state, ...newDates, colorScale};
     }
     case types.CHANGE_ABSOLUTE_DATE_MIN:
       return Object.assign({}, state, {
@@ -278,6 +279,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
         };
       }
       return newState;
+    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+      const colorScale = Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues });
+      return Object.assign({}, state, { colorScale: colorScale });
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 

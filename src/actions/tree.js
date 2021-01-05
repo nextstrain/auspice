@@ -6,6 +6,7 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+import { createVisibleLegendValues } from "../util/colorScale";
 
 
 export const applyInViewNodesToTree = (idx, tree) => {
@@ -96,6 +97,17 @@ export const updateVisibleTipsAndBranchThicknesses = (
       /* tip selected is the same as the first tree - the reducer uses that */
     }
 
+    /* Changes in visibility require a recomputation of which legend items we wish to display */
+    dispatchObj.visibleLegendValues = createVisibleLegendValues({
+      colorBy: controls.colorBy,
+      scaleType: controls.colorScale.scaleType,
+      legendValues: controls.colorScale.legendValues,
+      treeNodes: tree.nodes,
+      treeTooNodes: treeToo ? treeToo.nodes : undefined,
+      visibility: dispatchObj.visibility,
+      visibilityToo: dispatchObj.visibilityToo
+    });
+
     /* D I S P A T C H */
     dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
@@ -144,6 +156,17 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
     }
+
+    /* Changes in visibility require a recomputation of which legend items we wish to display */
+    dispatchObj.visibleLegendValues = createVisibleLegendValues({
+      colorBy: controls.colorBy,
+      scaleType: controls.colorScale.scaleType,
+      legendValues: controls.colorScale.legendValues,
+      treeNodes: tree.nodes,
+      treeTooNodes: treeToo ? treeToo.nodes : undefined,
+      visibility: dispatchObj.visibility,
+      visibilityToo: dispatchObj.visibilityToo
+    });
 
     /* D I S P A T C H */
     dispatch(dispatchObj);

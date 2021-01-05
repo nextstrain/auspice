@@ -11,7 +11,7 @@ import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
-import { calcColorScale } from "../util/colorScale";
+import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
@@ -793,6 +793,17 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
+
+  /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
+  controls.colorScale.visibleLegendValues = createVisibleLegendValues({
+    colorBy: controls.colorBy,
+    scaleType: controls.colorScale.scaleType,
+    legendValues: controls.colorScale.legendValues,
+    treeNodes: tree.nodes,
+    treeTooNodes: treeToo ? treeToo.nodes : undefined,
+    visibility: tree.visibility,
+    visibilityToo: treeToo ? treeToo.visibilityToo : undefined
+  });
 
   /* calculate entropy in view */
   if (entropy.loaded) {

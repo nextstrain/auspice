@@ -3,7 +3,7 @@ import scaleLinear from "d3-scale/src/linear";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import { genericDomain, colors, genotypeColors, isValueValid } from "./globals";
+import { genericDomain, colors, genotypeColors, isValueValid, NODE_VISIBLE } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -20,7 +20,7 @@ export const unknownColor = "#AAAAAA";
  * @param {object} tree
  * @param {object} treeToo
  * @param {object} metadata
- * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array|undefined, genotype: null|object}}
+ * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array|undefined, genotype: null|object, scaleType: null|string, visibleLegendValues: Array}}
  */
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   try {
@@ -40,6 +40,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       genotype = decodeColorByGenotype(colorBy, controls.geneLength);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
     }
+    const scaleType = genotype ? "categorical" : colorings[colorBy].type;
 
     if (genotype) {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
@@ -47,22 +48,33 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
-      } else if (colorings[colorBy].type === "categorical") {
+      } else if (scaleType === "categorical") {
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = createDiscreteScale(legendValues, "categorical");
-      } else if (colorings[colorBy].type === "ordinal") {
+      } else if (scaleType === "ordinal") {
         ({continuous, colorScale, legendValues, legendBounds} = createOrdinalScale(colorBy, tree.nodes, treeTooNodes));
-      } else if (colorings[colorBy].type === "boolean") {
+      } else if (scaleType === "boolean") {
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = booleanColorScale;
-      } else if (colorings[colorBy].type === "continuous") {
+      } else if (scaleType === "continuous") {
         ({continuous, colorScale, legendBounds, legendValues} = createContinuousScale(colorBy, tree.nodes, treeTooNodes));
       } else {
-        throw new Error(`ColorBy ${colorBy} invalid type -- ${colorings[colorBy].type}`);
+        throw new Error(`ColorBy ${colorBy} invalid type -- ${scaleType}`);
       }
     } else {
       throw new Error('Error in logic for processing colorings');
     }
+
+    const visibleLegendValues = createVisibleLegendValues({
+      colorBy,
+      scaleType,
+      legendValues,
+      treeNodes: tree.nodes,
+      treeTooNodes,
+      visibility: tree.visibility,
+      visibilityToo: treeToo ? treeToo.visibility : undefined
+    });
+
     return {
       scale: colorScale,
       continuous,
@@ -70,7 +82,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues,
       legendBounds,
-      genotype
+      genotype,
+      scaleType: scaleType,
+      visibleLegendValues: visibleLegendValues
     };
   } catch (err) {
     /* Catch all errors to avoid app crashes */
@@ -82,7 +96,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues: ["unknown"],
       legendBounds: createLegendBounds(["unknown"]),
-      genotype: null
+      genotype: null,
+      scaleType: null,
+      visibleLegendValues: ["unknown"]
     };
   }
 };
@@ -271,6 +287,33 @@ function getDiscreteValuesFromTree(nodes, nodesToo, attr) {
   }
   const domain = sortedDomain(Array.from(stateCount.keys()).filter((x) => isValueValid(x)), attr, stateCount);
   return domain;
+}
+
+/**
+ * Dynamically create legend values based on visibility for ordinal and categorical scale types.
+ */
+export function createVisibleLegendValues({colorBy, scaleType, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) {
+  if (visibility) {
+    // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
+    // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
+    if (scaleType === "ordinal" || scaleType === "categorical") {
+      let legendValuesObserved = treeNodes
+        .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
+        .map((n) => getTraitFromNode(n, colorBy));
+
+      // if the 2nd tree is enabled, compute visible legend values and merge the values.
+      if (treeTooNodes && visibilityToo) {
+        const legendValuesObservedToo = treeTooNodes
+          .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
+          .map((n) => getTraitFromNode(n, colorBy));
+        legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
+      }
+      legendValuesObserved = new Set(legendValuesObserved);
+      const visibleLegendValues = legendValues.filter((v) => legendValuesObserved.has(v));
+      return visibleLegendValues;
+    }
+  }
+  return legendValues.slice();
 }
 
 function createDiscreteScale(domain, type) {
