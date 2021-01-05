@@ -6,6 +6,7 @@ import { defaultGeoResolution,
   defaultLayout,
   defaultMutType,
   controlsHiddenWidth,
+  strainSymbol,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
@@ -74,6 +75,7 @@ export const getDefaultControlsState = () => {
     panelsAvailable: [],
     panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
+    tipLabelKey: strainSymbol,
     showTreeToo: undefined,
     showTangle: false,
     zoomMin: undefined,
@@ -194,6 +196,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelLayout: action.data
       });
+    case types.CHANGE_TIP_LABEL_KEY:
+      return {...state, tipLabelKey: action.key};
     case types.TREE_TOO_DATA:
       return action.controls;
     case types.TOGGLE_PANEL_DISPLAY:

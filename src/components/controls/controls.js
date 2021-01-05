@@ -7,6 +7,7 @@ import ChooseBranchLabelling from "./choose-branch-labelling";
 import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
 import ChooseSecondTree from "./choose-second-tree";
+import ChooseTipLabel from "./choose-tip-label";
 import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
@@ -42,6 +43,7 @@ function Controls({mapOn, frequenciesOn, mobileDisplay}) {
       <ChooseLayout />
       <ChooseMetric />
       <ChooseBranchLabelling />
+      <ChooseTipLabel />
       <ChooseSecondTree />
       <ToggleTangle />
 

@@ -3,6 +3,7 @@ import 'd3-transition';
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
+import { makeTipLabelFunc } from "../phyloTree/labels";
 
 export const renderTree = (that, main, phylotree, props) => {
   const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
@@ -31,7 +32,7 @@ export const renderTree = (that, main, phylotree, props) => {
       onBranchClick: callbacks.onBranchClick.bind(that),
       onBranchLeave: callbacks.onBranchLeave.bind(that),
       onTipLeave: callbacks.onTipLeave.bind(that),
-      tipLabel: (d) => d.n.name
+      tipLabel: makeTipLabelFunc(props.tipLabelKey)
     },
     treeState.branchThickness, /* guarenteed to be in redux by now */
     treeState.visibility,

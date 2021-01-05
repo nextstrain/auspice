@@ -16,7 +16,7 @@ import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
-
+import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -70,6 +70,9 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
     state["panelLayout"] = query.p;
+  }
+  if (query.tl) {
+    state["tipLabelKey"] = query.tl;
   }
   if (query.d) {
     const proposed = query.d.split(",");
@@ -169,6 +172,7 @@ const restoreQueryableStateToDefaults = (state) => {
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
+  state.tipLabelKey = strainSymbol;
   // console.log("state now", state);
   return state;
 };
@@ -476,6 +480,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     console.error("Can't set selected branch label to ", state.selectedBranchLabel);
     state.selectedBranchLabel = "none";
     state.defaults.selectedBranchLabel = "none";
+  }
+
+  /* check tip label is valid. We use the function which generates the options for the dropdown here */
+  if (!collectAvailableTipLabelOptions(metadata.colorings).map((o) => o.value).includes(state.tipLabelKey)) {
+    console.error("Can't set selected tip label to ", state.tipLabelKey);
+    state.tipLabelKey = strainSymbol;
   }
 
   /* temporalConfidence */
