@@ -1,21 +1,14 @@
 import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
-import { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
-
-import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
-import { materialButton, infoPanelStyles } from "../../globalStyles";
+import { TRIGGER_DOWNLOAD_MODAL, DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
+import { infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
-import * as helpers from "./helperFunctions";
-import * as icons from "../framework/svg-icons";
 import { getAcknowledgments} from "../framework/footer";
-import { createSummary, getNumSelectedTips } from "../info/info";
-import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
+import { createSummary } from "../info/info";
+import { DownloadButtons } from "./downloadButtons";
 
-const RectangularTreeIcon = withTheme(icons.RectangularTree);
-const PanelsGridIcon = withTheme(icons.PanelsGrid);
-const MetaIcon = withTheme(icons.Meta);
 
 // const dataUsage = [
 //   `The data presented here is intended to rapidly disseminate analysis of important pathogens.
@@ -52,6 +45,7 @@ export const publications = {
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
+  distanceMeasure: state.controls.distanceMeasure,
   metadata: state.metadata,
   entropy: state.entropy,
   mutType: state.controls.mutType,
@@ -112,7 +106,7 @@ class DownloadModal extends React.Component {
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
-      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport());
+      this.props.dispatch({type: this.props.show ? DISMISS_DOWNLOAD_MODAL : TRIGGER_DOWNLOAD_MODAL});
     });
   }
   getRelevantPublications() {
@@ -137,113 +131,8 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
-  getFilePrefix() {
-    return "nextstrain_" +
-      window.location.pathname
-          .replace(/^\//, '')       // Remove leading slashes
-          .replace(/:/g, '-')       // Change ha:na to ha-na
-          .replace(/\//g, '_');     // Replace slashes with spaces
-  }
-  makeTextStringsForSVGExport() {
-    const x = [];
-    x.push(this.props.metadata.title);
-    x.push(`Last updated ${this.props.metadata.updated}`);
-    const address = window.location.href.replace(/&/g, '&amp;');
-    x.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
-    x.push(this.createSummaryWrapper());
-    x.push("");
-    x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
-    x.push(`Visualizations are licensed under CC-BY.`);
-    x.push(`Relevant publications:`);
-    this.getRelevantPublications().forEach((pub) => {
-      x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
-    });
-    return x;
-  }
-  getNumUniqueAuthors(nodes) {
-    const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
-      .filter((a) => a && a.value);
-    const uniqueAuthors = new Set(authors.map((a) => a.value));
-    return uniqueAuthors.size;
-  }
-  downloadButtons() {
-    // getNumSelectedTips() is redundant work with createSummaryWrapper() below,
-    // and with the check done to make sure the node is visible in strainTSV(),
-    // so if speed becomes a concern, could alter this to just generate the list of selected nodes once,
-    // on modal creation, and add it as a property on the modal
-    const selectedTipsCount = getNumSelectedTips(this.props.nodes, this.props.tree.visibility);
-    // likewise, this is somewhat redundant with authorTSV()
-    const uniqueAuthorCount = this.getNumUniqueAuthors(this.props.nodes);
-    const filePrefix = this.getFilePrefix();
-    const iconWidth = 25;
-    const buttons = [
-      ["Tree", "Phylogenetic tree in Newick format with branch lengths in units of divergence.",
-        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
-      ["TimeTree", "Phylogenetic tree in Newick format with branch lengths measured in years.",
-        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["All Metadata (TSV)", `Per-sample metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}).`,
-        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)]
-    ];
-    if (selectedTipsCount > 0) {
-      buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
-        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,
-          this.props.metadata.colorings, true, this.props.tree.visibility)]);
-    }
-    if (helpers.areAuthorsPresent(this.props.tree)) {
-      buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
-        (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
-    }
-    if (this.props.entropy.loaded) {
-      let msg = `The data behind the diversity panel`;
-      msg += ` showing ${this.props.entropy.showCounts ? `a count of changes across the tree` : `normalised shannon entropy`}`;
-      msg += this.props.mutType === "nuc" ? " per nucleotide." : " per codon.";
-      if (selectedTipsCount !== this.props.metadata.mainTreeNumTips) {
-        msg += ` Restricted to strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`;
-      }
-      buttons.push([
-        "Genetic diversity data (TSV)",
-        msg,
-        (<MetaIcon width={iconWidth} selected />),
-        () => helpers.entropyTSV(this.props.dispatch, filePrefix, this.props.entropy, this.props.mutType)
-      ]);
-    }
-    buttons.push(
-      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format; CC-BY licensed.",
-        (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
-    );
-    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
-    const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
-    return (
-      <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
-        <div style={{ width: "100%" }}>
-          {buttons.map((data) => (
-            <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer' }}>
-              {data[2]}
-              <button style={buttonTextStyle} name={data[0]}>
-                {data[0]}
-              </button>
-              <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
-                <label style={buttonLabelStyle} htmlFor={data[0]}>{data[1]}</label>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
   dismissModal() {
     this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
-  }
-  createSummaryWrapper() {
-    return createSummary(
-      this.props.metadata.mainTreeNumTips,
-      this.props.nodes,
-      this.props.filters,
-      this.props.visibility,
-      this.props.visibleStateCounts,
-      undefined, // this.props.branchLengthsToDisplay,
-      this.props.t
-    );
   }
   render() {
     const { t } = this.props;
@@ -258,6 +147,8 @@ class DownloadModal extends React.Component {
     panelStyle.fontSize = 14;
     panelStyle.lineHeight = 1.4;
 
+    const relevantPublications = this.getRelevantPublications();
+
     const meta = this.props.metadata;
     return (
       <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
@@ -271,7 +162,15 @@ class DownloadModal extends React.Component {
           </div>
 
           <div>
-            {this.createSummaryWrapper()}
+            {createSummary(
+              this.props.metadata.mainTreeNumTips,
+              this.props.nodes,
+              this.props.filters,
+              this.props.visibility,
+              this.props.visibleStateCounts,
+              undefined, // this.props.branchLengthsToDisplay,
+              this.props.t
+            )}
           </div>
           <div style={infoPanelStyles.break}/>
           {" " + t("A full list of sequence authors is available via the TSV files below")}
@@ -286,14 +185,17 @@ class DownloadModal extends React.Component {
           <div style={infoPanelStyles.modalSubheading}>
             {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
           </div>
-          {this.formatPublications(this.getRelevantPublications())}
+          {this.formatPublications(relevantPublications)}
 
 
           <div style={infoPanelStyles.modalSubheading}>
             {t("Download data")}:
           </div>
-          {this.downloadButtons()}
-
+          <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
+            <div style={{ width: "100%" }}>
+              <DownloadButtons {...this.props} relevantPublications={relevantPublications}/>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -303,3 +205,4 @@ class DownloadModal extends React.Component {
 
 const WithTranslation = withTranslation()(DownloadModal);
 export default WithTranslation;
+

@@ -4,6 +4,8 @@ import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
+import { createSummary } from "../info/info";
+import { isColorByGenotype } from "../../util/getGenotype";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -14,25 +16,29 @@ export const isPaperURLValid = (d) => {
 };
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
-const treeToNewick = (root, temporal) => {
+const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=() => "") => {
+  const getXVal = temporal ? (n) => getTraitFromNode(n, "num_date") : getDivFromNode;
+
   function recurse(node, parentX) {
-    let subtree = "";
-    if (node.hasChildren) {
-      const children = [];
-      node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
-        children.push(subsubtree);
-      });
-      subtree += "(" + children.join(",") + ")" + node.name + ":";
-      subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
-    } else { /* terminal node */
-      let leaf = node.name + ":";
-      leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
-      subtree += leaf;
+    if (!node.inView || tree.visibility[node.arrayIdx]!==NODE_VISIBLE) {
+      return "";
     }
-    return subtree;
+    if (node.hasChildren) {
+      const childSubtrees = node.children.map((child) => {
+        const subtree = recurse(child, getXVal(node));
+        return subtree;
+      });
+      return `(${childSubtrees.filter((t) => !!t).join(",")})` +
+        `${internalNodeNames?node.name:""}${nodeAnnotation(node)}:${getXVal(node) - parentX}`;
+    }
+    /* terminal node */
+    const leaf = `${node.name}${nodeAnnotation(node)}:${getXVal(node) - parentX}`;
+    return leaf;
   }
-  return recurse(root, 0) + ";";
+
+  const rootNode = tree.nodes[tree.idxOfInViewRootNode];
+  const rootXVal = getXVal(rootNode);
+  return recurse(rootNode, rootXVal) + ";";
 };
 
 const MIME = {
@@ -42,6 +48,54 @@ const MIME = {
   svg: "image/svg+xml;charset=utf-8"
 };
 
+const treeToNexus = (tree, colorings, colorBy, temporal) => {
+  /**
+   * Create a NEXUS-type node-annotation conforming with BEAST export format
+   * For example:
+   * [&country=Thailand,region=SoutheastAsia,lbi=0.3355275145752664,gt-NS1_349=M]
+   * Simple key+value pairs look like `key=value` (value can be string or numeric & doesn't need to be quoted.
+   * Ranges can be included like `key={v1,v2}` (v1,v2 are usually numeric)
+   * Square brackets cannot be in the key or value, neither can curly brackets (except as noted above)
+   * not can commas or equals signs, except as noted above.
+   * We also strip non-latin characters, which cause issues for FigTree
+   *
+   * We export all node_attrs which are colorings, as well as divergence if the tree is temporally scaled.
+   * If the current color-by is a genotype, we export this.
+   */
+  const makeNodeAnnotation = () => {
+    const t = (x) => String(x).replace(/[[\]{}=,]/g, '').replace(/[\u0250-\ue007]/g, '');
+    const genotype = isColorByGenotype(colorBy) ? t(colorBy.replace(/,/g, '/')) : undefined;
+    return (node) => {
+      const annotations = [];
+      Object.keys(colorings).forEach((c) => {
+        if (c.includes("_lab") || c.includes("author")) return;
+        const v = getTraitFromNode(node, c);
+        if (v) {
+          annotations.push(`${t(c)}=${t(v)}`);
+          const conf = getTraitFromNode(node, c, {confidence: true});
+          if (Array.isArray(conf) && conf.length===2) {
+            annotations.push(`${t(c)}_CI={${conf.map((cv) => t(cv)).join(",")}}`);
+          }
+        }
+      });
+      if (genotype) {
+        annotations.push(`${genotype}=${t(node.currentGt.replace(/\s/g, ""))}`);
+      }
+      if (temporal) { // if temporal metric, export `div` as an attr if it exists
+        const div = getDivFromNode(node);
+        if (div!==undefined) annotations.push(`div=${div}`);
+      }
+      if (!annotations.length) return ``;
+      return `[&${annotations.join(',')}]`;
+    };
+  };
+  return [
+    '#nexus',
+    'begin trees;',
+    "  tree one = "+treeToNewick(tree, temporal, true, makeNodeAnnotation()),
+    "end;"
+  ].join("\n");
+};
 
 const write = (filename, type, content) => {
   /* https://stackoverflow.com/questions/18848860/javascript-array-to-csv/18849208#comment59677504_18849208 */
@@ -75,25 +129,27 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   const filename = filePrefix + "_authors.tsv";
   const UNKNOWN = "unknown";
   const info = {};
-  tree.nodes.filter((n) => !n.hasChildren).forEach((n) => {
-    const author = getFullAuthorInfoFromNode(n);
-    if (!author) return;
-    if (info[author.value]) {
-      /* this author has been seen before */
-      info[author.value].count += 1;
-      info[author.value].strains.push(n.name);
-    } else {
-      /* author as-yet unseen */
-      info[author.value] = {
-        author: author.value,
-        title: author.title || UNKNOWN,
-        journal: author.journal || UNKNOWN,
-        url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
-        count: 1,
-        strains: [n.name]
-      };
-    }
-  });
+  tree.nodes
+    .filter((n, i) => tree.visibility[i] === NODE_VISIBLE && n.inView)
+    .filter((n) => !n.hasChildren).forEach((n) => {
+      const author = getFullAuthorInfoFromNode(n);
+      if (!author) return;
+      if (info[author.value]) {
+        /* this author has been seen before */
+        info[author.value].count += 1;
+        info[author.value].strains.push(n.name);
+      } else {
+        /* author as-yet unseen */
+        info[author.value] = {
+          author: author.value,
+          title: author.title || UNKNOWN,
+          journal: author.journal || UNKNOWN,
+          url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
+          count: 1,
+          strains: [n.name]
+        };
+      }
+    });
   Object.values(info).forEach((v) => {
     lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"));
   });
@@ -104,9 +160,10 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
 
 /**
  * Create & write a TSV file where each row is a strain in the tree,
- * with the relevent information (accession, traits, etcetera)
+ * with the relevent information (accession, traits, etcetera).
+ * Only visible nodes (tips) will be included in the file.
  */
-export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
+export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
@@ -116,8 +173,9 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
 
-    if (selectedNodesOnly && nodeVisibilities &&
-      (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView) {
+      continue;
+    }
 
     tipTraitValues[node.name] = {Strain: node.name};
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
@@ -194,16 +252,21 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   }
 
   /* write out information we've collected */
-  const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}metadata.tsv`;
+  const filename = `${filePrefix}_metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
 
-export const newick = (dispatch, filePrefix, root, temporal) => {
-  const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
-  const message = temporal ? "TimeTree" : "Tree";
-  write(fName, MIME.text, treeToNewick(root, temporal));
-  dispatch(infoNotification({message: message + " written to " + fName}));
+export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colorings, colorBy}) => {
+  try {
+    const fName = `${filePrefix}_${temporal?'timetree':'tree'}.${isNewick?'nwk':'nexus'}`;
+    const treeString = isNewick ? treeToNewick(tree, temporal) : treeToNexus(tree, colorings, colorBy, temporal);
+    write(fName, MIME.text, treeString);
+    dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
+  } catch (err) {
+    console.error(err);
+    dispatch(warningNotification({message: "Error saving tree!"}));
+  }
 };
 
 const processXMLString = (input) => {
@@ -408,7 +471,30 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings) => {
+export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleStateCounts, filePrefix, panelsInDOM, panelLayout, publications) => {
+  /* make the text strings */
+  const textStrings = [];
+  textStrings.push(metadata.title);
+  textStrings.push(`Last updated ${metadata.updated}`);
+  const address = window.location.href.replace(/&/g, '&amp;');
+  textStrings.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
+  textStrings.push(createSummary(
+    metadata.mainTreeNumTips,
+    nodes,
+    filters,
+    visibility,
+    visibleStateCounts,
+    undefined, // param is `branchLengthsToDisplay`,
+    t
+  ));
+  textStrings.push("");
+  textStrings.push(`${t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+  textStrings.push(`Visualizations are licensed under CC-BY.`);
+  textStrings.push(`Relevant publications:`);
+  publications.forEach((pub) => {
+    textStrings.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
+  });
+
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
     window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
@@ -432,3 +518,4 @@ export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
   write(filename, MIME.tsv, lines.join("\n"));
   dispatch(infoNotification({message: `Diversity data exported to ${filename}`}));
 };
+
