@@ -2,10 +2,38 @@
 title: Changelog
 ---
 
+### Improved Functionality
+
+* Tree rendering and zooming has been improved.
+  * A new **Zoom to Selected** button has been added which allows you to zoom the tree to the clade containing the currently selected tips ([PR 1257](https://github.com/nextstrain/auspice/pull/1257)).
+  * Branches ancestral to the common ancestor of the currently selected tips are now correctly rendered ([PR 1248](https://github.com/nextstrain/auspice/pull/1248)).
+* The **Download Data** functionality has been improved to export data reflecting the currently viewed subset of data.
+Additionally we export annotated Nexus trees which can be parsed by [FigTree](http://tree.bio.ed.ac.uk/software/figtree/).
+See [PR 1245](https://github.com/nextstrain/auspice/pull/1245) for more.
+* The **drag & drop metadata** functionality has been improved to facilitate easier filtering, custom locations and colours.
+See [PR 1244](https://github.com/nextstrain/auspice/pull/1244) or [these docs](https://docs.nextstrain.org/projects/auspice/en/latest/advanced-functionality/drag-drop-csv-tsv.html) for more.
+* **Tip labels** are now user-selectable via a drop-down in the sidebar.
+See [PR 1246](https://github.com/nextstrain/auspice/pull/1246) for more.
+* **Legend values** now dynamically update to reflect those in the current view.
+See [PR 1250](https://github.com/nextstrain/auspice/pull/1250) for more.
+
+
+#### Other Changes
+
+* Italian translation added. See [PR 1256](https://github.com/nextstrain/auspice/pull/1256).
+* Amino acid labels are only shown on branches leading to big clades.
+See [PR 1249](https://github.com/nextstrain/auspice/pull/1249) for more.
+* Colour scale generation has been refactored and a (rare) bug fixed where color-bys which defined a scale in the JSON could cause tips with no trait value set to have a colour rather than a shade of grey.
+See [PR 1237](https://github.com/nextstrain/auspice/pull/1237).
+* Warnings added to documentation pages which are imported into Nextstrain's (main) RTD project.
+See [PR 1234](https://github.com/nextstrain/auspice/pull/1234).
+* Disabled a smoke-test which was stochastically failing on GitHub Actions (but which worked locally).
+See [PR 1258](https://github.com/nextstrain/auspice/pull/1258) for more.
+
+
+
 ## version 2.20.1 - 2020/11/19
-
-
-* Small bugfixes and performance improvements relatingo to the features introduced in 2.20.0
+* Small bugfixes and performance improvements relating to to the features introduced in 2.20.0
 
 ## version 2.20.0 - 2020/11/18
 
