@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.21.0 - 2021/01/06
+
+
 ### Improved Functionality
 
 * Tree rendering and zooming has been improved.
