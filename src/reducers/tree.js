@@ -46,6 +46,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
+        idxOfFilteredRoot: action.idxOfFilteredRoot,
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
         visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),

@@ -75,6 +75,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: rootIdxTree1,
+      idxOfFilteredRoot: data.idxOfFilteredRoot,
       cladeName: cladeSelected,
       selectedClade: cladeSelected,
       stateCountAttrs: Object.keys(controls.filters)
@@ -94,6 +95,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
+      dispatchObj.idxOfFilteredRootToo = dataToo.idxOfFilteredRoot;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
 
