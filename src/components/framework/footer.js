@@ -2,30 +2,18 @@ import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
-import { FaDownload } from "react-icons/fa";
-import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
+import { dataFont } from "../../globalStyles";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
-import { version } from "../../version";
-import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
 import { SimpleFilter } from "../info/filterBadge";
 
-const logoPNG = require("../../images/favicon.png");
-
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
-
-const dot = (
-  <span style={{marginLeft: 10, marginRight: 10}}>
-    •
-  </span>
-);
 
 const FooterStyles = styled.div`
   margin-left: 30px;
-  padding-bottom: 30px;
+  padding-bottom: 0px;
   font-family: ${dataFont};
   font-size: 15px;
   font-weight: 300;
@@ -105,10 +93,6 @@ const FooterStyles = styled.div`
     border-bottom: 1px solid #CCC;
   }
 
-  .finePrint {
-    font-size: 14px;
-  }
-
   .acknowledgments {
     margin-top: 10px;
   }
@@ -130,20 +114,6 @@ const FooterStyles = styled.div`
     margin-right: 30px;
     margin-top: 2px;
     margin-bottom: 2px;
-  }
-
-  .logoContainer {
-    padding: 1px 1px;
-    margin-right: 5px;
-    width: 24px;
-    cursor: pointer;
-  }
-
-  .logo {
-    margin-left: 1px;
-    margin-right: 1px;
-    margin-top: 1px;
-    margin-bottom: 3px;
   }
 
 `;
@@ -251,40 +221,6 @@ class Footer extends React.Component {
     );
   }
 
-  getUpdated() {
-    const { t } = this.props;
-    if (this.props.metadata.updated) {
-      return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
-    }
-    return null;
-  }
-  downloadDataButton() {
-    const { t } = this.props;
-    return (
-      <button
-        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
-        onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
-      >
-        <FaDownload />
-        <span style={{position: "relative"}}>{" "+t("Download data")}</span>
-      </button>
-    );
-  }
-  getCitation() {
-    return (
-      <span>
-        <a className='logoContainer' href="https://nextstrain.org">
-          <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
-        </a>
-        {"Powered by Nextstrain ("}
-        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-          {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
-        </a>
-        {")"}
-      </span>
-    );
-  }
-
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
     const width = this.props.width - 30; // need to subtract margin when calculating div width
@@ -304,25 +240,11 @@ class Footer extends React.Component {
                 </div>
               );
             })}
-          <Flex className='finePrint'>
-            {this.getUpdated()}
-            {dot}
-            {this.downloadDataButton()}
-            {dot}
-            {"Auspice v" + version}
-          </Flex>
-          <div style={{height: "5px"}}/>
-          <Flex className='finePrint'>
-            {this.getCitation()}
-          </Flex>
         </div>
       </FooterStyles>
     );
   }
 }
-
-// {dot}
-//
 
 const WithTranslation = withTranslation()(Footer);
 export default WithTranslation;
