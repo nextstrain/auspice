@@ -2,9 +2,11 @@ import React from "react";
 import styled from 'styled-components';
 import NavBar from "../navBar";
 import Flex from "../../components/framework/flex";
-import { logos } from "./logos";
 import { CenterContent } from "./centerContent";
+import { dataFont } from "../../globalStyles";
+import { publications } from "../download/downloadModal";
 
+const logoPNG = require("../../images/favicon.png");
 
 const getNumColumns = (width) => width > 1000 ? 3 : width > 750 ? 2 : 1;
 
@@ -29,6 +31,35 @@ const formatDataset = (requestPath, dispatch, changePage) => {
     </li>
   );
 };
+
+const FinePrintStyles = styled.div`
+  margin-left: 30px;
+  padding-bottom: 30px;
+  font-family: ${dataFont};
+  font-size: 15px;
+  font-weight: 300;
+  color: rgb(136, 136, 136);
+  line-height: 1.4;
+
+  .finePrint {
+    font-size: 14px;
+  }
+
+  .logoContainer {
+    padding: 1px 1px;
+    margin-right: 5px;
+    width: 24px;
+    cursor: pointer;
+  }
+
+  .logo {
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 1px;
+    margin-bottom: 3px;
+  }
+
+`;
 
 const SplashContent = ({available, browserDimensions, dispatch, errorMessage, changePage}) => {
 
@@ -103,10 +134,17 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
     </>
   );
 
-  const Footer = () => (
-    <CenterContent>
-      {logos}
-    </CenterContent>
+  const getCitation = () => (
+    <span>
+      <a className='logoContainer' href="https://nextstrain.org">
+        <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
+      </a>
+      {"Powered by Nextstrain ("}
+      <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
+        {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
+      </a>
+      {")"}
+    </span>
   );
 
   return (
@@ -117,7 +155,11 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
         {errorMessage ? <ErrorMessage/> : <Intro/>}
         <ListAvailable type="datasets" data={available.datasets}/>
         <ListAvailable type="narratives" data={available.narratives}/>
-        <Footer/>
+        <FinePrintStyles>
+          <Flex className='finePrint'>
+            {getCitation()}
+          </Flex>
+        </FinePrintStyles>
       </div>
     </>
   );
