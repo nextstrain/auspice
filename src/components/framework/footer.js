@@ -13,6 +13,8 @@ import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
 import { SimpleFilter } from "../info/filterBadge";
 
+const logoPNG = require("../../images/favicon.png");
+
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
 const dot = (
@@ -128,6 +130,20 @@ const FooterStyles = styled.div`
     margin-right: 30px;
     margin-top: 2px;
     margin-bottom: 2px;
+  }
+
+  .logoContainer {
+    padding: 1px 1px;
+    margin-right: 5px;
+    width: 24px;
+    cursor: pointer;
+  }
+
+  .logo {
+    margin-left: 1px;
+    margin-right: 1px;
+    margin-top: 1px;
+    margin-bottom: 3px;
   }
 
 `;
@@ -257,10 +273,14 @@ class Footer extends React.Component {
   getCitation() {
     return (
       <span>
-        {"Nextstrain: "}
-        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
+        <a className='logoContainer' href="https://nextstrain.org">
+          <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
         </a>
+        {"Powered by Nextstrain ("}
+        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
+          {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
+        </a>
+        {")"}
       </span>
     );
   }
@@ -291,7 +311,7 @@ class Footer extends React.Component {
             {dot}
             {"Auspice v" + version}
           </Flex>
-          <div style={{height: "3px"}}/>
+          <div style={{height: "5px"}}/>
           <Flex className='finePrint'>
             {this.getCitation()}
           </Flex>
