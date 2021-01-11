@@ -26,6 +26,7 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 * `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 * `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
+* `mapTiles` Specify the address (and other information) for the tiles used to render the map.
 
 ---
 
@@ -125,3 +126,24 @@ This can be changed by specifying `serverAddress` in the customisation JSON.
 
 > Note that currently you can't specify a different domain due to CORS headers.
 This may well be a simple fix -- please get in touch if you can help here!
+
+---
+
+### Custom Map tiles
+
+Auspice uses [Leaflet](https://leafletjs.com/) to render the map, which requires access to a tile set in order to render the geography.
+By default, auspice uses [Mapbox](https://www.mapbox.com/) for these tiles, and we make these available for local use of auspice.
+If you are distributing your own version of auspice (i.e. not running it locally) you must set an appropriate API address here so that the map can fetch suitable tiles.
+
+```json
+{
+  "mapTiles": {
+    "api": "API address for Leaflet to fetch map tiles",
+    "attribution": "HTML-formatted attribution string to be displayed in bottom-right-hand corner of map",
+    "mapboxWordmark": "(optional) should the Mapbox logo be displayed in the bottom-left of the map? (boolean)"
+  }
+}
+```
+
+For some examples of other tile sets you may use, see the [OpenStreetMap wiki](https://wiki.openstreetmap.org/wiki/Tile_servers), and please remember to adhere to the licenses and terms of use for each tile server.
+The API address contains parameters as specified by the [Leaflet API](https://docs.mapbox.com/api/overview/).

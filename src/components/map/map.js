@@ -25,6 +25,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundry";
+import { getMapTilesSettings } from "../../util/globals";
 import Legend from "../tree/legend/legend";
 import "../../css/mapbox.css";
 
@@ -79,7 +80,8 @@ class Map extends React.Component {
       transmissionData: null,
       demeIndices: null,
       transmissionIndices: null,
-      userHasInteractedWithMap: false
+      userHasInteractedWithMap: false,
+      tilesSettings: getMapTilesSettings()
     };
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
@@ -493,24 +495,24 @@ class Map extends React.Component {
 
     map.getRenderer(map).options.padding = 2;
 
-    L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2tqcnM5bXIxMWV1eTJzazN2YXVrODVnaiJ9.7iPttR9a_W7zuYlUCfrz6A', {
-      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>'
-    }).addTo(map);
+    L.tileLayer(this.state.tilesSettings.api, {attribution: this.state.tilesSettings.attribution || ''})
+      .addTo(map);
 
     if (!this.props.narrativeMode) {
       L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
     }
 
-    const Wordmark = L.Control.extend({
-      onAdd: function onAdd() {
-        const wordmark = L.DomUtil.create('a', 'mapbox-wordmark');
-        wordmark.href = "http://mapbox.com/about/maps";
-        wordmark.target = "_blank";
-        return wordmark;
-      }
-    });
-    (new Wordmark({position: 'bottomleft'})).addTo(map);
-
+    if (this.state.tilesSettings.mapboxWordmark) {
+      const Wordmark = L.Control.extend({
+        onAdd: function onAdd() {
+          const wordmark = L.DomUtil.create('a', 'mapbox-wordmark');
+          wordmark.href = "http://mapbox.com/about/maps";
+          wordmark.target = "_blank";
+          return wordmark;
+        }
+      });
+      (new Wordmark({position: 'bottomleft'})).addTo(map);
+    }
 
     /* Set up leaflet events */
     map.on("moveend", this.respondToLeafletEvent.bind(this));
