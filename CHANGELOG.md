@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.22.0 - 2021/01/11
+
+
 * The address Auspice uses to fetch map tiles, including the API token, has been updated and will now only work for local installs of auspice.
 For help on how to specify your own address, which lets you specify custom map tile sets, see [the Auspice docs](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html#specifying-the-api-server-address).
 See [PR 1261](https://github.com/nextstrain/auspice/pull/1261) for more.
