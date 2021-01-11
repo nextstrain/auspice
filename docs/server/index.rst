@@ -48,6 +48,12 @@ You can customise the default Auspice server by supplying your own handlers for 
 See `the API documentation <../server/api.html#suppling-custom-handlers-to-the-auspice-server>`_ for how to define these and provide them to `auspice view`.
 
 
+AGPL Source Code Requirement
+============================
+
+Auspice is distributed under `AGPL 3.0 <https://www.gnu.org/licenses/agpl-3.0.en.html>`_.
+Any modifications made to the auspice source code, including the auspice server, must be made publicly available.
+
 Writing Your Own Custom Server
 ======================================
 

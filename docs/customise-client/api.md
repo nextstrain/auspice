@@ -27,6 +27,9 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 * `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
 
+
+> Please remember to make any modifications, including customisations described here, publicly available. See [the previous page](./index.rst) for more details.
+
 ---
 
 ### Sidebar Theme
