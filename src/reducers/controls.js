@@ -299,11 +299,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
 export default Controls;
 
 function getInitialSidebarState() {
-  /* The following "hack" was present when `sidebarOpen` wasn't URL customisable. It can be removed
-  from here once the GISAID URLs (iFrames) are updated */
-  if (window.location.pathname.includes("gisaid")) {
-    return {sidebarOpen: false, setDefault: true};
-  }
   return {
     sidebarOpen: window.innerWidth > controlsHiddenWidth,
     setDefault: false

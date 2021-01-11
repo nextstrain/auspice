@@ -8,6 +8,7 @@ import Tree from "../tree";
 import Map from "../map/map";
 import { controlsHiddenWidth } from "../../util/globals";
 import Footer from "../framework/footer";
+import FinePrint from "../framework/fine-print";
 import DownloadModal from "../download/downloadModal";
 import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped";
@@ -155,7 +156,8 @@ class Main extends React.Component {
             </Suspense>) :
             null
           }
-          {this.props.displayNarrative|| this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.displayNarrative ? null : <FinePrint width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.displayNarrative && this.props.panelsToDisplay.includes("MainDisplayMarkdown") ?
             <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
             null

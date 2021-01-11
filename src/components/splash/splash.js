@@ -2,9 +2,8 @@ import React from "react";
 import styled from 'styled-components';
 import NavBar from "../navBar";
 import Flex from "../../components/framework/flex";
-import { logos } from "./logos";
 import { CenterContent } from "./centerContent";
-
+import { FinePrintStyles, getCitation} from "../../components/framework/fine-print";
 
 const getNumColumns = (width) => width > 1000 ? 3 : width > 750 ? 2 : 1;
 
@@ -103,12 +102,6 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
     </>
   );
 
-  const Footer = () => (
-    <CenterContent>
-      {logos}
-    </CenterContent>
-  );
-
   return (
     <>
       <NavBar sidebar={false}/>
@@ -117,7 +110,11 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
         {errorMessage ? <ErrorMessage/> : <Intro/>}
         <ListAvailable type="datasets" data={available.datasets}/>
         <ListAvailable type="narratives" data={available.narratives}/>
-        <Footer/>
+        <FinePrintStyles>
+          <Flex className='finePrint'>
+            {getCitation()}
+          </Flex>
+        </FinePrintStyles>
       </div>
     </>
   );
