@@ -15,7 +15,7 @@ import { SidebarSubtitle, SidebarButton } from "./styles";
     mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop
   };
 })
-class MapAnimationControls extends React.Component {
+class AnimationOptions extends React.Component {
   handleChangeAnimationTimeClicked(userSelectedDuration) {
     return () => {
       const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
@@ -98,5 +98,5 @@ class MapAnimationControls extends React.Component {
   }
 }
 
-const WithTranslations = withTranslation()(MapAnimationControls);
+const WithTranslations = withTranslation()(AnimationOptions);
 export default WithTranslations;

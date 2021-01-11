@@ -44,7 +44,7 @@ export const HeaderIconContainer = styled.span`
 export const SidebarButton = styled.button`
   border: 0px;
   background-color: inherit;
-  margin: 5px 0px 10px 5px;
+  margin: 5px 5px 10px 5px;
   border-radius: 2px;
   cursor: pointer;
   padding: 2px;
