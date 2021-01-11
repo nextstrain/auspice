@@ -17,7 +17,7 @@ const dot = (
   </span>
 );
 
-const FinePrintStyles = styled.div`
+export const FinePrintStyles = styled.div`
   margin-left: 30px;
   padding-bottom: 30px;
   font-family: ${dataFont};
@@ -86,20 +86,6 @@ class FinePrint extends React.Component {
       </button>
     );
   }
-  getCitation() {
-    return (
-      <span>
-        <a className='logoContainer' href="https://nextstrain.org">
-          <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
-        </a>
-        {"Powered by Nextstrain ("}
-        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-          {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
-        </a>
-        {")"}
-      </span>
-    );
-  }
 
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
@@ -116,7 +102,7 @@ class FinePrint extends React.Component {
           </Flex>
           <div style={{height: "5px"}}/>
           <Flex className='finePrint'>
-            {this.getCitation()}
+            {getCitation()}
           </Flex>
         </div>
       </FinePrintStyles>
@@ -126,3 +112,18 @@ class FinePrint extends React.Component {
 
 const WithTranslation = withTranslation()(FinePrint);
 export default WithTranslation;
+
+export function getCitation() {
+  return (
+    <span>
+      <a className='logoContainer' href="https://nextstrain.org">
+        <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
+      </a>
+      {"Powered by Nextstrain ("}
+      <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
+        {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
+      </a>
+      {")"}
+    </span>
+  );
+}
