@@ -27,7 +27,7 @@ class AnimationControls extends React.Component {
         }}
       >
         <span>
-          {this.props.animationPlayPauseButton === "Play" ? <FaPlay /> : <FaPause />}
+          {this.props.animationPlayPauseButton === "Play" ? <FaPlay color="#888"/> : <FaPause color="#888"/>}
           {" " + this.props.t(this.props.animationPlayPauseButton === "Play" ? "Play" : "Pause")}
         </span>
       </SidebarButton>
@@ -43,7 +43,7 @@ class AnimationControls extends React.Component {
         }}
       >
         <span>
-          {<FaUndo />}
+          {<FaUndo color="#888"/>}
           {" " + this.props.t("Reset")}
         </span>
       </SidebarButton>
