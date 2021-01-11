@@ -2,8 +2,17 @@
 title: Changelog
 ---
 
-## version 2.21.0 - 2021/01/06
+* The address Auspice uses to fetch map tiles, including the API token, has been updated and will now only work for local installs of auspice.
+For help on how to specify your own address, which lets you specify custom map tile sets, see [the Auspice docs](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html#specifying-the-api-server-address).
+See [PR 1261](https://github.com/nextstrain/auspice/pull/1261) for more.
+* Animation controls have moved and are now in the sidebar, underneath the date-slider.
+See [PR 1262](https://github.com/nextstrain/auspice/pull/1262) for more.
+* The footer has been updated to streamline the Nextstrain accreditation and now displays "Powered by Nextstrain".
+If you are serving your own version of auspice we ask for this accreditation to remain be maintained, in keeping with the spirit of scientific citations.
+Please also remember that customised version of auspice must make their source code available, as per Auspice's licence.
+See [PR 1260](https://github.com/nextstrain/auspice/pull/1260) for more.
 
+## version 2.21.0 - 2021/01/06
 
 ### Improved Functionality
 
