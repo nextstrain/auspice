@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.22.1 - 2021/01/13
+
+
 * Updated package-lock JSON file
 
 ## version 2.22.0 - 2021/01/11
