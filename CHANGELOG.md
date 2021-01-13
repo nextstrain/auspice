@@ -2,6 +2,11 @@
 title: Changelog
 ---
 
+* [bugfix] Updated how we generate hashes for the transpiled, chunked client bundles.
+This prevents subtle bugs where bundles could have the same hash, but different contents, and thus stale (browser cached) chunks may be used in certain situations.
+This bug most probably arose in v2.22.0, so please update to this version if possible!
+See [PR 1263](https://github.com/nextstrain/auspice/pull/1263) for more.
+
 ## version 2.22.1 - 2021/01/13
 
 
