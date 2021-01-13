@@ -97,7 +97,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new webpack.HashedModuleIdsPlugin({}),
     new WebpackChunkHash({algorithm: 'md5'}),
     pluginCompress,
     pluginHtml,
