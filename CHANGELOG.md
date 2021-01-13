@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.22.2 - 2021/01/14
+
+
 * [bugfix] Updated how we generate hashes for the transpiled, chunked client bundles.
 This prevents subtle bugs where bundles could have the same hash, but different contents, and thus stale (browser cached) chunks may be used in certain situations.
 This bug most probably arose in v2.22.0, so please update to this version if possible!
