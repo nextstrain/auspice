@@ -205,6 +205,7 @@ export const isValueValid = (value) => {
   return true;
 };
 export const strainSymbol = Symbol('strain');
+export const genotypeSymbol = Symbol('genotype');
 
 /**
  * Address to fetch tiles from (including access key).

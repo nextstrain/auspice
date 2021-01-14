@@ -1,4 +1,4 @@
-import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
+import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE, genotypeSymbol } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { warningNotification } from "../actions/notifications";
@@ -152,6 +152,7 @@ const getFilteredAndIdxOfFilteredRoot = (tree, controls, inView) => {
   let idxOfFilteredRoot; // index of last common ancestor of filtered nodes.
   const filters = [];
   Reflect.ownKeys(controls.filters).forEach((filterName) => {
+    if (filterName===genotypeSymbol) return; // see `performGenotypeFilterMatch` call below
     const items = controls.filters[filterName];
     const activeFilterItems = items.filter((item) => item.active).map((item) => item.value);
     if (activeFilterItems.length) {
@@ -176,6 +177,9 @@ const getFilteredAndIdxOfFilteredRoot = (tree, controls, inView) => {
      * ancestor of selected nodes, starting from the root of the tree */
     idxOfFilteredRoot = hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
   }
+
+  filtered = performGenotypeFilterMatch(filtered, controls.filters, tree.nodes);
+
   return {filtered, idxOfFilteredRoot};
 };
 
@@ -244,3 +248,64 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
     idxOfFilteredRoot: idxOfFilteredRoot
   };
 };
+
+function performGenotypeFilterMatch(filtered, filters, nodes) {
+  // check visibility of nodes based on genotype, utilising tree structure
+  // todo: this has the potential to be rather slow. Timing / optimisaiton needed.
+  // todo: race condition re: root-sequence data
+  // note: rather similar (in spirit) to how we calculate entropy - can we refactor / combine / speed up?
+  // todo: the (new) "zoom to selected" isn't working with genotypes currently (as we're not calculating CA and storing as `idxOfFilteredRoot`)
+  // todo: the entropy view is sometimes broken after filtering by genotype, but this shouldn't be the case (we can filter by other traits which are homoplasic and it works)
+  const genotypeFilters = Reflect.ownKeys(filters).includes(genotypeSymbol) ?
+    filters[genotypeSymbol].filter((item) => item.active).map((item) => item.value) :
+    false;
+  if (genotypeFilters && genotypeFilters.length) {
+    if (!filtered) { // happens if there are no other filters in play
+      filtered = Array.from({length: nodes.length}, () => true); // eslint-disable-line no-param-reassign
+    }
+    const filterConstellationLong = genotypeFilters.map((x) => {
+      const [gene, state] = x.split(':');
+      return [gene, state.slice(0, -1), state.slice(-1)];
+    });
+    const nGt = filterConstellationLong.length; // same as genotypeFilters.length
+    console.log("filterConstellationLong", filterConstellationLong);
+    // console.log(genotypeFilters, filterConstellation);
+    const recurse = (node, constellationMatch) => {
+      if (node.branch_attrs && node.branch_attrs.mutations && Object.keys(node.branch_attrs.mutations).length) {
+        const bmuts = node.branch_attrs.mutations;
+        for (let i=0; i<nGt; i++) {
+          // consider each individual genotype which the filter requests
+          // does this branch encode a mutation which means it matches this filter, or reverts away from it?
+          // modify the array-of-bools `constellationMatch` accordingly
+          if (bmuts[filterConstellationLong[i][0]]) {
+            // todo -- move these array creations out of the constellation loop & pre-compute for unique set of {gene,position} within `genotypeFilters`
+            const bposns = bmuts[filterConstellationLong[i][0]].map((m) => m.slice(1, -1));
+            const bmutsto = bmuts[filterConstellationLong[i][0]].map((m) => m.slice(-1));
+            const posIdx = bposns.indexOf(filterConstellationLong[i][1]);
+            if (posIdx!==-1) {
+              if (bmutsto[posIdx]===filterConstellationLong[i][2]) {
+                // we have branch mutation leading to the constellation mutation
+                console.log("Mutation observed @ ", node.name, bmuts[filterConstellationLong[i][0]][posIdx], "; node matches", genotypeFilters[i]);
+                constellationMatch[i] = true;
+              } else {
+                // we have branch mutation either leading away from the constellation mutation
+                // (or switching from a non-constellation mut to another non-constellation mut)
+                console.log("Mutation observed @ ", node.name, bmuts[filterConstellationLong[i][0]][posIdx], "; node doesn't match", genotypeFilters[i]);
+                constellationMatch[i] = false;
+              }
+            }
+          }
+        }
+      }
+      // filtered state is determined by checking if node (internal or leaf) has the "correct" constellation of mutations
+      // (if `filtered[idx]` was already `false` it means another filter (non-gt) excluded it)
+      filtered[node.arrayIdx] = filtered[node.arrayIdx] && constellationMatch.every((el) => el);
+      // recurse to children & pass down (copy of) `constellationMatch` which can then be modified by descendants
+      if (node.hasChildren) {
+        node.children.forEach((c) => recurse(c, [...constellationMatch]));
+      }
+    };
+    recurse(nodes[0], Array.from({length: nGt}, () => false)); // todo: 2nd arg depends on knowing root-sequence
+  }
+  return filtered;
+}

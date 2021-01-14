@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -95,6 +95,11 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.s) {   // selected strains are a filter too
     state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
+  }
+  if (query.gt) {
+    // todo - error checking etc
+    // todo - out-of-order bug whereby root-sequence data won't have yet arrived
+    state.filters[genotypeSymbol] = query.gt.split(',').map((value) => ({value, active: true}));
   }
   if (query.animate) {
     const params = query.animate.split(',');
@@ -210,6 +215,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   state.filters[strainSymbol] = [];
+  state.filters[genotypeSymbol] = []; // TODO - need to double check mutations are defined? Or set this when root-sequence arrives?
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line

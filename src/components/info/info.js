@@ -7,7 +7,7 @@ import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter } from "../../actions/tree";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { months, NODE_VISIBLE, strainSymbol } from "../../util/globals";
+import { months, NODE_VISIBLE, strainSymbol, genotypeSymbol } from "../../util/globals";
 import Byline from "./byline";
 import { FilterBadge, Tooltip } from "./filterBadge";
 
@@ -203,7 +203,7 @@ class Info extends React.Component {
         >
           <span>
             {item.value}
-            {filterName!==strainSymbol && ` (${this.props.totalStateCounts[filterName].get(item.value)})`}
+            {filterName!==strainSymbol && filterName!==genotypeSymbol && ` (${this.props.totalStateCounts[filterName].get(item.value)})`}
           </span>
         </FilterBadge>
       ]));
@@ -263,7 +263,8 @@ class Info extends React.Component {
     Reflect.ownKeys(this.props.filters)
       .filter((filterName) => this.props.filters[filterName].length > 0)
       .forEach((filterName) => {
-        filtersByCategory.push({name: filterName===strainSymbol?'strain':filterName, badges: this.createFilterBadges(filterName)});
+        const name = filterName===strainSymbol ? 'strain' : filterName===genotypeSymbol ? 'genotype' : filterName;
+        filtersByCategory.push({name, badges: this.createFilterBadges(filterName)});
       });
     if (!datesMaxed) {
       filtersByCategory.push({name: 'temporal', badges: [this.makeFilteredDatesButton()]});

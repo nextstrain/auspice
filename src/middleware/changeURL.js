@@ -2,7 +2,7 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
-import { strainSymbol } from "../util/globals";
+import { genotypeSymbol, strainSymbol } from "../util/globals";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -61,8 +61,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.APPLY_FILTER: {
-      /* for historical reasons, strains get stored under the `s` query key */
-      const queryKey = action.trait === strainSymbol ? 's' : `f_${action.trait}`;
+      const queryKey = action.trait === strainSymbol ? 's' : // for historical reasons, strains get stored under the `s` query key
+        action.trait === genotypeSymbol ? "gt" :
+          `f_${action.trait}`;
+      // todo - decide how to store mutation filters. E.g. `gt=nuc:123T,456G,S:789K` ?
       query[queryKey] = action.values
         .filter((item) => item.active) // only active filters in the URL
         .map((item) => item.value)
