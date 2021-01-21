@@ -15,9 +15,8 @@ import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
-import { collectMutationsOnBranch } from "../components/controls/filter";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -531,14 +530,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     if (!query.s) delete query.s;
   }
   if (state.filters[genotypeSymbol]) {
-    const observedMutations = new Set();
-    tree.nodes.forEach((n) => {
-      collectMutationsOnBranch(n).forEach((m) => observedMutations.add(m));
-    });
-    /* We now remove any genotype filters that we don't observe in the tree.
-    This isn't ideal because we can't filter by basal mutations. A better solution
-    would be to inactivate them (`active` prop -> `false`) and if a root-sequence
-    JSON arrives then reactivate them as appropriate.       james / jan 2021 */
+    const observedMutations = collectGenotypeStates(tree.nodes);
     state.filters[genotypeSymbol] = state.filters[genotypeSymbol]
       .filter((f) => observedMutations.has(f.value));
     query.gt = encodeGenotypeFilters(state.filters[genotypeSymbol]);

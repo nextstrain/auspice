@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Async from "react-select/lib/Async";
 import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
+import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
@@ -42,6 +43,7 @@ class FilterData extends React.Component {
      * by looping across each filter and calculating all valid options for each. This function runs
      * each time a filter is toggled on / off.
      */
+    console.log("EXPENSIVE makeOptions()")
     const options = [];
     Object.keys(this.props.activeFilters)
       .forEach((filterName) => {
@@ -68,7 +70,13 @@ class FilterData extends React.Component {
         });
     }
     if (genotypeSymbol in this.props.activeFilters) {
-      options.push(...collectObservedMutations(this.props.nodes));
+      /* TODO this may necessitate more efficient rendering of the select dropdown as there will often be thousands of entries here
+      (e.g. SARS-CoV-2 with ~4000 tips has ~30,000 genotype states).
+      Another option here is to skip this step (and therefore not render them) but allow them to typed in if they are known. */
+      options.push(...[...collectGenotypeStates(this.props.nodes)].map((o) => ({
+        label: `mutation ${o}`,
+        value: [genotypeSymbol, o]
+      })));
     }
     return options;
   }
@@ -145,33 +153,6 @@ export const FilterInfo = (
 );
 
 export default FilterData;
-
-function collectObservedMutations(nodes) {
-  /* todo - this needs to be timed as it could be slow */
-  /* todo - this needs to rerun once (if) root-sequence data arrives */
-  /* todo - this will necessitate more efficient rendering of the select dropdown as there will often be thousands (maybe 100k+) of entries here */
-  /* todo - another option here is to skip this step (and therefore not render them) but allow them to typed in if they are known... */
-  const options = new Set();
-  nodes.forEach((n) => {
-    collectMutationsOnBranch(n).forEach((o) => options.add(o));
-  });
-  return [...options].map((o) => ({
-    label: `mutation ${o}`,
-    value: [genotypeSymbol, o]
-  }));
-}
-
-export function collectMutationsOnBranch(n) {
-  const muts = [];
-  if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
-    Object.entries(n.branch_attrs.mutations).forEach(([gene, changes]) => {
-      changes.forEach((m) => {
-        muts.push(`${gene}:${m.slice(1)}`); // remove the _from_ base/codon
-      });
-    });
-  }
-  return muts;
-}
 
 function filterBadgeDisplayName(n, filterName) {
   if (filterName===strainSymbol) return `${n} x samples`;
