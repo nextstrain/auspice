@@ -542,7 +542,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelecte
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
+  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,true); // eslint-disable-line
 
   if (tipSelectedIdx) { /* i.e. query.s was set */
     newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
