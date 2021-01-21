@@ -66,3 +66,40 @@ export const decodePositions = (positions, geneLength = 'Infinity') => {
     .map((x) => parseInt(x, 10))
     .filter((x) => x > 0 && x <= Math.floor(geneLength));
 };
+
+/**
+ * Encode genotype filters for storage in URL query state.
+ * (Query schema is undocumented, see `tests/genotype.test.js` for examples)
+ */
+export const encodeGenotypeFilters = (values) => {
+  const geneToMuts = values
+    .filter((item) => item.active) // only active filters in the URL
+    .map((item) => item.value)
+    .reduce((map, value) => {
+      const [gene, mut] = value.split(":");
+      if (!map.has(gene)) map.set(gene, []);
+      map.get(gene).push(mut);
+      return map;
+    }, new Map());
+  return Array.from(geneToMuts.entries())
+    .map(([gene, muts]) => `${gene}:${muts.join(',')}`)
+    .join(",");
+};
+
+/**
+ * Decode genotype filters stored in URL query state.
+ * Returns array of type FilterValue (i.e. object with props `value` {str} and `active` {bool})
+ */
+export const decodeGenotypeFilters = (query) => {
+  let currentGene;
+  return query.split(',')
+    .map((x) => {
+      if (x.includes(':')) {
+        currentGene = x.split(":")[0];
+        return x;
+      }
+      return `${currentGene}:${x}`;
+    })
+    .map((value) => ({active: true, value})); // all URL filters _start_ active
+};
+

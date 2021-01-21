@@ -14,7 +14,7 @@ import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHel
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
-import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 
@@ -99,7 +99,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.gt) {
     // todo - error checking etc
     // todo - out-of-order bug whereby root-sequence data won't have yet arrived
-    state.filters[genotypeSymbol] = query.gt.split(',').map((value) => ({value, active: true}));
+    state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt);
   }
   if (query.animate) {
     const params = query.animate.split(',');
