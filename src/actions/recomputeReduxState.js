@@ -14,9 +14,10 @@ import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHel
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
-import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters } from "../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
+import { collectMutationsOnBranch } from "../components/controls/filter";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -97,8 +98,6 @@ const modifyStateViaURLQuery = (state, query) => {
     state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
   }
   if (query.gt) {
-    // todo - error checking etc
-    // todo - out-of-order bug whereby root-sequence data won't have yet arrived
     state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt);
   }
   if (query.animate) {
@@ -215,7 +214,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   state.filters[strainSymbol] = [];
-  state.filters[genotypeSymbol] = []; // TODO - need to double check mutations are defined? Or set this when root-sequence arrives?
+  state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
@@ -530,6 +529,19 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
       .filter((strainFilter) => validNames.includes(strainFilter.value));
     query.s = state.filters[strainSymbol].map((f) => f.value).join(",");
     if (!query.s) delete query.s;
+  }
+  if (state.filters[genotypeSymbol]) {
+    const observedMutations = new Set();
+    tree.nodes.forEach((n) => {
+      collectMutationsOnBranch(n).forEach((m) => observedMutations.add(m));
+    });
+    /* We now remove any genotype filters that we don't observe in the tree.
+    This isn't ideal because we can't filter by basal mutations. A better solution
+    would be to inactivate them (`active` prop -> `false`) and if a root-sequence
+    JSON arrives then reactivate them as appropriate.       james / jan 2021 */
+    state.filters[genotypeSymbol] = state.filters[genotypeSymbol]
+      .filter((f) => observedMutations.has(f.value));
+    query.gt = encodeGenotypeFilters(state.filters[genotypeSymbol]);
   }
 
   /* can we display branch length by div or num_date? */

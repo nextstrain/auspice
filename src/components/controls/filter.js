@@ -161,7 +161,7 @@ function collectObservedMutations(nodes) {
   }));
 }
 
-function collectMutationsOnBranch(n) {
+export function collectMutationsOnBranch(n) {
   const muts = [];
   if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
     Object.entries(n.branch_attrs.mutations).forEach(([gene, changes]) => {
