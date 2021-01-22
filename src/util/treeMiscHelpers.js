@@ -92,8 +92,8 @@ export function collectGenotypeStates(nodes) {
       Object.entries(n.branch_attrs.mutations).forEach(([gene, mutations]) => {
         mutations.forEach((m) => {
           const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)];
-          observedStates.add(`${gene}:${pos}${to}`);
-          observedStates.add(`${gene}:${pos}${from}`); // ancestral state, relative to this node
+          observedStates.add(`${gene} ${pos}${to}`);
+          observedStates.add(`${gene} ${pos}${from}`); // ancestral state, relative to this node
         });
       });
     }

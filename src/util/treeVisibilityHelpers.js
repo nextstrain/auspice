@@ -290,7 +290,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
     filtered = Array.from({length: nodes.length}, () => true); // eslint-disable-line no-param-reassign
   }
   const filterConstellationLong = genotypeFilters.map((x) => {
-    const [gene, state] = x.split(':');
+    const [gene, state] = x.split(' ');
     return [gene, state.slice(0, -1), state.slice(-1)];
   });
   const nGt = filterConstellationLong.length; // same as genotypeFilters.length

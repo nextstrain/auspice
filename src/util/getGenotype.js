@@ -76,13 +76,13 @@ export const encodeGenotypeFilters = (values) => {
     .filter((item) => item.active) // only active filters in the URL
     .map((item) => item.value)
     .reduce((map, value) => {
-      const [gene, mut] = value.split(":");
+      const [gene, mut] = value.split(" ");
       if (!map.has(gene)) map.set(gene, []);
       map.get(gene).push(mut);
       return map;
     }, new Map());
   return Array.from(geneToMuts.entries())
-    .map(([gene, muts]) => `${gene}:${muts.join(',')}`)
+    .map(([gene, muts]) => `${gene}.${muts.join(',')}`)
     .join(",");
 };
 
@@ -94,11 +94,12 @@ export const decodeGenotypeFilters = (query) => {
   let currentGene;
   return query.split(',')
     .map((x) => {
-      if (x.includes(':')) {
-        currentGene = x.split(":")[0];
-        return x;
+      if (x.includes('.')) {
+        const parts = x.split(".");
+        currentGene = parts[0];
+        return parts.join(" ");
       }
-      return `${currentGene}:${x}`;
+      return `${currentGene} ${x}`;
     })
     .map((value) => ({active: true, value})); // all URL filters _start_ active
 };
