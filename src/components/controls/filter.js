@@ -43,7 +43,6 @@ class FilterData extends React.Component {
      * by looping across each filter and calculating all valid options for each. This function runs
      * each time a filter is toggled on / off.
      */
-    console.log("EXPENSIVE makeOptions()")
     const options = [];
     Object.keys(this.props.activeFilters)
       .forEach((filterName) => {
