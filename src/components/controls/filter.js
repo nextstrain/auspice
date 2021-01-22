@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import Async from "react-select/lib/Async";
+import "react-select/dist/react-select.css";
+import "react-virtualized-select/styles.css";
+import Select from "react-virtualized-select";
 import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
@@ -106,7 +108,8 @@ class FilterData extends React.Component {
     const divKey = String(Object.keys(this.props.activeFilters).length);
     return (
       <div style={styles.base} key={divKey}>
-        <Async
+        <Select
+          async
           name="filterQueryBox"
           placeholder="Type filter query here..."
           value={undefined}
