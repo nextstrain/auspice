@@ -41,9 +41,13 @@ data_files=(
   "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
   "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
   # The ncov datasets. It's not worth downloading them all, just grab the latest
-  "ncov_global.json" "ncov_africa.json" "ncov_oceania.json" "ncov_asia.json" \
-  "ncov_europe.json" "ncov_north-america.json" "ncov_south-america.json" \
-  "ncov_non-subsampled.json" \
+  "ncov_global.json" "ncov_global_tip-frequencies.json" \
+  "ncov_africa.json" "ncov_africa_tip-frequencies.json" \
+  "ncov_asia.json" "ncov_asia_tip-frequencies.json" \
+  "ncov_europe.json" "ncov_europe_tip-frequencies.json" \
+  "ncov_north-america.json" "ncov_north-america_tip-frequencies.json" \
+  "ncov_oceania.json" "ncov_oceania_tip-frequencies.json" \
+  "ncov_south-america.json" "ncov_south-america_tip-frequencies.json" \
   # Adding the ncov datasets which are required by the narratives so they can be viewed locally
   # (Note that these all include the date of upload in the filename)
   "ncov_2020-01-23.json" "ncov_2020-01-25.json" "ncov_2020-01-26.json" "ncov_2020-01-30.json" \
