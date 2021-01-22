@@ -60,6 +60,13 @@ class FilterData extends React.Component {
             });
           });
       });
+    if (genotypeSymbol in this.props.activeFilters) {
+      const sortedGenotypes = [...collectGenotypeStates(this.props.nodes)].sort();
+      options.push(...sortedGenotypes.map((o) => ({
+        label: `mutation ${o}`,
+        value: [genotypeSymbol, o]
+      })));
+    }
     if (strainSymbol in this.props.activeFilters) {
       this.props.nodes
         .filter((n) => !n.hasChildren)
@@ -69,15 +76,6 @@ class FilterData extends React.Component {
             value: [strainSymbol, n.name]
           });
         });
-    }
-    if (genotypeSymbol in this.props.activeFilters) {
-      /* TODO this may necessitate more efficient rendering of the select dropdown as there will often be thousands of entries here
-      (e.g. SARS-CoV-2 with ~4000 tips has ~30,000 genotype states).
-      Another option here is to skip this step (and therefore not render them) but allow them to typed in if they are known. */
-      options.push(...[...collectGenotypeStates(this.props.nodes)].map((o) => ({
-        label: `mutation ${o}`,
-        value: [genotypeSymbol, o]
-      })));
     }
     return options;
   }
