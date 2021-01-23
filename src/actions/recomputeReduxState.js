@@ -660,6 +660,7 @@ export const createStateFromQueryOrJSONs = ({
   mainTreeName = false,
   secondTreeName = false,
   query,
+  url,
   dispatch
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
@@ -683,7 +684,7 @@ export const createStateFromQueryOrJSONs = ({
     }
 
     /* new controls state - don't apply query yet (or error check!) */
-    controls = getDefaultControlsState();
+    controls = getDefaultControlsState(url);
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;

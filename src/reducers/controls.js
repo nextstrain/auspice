@@ -14,13 +14,13 @@ import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
-export const getDefaultControlsState = () => {
+export const getDefaultControlsState = (url) => {
   const defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
-    geoResolution: defaultGeoResolution,
+    geoResolution: (url!==undefined && url.endsWith('/covid19/il')) ? 'location' : defaultGeoResolution,
     filters: {},
-    colorBy: defaultColorBy,
+    colorBy: (url!==undefined && url.endsWith('/covid19/il')) ? 'clade_membership' : defaultColorBy,
     selectedBranchLabel: "none"
   };
   // a default sidebarOpen status is only set via JSON, URL query
