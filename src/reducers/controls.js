@@ -22,7 +22,7 @@ export const getDefaultControlsState = (url) => {
     geoResolution: (url!==undefined && url.endsWith('/covid19/il')) ? 'location' : defaultGeoResolution,
     filters: {},
     showTransmissionLines: true,
-    colorBy: (url!==undefined && url.endsWith('/covid19/il')) ? 'clade_membership' : defaultColorBy,
+    colorBy: (url!==undefined && url.includes('/covid19')) ? 'clade_membership' : defaultColorBy,
     selectedBranchLabel: "none"
   };
   // a default sidebarOpen status is only set via JSON, URL query
