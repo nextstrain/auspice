@@ -1,4 +1,5 @@
 import { encodeGenotypeFilters, decodeGenotypeFilters } from "../src/util/getGenotype";
+import { sortConstellationLongFn } from "../src/util/treeVisibilityHelpers";
 
 const filtersToQuery = [
   [[{active: true, value: "NS3 572L"}], "NS3.572L"],
@@ -17,5 +18,31 @@ test("Genotype URL queries are correctly decoded", () => {
   filtersToQuery.forEach(([filterValues, expectedQuery]) => {
     const activeFilterValues = filterValues.filter((v) => v.active); // URLs only encode the active filters
     expect(decodeGenotypeFilters(expectedQuery)).toStrictEqual(activeFilterValues);
+  });
+});
+
+
+const constellationsToSort = [
+  [ // singleton
+    [["HA1", "186", "D"]],
+    [["HA1", "186", "D"]]
+  ],
+  [ // residues are alphabetical
+    [["HA1", "186", "S"], ["HA1", "186", "D"]],
+    [["HA1", "186", "D"], ["HA1", "186", "S"]]
+  ],
+  [ // bases are numerically sorted
+    [["HA1", "186", "S"], ["HA1", "91", "X"]],
+    [["HA1", "91", "X"], ["HA1", "186", "S"]]
+  ],
+  [ // genes are sorted alphabetically, with "nuc" last
+    [["BBB", "1", "B"], ["nuc", "0", "N"], ["AAA", "2", "A"]],
+    [["AAA", "2", "A"], ["BBB", "1", "B"], ["nuc", "0", "N"]]
+  ]
+];
+
+test("Genotype sorting function", () => {
+  constellationsToSort.forEach(([unsorted, sorted]) => {
+    expect(unsorted.sort(sortConstellationLongFn)).toStrictEqual(sorted);
   });
 });

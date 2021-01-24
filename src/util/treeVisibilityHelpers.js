@@ -289,12 +289,8 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   if (!filtered) { // happens if there are no other filters in play
     filtered = Array.from({length: nodes.length}, () => true); // eslint-disable-line no-param-reassign
   }
-  const filterConstellationLong = genotypeFilters.map((x) => {
-    const [gene, state] = x.split(' ');
-    return [gene, state.slice(0, -1), state.slice(-1)];
-  });
-  const nGt = filterConstellationLong.length; // same as genotypeFilters.length
-  // console.log("filterConstellationLong", filterConstellationLong);
+  const filterConstellationLong = createFilterConstellation(genotypeFilters)
+  const nGt = filterConstellationLong.length; // Note: may not be the same as genotypeFilters.length
   // type basalGt: Array<string> // entries at index `i` are the basal nt / aa at genotypeFilters[i]
   const basalGt = new Array(nGt); // stores the basal nt / aa of the position
   // type constellationEntry: undefined | false | true
@@ -314,7 +310,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
           const posIdx = bposns.indexOf(filterConstellationLong[i][1]);
           if (posIdx!==-1) {
             /* part I: does the mutation mean the node (at this idx) matches the ith entry in the constellation? */
-            if (bmutsto[posIdx]===filterConstellationLong[i][2]) { // branch mutation leading to the constellation mutation
+            if (filterConstellationLong[i][2].has(bmutsto[posIdx])) { // branch mutation leading to the constellation mutation
               constellationMatch[i] = true;
             } else { // branch mutation meaning the inherited state does not match the constellation
               constellationMatch[i] = false;
@@ -337,8 +333,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   recurse(nodes[0], Array.from({length: nGt}, () => undefined));
 
   /* We can now compute whether the basal positions match the relevant filter */
-  const basalConstellationMatch = basalGt.map((basalState, i) => filterConstellationLong[i][2]===basalState);
-
+  const basalConstellationMatch = basalGt.map((basalState, i) => filterConstellationLong[i][2].has(basalState));
   // filtered state is determined by checking if each node has the "correct" constellation of mutations
   return filtered.map((prevFilterValue, idx) => {
     if (!prevFilterValue) return false; // means that another filter (non-gt) excluded it
@@ -347,3 +342,58 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
       .every((el) => el);
   });
 }
+
+
+/**
+ * Given genotype filters, such as `["HA1 186D", "HA1 186S", "nuc 100T"]`
+ * Produce an array of arrays whereby genotypes at the same position are grouped
+ * e.g. `[["HA1", "186", Set("D", "S")], ["nuc", "100", "T"]]`.
+ * The returned array will be sorted to improve readability.
+ * @param {Array<string>} filters genotype filters
+ */
+function createFilterConstellation(filters) {
+  return filters
+    .map((x) => {
+      const [gene, state] = x.split(' ');
+      return [gene, state.slice(0, -1), state.slice(-1)];  // e.g. ["HA1", "186", "D"]
+    })
+    .sort(sortConstellationLongFn)
+    .map((e, i) => {
+      if (i===0) return [[e[0], e[1], new Set(e[2])]]; // ideally could be part of the `reduce` call
+      return e;
+    })
+    .reduce((constellation, entry) => {
+      const lastEntry = constellation[constellation.length-1];
+      if (entry[0]===lastEntry[0] && entry[1]===lastEntry[1]) {
+        lastEntry[2].add(entry[2]);
+      } else {
+        constellation.push([entry[0], entry[1], new Set(entry[2])]);
+      }
+      return constellation;
+    });
+}
+
+export function sortConstellationLongFn(a, b) {
+  if (a[0]!==b[0]) {
+    // alphabetically sort genes, nuc goes last.
+    if (a[0]==="nuc") return 1;
+    if (b[0]==="nuc") return -1;
+    return a<b ? -1 : 1;
+  }
+  // sort according to codon / nt position
+  const [posA, posB] = [parseInt(a[1], 10), parseInt(b[1], 10)];
+  if (posA > posB) {
+    return 1;
+  } else if (posB > posA) {
+    return -1;
+  }
+  // codon / nt position is the same => sort alphabetically by residue
+  if (a[2] > b[2]) {
+    return 1;
+  }
+  if (a[2] < b[2]) {
+    return -1;
+  }
+  return 0;
+}
+
