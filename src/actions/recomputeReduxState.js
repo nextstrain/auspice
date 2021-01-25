@@ -542,7 +542,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelecte
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
+  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,true); // eslint-disable-line
 
   if (tipSelectedIdx) { /* i.e. query.s was set */
     newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
@@ -660,6 +660,7 @@ export const createStateFromQueryOrJSONs = ({
   mainTreeName = false,
   secondTreeName = false,
   query,
+  url,
   dispatch
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
@@ -683,7 +684,7 @@ export const createStateFromQueryOrJSONs = ({
     }
 
     /* new controls state - don't apply query yet (or error check!) */
-    controls = getDefaultControlsState();
+    controls = getDefaultControlsState(url);
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
