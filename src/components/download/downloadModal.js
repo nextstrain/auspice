@@ -6,7 +6,7 @@ import { TRIGGER_DOWNLOAD_MODAL, DISMISS_DOWNLOAD_MODAL } from "../../actions/ty
 import { infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import { getAcknowledgments} from "../framework/footer";
-import { createSummary } from "../info/info";
+import { datasetSummary } from "../info/datasetSummary";
 import { DownloadButtons } from "./downloadButtons";
 
 
@@ -162,15 +162,14 @@ class DownloadModal extends React.Component {
           </div>
 
           <div>
-            {createSummary(
-              this.props.metadata.mainTreeNumTips,
-              this.props.nodes,
-              this.props.filters,
-              this.props.visibility,
-              this.props.visibleStateCounts,
-              undefined, // this.props.branchLengthsToDisplay,
-              this.props.t
-            )}
+            {datasetSummary({
+              mainTreeNumTips: this.props.metadata.mainTreeNumTips,
+              nodes: this.props.nodes,
+              filters: this.props.filters,
+              visibility: this.props.visibility,
+              visibleStateCounts: this.props.visibleStateCounts,
+              t: this.props.t
+            })}
           </div>
           <div style={infoPanelStyles.break}/>
           {" " + t("A full list of sequence authors is available via the TSV files below")}

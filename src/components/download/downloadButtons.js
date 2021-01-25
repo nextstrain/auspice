@@ -4,8 +4,8 @@ import * as icons from "../framework/svg-icons";
 import { NODE_VISIBLE } from "../../util/globals";
 import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
-import { getNumSelectedTips } from "../info/info";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
+import { getNumSelectedTips } from "../../util/treeVisibilityHelpers";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);

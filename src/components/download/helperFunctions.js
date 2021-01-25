@@ -4,7 +4,7 @@ import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
-import { createSummary } from "../info/info";
+import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 
 export const isPaperURLValid = (d) => {
@@ -478,15 +478,14 @@ export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleSt
   textStrings.push(`Last updated ${metadata.updated}`);
   const address = window.location.href.replace(/&/g, '&amp;');
   textStrings.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
-  textStrings.push(createSummary(
-    metadata.mainTreeNumTips,
+  textStrings.push(datasetSummary({
+    mainTreeNumTips: metadata.mainTreeNumTips,
     nodes,
     filters,
     visibility,
     visibleStateCounts,
-    undefined, // param is `branchLengthsToDisplay`,
     t
-  ));
+  }));
   textStrings.push("");
   textStrings.push(`${t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
   textStrings.push(`Visualizations are licensed under CC-BY.`);

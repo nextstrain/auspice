@@ -289,7 +289,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   if (!filtered) { // happens if there are no other filters in play
     filtered = Array.from({length: nodes.length}, () => true); // eslint-disable-line no-param-reassign
   }
-  const filterConstellationLong = createFilterConstellation(genotypeFilters)
+  const filterConstellationLong = createFilterConstellation(genotypeFilters);
   const nGt = filterConstellationLong.length; // Note: may not be the same as genotypeFilters.length
   // type basalGt: Array<string> // entries at index `i` are the basal nt / aa at genotypeFilters[i]
   const basalGt = new Array(nGt); // stores the basal nt / aa of the position
@@ -397,3 +397,12 @@ export function sortConstellationLongFn(a, b) {
   return 0;
 }
 
+export const getNumSelectedTips = (nodes, visibility) => {
+  let count = 0;
+  nodes.forEach((d, idx) => {
+    // nodes which are not inView have a visibility of NODE_NOT_VISIBLE
+    // so this check accounts for them as well
+    if (!d.hasChildren && visibility[idx] === NODE_VISIBLE) count += 1;
+  });
+  return count;
+};
