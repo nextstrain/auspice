@@ -351,7 +351,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
  * The returned array will be sorted to improve readability.
  * @param {Array<string>} filters genotype filters
  */
-function createFilterConstellation(filters) {
+export function createFilterConstellation(filters) {
   return filters
     .map((x) => {
       const [gene, state] = x.split(' ');

@@ -127,7 +127,12 @@ class FilterData extends React.Component {
             </SidebarSubtitle>
             {inUseFilters.map((filter) => (
               <div style={{display: 'inline-block', margin: '2px'}} key={filter.displayName}>
-                <FilterBadge active id={filter.displayName} remove={filter.remove}>
+                <FilterBadge
+                  active
+                  id={filter.displayName}
+                  remove={filter.remove}
+                  onHoverMessage={`Data is currently filtered by ${filter.displayName}`}
+                >
                   {filter.displayName}
                 </FilterBadge>
               </div>

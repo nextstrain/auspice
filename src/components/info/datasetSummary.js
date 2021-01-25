@@ -7,7 +7,7 @@ const plurals = {
   authors: "authors"
 };
 
-const pluralise = (word, n) => {
+export const pluralise = (word, n) => {
   if (n === 1) {
     if (word === "authors") word = "author"; // eslint-disable-line
   } else {
