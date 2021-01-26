@@ -6,7 +6,6 @@ const fs = require('fs');
 const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const WebpackChunkHash = require('webpack-chunk-hash');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 /* Webpack config generator */
@@ -97,7 +96,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new WebpackChunkHash({algorithm: 'md5'}),
     pluginCompress,
     pluginHtml,
     cleanWebpackPlugin
