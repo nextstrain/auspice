@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -14,8 +14,8 @@ import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHel
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
-import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
+import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
+import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -95,6 +95,9 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.s) {   // selected strains are a filter too
     state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
+  }
+  if (query.gt) {
+    state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt);
   }
   if (query.animate) {
     const params = query.animate.split(',');
@@ -210,6 +213,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   state.filters[strainSymbol] = [];
+  state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
@@ -524,6 +528,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
       .filter((strainFilter) => validNames.includes(strainFilter.value));
     query.s = state.filters[strainSymbol].map((f) => f.value).join(",");
     if (!query.s) delete query.s;
+  }
+  if (state.filters[genotypeSymbol]) {
+    const observedMutations = collectGenotypeStates(tree.nodes);
+    state.filters[genotypeSymbol] = state.filters[genotypeSymbol]
+      .filter((f) => observedMutations.has(f.value));
+    query.gt = encodeGenotypeFilters(state.filters[genotypeSymbol]);
   }
 
   /* can we display branch length by div or num_date? */

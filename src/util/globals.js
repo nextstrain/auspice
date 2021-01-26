@@ -205,6 +205,7 @@ export const isValueValid = (value) => {
   return true;
 };
 export const strainSymbol = Symbol('strain');
+export const genotypeSymbol = Symbol('genotype');
 
 /**
  * Address to fetch tiles from (including access key).
@@ -224,3 +225,28 @@ export const getMapTilesSettings = () => {
     mapboxWordmark: true
   };
 };
+
+const aminoAcids = {
+  A: "Alanine",
+  R: "Arginine",
+  N: "Asparagine",
+  D: "Aspartic acid",
+  C: "Cysteine",
+  Q: "Glutamine",
+  E: "Glutamic acid",
+  G: "Glycine",
+  H: "Histidine",
+  I: "Isoleucine",
+  L: "Leucine",
+  K: "Lysine",
+  M: "Methionine",
+  F: "Phenylalanine",
+  P: "Proline",
+  S: "Serine",
+  T: "Threonine",
+  W: "Tryptophan",
+  Y: "Tyrosine",
+  V: "Valine"
+};
+
+export const getAminoAcidName = (x) => aminoAcids[x.toUpperCase()] || "Unknown";

@@ -78,3 +78,25 @@ export const getAccessionFromNode = (node) => {
 /* see comment at top of this file */
 export const getUrlFromNode = (node) =>
   (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
+
+/**
+ * Traverses the tree and returns a set of genotype states such as
+ * {"nuc:123A", "S:418K"}.
+ * Note 1: Only variable sites are considered.
+ * Note 2: Basal states are included in the returned value.
+ */
+export function collectGenotypeStates(nodes) {
+  const observedStates = new Set();
+  nodes.forEach((n) => {
+    if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
+      Object.entries(n.branch_attrs.mutations).forEach(([gene, mutations]) => {
+        mutations.forEach((m) => {
+          const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)];
+          observedStates.add(`${gene} ${pos}${to}`);
+          observedStates.add(`${gene} ${pos}${from}`); // ancestral state, relative to this node
+        });
+      });
+    }
+  });
+  return observedStates;
+}

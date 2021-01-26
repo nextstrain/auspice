@@ -96,14 +96,14 @@ export const Tooltip = ({id, children}) => (
  * React component to display a selected filter with associated
  * icons to remove filter. More functionality to be added!
  */
-export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children, id}) => {
+export const FilterBadge = ({remove, canMakeInactive, active, activate, inactivate, children, id, onHoverMessage="The visible data is being filtered by this"}) => {
   return (
     <BadgeContainer striped={canMakeInactive && !active}>
       <TextContainer active={canMakeInactive ? active : true} data-tip data-for={id}>
         {children}
       </TextContainer>
       <Tooltip id={id}>
-        {canMakeInactive && !active ? `This filter is currently inactive` : `The visible data is being filtered by this`}
+        {canMakeInactive && !active ? `This filter is currently inactive` : onHoverMessage}
       </Tooltip>
       {canMakeInactive && (
         <IconContainer onClick={active ? inactivate : activate} role="button" tabIndex={0} data-tip data-for={id+'active'}>

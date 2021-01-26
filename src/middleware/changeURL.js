@@ -2,7 +2,8 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
-import { strainSymbol } from "../util/globals";
+import { genotypeSymbol, strainSymbol } from "../util/globals";
+import { encodeGenotypeFilters } from "../util/getGenotype";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -61,8 +62,12 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.APPLY_FILTER: {
-      /* for historical reasons, strains get stored under the `s` query key */
-      const queryKey = action.trait === strainSymbol ? 's' : `f_${action.trait}`;
+      if (action.trait === genotypeSymbol) {
+        query.gt = encodeGenotypeFilters(action.values);
+        break;
+      }
+      const queryKey = action.trait === strainSymbol ? 's' : // for historical reasons, strains get stored under the `s` query key
+        `f_${action.trait}`;
       query[queryKey] = action.values
         .filter((item) => item.active) // only active filters in the URL
         .map((item) => item.value)
