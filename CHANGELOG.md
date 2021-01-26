@@ -2,17 +2,20 @@
 title: Changelog
 ---
 
+
+* [feature] Implement genotype filtering.
+The sidebar, typing-based filter UI now includes genotypes (for datasets which define mutations on branches).
+See [PR 1265](https://github.com/nextstrain/auspice/pull/1265) for more.
+* [bugfix] Update how we generate the bundle hashes as the fix introduced in v2.22.2 was insufficient.
+See [PR 1272](https://github.com/nextstrain/auspice/pull/1272) for more.
+
 ## version 2.22.2 - 2021/01/14
-
-
 * [bugfix] Updated how we generate hashes for the transpiled, chunked client bundles.
 This prevents subtle bugs where bundles could have the same hash, but different contents, and thus stale (browser cached) chunks may be used in certain situations.
 This bug most probably arose in v2.22.0, so please update to this version if possible!
 See [PR 1263](https://github.com/nextstrain/auspice/pull/1263) for more.
 
 ## version 2.22.1 - 2021/01/13
-
-
 * Updated package-lock JSON file
 
 ## version 2.22.0 - 2021/01/11
