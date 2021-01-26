@@ -178,7 +178,7 @@ const getFilteredAndIdxOfFilteredRoot = (tree, controls, inView) => {
     idxOfFilteredRoot = hideNodesAboveVisibleCommonAncestor(filtered, tree.nodes[0]);
   }
 
-  filtered = performGenotypeFilterMatch(filtered, controls.filters, tree.nodes);
+  ([filtered, idxOfFilteredRoot] = performGenotypeFilterMatch(filtered, controls.filters, tree.nodes) || [filtered, idxOfFilteredRoot]);
 
   return {filtered, idxOfFilteredRoot};
 };
@@ -278,7 +278,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
     filters[genotypeSymbol].filter((item) => item.active).map((item) => item.value) :
     false;
   if (!genotypeFilters || !genotypeFilters.length) {
-    return filtered;
+    return undefined;
   }
 
   // todo: this has the potential to be rather slow. Timing / optimisation needed.
@@ -335,12 +335,15 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   /* We can now compute whether the basal positions match the relevant filter */
   const basalConstellationMatch = basalGt.map((basalState, i) => filterConstellationLong[i][2].has(basalState));
   // filtered state is determined by checking if each node has the "correct" constellation of mutations
-  return filtered.map((prevFilterValue, idx) => {
+  const newFiltered = filtered.map((prevFilterValue, idx) => {
     if (!prevFilterValue) return false; // means that another filter (non-gt) excluded it
     return constellationMatchesPerNode[idx]
       .map((match, i) => match===undefined ? basalConstellationMatch[i] : match) // See docstring for defn of `undefined` here
       .every((el) => el);
   });
+  /* Find the MRCA of the filtered nodes, which we use for `zoom to selected` */
+  const newIdxOfFilteredRoot = findFilteredMRCA(nodes, newFiltered);
+  return [newFiltered, newIdxOfFilteredRoot];
 }
 
 
@@ -406,3 +409,54 @@ export const getNumSelectedTips = (nodes, visibility) => {
   });
   return count;
 };
+
+/**
+ * Given filtered: Array<bool> find the MRCA node of the filtered nodes
+ * Note that this node not be part of the filtered selection.
+ */
+function findFilteredMRCA(nodes, filtered) {
+  const basalIdxsOfFilteredClades = []; // the `arrayIdx`s of the first (preorder) visible nodes
+  const rootPathToBasalFiltered = new Set(); // the `arrayIdx`s of paths from the root -> each of the nodes from `basalIdxsOfFilteredClades`
+  let mrcaIdx = 0;
+  findBasalFilteredNodes(nodes[0]);
+  basalIdxsOfFilteredClades.forEach((idx) => constructPathToRoot(idx));
+  findMrca(nodes[0]);
+
+  /* step1 does a shortened preorder traversal to find the set of basal visible nodes */
+  function findBasalFilteredNodes(n) {
+    if (filtered[n.arrayIdx]) {
+      basalIdxsOfFilteredClades.push(n.arrayIdx);
+      return;
+    }
+    if (n.hasChildren) {
+      for (let i = 0; i < n.children.length; i++) {
+        findBasalFilteredNodes(n.children[i]);
+      }
+    }
+  }
+  /* step 2 recursively visit parents to store the node indexes of the path to the root in `rootPathToBasalFiltered` */
+  function constructPathToRoot(nIdx) {
+    rootPathToBasalFiltered.add(nIdx);
+    const pIdx = nodes[nIdx].parent.arrayIdx;
+    if (nIdx===0 || rootPathToBasalFiltered.has(pIdx)) {
+      return; // this is the root of the tree or the parent was already in the path
+    }
+    constructPathToRoot(pIdx);
+  }
+  /* step 3 - preorder confined to nodes in `rootPathToBasalFiltered` to find first node with multiple children in the path */
+  function findMrca(n) {
+    const nIdx = n.arrayIdx;
+    if (!rootPathToBasalFiltered.has(nIdx)) return;
+    if (!n.hasChildren) { // occurs when {filtered nodes} is a single terminal node
+      mrcaIdx = nIdx;
+      return;
+    }
+    const childrenInPath = n.children.filter((c) => rootPathToBasalFiltered.has(c.arrayIdx));
+    if (childrenInPath.length!==1) {
+      mrcaIdx = nIdx;
+      return;
+    }
+    findMrca(childrenInPath[0]);
+  }
+  return mrcaIdx;
+}
