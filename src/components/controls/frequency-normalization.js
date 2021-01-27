@@ -5,7 +5,7 @@ import { withTranslation } from "react-i18next";
 import Toggle from "./toggle";
 import { controlsWidth } from "../../util/globals";
 import { FREQUENCY_MATRIX } from "../../actions/types";
-import { computeMatrixFromRawData } from "../../util/processFrequencies";
+import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../../util/processFrequencies";
 
 @connect((state) => {
   return {
@@ -23,7 +23,19 @@ class NormalizeFrequencies extends React.Component {
           display
           on={this.props.controls.normalizeFrequencies}
           callback={() => {
-            const normalizeFrequencies = !this.props.controls.normalizeFrequencies;
+            let normalizeFrequencies = !this.props.controls.normalizeFrequencies;
+
+            const allowNormalization = checkIfNormalizableFromRawData(
+              this.props.frequencies.data,
+              this.props.frequencies.pivots,
+              this.props.tree.nodes,
+              this.props.tree.visibility
+            );
+
+            if (!allowNormalization) {
+              normalizeFrequencies = false;
+            }
+
             const matrix = computeMatrixFromRawData(
               this.props.frequencies.data,
               this.props.frequencies.pivots,

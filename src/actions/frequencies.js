@@ -1,7 +1,7 @@
 import { debounce } from 'lodash';
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
-import { computeMatrixFromRawData, processFrequenciesJSON } from "../util/processFrequencies";
+import { computeMatrixFromRawData, checkIfNormalizableFromRawData, processFrequenciesJSON } from "../util/processFrequencies";
 
 export const loadFrequencies = (json) => (dispatch, getState) => {
   const { tree, controls } = getState();
@@ -22,6 +22,18 @@ const updateFrequencyData = (dispatch, getState) => {
     console.error("Race condition in updateFrequencyData. Frequencies data not in state. Matrix can't be calculated.");
     return;
   }
+
+  const allowNormalization = checkIfNormalizableFromRawData(
+    frequencies.data,
+    frequencies.pivots,
+    tree.nodes,
+    tree.visibility
+  );
+
+  if (!allowNormalization) {
+    controls.normalizeFrequencies = false;
+  }
+
   const matrix = computeMatrixFromRawData(
     frequencies.data,
     frequencies.pivots,
