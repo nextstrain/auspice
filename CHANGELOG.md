@@ -2,7 +2,7 @@
 title: Changelog
 ---
 
-
+## version 2.23.0 - 2021/01/28
 * [feature] Implement genotype filtering.
 The sidebar, typing-based filter UI now includes genotypes (for datasets which define mutations on branches).
 See [PR 1265](https://github.com/nextstrain/auspice/pull/1265) for more.
