@@ -106,13 +106,15 @@ export function collectGenotypeStates(nodes) {
  * We may want to expand this funciton to take a second argument as the "stopping node"
  * @param {TreeNode} fromNode
  */
-export function collectMutations({fromNode}) {
+export const collectMutations = (fromNode, include_nuc=false) => {
   const mutations = {};
   const walk = (n) => {
     if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
       Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
-        if (!mutations[gene]) mutations[gene] = new Set();
-        muts.forEach((m) => mutations[gene].add(m));
+        if ((gene === "nuc" && include_nuc) || gene !== "nuc") {
+          if (!mutations[gene]) mutations[gene] = new Set();
+          muts.forEach((m) => mutations[gene].add(m));
+        }
       });
     }
     const nIdx = n.arrayIdx;
@@ -124,4 +126,4 @@ export function collectMutations({fromNode}) {
   walk(fromNode);
 
   return mutations;
-}
+};

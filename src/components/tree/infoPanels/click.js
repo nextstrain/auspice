@@ -78,24 +78,14 @@ const MutationTable = ({mutations}) => {
     return aa<bb ? -1 : 1;
   };
   return (
-    <table style={{marginTop: "10px"}}>
-      <tbody>
-        <tr>
-          <th style={{minWidth: "60px"}}>Gene</th>
-          <th>Mutations</th>
-        </tr>
-        {Object.entries(mutations)
-          .sort(geneSortFn)
-          .map(([gene, muts]) => (
-            <tr key={gene}>
-              <td>{gene}</td>
-              <td>{[...muts].sort(mutSortFn).join(", ")}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
+    Object.entries(mutations)
+      .sort(geneSortFn)
+      .map(([gene, muts], index) => (
+        item(index === 0 ? "Mutations" : "", gene + ": " + [...muts].sort(mutSortFn).join(", "))
+      ))
   );
 };
+
 
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
@@ -250,7 +240,7 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
   const node = tip.n;
-  const mutationsToRoot = collectMutations({fromNode: node});
+  const mutationsToRoot = collectMutations(node);
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
@@ -264,7 +254,8 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
               <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
             <AccessionAndUrl node={node}/>
-            {item("Mutations", <MutationTable mutations={mutationsToRoot}/>)}
+            {item("", "")}
+            <MutationTable mutations={mutationsToRoot}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>
