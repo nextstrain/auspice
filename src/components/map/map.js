@@ -433,7 +433,7 @@ class Map extends React.Component {
       );
 
       this.moveMapAccordingToData({
-        geoResolutionChanged: nextProps.geoResolution !== this.props.geoResolution,
+        geoResolutionChanged: false,
         visibilityChanged: nextProps.visibility !== this.props.visibility,
         demeData: newDemes,
         demeIndices: this.state.demeIndices
