@@ -81,7 +81,7 @@ const MutationTable = ({mutations}) => {
     Object.entries(mutations)
       .sort(geneSortFn)
       .map(([gene, muts], index) => (
-        item(index === 0 ? "Mutations" : "", gene + ": " + [...muts].sort(mutSortFn).join(", "))
+        item(index === 0 ? "Mutations from root" : "", gene + ": " + [...muts].sort(mutSortFn).join(", ").substring(0, 200))
       ))
   );
 };
