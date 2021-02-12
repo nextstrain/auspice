@@ -283,7 +283,7 @@ const AttributionInfo = ({node}) => {
 const Container = ({node, panelDims, children}) => {
   const xOffset = 10;
   const yOffset = 10;
-  const width = 200;
+  const width = (!node.branch_attrs || !node.branch_attrs.mutations || !node.branch_attrs.mutations.nuc) ? 200 : ((node.branch_attrs.mutations.nuc.length > 15) ? 400 : 200);
 
   /* this adjusts the x-axis for the right tree in dual tree view */
   const xPos = node.shell.that.params.orientation[0] === -1 ?
