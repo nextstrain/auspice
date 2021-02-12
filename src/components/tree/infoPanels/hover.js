@@ -150,7 +150,7 @@ const Mutations = ({node, t}) => {
   /* --------- NUCLEOTIDE MUTATIONS --------------- */
   /* Nt mutations are found at `mutations.nuc` -> Array of strings */
   if (mutations.nuc && mutations.nuc.length) {
-    const nDisplay = 9; // max number of mutations to display
+    const nDisplay = 21; // max number of mutations to display
 
     const isMutGap = (mut) => mut.slice(-1) === "-" || mut.slice(0, 1) === "-";
     const isMutUnknown = (mut) => mut.slice(-1) === "N" || mut.slice(0, 1) === "N";
@@ -196,8 +196,8 @@ const Mutations = ({node, t}) => {
     }
   }
   if (shouldDisplay) {
-    const nDisplay = 3; // number of mutations to display per protein
-    const nProtsToDisplay = 7; // max number of proteins to display
+    const nDisplay = 10; // number of mutations to display per protein
+    const nProtsToDisplay = 8; // max number of proteins to display
     const mutationsToRender = [];
     Object.keys(mutationsToDisplay).forEach((prot, idx) => {
       if (idx < nProtsToDisplay) {
