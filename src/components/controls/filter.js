@@ -61,11 +61,14 @@ class FilterData extends React.Component {
           });
       });
     if (genotypeSymbol in this.props.activeFilters) {
-      const sortedGenotypes = [...collectGenotypeStates(this.props.nodes)].sort();
-      options.push(...sortedGenotypes.map((o) => ({
-        label: `genotype ${o}`,
-        value: [genotypeSymbol, o]
-      })));
+      Array.from(collectGenotypeStates(this.props.nodes))
+        .sort()
+        .forEach((o) => {
+          options.push({
+            label: `genotype ${o}`,
+            value: [genotypeSymbol, o]
+          });
+        });
     }
     if (strainSymbol in this.props.activeFilters) {
       this.props.nodes
