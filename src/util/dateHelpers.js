@@ -153,7 +153,13 @@ export const prettifyDate = (unit, date) => {
   const stringDate = typeof date ==="number" ? numericToCalendar(date) :
     date instanceof Date ? dateToString(date) :
       date;
-  const [year, month, day] = stringDate.split("-");
+  let year, month, day;
+  if (!stringDate.startsWith("-")) {
+    [year, month, day] = stringDate.split("-");
+  } else {
+    [year, month, day] = stringDate.slice(1).split("-");
+    year = `-${year}`;
+  }
   switch (unit) {
     case "CENTURY": // falls through
     case "DECADE": // falls through
