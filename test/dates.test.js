@@ -91,4 +91,5 @@ test("dates are prettified as expected", () => {
   expect(prettifyDate("YEAR", "2020-01-01")).toStrictEqual("2020");
   expect(prettifyDate("MONTH", "2020-01-05")).toStrictEqual("2020-Jan-05");
   expect(prettifyDate("MONTH", "2020-01-01")).toStrictEqual("2020-Jan");
+  expect(prettifyDate("CENTURY", "-3000-01-01")).toStrictEqual("-3000"); // BCE
 });
