@@ -103,7 +103,9 @@ export function collectGenotypeStates(nodes) {
 
 /**
  * Collect mutations from node `fromNode` to the root.
- * We may want to expand this funciton to take a second argument as the "stopping node"
+ * Reversions (e.g. root -> A<pos>B -> B<pos>A -> fromNode) will not be reported
+ * Multiple mutations (e.g. root -> A<pos>B -> B<pos>C -> fromNode) will be represented as A<pos>C
+ * We may want to expand this function to take a second argument as the "stopping node"
  * @param {TreeNode} fromNode
  */
 export const collectMutations = (fromNode, include_nuc=false) => {
@@ -112,8 +114,15 @@ export const collectMutations = (fromNode, include_nuc=false) => {
     if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
       Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
         if ((gene === "nuc" && include_nuc) || gene !== "nuc") {
-          if (!mutations[gene]) mutations[gene] = new Set();
-          muts.forEach((m) => mutations[gene].add(m));
+          if (!mutations[gene]) mutations[gene] = {};
+          muts.forEach((m) => {
+            const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)]; // note: `pos` is a string
+            if (mutations[gene][pos]) {
+              mutations[gene][pos][0] = from; // mutation already seen => update ancestral state.
+            } else {
+              mutations[gene][pos] = [from, to];
+            }
+          });
         }
       });
     }
@@ -124,6 +133,14 @@ export const collectMutations = (fromNode, include_nuc=false) => {
     }
   };
   walk(fromNode);
-
+  // update structure to be returned
+  Object.keys(mutations).forEach((gene) => {
+    mutations[gene] = Object.entries(mutations[gene])
+      .map(([pos, [from, to]]) => {
+        if (from===to) return undefined; // reversion to ancestral (root) state
+        return `${from}${pos}${to}`;
+      })
+      .filter((value) => !!value);
+  });
   return mutations;
 };
