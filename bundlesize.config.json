@@ -6,7 +6,7 @@
     },
     {
       "path": "./dist/auspice.chunk.+([0-9]).bundle.*.js",
-      "maxSize": "75 kB"
+      "maxSize": "100 kB"
     },
     {
       "path": "./dist/auspice.chunk.core-vendors.bundle.*.js",
@@ -14,7 +14,7 @@
     },
     {
       "path": "./dist/auspice.chunk.other-vendors.bundle.*.js",
-      "maxSize": "85 kB"
+      "maxSize": "150 kB"
     },
     {
       "path": "./dist/auspice.chunk.locales.bundle.*.js",
