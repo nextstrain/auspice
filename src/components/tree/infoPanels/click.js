@@ -77,11 +77,15 @@ const MutationTable = ({mutations}) => {
     const [aa, bb] = [parseInt(a.slice(1, -1), 10), parseInt(b.slice(1, -1), 10)];
     return aa<bb ? -1 : 1;
   };
+  // we encode the table here (rather than via `item()`) to set component keys appropriately
   return (
     Object.entries(mutations)
       .sort(geneSortFn)
       .map(([gene, muts], index) => (
-        item(index === 0 ? "Mutations from root" : "", gene + ": " + muts.sort(mutSortFn).join(", ").substring(0, 200))
+        <tr key={gene}>
+          <th style={infoPanelStyles.item}>{index===0 ? "Mutations from root" : ""}</th>
+          <td style={infoPanelStyles.item}>{`${gene}:${muts.sort(mutSortFn).join(", ").substring(0, 200)}`}</td>
+        </tr>
       ))
   );
 };
