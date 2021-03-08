@@ -84,7 +84,7 @@ const MutationTable = ({mutations}) => {
       .map(([gene, muts], index) => (
         <tr key={gene}>
           <th style={infoPanelStyles.item}>{index===0 ? "Mutations from root" : ""}</th>
-          <td style={infoPanelStyles.item}>{`${gene}:${muts.sort(mutSortFn).join(", ").substring(0, 200)}`}</td>
+          <td style={infoPanelStyles.item}>{`${gene}:${muts.sort(mutSortFn).join(", ")}`}</td>
         </tr>
       ))
   );
