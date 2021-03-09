@@ -277,7 +277,8 @@ export const drawStream = (
     /* what's the closest pivot? */
     const date = scales.x.invert(mousex);
     const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);
-    const freqVal = Math.round((d[pivotIdx][1] - d[pivotIdx][0]) * 100) + "%";
+    const frequency = (d[pivotIdx][1] - d[pivotIdx][0]) * 100;
+    const freqVal = frequency < 1 ? "<1%" : Math.round(frequency) + "%";
     const xValueOfPivot = scales.x(pivots[pivotIdx]);
     const y1ValueOfPivot = scales.y(d[pivotIdx][1]);
     const y2ValueOfPivot = scales.y(d[pivotIdx][0]);
