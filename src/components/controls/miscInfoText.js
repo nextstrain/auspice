@@ -38,5 +38,6 @@ export const PanelOptionsInfo = (
 export const FrequencyInfo = (
   <>
     <em>Normalize frequencies</em> controls whether the vertical axis represents the entire dataset or only the samples currently visible (e.g. due to filtering).
+    This option is not available when data is limited to prevent numerical issues.
   </>
 );

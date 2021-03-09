@@ -6,6 +6,7 @@ import Toggle from "./toggle";
 import { controlsWidth } from "../../util/globals";
 import { FREQUENCY_MATRIX } from "../../actions/types";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../../util/processFrequencies";
+import { SidebarSubtitle } from "./styles";
 
 @connect((state) => {
   return {
@@ -17,24 +18,27 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../../
 class NormalizeFrequencies extends React.Component {
   render() {
     const { t } = this.props;
+
+    const allowNormalization = this.props.frequencies.loaded && this.props.tree.loaded &&
+      checkIfNormalizableFromRawData(
+        this.props.frequencies.data,
+        this.props.frequencies.pivots,
+        this.props.tree.nodes,
+        this.props.tree.visibility
+      );
+    if (!allowNormalization) {
+      return (
+        <SidebarSubtitle>(Frequencies cannot be normalized)</SidebarSubtitle>
+      );
+    }
+
     return (
       <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
         <Toggle
           display
           on={this.props.controls.normalizeFrequencies}
           callback={() => {
-            let normalizeFrequencies = !this.props.controls.normalizeFrequencies;
-
-            const allowNormalization = checkIfNormalizableFromRawData(
-              this.props.frequencies.data,
-              this.props.frequencies.pivots,
-              this.props.tree.nodes,
-              this.props.tree.visibility
-            );
-
-            if (!allowNormalization) {
-              normalizeFrequencies = false;
-            }
+            const normalizeFrequencies = !this.props.controls.normalizeFrequencies;
 
             const matrix = computeMatrixFromRawData(
               this.props.frequencies.data,
