@@ -285,6 +285,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 
+    case types.LOAD_FREQUENCIES:
+      return {...state, normalizeFrequencies: action.normalizeFrequencies};
     case types.FREQUENCY_MATRIX: {
       if (Object.hasOwnProperty.call(action, "normalizeFrequencies")) {
         return Object.assign({}, state, { normalizeFrequencies: action.normalizeFrequencies });

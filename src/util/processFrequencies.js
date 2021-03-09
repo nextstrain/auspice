@@ -116,16 +116,8 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     });
   });
 
-  const allowNormalization = checkIfNormalizableFromRawData(
-    data,
-    pivots,
-    tree.nodes,
-    tree.visibility
-  );
-
-  if (!allowNormalization) {
-    controls.normalizeFrequencies = false;
-  }
+  const normalizeFrequencies = controls.normalizeFrequencies &&
+    checkIfNormalizableFromRawData(data, pivots, tree.nodes, tree.visibility);
 
   const matrix = computeMatrixFromRawData(
     data,
@@ -134,12 +126,13 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     tree.visibility,
     controls.colorScale,
     controls.colorBy,
-    controls.normalizeFrequencies
+    normalizeFrequencies
   );
   return {
     data,
     pivots,
     matrix,
-    projection_pivot
+    projection_pivot,
+    normalizeFrequencies
   };
 };

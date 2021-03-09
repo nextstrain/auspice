@@ -5,9 +5,11 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData, processFreque
 
 export const loadFrequencies = (json) => (dispatch, getState) => {
   const { tree, controls } = getState();
+  const { data, pivots, matrix, projection_pivot, normalizeFrequencies } = processFrequenciesJSON(json, tree, controls);
   dispatch({
     type: types.LOAD_FREQUENCIES,
-    frequencies: {loaded: true, version: 1, ...processFrequenciesJSON(json, tree, controls)}
+    frequencies: {loaded: true, version: 1, data, pivots, matrix, projection_pivot},
+    normalizeFrequencies
   });
 };
 
@@ -23,16 +25,8 @@ const updateFrequencyData = (dispatch, getState) => {
     return;
   }
 
-  const allowNormalization = checkIfNormalizableFromRawData(
-    frequencies.data,
-    frequencies.pivots,
-    tree.nodes,
-    tree.visibility
-  );
-
-  if (!allowNormalization) {
-    controls.normalizeFrequencies = false;
-  }
+  const normalizeFrequencies = controls.normalizeFrequencies &&
+    checkIfNormalizableFromRawData(frequencies.data, frequencies.pivots, tree.nodes, tree.visibility);
 
   const matrix = computeMatrixFromRawData(
     frequencies.data,
@@ -41,10 +35,10 @@ const updateFrequencyData = (dispatch, getState) => {
     tree.visibility,
     controls.colorScale,
     controls.colorBy,
-    controls.normalizeFrequencies
+    normalizeFrequencies
   );
   timerEnd("updateFrequencyData");
-  dispatch({type: types.FREQUENCY_MATRIX, matrix});
+  dispatch({type: types.FREQUENCY_MATRIX, matrix, normalizeFrequencies});
 };
 
 /* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
