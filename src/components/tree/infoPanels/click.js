@@ -2,7 +2,8 @@ import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
+  getAccessionFromNode, getUrlFromNode, collectMutations } from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -58,6 +59,41 @@ const Link = ({url, title, value}) => (
     </td>
   </tr>
 );
+
+/**
+ * Render a 2-column table of gene -> mutations.
+ * Rows are sorted by gene name, alphabetically, with "nuc" last.
+ * Mutations are sorted by genomic position.
+ * todo: sort genes by position in genome
+ * todo: provide in-app links from mutations to color-bys? filters?
+ */
+const MutationTable = ({mutations}) => {
+  const geneSortFn = (a, b) => {
+    if (a[0]==="nuc") return 1;
+    if (b[0]==="nuc") return -1;
+    return a[0]<b[0] ? -1 : 1;
+  };
+  const mutSortFn = (a, b) => {
+    const [aa, bb] = [parseInt(a.slice(1, -1), 10), parseInt(b.slice(1, -1), 10)];
+    return aa<bb ? -1 : 1;
+  };
+  // we encode the table here (rather than via `item()`) to set component keys appropriately
+  return (
+    <tr key={"Mutations"}>
+      <th style={infoPanelStyles.item}>{"Mutations from root"}</th>
+      <td style={infoPanelStyles.item}>{
+        Object.entries(mutations)
+          .sort(geneSortFn)
+          .map(([gene, muts]) => (
+            <div style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
+              {gene}: {muts.sort(mutSortFn).join(", ")}
+            </div>
+          ))
+      }</td>
+    </tr>
+  );
+};
+
 
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
@@ -212,6 +248,7 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
   const node = tip.n;
+  const mutationsToRoot = collectMutations(node);
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
@@ -225,6 +262,8 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
               <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
             <AccessionAndUrl node={node}/>
+            {item("", "")}
+            <MutationTable mutations={mutationsToRoot}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>
