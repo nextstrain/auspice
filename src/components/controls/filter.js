@@ -107,6 +107,7 @@ class FilterData extends React.Component {
     // to `loadOptions` we don't slow things down by comparing queries to a large number of options
     const options = this.makeOptions();
     const loadOptions = debounce((input, callback) => callback(null, {options}), DEBOUNCE_TIME);
+    const filterOption = (option, filter) => filter.toLowerCase().split(" ").every((word) => option.label.toLowerCase().includes(word));
     const styles = this.getStyles();
     const inUseFilters = this.summariseFilters();
     /* When filter categories were dynamically created (via metadata drag&drop) the `options` here updated but `<Async>`
@@ -121,6 +122,7 @@ class FilterData extends React.Component {
           value={undefined}
           arrowRenderer={null}
           loadOptions={loadOptions}
+          filterOption={filterOption}
           ignoreAccents={false}
           clearable={false}
           searchable
