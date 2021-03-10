@@ -79,14 +79,18 @@ const MutationTable = ({mutations}) => {
   };
   // we encode the table here (rather than via `item()`) to set component keys appropriately
   return (
-    Object.entries(mutations)
-      .sort(geneSortFn)
-      .map(([gene, muts], index) => (
-        <tr key={gene}>
-          <th style={infoPanelStyles.item}>{index===0 ? "Mutations from root" : ""}</th>
-          <td style={infoPanelStyles.item}>{`${gene}:${muts.sort(mutSortFn).join(", ")}`}</td>
-        </tr>
-      ))
+    <tr key={"Mutations"}>
+      <th style={infoPanelStyles.item}>{"Mutations from root"}</th>
+      <td style={infoPanelStyles.item}>{
+        Object.entries(mutations)
+          .sort(geneSortFn)
+          .map(([gene, muts]) => (
+            <div style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
+              {gene}: {muts.sort(mutSortFn).join(", ")}
+            </div>
+          ))
+      }</td>
+    </tr>
   );
 };
 
