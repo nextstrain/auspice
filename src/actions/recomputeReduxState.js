@@ -661,6 +661,7 @@ const createMetadataStateFromJSON = (json) => {
       branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
       layout: "layout",
+      language: "language",
       sidebar: "sidebar",
       panels: "panels",
       transmission_lines: "showTransmissionLines"
