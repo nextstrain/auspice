@@ -279,6 +279,10 @@ export const mapToScreen = function mapToScreen() {
     right: this.params.margins.right,
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
+  if (this.layout==="rect" || this.layout==="unrooted") {
+    // legend is 12px, but 6px is enough to prevent tips being obscured
+    tmpMargins.top += 6;
+  }
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
   if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
 
