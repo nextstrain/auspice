@@ -34,6 +34,23 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   return unassigned_label;
 };
 
+// Returns a boolean specifying if frequencies are allowed to be normalized
+// Only normalize if minimum frequency is above 0.1%
+export const checkIfNormalizableFromRawData = (data, pivots, nodes, visibility) => {
+  const pivotsLen = pivots.length;
+  const pivotTotals = new Array(pivotsLen).fill(0);
+  data.forEach((d) => {
+    if (visibility[d.idx] === NODE_VISIBLE) {
+      for (let i = 0; i < pivotsLen; i++) {
+        pivotTotals[i] += d.values[i];
+      }
+    }
+  });
+  const minFrequency = Math.min(...pivotTotals);
+  const allowNormalization = minFrequency > 0.001;
+  return allowNormalization;
+};
+
 export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy, normalizeFrequencies) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
@@ -98,6 +115,10 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
       weight: rawJSON[n.name].weight
     });
   });
+
+  const normalizeFrequencies = controls.normalizeFrequencies &&
+    checkIfNormalizableFromRawData(data, pivots, tree.nodes, tree.visibility);
+
   const matrix = computeMatrixFromRawData(
     data,
     pivots,
@@ -105,12 +126,13 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     tree.visibility,
     controls.colorScale,
     controls.colorBy,
-    controls.normalizeFrequencies
+    normalizeFrequencies
   );
   return {
     data,
     pivots,
     matrix,
-    projection_pivot
+    projection_pivot,
+    normalizeFrequencies
   };
 };

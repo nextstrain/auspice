@@ -5,7 +5,7 @@ import 'd3-transition';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, drawProjectionInfo,
-  areListsEqual, drawStream, processMatrix, parseColorBy, normString } from "./functions";
+  drawStream, processMatrix, parseColorBy, normString } from "./functions";
 import "../../css/entropy.css";
 
 @connect((state) => {
@@ -50,8 +50,6 @@ class Frequencies extends React.Component {
     /* we don't have to check width / height changes here - that's done in componentDidUpdate */
     const data = processMatrix({...newProps});
     const maxYChange = oldState.maxY !== data.maxY;
-    const catChange = !areListsEqual(oldState.categories, data.categories);
-    if (!maxYChange && !catChange) return false;
     const chartGeom = this.calcChartGeom(newProps.width, newProps.height);
     /* should the y scale be updated? */
     let newScales;

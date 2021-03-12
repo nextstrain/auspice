@@ -12,7 +12,7 @@ import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
-import { computeMatrixFromRawData } from "../util/processFrequencies";
+import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
@@ -830,6 +830,18 @@ export const createStateFromQueryOrJSONs = ({
   /* update frequencies if they exist (not done for new JSONs) */
   if (frequencies && frequencies.loaded) {
     frequencies.version++;
+
+    const allowNormalization = checkIfNormalizableFromRawData(
+      frequencies.data,
+      frequencies.pivots,
+      tree.nodes,
+      tree.visibility
+    );
+
+    if (!allowNormalization) {
+      controls.normalizeFrequencies = false;
+    }
+
     frequencies.matrix = computeMatrixFromRawData(
       frequencies.data,
       frequencies.pivots,
