@@ -44,6 +44,7 @@ A tanglegram of Vic and H3N2 makes little sense, but we should see the trees lin
 
 The left tree (Vic) should be coloured teal. When reloading the page this should initially flash grey.
 
-We should also see _both_ the entropy and the frequencies panel. The latter may take a moment to arrive when refreshing the page.
+The URL specifies that we should also see _both_ the entropy and the frequencies panel,
+however this functionality does not yet exist in Nextstrain narratives when viewing a tangletree.
 
 #### Checklist: refresh the page from this slide

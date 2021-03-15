@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
-import { collectDatasetFetchUrls } from "./loadData";
+import { getDatasetNamesFromUrl } from "./loadData";
 
 /* Given a URL, what "page" should be displayed?
  * "page" means the main app, splash page, status page etc
@@ -27,17 +27,25 @@ export const chooseDisplayComponentFromURL = (url) => {
 
 /*
  * All the Fetch Promises are created before first render. When trying the cache we `await`.
- * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immeditaly return the result.
+ * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immediately return the result.
  * For the landing dataset, no problem either because await on a value just returns the value.
  */
 const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
-  if (state.jsonCache && state.jsonCache.jsons && state.jsonCache.jsons[mainTreeName] !== undefined) {
-    return {
-      json: await state.jsonCache.jsons[mainTreeName],
-      secondJson: await state.jsonCache.jsons[secondTreeName]
-    };
+  // console.log("tryCacheThenFetch", mainTreeName, mainTreeName);
+
+  if (!state.jsonCache || !state.jsonCache.jsons) {
+    throw new Error("Cache not present");
   }
-  throw new Error("This should not happen given that we start fetching all datasets before rendering");
+  const cache = state.jsonCache.jsons;
+  if (!cache[mainTreeName] || !cache[mainTreeName].main) {
+    throw new Error(`${mainTreeName} not in cache.`);
+  }
+  const mainJson = await cache[mainTreeName].main;
+  const secondJson = cache[secondTreeName] ? await cache[secondTreeName].main : undefined;
+  return {json: mainJson, secondJson};
+
+  // todo: sidecar files. These are in cache. Turn `tryCacheThenFetch`
+  // into an async generator?
 };
 
 /* changes the state of the page and (perhaps) the dataset displayed.
@@ -87,7 +95,7 @@ export const changePage = ({
     });
   } else if (changeDatasetOnly) {
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
-    const [mainTreeName, secondTreeName] = collectDatasetFetchUrls(path);
+    const [mainTreeName, secondTreeName] = getDatasetNamesFromUrl(path);
     tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
       .then(({json, secondJson}) => {
         const newState = createStateFromQueryOrJSONs({
