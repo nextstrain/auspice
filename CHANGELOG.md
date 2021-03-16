@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.24.0 - 2021/03/17
+
+
 
 * Frequencies are no longer normalized when the data is lacking.
 See [PR 1278](https://github.com/nextstrain/auspice/pull/1278) for more.
