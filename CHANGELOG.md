@@ -2,6 +2,23 @@
 title: Changelog
 ---
 
+
+* Frequencies are no longer normalized when the data is lacking.
+See [PR 1278](https://github.com/nextstrain/auspice/pull/1278) for more.
+* Fixed a stack size bug, which mainly affected the TB dataset on certain browsers.
+See [PR 1293](https://github.com/nextstrain/auspice/pull/1293) for more.
+* Root-to-tip mutations are now displayed in the tip-clicked info box.
+See [PR 1280](https://github.com/nextstrain/auspice/pull/1280) for more.
+* Datasets may now define the default language.
+See [PR 1303](https://github.com/nextstrain/auspice/pull/1303) for more.
+* Polish language added.
+See [PR 1288](https://github.com/nextstrain/auspice/pull/1288) for more.
+* Tips in the tree should no longer be obscured behind the legend.
+See [PR 1302](https://github.com/nextstrain/auspice/pull/1302) for more.
+* Dates BCE are now correctly displayed in the phylogeny axis.
+See [PR 1297](https://github.com/nextstrain/auspice/pull/1297) for more.
+
+
 ## version 2.23.0 - 2021/01/28
 * [feature] Implement genotype filtering.
 The sidebar, typing-based filter UI now includes genotypes (for datasets which define mutations on branches).
