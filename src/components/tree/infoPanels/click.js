@@ -218,7 +218,7 @@ const SampleDate = ({node, t}) => {
 const getTraitsToDisplay = (node) => {
   // TODO -- this should be centralised somewhere
   if (!node.node_attrs) return [];
-  const ignore = ["author", "div", "num_date", "gisaid_epi_isl", "genbank_accession"];
+  const ignore = ["author", "div", "num_date", "gisaid_epi_isl", "genbank_accession", "accession", "url"];
   return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
 };
 
