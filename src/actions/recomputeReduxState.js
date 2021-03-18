@@ -241,6 +241,8 @@ const modifyStateViaMetadata = (state, metadata) => {
         }
       }
     }
+  } else {
+    metadata.displayDefaults = {}; // allows code to rely on `displayDefaults` existing
   }
 
   if (metadata.panels) {
