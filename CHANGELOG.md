@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.24.1 - 2021/03/19
+
+
 * [bugfix] Fixes a bug introduced in v2.24.0 where certain datasets wouldn't load
 
 ## version 2.24.0 - 2021/03/17
