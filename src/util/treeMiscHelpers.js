@@ -69,15 +69,25 @@ export const getFullAuthorInfoFromNode = (node) =>
 
 export const getAccessionFromNode = (node) => {
   /* see comment at top of this file */
-  if (node.node_attrs && node.node_attrs.accession) {
-    return node.node_attrs.accession;
+  let accession, url;
+  if (node.node_attrs) {
+    if (isValueValid(node.node_attrs.accession)) {
+      accession = node.node_attrs.accession;
+    }
+    if (typeof node.node_attrs.url === "string") {
+      url = node.node_attrs.url;
+    }
   }
-  return undefined;
+  return {accession, url};
 };
 
 /* see comment at top of this file */
-export const getUrlFromNode = (node) =>
-  (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
+export const getUrlFromNode = (node, trait) => {
+  if (node.node_attrs && node.node_attrs[trait] && typeof node.node_attrs[trait].url === "string") {
+    return node.node_attrs[trait].url;
+  }
+  return undefined;
+};
 
 /**
  * Traverses the tree and returns a set of genotype states such as

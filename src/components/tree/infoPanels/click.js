@@ -96,8 +96,7 @@ const MutationTable = ({mutations}) => {
 
 
 const AccessionAndUrl = ({node}) => {
-  const accession = getAccessionFromNode(node);
-  const url = getUrlFromNode(node);
+  const {accession, url} = getAccessionFromNode(node);
   const genbank_accession = getTraitFromNode(node, "genbank_accession");
 
   /* `gisaid_epi_isl` is a special value attached to nodes introduced during the 2019 nCoV outbreak.
@@ -230,10 +229,16 @@ const Trait = ({node, trait, colorings}) => {
       value = Number.parseFloat(value_tmp).toPrecision(3);
     }
   }
+  if (!isValueValid(value)) return null;
+
   const name = (colorings && colorings[trait] && colorings[trait].title) ?
     colorings[trait].title :
     trait;
-  return isValueValid(value) ? item(name, value) : null;
+  const url = getUrlFromNode(node, trait);
+  if (url) {
+    return <Link title={name} url={formatURL(url)} value={value}/>;
+  }
+  return item(name, value);
 };
 
 /**
