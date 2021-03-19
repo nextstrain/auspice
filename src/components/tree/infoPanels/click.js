@@ -42,15 +42,6 @@ const item = (key, value, href) => (
   </tr>
 );
 
-const formatURL = (url) => {
-  if (url !== undefined && url.startsWith("https_")) {
-    return url.replace("https_", "https:");
-  } else if (url !== undefined && url.startsWith("http_")) {
-    return url.replace("http_", "http:");
-  }
-  return url;
-};
-
 const Link = ({url, title, value}) => (
   <tr>
     <th style={infoPanelStyles.item}>{title}</th>
@@ -96,12 +87,10 @@ const MutationTable = ({mutations}) => {
 
 
 const AccessionAndUrl = ({node}) => {
-  const {accession, url} = getAccessionFromNode(node);
-  const genbank_accession = getTraitFromNode(node, "genbank_accession");
-
-  /* `gisaid_epi_isl` is a special value attached to nodes introduced during the 2019 nCoV outbreak.
-  If set, the display is different from the normal behavior */
+  /* If `gisaid_epi_isl` or `genbank_accession` exist as node attrs, these preempt normal use of `accession` and `url`.
+  These special values were introduced during the 2019 nCoV outbreak. */
   const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
+  const genbank_accession = getTraitFromNode(node, "genbank_accession");
   if (isValueValid(gisaid_epi_isl)) {
     return (
       <>
@@ -113,22 +102,24 @@ const AccessionAndUrl = ({node}) => {
       </>
     );
   }
-
   if (isValueValid(genbank_accession)) {
     return (
       <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
     );
-  } else if (isValueValid(accession) && isValueValid(url)) {
+  }
+
+  const {accession, url} = getAccessionFromNode(node);
+  if (accession && url) {
     return (
-      <Link url={formatURL(url)} value={accession} title={"Accession"}/>
+      <Link url={url} value={accession} title={"Accession"}/>
     );
-  } else if (isValueValid(accession)) {
+  } else if (accession) {
     return (
       item("Accession", accession)
     );
-  } else if (isValueValid(url)) {
+  } else if (url) {
     return (
-      <Link title={"Strain URL"} url={formatURL(url)} value={"click here"}/>
+      <Link title={"Strain URL"} url={url} value={"click here"}/>
     );
   }
   return null;
@@ -236,7 +227,7 @@ const Trait = ({node, trait, colorings}) => {
     trait;
   const url = getUrlFromNode(node, trait);
   if (url) {
-    return <Link title={name} url={formatURL(url)} value={value}/>;
+    return <Link title={name} url={url} value={value}/>;
   }
   return item(name, value);
 };
