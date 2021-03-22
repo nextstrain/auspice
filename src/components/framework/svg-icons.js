@@ -42,6 +42,27 @@ export const Clock = ({theme, selected, width}) => {
   );
 };
 
+export const Scatter = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
+  return (
+    <svg width={width} height={width + 5}>
+      <g transform="translate(0,4)">
+        <svg width={width} height={width} viewBox="0 0 30 30 ">
+          <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(17.000000, 20.000000)">
+            <polyline id="Path-3" stroke={stroke} points="-15 5 -15 -25 "/>
+            <polyline id="Path-4" stroke={stroke} points="-15 5 25 5"/>
+            <circle id="c-1" stroke={stroke} cx="-8" cy="0" r="2"/>
+            <circle id="c-2" stroke={stroke} cx="3" cy="0" r="2"/>
+            <circle id="c-3" stroke={stroke} cx="8" cy="-5" r="2"/>
+            <circle id="c-4" stroke={stroke} cx="-4" cy="-15" r="2"/>
+            <circle id="c-5" stroke={stroke} cx="1" cy="-11" r="2"/>
+          </g>
+        </svg>
+      </g>
+    </svg>
+  );
+};
+
 export const RadialTree = ({theme, selected, width}) => {
   const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (

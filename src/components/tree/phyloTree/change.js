@@ -257,7 +257,7 @@ export const change = function change({
   /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
-  updateLayout = undefined,
+  updateLayout = undefined, // todo - this seems identical to `newLayout`
   newBranchLabellingKey = undefined,
   newTipLabelKey = undefined,
   /* arrays of data (the same length as nodes) */
@@ -266,7 +266,9 @@ export const change = function change({
   fill = undefined,
   visibility = undefined,
   tipRadii = undefined,
-  branchThickness = undefined
+  branchThickness = undefined,
+  /* other data */
+  scatterVariables = undefined
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
@@ -342,9 +344,11 @@ export const change = function change({
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
-  if (newDistance) this.setDistance(newDistance);
+  if (newDistance || updateLayout) this.setDistance(newDistance);
   /* layout (must run after distance) */
-  if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
+  if (newDistance || newLayout || updateLayout) {
+    this.setLayout(newLayout || this.layout, scatterVariables);
+  }
   /* show confidences - set this param which actually adds the svg paths for
      confidence intervals when mapToScreen() gets called below */
   if (showConfidences) this.params.confidence = true;

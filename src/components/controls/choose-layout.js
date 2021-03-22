@@ -6,15 +6,20 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
+import Select from "react-select/lib/Select";
 import * as icons from "../framework/svg-icons";
+import { controlsWidth } from "../../util/globals";
+import { collectScatterVariables, getStartingScatterVariables } from "../../util/scatterplotHelpers";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle, SidebarButton } from "./styles";
+
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const RadialTreeIcon = withTheme(icons.RadialTree);
 const UnrootedTreeIcon = withTheme(icons.UnrootedTree);
 const ClockIcon = withTheme(icons.Clock);
+const ScatterIcon = withTheme(icons.Scatter);
 
 export const RowContainer = styled.div`
   padding: 0px 5px 1px 5px;
@@ -23,6 +28,10 @@ export const RowContainer = styled.div`
 @connect((state) => {
   return {
     layout: state.controls.layout,
+    scatterVariables: state.controls.scatterVariables,
+    colorBy: state.controls.colorBy,
+    distanceMeasure: state.controls.distanceMeasure,
+    colorings: state.metadata.colorings,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
@@ -31,6 +40,16 @@ class ChooseLayout extends React.Component {
   static propTypes = {
     layout: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
+  }
+  constructor(props) {
+    super(props);
+    this.updateScatterplot = (scatterVariables) => {
+      this.props.dispatch({
+        type: CHANGE_LAYOUT,
+        layout: "scatter",
+        scatterVariables
+      });
+    };
   }
 
   handleChangeLayoutClicked(userSelectedLayout) {
@@ -47,12 +66,42 @@ class ChooseLayout extends React.Component {
       } else {
         console.warn("Odd... controls/choose-layout.js tried to set a layout we don't offer...");
       }
-
       this.props.dispatch({
         type: CHANGE_LAYOUT,
-        data: userSelectedLayout
+        layout: userSelectedLayout
       });
     }
+  }
+
+  selectScatterVariables() {
+    const {options, selected} = collectScatterVariables(this.props.colorings, this.props.scatterVariables);
+    const miscSelectProps = {options, clearable: false, searchable: false, multi: false, valueKey: "label"};
+
+    return (
+      <>
+        <ScatterVariableContainer>
+          <ScatterAxisName>x</ScatterAxisName>
+          <ScatterSelectContainer>
+            <Select
+              {...miscSelectProps}
+              value={selected.x}
+              onChange={(value) => this.updateScatterplot({x: value.value, y: this.props.scatterVariables.y})}
+            />
+          </ScatterSelectContainer>
+        </ScatterVariableContainer>
+
+        <ScatterVariableContainer>
+          <ScatterAxisName>y</ScatterAxisName>
+          <ScatterSelectContainer>
+            <Select
+              {...miscSelectProps}
+              value={selected.y}
+              onChange={(value) => this.updateScatterplot({x: this.props.scatterVariables.x, y: value.value})}
+            />
+          </ScatterSelectContainer>
+        </ScatterVariableContainer>
+      </>
+    );
   }
 
   render() {
@@ -91,6 +140,7 @@ class ChooseLayout extends React.Component {
             {t("sidebar:unrooted")}
           </SidebarButton>
         </RowContainer>
+        { /* Show clock view only if both time and divergence are defined for the tree */ }
         {
           this.props.branchLengthsToDisplay === "divAndDate" ?
             (
@@ -106,6 +156,17 @@ class ChooseLayout extends React.Component {
             ) :
             null
         }
+        { /* Scatterplot view -- when selected this shows x & y dropdown selectors */ }
+        <RowContainer>
+          <ScatterIcon width={25} selected={selected === "scatter"}/>
+          <SidebarButton
+            selected={selected === "scatter"}
+            onClick={() => this.updateScatterplot({x: this.props.distanceMeasure, y: this.props.colorBy})}
+          >
+            {t("sidebar:scatter")}
+          </SidebarButton>
+          {selected==="scatter" && this.selectScatterVariables()}
+        </RowContainer>
       </div>
     );
   }
@@ -113,3 +174,34 @@ class ChooseLayout extends React.Component {
 
 const WithTranslation = withTranslation()(ChooseLayout);
 export default WithTranslation;
+
+
+const ScatterVariableContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-content: stretch;
+  flex-wrap: nowrap;
+  height: 100%;
+  order: 0;
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+  align-self: auto;
+  padding: 0px 0px 2px 15px;
+`;
+
+const ScatterAxisName = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: ${(props) => props.theme["font-family"]};
+  color: ${(props) => props.theme.color};
+`;
+
+const ScatterSelectContainer = styled.div`
+  width: ${controlsWidth-18}px;
+  font-size: 12px;
+`;

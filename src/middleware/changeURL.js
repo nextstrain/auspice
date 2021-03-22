@@ -75,7 +75,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_LAYOUT: {
-      query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
+      query.l = action.layout === state.controls.defaults.layout ? undefined : action.layout;
       if (!shouldDisplayTemporalConfidence(state.controls.temporalConfidence.exists, state.controls.distanceMeasure, query.l)) {
         query.ci = undefined;
       }

@@ -69,9 +69,14 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.showConfidences = true;
   }
 
+  if (newProps.layout==="scatter" && (oldProps.scatterVariables!==newProps.scatterVariables)) {
+    args.updateLayout = true;
+    args.scatterVariables = newProps.scatterVariables;
+  }
   if (oldProps.layout !== newProps.layout) {
     args.newLayout = newProps.layout;
   }
+
 
   /* zoom to a clade / reset zoom to entire tree */
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {

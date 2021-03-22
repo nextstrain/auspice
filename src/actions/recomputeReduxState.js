@@ -553,6 +553,11 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     state.sidebarOpen=true;
   }
 
+  /* if we are starting in a scatterplot layout, we need to ensure we have x & v variables */
+  // todo: these should be URL query & JSON definable (and stored as defaults)
+  if (state.layout==="scatter") {
+    state.scatterVariables = {x: state.distanceMeasure, y: state.colorBy};
+  }
   return state;
 };
 

@@ -23,7 +23,8 @@ export const getDefaultControlsState = () => {
     filters: {},
     colorBy: defaultColorBy,
     selectedBranchLabel: "none",
-    showTransmissionLines: true
+    showTransmissionLines: true,
+    scatterVariables: {x: undefined, y: undefined}
   };
   // a default sidebarOpen status is only set via JSON, URL query
   // _or_ if certain URL keywords are triggered
@@ -120,7 +121,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
-        layout: action.data,
+        layout: action.layout,
+        scatterVariables: action.scatterVariables || {x: undefined, y: undefined},
         /* temporal confidence can only be displayed for rectangular trees */
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
           display: shouldDisplayTemporalConfidence(

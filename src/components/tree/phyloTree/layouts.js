@@ -9,9 +9,9 @@ import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers"
  * assigns the attribute this.layout and calls the function that
  * calculates the x,y coordinates for the respective layouts
  * @param layout -- the layout to be used, has to be one of
- *                  ["rect", "radial", "unrooted", "clock"]
+ *                  ["rect", "radial", "unrooted", "clock", "scatter"]
  */
-export const setLayout = function setLayout(layout) {
+export const setLayout = function setLayout(layout, scatterVariables) {
   // console.log("set layout");
   timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
@@ -22,10 +22,15 @@ export const setLayout = function setLayout(layout) {
   } else {
     this.layout = layout;
   }
+  this.scatterVariables = scatterVariables;
+  if (this.layout === "clock") {
+    this.scatterVariables = {x: "num_date", y: "div"};
+  }
+
   if (this.layout === "rect") {
     this.rectangularLayout();
-  } else if (this.layout === "clock") {
-    this.timeVsRootToTip();
+  } else if (this.layout === "clock" || this.layout === "scatter") {
+    this.scatterplotLayout();
   } else if (this.layout === "radial") {
     this.radialLayout();
   } else if (this.layout === "unrooted") {
@@ -56,25 +61,10 @@ export const rectangularLayout = function rectangularLayout() {
 };
 
 /**
- * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with `num_date` info set
- * in addition, this function calculates a regression between
+ * this function calculates a regression between
  * num_date and div which is saved as this.regression
- * @return {null}
  */
-export const timeVsRootToTip = function timeVsRootToTip() {
-  this.nodes.forEach((d) => {
-    d.y = getDivFromNode(d.n);
-    d.x = getTraitFromNode(d.n, "num_date");
-    d.px = getTraitFromNode(d.n.parent, "num_date");
-    d.py = getDivFromNode(d.n.parent);
-  });
-  if (this.vaccines) { /* overlay vaccine cross on tip */
-    this.vaccines.forEach((d) => {
-      d.xCross = d.x;
-      d.yCross = d.y;
-    });
-  }
+export const calculateRegression = function calculateRegression() {
   const nTips = this.numberOfTips;
   // REGRESSION WITH FREE INTERCEPT
   // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
@@ -96,6 +86,48 @@ export const timeVsRootToTip = function timeVsRootToTip() {
   const slope = XY / secondMomentTime;
   const intercept = -offset * slope;
   this.regression = {slope: slope, intercept: intercept};
+};
+
+/**
+ * assign x,y coordinates for nodes based upon user-selected variables
+ * TODO: timeVsRootToTip is a specific instance of this
+ */
+export const scatterplotLayout = function scatterplotLayout() {
+  console.log("scatterplotLayout setting x, y values", this.layout, this.scatterVariables);
+
+  if (!this.scatterVariables) {
+    console.error("Scatterplot called without variables");
+    return;
+  }
+
+  this.nodes.forEach((d) => {
+    // set x and parent X values
+    if (this.scatterVariables.x==="div") {
+      d.x = getDivFromNode(d.n);
+      d.px = getDivFromNode(d.n.parent);
+    } else {
+      d.x = getTraitFromNode(d.n, this.scatterVariables.x);
+      d.px = getTraitFromNode(d.n.parent, this.scatterVariables.x);
+    }
+    // set y and parent  values
+    if (this.scatterVariables.y==="div") {
+      d.y = getDivFromNode(d.n);
+      d.py = getDivFromNode(d.n.parent);
+    } else {
+      d.y = getTraitFromNode(d.n, this.scatterVariables.y);
+      d.py = getTraitFromNode(d.n.parent, this.scatterVariables.y);
+    }
+  });
+
+  if (this.vaccines) { /* overlay vaccine cross on tip */
+    this.vaccines.forEach((d) => {
+      d.xCross = d.x;
+      d.yCross = d.y;
+    });
+  }
+
+  this.calculateRegression();
+
 };
 
 /*
@@ -207,6 +239,8 @@ export const setDistance = function setDistance(distanceAttribute) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
   this.distance = distanceAttribute || "div"; // div is default
+
+  // todo - can the following loops be skipped for scatterplots?
 
   // assign node and parent depth
   if (this.distance === "div") {
@@ -348,7 +382,7 @@ export const mapToScreen = function mapToScreen() {
     const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
     this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
     this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
-  } else if (this.layout==="clock") {
+  } else if (this.layout==="clock" || this.layout==="scatter") {
     // same as rectangular, but flipped yscale
     this.xScale.domain([minX, maxX]);
     this.yScale.domain([maxY, minY]);
@@ -359,10 +393,10 @@ export const mapToScreen = function mapToScreen() {
 
   // pass all x,y through scales and assign to xTip, xBase
   this.nodes.forEach((d) => {
-    d.xTip = this.xScale(d.x);
-    d.yTip = this.yScale(d.y);
-    d.xBase = this.xScale(d.px);
-    d.yBase = this.yScale(d.py);
+    d.xTip = this.xScale(d.x) || 0;
+    d.yTip = this.yScale(d.y) || 0;
+    d.xBase = this.xScale(d.px) || 0;
+    d.yBase = this.yScale(d.py) || 0;
 
     d.rot = Math.atan2(d.yTip-d.yBase, d.xTip-d.xBase) * 180/Math.PI;
 
@@ -377,7 +411,7 @@ export const mapToScreen = function mapToScreen() {
   }
 
   // assign the branches as path to each node for the different layouts
-  if (this.layout==="clock" || this.layout==="unrooted") {
+  if (this.layout==="clock" || this.layout==="unrooted" || this.layout==="scatter") {
     this.nodes.forEach((d) => {
       d.branch = [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
     });

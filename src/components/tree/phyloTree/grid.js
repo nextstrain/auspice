@@ -265,7 +265,7 @@ export const addGrid = function addGrid() {
   const gridline = (xScale, yScale, layoutShadow) => (gridPoint) => {
     let svgPath="";
     if (gridPoint.axis === "x") {
-      if (layoutShadow==="rect" || layoutShadow==="clock") {
+      if (layoutShadow==="rect" || layoutShadow==="clock" || layoutShadow==="scatter") {
         const xPos = xScale(gridPoint.position);
         svgPath = 'M'+xPos.toString() +
           " " +
@@ -324,7 +324,7 @@ export const addGrid = function addGrid() {
 
   /* for clock layouts, add y-points to the majorGridPoints array
   Note that these don't have lines drawn, only text */
-  if (this.layout==="clock") {
+  if (this.layout==="clock" || this.layout==="scatter") {
     majorGridPoints.push(...computeYGridPoints(ymin, ymax).majorGridPoints);
   }
 

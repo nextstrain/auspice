@@ -16,9 +16,11 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {array} tipStroke       -- tip stroke colour for each node (set onto each node)
  * @param {array} tipFill         -- tip fill colour for each node (set onto each node)
  * @param {array|null} tipRadii   -- array of tip radius'
+ * @param {array} dateRange
+ * @param {object} scatterVariables  -- {x, y} properties to map nodes => scatterplot (only used if layout="scatter")
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -28,7 +30,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
 
   /* set x, y values & scale them to the screen */
   this.setDistance(distance);
-  this.setLayout(layout);
+  this.setLayout(layout, scatterVariables);
   this.mapToScreen();
 
   /* set nodes stroke / fill */
@@ -172,7 +174,7 @@ export const drawBranches = function drawBranches() {
   if (!("branchTee" in this.groups)) {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
   }
-  if (this.layout === "clock" || this.layout === "unrooted") {
+  if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
   } else {
     this.groups.branchTee
