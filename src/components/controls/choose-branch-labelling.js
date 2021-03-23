@@ -9,7 +9,8 @@ import { controlsWidth } from "../../util/globals";
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
-  available: state.tree.availableBranchLabels
+  available: state.tree.availableBranchLabels,
+  canRenderBranchLabels: state.controls.canRenderBranchLabels
 }))
 class ChooseBranchLabelling extends React.Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class ChooseBranchLabelling extends React.Component {
     this.change = (value) => {this.props.dispatch({type: CHANGE_BRANCH_LABEL, value: value.value});};
   }
   render() {
+    if (!this.props.canRenderBranchLabels) return null;
     const { t } = this.props;
     return (
       <div style={{paddingTop: 5}}>

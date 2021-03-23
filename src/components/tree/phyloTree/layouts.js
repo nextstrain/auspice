@@ -24,7 +24,7 @@ export const setLayout = function setLayout(layout, scatterVariables) {
   }
   this.scatterVariables = scatterVariables;
   if (this.layout === "clock") {
-    this.scatterVariables = {x: "num_date", y: "div"};
+    this.scatterVariables = {x: "num_date", y: "div", showBranches: true};
   }
 
   if (this.layout === "rect") {
@@ -93,7 +93,6 @@ export const calculateRegression = function calculateRegression() {
  * TODO: timeVsRootToTip is a specific instance of this
  */
 export const scatterplotLayout = function scatterplotLayout() {
-  console.log("scatterplotLayout setting x, y values", this.layout, this.scatterVariables);
 
   if (!this.scatterVariables) {
     console.error("Scatterplot called without variables");
@@ -313,7 +312,7 @@ export const mapToScreen = function mapToScreen() {
     right: this.params.margins.right,
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
-  if (this.layout==="rect" || this.layout==="unrooted") {
+  if (this.layout==="rect" || this.layout==="unrooted" || this.layout==="scatter") {
     // legend is 12px, but 6px is enough to prevent tips being obscured
     tmpMargins.top += 6;
   }
@@ -341,8 +340,8 @@ export const mapToScreen = function mapToScreen() {
   this.setScales(tmpMargins);
 
   /* find minimum & maximum x & y values */
-  let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
-  this.nodes.filter((d) => d.inView).forEach((d) => {
+  let [minY, maxY, minX, maxX] = [1000000, -100000, 1000000, -100000];
+  this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined).forEach((d) => {
     if (d.x > maxX) maxX = d.x;
     if (d.y > maxY) maxY = d.y;
     if (d.x < minX) minX = d.x;
@@ -391,13 +390,26 @@ export const mapToScreen = function mapToScreen() {
     this.yScale.domain([minY, maxY]);
   }
 
+  const hiddenYPosition = this.yScale.range()[1] + 100;
+  const hiddenXPosition = this.xScale.range()[0] - 100;
+
   // pass all x,y through scales and assign to xTip, xBase
   this.nodes.forEach((d) => {
-    d.xTip = this.xScale(d.x) || 0;
-    d.yTip = this.yScale(d.y) || 0;
-    d.xBase = this.xScale(d.px) || 0;
-    d.yBase = this.yScale(d.py) || 0;
-
+    d.xTip = this.xScale(d.x);
+    d.yTip = this.yScale(d.y);
+    d.xBase = this.xScale(d.px);
+    d.yBase = this.yScale(d.py);
+    // for scatterplots values may be missing & we want to avoid rendering these
+    if (this.layout==="scatter") {
+      if (isNaN(d.xTip)) {
+        d.xTip = hiddenXPosition;
+      }
+      if (isNaN(d.yTip)) {
+        d.yTip=hiddenYPosition;
+      }
+      if (isNaN(d.xBase)) d.xBase=hiddenXPosition;
+      if (isNaN(d.yBase)) d.yBase=hiddenYPosition;
+    }
     d.rot = Math.atan2(d.yTip-d.yBase, d.xTip-d.xBase) * 180/Math.PI;
 
   });
@@ -411,10 +423,21 @@ export const mapToScreen = function mapToScreen() {
   }
 
   // assign the branches as path to each node for the different layouts
-  if (this.layout==="clock" || this.layout==="unrooted" || this.layout==="scatter") {
+  if (this.layout==="clock" || this.layout==="unrooted") {
     this.nodes.forEach((d) => {
       d.branch = [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
     });
+  } else if (this.layout==="scatter") {
+    // if nodes are deliberately obscured (as traits may not be set for some nodes), we don't want to render branches joining that node
+    if (this.scatterVariables.showBranches) {
+      this.nodes.forEach((d) => {
+        d.branch = d.xBase===hiddenXPosition || d.xTip===hiddenXPosition || d.yBase===hiddenYPosition || d.yTip===hiddenYPosition ?
+          [""] :
+          [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
+      });
+    } else {
+      this.nodes.forEach((d) => {d.branch=[];});
+    }
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;

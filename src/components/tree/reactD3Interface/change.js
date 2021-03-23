@@ -52,7 +52,12 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
   /* change in key used to define branch labels, tip labels */
-  if (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel) {
+  if (oldProps.canRenderBranchLabels===true && newProps.canRenderBranchLabels===false) {
+    args.newBranchLabellingKey = "none";
+  } else if (
+    (oldProps.canRenderBranchLabels===false && newProps.canRenderBranchLabels===true) ||
+    (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel)
+  ) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
   if (oldProps.tipLabelKey !== newProps.tipLabelKey) {

@@ -13,6 +13,7 @@ import { collectScatterVariables, getStartingScatterVariables } from "../../util
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle, SidebarButton } from "./styles";
+import Toggle from "./toggle";
 
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
@@ -47,7 +48,7 @@ class ChooseLayout extends React.Component {
       this.props.dispatch({
         type: CHANGE_LAYOUT,
         layout: "scatter",
-        scatterVariables
+        scatterVariables: {...this.props.scatterVariables, ...scatterVariables}
       });
     };
   }
@@ -85,7 +86,7 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selected.x}
-              onChange={(value) => this.updateScatterplot({x: value.value, y: this.props.scatterVariables.y})}
+              onChange={(value) => this.updateScatterplot({x: value.value})}
             />
           </ScatterSelectContainer>
         </ScatterVariableContainer>
@@ -96,9 +97,18 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selected.y}
-              onChange={(value) => this.updateScatterplot({x: this.props.scatterVariables.x, y: value.value})}
+              onChange={(value) => this.updateScatterplot({y: value.value})}
             />
           </ScatterSelectContainer>
+        </ScatterVariableContainer>
+        <div style={{paddingTop: "2px"}}/>
+        <ScatterVariableContainer>
+          <Toggle
+            display
+            on={this.props.scatterVariables.showBranches}
+            callback={() => this.updateScatterplot({showBranches: !this.props.scatterVariables.showBranches})}
+            label={"Show branches"}
+          />
         </ScatterVariableContainer>
       </>
     );
@@ -161,7 +171,7 @@ class ChooseLayout extends React.Component {
           <ScatterIcon width={25} selected={selected === "scatter"}/>
           <SidebarButton
             selected={selected === "scatter"}
-            onClick={() => this.updateScatterplot({x: this.props.distanceMeasure, y: this.props.colorBy})}
+            onClick={() => this.updateScatterplot(getStartingScatterVariables(this.props.colorings, this.props.distanceMeasure, this.props.colorBy))}
           >
             {t("sidebar:scatter")}
           </SidebarButton>

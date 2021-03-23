@@ -14,6 +14,7 @@ import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHel
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
+import { getStartingScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
@@ -556,7 +557,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   /* if we are starting in a scatterplot layout, we need to ensure we have x & v variables */
   // todo: these should be URL query & JSON definable (and stored as defaults)
   if (state.layout==="scatter") {
-    state.scatterVariables = {x: state.distanceMeasure, y: state.colorBy};
+    state.scatterVariables = getStartingScatterVariables(metadata.colorings, state.distanceMeasure, state.colorBy);
   }
   return state;
 };
