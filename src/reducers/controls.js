@@ -23,8 +23,7 @@ export const getDefaultControlsState = () => {
     filters: {},
     colorBy: defaultColorBy,
     selectedBranchLabel: "none",
-    showTransmissionLines: true,
-    scatterVariables: {x: undefined, y: undefined}
+    showTransmissionLines: true
   };
   // a default sidebarOpen status is only set via JSON, URL query
   // _or_ if certain URL keywords are triggered
@@ -50,6 +49,7 @@ export const getDefaultControlsState = () => {
     mutType: defaultMutType,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
+    scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
     dateMin,
     dateMinNumeric,
