@@ -1,6 +1,6 @@
 
 
-export function collectScatterVariables(colorings, scatterVariables, validate=false) {
+export function collectAvailableScatterVariables(colorings) {
   // todo: genotype (special case)
   const options = Object.keys(colorings)
     .filter((key) => key!=="gt")
@@ -10,36 +10,53 @@ export function collectScatterVariables(colorings, scatterVariables, validate=fa
       label: colorings[key].title || key
     }));
   options.unshift({value: "div", label: "Divergence"});
+  return options;
+}
 
-  let x = options.filter((o) => o.value===scatterVariables.x)[0];
-  let y = options.filter((o) => o.value===scatterVariables.y)[0];
-
-  if (validate) {
-    // if the supplied variables aren't within `options` select some that are!
-    // values can be `undefined`, this results in "scatter" being selected but the user needs to select a value
-    if (!x) x = _getFirstNonMatch(options, y);
-    if (!y) y = _getFirstNonMatch(options, x);
+/**
+ * Return a (validated) `scatterVariables` object, given any existing scatterVariables (which may themselves be invalid)
+ */
+export function validateScatterVariables(existingScatterVariables={}, colorings, distanceMeasure, colorBy, isClock) {
+  const availableOptions = collectAvailableScatterVariables(colorings);
+  const scatterVariables = {};
+  // default is to show branches, unless the existing state says otherwise
+  scatterVariables.showBranches = Object.prototype.hasOwnProperty.call(existingScatterVariables, "showBranches") ?
+    existingScatterVariables.showBranches : true;
+  // default is to show regressions in clock mode, hide them for other scatterplots (unless the existing state says otherwise)
+  scatterVariables.showRegression = Object.prototype.hasOwnProperty.call(existingScatterVariables, "showRegression") ?
+    existingScatterVariables.showRegression : !!isClock;
+  // we only validate the x & y values if we're _not_ in clock mode, as we don't use them there!
+  if (!isClock) {
+    // default X value is existing state, or the distanceMeasure. It should not be the existing y value (if that's set)
+    const xOption = _getFirstMatchingOption(availableOptions, [existingScatterVariables.x, distanceMeasure], existingScatterVariables.y);
+    scatterVariables.x = xOption.value;
+    scatterVariables.xLabel = xOption.label;
+    // default Y value is similar, but we default to the colorBy (if available)
+    const yOption = _getFirstMatchingOption(availableOptions, [existingScatterVariables.y, colorBy], xOption.value);
+    scatterVariables.y = yOption.value;
+    scatterVariables.yLabel = yOption.label;
   }
-
-  const selected = {x, y};
-  return {options, selected};
+  return scatterVariables;
 }
 
-export function getStartingScatterVariables(colorings, distanceMeasure, colorBy) {
-  const {selected} = collectScatterVariables(colorings, {x: distanceMeasure, y: colorBy}, true);
-  return {
-    x: selected.x && selected.x.value,
-    y: selected.y && selected.y.value,
-    showBranches: true
-  };
-}
-
-
-function _getFirstNonMatch(options, other) {
+/**
+ * Given an array of `options` (in the shape that <Select> expects, i.e. each element
+ * is an object with `value` and `label` props), return one option.
+ * First scans through a list of values to try (`tryTheseFirst`)
+ * Will not return an option whose key matches `notThisValue`
+ */
+function _getFirstMatchingOption(options, tryTheseFirst, notThisValue) {
   const availableValues = options.map((opt) => opt.value);
-  const otherValue = other && other.value;
+  for (let i=0; i<tryTheseFirst.length; i++) {
+    if (tryTheseFirst[i] && tryTheseFirst[i]!==notThisValue) {
+      const optionsIdx = availableValues.indexOf(tryTheseFirst[i]);
+      if (optionsIdx!==-1) {
+        return options[optionsIdx];
+      }
+    }
+  }
   for (let i=0; i<availableValues.length; i++) {
-    if (availableValues[i]!==otherValue) {
+    if (availableValues[i]!==notThisValue) {
       return options[i];
     }
   }

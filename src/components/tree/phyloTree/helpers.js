@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
 
 /** get a string to be used as the DOM element ID
@@ -156,3 +157,15 @@ export const getParentBeyondPolytomy = (node, distanceMeasure) => {
   }
   return potentialNode;
 };
+
+/**
+ * Prior to Jan 2020, the divergence measure was always "subs per site per year"
+ * however certain datasets changed this to "subs per year" across entire sequence.
+ * This distinction is not set in the JSON, so in order to correctly display the rate
+ * we will "guess" this here. A future augur update will export this in a JSON key,
+ * removing the need to guess.
+ */
+export function guessAreMutationsPerSite(scale) {
+  const maxDivergence = max(scale.domain());
+  return maxDivergence <= 5;
+}

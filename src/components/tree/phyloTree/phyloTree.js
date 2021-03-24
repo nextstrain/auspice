@@ -72,7 +72,6 @@ PhyloTree.prototype.rectangularLayout = layouts.rectangularLayout;
 PhyloTree.prototype.scatterplotLayout = layouts.scatterplotLayout;
 PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
-PhyloTree.prototype.calculateRegression = layouts.calculateRegression;
 PhyloTree.prototype.setScales = layouts.setScales;
 PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
 

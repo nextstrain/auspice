@@ -123,8 +123,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.layout,
-        canRenderBranchLabels: action.layout!=="scatter" || (action.scatterVariables && action.scatterVariables.showBranches),
-        scatterVariables: action.scatterVariables || {x: undefined, y: undefined},
+        canRenderBranchLabels: (action.layout!=="scatter" && action.layout!=="clock") || (action.scatterVariables && action.scatterVariables.showBranches),
+        scatterVariables: action.scatterVariables,
         /* temporal confidence can only be displayed for rectangular trees */
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
           display: shouldDisplayTemporalConfidence(

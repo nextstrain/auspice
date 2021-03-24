@@ -164,7 +164,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   }
   if (elemsToUpdate.has('.regression')) {
     this.removeRegression();
-    if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+    if (this.regression) this.drawRegression();
   }
 
   /* confidence intervals */
@@ -200,7 +200,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
  * step 2: when step 1 has finished, move tips across the screen.
  * step 3: when step 2 has finished, redraw everything. No transition here.
  */
-export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips) {
+export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips, extras) {
   elemsToUpdate.delete(".tip");
   this.hideGrid();
   let inProgress = 0; /* counter of transitions currently in progress */
@@ -213,8 +213,8 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
     this.showTemporalSlice();
-    if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
-    if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(this.params.branchLabelKey);
+    if (this.regression) this.drawRegression();
+    if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(extras.newBranchLabellingKey || this.params.branchLabelKey);
   };
 
   /* STEP 2: move tips */
@@ -375,7 +375,7 @@ export const change = function change({
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   extras.hideTipLabels = animationInProgress;
   if (useModifySVGInStages) {
-    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
+    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
   } else {
     this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
   }

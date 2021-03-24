@@ -74,7 +74,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.showConfidences = true;
   }
 
-  if (newProps.layout==="scatter" && (oldProps.scatterVariables!==newProps.scatterVariables)) {
+  if ((newProps.layout==="scatter" || newProps.layout==="clock") && (oldProps.scatterVariables!==newProps.scatterVariables)) {
     args.updateLayout = true;
     args.scatterVariables = newProps.scatterVariables;
   }

@@ -21,7 +21,7 @@ class ChooseMetric extends React.Component {
   render() {
     const { t } = this.props;
     if (this.props.branchLengthsToDisplay !== "divAndDate") return null;
-    if (this.props.layout==="scatter") return null;
+    if (this.props.layout==="scatter" || this.props.layout==="clock") return null;
     /* this used to be added to the first SidebarSubtitle
     const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {}; */
     return (
