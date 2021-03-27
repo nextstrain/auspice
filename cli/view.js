@@ -5,8 +5,8 @@ const path = require("path");
 const fs = require("fs");
 const express = require("express");
 const csrf = require("csurf");
-const esapi = require("node-esapi")
 const cookieParser = require('cookie-parser');
+
 const csrfProtection = csrf({cookie: true});
 const expressStaticGzip = require("express-static-gzip");
 const compression = require('compression');
@@ -35,7 +35,7 @@ const addParser = (parser) => {
 const serveRelativeFilepaths = ({app, dir}) => {
   app.get("*.json", (req, res) => {
     const filePath = path.join(dir, req.originalUrl);
-    utils.log(esapi.encoder.encodeForJavaScript(`${req.originalUrl} -> ${filePath}`));
+    utils.log(`${req.originalUrl} -> ${filePath}`);
     res.sendFile(filePath);
   });
   return `JSON requests will be served relative to ${dir}.`;
@@ -70,7 +70,7 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
   app.get("/charon*", (req, res) => {
     const errorMessage = "Query unhandled -- " + req.originalUrl;
     res.statusMessage = "Query unhandled -- " + req.originalUrl;
-    utils.warn(esapi.encoder.encodeForJavaScript(res.statusMessage));
+    utils.warn(res.statusMessage);
     return res.status(500).type("text/plain").send(errorMessage);
   });
 
@@ -117,7 +117,10 @@ const run = (args) => {
   const auspiceBuild = getAuspiceBuild();
   utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
-  app.get("/favicon.png", csrfProtection, (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));{ req.csrfToken() }});
+  app.get("/favicon.png", csrfProtection, (req, res) => {
+    res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));
+    req.csrfToken();
+  });
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
   let handlerMsg = "";
@@ -142,16 +145,16 @@ const run = (args) => {
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
-      utils.error(esapi.encoder.encodeForJavaScript(`Port ${app.get('port')} is currently in use by another program.
-      You must either close that program or specify a different port by setting the shell variable "$PORT". Note that on MacOS / Linux ${chalk.yellow(`lsof -n -i :${app.get('port')} | grep LISTEN`)} should identify the process currently using the port.`));
+      utils.error(`Port ${app.get('port')} is currently in use by another program.
+      You must either close that program or specify a different port by setting the shell variable "$PORT". Note that on MacOS / Linux ${chalk.yellow(`lsof -n -i :${app.get('port')} | grep LISTEN`)} should identify the process currently using the port.`);
     }
 
     if (error.code === 'ENOTFOUND') {
-      utils.error(esapi.encoder.encodeForJavaScript(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
+      utils.error(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
 
       Example commands to fix:
         ${chalk.yellow('HOST="localhost" auspice view')}
-        ${chalk.yellow('HOST="localhost" npm run view')}`));
+        ${chalk.yellow('HOST="localhost" npm run view')}`);
     }
 
     utils.error(`Uncaught error in app.listen(). Code: ${error.code}`);

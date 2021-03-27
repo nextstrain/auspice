@@ -30,6 +30,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run get-data
+      - run: npm run get-narratives
       - run: npm run smoke-test:ci
   lint:
     runs-on: ubuntu-latest
