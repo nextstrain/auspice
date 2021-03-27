@@ -2,6 +2,7 @@ import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
 import { getDatasetNamesFromUrl } from "./loadData";
+import { errorNotification } from "./notifications";
 
 /* Given a URL, what "page" should be displayed?
  * "page" means the main app, splash page, status page etc
@@ -26,26 +27,39 @@ export const chooseDisplayComponentFromURL = (url) => {
 };
 
 /*
- * All the Fetch Promises are created before first render. When trying the cache we `await`.
+ * `datasets` is populated with `Dataset()` instances for each dataset in a narrative.
+ * Each instance contains promises to represent the main and sidecar datafiles.
  * If the Fetch is not finished, this will wait for it to end. Subsequent awaits will immediately return the result.
- * For the landing dataset, no problem either because await on a value just returns the value.
  */
-const tryCacheThenFetch = async (mainTreeName, secondTreeName, state) => {
-  // console.log("tryCacheThenFetch", mainTreeName, mainTreeName);
-
-  if (!state.jsonCache || !state.jsonCache.jsons) {
-    throw new Error("Cache not present");
+const updateNarrativeDataset = async (dispatch, datasets, narrativeBlocks, path, query) => {
+  try {
+    const [mainTreeName, secondTreeName] = getDatasetNamesFromUrl(path);
+    const mainDataset = datasets[mainTreeName];
+    const secondDataset = datasets[secondTreeName];
+    const mainJson = await mainDataset.main;
+    const secondJson = secondDataset ? (await secondDataset.main) : false;
+    dispatch({
+      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+      ...createStateFromQueryOrJSONs({
+        json: mainJson,
+        secondTreeDataset: secondJson,
+        mainTreeName,
+        secondTreeName,
+        narrativeBlocks,
+        query,
+        dispatch
+      }),
+      pushState: true,
+      query
+    });
+    mainDataset.loadSidecars(dispatch);
+  } catch (err) {
+    dispatch(errorNotification({
+      message: `Error loading the datasets for this narrative slide`,
+      details: `Please contact the author of this narrative!`
+    }));
+    console.error(err);
   }
-  const cache = state.jsonCache.jsons;
-  if (!cache[mainTreeName] || !cache[mainTreeName].main) {
-    throw new Error(`${mainTreeName} not in cache.`);
-  }
-  const mainJson = await cache[mainTreeName].main;
-  const secondJson = cache[secondTreeName] ? await cache[secondTreeName].main : undefined;
-  return {json: mainJson, secondJson};
-
-  // todo: sidecar files. These are in cache. Turn `tryCacheThenFetch`
-  // into an async generator?
 };
 
 /* changes the state of the page and (perhaps) the dataset displayed.
@@ -95,26 +109,7 @@ export const changePage = ({
     });
   } else if (changeDatasetOnly) {
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
-    const [mainTreeName, secondTreeName] = getDatasetNamesFromUrl(path);
-    tryCacheThenFetch(mainTreeName, secondTreeName, oldState)
-      .then(({json, secondJson}) => {
-        const newState = createStateFromQueryOrJSONs({
-          json,
-          secondTreeDataset: secondJson || false,
-          mainTreeName,
-          secondTreeName: secondTreeName || false,
-          narrativeBlocks: oldState.narrative.blocks,
-          query,
-          dispatch
-        });
-        // same dispatch as case 1 but the state comes from a JSON
-        dispatch({
-          type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-          ...newState,
-          pushState: push,
-          query
-        });
-      });
+    updateNarrativeDataset(dispatch, oldState.jsonCache.jsons, oldState.narrative.blocks, path, query);
   } else {
     /* Case 3 (see docstring): the path (dataset) has changed and we want to change pages and set a new state according to the path */
     dispatch({
@@ -136,4 +131,3 @@ export const goTo404 = (errorMessage) => ({
   errorMessage,
   pushState: true
 });
-
