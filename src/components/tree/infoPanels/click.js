@@ -280,6 +280,8 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
             {item("", "")}
             <MutationTable mutations={mutationsToRoot}/>
             <OtherFields node={node} t={t}/>
+            {item("", "")}
+            <MutationTable mutations={mutationsToRoot}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

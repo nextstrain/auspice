@@ -112,4 +112,3 @@ The name of the first column is not used, but the first column is always taken t
 ## Scale types
 The type of the data is currently always categorical.
 This means that while numeric data will work, it won't be very usable if there are many values.
-

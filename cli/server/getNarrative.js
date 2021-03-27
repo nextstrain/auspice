@@ -16,6 +16,18 @@ const parseNarrative = (fileContents) => {
 };
 const logReport = utils.log;
 const esapi = require("node-esapi");
+const marked = require('marked');
+const { parseMarkdownNarrativeFile } = require("../../src/util/parseNarrative");
+
+/**
+ * A thin wrapper around the client-side `parseMarkdownNarrativeFile` function.
+ * The main difference is that we pass in a different markdown parser
+ * than the client uses.
+ */
+const parseNarrative = (fileContents) => {
+  utils.verbose("Deprecation warning: Server-side parsing of narrative files is no longer needed!");
+  return parseMarkdownNarrativeFile(fileContents, marked);
+};
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -47,7 +59,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       }
       utils.verbose("SUCCESS");
     } catch (err) {
-      const errorMessage = "Query unhandled -- " + req.originalUrl;
+      const errorMessage = `Narratives couldn't be served -- ${err.message}`;
       res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
       utils.warn(esapi.encoder.encodeForJavaScript(res.statusMessage));
       res.status(500).type("text/plain").send(errorMessage);

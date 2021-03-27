@@ -19,4 +19,3 @@ export const AnnotatedHeader = ({title, tooltip, mobile}) => {
     </HeaderContainer>
   );
 };
-

@@ -128,4 +128,3 @@ export const goTo404 = (errorMessage) => ({
   errorMessage,
   pushState: true
 });
-

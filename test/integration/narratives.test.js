@@ -68,4 +68,3 @@ async function matchScreenshot(id) {
     }
   );
 }
-
