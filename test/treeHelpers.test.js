@@ -1,4 +1,4 @@
-import { collectMutations } from "../src/util/treeMiscHelpers";
+import { collectMutations, getUrlFromNode, getAccessionFromNode } from "../src/util/treeMiscHelpers";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
 
 /**
@@ -53,3 +53,37 @@ function getNodeByName(tree, name) {
   recurse(tree[0]);
   return namedNode;
 }
+
+describe('Extract various values from node_attrs', () => {
+  beforeEach(() => {
+    jest.spyOn(console, 'warn').mockImplementation(() => {});
+  });
+
+  // the following test also covers `validateUrl`
+  test("getUrlFromNode correctly handles various URLs", () => {
+    expect(getUrlFromNode({}, "trait")).toEqual(undefined); // no node_attrs on node
+    expect(getUrlFromNode({node_attrs: {}}, "trait")).toEqual(undefined); // no "trait" defined in node_attrs
+    expect(getUrlFromNode({node_attrs: {trait: "str_value"}}, "trait")).toEqual(undefined); // incorrectly formatted "trait"
+    expect(getUrlFromNode({node_attrs: {trait: {}}}, "trait")).toEqual(undefined); // correctly formatted "trait", no URL
+    expect(getUrlFromNode({node_attrs: {trait: {url: 1234}}}, "trait")).toEqual(undefined); // invalid URL
+    expect(getUrlFromNode({node_attrs: {trait: {url: "bad url"}}}, "trait")).toEqual(undefined); // invalid URL
+    expect(getUrlFromNode({node_attrs: {trait: {url: "https://nextstrain.org"}}}, "trait")).toEqual("https://nextstrain.org/");
+    expect(getUrlFromNode({node_attrs: {trait: {url: "http://nextstrain.org"}}}, "trait")).toEqual("http://nextstrain.org/");
+    expect(getUrlFromNode({node_attrs: {trait: {url: "https_//nextstrain.org"}}}, "trait")).toEqual("https://nextstrain.org/"); // see code for details
+    expect(getUrlFromNode({node_attrs: {trait: {url: "http_//nextstrain.org"}}}, "trait")).toEqual("http://nextstrain.org/"); // see code for details
+  });
+
+  test("extract accession & corresponding URL from a node", () => {
+    expect(getAccessionFromNode({}))
+      .toStrictEqual({accession: undefined, url: undefined});  // no node_attrs on node
+    expect(getAccessionFromNode({node_attrs: {}}))
+      .toStrictEqual({accession: undefined, url: undefined}); // no "accession" on node_attrs
+    expect(getAccessionFromNode({node_attrs: {accession: "MK049251", url: "https://www.ncbi.nlm.nih.gov/nuccore/MK049251"}}))
+      .toStrictEqual({accession: "MK049251", url: "https://www.ncbi.nlm.nih.gov/nuccore/MK049251"});
+    expect(getAccessionFromNode({node_attrs: {url: "https://www.ncbi.nlm.nih.gov/nuccore/MK049251"}}))
+      .toStrictEqual({accession: undefined, url: "https://www.ncbi.nlm.nih.gov/nuccore/MK049251"}); // url can be defined without accession
+    expect(getAccessionFromNode({node_attrs: {accession: "MK049251", url: "nuccore/MK049251"}}))
+      .toStrictEqual({accession: "MK049251", url: undefined}); // invalid URL
+  });
+
+});

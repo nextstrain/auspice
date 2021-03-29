@@ -69,15 +69,42 @@ export const getFullAuthorInfoFromNode = (node) =>
 
 export const getAccessionFromNode = (node) => {
   /* see comment at top of this file */
-  if (node.node_attrs && node.node_attrs.accession) {
-    return node.node_attrs.accession;
+  let accession, url;
+  if (node.node_attrs) {
+    if (isValueValid(node.node_attrs.accession)) {
+      accession = node.node_attrs.accession;
+    }
+    url = validateUrl(node.node_attrs.url);
   }
-  return undefined;
+  return {accession, url};
 };
 
 /* see comment at top of this file */
-export const getUrlFromNode = (node) =>
-  (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
+export const getUrlFromNode = (node, trait) => {
+  if (!node.node_attrs || !node.node_attrs[trait]) return undefined;
+  return validateUrl(node.node_attrs[trait].url);
+};
+
+/**
+ * Check if a URL seems valid & return it.
+ * For historical reasons, we allow URLs to be defined as `http[s]_` and coerce these into `http[s]:`
+ * URls are interpreted by `new URL()` and thus may be returned with a trailing slash
+ * @param {String} url URL string to validate
+ * @returns {String|undefined} potentially modified URL string or `undefined` (if it doesn't seem valid)
+ */
+function validateUrl(url) {
+  if (url===undefined) return undefined; // urls are optional, so return early to avoid the console warning
+  try {
+    if (typeof url !== "string") throw new Error();
+    if (url.startsWith("http_")) url = url.replace("http_", "http:"); // eslint-disable-line no-param-reassign
+    if (url.startsWith("https_")) url = url.replace("https_", "https:"); // eslint-disable-line no-param-reassign
+    const urlObj = new URL(url);
+    return urlObj.href;
+  } catch (err) {
+    console.warn(`Dataset provided the invalid URL ${url}`);
+    return undefined;
+  }
+}
 
 /**
  * Traverses the tree and returns a set of genotype states such as
