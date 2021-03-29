@@ -113,8 +113,10 @@ function renderDataProvenance(t, metadata) {
     .filter((source) => typeof source === "object")
     .filter((source) => Object.prototype.hasOwnProperty.call(source, "name"))
     .map((source) => {
-      if (source.name === "GISAID") { // SPECIAL CASE
-        return <img key={source.name} src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>;
+      if (source.name.toUpperCase() === "GISAID") { // SPECIAL CASE
+        return (<Link url="https://www.gisaid.org" key={source.name}>
+          <img key={source.name} src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </Link>);
       }
       const url = parseUrl(source.url);
       if (url) {
