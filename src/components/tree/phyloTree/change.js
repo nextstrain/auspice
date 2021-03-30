@@ -150,7 +150,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.branchLabel')) {
+  if (elemsToUpdate.has('.branchLabel') && !extras.newBranchLabellingKey) {
     this.updateBranchLabels(transitionTime);
   }
   if (extras.hideTipLabels) {

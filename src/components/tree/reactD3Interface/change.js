@@ -56,7 +56,8 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newBranchLabellingKey = "none";
   } else if (
     (oldProps.canRenderBranchLabels===false && newProps.canRenderBranchLabels===true) ||
-    (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel)
+    (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel) ||
+    (oldProps.scatterVariables.showBranches===false && newProps.scatterVariables.showBranches===true)
   ) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
