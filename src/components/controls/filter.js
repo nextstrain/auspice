@@ -21,6 +21,7 @@ const DEBOUNCE_TIME = 200;
 @connect((state) => {
   return {
     activeFilters: state.controls.filters,
+    colorings: state.metadata.colorings,
     totalStateCounts: state.tree.totalStateCounts,
     nodes: state.tree.nodes
   };
@@ -39,6 +40,9 @@ class FilterData extends React.Component {
       }
     };
   }
+  getFilterTitle(filterName) {
+    return this.props.colorings && this.props.colorings[filterName] && this.props.colorings[filterName].title || filterName;
+  }
   makeOptions = () => {
     /**
      * The <Select> component needs an array of options to display (and search across). We compute this
@@ -48,6 +52,7 @@ class FilterData extends React.Component {
     const options = [];
     Object.keys(this.props.activeFilters)
       .forEach((filterName) => {
+        const filterTitle = this.getFilterTitle(filterName);
         const filterValuesCurrentlyActive = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
         Array.from(this.props.totalStateCounts[filterName].keys())
           .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
@@ -55,7 +60,7 @@ class FilterData extends React.Component {
           .sort() // filters are sorted alphabetically - probably not necessary for a select component
           .forEach((itemName) => {
             options.push({
-              label: `${filterName} → ${itemName}`,
+              label: `${filterTitle} → ${itemName}`,
               value: [filterName, itemName]
             });
           });
@@ -92,7 +97,7 @@ class FilterData extends React.Component {
       const n = this.props.activeFilters[filterName].filter((f) => f.active).length;
       return {
         filterName,
-        displayName: filterBadgeDisplayName(n, filterName),
+        displayName: filterBadgeDisplayName(n, this.getFilterTitle(filterName)),
         remove: () => {this.props.dispatch(applyFilter("set", filterName, []));}
       };
     });
