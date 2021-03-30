@@ -242,7 +242,7 @@ export const addGrid = function addGrid() {
   if (
     (this.layout==="scatter" && this.scatterVariables.x==="num_date") ||
     this.layout==="clock" ||
-    this.distance==="num_date"
+    (this.layout!=="scatter" && this.distance==="num_date")
   ) {
     xGridPoints = computeTemporalGridPoints(xmin, xmax, xAxisPixels, "x");
   } else {
