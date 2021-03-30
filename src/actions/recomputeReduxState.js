@@ -219,6 +219,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     });
   } else {
     console.warn("JSON did not include any filters");
+    state.filtersInFooter = [];
   }
   state.filters[strainSymbol] = [];
   state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
