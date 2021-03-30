@@ -14,6 +14,7 @@ import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHel
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
+import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
@@ -145,6 +146,12 @@ const modifyStateViaURLQuery = (state, query) => {
       state.showTransmissionLines = false;
     }
   }
+  /* parse queries which may modify scatterplot-like views. These will be validated before dispatch. */
+  if (query.branches==="hide") state.scatterVariables.showBranches = false;
+  if (query.regression==="show") state.scatterVariables.showRegression = true;
+  if (query.regression==="hide") state.scatterVariables.showRegression = false;
+  if (query.scatterX) state.scatterVariables.x = query.scatterX;
+  if (query.scatterY) state.scatterVariables.y = query.scatterY;
   return state;
 };
 
@@ -176,6 +183,7 @@ const restoreQueryableStateToDefaults = (state) => {
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
   state.tipLabelKey = strainSymbol;
+  state.scatterVariables = {};
   // console.log("state now", state);
   return state;
 };
@@ -551,6 +559,28 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     // or a URL query anywhere within the narrative.
     if ("sidebarOpen" in state.defaults) delete state.defaults.sidebarOpen;
     state.sidebarOpen=true;
+  }
+
+  /* if we are starting in a scatterplot-like layout, we need to ensure we have `scatterVariables`
+  If not, we deliberately don't instantiate them, so that they are instantiated when first
+  triggering a scatterplot, thus defaulting to the colorby in use at that time */
+  // todo: these should be JSON definable (via display_defaults)
+  if (state.layout==="scatter" || state.layout==="clock") {
+    state.scatterVariables = validateScatterVariables(
+      state.scatterVariables, metadata.colorings, state.distanceMeasure, state.colorBy, state.layout==="clock"
+    );
+    if (query.scatterX && query.scatterX!==state.scatterVariables.x) delete query.scatterX;
+    if (query.scatterY && query.scatterY!==state.scatterVariables.y) delete query.scatterY;
+    if (state.layout==="clock") {
+      delete query.scatterX;
+      delete query.scatterY;
+    }
+  } else {
+    state.scatterVariables = {};
+    delete query.scatterX;
+    delete query.scatterY;
+    delete query.regression;
+    delete query.branches;
   }
 
   return state;

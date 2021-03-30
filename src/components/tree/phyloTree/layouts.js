@@ -1,7 +1,8 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
-import { min, max, sum } from "d3-array";
-import { addLeafCount } from "./helpers";
+import { min, max } from "d3-array";
+import { addLeafCount} from "./helpers";
+import { calculateRegressionThroughRoot, calculateRegressionWithFreeIntercept } from "./regression";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 
@@ -9,9 +10,9 @@ import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers"
  * assigns the attribute this.layout and calls the function that
  * calculates the x,y coordinates for the respective layouts
  * @param layout -- the layout to be used, has to be one of
- *                  ["rect", "radial", "unrooted", "clock"]
+ *                  ["rect", "radial", "unrooted", "clock", "scatter"]
  */
-export const setLayout = function setLayout(layout) {
+export const setLayout = function setLayout(layout, scatterVariables) {
   // console.log("set layout");
   timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
@@ -22,10 +23,23 @@ export const setLayout = function setLayout(layout) {
   } else {
     this.layout = layout;
   }
+
+  // remove any regression. This will be recalculated if required.
+  this.regression = undefined;
+
+  // assign scatterVariables, needed for clock / scatter layouts.
+  // P.S. we overwrite the x & y axis for clock views _only_ within PhyloTree. This allows
+  // the scatterplot variables to be remembered while viewing other layouts
+  if (scatterVariables) this.scatterVariables = {...scatterVariables};
+  if (this.layout === "clock") {
+    this.scatterVariables.x="num_date";
+    this.scatterVariables.y="div";
+  }
+
   if (this.layout === "rect") {
     this.rectangularLayout();
-  } else if (this.layout === "clock") {
-    this.timeVsRootToTip();
+  } else if (this.layout === "clock" || this.layout === "scatter") {
+    this.scatterplotLayout();
   } else if (this.layout === "radial") {
     this.radialLayout();
   } else if (this.layout === "unrooted") {
@@ -56,46 +70,49 @@ export const rectangularLayout = function rectangularLayout() {
 };
 
 /**
- * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with `num_date` info set
- * in addition, this function calculates a regression between
- * num_date and div which is saved as this.regression
- * @return {null}
+ * assign x,y coordinates for nodes based upon user-selected variables
+ * TODO: timeVsRootToTip is a specific instance of this
  */
-export const timeVsRootToTip = function timeVsRootToTip() {
+export const scatterplotLayout = function scatterplotLayout() {
+  if (!this.scatterVariables) {
+    console.error("Scatterplot called without variables");
+    return;
+  }
+
   this.nodes.forEach((d) => {
-    d.y = getDivFromNode(d.n);
-    d.x = getTraitFromNode(d.n, "num_date");
-    d.px = getTraitFromNode(d.n.parent, "num_date");
-    d.py = getDivFromNode(d.n.parent);
+    // set x and parent X values
+    if (this.scatterVariables.x==="div") {
+      d.x = getDivFromNode(d.n);
+      d.px = getDivFromNode(d.n.parent);
+    } else {
+      d.x = getTraitFromNode(d.n, this.scatterVariables.x);
+      d.px = getTraitFromNode(d.n.parent, this.scatterVariables.x);
+    }
+    // set y and parent  values
+    if (this.scatterVariables.y==="div") {
+      d.y = getDivFromNode(d.n);
+      d.py = getDivFromNode(d.n.parent);
+    } else {
+      d.y = getTraitFromNode(d.n, this.scatterVariables.y);
+      d.py = getTraitFromNode(d.n.parent, this.scatterVariables.y);
+    }
   });
+
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
       d.xCross = d.x;
       d.yCross = d.y;
     });
   }
-  const nTips = this.numberOfTips;
-  // REGRESSION WITH FREE INTERCEPT
-  // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
-  // const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
-  // const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
-  // const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
-  // const slope = covarTimeDiv/varTime;
-  // const intercept = meanDiv-meanTime*slope;
-  // REGRESSION THROUGH ROOT
-  const offset = this.nodes[0].depth;
-  const XY = sum(
-    this.nodes.filter((d) => d.terminal)
-      .map((d) => (d.y) * (d.depth - offset))
-  ) / nTips;
-  const secondMomentTime = sum(
-    this.nodes.filter((d) => d.terminal)
-      .map((d) => (d.depth - offset) * (d.depth - offset))
-  ) / nTips;
-  const slope = XY / secondMomentTime;
-  const intercept = -offset * slope;
-  this.regression = {slope: slope, intercept: intercept};
+
+  if (this.scatterVariables.showRegression) {
+    if (this.layout==="clock") {
+      this.regression = calculateRegressionThroughRoot(this.nodes);
+    } else {
+      this.regression = calculateRegressionWithFreeIntercept(this.nodes);
+    }
+  }
+
 };
 
 /*
@@ -206,7 +223,16 @@ export const radialLayout = function radialLayout() {
 export const setDistance = function setDistance(distanceAttribute) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
-  this.distance = distanceAttribute || "div"; // div is default
+  if (distanceAttribute) {
+    this.distance = distanceAttribute;
+  }
+  if (!["div", "num_date"].includes(this.distance)) {
+    console.error("Tree distance measure not set or invalid. Using `div`.");
+    this.distance = "div"; // fallback to div
+  }
+
+
+  // todo - can the following loops be skipped for scatterplots?
 
   // assign node and parent depth
   if (this.distance === "div") {
@@ -271,7 +297,6 @@ export const setScales = function setScales(margins) {
 */
 export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
-
   /* pad margins if tip labels are visible */
   /* padding width based on character count */
   const tmpMargins = {
@@ -279,7 +304,7 @@ export const mapToScreen = function mapToScreen() {
     right: this.params.margins.right,
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
-  if (this.layout==="rect" || this.layout==="unrooted") {
+  if (this.layout==="rect" || this.layout==="unrooted" || this.layout==="scatter") {
     // legend is 12px, but 6px is enough to prevent tips being obscured
     tmpMargins.top += 6;
   }
@@ -307,8 +332,14 @@ export const mapToScreen = function mapToScreen() {
   this.setScales(tmpMargins);
 
   /* find minimum & maximum x & y values */
-  let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
-  this.nodes.filter((d) => d.inView).forEach((d) => {
+  let [minY, maxY, minX, maxX] = [1000000, -100000, 1000000, -100000];
+  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
+  // then we don't consider internal nodes for the domain calc
+  if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
+    nodesInDomain = nodesInDomain.filter((d) => d.terminal);
+  }
+  nodesInDomain.forEach((d) => {
     if (d.x > maxX) maxX = d.x;
     if (d.y > maxY) maxY = d.y;
     if (d.x < minX) minX = d.x;
@@ -348,7 +379,7 @@ export const mapToScreen = function mapToScreen() {
     const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
     this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
     this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
-  } else if (this.layout==="clock") {
+  } else if (this.layout==="clock" || this.layout==="scatter") {
     // same as rectangular, but flipped yscale
     this.xScale.domain([minX, maxX]);
     this.yScale.domain([maxY, minY]);
@@ -357,16 +388,27 @@ export const mapToScreen = function mapToScreen() {
     this.yScale.domain([minY, maxY]);
   }
 
+  const hiddenYPosition = this.yScale.range()[1] + 100;
+  const hiddenXPosition = this.xScale.range()[0] - 100;
+
   // pass all x,y through scales and assign to xTip, xBase
   this.nodes.forEach((d) => {
     d.xTip = this.xScale(d.x);
     d.yTip = this.yScale(d.y);
     d.xBase = this.xScale(d.px);
     d.yBase = this.yScale(d.py);
-
     d.rot = Math.atan2(d.yTip-d.yBase, d.xTip-d.xBase) * 180/Math.PI;
-
   });
+  // for scatterplots we do an additional iteration as some values may be missing
+  // & we want to avoid rendering these
+  if (this.layout==="scatter") {
+    this.nodes.forEach((d) => {
+      if (isNaN(d.xTip)) d.xTip = hiddenXPosition;
+      if (isNaN(d.yTip)) d.yTip=hiddenYPosition;
+      if (isNaN(d.xBase)) d.xBase=hiddenXPosition;
+      if (isNaN(d.yBase)) d.yBase=hiddenYPosition;
+    });
+  }
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
       const n = 6; /* half the number of pixels that the cross will take up */
@@ -377,10 +419,21 @@ export const mapToScreen = function mapToScreen() {
   }
 
   // assign the branches as path to each node for the different layouts
-  if (this.layout==="clock" || this.layout==="unrooted") {
+  if (this.layout==="unrooted") {
     this.nodes.forEach((d) => {
       d.branch = [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
     });
+  } else if (this.layout==="clock" || this.layout==="scatter") {
+    // if nodes are deliberately obscured (as traits may not be set for some nodes), we don't want to render branches joining that node
+    if (this.scatterVariables.showBranches) {
+      this.nodes.forEach((d) => {
+        d.branch = d.xBase===hiddenXPosition || d.xTip===hiddenXPosition || d.yBase===hiddenYPosition || d.yTip===hiddenYPosition ?
+          [""] :
+          [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
+      });
+    } else {
+      this.nodes.forEach((d) => {d.branch=[];});
+    }
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;

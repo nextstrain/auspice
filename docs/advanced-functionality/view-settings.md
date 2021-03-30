@@ -33,7 +33,7 @@ For instance, if you set `display_defaults.color_by` to `country`, but load the 
 | `geo_resolution`    | Geographic resolution | "country" |
 | `distance_measure`  | Phylogeny x-axis measure     | "div" or "num_date" |
 | `map_triplicate`    | Should the map repeat, so that you can pan further in each direction? | Boolean |
-| `layout`            | Tree layout        | "rect", "radial", "clock" or "unrooted |
+| `layout`            | Tree layout        | "rect", "radial", "unrooted", "clock" or "scatter" |
 | `branch_label`      | Which set of branch labels are to be displayed | "aa", "lineage" |
 | `panels`            | List of panels which (if available) are to be displayed  | ["tree", "map"] |
 | `transmission_lines`| Should transmission lines (if available) be rendered on the map?  | Boolean |
@@ -58,6 +58,11 @@ All URL queries modify the view away from the default settings -- if you change 
 | `r`        | Geographic resolution | `r=region` |
 | `m`        | Phylogeny x-axis measure | `m=div` |
 | `l`        | Phylogeny layout | `l=clock` |
+| `scatterX` | Scatterplot X variable | `scatterX=num_date` |
+| `scatterY` | Scatterplot Y variable | `scatterY=num_date` |
+| `branches` | Hide branches | `branches=hide` |
+| `regression` | Show/Hide regression line | `regression=hide`, `regression=show` |
+| `transmissions` | Hide transmission lines | `transmissions=hide`|
 | `lang`     | Language | `lang=ja` (Japanese) |
 | `dmin`     | Temporal range (minimum) | `dmin=2008-05-13` |
 | `dmax`     | Temporal range (maximum) | `dmax=2010-05-13` |

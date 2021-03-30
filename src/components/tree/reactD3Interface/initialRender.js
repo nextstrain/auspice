@@ -20,7 +20,7 @@ export const renderTree = (that, main, phylotree, props) => {
     { /* parameters (modifies PhyloTree's defaults) */
       grid: true,
       confidence: props.temporalConfidence.display,
-      branchLabelKey: props.selectedBranchLabel,
+      branchLabelKey: props.canRenderBranchLabels && props.selectedBranchLabel,
       orientation: main ? [1, 1] : [-1, 1],
       tipLabels: true,
       showTipLabels: true
@@ -42,6 +42,7 @@ export const renderTree = (that, main, phylotree, props) => {
     treeState.nodeColors,
     treeState.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
     treeState.tipRadii, /* might be null */
-    [props.dateMinNumeric, props.dateMaxNumeric]
+    [props.dateMinNumeric, props.dateMaxNumeric],
+    props.scatterVariables
   );
 };

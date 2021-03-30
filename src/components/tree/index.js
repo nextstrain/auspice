@@ -10,6 +10,7 @@ const Tree = connect((state) => ({
   colorBy: state.controls.colorBy,
   colorByConfidence: state.controls.colorByConfidence,
   layout: state.controls.layout,
+  scatterVariables: state.controls.scatterVariables,
   temporalConfidence: state.controls.temporalConfidence,
   distanceMeasure: state.controls.distanceMeasure,
   mutType: state.controls.mutType,
@@ -19,6 +20,7 @@ const Tree = connect((state) => ({
   showTangle: state.controls.showTangle,
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel,
+  canRenderBranchLabels: state.controls.canRenderBranchLabels,
   tipLabelKey: state.controls.tipLabelKey,
   narrativeMode: state.narrative.display,
   animationPlayPauseButton: state.controls.animationPlayPauseButton

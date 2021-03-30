@@ -4,6 +4,7 @@ import { transition } from "d3-transition";
 import { easeLinear } from "d3-ease";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { animationInterpolationDuration } from "../../../util/globals";
+import { guessAreMutationsPerSite } from "./helpers";
 import { numericToDateObject, calendarToNumeric, getPreviousDate, getNextDate, dateToString, prettifyDate } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
@@ -46,14 +47,14 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
 };
 
 /**
- * Create the separation between major & minor grid lines for divergence scales.
- * @param {numeric} range amount of divergence (subs/site/year _or_ num mutations) present in current view
+ * Create the separation between major & minor grid lines for numeric scales.
+ * @param {numeric} range e.g. amount of divergence (subs/site/year _or_ num mutations) present in current view
  * @param {numeric} minorTicks num of minor ticks desired between each major step
  * @returns {object}
  *  - property `majorStep` {numeric}: space between major x-axis gridlines (measure of divergence)
  *  - property `minorStep` {numeric}: space between minor x-axis gridlines (measure of divergence)
  */
-const calculateDivGridSeperation = (range, minorTicks) => {
+const calculateNumericGridSeparation = (range, minorTicks) => {
   /* make an informed guess of the step size to start with.
   E.g. 0.07 => step of 0.01, 70 => step size of 10 */
   const logRange = Math.floor(Math.log10(range));
@@ -71,33 +72,35 @@ const calculateDivGridSeperation = (range, minorTicks) => {
   return {majorStep, minorStep};
 };
 
-const computeDivergenceGridPoints = (xmin, xmax, layout, minorTicks) => {
+/**
+ * Return `{majorGridPoints, minorGridPoints}` for numeric scales (e.g. divergence)
+ */
+const computeNumericGridPoints = (minVal, maxVal, layout, nMinorTicks, axis) => {
   const majorGridPoints = [];
   const minorGridPoints = [];
 
-  /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
-  const {majorStep, minorStep} = calculateDivGridSeperation(xmax-xmin, minorTicks);
+  /* step is the amount (same units of minVal, maxVal) of separation between major grid lines */
+  const {majorStep, minorStep} = calculateNumericGridSeparation(maxVal-minVal, nMinorTicks);
 
-  const gridMin = Math.floor(xmin/majorStep)*majorStep;
-  const minVis = layout==="radial" ? xmin : gridMin;
-  const maxVis = xmax;
+  const gridMin = Math.floor(minVal/majorStep)*majorStep;
+  const minVis = layout==="radial" ? minVal : gridMin;
+  const maxVis = maxVal;
 
-  for (let ii = 0; ii <= (xmax - gridMin)/majorStep+3; ii++) {
+  for (let ii = 0; ii <= (maxVal - gridMin)/majorStep+3; ii++) {
     const pos = gridMin + majorStep*ii;
     majorGridPoints.push({
       position: pos,
       name: pos.toFixed(Math.max(0, -Math.floor(Math.log10(majorStep)))),
       visibility: ((pos<minVis) || (pos>maxVis)) ? "hidden" : "visible",
-      axis: "x"
+      axis
     });
-    for (let minorPos=pos+minorStep; minorPos<(pos+majorStep) && minorPos<xmax; minorPos+=minorStep) {
+    for (let minorPos=pos+minorStep; minorPos<(pos+majorStep) && minorPos<maxVal; minorPos+=minorStep) {
       minorGridPoints.push({
         position: minorPos,
         visibility: ((minorPos<minVis) || (minorPos>maxVis+minorStep)) ? "hidden" : "visible",
-        axis: "x"
+        axis
       });
     }
-
   }
   return {majorGridPoints, minorGridPoints};
 };
@@ -160,25 +163,26 @@ const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
 
 /**
  * Compute the major & minor temporal grid points for display.
- * @param {numeric} xmin numeric date of minimum value in view
- * @param {numeric} xmax numeric date of maximum value in view
+ * @param {numeric} numDateMin numeric date of minimum value in view
+ * @param {numeric} numDateMax numeric date of maximum value in view
  * @param {numeric} pxAvailable pixels in which to display the date range (xmin, xmax)
+ * @param {string} axis "x" or "y"
  * @returns {Object} properties: `majorGridPoints`, `minorGridPoints`
  */
-export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
+export const computeTemporalGridPoints = (numDateMin, numDateMax, pxAvailable, axis) => {
   const [majorGridPoints, minorGridPoints] = [[], []];
-  const {majorStep, minorStep} = calculateTemporalGridSeperation(xmax-xmin, Math.abs(pxAvailable));
+  const {majorStep, minorStep} = calculateTemporalGridSeperation(numDateMax-numDateMin, Math.abs(pxAvailable));
 
   /* Major Grid Points */
-  const overallStopDate = getNextDate(majorStep.unit, numericToDateObject(xmax));
-  let proposedDate = getPreviousDate(majorStep.unit, numericToDateObject(xmin));
+  const overallStopDate = getNextDate(majorStep.unit, numericToDateObject(numDateMax));
+  let proposedDate = getPreviousDate(majorStep.unit, numericToDateObject(numDateMin));
   while (proposedDate < overallStopDate) {
     majorGridPoints.push({
       date: proposedDate,
       position: calendarToNumeric(dateToString(proposedDate)),
       name: prettifyDate(majorStep.unit, proposedDate),
       visibility: 'visible',
-      axis: "x"
+      axis
     });
     for (let i=0; i<majorStep.n; i++) {
       proposedDate = getNextDate(majorStep.unit, proposedDate);
@@ -198,7 +202,7 @@ export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
         minorGridPoints.push({
           position: calendarToNumeric(dateToString(proposedDate)),
           visibility: 'visible',
-          axis: "x"
+          axis
         });
         for (let i=0; i<minorStep.n; i++) {
           proposedDate = getNextDate(minorStep.unit, proposedDate);
@@ -207,27 +211,6 @@ export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
     });
   }
   return {majorGridPoints, minorGridPoints};
-};
-
-
-const computeYGridPoints = (ymin, ymax) => {
-  const majorGridPoints = [];
-  let yStep = 0;
-  yStep = calculateDivGridSeperation(ymax-ymin).majorStep;
-  const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
-  const gridYMin = Math.floor(ymin/yStep)*yStep;
-  const maxYVis = ymax;
-  const minYVis = gridYMin;
-  for (let ii = 1; ii <= (ymax - gridYMin)/yStep+10; ii++) {
-    const pos = gridYMin + yStep*ii;
-    majorGridPoints.push({
-      position: pos,
-      name: pos.toFixed(precisionY),
-      visibility: ((pos<minYVis)||(pos>maxYVis)) ? "hidden" : "visible",
-      axis: "y"
-    });
-  }
-  return {majorGridPoints};
 };
 
 /**
@@ -255,9 +238,17 @@ export const addGrid = function addGrid() {
   /* determine grid points (i.e. on the x/polar axis where lines/circles will be drawn through)
   Major grid points are thicker and have text
   Minor grid points have no text */
-  const {majorGridPoints, minorGridPoints} = this.distance === "num_date" ?
-    computeTemporalGridPoints(xmin, xmax, xAxisPixels) :
-    computeDivergenceGridPoints(xmin, xmax, layout, this.params.minorTicks);
+  let xGridPoints;
+  if (
+    (this.layout==="scatter" && this.scatterVariables.x==="num_date") ||
+    this.layout==="clock" ||
+    this.distance==="num_date"
+  ) {
+    xGridPoints = computeTemporalGridPoints(xmin, xmax, xAxisPixels, "x");
+  } else {
+    xGridPoints = computeNumericGridPoints(xmin, xmax, layout, this.params.minorTicks, "x");
+  }
+  const {majorGridPoints, minorGridPoints} = xGridPoints;
 
   /* HOF, which returns the fn which constructs the SVG path string
   to draw the axis lines (circles for radial trees).
@@ -265,7 +256,7 @@ export const addGrid = function addGrid() {
   const gridline = (xScale, yScale, layoutShadow) => (gridPoint) => {
     let svgPath="";
     if (gridPoint.axis === "x") {
-      if (layoutShadow==="rect" || layoutShadow==="clock") {
+      if (layoutShadow==="rect" || layoutShadow==="clock" || layoutShadow==="scatter") {
         const xPos = xScale(gridPoint.position);
         svgPath = 'M'+xPos.toString() +
           " " +
@@ -322,13 +313,19 @@ export const addGrid = function addGrid() {
     return "start";
   };
 
-  /* for clock layouts, add y-points to the majorGridPoints array
-  Note that these don't have lines drawn, only text */
-  if (this.layout==="clock") {
-    majorGridPoints.push(...computeYGridPoints(ymin, ymax).majorGridPoints);
+  /* for scatterplot-like layouts, add grid points for the y-axis (rendered as horizontal lines) */
+  if (this.layout==="clock" || this.layout==="scatter") {
+    if (this.layout==="scatter" && this.scatterVariables.y==="num_date") {
+      const yAxisPixels = this.yScale.range()[1] - this.yScale.range()[0];
+      const temporalGrid = computeTemporalGridPoints(ymin, ymax, yAxisPixels, "y");
+      majorGridPoints.push(...temporalGrid.majorGridPoints);
+    } else {
+      const numericGrid = computeNumericGridPoints(ymin, ymax, layout, 1, "y");
+      majorGridPoints.push(...numericGrid.majorGridPoints);
+    }
   }
 
-  /* D3 commands to add grid + text to the DOM
+  /* Add grid lines (horizontal & vertical) to the DOM + text for major lines
   Note that the groups were created the first time this function was called */
   // add major grid to svg
   this.groups.majorGrid.selectAll("*").remove();
@@ -343,7 +340,6 @@ export const addGrid = function addGrid() {
         .style("visibility", (d) => d.visibility)
         .style("stroke", this.params.majorGridStroke)
         .style("stroke-width", this.params.majorGridWidth);
-
   // add minor grid to SVG
   this.groups.minorGrid.selectAll("*").remove();
   this.svg.selectAll(".minorGrid").remove();
@@ -358,7 +354,6 @@ export const addGrid = function addGrid() {
         .style("visibility", (d) => d.visibility)
         .style("stroke", this.params.minorGridStroke)
         .style("stroke-width", this.params.minorGridWidth);
-
   /* draw the text labels for majorGridPoints */
   this.groups.gridText.selectAll("*").remove();
   this.svg.selectAll(".gridText").remove();
@@ -380,21 +375,23 @@ export const addGrid = function addGrid() {
   /* add axis labels */
   this.groups.axisText.selectAll("*").remove();
   this.svg.selectAll(".axisText").remove();
-  if (layout === 'rect' || layout === "clock") {
-    let label = "Date";
-    // We use the same heursitic as in `getRateEstimate` to decide whether this data
-    // measures "substitutions per site" or "substitutions"
-    if (this.layout === 'clock') {
-      // In clock view the divergence / mutations axis is vertical
-      label = this.yScale.domain()[0] > 5 ? "Mutations" : "Divergence";
-    } else if (this.distance === "div") {
-      // In rectangular view the divergence / mutations axis is horizontal
-      label = this.xScale.domain()[1] > 5 ? "Mutations" : "Divergence";
-    }
-    /* Add a x-axis label */
+  let yAxisLabel, xAxisLabel; // not all views define axes labels. `undefined` => don't draw.
+  if (layout==="clock") {
+    xAxisLabel = "Date";
+    yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
+  } else if (layout==="scatter") {
+    xAxisLabel = this.scatterVariables.xLabel;
+    if (xAxisLabel==="div") xAxisLabel = guessAreMutationsPerSite(this.xScale) ? "Divergence" : "Mutations";
+    yAxisLabel = this.scatterVariables.yLabel;
+    if (yAxisLabel==="div") yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
+  } else if (layout==="rect") {
+    xAxisLabel = this.distance === "num_date" ? "Date" :
+      guessAreMutationsPerSite(this.xScale) ? "Divergence" : "Mutations";
+  }
+  if (xAxisLabel) {
     this.groups.axisText
       .append("text")
-        .text(layout === 'rect' ? label : "Date") // Clock always has Date on the X-axis
+        .text(xAxisLabel)
         .attr("class", "gridText")
         .style("font-size", this.params.tickLabelSize)
         .style("font-family", this.params.fontFamily)
@@ -402,19 +399,17 @@ export const addGrid = function addGrid() {
         .style("text-anchor", "middle")
         .attr("x", Math.abs(this.xScale.range()[1]-this.xScale.range()[0]) / 2)
         .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
-
-    /* Add a rotated y-axis label in clock view */
-    if (layout === 'clock') {
-      this.groups.axisText
-        .append("text")
-          .text(label) // Clock always has Date on the X-axis
-          .attr("class", "gridText")
-          .style("font-size", this.params.tickLabelSize)
-          .style("font-family", this.params.fontFamily)
-          .style("fill", this.params.tickLabelFill)
-          .style("text-anchor", "middle")
-          .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)');
-    }
+  }
+  if (yAxisLabel) {
+    this.groups.axisText
+      .append("text")
+        .text(yAxisLabel)
+        .attr("class", "gridText")
+        .style("font-size", this.params.tickLabelSize)
+        .style("font-family", this.params.fontFamily)
+        .style("fill", this.params.tickLabelFill)
+        .style("text-anchor", "middle")
+        .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)');
   }
 
   this.grid=true;

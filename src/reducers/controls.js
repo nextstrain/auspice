@@ -49,6 +49,7 @@ export const getDefaultControlsState = () => {
     mutType: defaultMutType,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
+    scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
     dateMin,
     dateMinNumeric,
@@ -62,6 +63,7 @@ export const getDefaultControlsState = () => {
     colorByConfidence: { display: false, on: false },
     colorScale: undefined,
     selectedBranchLabel: "none",
+    canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
     filters: {},
@@ -120,7 +122,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
-        layout: action.data,
+        layout: action.layout,
+        canRenderBranchLabels: (action.layout!=="scatter" && action.layout!=="clock") || (action.scatterVariables && action.scatterVariables.showBranches),
+        scatterVariables: action.scatterVariables,
         /* temporal confidence can only be displayed for rectangular trees */
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
           display: shouldDisplayTemporalConfidence(

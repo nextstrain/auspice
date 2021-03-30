@@ -115,6 +115,7 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
 };
 
 export const removeBranchLabels = function removeBranchLabels() {
+  this.params.branchLabelKey = undefined;
   if ("branchLabels" in this.groups) {
     this.groups.branchLabels.selectAll("*").remove();
   }

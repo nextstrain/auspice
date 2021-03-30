@@ -52,7 +52,12 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
   /* change in key used to define branch labels, tip labels */
-  if (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel) {
+  if (oldProps.canRenderBranchLabels===true && newProps.canRenderBranchLabels===false) {
+    args.newBranchLabellingKey = "none";
+  } else if (
+    (oldProps.canRenderBranchLabels===false && newProps.canRenderBranchLabels===true) ||
+    (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel)
+  ) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
   if (oldProps.tipLabelKey !== newProps.tipLabelKey) {
@@ -69,9 +74,14 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.showConfidences = true;
   }
 
+  if ((newProps.layout==="scatter" || newProps.layout==="clock") && (oldProps.scatterVariables!==newProps.scatterVariables)) {
+    args.updateLayout = true;
+    args.scatterVariables = newProps.scatterVariables;
+  }
   if (oldProps.layout !== newProps.layout) {
     args.newLayout = newProps.layout;
   }
+
 
   /* zoom to a clade / reset zoom to entire tree */
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {

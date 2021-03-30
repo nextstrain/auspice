@@ -75,7 +75,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_LAYOUT: {
-      query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
+      const sv = action.scatterVariables;
+      query.scatterX = action.layout==="scatter" && state.controls.distanceMeasure!==sv.x ? sv.x : undefined;
+      query.scatterY = action.layout==="scatter" && state.controls.colorBy!==sv.y ? sv.y : undefined;
+      query.branches = (action.layout==="scatter" || action.layout==="clock") && sv.showBranches===false ? "hide" : undefined;
+      query.regression = action.layout==="scatter" && sv.showRegression===true ? "show" :
+        action.layout==="clock" && sv.showRegression===false ? "hide" :
+          undefined;
+      query.l = action.layout === state.controls.defaults.layout ? undefined : action.layout;
       if (!shouldDisplayTemporalConfidence(state.controls.temporalConfidence.exists, state.controls.distanceMeasure, query.l)) {
         query.ci = undefined;
       }

@@ -1,6 +1,7 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId, formatDivergence } from "./helpers";
+import { getDomId } from "./helpers";
+import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
@@ -16,9 +17,11 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {array} tipStroke       -- tip stroke colour for each node (set onto each node)
  * @param {array} tipFill         -- tip fill colour for each node (set onto each node)
  * @param {array|null} tipRadii   -- array of tip radius'
+ * @param {array} dateRange
+ * @param {object} scatterVariables  -- {x, y} properties to map nodes => scatterplot (only used if layout="scatter")
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -28,7 +31,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
 
   /* set x, y values & scale them to the screen */
   this.setDistance(distance);
-  this.setLayout(layout);
+  this.setLayout(layout, scatterVariables);
   this.mapToScreen();
 
   /* set nodes stroke / fill */
@@ -51,7 +54,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.drawTips();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
-  if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+  if (this.regression) this.drawRegression();
   this.confidencesInSVG = false;
   if (drawConfidence) this.drawConfidence();
 
@@ -172,7 +175,7 @@ export const drawBranches = function drawBranches() {
   if (!("branchTee" in this.groups)) {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
   }
-  if (this.layout === "clock" || this.layout === "unrooted") {
+  if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
   } else {
     this.groups.branchTee
@@ -242,11 +245,11 @@ export const drawRegression = function drawRegression() {
   const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
 
-  if (!("clockRegression" in this.groups)) {
-    this.groups.clockRegression = this.svg.append("g").attr("id", "clockRegression");
+  if (!("regression" in this.groups)) {
+    this.groups.regression = this.svg.append("g").attr("id", "regression");
   }
 
-  this.groups.clockRegression
+  this.groups.regression
     .append("path")
     .attr("d", path)
     .attr("class", "regression")
@@ -254,9 +257,12 @@ export const drawRegression = function drawRegression() {
     .style("visibility", "visible")
     .style("stroke", this.params.regressionStroke)
     .style("stroke-width", this.params.regressionWidth);
-  this.groups.clockRegression
+
+  /* Compute & draw regression text. Note that the text hasn't been created until now,
+  as we need to wait until rendering time when the scales have been calculated */
+  this.groups.regression
     .append("text")
-    .text(getRateEstimate(this.regression, this.yScale.domain()[0]))
+    .text(makeRegressionText(this.regression, this.layout, this.yScale))
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)
@@ -267,8 +273,8 @@ export const drawRegression = function drawRegression() {
 };
 
 export const removeRegression = function removeRegression() {
-  if ("clockRegression" in this.groups) {
-    this.groups.clockRegression.selectAll("*").remove();
+  if ("regression" in this.groups) {
+    this.groups.regression.selectAll("*").remove();
   }
 };
 
@@ -365,16 +371,3 @@ export const branchStrokeForHover = function branchStrokeForHover(d) {
   if (!d) { return; }
   handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
 };
-
-
-function getRateEstimate(regression, maxDivergence) {
-  /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
-    however certain datasets chaged this to "subs per year" across entire sequence.
-    This distinction is not set in the JSON, so in order to correctly display the rate
-    we will "guess" this here. A future augur update will export this in a JSON key,
-    removing the need to guess */
-  if (maxDivergence > 5) {
-    return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
-  }
-  return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
-}
