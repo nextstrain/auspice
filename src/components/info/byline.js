@@ -4,49 +4,25 @@ import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headerFont } from "../../globalStyles";
 
+/**
+ * React component for the byline of the current dataset.
+ * This details (non-dynamic) information about the dataset, such as the
+ * maintainers, source, data provenance etc.
+ */
 @connect((state) => {
   return {
     metadata: state.metadata
   };
 })
 class Byline extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     const { t } = this.props;
-
-    /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
-     * This is somewhat temporary and may be switched to a nextstrain.org
-     * auspice customisation in the future.
-     */
-    if (
-      // comment out the next line for testing on localhost
-      (window.location.hostname === "nextstrain.org" || window.location.hostname === "dev.nextstrain.org") &&
-      window.location.pathname.startsWith("/ncov")
-    ) {
-      return (
-        <>
-          {renderAvatar(t, this.props.metadata)}
-          {renderMaintainers(t, this.props.metadata)}
-          {
-            this.props.metadata.buildUrl &&
-            <span>
-              {" Enabled by data from "}
-              <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
-            </span>
-          }
-        </>
-      );
-    }
-    /* End nextstrain-specific ncov / SARS-CoV-2 code */
-
     return (
       <>
         {renderAvatar(t, this.props.metadata)}
         {renderBuildInfo(t, this.props.metadata)}
         {renderMaintainers(t, this.props.metadata)}
+        {renderDataProvenance(t, this.props.metadata)}
       </>
     );
   }
@@ -57,6 +33,10 @@ const AvatarImg = styled.img`
   margin-bottom: 2px;
 `;
 
+/**
+ * Renders the GitHub avatar of the current dataset for datasets with a `buildUrl`
+ * which is a GitHub repo. The avatar image is fetched from GitHub (by the client).
+ */
 function renderAvatar(t, metadata) {
   const repo = metadata.buildUrl;
   if (typeof repo === 'string') {
@@ -71,7 +51,8 @@ function renderAvatar(t, metadata) {
 }
 
 /**
- * Render the byline of the page to indicate the source of the build (often a GitHub repo)
+ * Returns a React component detailing the source of the build (pipeline).
+ * Renders a <span> containing "Built with X", where X derives from `metadata.buildUrl`
  */
 function renderBuildInfo(t, metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
@@ -94,7 +75,10 @@ function renderBuildInfo(t, metadata) {
   return null;
 }
 
-
+/**
+ * Returns a React component detailing the maintainers of the build (pipeline).
+ * Renders a <span> containing "Maintained by X", where X derives from `metadata.maintainers`
+ */
 function renderMaintainers(t, metadata) {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
@@ -109,12 +93,64 @@ function renderMaintainers(t, metadata) {
               {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
             </React.Fragment>
           ))}
-          {"."}
+          {". "}
         </span>
       );
     }
   }
   return null;
+}
+
+
+/**
+ * Returns a React component detailing the data provenance of the build (pipeline).
+ * Renders a <span> containing "Enabled by data from X", where X derives from `metadata.dataProvenance`
+ * Note that this function includes logic to special-case certain values which may appear there.
+ */
+function renderDataProvenance(t, metadata) {
+  if (!Array.isArray(metadata.dataProvenance)) return null;
+  const sources = metadata.dataProvenance
+    .filter((source) => typeof source === "object")
+    .filter((source) => Object.prototype.hasOwnProperty.call(source, "name"))
+    .map((source) => {
+      if (source.name.toUpperCase() === "GISAID") { // SPECIAL CASE
+        return (<Link url="https://www.gisaid.org" key={source.name}>
+          <img key={source.name} src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </Link>);
+      }
+      const url = parseUrl(source.url);
+      if (url) {
+        return <Link url={url} key={source.name}>{source.name}</Link>;
+      }
+      return source.name;
+    });
+  if (!sources.length) return null;
+  return (
+    <span>
+      {t("Enabled by data from") + " "}
+      {makePrettyList(sources)}
+      {"."}
+    </span>
+  );
+}
+
+function makePrettyList(els) {
+  if (els.length<2) return els;
+  return Array.from({length: els.length*2-1})
+    .map((_, idx) => idx%2===0 ? els[idx/2] : idx===els.length*2-3 ? " and " : ", ");
+}
+
+
+/**
+ * Attempts to parse a url. Returns a valid-looking URL string or `false`.
+ */
+function parseUrl(potentialUrl) {
+  try {
+    const urlObj = new URL(potentialUrl);
+    return urlObj.href;
+  } catch (err) {
+    return false;
+  }
 }
 
 const BylineLink = styled.a`

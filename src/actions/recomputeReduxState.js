@@ -648,6 +648,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.genome_annotations) {
     metadata.genomeAnnotations = json.meta.genome_annotations;
   }
+  if (json.meta.data_provenance) {
+    metadata.dataProvenance = json.meta.data_provenance;
+  }
   if (json.meta.filters) {
     metadata.filters = json.meta.filters;
   }
