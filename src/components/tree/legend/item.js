@@ -5,9 +5,9 @@ import { dataFont, darkGrey } from "../../../globalStyles";
 const LegendItem = ({
   dispatch,
   transform,
+  clipId,
   legendRectSize,
   legendSpacing,
-  legendMaxLength,
   rectStroke,
   rectFill,
   label,
@@ -33,9 +33,10 @@ const LegendItem = ({
       x={legendRectSize + legendSpacing + 5}
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
+      clipPath={clipId?`url(#${clipId})`:undefined}
     >
       <title>{label}</title>
-      {typeof label === 'string' ? label.substring(0, legendMaxLength) : label}
+      {label}
     </text>
   </g>
 );
