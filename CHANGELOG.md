@@ -2,8 +2,23 @@
 title: Changelog
 ---
 
-## version 2.24.1 - 2021/03/19
+* Scatterplots are now available as a tree layout.
+These allow graphs to be created between any two continuous traits (colourings), similar to the "clock" layout but with user-definable variables
+Branches and regression lines can be toggled on/off, and nodes which do not define valid values for both variables will be hidden.
+Note that the regression line is calculated with a free intercept, which differs from the clock view where we force it to pass through the root.
+See [PR 1310](https://github.com/nextstrain/auspice/pull/1310) and [PR 1326](https://github.com/nextstrain/auspice/pull/1326) for more.
+* Datasets may now define "data provenance" which will be rendered in the byline.
+See [PR 1313](https://github.com/nextstrain/auspice/pull/1313) for more.
+* Names within the filtering UI now use the metadata-provided title, which is clearer.
+See [PR 1327](https://github.com/nextstrain/auspice/pull/1327) for more.
+* Frequency rounding is improved for small values.
+See [PR 1301](https://github.com/nextstrain/auspice/pull/1301) for more.
+* Node traits may define a URL which will result in the value being displayed as a link.
+See [PR 1308](https://github.com/nextstrain/auspice/pull/1308) for more.
+* A bug was fixed which caused some datasets to crash auspice when metadata files were dragged on.
+See [PR 1319](https://github.com/nextstrain/auspice/pull/1319) for more.
 
+## version 2.24.1 - 2021/03/19
 
 * [bugfix] Fixes a bug introduced in v2.24.0 where certain datasets wouldn't load
 
