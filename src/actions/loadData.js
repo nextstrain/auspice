@@ -174,7 +174,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         mainTreeName: secondTreeUrl ? mainDatasetUrl : null,
         secondTreeName: secondTreeUrl ? secondTreeUrl : null,
         url,
-        dispatch,
+        dispatch
       })
     });
 
