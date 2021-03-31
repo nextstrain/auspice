@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.25.0 - 2021/03/31
+
+
 * Scatterplots are now available as a tree layout.
 These allow graphs to be created between any two continuous traits (colourings), similar to the "clock" layout but with user-definable variables
 Branches and regression lines can be toggled on/off, and nodes which do not define valid values for both variables will be hidden.
