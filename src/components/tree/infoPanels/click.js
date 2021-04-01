@@ -205,15 +205,14 @@ const OtherFields = ({node, t}) => {
   const exceptions = ["accession", "url", "vaccine", "div", "author", "num_date", "country", "region"];
   const itemsToRender = [];
   others.forEach(([key, value]) => {
-    if (!exceptions.includes(key))
+    if (!exceptions.includes(key)){
       itemsToRender.push(<tr key={key + "_ex"}>
         <th>{t(key[0].toUpperCase() + key.slice(1))}</th>
         <td>{value}</td>
-      </tr>)
-    }
-  )
+        </tr>);
+      }
   return itemsToRender;
-}
+};
 
 /**
  * A React component to display information about a tree tip in a modal-overlay style
