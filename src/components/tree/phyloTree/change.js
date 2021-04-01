@@ -150,9 +150,6 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.branchLabel') && !extras.newBranchLabellingKey) {
-    this.updateBranchLabels(transitionTime);
-  }
   if (extras.hideTipLabels) {
     this.removeTipLabels();
   } else if (elemsToUpdate.has('.tipLabel')) {
@@ -192,6 +189,8 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     if (extras.newBranchLabellingKey !== "none") {
       this.drawBranchLabels(extras.newBranchLabellingKey);
     }
+  } else if (elemsToUpdate.has('.branchLabel')) {
+    this.updateBranchLabels(transitionTime);
   }
 };
 
