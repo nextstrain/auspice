@@ -212,7 +212,7 @@ const OtherFields = ({node, t}) => {
         </tr>);
       }
   return itemsToRender;
-};
+}
 
 /**
  * A React component to display information about a tree tip in a modal-overlay style
