@@ -77,14 +77,14 @@ export const getAttributeFromNodeByName = (node, attr) => {
     return node.node_attrs[attr];
   }
   return undefined;
-}
+};
 
 export const getAllAttributesFromNode = (node) => {
   if (node.node_attrs) {
     return Object.entries(node.node_attrs);
   }
-  return []
-}
+  return [];
+};
 
 /* see comment at top of this file */
 export const getUrlFromNode = (node) =>
