@@ -135,7 +135,7 @@ const run = (args) => {
     res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"), {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 
-  const server = app.listen(app.get('port'), () => {
+  const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
     const host = app.get('host');
     const {port} = server.address();

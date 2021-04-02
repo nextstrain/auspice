@@ -238,18 +238,16 @@ const Trait = ({node, trait, colorings}) => {
 
 const OtherFields = ({node, t}) => {
   const others = getAllAttributesFromNode(node);
-  const exceptions = ["accession", "url", "vaccine", "div", "author", "num_date", "country", "region"];
+  const exceptions = ["accession", "url", "vaccine", "div",
+    "author", "num_date", "country", "region", "mutations"];
   const itemsToRender = [];
   others.forEach(([key, value]) => {
-      if (!exceptions.includes(key))
-        itemsToRender.push(<tr key={key + "_ex"}>
-          <th>{t(key[0].toUpperCase() + key.slice(1))}</th>
-          <td>{value}</td>
-        </tr>)
+    if (!exceptions.includes(key)) {
+      itemsToRender.push(item(t(key[0].toUpperCase() + key.slice(1)), value.value));
     }
-  )
+  });
   return itemsToRender;
-}
+};
 
 /**
  * A React component to display information about a tree tip in a modal-overlay style
@@ -277,8 +275,6 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
               <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
             <AccessionAndUrl node={node}/>
-            {item("", "")}
-            <MutationTable mutations={mutationsToRoot}/>
             <OtherFields node={node} t={t}/>
             {item("", "")}
             <MutationTable mutations={mutationsToRoot}/>
