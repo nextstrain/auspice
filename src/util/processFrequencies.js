@@ -90,7 +90,7 @@ export const computeMatrixFromRawData = (
 
   if (normalizeFrequencies) {
     const nCategories = Object.keys(matrix).length;
-    const minVal = 1e-10;
+    const minVal = 1e-6;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
         matrix[cat][i] /= nCategories * minVal + norm;
