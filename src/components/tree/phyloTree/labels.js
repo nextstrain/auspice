@@ -95,6 +95,9 @@ const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
 };
 
 export const updateBranchLabels = function updateBranchLabels(dt) {
+  if (!this.groups.branchLabels) {
+    return;
+  }
   const visibility = createBranchLabelVisibility(
     this.params.branchLabelKey,
     this.layout,
