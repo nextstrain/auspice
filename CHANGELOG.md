@@ -2,8 +2,11 @@
 title: Changelog
 ---
 
-## version 2.25.0 - 2021/03/31
+* Bugfix for cases where certain interactions with scatterplot variables would cause auspice to crash.
+See [PR 1332](https://github.com/nextstrain/auspice/pull/1332) for more.
 
+
+## version 2.25.0 - 2021/03/31
 
 * Scatterplots are now available as a tree layout.
 These allow graphs to be created between any two continuous traits (colourings), similar to the "clock" layout but with user-definable variables
