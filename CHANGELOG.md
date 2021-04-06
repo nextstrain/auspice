@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.25.1 - 2021/04/07
+
+
 * Bugfix for cases where certain interactions with scatterplot variables would cause auspice to crash.
 See [PR 1332](https://github.com/nextstrain/auspice/pull/1332) for more.
 
