@@ -126,7 +126,7 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
       data.push({
         idx: n.arrayIdx,
         values: rawJSON[n.name].frequencies,
-        weight: rawJSON[n.name].weight,
+        weight: rawJSON[n.name].weight
       });
     });
 
@@ -148,6 +148,6 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     pivots,
     matrix,
     projection_pivot,
-    normalizeFrequencies,
+    normalizeFrequencies
   };
 };
