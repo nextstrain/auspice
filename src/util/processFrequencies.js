@@ -89,7 +89,6 @@ export const computeMatrixFromRawData = (
   });
 
   if (normalizeFrequencies) {
-    const nCategories = Object.keys(matrix).length;
     const minVal = 1e-7;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
