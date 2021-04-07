@@ -90,10 +90,10 @@ export const computeMatrixFromRawData = (
 
   if (normalizeFrequencies) {
     const nCategories = Object.keys(matrix).length;
-    const minVal = 1e-6;
+    const minVal = 1e-7;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
-        if (norm > nCategories*0.01*minVal) {
+        if (norm > minVal) {
           matrix[cat][i] /= norm;
         } else {
           matrix[cat][i] = 0.0;
