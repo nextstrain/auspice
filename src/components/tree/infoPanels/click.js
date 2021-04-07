@@ -241,8 +241,10 @@ const Trait = ({node, trait, colorings}) => {
 
 const OtherFields = ({node, t}) => {
   const others = getAllAttributesFromNode(node);
-  const exceptions = ["accession", "url", "vaccine", "div", "author",
-    "num_date", "country", "region", "mutations", "division", "location"];
+  const exceptions = ["accession", "url", "vaccine", "div", "author", "file_name", "file_size",
+    "md5sum", "num_date", "country", "region", "mutations", "division", "location", "object_id",
+    "clade_membership"
+  ];
   const itemsToRender = [];
   others.forEach(([key, value]) => {
     if (!exceptions.includes(key)) {
