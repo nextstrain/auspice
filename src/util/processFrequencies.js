@@ -93,7 +93,11 @@ export const computeMatrixFromRawData = (
     const minVal = 1e-6;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
-        matrix[cat][i] /= nCategories * minVal + norm;
+        if (norm > nCategories*0.01*minVal) {
+          matrix[cat][i] /= norm;
+        } else {
+          matrix[cat][i] = 0.0;
+        }
       });
     });
   }
