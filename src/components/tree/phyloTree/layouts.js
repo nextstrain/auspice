@@ -34,7 +34,6 @@ export const setLayout = function setLayout(layout) {
   timerEnd("setLayout");
 };
 
-
 /**
  * assignes x,y coordinates for a rectancular layout
  * @return {null}
@@ -121,7 +120,6 @@ const unrootedPlaceSubtree = (node, nTips) => {
     }
   }
 };
-
 
 /**
  * calculates x,y coordinates for the unrooted layout. this is
@@ -230,7 +228,6 @@ export const setDistance = function setDistance(distanceAttribute) {
   }
   timerEnd("setDistance");
 };
-
 
 /**
  * sets the range of the scales used to map the x,y coordinates to the screen

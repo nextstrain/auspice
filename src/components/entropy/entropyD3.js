@@ -206,8 +206,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
-      this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2
-    )
+      this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2)
     .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
@@ -237,8 +236,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
     .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
-      this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2
-    )
+      this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2)
     .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
@@ -399,7 +397,6 @@ EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax
   /* requires redraw of bars */
 };
 
-
 /* calculate the offsets */
 EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   /* hardcoded padding */
@@ -510,9 +507,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     .attr("transform", (d) =>
       d.type === "e" ?
         "translate(" + (this.scales.xNav(this.zoomCoordinates[1]) - 1) + "," + (this.offsets.heightNav + 25) + ")" :
-        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")"
-        /* this makes handles move if initial draw is zoomed! */
-    );
+        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")");
 };
 
 /* set up zoom */

@@ -3,7 +3,6 @@ import { errorNotification, successNotification, warningNotification } from "../
 import { ADD_EXTRA_METADATA } from "../types";
 import { parseCsvTsv } from "./parseCsvTsv";
 
-
 const handleMetadata = async (dispatch, getState, file) => {
   const fileName = file.name;
 
@@ -42,9 +41,7 @@ const handleMetadata = async (dispatch, getState, file) => {
 
 export default handleMetadata;
 
-
 /* ---------------------- helper functions to parse data ---------------------------- */
-
 
 function processHeader(fields) {
   const strainKey = fields[0];
@@ -169,7 +166,7 @@ function processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) {
   /* Collect groups of strains with identical lat/longs */
   Object.entries(rows).forEach(([strain, row]) => {
     const [latitude, longitude] = [Number(row[latLongKeys.latitude]), Number(row[latLongKeys.longitude])];
-    if (isNaN(latitude) || isNaN(longitude) || latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) return;
+    if (Number.isNaN(latitude) || Number.isNaN(longitude) || latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) return;
     const strKey = String(row[latLongKeys.latitude])+String(row[latLongKeys.longitude]);
     if (!coordsStrains.has(strKey)) {
       coordsStrains.set(strKey, {latitude, longitude, strains: new Set()});

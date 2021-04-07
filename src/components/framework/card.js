@@ -31,6 +31,7 @@ class Card extends React.Component {
       }
     };
   }
+
   getStylesInfoCard() {
     return {
       base: {
@@ -58,6 +59,7 @@ class Card extends React.Component {
       }
     };
   }
+
   render() {
     const styles = this.props.infocard ? this.getStylesInfoCard() : this.getStyles();
     return (

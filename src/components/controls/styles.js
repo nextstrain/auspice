@@ -6,7 +6,6 @@ import ReactTooltip from 'react-tooltip';
  * props.theme.x
  */
 
-
 export const ControlsContainer = styled.div`
   display: flex;
   flex-direction: column;

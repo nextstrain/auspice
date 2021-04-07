@@ -15,9 +15,7 @@ class Monitor extends React.Component {
   constructor(props) {
     super(props);
   }
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired
-  }
+
   componentDidMount() {
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
@@ -77,5 +75,9 @@ class Monitor extends React.Component {
     return null;
   }
 }
+
+Monitor.propTypes = {
+  dispatch: PropTypes.func.isRequired
+};
 
 export default Monitor;

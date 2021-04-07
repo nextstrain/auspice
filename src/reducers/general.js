@@ -20,7 +20,6 @@ const getFirstPageToDisplay = () => {
   return chooseDisplayComponentFromURL(window.location.pathname);
 };
 
-
 const general = (state = {
   defaults,
   displayComponent: getFirstPageToDisplay(),
@@ -37,21 +36,16 @@ const general = (state = {
       if (action.path) {
         stateUpdate.pathname = action.path;
       }
-      return Object.assign({}, state, stateUpdate);
+      return { ...state, ...stateUpdate};
     case types.UPDATE_PATHNAME:
-      return Object.assign({}, state, {
-        pathname: action.pathname
-      });
+      return { ...state, pathname: action.pathname};
     case types.CHANGE_LANGUAGE:
-      return Object.assign({}, state, {
-        language: action.data
-      });
+      return { ...state, language: action.data};
     case types.CLEAN_START:
       const defaultLanguage = action.metadata.displayDefaults["language"] || defaults.language;
-      return Object.assign({}, state, {
-        defaults: Object.assign({}, state.defaults, {language: defaultLanguage}),
-        language: query.lang ? query.lang : defaultLanguage
-      });
+      return { ...state,
+        defaults: { ...state.defaults, language: defaultLanguage},
+        language: query.lang ? query.lang : defaultLanguage};
     default:
       return state;
   }

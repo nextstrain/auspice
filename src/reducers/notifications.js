@@ -28,11 +28,11 @@ const Metadata = (state = {
     case types.ADD_NOTIFICATION:
       stack = state.stack.slice(); // shallow copy
       stack.push(makeNotification(action));
-      return Object.assign({}, state, {counter: action.id, stack});
+      return { ...state, counter: action.id, stack};
     case types.REMOVE_NOTIFICATION:
       stack = state.stack.slice(); // shallow copy
       stack.splice(arrayObjectIndexOf(stack, action.id), 1);
-      return Object.assign({}, state, {stack});
+      return { ...state, stack};
     default:
       return state;
   }

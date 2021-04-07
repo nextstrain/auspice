@@ -2,7 +2,6 @@ import { warningNotification } from "../notifications";
 import handleMetadata from "./metadata";
 import { is_csv_or_tsv } from "./constants";
 
-
 /**
  * A thunk to handle dropped files and take the appropriate action.
  * @param {*} files DataTransfer object's FileList

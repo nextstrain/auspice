@@ -43,7 +43,7 @@ class AnimationControls extends React.Component {
         }}
       >
         <span>
-          {<FaUndo color="#888"/>}
+          <FaUndo color="#888"/>
           {" " + this.props.t("Reset")}
         </span>
       </SidebarButton>

@@ -157,7 +157,6 @@ const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
   return {majorStep, minorStep};
 };
 
-
 /**
  * Compute the major & minor temporal grid points for display.
  * @param {numeric} xmin numeric date of minimum value in view
@@ -185,7 +184,6 @@ export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
     }
   }
 
-
   /* Minor Grid Points between each pair of major grid points */
   if (minorStep.n) {
     majorGridPoints.forEach((majorGridPoint, majorIdx) => {
@@ -208,7 +206,6 @@ export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
   }
   return {majorGridPoints, minorGridPoints};
 };
-
 
 const computeYGridPoints = (ymin, ymax) => {
   const majorGridPoints = [];
@@ -500,7 +497,6 @@ export const showTemporalSlice = function showTemporalSlice() {
       .attr("height", height)
       .attr("fill", fill)
       .attr("transform", transform_endRegion);
-
 
     // Only apply animation if rectangle was already visible in the previous frame.
     // Unlike the startingRegion, this panel cannot depend

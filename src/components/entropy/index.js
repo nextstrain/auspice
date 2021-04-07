@@ -83,22 +83,17 @@ class Entropy extends React.Component {
       chart: false
     };
   }
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    loaded: PropTypes.bool.isRequired,
-    colorBy: PropTypes.string.isRequired,
-    defaultColorBy: PropTypes.string.isRequired,
-    mutType: PropTypes.string.isRequired
-  }
 
   /* CALLBACKS */
   onHover(d, x, y) {
     // console.log("hovering @", x, y, this.state.chartGeom);
     this.setState({hovered: {d, type: ".tip", x, y}});
   }
+
   onLeave() {
     this.setState({hovered: false});
   }
+
   onClick(d) {
     if (this.props.narrativeMode) return;
     const colorBy = constructEncodedGenotype(this.props.mutType, d);
@@ -121,44 +116,66 @@ class Entropy extends React.Component {
     return (
       <div style={{...tabGroup, ...styles.aaNtSwitch}}>
         <button
+          type="button"
           key={1}
           style={this.props.mutType === "aa" ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.changeMutTypeCallback("aa")}
         >
-          <span style={styles.switchTitle}> {"AA"} </span>
+          <span style={styles.switchTitle}>
+            {' '}
+            AA
+            {' '}
+          </span>
         </button>
         <button
+          type="button"
           key={2}
           style={this.props.mutType !== "aa" ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.changeMutTypeCallback("nuc")}
         >
-          <span style={styles.switchTitle}> {"NT"} </span>
+          <span style={styles.switchTitle}>
+            {' '}
+            NT
+            {' '}
+          </span>
         </button>
       </div>
     );
   }
+
   entropyCountSwitch(styles) {
     const { t } = this.props;
     if (this.props.narrativeMode) return null;
     return (
       <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
         <button
+          type="button"
           key={1}
           style={this.props.showCounts ? tabGroupMember : tabGroupMemberSelected}
           onClick={() => this.props.dispatch(showCountsNotEntropy(false))}
         >
-          <span style={styles.switchTitle}> {t("entropy")} </span>
+          <span style={styles.switchTitle}>
+            {' '}
+            {t("entropy")}
+            {' '}
+          </span>
         </button>
         <button
+          type="button"
           key={2}
           style={this.props.showCounts ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.props.dispatch(showCountsNotEntropy(true))}
         >
-          <span style={styles.switchTitle}> {t("events")} </span>
+          <span style={styles.switchTitle}>
+            {' '}
+            {t("events")}
+            {' '}
+          </span>
         </button>
       </div>
     );
   }
+
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
@@ -177,12 +194,14 @@ class Entropy extends React.Component {
     }
     this.setState({chart});
   }
+
   componentDidMount() {
     if (this.props.loaded) {
       this.setUp(this.props);
     }
   }
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
@@ -296,6 +315,14 @@ class Entropy extends React.Component {
     // TODO:1050 undo all listeners within EntropyChart (ie this.state.chart)
   }
 }
+
+Entropy.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  loaded: PropTypes.bool.isRequired,
+  colorBy: PropTypes.string.isRequired,
+  defaultColorBy: PropTypes.string.isRequired,
+  mutType: PropTypes.string.isRequired
+};
 
 const WithTranslation = withTranslation()(Entropy);
 export default WithTranslation;

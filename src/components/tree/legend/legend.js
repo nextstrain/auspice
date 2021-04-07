@@ -66,6 +66,7 @@ class Legend extends React.Component {
     const vert = fromTop * (legendRectSize + legendSpacing);
     return "translate(" + horz + "," + vert + ")";
   }
+
   getTitleString() {
     if (isColorByGenotype(this.props.colorBy)) {
       const genotype = decodeColorByGenotype(this.props.colorBy);

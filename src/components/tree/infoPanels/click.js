@@ -35,18 +35,19 @@ export const stopProp = (e) => {
 const item = (key, value, href) => (
   <tr key={key}>
     <th style={infoPanelStyles.item}>{key}</th>
-    <td style={infoPanelStyles.item}>{href ? (
-      <a href={href} target="_blank" rel="noopener noreferrer">{value}</a>
-    ) :
-      value
-    }</td>
+    <td style={infoPanelStyles.item}>
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">{value}</a>
+      ) :
+        value}
+    </td>
   </tr>
 );
 
 const formatURL = (url) => {
   if (url !== undefined && url.startsWith("https_")) {
     return url.replace("https_", "https:");
-  } else if (url !== undefined && url.startsWith("http_")) {
+  } if (url !== undefined && url.startsWith("http_")) {
     return url.replace("http_", "http:");
   }
   return url;
@@ -80,21 +81,24 @@ const MutationTable = ({mutations}) => {
   };
   // we encode the table here (rather than via `item()`) to set component keys appropriately
   return (
-    <tr key={"Mutations"}>
-      <th style={infoPanelStyles.item}>{"Mutations from root"}</th>
-      <td style={infoPanelStyles.item}>{
-        Object.entries(mutations)
+    <tr key="Mutations">
+      <th style={infoPanelStyles.item}>Mutations from root</th>
+      <td style={infoPanelStyles.item}>
+        {
+          Object.entries(mutations)
           .sort(geneSortFn)
           .map(([gene, muts]) => (
             <div style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
-              {gene}: {muts.sort(mutSortFn).join(", ")}
+              {gene}
+              :
+              {muts.sort(mutSortFn).join(", ")}
             </div>
           ))
-      }</td>
+        }
+      </td>
     </tr>
   );
 };
-
 
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
@@ -107,30 +111,29 @@ const AccessionAndUrl = ({node}) => {
   if (isValueValid(gisaid_epi_isl)) {
     return (
       <>
-        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl.split("_")[2]} url={"https://gisaid.org"}/>
+        <Link title="GISAID EPI ISL" value={gisaid_epi_isl.split("_")[2]} url="https://gisaid.org"/>
         {isValueValid(genbank_accession) ?
-          <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
-          null
-        }
+          <Link title="Genbank accession" value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
+          null}
       </>
     );
   }
 
   if (isValueValid(genbank_accession)) {
     return (
-      <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
+      <Link title="Genbank accession" value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
     );
-  } else if (isValueValid(accession) && isValueValid(url)) {
+  } if (isValueValid(accession) && isValueValid(url)) {
     return (
-      <Link url={formatURL(url)} value={accession} title={"Accession"}/>
+      <Link url={formatURL(url)} value={accession} title="Accession"/>
     );
-  } else if (isValueValid(accession)) {
+  } if (isValueValid(accession)) {
     return (
       item("Accession", accession)
     );
-  } else if (isValueValid(url)) {
+  } if (isValueValid(url)) {
     return (
-      <Link title={"Strain URL"} url={formatURL(url)} value={"click here"}/>
+      <Link title="Strain URL" url={formatURL(url)} value="click here"/>
     );
   }
   return null;
@@ -142,7 +145,7 @@ const VaccineInfo = ({node, t}) => {
   const renderElements = [];
   if (vaccineInfo.selection_date) {
     renderElements.push(
-      <tr key={"seldate"}>
+      <tr key="seldate">
         <th>{t("Vaccine selected")}</th>
         <td>{vaccineInfo.selection_date}</td>
       </tr>
@@ -150,7 +153,7 @@ const VaccineInfo = ({node, t}) => {
   }
   if (vaccineInfo.start_date) {
     renderElements.push(
-      <tr key={"startdate"}>
+      <tr key="startdate">
         <th>{t("Vaccine start date")}</th>
         <td>{vaccineInfo.start_date}</td>
       </tr>
@@ -158,7 +161,7 @@ const VaccineInfo = ({node, t}) => {
   }
   if (vaccineInfo.end_date) {
     renderElements.push(
-      <tr key={"enddate"}>
+      <tr key="enddate">
         <th>{t("Vaccine end date")}</th>
         <td>{vaccineInfo.end_date}</td>
       </tr>
@@ -166,7 +169,7 @@ const VaccineInfo = ({node, t}) => {
   }
   if (vaccineInfo.serum) {
     renderElements.push(
-      <tr key={"serum"}>
+      <tr key="serum">
         <th>{t("Serum strain")}</th>
         <td/>
       </tr>
@@ -263,8 +266,15 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
   const node = tip.n;
   const mutationsToRoot = collectMutations(node);
   return (
-    <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
-      <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
+    <div style={infoPanelStyles.modalContainer}
+      onClick={() => goAwayCallback(tip)}
+      onKeyDown={() => goAwayCallback(tip)}
+    >
+      <div className="panel"
+        style={panelStyle}
+        onClick={(e) => stopProp(e)}
+        onKeyDown={(e) => stopProp(e)}
+      >
         <StrainName>{node.name}</StrainName>
         <table>
           <tbody>

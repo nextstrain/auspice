@@ -19,7 +19,7 @@ const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
   };
 
   return (
-    <div style={chevronStyle} onClick={onClick}>
+    <div style={chevronStyle} onClick={onClick} onKeyDown={onClick}>
       <FaChevronLeft />
     </div>
   );

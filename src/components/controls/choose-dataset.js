@@ -49,8 +49,7 @@ class ChooseDataset extends React.Component {
       ).map((opt) => ({
         value: displayedDataset.slice(0, i).concat(opt).join("/"),
         label: opt
-      }))
-    );
+      })));
 
     return (
       <>

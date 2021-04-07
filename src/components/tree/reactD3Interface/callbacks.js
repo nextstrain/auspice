@@ -27,7 +27,6 @@ export const onTipClick = function onTipClick(d) {
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
-
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
 
@@ -71,8 +70,7 @@ export const onBranchClick = function onBranchClick(d) {
     const availableBranchLabels = this.props.tree.availableBranchLabels;
     // sort the possible branch labels by the order of those available on the tree
     legalBranchLabels.sort((a, b) =>
-      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
-    );
+      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b));
     // then use the first!
     const key = legalBranchLabels[0];
     cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;

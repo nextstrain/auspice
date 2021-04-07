@@ -346,7 +346,6 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   return [newFiltered, newIdxOfFilteredRoot];
 }
 
-
 /**
  * Given genotype filters, such as `["HA1 186D", "HA1 186S", "nuc 100T"]`
  * Produce an array of arrays whereby genotypes at the same position are grouped
@@ -387,7 +386,7 @@ export function sortConstellationLongFn(a, b) {
   const [posA, posB] = [parseInt(a[1], 10), parseInt(b[1], 10)];
   if (posA > posB) {
     return 1;
-  } else if (posB > posA) {
+  } if (posB > posA) {
     return -1;
   }
   // codon / nt position is the same => sort alphabetically by residue

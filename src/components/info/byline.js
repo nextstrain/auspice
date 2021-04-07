@@ -31,11 +31,12 @@ class Byline extends React.Component {
           {renderAvatar(t, this.props.metadata)}
           {renderMaintainers(t, this.props.metadata)}
           {
-            this.props.metadata.buildUrl &&
-            <span>
-              {" Enabled by data from "}
-              <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
-            </span>
+            this.props.metadata.buildUrl && (
+              <span>
+                {" Enabled by data from "}
+                <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+              </span>
+            )
           }
         </>
       );
@@ -94,7 +95,6 @@ function renderBuildInfo(t, metadata) {
   return null;
 }
 
-
 function renderMaintainers(t, metadata) {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
@@ -109,7 +109,7 @@ function renderMaintainers(t, metadata) {
               {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
             </React.Fragment>
           ))}
-          {"."}
+          .
         </span>
       );
     }

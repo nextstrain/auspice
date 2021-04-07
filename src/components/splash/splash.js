@@ -1,9 +1,9 @@
 import React from "react";
 import styled from 'styled-components';
 import NavBar from "../navBar";
-import Flex from "../../components/framework/flex";
+import Flex from "../framework/flex";
 import { CenterContent } from "./centerContent";
-import { FinePrintStyles, getCitation} from "../../components/framework/fine-print";
+import { FinePrintStyles, getCitation} from "../framework/fine-print";
 
 const getNumColumns = (width) => width > 1000 ? 3 : width > 750 ? 2 : 1;
 
@@ -21,6 +21,7 @@ const formatDataset = (requestPath, dispatch, changePage) => {
     <li key={requestPath}>
       <div
         style={{color: "#5097BA", textDecoration: "none", cursor: "pointer", fontWeight: "400", fontSize: "94%"}}
+        onKeyDown={() => dispatch(changePage({path: requestPath, push: true}))}
         onClick={() => dispatch(changePage({path: requestPath, push: true}))}
       >
         {requestPath}
@@ -36,10 +37,10 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
       <Flex justifyContent="center">
         <div style={{paddingRight: "40px"}}>
           <h1 style={{textAlign: "center", marginTop: "20px", marginLeft: "20px", fontSize: "72px", letterSpacing: "4rem"}}>
-            {"auspice"}
+            auspice
           </h1>
           <h1 style={{textAlign: "center", marginTop: "0px", fontSize: "29px"}}>
-            {"Interactive Visualisation of Phylogenomic data"}
+            Interactive Visualisation of Phylogenomic data
           </h1>
         </div>
         <img
@@ -66,14 +67,14 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
     <CenterContent>
       <div>
         <p style={{color: "rgb(222, 60, 38)", fontWeight: 600, fontSize: "24px"}}>
-          {"😱 404, or an error has occured 😱"}
+          😱 404, or an error has occured 😱
         </p>
         <p style={{color: "rgb(222, 60, 38)", fontWeight: 400, fontSize: "18px"}}>
           {`Details: ${errorMessage}`}
         </p>
         <p style={{fontSize: "16px"}}>
           {"If this keeps happening, or you believe this is a bug, please "}
-          <a href={"mailto:hello@nextstrain.org"}>{"get in contact with us."}</a>
+          <a href="mailto:hello@nextstrain.org">get in contact with us.</a>
         </p>
       </div>
     </CenterContent>

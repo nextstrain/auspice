@@ -12,7 +12,6 @@ const SplashContent = hasExtension("splashComponent") ?
   DefaultSplashContent;
 /* TODO: check that when compiling DefaultSplashContent isn't included if extension is defined */
 
-
 @connect((state) => ({
   errorMessage: state.general.errorMessage,
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -24,6 +23,7 @@ class Splash extends React.Component {
     /* state is set via the returned JSON from the server (aka charon) in the fetch in CDM */
     this.state = {available: {}, errorMessage: undefined};
   }
+
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getAvailable?prefix=${this.props.reduxPathname}`)
       .then((json) => {
@@ -34,6 +34,7 @@ class Splash extends React.Component {
         console.warn(err.message);
       });
   }
+
   render() {
     return (
       <ErrorBoundary>

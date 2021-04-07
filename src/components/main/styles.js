@@ -32,7 +32,6 @@ export const SidebarContainer = styled.div`
   font-family: ${(props) => props.theme["font-family"]};
 `;
 
-
 /* The sidebar theme is available to all styled components in the sidebar.
  */
 const sidebarThemeDefaults = {

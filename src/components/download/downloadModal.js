@@ -9,7 +9,6 @@ import { getAcknowledgments} from "../framework/footer";
 import { datasetSummary } from "../info/datasetSummary";
 import { DownloadButtons } from "./downloadButtons";
 
-
 // const dataUsage = [
 //   `The data presented here is intended to rapidly disseminate analysis of important pathogens.
 //   Unpublished data is included with permission of the data generators, and does not impact their right to publish.`,
@@ -104,11 +103,13 @@ class DownloadModal extends React.Component {
     };
     this.dismissModal = this.dismissModal.bind(this);
   }
+
   componentDidMount() {
     Mousetrap.bind('d', () => {
       this.props.dispatch({type: this.props.show ? DISMISS_DOWNLOAD_MODAL : TRIGGER_DOWNLOAD_MODAL});
     });
   }
+
   getRelevantPublications() {
     const x = [publications.nextstrain, publications.treetime];
     if (["cTiter", "rb", "ep", "ne"].indexOf(this.props.colorBy) !== -1) {
@@ -116,6 +117,7 @@ class DownloadModal extends React.Component {
     }
     return x;
   }
+
   formatPublications(pubs) {
     return (
       <span>
@@ -123,7 +125,15 @@ class DownloadModal extends React.Component {
           {pubs.map((pub) => (
             <li key={pub.href}>
               <a href={pub.href} target="_blank" rel="noreferrer noopener">
-                {pub.author}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
+                {pub.author}
+                ,
+                {pub.title}
+                ,
+                <i>{pub.journal}</i>
+                {' '}
+                (
+                {pub.year}
+                )
               </a>
             </li>
           ))}
@@ -131,9 +141,11 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
+
   dismissModal() {
     this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
   }
+
   render() {
     const { t } = this.props;
 
@@ -151,14 +163,28 @@ class DownloadModal extends React.Component {
 
     const meta = this.props.metadata;
     return (
-      <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
-        <div style={panelStyle} onClick={(e) => stopProp(e)}>
+      <div style={infoPanelStyles.modalContainer}
+        onClick={this.dismissModal}
+        onKeyDown={this.dismissModal}
+      >
+        <div style={panelStyle}
+          onClick={(e) => stopProp(e)}
+          onKeyDown={(e) => stopProp(e)}
+        >
           <p style={infoPanelStyles.topRightMessage}>
-            ({t("click outside this box to return to the app")})
+            (
+            {t("click outside this box to return to the app")}
+            )
           </p>
 
           <div style={infoPanelStyles.modalSubheading}>
-            {meta.title} ({t("last updated")} {meta.updated})
+            {meta.title}
+            {' '}
+            (
+            {t("last updated")}
+            {' '}
+            {meta.updated}
+            )
           </div>
 
           <div>
@@ -186,12 +212,13 @@ class DownloadModal extends React.Component {
           </div>
           {this.formatPublications(relevantPublications)}
 
-
           <div style={infoPanelStyles.modalSubheading}>
-            {t("Download data")}:
+            {t("Download data")}
+            :
           </div>
           <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
             <div style={{ width: "100%" }}>
+              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
               <DownloadButtons {...this.props} relevantPublications={relevantPublications}/>
             </div>
           </div>
@@ -201,7 +228,5 @@ class DownloadModal extends React.Component {
   }
 }
 
-
 const WithTranslation = withTranslation()(DownloadModal);
 export default WithTranslation;
-

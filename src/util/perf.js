@@ -37,7 +37,6 @@ const dbsingle = {};
 
 /* array format = [start time (or false), numIter, totalTime] */
 
-
 const startTwiceError = (name) => {
   console.error("Race condition bug! Perf. timer", name, "started when it was already running.");
 };

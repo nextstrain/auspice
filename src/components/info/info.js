@@ -52,12 +52,12 @@ class Info extends React.Component {
 
           <div width={this.props.width} style={styles.n}>
             {animating ? t("Animation in progress") + ". " : null}
-            {showExtended &&
+            {showExtended && (
               <>
                 {datasetSummary({...this.props, mainTreeNumTips: this.props.metadata.mainTreeNumTips})}
                 <FiltersSummary/>
               </>
-            }
+            )}
           </div>
         </div>
       </Card>

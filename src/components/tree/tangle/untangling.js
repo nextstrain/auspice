@@ -1,6 +1,5 @@
 import { setYValuesRecursively, setYValues } from "../phyloTree/helpers";
 
-
 /** calculatePearsonCorrelationCoefficient
  * "a measure of the linear correlation between two variables X and Y"
  * covariance / (stdev(tree1) * stdev(tree2))
@@ -31,7 +30,6 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   const corr = (y12-my1*my2)/Math.sqrt((sqy1 - my1**2)*(sqy2 - my2**2));
   return corr;
 };
-
 
 /** flipChildrenPostorder
  * re-order the children - if the correlation is improved, keep the flip, else restore original

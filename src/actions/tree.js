@@ -8,7 +8,6 @@ import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { createVisibleLegendValues } from "../util/colorScale";
 
-
 export const applyInViewNodesToTree = (idx, tree) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
   if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {

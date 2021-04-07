@@ -91,12 +91,12 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
  * React Component for an individual button
  */
 function Button({name, description, icon, onClick}) {
-  const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
+  const buttonTextStyle = { ...materialButton, backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left"};
   const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
   return (
-    <div key={name} onClick={onClick} style={{cursor: 'pointer' }}>
+    <div key={name} onClick={onClick} style={{cursor: 'pointer' }} onKeyDown={onClick}>
       {icon}
-      <button style={buttonTextStyle} name={name}>
+      <button style={buttonTextStyle} name={name} type="button">
         {name}
       </button>
       <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
@@ -113,8 +113,7 @@ function getNumUniqueAuthors(nodes, nodeVisibilities) {
     .filter((n, i) => nodeVisibilities[i] === NODE_VISIBLE && n.inView)
     .map((n) => getFullAuthorInfoFromNode(n))
     .filter((a) => a && a.value)
-    .map((a) => a.value)
-  );
+    .map((a) => a.value));
   return authors.size;
 }
 

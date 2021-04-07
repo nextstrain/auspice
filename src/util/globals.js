@@ -1,6 +1,6 @@
 import { sqrt as scaleSqrt } from "d3-scale/src/pow";
 import scaleLinear from "d3-scale/src/linear";
-import { hasExtension, getExtension } from "../util/extensions";
+import { hasExtension, getExtension } from "./extensions";
 
 export const colorOptions = {
   country: {key: "country", legendTitle: "Country", menuItem: "country", type: "discrete"},

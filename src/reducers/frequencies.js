@@ -14,7 +14,7 @@ const frequencies = (state = {
     case types.LOAD_FREQUENCIES:
       return action.frequencies ? action.frequencies : state;
     case types.FREQUENCY_MATRIX: {
-      return Object.assign({}, state, {loaded: true, matrix: action.matrix, version: state.version + 1});
+      return { ...state, loaded: true, matrix: action.matrix, version: state.version + 1};
     }
     case types.DATA_INVALID: {
       return {loaded: false, data: undefined, pivots: undefined, matrix: undefined, projection_pivot: undefined, version: 0};

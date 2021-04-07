@@ -36,10 +36,10 @@ export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}=
     const value = node.node_attrs[trait].value;
     if (!isValueValid(value)) return undefined;
     return value;
-  } else if (entropy) {
+  } if (entropy) {
     if (node.node_attrs[trait]) return node.node_attrs[trait].entropy;
     return undefined;
-  } else if (confidence) {
+  } if (confidence) {
     if (node.node_attrs[trait]) return node.node_attrs[trait].confidence;
     return undefined;
   }
@@ -80,14 +80,14 @@ export const getAttributeFromNodeByName = (node, attr) => {
     return node.node_attrs[attr];
   }
   return undefined;
-}
+};
 
 export const getAllAttributesFromNode = (node) => {
   if (node.node_attrs) {
     return Object.entries(node.node_attrs);
   }
-  return []
-}
+  return [];
+};
 
 /* see comment at top of this file */
 export const getUrlFromNode = (node) =>

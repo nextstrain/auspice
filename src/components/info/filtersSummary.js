@@ -10,7 +10,7 @@ import { createFilterConstellation } from "../../util/treeVisibilityHelpers";
 const Intersect = ({id}) => (
   <span style={{fontSize: "2rem", fontWeight: 300, padding: "0px 4px 0px 2px", cursor: 'help'}} data-tip data-for={id}>
     ∩
-    <Tooltip id={id}>{`Groups of filters are combined by intersection`}</Tooltip>
+    <Tooltip id={id}>Groups of filters are combined by intersection</Tooltip>
   </span>
 );
 const Union = () => (
@@ -22,7 +22,6 @@ const openBracketBig = <span style={{fontSize: "2rem", fontWeight: 300, padding:
 const closeBracketBig = <span style={{fontSize: "2rem", fontWeight: 300, padding: "0px 2px"}}>{'}'}</span>;
 const openBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, padding: "0px 2px"}}>{'{'}</span>;
 const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, padding: "0px 2px"}}>{'}'}</span>;
-
 
 @connect((state) => {
   return {
@@ -46,6 +45,7 @@ class FiltersSummary extends React.Component {
   constructor(props) {
     super(props);
   }
+
   createIndividualBadge({filterName, item, label, onHoverMessage}) {
     return (
       <FilterBadge
@@ -62,6 +62,7 @@ class FiltersSummary extends React.Component {
       </FilterBadge>
     );
   }
+
   createFilterBadgesForTime() {
     return ([
       <FilterBadge
@@ -74,6 +75,7 @@ class FiltersSummary extends React.Component {
       </FilterBadge>
     ]);
   }
+
   createFilterBadges(filterName) {
     const filterNameString = filterName===strainSymbol ? "sample" : filterName;
     const nFilterValues = this.props.filters[filterName].length;
@@ -88,6 +90,7 @@ class FiltersSummary extends React.Component {
         return this.createIndividualBadge({filterName, item, label, onHoverMessage});
       });
   }
+
   createFilterBadgesForGenotype() {
     const filters = this.props.filters[genotypeSymbol];
     const activeSet = new Set(filters.filter((f) => f.active).map((f) => f.value));
@@ -118,6 +121,7 @@ class FiltersSummary extends React.Component {
       });
     });
   }
+
   render() {
     const { t } = this.props;
     // create an array of objects, with each object containing the badges for a filter category.
@@ -150,7 +154,9 @@ class FiltersSummary extends React.Component {
           return (
             <span style={{fontSize: "2rem", padding: "0px 2px"}} key={filterCategory.name}>
               {previousCategoriesRendered && <Intersect id={'intersect'+idx}/>}
-              {multipleFilterBadges && openBracketBig} {/* multiple badges => surround with set notation */}
+              {multipleFilterBadges && openBracketBig}
+              {' '}
+              {/* multiple badges => surround with set notation */}
               {filterCategory.badges.map((badge, badgeIdx) => {
                 if (Array.isArray(badge)) { // if `badge` is an array then we wish to render a set-within-a-set
                   return (

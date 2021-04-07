@@ -143,7 +143,6 @@ export const tabGroupMemberSelected = {
   fontSize: 12
 };
 
-
 export const titleStyles = {
   big: {
     fontFamily: titleFont,

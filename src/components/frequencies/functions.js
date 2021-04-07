@@ -23,7 +23,7 @@ export const areListsEqual = (a, b) => {
 export const parseColorBy = (colorBy, colorOptions) => {
   if (colorOptions && colorOptions[colorBy]) {
     return colorOptions[colorBy].title;
-  } else if (isColorByGenotype(colorBy)) {
+  } if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     return genotype.aa
       ? `Genotype at ${genotype.gene} pos ${genotype.positions.join(", ")}`
@@ -106,8 +106,7 @@ export const drawXAxis = (svg, chartGeom, scales) => {
     .style("font-size", "12px")
     .call(axisBottom(scales.x)
       .tickValues(majorGridPoints.map((x) => x.position))
-      .tickFormat((_, i) => majorGridPoints[i].name)
-    );
+      .tickFormat((_, i) => majorGridPoints[i].name));
 };
 
 export const drawYAxis = (svg, chartGeom, scales) => {
@@ -190,8 +189,7 @@ const getMeaningfulLabels = (categories, colorScale) => {
   if (colorScale.continuous) {
     return categories.map((name) => name === unassigned_label ?
       unassigned_label :
-      `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`
-    );
+      `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`);
   }
   return categories.slice();
 };
@@ -321,7 +319,6 @@ export const drawStream = (
         <p>${frequencyText}: ${freqVal}</p>`
       );
   }
-
 
   /* the streams */
   svgStreamGroup.selectAll(".stream")

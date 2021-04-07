@@ -61,7 +61,6 @@ const SelectedFilterTextContainer = styled(BaseContainer)`
   }
 `;
 
-
 const BadgeContainer = styled.div`
   background-color: #E9F2F6;
   ${(props) => props.striped ? 'background: repeating-linear-gradient(135deg, #E9F2F6, #E9F2F6 5px, transparent 5px, transparent 10px);' : ''};
@@ -72,7 +71,6 @@ const BadgeContainer = styled.div`
   border-style: solid;
   border-color: #BDD8E5;
 `;
-
 
 const StyledTooltip = styled(ReactTooltip)`
   max-width: 30vh;
@@ -90,7 +88,6 @@ export const Tooltip = ({id, children}) => (
     {children}
   </StyledTooltip>
 );
-
 
 /**
  * React component to display a selected filter with associated
@@ -113,12 +110,11 @@ export const FilterBadge = ({remove, canMakeInactive, active, activate, inactiva
       )}
       <IconContainer onClick={remove} role="button" tabIndex={0}>
         <FaTrash data-tip data-for={id+'remove'}/>
-        <Tooltip id={id+'remove'}>{'Remove this filter'}</Tooltip>
+        <Tooltip id={id+'remove'}>Remove this filter</Tooltip>
       </IconContainer>
     </BadgeContainer>
   );
 };
-
 
 /**
  * A simpler version of <FilterBadge> with no icons

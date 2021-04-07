@@ -39,6 +39,7 @@ class FilterData extends React.Component {
       }
     };
   }
+
   makeOptions = () => {
     /**
      * The <Select> component needs an array of options to display (and search across). We compute this
@@ -82,9 +83,11 @@ class FilterData extends React.Component {
     }
     return options;
   }
+
   selectionMade = (sel) => {
     this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
   }
+
   summariseFilters = () => {
     const filterNames = Reflect.ownKeys(this.props.activeFilters)
       .filter((filterName) => this.props.activeFilters[filterName].length > 0);
@@ -97,6 +100,7 @@ class FilterData extends React.Component {
       };
     });
   }
+
   render() {
     // options only need to be calculated a single time per render, and by adding a debounce
     // to `loadOptions` we don't slow things down by comparing queries to a large number of options
@@ -126,7 +130,7 @@ class FilterData extends React.Component {
         {inUseFilters.length ? (
           <>
             <SidebarSubtitle spaceAbove>
-              {`Currently selected filter categories:`}
+              Currently selected filter categories:
             </SidebarSubtitle>
             {inUseFilters.map((filter) => (
               <div style={{display: 'inline-block', margin: '2px'}} key={filter.displayName}>

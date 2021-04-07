@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { getServerAddress } from "../util/globals";
+// eslint-disable-next-line import/no-cycle
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
@@ -10,7 +11,7 @@ import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
 import { NoContentError } from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
-import { updateColorByWithRootSequenceData } from "../actions/colors";
+import { updateColorByWithRootSequenceData } from "./colors";
 
 /**
  * Sends a GET request to the `/charon` web API endpoint requesting data.
@@ -245,10 +246,9 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
 
 function addEndOfNarrativeBlock(narrativeBlocks) {
   const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
-  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
+  const endOfNarrativeSlide = { ...lastContentSlide,
     __html: undefined,
-    isEndOfNarrativeSlide: true
-  });
+    isEndOfNarrativeSlide: true};
   narrativeBlocks.push(endOfNarrativeSlide);
 }
 
@@ -325,7 +325,6 @@ const fetchAndCacheNarrativeDatasets = async (dispatch, blocks, query) => {
     jsons
   });
 };
-
 
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
   return (dispatch, getState) => {

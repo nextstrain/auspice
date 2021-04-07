@@ -49,16 +49,13 @@ class Notifications extends React.Component {
   constructor(props) {
     super(props);
   }
-  static propTypes = {
-    stack: PropTypes.array.isRequired,
-    dispatch: PropTypes.func.isRequired,
-    pageWidth: PropTypes.number.isRequired
-  }
+
   closeIcon(d) {
     return (
       <div onClick={() => { this.removeNotificationCallback(d.id); }}
+        onKeyDown={() => { this.removeNotificationCallback(d.id); }}
         style={{cursor: "pointer"}}
-        className={"close-icon"}
+        className="close-icon"
       >
         <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 15 15">
           <polygon id="Shape" points="7.48 8 11.23 11.75 9.75 13.23 6 9.48 2.25 13.23 0.77 11.75 4.52 8 0.77 4.25 2.25 2.77 6 6.52 9.75 2.77 11.23 4.25"/>
@@ -66,6 +63,7 @@ class Notifications extends React.Component {
       </div>
     );
   }
+
   generateEl(d) {
     return (
       <div key={d.id} className={d.classes.join(" ")}>
@@ -91,9 +89,11 @@ class Notifications extends React.Component {
       </div>
     );
   }
+
   removeNotificationCallback(id) {
     this.props.dispatch({type: REMOVE_NOTIFICATION, id});
   }
+
   render() {
     /* don't display on small screens */
     if (this.props.pageWidth < 600) {
@@ -111,5 +111,11 @@ class Notifications extends React.Component {
     );
   }
 }
+
+Notifications.propTypes = {
+  stack: PropTypes.array.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  pageWidth: PropTypes.number.isRequired
+};
 
 export default Notifications;

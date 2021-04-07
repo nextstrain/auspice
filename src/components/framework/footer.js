@@ -159,7 +159,6 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => (
   </SimpleFilter>
 );
 
-
 @connect((state) => {
   return {
     tree: state.tree,
@@ -176,9 +175,9 @@ class Footer extends React.Component {
     if (this.props.tree.version !== nextProps.tree.version ||
     this.props.browserDimensions !== nextProps.browserDimensions) {
       return true;
-    } else if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
+    } if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
       return true;
-    } else if (Object.keys(this.props.activeFilters).length > 0) {
+    } if (Object.keys(this.props.activeFilters).length > 0) {
       for (const name of this.props.activeFilters) {
         if (this.props.activeFilters[name] !== nextProps.activeFilters[name]) {
           return true;

@@ -57,7 +57,7 @@ const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
   }
 
   return (
-    <div style={containerStyle} onClick={handler}>
+    <div style={containerStyle} onClick={handler} onKeyDown={handler}>
       <div style={iconStyle}>{icon}</div>
     </div>
   );

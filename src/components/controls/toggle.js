@@ -67,7 +67,6 @@ const Input = styled.input`
   }
 `;
 
-
 const Toggle = ({display, on, callback, label, style={}}) => {
   if (!display) return null;
 

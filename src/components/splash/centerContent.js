@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
 import React from "react";
-import Flex from "../../components/framework/flex";
+import Flex from "../framework/flex";
 
 export const CenterContent = (props) => (
   <div className="row">

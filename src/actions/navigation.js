@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+// eslint-disable-next-line import/no-cycle
 import { collectDatasetFetchUrls } from "./loadData";
 
 /* Given a URL, what "page" should be displayed?
@@ -19,7 +20,7 @@ export const chooseDisplayComponentFromURL = (url) => {
     (parts.length === 2 && parts[0] === "groups")
   ) {
     return "splash";
-  } else if (parts[0] === "status") {
+  } if (parts[0] === "status") {
     return "status";
   }
   return "datasetLoader"; // fallthrough

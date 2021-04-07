@@ -36,7 +36,6 @@ const NarrativeTitle = styled.div`
   text-overflow: ellipsis;
 `;
 
-
 const renderTitle = (narrativeTitle, width) => {
   if (narrativeTitle) {
     return (
@@ -47,7 +46,7 @@ const renderTitle = (narrativeTitle, width) => {
   }
   return (
     <Title href="/">
-      {"auspice"}
+      auspice
     </Title>
   );
 };

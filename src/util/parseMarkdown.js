@@ -3,6 +3,7 @@ import dompurify from "dompurify";
 
 dompurify.addHook("afterSanitizeAttributes", (node) => {
   // Set external links to open in a new tab
+  // eslint-disable-next-line no-restricted-globals
   if ('href' in node && location.hostname !== node.hostname) {
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noreferrer nofollow');

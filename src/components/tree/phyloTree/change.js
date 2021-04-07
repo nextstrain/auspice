@@ -27,7 +27,6 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   // console.log("marking ", tmp, " nodes for update");
 };
 
-
 /* svgSetters defines how attrs & styles should be applied to which class (e.g. ".tip").
  * E.g. which node attribute should be used?!?
  * Note that only the relevant functions are called on a transition.
@@ -67,7 +66,6 @@ const svgSetters = {
     }
   }
 };
-
 
 /** createUpdateCall
  * returns a function which can be called as part of a D3 chain in order to modify
@@ -237,7 +235,6 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
   this.hideTemporalSlice();
   if (!transitionTimeFadeOut) timerFlush();
 };
-
 
 /* the main interface to changing a currently rendered tree.
  * simply call change and tell it what should be changed.

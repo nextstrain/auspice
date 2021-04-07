@@ -2,10 +2,10 @@ import React from "react";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 import { tabSingle, darkGrey } from "../../globalStyles";
 
-
 export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
   return (
     <button
+      type="button"
       style={{
         ...tabSingle,
         fontSize: 14,

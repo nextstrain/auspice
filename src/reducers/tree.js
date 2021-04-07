@@ -28,16 +28,13 @@ export const getDefaultTreeState = () => {
   };
 };
 
-
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.tree;
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return { ...state, loaded: false};
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const newStates = {
@@ -52,17 +49,15 @@ const Tree = (state = getDefaultTreeState(), action) => {
         visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };
-      return Object.assign({}, state, newStates);
+      return { ...state, ...newStates};
     case types.UPDATE_TIP_RADII:
-      return Object.assign({}, state, {
+      return { ...state,
         tipRadii: action.data,
-        tipRadiiVersion: action.version
-      });
+        tipRadiiVersion: action.version};
     case types.NEW_COLORS:
-      return Object.assign({}, state, {
+      return { ...state,
         nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version
-      });
+        nodeColorsVersion: action.version};
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA:

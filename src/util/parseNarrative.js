@@ -14,7 +14,6 @@
 const { loadFront } = require('yaml-front-matter');
 const queryString = require("query-string");
 
-
 const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
   const frontMatter = loadFront(fileContents);
 
@@ -30,7 +29,6 @@ const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
     ...parseNarrativeBody(frontMatter.__content, titleSlide.dataset, markdownParser)
   ];
 };
-
 
 function createTitleSlideFromFrontmatter(frontMatter, markdownParser) {
   let markdown = ""; // A markdown interpretation of the YAML for display
@@ -159,7 +157,6 @@ function addMainMarkdownBlock(slide) {
   return slide;
 }
 
-
 function parseNarrativeAuthors(frontMatter) {
   let authorMd = "";
   const authors = parseAttributions(frontMatter, "authors", "authorLinks");
@@ -191,7 +188,7 @@ function parseAttributions(frontMatter, attributionsKey, attributionLinksKey) {
 
   if (Array.isArray(attributions)) {
     return parseAttributionsArray(attributions, attributionLinks, attributionsKey, attributionLinksKey);
-  } else if (typeof attributions === 'string') {
+  } if (typeof attributions === 'string') {
     return parseAttributionsString(attributions, attributionLinks, attributionsKey, attributionLinksKey);
   }
   return undefined;
@@ -233,7 +230,6 @@ function attributionLink(attribution, attributionLinkValue) {
   }
   return attribution;
 }
-
 
 module.exports = {
   parseMarkdownNarrativeFile,

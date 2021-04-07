@@ -27,7 +27,6 @@ import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
 
-
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
@@ -61,14 +60,13 @@ class Main extends React.Component {
     analyticsNewPage();
     this.toggleSidebar = this.toggleSidebar.bind(this);
   }
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired
-  }
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
       this.setState({showSpinner: false});
     }
   }
+
   componentDidMount() {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
     document.addEventListener("drop", (e) => {
@@ -76,6 +74,7 @@ class Main extends React.Component {
       return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
   }
+
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }
@@ -139,38 +138,41 @@ class Main extends React.Component {
         />
         <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>
           {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("MainDisplayMarkdown") ?
-            renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
-          }
+            renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null}
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} key={this.props.treeName} /> : null}
           {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} key={this.props.treeName+"_map"} justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
           {this.props.panelsToDisplay.includes("entropy") ?
-            (<Suspense fallback={null}>
-              <Entropy width={chart.width} height={chart.height} key={this.props.treeName+"_entropy"}/>
-            </Suspense>) :
-            null
-          }
+            (
+              <Suspense fallback={null}>
+                <Entropy width={chart.width} height={chart.height} key={this.props.treeName+"_entropy"}/>
+              </Suspense>
+            ) :
+            null}
           {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
-            (<Suspense fallback={null}>
-              <Frequencies width={chart.width} height={chart.height} key={this.props.treeName+"_frequencies"}/>
-            </Suspense>) :
-            null
-          }
+            (
+              <Suspense fallback={null}>
+                <Frequencies width={chart.width} height={chart.height} key={this.props.treeName+"_frequencies"}/>
+              </Suspense>
+            ) :
+            null}
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.displayNarrative ? null : <FinePrint width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.displayNarrative && this.props.panelsToDisplay.includes("MainDisplayMarkdown") ?
             <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
-            null
-          }
+            null}
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}
         {this.state.mobileDisplay ?
-          <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
-          null
-        }
+          <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler} onKeyDown={overlayHandler}/> :
+          null}
       </span>
     );
   }
 }
+
+Main.propTypes = {
+  dispatch: PropTypes.func.isRequired
+};
 
 export default Main;

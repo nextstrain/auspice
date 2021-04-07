@@ -53,6 +53,7 @@ class Narrative extends React.Component {
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx-1);
     };
   }
+
   componentDidMount() {
     if (window.twttr && window.twttr.ready) {
       window.twttr.widgets.load();
@@ -68,6 +69,7 @@ class Narrative extends React.Component {
     Mousetrap.bind(['left', 'up'], this.goToPreviousSlide);
     Mousetrap.bind(['right', 'down'], this.goToNextSlide);
   }
+
   renderChevron(pointUp) {
     const width = 30;
     const style = {
@@ -86,11 +88,13 @@ class Narrative extends React.Component {
       <div id={`hand${pointUp?"Up":"Down"}`}
         style={style}
         onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}
+        onKeyDown={pointUp ? this.goToPreviousSlide : this.goToNextSlide}
       >
         {icon}
       </div>
     );
   }
+
   renderProgress() {
     return (
       <ProgressBar style={{height: `${progressHeight}px`}}
@@ -99,15 +103,18 @@ class Narrative extends React.Component {
         {this.props.blocks.map((b, i) => {
           const d = this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
-          return (<ProgressButton
-            key={i}
-            style={{width: d, height: d}}
-            onClick={() => this.reactPageScroller.goToPage(i)}
-          />);
+          return (
+            <ProgressButton
+              key={i}
+              style={{width: d, height: d}}
+              onClick={() => this.reactPageScroller.goToPage(i)}
+            />
+          );
         })}
       </ProgressBar>
     );
   }
+
   renderBlocks() {
     return this.props.blocks.map((b, i) => {
 
@@ -115,14 +122,18 @@ class Narrative extends React.Component {
         return (
           <EndOfNarrative key="EON" id="EndOfNarrative">
             <h1>END OF NARRATIVE</h1>
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a style={{...linkStyles}}
               onClick={() => this.reactPageScroller.goToPage(0)}
+              onKeyDown={() => this.reactPageScroller.goToPage(0)}
             >
               Scroll back to the beginning
             </a>
             <br />
+            {/* eslint-disable-next-line jsx-a11y/anchor-is-valid */}
             <a style={{...linkStyles}}
               onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
+              onKeyDown={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
             </a>
@@ -150,6 +161,7 @@ class Narrative extends React.Component {
       );
     });
   }
+
   render() {
     if (!this.props.loaded) {return null;}
     return (
@@ -172,6 +184,7 @@ class Narrative extends React.Component {
       </NarrativeStyles>
     );
   }
+
   componentWillUnmount() {
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
   }

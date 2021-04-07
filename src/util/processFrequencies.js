@@ -1,6 +1,6 @@
 import { NODE_VISIBLE } from "./globals";
 import { isColorByGenotype } from "./getGenotype";
-import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const unassigned_label = "unassigned";
 

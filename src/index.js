@@ -11,12 +11,12 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 /* A U S P I C E   I M P O R T S */
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 import Root from "./root";
 /* I N T E R N A T I O N A L I Z A T I O N */
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
 /* S T Y L E S H E E T S */
 import "./css/global.css";
 import "./css/browserCompatability.css";

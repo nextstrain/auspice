@@ -143,12 +143,14 @@ class MobileNarrativeDisplay extends React.Component {
           <EndOfNarrative>
             <h1>End of Narrative</h1>
             <a style={{...linkStyles}}
+              onKeyDown={() => this._goToPage(0)}
               onClick={() => this._goToPage(0)}
             >
               Jump to the beginning
             </a>
             <br />
             <a style={{...linkStyles}}
+              onKeyDown={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
               onClick={() => this.props.dispatch({type: TOGGLE_NARRATIVE, narrativeOn: false})}
             >
               Leave the narrative & explore the data yourself
@@ -223,7 +225,8 @@ class MobileNarrativeDisplay extends React.Component {
               key={i}
               style={{width: d, height: d}}
               onClick={() => this._goToPage(i)}
-            />);
+            />
+          );
         })}
       </ProgressBar>
     );
@@ -233,12 +236,11 @@ class MobileNarrativeDisplay extends React.Component {
 
     if (this.props.currentInFocusBlockIdx === 0) {
       return this.renderStartOfNarrative();
-    } else if (this.props.currentInFocusBlockIdx !== this.props.blocks.length-1) {
+    } if (this.props.currentInFocusBlockIdx !== this.props.blocks.length-1) {
       return this.renderMiddleOfNarrative();
     }
     return this.renderEndOfNarrative();
   }
 }
-
 
 export default MobileNarrativeDisplay;

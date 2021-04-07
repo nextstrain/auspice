@@ -26,8 +26,8 @@ class Tree extends React.Component {
     };
     this.tangleRef = undefined;
     this.state = {
-      hover: null,
-      selectedBranch: null,
+      // hover: null,
+      // selectedBranch: null,
       selectedTip: null,
       tree: null,
       treeToo: null
@@ -41,6 +41,7 @@ class Tree extends React.Component {
       }));
     };
   }
+
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
@@ -50,6 +51,7 @@ class Tree extends React.Component {
     }
     renderTree(this, false, newState.treeToo, props);
   }
+
   componentDidMount() {
     if (this.props.tree.loaded) {
       const newState = {};
@@ -61,6 +63,7 @@ class Tree extends React.Component {
       this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
+
   componentDidUpdate(prevProps) {
     let newState = {};
     let rightTreeUpdated = false;
@@ -82,8 +85,7 @@ class Tree extends React.Component {
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
-      let unusedNewState; // eslint-disable-line
-      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      [, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
       /* note, we don't incorporate unusedNewState into the state? why not? */
     }
 
@@ -191,17 +193,16 @@ class Tree extends React.Component {
         {this.props.showTreeToo ? <div id="treeSpacer" style={{width: spaceBetweenTrees}}/> : null}
         {this.props.showTreeToo ?
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
-          null
-        }
+          null}
         {this.props.narrativeMode ? null : (
           <div style={{...styles.treeButtonsDiv}}>
-            <button
+            <button type="button"
               style={{...tabSingle, ...styles.zoomToSelectedButton}}
               onClick={this.zoomToSelected}
             >
               {t("Zoom to Selected")}
             </button>
-            <button
+            <button type="button"
               style={{...tabSingle, ...styles.resetTreeButton}}
               onClick={this.redrawTree}
             >

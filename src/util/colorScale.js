@@ -178,6 +178,7 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
       const spread = minMax[1] - minMax[0];
       const dp = spread > 5 ? 2 : 3;
       legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+      // eslint-disable-next-line no-compare-neg-zero
       if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       legendBounds = createLegendBounds(legendValues);
     }
@@ -247,6 +248,7 @@ function createContinuousScale(colorBy, t1nodes, t2nodes) {
       const dp = spread > 5 ? 2 : 3;
       legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
   }
+  // eslint-disable-next-line no-compare-neg-zero
   if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
 
   return {
@@ -256,7 +258,6 @@ function createContinuousScale(colorBy, t1nodes, t2nodes) {
     legendValues
   };
 }
-
 
 function getMinMaxFromTree(nodes, nodesToo, attr) {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();

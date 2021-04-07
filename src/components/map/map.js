@@ -61,11 +61,6 @@ import "../../css/mapbox.css";
 })
 
 class Map extends React.Component {
-  static propTypes = {
-    treeVersion: PropTypes.number.isRequired,
-    treeLoaded: PropTypes.bool.isRequired,
-    colorScaleVersion: PropTypes.number.isRequired
-  }
   constructor(props) {
     super(props);
     this.state = {
@@ -84,7 +79,7 @@ class Map extends React.Component {
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
@@ -111,6 +106,7 @@ class Map extends React.Component {
       };
     }
   }
+
   componentDidMount() {
     this.maybeChangeSize(this.props);
     const removed = this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
@@ -120,7 +116,8 @@ class Map extends React.Component {
     }
     this.maybeInvalidateMapSize(this.props);
   }
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
@@ -130,12 +127,14 @@ class Map extends React.Component {
     }
     this.maybeInvalidateMapSize(nextProps);
   }
+
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissionsAndMoveMap(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
+
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
     if (this.state.map && (this.props.width !== nextProps.width || this.props.height !== nextProps.height)) {
@@ -150,15 +149,18 @@ class Map extends React.Component {
       );
     }
   }
+
   invalidateMapSize() {
     this.state.map.invalidateSize();
   }
+
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
     if (this.props.metadata.loaded && !this.state.map && document.getElementById("map")) {
       this.createMap();
     }
   }
+
   maybeChangeSize(nextProps) {
     if (this.props.width !== nextProps.width ||
       this.props.height !== nextProps.height ||
@@ -169,6 +171,7 @@ class Map extends React.Component {
       this.setState({responsive: {width: nextProps.width, height: nextProps.height}});
     }
   }
+
   maybeSetupD3DOMNode() {
     if (
       this.state.map &&
@@ -179,6 +182,7 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
+
   modulateInterfaceForNarrativeMode(nextProps) {
     if (this.props.narrativeMode === nextProps.narrativeMode || !this.state.map) return;
     if (nextProps.narrativeMode) {
@@ -256,6 +260,7 @@ class Map extends React.Component {
       timerEnd("drawDemesAndTransmissions");
     }
   }
+
   /**
    * removing demes & transmissions, both from the react state & from the DOM.
    * They will be created from scratch (& rendered) by `this.maybeDrawDemesAndTransmissionsAndMoveMap`
@@ -286,6 +291,7 @@ class Map extends React.Component {
     }
     return false;
   }
+
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
@@ -316,6 +322,7 @@ class Map extends React.Component {
       this.setState({demeData: newDemes, transmissionData: newTransmissions});
     }
   }
+
   getGeoRange(demeData, demeIndices) {
     const latitudes = [];
     const longitudes = [];
@@ -355,6 +362,7 @@ class Map extends React.Component {
 
     return [L.latLng(south, west), L.latLng(north, east)];
   }
+
   /**
    * updates demes & transmissions when redux (tree) visibility or colorScale (i.e. colorBy) has changed
    * returns early if the map or tree isn't ready
@@ -526,6 +534,7 @@ class Map extends React.Component {
       container = (
         <div style={{position: "relative"}}>
           <div
+            onKeyDown={() => {this.setState({userHasInteractedWithMap: true});}}
             onClick={() => {this.setState({userHasInteractedWithMap: true});}}
             id="map"
             style={{
@@ -538,6 +547,7 @@ class Map extends React.Component {
     }
     return container;
   }
+
   moveMapAccordingToData({geoResolutionChanged, visibilityChanged, demeData, demeIndices}) {
     /* Given d3 data (may not be drawn) we can compute map bounds & move as appropriate */
     if (!this.state.boundsSet) {
@@ -556,6 +566,7 @@ class Map extends React.Component {
       }
     }
   }
+
   getMaxZoomForFittingMapToData() {
     /* To avoid setting the bounds too small (e.g. if restricted to one country
       then we don't want to be at maximum zoom) we use hardcoded zoom levels which
@@ -578,6 +589,7 @@ class Map extends React.Component {
         return 8;
     }
   }
+
   fitMapBoundsToData(demeData, demeIndices) {
     const SWNE = this.getGeoRange(demeData, demeIndices);
     // window.L available because leaflet() was called in componentWillMount
@@ -596,6 +608,7 @@ class Map extends React.Component {
       this.state.map
     );
   }
+
   getStyles = () => {
     const activeResetZoomButton = true;
     return {
@@ -609,6 +622,7 @@ class Map extends React.Component {
       }
     };
   };
+
   render() {
     const { t } = this.props;
     const styles = this.getStyles();
@@ -616,12 +630,14 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
-        {this.props.legend && <ErrorBoundary>
-          <Legend right width={this.props.width} />
-        </ErrorBoundary>}
+        {this.props.legend && (
+          <ErrorBoundary>
+            <Legend right width={this.props.width} />
+          </ErrorBoundary>
+        )}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
-          <button
+          <button type="button"
             style={{...tabSingle, ...styles.resetZoomButton}}
             onClick={() => {
               this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
@@ -634,11 +650,18 @@ class Map extends React.Component {
       </Card>
     );
   }
+
   componentWillUnmount() {
     this.state.map.off("moveend");
     this.state.map.off("resize");
   }
 }
+
+Map.propTypes = {
+  treeVersion: PropTypes.number.isRequired,
+  treeLoaded: PropTypes.bool.isRequired,
+  colorScaleVersion: PropTypes.number.isRequired
+};
 
 const WithTranslation = withTranslation()(Map);
 export default WithTranslation;

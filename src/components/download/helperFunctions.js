@@ -517,4 +517,3 @@ export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
   write(filename, MIME.tsv, lines.join("\n"));
   dispatch(infoNotification({message: `Diversity data exported to ${filename}`}));
 };
-

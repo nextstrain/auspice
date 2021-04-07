@@ -1,4 +1,3 @@
-
 /** applyToNodesPostOrder
  * recursivly apply the callback to each node postorder (root to tip, go left as far as you can, then backtrack...)
  */

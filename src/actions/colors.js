@@ -66,7 +66,6 @@ export const changeColorBy = (providedColorBy = undefined) => {
   };
 };
 
-
 export const updateColorByWithRootSequenceData = () => {
   return (dispatch, getState) => {
     const { controls, metadata } = getState();

@@ -38,6 +38,7 @@ class DateRangeInputs extends React.Component {
     this.updateFromSliderNotDebounced = this.updateFromSlider.bind(this, false);
     this.updateFromSliderDebounced = this.updateFromSlider.bind(this, true);
   }
+
   maybeClearMapAnimationInterval() {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
       clearInterval(window.NEXTSTRAIN.animationTickReference);
@@ -48,6 +49,7 @@ class DateRangeInputs extends React.Component {
       });
     }
   }
+
   updateFromSlider(debounce, numDateValues) {
     /* debounce: boolean. TRUE: both debounce and quickdraw. */
     this.maybeClearMapAnimationInterval();
@@ -79,6 +81,7 @@ class DateRangeInputs extends React.Component {
     }
     return null;
   }
+
   render() {
     if (this.props.branchLengthsToDisplay === "divOnly") {
       return null;

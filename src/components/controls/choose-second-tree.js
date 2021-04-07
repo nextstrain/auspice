@@ -8,7 +8,6 @@ import { REMOVE_TREE_TOO } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 
-
 @connect((state) => {
   return {
     available: state.controls.available,
@@ -43,7 +42,7 @@ class ChooseSecondTree extends React.Component {
         <SidebarSubtitle spaceAbove>
           {t("sidebar:Second Tree")}
         </SidebarSubtitle>
-        <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
+        <div key="treetooselect" style={{width: controlsWidth, fontSize: 14}}>
           <Select
             name="selectTreeToo"
             id="selectTreeToo"

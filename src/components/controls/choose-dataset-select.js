@@ -5,7 +5,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
 import { controlsWidth } from "../../util/globals";
 
-
 class ChooseDatasetSelect extends React.Component {
   changeDataset(newPath) {
     // 0 analytics (optional)
@@ -18,6 +17,7 @@ class ChooseDatasetSelect extends React.Component {
     }
     this.props.dispatch(changePage({path: newPath}));
   }
+
   render() {
     return (
       <div style={{width: controlsWidth, fontSize: 14}}>

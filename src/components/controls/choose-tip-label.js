@@ -15,6 +15,7 @@ class ChooseTipLabel extends React.Component {
     super(props);
     this.change = (value) => {this.props.dispatch({type: CHANGE_TIP_LABEL_KEY, key: value.value});};
   }
+
   render() {
     const { t } = this.props;
     return (

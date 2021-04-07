@@ -5,6 +5,7 @@ import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResol
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+// eslint-disable-next-line import/no-cycle
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
@@ -13,7 +14,7 @@ import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
-import { applyInViewNodesToTree } from "../actions/tree";
+import { applyInViewNodesToTree } from "./tree";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
@@ -364,7 +365,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   examineNodes(tree.nodes);
   if (treeToo) examineNodes(treeToo.nodes);
 
-
   /* ensure specified mutType is indeed available */
   if (!aaMuts && !nucMuts) {
     state.mutType = null;
@@ -575,7 +575,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
     {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric}
   );
 
-  const newState = Object.assign({}, oldState, visAndThicknessData);
+  const newState = { ...oldState, ...visAndThicknessData};
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
@@ -678,7 +678,6 @@ const createMetadataStateFromJSON = (json) => {
     metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
-
   if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
     console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
   }
@@ -767,7 +766,6 @@ export const createStateFromQueryOrJSONs = ({
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
   controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
-
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (json || controls.colorBy !== oldState.controls.colorBy) {
@@ -872,7 +870,7 @@ export const createTreeTooState = ({
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
-  const tree = Object.assign({}, oldState.tree);
+  const tree = { ...oldState.tree};
   tree.name = originalTreeUrl;
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.name = secondTreeUrl;

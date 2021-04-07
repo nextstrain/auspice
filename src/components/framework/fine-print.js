@@ -70,15 +70,23 @@ class FinePrint extends React.Component {
   getUpdated() {
     const { t } = this.props;
     if (this.props.metadata.updated) {
-      return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
+      return (
+        <span>
+          {t("Data updated")}
+          {' '}
+          {this.props.metadata.updated}
+        </span>
+      );
     }
     return null;
   }
+
   downloadDataButton() {
     const { t } = this.props;
     return (
       <button
-        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
+        type="button"
+        style={({ ...materialButton, backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
         <FaDownload />
@@ -119,11 +127,13 @@ export function getCitation() {
       <a className='logoContainer' href="https://nextstrain.org">
         <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
       </a>
-      {"Powered by Nextstrain ("}
+      Powered by Nextstrain (
       <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-        {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
+        {publications.nextstrain.author}
+        {' '}
+        <i>{publications.nextstrain.journal}</i>
       </a>
-      {")"}
+      )
     </span>
   );
 }
