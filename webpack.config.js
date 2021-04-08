@@ -3,10 +3,10 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
-const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const utils = require('./cli/utils');
 
 /* Webpack config generator */
 
