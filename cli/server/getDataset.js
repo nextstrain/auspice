@@ -14,11 +14,11 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
       console.trace(err);
       // Throw 404 when not available
       const errorCode = err.message.endsWith("not in available datasets") ? 404 : 500;
+      // eslint-disable-next-line consistent-return
       return helpers.handleError(res, `couldn't fetch JSONs`, err.message, errorCode);
     }
   };
 };
-
 
 module.exports = {
   setUpGetDatasetHandler

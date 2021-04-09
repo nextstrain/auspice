@@ -1,8 +1,9 @@
 const queryString = require("query-string");
 const path = require("path");
 const fs = require("fs");
-const utils = require("../utils");
 const marked = require('marked');
+const esapi = require("node-esapi");
+const utils = require("../utils");
 const { parseMarkdownNarrativeFile } = require("../../src/util/parseNarrative");
 
 /**
@@ -30,7 +31,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
     const type = query.type ? query.type.toLowerCase() : "json";
 
     const pathName = path.join(narrativesPath, filename);
-    utils.log("trying to access & parse local narrative file: " + pathName);
+    utils.log(esapi.encoder().encodeForJavaScript("trying to access & parse local narrative file: " + pathName));
     try {
       const fileContents = fs.readFileSync(pathName, 'utf8');
       if (type === "md" || type === "markdown") {
@@ -45,10 +46,9 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       }
       utils.verbose("SUCCESS");
     } catch (err) {
-      const errorMessage = `Narratives couldn't be served -- ${err.message}`;
       res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
-      utils.warn(res.statusMessage);
-      res.status(500).type("text/plain").send(errorMessage);
+      utils.warn(esapi.encoder().encodeForJavaScript(res.statusMessage));
+      res.status(500).end();
     }
   };
 };

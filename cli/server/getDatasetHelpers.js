@@ -8,23 +8,22 @@
 *
 */
 
-
-const utils = require("../utils");
+const esapi = require("node-esapi");
+const fs = require("fs");
 const queryString = require("query-string");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
-const fs = require("fs");
+const utils = require("../utils");
 
 const handleError = (res, clientMsg, serverMsg="", code=500) => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
-  return res.status(code).type("text/plain").send(clientMsg);
+  return res.status(code).end();
 };
 
 const splitPrefixIntoParts = (url) => url
   .replace(/^\//, '')
   .replace(/\/$/, '')
   .split("/");
-
 
 /**
  * Basic interpretation of an auspice request
@@ -99,6 +98,7 @@ const makeFetchAddresses = (info, datasetsPath, availableDatasets) => {
   }
 };
 
+// eslint-disable-next-line consistent-return
 const sendJson = async (res, info) => {
   if (typeof info.address === "string") {
     /* In general, JSONs are designed such that no server modifications
@@ -110,7 +110,7 @@ const sendJson = async (res, info) => {
       readStream.pipe(res);
     });
     readStream.on('error', (err) => {
-      utils.warn(`Failed to read ${info.address}`);
+      utils.warn(esapi.encoder().encodeForJavaScript(`Failed to read ${info.address}`));
       utils.verbose(err);
       res.sendStatus(404);
     });
