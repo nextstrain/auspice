@@ -46,25 +46,37 @@ export const checkIfNormalizableFromRawData = (data, pivots, nodes, visibility) 
       }
     }
   });
-  const minFrequency = Math.min(...pivotTotals);
-  const allowNormalization = minFrequency > 0.001;
+  // const minFrequency = Math.min(...pivotTotals);
+  const allowNormalization = true;
   return allowNormalization;
 };
 
-export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy, normalizeFrequencies) => {
+export const computeMatrixFromRawData = (
+  data,
+  pivots,
+  nodes,
+  visibility,
+  colorScale,
+  colorBy,
+  normalizeFrequencies
+) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
   const isGenotype = isColorByGenotype(colorBy);
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
-  categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
+  categories.forEach((x) => {
+    matrix[x] = new Array(pivotsLen).fill(0);
+  });
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
     if (visibility[d.idx] === NODE_VISIBLE) {
       // debugTipsSeen++;
-      const category = assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) || unassigned_label;
+      const category =
+        assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) ||
+        unassigned_label;
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
         matrix[category][i] += d.values[i];
@@ -77,11 +89,14 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   });
 
   if (normalizeFrequencies) {
-    const nCategories = Object.keys(matrix).length;
-    const minVal = 1e-10;
+    const minVal = 1e-7;
     Object.keys(matrix).forEach((cat) => {
       debugPivotTotals.forEach((norm, i) => {
-        matrix[cat][i] = (matrix[cat][i] + minVal) / (nCategories * minVal + norm);
+        if (norm > minVal) {
+          matrix[cat][i] /= norm;
+        } else {
+          matrix[cat][i] = 0.0;
+        }
       });
     });
   }
@@ -104,19 +119,22 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     throw new Error("tree not loaded");
   }
   const data = [];
-  tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
-    if (!rawJSON[n.name]) {
-      console.warn(`No tip frequency information for ${n.name}`);
-      return;
-    }
-    data.push({
-      idx: n.arrayIdx,
-      values: rawJSON[n.name].frequencies,
-      weight: rawJSON[n.name].weight
+  tree.nodes
+    .filter((d) => !d.hasChildren)
+    .forEach((n) => {
+      if (!rawJSON[n.name]) {
+        console.warn(`No tip frequency information for ${n.name}`);
+        return;
+      }
+      data.push({
+        idx: n.arrayIdx,
+        values: rawJSON[n.name].frequencies,
+        weight: rawJSON[n.name].weight
+      });
     });
-  });
 
-  const normalizeFrequencies = controls.normalizeFrequencies &&
+  const normalizeFrequencies =
+    controls.normalizeFrequencies &&
     checkIfNormalizableFromRawData(data, pivots, tree.nodes, tree.visibility);
 
   const matrix = computeMatrixFromRawData(
