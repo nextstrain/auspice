@@ -142,7 +142,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
         but increase programmatic complexity. (TODO) */
         const newState = {};
         arrayOfProts.forEach((p) => {
-          newState[p] = Object.assign({}, state[p]);
+          newState[p] = { ...state[p]};
         });
         recurse(child, newState);
       }

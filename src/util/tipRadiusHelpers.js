@@ -1,6 +1,6 @@
 import { tipRadius, tipRadiusOnLegendMatch } from "./globals";
 import { getTipColorAttribute } from "./colorHelpers";
-import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
 * equates a single tip and a legend element
@@ -44,15 +44,15 @@ const determineLocationMatch = (node, geoResolution, geoValueToMatch) => {
 export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false, colorScale, tree}) => {
   if (selectedLegendItem !== false && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
-  } else if (geoFilter.length===2 && tree && tree.nodes) {
+  } if (geoFilter.length===2 && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLocationMatch(d, ...geoFilter) ? tipRadiusOnLegendMatch : tipRadius);
-  } else if (searchNodes) {
+  } if (searchNodes) {
     return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
-  } else if (tipSelectedIdx) {
+  } if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
     return radii;
-  } else if (tree && tree.nodes) {
+  } if (tree && tree.nodes) {
     return tree.nodes.map(() => tipRadius);
   }
   return null; // fallthrough

@@ -13,46 +13,6 @@ import PropTypes from 'prop-types';
 */
 
 class Flex extends React.Component {
-  static propTypes = {
-    direction: PropTypes.oneOf([
-      "row", "rowReverse", "column", "columnReverse"
-    ]),
-    wrap: PropTypes.oneOf([
-      "nowrap", "wrap", "wrap-reverse"
-    ]),
-    justifyContent: PropTypes.oneOf([
-      "flex-start", "flex-end", "center", "space-between", "space-around"
-    ]),
-    alignItems: PropTypes.oneOf([
-      "flex-start", "flex-end", "center", "baseline", "stretch"
-    ]),
-    alignContent: PropTypes.oneOf([
-      "flex-start", "flex-end", "center", "space-between", "space-around", "stretch"
-    ]),
-    grow: PropTypes.number,
-    shrink: PropTypes.number,
-    basis: PropTypes.string,
-    order: PropTypes.number,
-    alignSelf: PropTypes.oneOf([
-      "auto", "flex-start", "flex-end", "center", "baseline", "stretch"
-    ]),
-    children: PropTypes.node.isRequired,
-    clickHandler: PropTypes.func
-  }
-  static defaultProps = {
-    direction: "row",
-    wrap: "nowrap",
-    justifyContent: "center",
-    alignItems: "center",
-    alignContent: "stretch",
-    grow: 0,
-    shrink: 1,
-    basis: "auto",
-    alignSelf: "auto",
-    order: 0,
-    style: {},
-    clickHandler: () => {}
-  }
   getStyles() {
     return {
       base: {
@@ -79,6 +39,7 @@ class Flex extends React.Component {
       <div
         id={this.props.id}
         onClick={this.props.clickHandler}
+        onKeyDown={this.props.clickHandler}
         style={{ ...styles.base, ...styles.style }}
       >
         {this.props.children}
@@ -86,5 +47,46 @@ class Flex extends React.Component {
     );
   }
 }
+
+Flex.propTypes = {
+  direction: PropTypes.oneOf([
+    "row", "rowReverse", "column", "columnReverse"
+  ]),
+  wrap: PropTypes.oneOf([
+    "nowrap", "wrap", "wrap-reverse"
+  ]),
+  justifyContent: PropTypes.oneOf([
+    "flex-start", "flex-end", "center", "space-between", "space-around"
+  ]),
+  alignItems: PropTypes.oneOf([
+    "flex-start", "flex-end", "center", "baseline", "stretch"
+  ]),
+  alignContent: PropTypes.oneOf([
+    "flex-start", "flex-end", "center", "space-between", "space-around", "stretch"
+  ]),
+  grow: PropTypes.number,
+  shrink: PropTypes.number,
+  basis: PropTypes.string,
+  order: PropTypes.number,
+  alignSelf: PropTypes.oneOf([
+    "auto", "flex-start", "flex-end", "center", "baseline", "stretch"
+  ]),
+  children: PropTypes.node.isRequired,
+  clickHandler: PropTypes.func
+};
+
+Flex.defaultProps = {
+  direction: "row",
+  wrap: "nowrap",
+  justifyContent: "center",
+  alignItems: "center",
+  alignContent: "stretch",
+  grow: 0,
+  shrink: 1,
+  basis: "auto",
+  alignSelf: "auto",
+  order: 0,
+  clickHandler: () => {}
+};
 
 export default Flex;

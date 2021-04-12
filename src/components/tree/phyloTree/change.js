@@ -5,6 +5,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
+import { makeTipLabelFunc } from "./labels";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -25,7 +26,6 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   });
   // console.log("marking ", tmp, " nodes for update");
 };
-
 
 /* svgSetters defines how attrs & styles should be applied to which class (e.g. ".tip").
  * E.g. which node attribute should be used?!?
@@ -60,18 +60,12 @@ const svgSetters = {
     // only allow stroke to be set on individual branches
     ".branch": {
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
+      stroke: (d) => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
       cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default",
       visibility: getBranchVisibility
-    },
-    ".branch.S": {
-      stroke: (d) => strokeForBranch(d, "S")
-    },
-    ".branch.T": {
-      stroke: (d) => strokeForBranch(d, "T")
     }
   }
 };
-
 
 /** createUpdateCall
  * returns a function which can be called as part of a D3 chain in order to modify
@@ -123,7 +117,6 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
 export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
   let updateCall;
   const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
-
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
     const applyBranchPropsAlso = elemsToUpdate.has(".branch");
@@ -135,11 +128,6 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
           updateCall = (selection) => {
             createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
             selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
-          };
-        } else if (svgPropsToUpdate.has("stroke")) { /* we seed to set stroke differently on T and S branches */
-          updateCall = (selection) => {
-            createUpdateCall(`.branch${x}`, svgPropsToUpdate)(selection);
-            selection.attr("d", (d) => d.branch[STidx]);
           };
         } else {
           updateCall = (selection) => {
@@ -248,7 +236,6 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
   if (!transitionTimeFadeOut) timerFlush();
 };
 
-
 /* the main interface to changing a currently rendered tree.
  * simply call change and tell it what should be changed.
  * try to do a single change() call with as many things as possible in it
@@ -264,11 +251,12 @@ export const change = function change({
   zoomIntoClade = false,
   svgHasChangedDimensions = false,
   animationInProgress = false,
-  /* change these things to provided value */
+  /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
   updateLayout = undefined,
   newBranchLabellingKey = undefined,
+  newTipLabelKey = undefined,
   /* arrays of data (the same length as nodes) */
   branchStroke = undefined,
   tipStroke = undefined,
@@ -295,7 +283,7 @@ export const change = function change({
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
     /* check that fill & stroke are defined */
-    elemsToUpdate.add(".branch.S").add(".branch.T").add(".tip").add(".conf");
+    elemsToUpdate.add(".branch").add(".tip").add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.branchStroke = branchStroke;
     nodePropsToModify.tipStroke = tipStroke;
@@ -368,6 +356,11 @@ export const change = function change({
     showConfidences
   ) {
     this.mapToScreen();
+  }
+  /* tip label key change -> update callback used */
+  if (newTipLabelKey) {
+    this.callbacks.tipLabel = makeTipLabelFunc(newTipLabelKey);
+    elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
   }
 
   /* Finally, actually change the SVG elements themselves */

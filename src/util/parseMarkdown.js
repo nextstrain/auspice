@@ -3,6 +3,7 @@ import dompurify from "dompurify";
 
 dompurify.addHook("afterSanitizeAttributes", (node) => {
   // Set external links to open in a new tab
+  // eslint-disable-next-line no-restricted-globals
   if ('href' in node && location.hostname !== node.hostname) {
     node.setAttribute('target', '_blank');
     node.setAttribute('rel', 'noreferrer nofollow');
@@ -20,7 +21,7 @@ dompurify.addHook("afterSanitizeAttributes", (node) => {
 });
 
 const ALLOWED_TAGS = ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img'];
-ALLOWED_TAGS.push('#text', 'code', 'pre', 'hr', 'table', 'thead', 'tbody', 'th', 'tr', 'td');
+ALLOWED_TAGS.push('#text', 'code', 'pre', 'hr', 'table', 'thead', 'tbody', 'th', 'tr', 'td', 'sub', 'sup');
 // We want to support SVG elements, requiring the following tags (we exclude "foreignObject", "style" and "script")
 ALLOWED_TAGS.push("svg", "altGlyph", "altGlyphDef", "altGlyphItem", "animate", "animateColor", "animateMotion", "animateTransform");
 ALLOWED_TAGS.push("circle", "clipPath", "color-profile", "cursor", "defs", "desc", "ellipse", "feBlend", "feColorMatrix", "feComponentTransfer");

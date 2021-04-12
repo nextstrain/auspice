@@ -48,12 +48,6 @@ class ColorBy extends React.Component {
       });
     }
   }
-  static propTypes = {
-    colorBy: PropTypes.string.isRequired,
-    geneLength: PropTypes.object.isRequired,
-    colorings: PropTypes.object.isRequired,
-    dispatch: PropTypes.func.isRequired
-  }
 
   // Applies the given state to the immutable blank state and replaces the
   // current state with the result.
@@ -69,7 +63,7 @@ class ColorBy extends React.Component {
   }
 
   // State from the outside world enters via props.
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
       if (isColorByGenotype(nextProps.colorBy)) {
         const genotype = decodeColorByGenotype(nextProps.colorBy);
@@ -116,10 +110,11 @@ class ColorBy extends React.Component {
   /**
    * Avoids double invocation of change() method
    */
-  shouldComponentUpdate(_, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     if (this.state.colorBySelected === nextState.colorBySelected &&
         this.state.geneSelected === nextState.geneSelected &&
-        this.state.positionSelected === nextState.positionSelected) {
+        this.state.positionSelected === nextState.positionSelected &&
+        this.props.colorings === nextProps.colorings) {
       return false;
     }
     return true;
@@ -218,17 +213,33 @@ class ColorBy extends React.Component {
             this.replaceState({ colorBySelected: opt.value });
           }}
         />
-        {this.state.colorBySelected === "gt" ?
+        {this.state.colorBySelected === "gt" ? (
           <div>
             {this.gtGeneSelect()}
             {this.gtPositionInput()}
           </div>
+        )
           :
-          null
-        }
+          null}
       </div>
     );
   }
 }
+
+ColorBy.propTypes = {
+  colorBy: PropTypes.string.isRequired,
+  geneLength: PropTypes.object.isRequired,
+  colorings: PropTypes.object.isRequired,
+  dispatch: PropTypes.func.isRequired
+};
+
+export const ColorByInfo = (
+  <>
+    Change the metadata field which the visualisation is coloured by.
+    <br/>
+    The phylogeny, map and frequencies panel (if available) will all be coloured
+    in a consistent fashion.
+  </>
+);
 
 export default ColorBy;

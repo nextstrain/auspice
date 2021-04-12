@@ -9,7 +9,7 @@ const Spinner = ({availableHeight=false}) => {
   const style = {
     marginTop: `${availableHeight / 2 - 100}px`
   };
-  return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={style}/>);
+  return (<img className="spinner" src={nextstrainLogo} alt="loading" style={style}/>);
 };
 
 export default Spinner;

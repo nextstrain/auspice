@@ -5,8 +5,9 @@ import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
  * Note that this cannot have any "special" characters
  */
 export const getDomId = (type, strain) => {
-  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, '') : strain;
-  return `${type}_${name}`;
+  // Replace non-alphanumeric characters with dashes (probably unnecessary)
+  const name = `${type}_${strain}`.replace(/(\W+)/g, '-');
+  return CSS.escape(name);
 };
 
 /**
@@ -31,7 +32,6 @@ export const addLeafCount = (node) => {
   }
 };
 
-
 /*
  * this function takes a call back and applies it recursively
  * to all child nodes, including internal nodes
@@ -48,7 +48,6 @@ export const applyToChildren = (node, func) => {
     applyToChildren(node.children[i], func);
   }
 };
-
 
 /*
 * given nodes, create the children and parent properties.
@@ -101,7 +100,6 @@ export const setYValuesRecursively = (node, yCounter) => {
  */
 export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
 
-
 export const formatDivergence = (divergence) => {
   return divergence > 1 ?
     Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
@@ -109,7 +107,6 @@ export const formatDivergence = (divergence) => {
       Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
       divergence.toExponential(3);
 };
-
 
 /** get the idx of the zoom node (i.e. the in-view root node).
  * This differs depending on which tree is in view so it's helpful to access it
@@ -136,7 +133,6 @@ function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
   const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth)/50;
   return (getDivFromNode(node) - tolerance < getDivFromNode(otherNode));
 }
-
 
 /**
  * Given a `node`, get the parent, grandparent etc node which is beyond some

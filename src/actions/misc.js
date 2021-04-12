@@ -6,8 +6,7 @@ export const togglePanelDisplay = (panelName) => (dispatch, getState) => {
   let panelsToDisplay;
   if (idx === -1) {/* add */
     panelsToDisplay = controls.panelsAvailable.filter((n) =>
-      controls.panelsToDisplay.indexOf(n) !== -1 || n === panelName
-    );
+      controls.panelsToDisplay.indexOf(n) !== -1 || n === panelName);
   } else { /* remove */
     panelsToDisplay = controls.panelsToDisplay.slice();
     panelsToDisplay.splice(idx, 1);

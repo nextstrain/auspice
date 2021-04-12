@@ -58,7 +58,7 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) =>
   const codonFromNuc = hovered.d.prot && mutType !== "aa" ? Math.floor((nucPos)/3) + 1 : null;
   return (
     <div style={styles.container}>
-      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+      <div className="tooltip" style={infoPanelStyles.tooltip}>
         <div>
           {
             mutType === "aa" ? t("Codon {{codon}} in protein {{protein}}", {codon: hovered.d.codon, protein: hovered.d.prot}) :

@@ -1,7 +1,6 @@
 import { computeResponsive } from "../../util/computeResponsive";
 import { controlsWidth, controlsPadding } from "../../util/globals";
 
-
 export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth, availableHeight) => {
   /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
   const chartWidthFraction = 1;
@@ -39,7 +38,7 @@ export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth
 const calculateSidebarWidth = (available, narrativeMode) => {
   if (narrativeMode) {
     if (available>1500) return 500;
-    else if (available>1000) return 400;
+    if (available>1000) return 400;
     return 310;
   }
   return controlsWidth+controlsPadding;

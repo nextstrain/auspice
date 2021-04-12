@@ -1,5 +1,7 @@
 import { timerFlush } from "d3-timer";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { numericToDateObject, prettifyDate } from "../../../util/dateHelpers";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   if ("tipLabels" in this.groups) {
@@ -12,15 +14,12 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const xPad = this.params.tipLabelPadX;
   const yPad = this.params.tipLabelPadY;
 
-  const inViewTips = this.nodes
-    .filter((d) => d.terminal)
-    .filter((d) => d.inView);
+  const inViewTips = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
 
   const inViewVisibleTips = inViewTips.filter((d) => d.visibility === NODE_VISIBLE);
 
   /* We show tip labels by checking the number of "inView & visible" tips */
   if (inViewVisibleTips.length < this.params.tipLabelBreakL1) {
-
     /* We calculate font size based on the total number of in view tips (both visible & non-visible) */
     let fontSize = this.params.tipLabelFontSizeL1;
     if (inViewTips.length < this.params.tipLabelBreakL3) {
@@ -31,7 +30,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
 
     window.setTimeout(() => {
       this.groups.tipLabels
-        .selectAll('.tipLabel')
+        .selectAll(".tipLabel")
         .data(inViewVisibleTips)
         .enter()
         .append("text")
@@ -39,8 +38,8 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .attr("y", (d) => d.yTip + yPad)
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
-        .style("font-size", fontSize.toString()+"px")
-        .style('visibility', (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden");
+        .style("font-size", fontSize.toString() + "px")
+        .style("visibility", (d) => (d.visibility === NODE_VISIBLE ? "visible" : "hidden"));
     }, dt);
   }
 };
@@ -85,10 +84,6 @@ const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
     if (layout !== "rect") {
       return "hidden";
     }
-    /* if any other labelling is defined on the branch, then show AA mutations */
-    if (Object.keys(d.n.branch_attrs.labels).filter((k) => k!=="aa").length) {
-      return "visible";
-    }
     /* if the number of _visible_ tips descending from this node are over the
     magicTipFractionToShowBranchLabel (c/w the total numer of _visible_ and
     _inView_ tips then display the label */
@@ -100,12 +95,17 @@ const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
 };
 
 export const updateBranchLabels = function updateBranchLabels(dt) {
-  const visibility = createBranchLabelVisibility(this.params.branchLabelKey, this.layout, this.zoomNode.n.tipCount);
+  const visibility = createBranchLabelVisibility(
+    this.params.branchLabelKey,
+    this.layout,
+    this.zoomNode.n.tipCount
+  );
   const labelSize = branchLabelSize(this.params.branchLabelKey);
   const fontWeight = branchLabelFontWeight(this.params.branchLabelKey);
   this.groups.branchLabels
-    .selectAll('.branchLabel')
-    .transition().duration(dt)
+    .selectAll(".branchLabel")
+    .transition()
+    .duration(dt)
     .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
@@ -131,20 +131,37 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels");
   }
   this.groups.branchLabels
-    .selectAll('.branchLabel')
-    .data(this.nodes.filter(
-      (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key])
+    .selectAll(".branchLabel")
+    .data(
+      this.nodes.filter(
+        (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key]
+      )
     )
     .enter()
     .append("text")
     .attr("class", "branchLabel")
-    .attr("x", (d) => d.xTip + ((this.params.orientation[0]>0)?-5:5))
+    .attr("x", (d) => d.xTip + (this.params.orientation[0] > 0 ? -5 : 5))
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
-    .style("text-anchor", (this.params.orientation[0]>0)?"end":"start")
+    .style("text-anchor", this.params.orientation[0] > 0 ? "end" : "start")
     .style("visibility", visibility)
     .style("fill", this.params.branchLabelFill)
     .style("font-family", this.params.branchLabelFont)
     .style("font-weight", fontWeight)
     .style("font-size", labelSize)
     .text((d) => d.n.branch_attrs.labels[key]);
+};
+
+/**
+ * A helper factory to create the tip label function.
+ * This (returned function) is typically set elsewhere
+ * and stored on `this.callbacks.tipLabel` which is used
+ * in the `updateTipLabels` function.
+ */
+export const makeTipLabelFunc = (tipLabelKey) => {
+  /* special-case `num_date`. In the future we may wish to examine
+  `metadata.colorings` and special case other scale types */
+  if (tipLabelKey === "num_date") {
+    return (d) => prettifyDate("DAY", numericToDateObject(getTraitFromNode(d.n, "num_date")));
+  }
+  return (d) => getTraitFromNode(d.n, tipLabelKey);
 };

@@ -11,6 +11,7 @@ export default function MarkdownDisplay({ mdstring, ...props }) {
   }
   return (
     <div
+      /* eslint-disable-next-line react/jsx-props-no-spreading */
       {...props}
       dangerouslySetInnerHTML={{ __html: cleanDescription }} // eslint-disable-line react/no-danger
     />

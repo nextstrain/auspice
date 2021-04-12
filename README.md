@@ -21,18 +21,19 @@ Auspice may be used to explore datasets locally or run as a server to share resu
 
 ## Documentation
 
-Full documentation may be found at: [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice).
-The following are helpful when beginning to use Auspice:
+The main Nextstrain documentation is available at [docs.nextstrain.org](https://docs.nextstrain.org/en/latest/index.html). This includes tutorials, how-to guides, and explanations of concepts to help you get started and answer common questions to achieve your goal(s) with Auspice and other Nextstrain tools.
 
-* [Overview of how Auspice fits together with other Nextstrain tools](https://nextstrain.org/docs/getting-started/introduction#open-source-tools-for-the-community)  
-* [Auspice documentation](https://nextstrain.github.io/auspice/introduction/overview)
+When getting started with Auspice, it may be helpful to read our [overview of how Auspice fits together with other Nextstrain tools](https://docs.nextstrain.org/en/latest/learn/about-nextstrain.html#open-source-tools-for-the-community).
+
+For more detailed technical information how Auspice works and reference guides describing specific Auspice features, check out the Auspice reference-guide documentation at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/stable/index.html).
 
 ## Quickstart
 
 ### Installation
 
 Install auspice for use as a global command.
-This requires nodejs 10+. We recommend using a conda environment, but this is not the only way.
+This requires nodejs.
+We recommend using a conda environment, but this is not the only way.
 (See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
 
 #### Install with conda (Recommended)
@@ -40,7 +41,7 @@ This requires nodejs 10+. We recommend using a conda environment, but this is no
 Create and activate a [conda](https://docs.conda.io) environment:
 
 ```bash
-conda create --name auspice nodejs=10
+conda create --name auspice nodejs=12
 conda activate auspice
 ```
 
@@ -77,8 +78,15 @@ If you've installed auspice from source, we have helper scripts to make all the 
 ```bash
 # from the auspice src directory
 npm run get-data
-npm run get-narratives
 ```
+
+### Obtain narratives to view locally
+
+This repository contains a number of "test narratives" which serve both to provide examples of the capability of narratives, as well as being used to test functionality and fix bugs. 
+These should work out of the box, assuming you have obtained the necessary datasets via the above script.
+
+If you wish to view the [nextstrain-maintained narratives](https://nextstrain.org/docs/contributing/sharing-data), then this can be done by checking out the [nextstrain/narratives github repo](github.com/nextstrain/narratives) and telling `auspice` to look for narratives there via the `--narrativeDir` argument.
+
 
 ### Run auspice
 

@@ -58,8 +58,7 @@ class ChooseMetric extends React.Component {
                 label={t("sidebar:Show confidence intervals")}
               />
             </div>
-          )
-        }
+          )}
       </div>
     );
   }

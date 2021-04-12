@@ -24,7 +24,6 @@ const NavBarContainer = styled.div`
 const Content = hasExtension("navbarComponent") ?
   getExtension("navbarComponent") : AuspiceNavBar;
 
-
 const NavBar = ({sidebar, toggleHandler, narrativeTitle, width}) => {
   // const styles = getStyles({minified, narrative: !!narrativeTitle, width});
   const showSidebarToggle = sidebar && !narrativeTitle;

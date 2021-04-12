@@ -19,6 +19,7 @@ class SingleDataset extends React.Component {
       lastUpdated: undefined
     };
   }
+
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getDataset?prefix=${this.props.path}`)
       .then((json) => {
@@ -58,8 +59,8 @@ class SingleDataset extends React.Component {
         <h3 style={narrower}>{this.state.status}</h3>
         {this.state.status === "loaded" ? (
           [
-            <h3 style={wider} key={"tips"}>{`${this.state.numTips} tips span ${this.state.minDate} to ${this.state.maxDate}`}</h3>,
-            <h3 style={narrower} key={"updated"}>{`Last updated: ${this.state.lastUpdated}`}</h3>
+            <h3 style={wider} key="tips">{`${this.state.numTips} tips span ${this.state.minDate} to ${this.state.maxDate}`}</h3>,
+            <h3 style={narrower} key="updated">{`Last updated: ${this.state.lastUpdated}`}</h3>
           ]
         ) : null}
       </div>

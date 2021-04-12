@@ -3,11 +3,10 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
-const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const WebpackChunkHash = require('webpack-chunk-hash');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const utils = require('./cli/utils');
 
 /* Webpack config generator */
 
@@ -97,8 +96,6 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new webpack.HashedModuleIdsPlugin({}),
-    new WebpackChunkHash({algorithm: 'md5'}),
     pluginCompress,
     pluginHtml,
     cleanWebpackPlugin
@@ -109,7 +106,7 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry = devMode ? ["webpack-hot-middleware/client", "./src/indexAsync"] : ["./src/indexAsync"];
+  const entry = devMode ? ["webpack-hot-middleware/client", "./src/indexAsync"] : ["core-js/es/promise", "./src/indexAsync"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
@@ -157,17 +154,22 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
   const bigVendors = [
     "d3-.*", // d3 is imported selectively, new usages may change the bundle
     "lodash", // lodash is imported selectively using the lodash plugin, new usages may change the bundle
-    "awesomplete",
     "react-transition-group",
     "react-icons",
+    "react-tooltip",
     "create-react-class",
     "mousetrap",
     "react-input-autosize",
     "typeface-lato",
     // "papaparse", <= This is only for the drag-and-drop of files and can be separated
-    "dom-to-image"
-    // "marked",
-    // "dompurify", <= These two are only for MD display and can be separated
+    "dom-to-image",
+    // marked + dompurify are used for MD display of the footer in (most) datasets
+    "marked",
+    "dompurify",
+    // `yaml-front-matter` only used for narrative parsing, but included here to simplify the import code
+    // and avoid it being bundled with most of the Auspice code. It imports "js-yaml".
+    "yaml-front-matter",
+    "js-yaml"
   ];
 
   /**
@@ -251,6 +253,12 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
         {
           test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
           use: "file-loader"
+        },
+        {
+          // esprima is a (large) dependency of js-yaml which is unnecessary in a browser
+          // see https://github.com/nodeca/js-yaml/issues/230
+          test: /node_modules\/esprima/,
+          use: 'null-loader'
         }
       ]
     }

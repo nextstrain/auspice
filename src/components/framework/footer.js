@@ -2,27 +2,18 @@ import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
-import { FaDownload } from "react-icons/fa";
-import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
+import { dataFont } from "../../globalStyles";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
-import { version } from "../../version";
-import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
+import { SimpleFilter } from "../info/filterBadge";
 
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
-const dot = (
-  <span style={{marginLeft: 10, marginRight: 10}}>
-    •
-  </span>
-);
-
 const FooterStyles = styled.div`
   margin-left: 30px;
-  padding-bottom: 30px;
+  padding-bottom: 0px;
   font-family: ${dataFont};
   font-size: 15px;
   font-weight: 300;
@@ -102,10 +93,6 @@ const FooterStyles = styled.div`
     border-bottom: 1px solid #CCC;
   }
 
-  .finePrint {
-    font-size: 14px;
-  }
-
   .acknowledgments {
     margin-top: 10px;
   }
@@ -157,68 +144,20 @@ export const getAcknowledgments = (metadata, dispatch) => {
 };
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
-  const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
+  const activeValuesOfFilter = activeFilters[key].map((f) => f.value);
+  const mode = activeValuesOfFilter.indexOf(value) === -1 ? "add" : "remove";
   dispatch(applyFilter(mode, key, [value]));
 };
 
-export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
-  const active = activeFilters[filterName].indexOf(itemName) !== -1;
-  if (active && showX) {
-    return (
-      <div key={itemName} style={{display: "inline-block"}}>
-        <div
-          className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-          role="button"
-          tabIndex={0}
-        >
-          {'\xD7'}
-        </div>
-        <div className={"boxed-item active-with-icon"}>
-          {display}
-        </div>
-      </div>
-    );
-  }
-  if (active) {
-    return (
-      <div
-        className={"boxed-item active-clickable"}
-        key={itemName}
-        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-        role="button"
-        tabIndex={0}
-      >
-        {display}
-      </div>
-    );
-  }
-  return (
-    <div
-      className={"boxed-item inactive"}
-      key={itemName}
-      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
-      role="button"
-      tabIndex={0}
-    >
-      {display}
-    </div>
-  );
-};
-
-const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
-  return (
-    <div
-      className={`${outerClassName} boxed-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));
-      }}
-    >
-      {label}
-    </div>
-  );
-};
+const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => (
+  <SimpleFilter
+    active
+    extraStyles={{float: "right", margin: "0px 4px"}}
+    onClick={() => {filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));}}
+  >
+    {label}
+  </SimpleFilter>
+);
 
 @connect((state) => {
   return {
@@ -227,7 +166,8 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
     metadata: state.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
-    activeFilters: state.controls.filters
+    activeFilters: state.controls.filters,
+    filtersInFooter: state.controls.filtersInFooter
   };
 })
 class Footer extends React.Component {
@@ -235,9 +175,9 @@ class Footer extends React.Component {
     if (this.props.tree.version !== nextProps.tree.version ||
     this.props.browserDimensions !== nextProps.browserDimensions) {
       return true;
-    } else if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
+    } if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
       return true;
-    } else if (Object.keys(this.props.activeFilters).length > 0) {
+    } if (Object.keys(this.props.activeFilters).length > 0) {
       for (const name of this.props.activeFilters) {
         if (this.props.activeFilters[name] !== nextProps.activeFilters[name]) {
           return true;
@@ -251,6 +191,7 @@ class Footer extends React.Component {
     const { t } = this.props;
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
+    const activeFilterItems = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
     return (
       <div>
         {t("Filter by {{filterTitle}}", {filterTitle: filterTitle})}
@@ -261,48 +202,21 @@ class Footer extends React.Component {
               Array.from(totalStateCount.keys())
                 .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
                 .sort() // filters are sorted alphabetically
-                .map((itemName) => {
-                  const display = (
+                .map((itemName) => (
+                  <SimpleFilter
+                    key={itemName}
+                    active={activeFilterItems.indexOf(itemName) !== -1}
+                    onClick={() => dispatchFilter(this.props.dispatch, this.props.activeFilters, filterName, itemName)}
+                  >
                     <span>
                       {`${itemName} (${totalStateCount.get(itemName)})`}
                     </span>
-                  );
-                  return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-                })
+                  </SimpleFilter>
+                ))
             }
           </Flex>
         </div>
       </div>
-    );
-  }
-
-  getUpdated() {
-    const { t } = this.props;
-    if (this.props.metadata.updated) {
-      return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
-    }
-    return null;
-  }
-  downloadDataButton() {
-    const { t } = this.props;
-    return (
-      <button
-        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
-        onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
-      >
-        <FaDownload />
-        <span style={{position: "relative"}}>{" "+t("Download data")}</span>
-      </button>
-    );
-  }
-  getCitation() {
-    return (
-      <span>
-        {"Nextstrain: "}
-        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
-        </a>
-      </span>
     );
   }
 
@@ -315,33 +229,21 @@ class Footer extends React.Component {
           <div className='line'/>
           {getAcknowledgments(this.props.metadata, this.props.dispatch)}
           <div className='line'/>
-          {Object.keys(this.props.activeFilters).map((name) => {
-            return (
-              <div key={name}>
-                {this.displayFilter(name)}
-                <div className='line'/>
-              </div>
-            );
-          })}
-          <Flex className='finePrint'>
-            {this.getUpdated()}
-            {dot}
-            {this.downloadDataButton()}
-            {dot}
-            {"Auspice v" + version}
-          </Flex>
-          <div style={{height: "3px"}}/>
-          <Flex className='finePrint'>
-            {this.getCitation()}
-          </Flex>
+          {Object.keys(this.props.activeFilters)
+            .filter((name) => this.props.filtersInFooter.includes(name))
+            .map((name) => {
+              return (
+                <div key={name}>
+                  {this.displayFilter(name)}
+                  <div className='line'/>
+                </div>
+              );
+            })}
         </div>
       </FooterStyles>
     );
   }
 }
-
-// {dot}
-//
 
 const WithTranslation = withTranslation()(Footer);
 export default WithTranslation;

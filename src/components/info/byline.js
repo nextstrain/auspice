@@ -1,68 +1,62 @@
 import React from "react";
-import { useTranslation } from 'react-i18next';
-
+import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+import styled from 'styled-components';
 import { headerFont } from "../../globalStyles";
 
-const styles = {
-  avatar: {
-    marginRight: 5,
-    marginBottom: 2
-  },
-  byline: {
-    fontFamily: headerFont,
-    fontSize: 15,
-    marginLeft: 2,
-    marginTop: 5,
-    marginBottom: 5,
-    fontWeight: 500,
-    color: "#555",
-    lineHeight: 1.4,
-    verticalAlign: "middle"
-  },
-  bylineWeight: {
-    fontFamily: headerFont,
-    fontSize: 15,
-    fontWeight: 500
+@connect((state) => {
+  return {
+    metadata: state.metadata
+  };
+})
+class Byline extends React.Component {
+  constructor(props) {
+    super(props);
   }
-};
 
-const Byline = ({width, metadata}) => {
-  const { t } = useTranslation();
+  render() {
+    const { t } = this.props;
 
-  /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
-   * This is somewhat temporary and may be switched to a nextstrain.org
-   * auspice customisation in the future.
-   */
-  if (
-    // comment out the next line for testing on localhost
-    (window.location.hostname === "nextstrain.org" || window.location.hostname === "dev.nextstrain.org") &&
-    window.location.pathname.startsWith("/ncov")
-  ) {
+    /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
+     * This is somewhat temporary and may be switched to a nextstrain.org
+     * auspice customisation in the future.
+     */
+    if (
+      // comment out the next line for testing on localhost
+      (window.location.hostname === "nextstrain.org" || window.location.hostname === "dev.nextstrain.org") &&
+      window.location.pathname.startsWith("/ncov")
+    ) {
+      return (
+        <>
+          {renderAvatar(t, this.props.metadata)}
+          {renderMaintainers(t, this.props.metadata)}
+          {
+            this.props.metadata.buildUrl && (
+              <span>
+                {" Enabled by data from "}
+                <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+              </span>
+            )
+          }
+        </>
+      );
+    }
+    /* End nextstrain-specific ncov / SARS-CoV-2 code */
+
     return (
-      <div width={width} style={styles.byline}>
-        {renderAvatar(t, metadata)}
-        {renderMaintainers(t, metadata)}
-        {
-          metadata.buildUrl &&
-          <span>
-            {" Enabled by data from "}
-            <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
-          </span>
-        }
-      </div>
+      <>
+        {renderAvatar(t, this.props.metadata)}
+        {renderBuildInfo(t, this.props.metadata)}
+        {renderMaintainers(t, this.props.metadata)}
+      </>
     );
   }
-  /* End nextstrain-specific ncov / SARS-CoV-2 code */
+}
 
-
-  return (
-    <div width={width} style={styles.byline}>
-      {renderAvatar(t, metadata)}
-      {renderBuildInfo(t, metadata)}
-      {renderMaintainers(t, metadata)}
-    </div>
-  );
-};
+const AvatarImg = styled.img`
+  margin-right: 5px;
+  margin-bottom: 2px;
+`;
 
 function renderAvatar(t, metadata) {
   const repo = metadata.buildUrl;
@@ -70,7 +64,7 @@ function renderAvatar(t, metadata) {
     const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
     if (match) {
       return (
-        <img style={styles.avatar} alt="avatar" width="28" src={`https://github.com/${match[3]}.png?size=200`}/>
+        <AvatarImg alt="avatar" width="28" src={`https://github.com/${match[3]}.png?size=200`}/>
       );
     }
   }
@@ -101,7 +95,6 @@ function renderBuildInfo(t, metadata) {
   return null;
 }
 
-
 function renderMaintainers(t, metadata) {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
@@ -116,7 +109,7 @@ function renderMaintainers(t, metadata) {
               {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
             </React.Fragment>
           ))}
-          {"."}
+          .
         </span>
       );
     }
@@ -124,12 +117,19 @@ function renderMaintainers(t, metadata) {
   return null;
 }
 
+const BylineLink = styled.a`
+  font-family: ${headerFont};
+  font-size: 15;
+  font-weight: 500;
+`;
+
 function Link({url, children}) {
   return (
-    <a style={styles.bylineWeight} rel="noopener noreferrer" href={url} target="_blank">
+    <BylineLink rel="noopener noreferrer" href={url} target="_blank">
       {children}
-    </a>
+    </BylineLink>
   );
 }
 
-export default Byline;
+const WithTranslation = withTranslation()(Byline);
+export default WithTranslation;

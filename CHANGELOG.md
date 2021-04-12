@@ -2,6 +2,181 @@
 title: Changelog
 ---
 
+## version 2.24.1 - 2021/03/19
+
+
+* [bugfix] Fixes a bug introduced in v2.24.0 where certain datasets wouldn't load
+
+## version 2.24.0 - 2021/03/17
+
+* Frequencies are no longer normalized when the data is lacking.
+See [PR 1278](https://github.com/nextstrain/auspice/pull/1278) for more.
+* Fixed a stack size bug, which mainly affected the TB dataset on certain browsers.
+See [PR 1293](https://github.com/nextstrain/auspice/pull/1293) for more.
+* Root-to-tip mutations are now displayed in the tip-clicked info box.
+See [PR 1280](https://github.com/nextstrain/auspice/pull/1280) for more.
+* Datasets may now define the default language.
+See [PR 1303](https://github.com/nextstrain/auspice/pull/1303) for more.
+* Polish language added.
+See [PR 1288](https://github.com/nextstrain/auspice/pull/1288) for more.
+* Tips in the tree should no longer be obscured behind the legend.
+See [PR 1302](https://github.com/nextstrain/auspice/pull/1302) for more.
+* Dates BCE are now correctly displayed in the phylogeny axis.
+See [PR 1297](https://github.com/nextstrain/auspice/pull/1297) for more.
+
+
+## version 2.23.0 - 2021/01/28
+* [feature] Implement genotype filtering.
+The sidebar, typing-based filter UI now includes genotypes (for datasets which define mutations on branches).
+See [PR 1265](https://github.com/nextstrain/auspice/pull/1265) for more.
+* [bugfix] Update how we generate the bundle hashes as the fix introduced in v2.22.2 was insufficient.
+See [PR 1272](https://github.com/nextstrain/auspice/pull/1272) for more.
+
+## version 2.22.2 - 2021/01/14
+* [bugfix] Updated how we generate hashes for the transpiled, chunked client bundles.
+This prevents subtle bugs where bundles could have the same hash, but different contents, and thus stale (browser cached) chunks may be used in certain situations.
+This bug most probably arose in v2.22.0, so please update to this version if possible!
+See [PR 1263](https://github.com/nextstrain/auspice/pull/1263) for more.
+
+## version 2.22.1 - 2021/01/13
+* Updated package-lock JSON file
+
+## version 2.22.0 - 2021/01/11
+
+* The address Auspice uses to fetch map tiles, including the API token, has been updated and will now only work for local installs of auspice.
+For help on how to specify your own address, which lets you specify custom map tile sets, see [the Auspice docs](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html#specifying-the-api-server-address).
+See [PR 1261](https://github.com/nextstrain/auspice/pull/1261) for more.
+* Animation controls have moved and are now in the sidebar, underneath the date-slider.
+See [PR 1262](https://github.com/nextstrain/auspice/pull/1262) for more.
+* The footer has been updated to streamline the Nextstrain accreditation and now displays "Powered by Nextstrain".
+If you are serving your own version of auspice we ask for this accreditation to remain be maintained, in keeping with the spirit of scientific citations.
+Please also remember that customised version of auspice must make their source code available, as per Auspice's licence.
+See [PR 1260](https://github.com/nextstrain/auspice/pull/1260) for more.
+
+## version 2.21.0 - 2021/01/06
+
+### Improved Functionality
+
+* Tree rendering and zooming has been improved.
+  * A new **Zoom to Selected** button has been added which allows you to zoom the tree to the clade containing the currently selected tips ([PR 1257](https://github.com/nextstrain/auspice/pull/1257)).
+  * Branches ancestral to the common ancestor of the currently selected tips are now correctly rendered ([PR 1248](https://github.com/nextstrain/auspice/pull/1248)).
+* The **Download Data** functionality has been improved to export data reflecting the currently viewed subset of data.
+Additionally we export annotated Nexus trees which can be parsed by [FigTree](http://tree.bio.ed.ac.uk/software/figtree/).
+See [PR 1245](https://github.com/nextstrain/auspice/pull/1245) for more.
+* The **drag & drop metadata** functionality has been improved to facilitate easier filtering, custom locations and colours.
+See [PR 1244](https://github.com/nextstrain/auspice/pull/1244) or [these docs](https://docs.nextstrain.org/projects/auspice/en/latest/advanced-functionality/drag-drop-csv-tsv.html) for more.
+* **Tip labels** are now user-selectable via a drop-down in the sidebar.
+See [PR 1246](https://github.com/nextstrain/auspice/pull/1246) for more.
+* **Legend values** now dynamically update to reflect those in the current view.
+See [PR 1250](https://github.com/nextstrain/auspice/pull/1250) for more.
+
+
+#### Other Changes
+
+* Italian translation added. See [PR 1256](https://github.com/nextstrain/auspice/pull/1256).
+* Amino acid labels are only shown on branches leading to big clades.
+See [PR 1249](https://github.com/nextstrain/auspice/pull/1249) for more.
+* Colour scale generation has been refactored and a (rare) bug fixed where color-bys which defined a scale in the JSON could cause tips with no trait value set to have a colour rather than a shade of grey.
+See [PR 1237](https://github.com/nextstrain/auspice/pull/1237).
+* Warnings added to documentation pages which are imported into Nextstrain's (main) RTD project.
+See [PR 1234](https://github.com/nextstrain/auspice/pull/1234).
+* Disabled a smoke-test which was stochastically failing on GitHub Actions (but which worked locally).
+See [PR 1258](https://github.com/nextstrain/auspice/pull/1258) for more.
+
+
+
+## version 2.20.1 - 2020/11/19
+* Small bugfixes and performance improvements relating to to the features introduced in 2.20.0
+
+## version 2.20.0 - 2020/11/18
+
+See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
+* Add on-hover tooltips to the sidebar to better convey the functionality available.
+See [PR 1200](https://github.com/nextstrain/auspice/pull/1200).
+* Improve how we space temporal grid lines (phylogeny & frequencies panels).
+See [PR 1229](https://github.com/nextstrain/auspice/pull/1229).
+* Fix a bug in how we detected HTTP status codes.
+See [PR 1226](https://github.com/nextstrain/auspice/pull/1226).
+* Auspice documentation is now switched to the Read The Docs platform, and available at https://docs.nextstrain.org/projects/auspice.
+Redirects have been added for the old GitHub pages site, and can be found in the [redirect-documentation](https://github.com/nextstrain/auspice/tree/redirect-documentation) branch.
+See [PR 1220](https://github.com/nextstrain/auspice/pull/1220).
+
+
+## version 2.19.0 - 2020/10/07
+* The auspice client now makes a request for the root-sequence JSON, which allows colouring of the tree by genotypes where there are no mutations.
+See [PR 1197](https://github.com/nextstrain/auspice/pull/1197).
+* polyfill `Promise` to avoid crashes in old browsers.
+See [PR 1217](https://github.com/nextstrain/auspice/pull/1217).
+
+
+## version 2.18.4 - 2020/09/28
+* (Bugfix) Update dependencies to restore behavior of the leaflet-scroll overlay.
+See [nextstrain.org PR #223](https://github.com/nextstrain/nextstrain.org/issues/223) for context, implemented in [PR 1214](https://github.com/nextstrain/auspice/pull/1214)
+
+## version 2.18.3 - 2020/09/22
+This version reverts the change to URL parsing introduced in 2.18.2 which broke Auspice on Safari (and perhaps other browsers).
+
+## version 2.18.2 - 2020/09/19
+* (Bugfix) Ensure generated SVG ids are escaped correctly. See [PR 1209](https://github.com/nextstrain/auspice/pull/1209).
+* Improve parsing of auspice URLs with colon characters in the pathname. See [PR 1210](https://github.com/nextstrain/auspice/pull/1210).
+
+## version 2.18.1 - 2020/08/07
+* Add between-paragraph padding for text rendering in (non-mobile) narratives. 
+
+## version 2.18.0 - 2020/08/03
+* Parse narratives client side.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193) and [PR 1172](https://github.com/nextstrain/auspice/pull/1172).
+This shifts the default client behavior to request a narrative in markdown format and parse it client-side.
+The server still retains the ability to parse narratives server-side and return narratives in JSON format, so there are no breaking changes.
+
+* Narratives can now contain multiple datasets.
+See [PR 1193](https://github.com/nextstrain/auspice/pull/1193), [PR 1176](https://github.com/nextstrain/auspice/pull/1176) and [PR 1164](https://github.com/nextstrain/auspice/pull/1164).
+Narrative slides may now define their own unique datasets, with datasets preemptively fetched and cached to improve performance.
+Invalid datasets will show an error notification and fallback to the dataset defined by the frontmatter of the narrative.
+
+* (Bugfix) Zooming in the entropy panel by using shift/option + mouseWheel now appropriately updates the URL query.
+See [PR 1188](https://github.com/nextstrain/auspice/pull/1188)
+
+* (Bugfix) The animation occuring when zooming the phylogeny is now restored.
+See [PR 1192](https://github.com/nextstrain/auspice/pull/1192)
+
+## version 2.17.4 - 2020/07/21
+* (Bugfix) Improve parsing of narrative files where a regex on a large string (e.g. image encoded as a blob) would hang the server
+
+## version 2.17.3 - 2020/07/14
+* (Bugfix) Allow `auspice view` to serve custom auspice client if one exists.
+See [PR 1182](https://github.com/nextstrain/auspice/pull/1182).
+
+
+## version 2.17.2 - 2020/07/13
+* (Bugfix) Send error messages in the (HTTP) response body, not the status line.
+See [PR 1181](https://github.com/nextstrain/auspice/pull/1181).
+
+
+## version 2.17.1 - 2020/06/25
+* (Bugfix) Metadata from drag-and-drop CSVs now shows up in the color-by menu.
+See [PR 1177](https://github.com/nextstrain/auspice/pull/1177).
+
+## version 2.17.0 - 2020/06/19
+* You can now toggle whether the data in the frequencies panel is normalized.
+See [PR 1158](https://github.com/nextstrain/auspice/pull/1158).
+* You can now set the starting state of the transmissions-line toggle via the JSON or a URL query.
+See [PR 1152](https://github.com/nextstrain/auspice/pull/1152) and [PR 1165](https://github.com/nextstrain/auspice/pull/1129).
+* Improve the caching settings for the auspice server.
+See [PR 1146](https://github.com/nextstrain/auspice/pull/1146).
+* The performance of Auspice is improved when transmission lines are not rendered.
+See [PR 1153](https://github.com/nextstrain/auspice/pull/1153).
+* The "narratives" folder is now part of this repo and contains a number of test narratives.
+See [PR 1170](https://github.com/nextstrain/auspice/pull/1170) for more details.
+* A bug was fixed where narrative slides would sometimes fail to update the tree as expected.
+See [PR 1169](https://github.com/nextstrain/auspice/pull/1169).
+* A bug was fixed where loading a tree zoomed to a clade would prevent zooming out.
+See [PR 1156](https://github.com/nextstrain/auspice/pull/1156).
+* A bug was fixed where numeric branch labels couldn't be used as URL queries.
+See [PR 1157](https://github.com/nextstrain/auspice/pull/1157).
+* The list of allowed nodejs versions was expanded.
+See [PR 1166](https://github.com/nextstrain/auspice/pull/1166).
+
 ## version 2.16.0 - 2020/05/29
 
 #### Features

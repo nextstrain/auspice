@@ -126,7 +126,5 @@ export const treeJsonToState = (treeJSON) => {
     return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
   });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
-  return Object.assign({}, getDefaultTreeState(), {
-    nodes, vaccines, availableBranchLabels, loaded: true
-  });
+  return { ...getDefaultTreeState(), nodes, vaccines, availableBranchLabels, loaded: true};
 };

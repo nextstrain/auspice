@@ -1,7 +1,7 @@
 ---
 extends: "airbnb"
 plugins: ["react-hooks"]
-parser: "babel-eslint"
+parser: "@babel/eslint-parser"
 globals:
   page: true
   browser: true
@@ -63,6 +63,9 @@ rules:
   implicit-arrow-linebreak: off
   jsx-quotes: off
   no-use-before-define: ["error", { "functions": false }]
+  no-return-await: off
+  react/no-access-state-in-setstate: off
+  jsx-a11y/anchor-is-valid: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module

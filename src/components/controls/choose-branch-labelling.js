@@ -16,6 +16,7 @@ class ChooseBranchLabelling extends React.Component {
     super(props);
     this.change = (value) => {this.props.dispatch({type: CHANGE_BRANCH_LABEL, value: value.value});};
   }
+
   render() {
     const { t } = this.props;
     return (

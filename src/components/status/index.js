@@ -11,6 +11,7 @@ class Status extends React.Component {
     super(props);
     this.state = {available: undefined};
   }
+
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`)
       .then((json) => {this.setState({available: json});})
@@ -19,6 +20,7 @@ class Status extends React.Component {
         this.props.dispatch(goTo404("Error getting available datasets"));
       });
   }
+
   renderHeader() {
     return (
       <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", minHeight: "50px"}}>

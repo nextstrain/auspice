@@ -143,7 +143,6 @@ export const tabGroupMemberSelected = {
   fontSize: 12
 };
 
-
 export const titleStyles = {
   big: {
     fontFamily: titleFont,
@@ -262,7 +261,8 @@ export const infoPanelStyles = {
   item: {
     paddingTop: 4,
     paddingBottom: 4,
-    minWidth: 120
+    minWidth: 130,
+    verticalAlign: "top"
   },
   break: {
     marginBottom: "10px"

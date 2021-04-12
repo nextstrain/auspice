@@ -2,6 +2,8 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
+import { genotypeSymbol, strainSymbol } from "../util/globals";
+import { encodeGenotypeFilters } from "../util/getGenotype";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -33,8 +35,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* first switch: query change */
   switch (action.type) {
     case types.CLEAN_START: // fallthrough
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
-    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       query = action.query;
       if (query.n === 0) delete query.n;
       if (query.tt) delete query.tt;
@@ -61,7 +62,16 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.APPLY_FILTER: {
-      query[`f_${action.trait}`] = action.values.join(',');
+      if (action.trait === genotypeSymbol) {
+        query.gt = encodeGenotypeFilters(action.values);
+        break;
+      }
+      const queryKey = action.trait === strainSymbol ? 's' : // for historical reasons, strains get stored under the `s` query key
+        `f_${action.trait}`;
+      query[queryKey] = action.values
+        .filter((item) => item.active) // only active filters in the URL
+        .map((item) => item.value)
+        .join(',');
       break;
     }
     case types.CHANGE_LAYOUT: {
@@ -73,6 +83,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.CHANGE_GEO_RESOLUTION: {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
+      break;
+    }
+    case types.TOGGLE_TRANSMISSION_LINES: {
+      if (action.data === state.controls.defaults.showTransmissionLines) query.transmissions = undefined;
+      else query.transmissions = action.data ? 'show' : 'hide';
       break;
     }
     case types.CHANGE_LANGUAGE: {
@@ -119,6 +134,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.p = action.panelLayout;
       break;
     }
+    case types.CHANGE_TIP_LABEL_KEY: {
+      query.tl = action.key===strainSymbol ? undefined : action.key;
+      break;
+    }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
         query.dmin = undefined;
@@ -130,7 +149,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      query.s = action.selectedStrain ? action.selectedStrain : undefined;
+      // query.s = action.selectedStrain ? action.selectedStrain : undefined;
       query.label = action.cladeName ? action.cladeName : undefined;
       break;
     }
@@ -158,8 +177,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.TOGGLE_NARRATIVE: {
-      if (action.display === true) {
+      if (action.narrativeOn === true) {
         query = {n: state.narrative.blockIdx};
+      } else if (action.narrativeOn === false) {
+        query = queryString.parse(state.narrative.blocks[state.narrative.blockIdx].query);
       }
       break;
     }
@@ -182,13 +203,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         }
       }
       break;
-    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
-      if (action.pathname) pathname = action.pathname;
-      break;
-    }
     case types.TOGGLE_NARRATIVE: {
-      if (action.display === true) {
+      if (action.narrativeOn === true) {
         pathname = state.narrative.pathname;
+      } else if (action.narrativeOn === false) {
+        pathname = state.narrative.blocks[state.narrative.blockIdx].dataset;
       }
       break;
     }

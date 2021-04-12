@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import ChooseDatasetSelect from "./choose-dataset-select";
-import { SidebarHeader } from "./styles";
+import { AnnotatedHeader } from "./annotatedHeader";
 
 // const DroppedFiles = withTheme((props) => {
 //   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
@@ -49,12 +49,11 @@ class ChooseDataset extends React.Component {
       ).map((opt) => ({
         value: displayedDataset.slice(0, i).concat(opt).join("/"),
         label: opt
-      }))
-    );
+      })));
 
     return (
       <>
-        <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
+        <AnnotatedHeader title={t("sidebar:Dataset")} />
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
             key={displayedDataset[optionIdx]}

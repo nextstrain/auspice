@@ -5,10 +5,9 @@ const triggerNotification = (data) => {
   return (dispatch, getState) => {
     const { notifications } = getState();
     const id = notifications.counter + 1;
-    dispatch(Object.assign({}, data, {
+    dispatch({ ...data,
       type: types.ADD_NOTIFICATION,
-      id
-    }));
+      id});
     if (data.notificationType !== "error") {
       window.setTimeout(() => dispatch({
         type: types.REMOVE_NOTIFICATION,

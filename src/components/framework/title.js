@@ -35,6 +35,7 @@ class Title extends React.Component {
       }
     };
   }
+
   createTitle() {
     const title = "nextstrain";
     return title.split("").map((letter, i) => (
@@ -46,6 +47,7 @@ class Title extends React.Component {
       </span>
     ));
   }
+
   render() {
     const styles = this.getStyles();
     return (

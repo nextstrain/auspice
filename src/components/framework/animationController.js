@@ -20,16 +20,20 @@ class AnimationController extends React.Component {
   constructor(props) {
     super(props);
   }
+
   componentDidMount() {
     this.maybeAnimate();
   }
+
   componentDidUpdate() {
     /* check that things are loaded?!?! */
     this.maybeAnimate();
   }
+
   render() {
     return null;
   }
+
   maybeAnimate() {
     /* we trigger animation when 2 criteria are met:
     (1) this.props.animationPlayPauseButton shows "Pause"

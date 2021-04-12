@@ -9,9 +9,7 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     // case types.CLEAN_START:
     //   return action.tree;
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return { ...state, loaded: false};
     case types.REMOVE_TREE_TOO:
       return getDefaultTreeState();
     case types.CLEAN_START:
@@ -25,28 +23,26 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
         // console.warn("NB missing visibleStateCounts from treeToo here");
-        return Object.assign({}, state, {
+        return { ...state,
           tangleTipLookup: action.tangleTipLookup,
           visibility: action.visibilityToo,
           visibilityVersion: action.visibilityVersionToo,
           branchThickness: action.branchThicknessToo,
           branchThicknessVersion: action.branchThicknessVersionToo,
           idxOfInViewRootNode: action.idxOfInViewRootNodeToo,
-          selectedStrain: action.selectedStrain
-        });
+          idxOfFilteredRoot: action.idxOfFilteredRootToo,
+          selectedStrain: action.selectedStrain};
       }
       return state;
     case types.UPDATE_TIP_RADII:
-      return Object.assign({}, state, {
+      return { ...state,
         tipRadii: action.dataToo,
-        tipRadiiVersion: action.version
-      });
+        tipRadiiVersion: action.version};
     case types.NEW_COLORS:
       if (action.nodeColorsToo) {
-        return Object.assign({}, state, {
+        return { ...state,
           nodeColors: action.nodeColorsToo,
-          nodeColorsVersion: action.version
-        });
+          nodeColorsVersion: action.version};
       }
       return state;
     default:

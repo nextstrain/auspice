@@ -206,8 +206,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
-      this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2
-    )
+      this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2)
     .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
@@ -237,8 +236,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
     .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
-      this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2
-    )
+      this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2)
     .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
@@ -399,7 +397,6 @@ EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax
   /* requires redraw of bars */
 };
 
-
 /* calculate the offsets */
 EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   /* hardcoded padding */
@@ -442,14 +439,29 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushFinished = function brushFinished() {
     this.brushed();
     /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
-    if (d3event.sourceEvent instanceof MouseEvent && (!d3event.selection || d3event.sourceEvent.target.id === "d3entropyParent" ||
-        d3event.sourceEvent.target.id === "")) {
+    if (d3event.sourceEvent instanceof MouseEvent) {
+      if (
+        !d3event.selection ||
+        d3event.sourceEvent.target.id === "d3entropyParent" ||
+        d3event.sourceEvent.target.id === ""
+      ) {
+        this.props.dispatch(changeZoom(this.zoomCoordinates));
+      } else if (
+        d3event.sourceEvent.target.id.match(/^prot/) ||
+        d3event.sourceEvent.target.id.match(/^nt/)
+      ) {
+        /* If selected gene or clicked on entropy, hide zoom coords */
+        this.props.dispatch(changeZoom([undefined, undefined]));
+      }
+    } else if (_isZoomEvent(d3event)) {
       this.props.dispatch(changeZoom(this.zoomCoordinates));
-    } else {
-      /* If selected gene or clicked on entropy, hide zoom coords */
-      this.props.dispatch(changeZoom([undefined, undefined]));
     }
   };
+
+  /* ZoomEvent is emitted by d3-zoom when shift/option + mouseWheel on the entropy panel. */
+  function _isZoomEvent(d3Event) {
+    return d3Event && d3Event.sourceEvent && d3Event.sourceEvent.type === 'zoom';
+  }
 
   /* zooms in by modifing the domain of xMain scale */
   this._zoom = function _zoom(start, end) {
@@ -495,9 +507,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     .attr("transform", (d) =>
       d.type === "e" ?
         "translate(" + (this.scales.xNav(this.zoomCoordinates[1]) - 1) + "," + (this.offsets.heightNav + 25) + ")" :
-        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")"
-        /* this makes handles move if initial draw is zoomed! */
-    );
+        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")");
 };
 
 /* set up zoom */

@@ -6,7 +6,6 @@ import Controls from "../controls/controls";
 import { SidebarContainer, sidebarTheme } from "./styles";
 import { narrativeNavBarHeight } from "../../util/globals";
 
-
 export const Sidebar = (
   {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, mobileDisplay, navBarHandler}
 ) => {
@@ -24,6 +23,7 @@ export const Sidebar = (
           <Narrative height={height - narrativeNavBarHeight} width={width} />
         ) : (
           <Controls
+            mobileDisplay={mobileDisplay}
             mapOn={panelsToDisplay.includes("map")}
             frequenciesOn={panelsToDisplay.includes("frequencies")}
           />

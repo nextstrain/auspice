@@ -19,13 +19,17 @@ class Language extends React.Component {
   async ensureLanguageResources(lang) {
     for (const ns of ["language", "sidebar", "translation"]) {
       if (!i18n.hasResourceBundle(lang, ns)) {
-        const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`); // eslint-disable-line
-        i18n.addResourceBundle(lang, ns, res.default);
+        try {
+          const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`); // eslint-disable-line
+          i18n.addResourceBundle(lang, ns, res.default);
+        } catch (err) {
+          console.error(`Language ${lang} not found!`);
+        }
       }
     }
   }
 
-  async componentWillMount() {
+  async UNSAFE_componentWillMount() {
     if (!this.props.language || this.props.language === "en") return;
     await this.ensureLanguageResources(this.props.language);
     i18n.changeLanguage(this.props.language);
@@ -42,7 +46,9 @@ class Language extends React.Component {
       {value: "fr", label: "Français"},
       {value: "tr", label: "Türkçe"},
       {value: "ja", label: "日本語"},
-      {value: "ar", label: "العربية"}
+      {value: "ar", label: "العربية"},
+      {value: "it", label: "Italiano"},
+      {value: "pl", label: "Polski"}
     ];
     return languages;
   }

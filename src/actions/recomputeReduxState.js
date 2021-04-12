@@ -1,22 +1,23 @@
 import queryString from "query-string";
+import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
-import { calcTipRadii } from "../util/tipRadiusHelpers";
+// eslint-disable-next-line import/no-cycle
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
-import { calcColorScale } from "../util/colorScale";
-import { computeMatrixFromRawData } from "../util/processFrequencies";
-import { applyInViewNodesToTree } from "../actions/tree";
-import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
-
+import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
+import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
+import { applyInViewNodesToTree } from "./tree";
+import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
+import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
+import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -44,6 +45,7 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  // console.log("modify state via URL query", query)
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -70,6 +72,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
     state["panelLayout"] = query.p;
   }
+  if (query.tl) {
+    state["tipLabelKey"] = query.tl;
+  }
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
@@ -86,7 +91,14 @@ const modifyStateViaURLQuery = (state, query) => {
     state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
   }
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
-    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
+    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
+      .map((value) => ({value, active: true})); /* all filters in the URL are "active" */
+  }
+  if (query.s) {   // selected strains are a filter too
+    state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
+  }
+  if (query.gt) {
+    state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt);
   }
   if (query.animate) {
     const params = query.animate.split(',');
@@ -127,7 +139,13 @@ const modifyStateViaURLQuery = (state, query) => {
   if ("onlyPanels" in query) {
     state.showOnlyPanels = true;
   }
-
+  if (query.transmissions) {
+    if (query.transmissions === "show") {
+      state.showTransmissionLines = true;
+    } else if (query.transmissions === "hide") {
+      state.showTransmissionLines = false;
+    }
+  }
   return state;
 };
 
@@ -158,6 +176,7 @@ const restoreQueryableStateToDefaults = (state) => {
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
+  state.tipLabelKey = strainSymbol;
   // console.log("state now", state);
   return state;
 };
@@ -184,13 +203,18 @@ const modifyStateViaMetadata = (state, metadata) => {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
   if (metadata.filters) {
+    /* the `meta -> filters` JSON spec should define which filters are displayed in the footer.
+    Note that this UI may change, and if so then we can change this state name. */
+    state.filtersInFooter = [...metadata.filters];
+    /* TODO - these will be searchable => all available traits should be added and this block shifted up */
     metadata.filters.forEach((v) => {
       state.filters[v] = [];
-      state.defaults.filters[v] = [];
     });
   } else {
     console.warn("JSON did not include any filters");
   }
+  state.filters[strainSymbol] = [];
+  state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
@@ -218,6 +242,8 @@ const modifyStateViaMetadata = (state, metadata) => {
         }
       }
     }
+  } else {
+    metadata.displayDefaults = {}; // allows code to rely on `displayDefaults` existing
   }
 
   if (metadata.panels) {
@@ -338,7 +364,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   };
   examineNodes(tree.nodes);
   if (treeToo) examineNodes(treeToo.nodes);
-
 
   /* ensure specified mutType is indeed available */
   if (!aaMuts && !nucMuts) {
@@ -463,6 +488,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     state.defaults.selectedBranchLabel = "none";
   }
 
+  /* check tip label is valid. We use the function which generates the options for the dropdown here */
+  if (!collectAvailableTipLabelOptions(metadata.colorings).map((o) => o.value).includes(state.tipLabelKey)) {
+    console.error("Can't set selected tip label to ", state.tipLabelKey);
+    state.tipLabelKey = strainSymbol;
+  }
+
   /* temporalConfidence */
   if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
     state.temporalConfidence.display = true;
@@ -480,18 +511,31 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     }
   }
 
-  /* are filters valid? */
-  const activeFilters = Object.keys(state.filters).filter((f) => f.length);
-  const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
-  for (const filterType of activeFilters) {
-    const validValues = state.filters[filterType]
-      .filter((filterValue) => stateCounts[filterType].has(filterValue));
-    state.filters[filterType] = validValues;
-    if (!validValues.length) {
-      delete query[`f_${filterType}`];
+  /* ensure selected filters (via the URL query) are valid. If not, modify state + URL. */
+  const filterNames = Object.keys(state.filters).filter((filterName) => state.filters[filterName].length);
+  const stateCounts = countTraitsAcrossTree(tree.nodes, filterNames, false, true);
+  filterNames.forEach((filterName) => {
+    const validItems = state.filters[filterName]
+      .filter((item) => stateCounts[filterName].has(item.value));
+    state.filters[filterName] = validItems;
+    if (!validItems.length) {
+      delete query[`f_${filterName}`];
     } else {
-      query[`f_${filterType}`] = validValues.join(",");
+      query[`f_${filterName}`] = validItems.map((x) => x.value).join(",");
     }
+  });
+  if (state.filters[strainSymbol]) {
+    const validNames = tree.nodes.map((n) => n.name);
+    state.filters[strainSymbol] = state.filters[strainSymbol]
+      .filter((strainFilter) => validNames.includes(strainFilter.value));
+    query.s = state.filters[strainSymbol].map((f) => f.value).join(",");
+    if (!query.s) delete query.s;
+  }
+  if (state.filters[genotypeSymbol]) {
+    const observedMutations = collectGenotypeStates(tree.nodes);
+    state.filters[genotypeSymbol] = state.filters[genotypeSymbol]
+      .filter((f) => observedMutations.has(f.value));
+    query.gt = encodeGenotypeFilters(state.filters[genotypeSymbol]);
   }
 
   /* can we display branch length by div or num_date? */
@@ -512,42 +556,31 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelected, controlsState, dispatch) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsState, dispatch) => {
   /* calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0;
-  /* check if the query defines a strain to be selected */
   let newIdxRoot = oldState.idxOfInViewRootNode;
-  if (tipSelected) {
-    tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
-    oldState.selectedStrain = tipSelected;
-  }
   if (zoomSelected) {
     // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
     const [labelName, labelValue] = zoomSelected.split(":");
     const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     oldState.selectedClade = zoomSelected;
-    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
+    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
   } else {
     oldState.selectedClade = undefined;
-    newIdxRoot = applyInViewNodesToTree(0, oldState); // tipSelectedIdx, oldState);
+    newIdxRoot = applyInViewNodesToTree(0, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
-    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx}
+    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric}
   );
 
-  const newState = Object.assign({}, oldState, visAndThicknessData);
+  const newState = { ...oldState, ...visAndThicknessData};
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
   newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,true); // eslint-disable-line
 
-  if (tipSelectedIdx) { /* i.e. query.s was set */
-    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
-    newState.tipRadiiVersion = 1;
-  }
   return newState;
 };
 
@@ -583,7 +616,7 @@ const modifyControlsViaTreeToo = (controls, name) => {
 const convertColoringsListToDict = (coloringsList) => {
   const colorings = {};
   coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = coloring;
+    colorings[coloring.key] = { ...coloring };
     delete colorings[coloring.key].key;
   });
   return colorings;
@@ -630,6 +663,7 @@ const createMetadataStateFromJSON = (json) => {
       branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
       layout: "layout",
+      language: "language",
       sidebar: "sidebar",
       panels: "panels",
       transmission_lines: "showTransmissionLines"
@@ -644,7 +678,6 @@ const createMetadataStateFromJSON = (json) => {
     metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
-
   if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
     console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
   }
@@ -652,11 +685,21 @@ const createMetadataStateFromJSON = (json) => {
   return metadata;
 };
 
+export const getNarrativePageFromQuery = (query, narrative) => {
+  let n = parseInt(query.n, 10) || 0;
+  /* If the query has defined a block which doesn't exist then default to n=0 */
+  if (n >= narrative.length) {
+    console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+    n=0;
+  }
+  return n;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
-  narrativeBlocks = false,
+  narrativeBlocks = false, /* if in a narrative this argument is set */
   mainTreeName = false,
   secondTreeName = false,
   query,
@@ -690,8 +733,9 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
-    /* revisit this - but it helps prevent bugs */
-    controls = {...oldState.controls};
+    /* creating deep copies avoids references to (nested) objects remaining the same which
+    can affect props comparisons. Due to the size of some of the state, we only do this selectively */
+    controls = cloneDeep(oldState.controls);
     entropy = {...oldState.entropy};
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
@@ -700,35 +744,28 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
-
   /* For the creation of state, we want to parse out URL query parameters
   (e.g. ?c=country means we want to color-by country) and modify the state
   accordingly. For narratives, we _don't_ display these in the URL, instead
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
+  let narrativeSlideIdx;
   if (narrativeBlocks) {
-    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
-    let n = parseInt(query.n, 10) || 0;
-    /* If the query has defined a block which doesn't exist then default to n=0 */
-    if (n >= narrative.length) {
-      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
-      n=0;
-    }
-    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
-    query = n===0 ? {} : {n}; // eslint-disable-line
-    /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
-    update `controls.panelsToDisplay` so this is displayed */
-    if (narrative[n].mainDisplayMarkdown) {
-      controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
-    }
-  } else {
-    controls = modifyStateViaURLQuery(controls, query);
+    narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
+    /* replace the query with the information which can guide the view */
+    query = queryString.parse(narrative[narrativeSlideIdx].query); // eslint-disable-line no-param-reassign
+  }
+
+  controls = modifyStateViaURLQuery(controls, query);
+
+  /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
+  if (narrativeBlocks && narrative[narrativeSlideIdx].mainDisplayMarkdown) {
+    controls.panelsToDisplay = ["MainDisplayMarkdown"];
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
   controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
-
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (json || controls.colorBy !== oldState.controls.colorBy) {
@@ -759,15 +796,27 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   /* if query.label is undefined then we intend to zoom to the root */
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, query.label, controls, dispatch);
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
 
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls, dispatch);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
+
+  /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
+  controls.colorScale.visibleLegendValues = createVisibleLegendValues({
+    colorBy: controls.colorBy,
+    scaleType: controls.colorScale.scaleType,
+    genotype: controls.colorScale.genotype,
+    legendValues: controls.colorScale.legendValues,
+    treeNodes: tree.nodes,
+    treeTooNodes: treeToo ? treeToo.nodes : undefined,
+    visibility: tree.visibility,
+    visibilityToo: treeToo ? treeToo.visibilityToo : undefined
+  });
 
   /* calculate entropy in view */
   if (entropy.loaded) {
@@ -782,6 +831,18 @@ export const createStateFromQueryOrJSONs = ({
   /* update frequencies if they exist (not done for new JSONs) */
   if (frequencies && frequencies.loaded) {
     frequencies.version++;
+
+    const allowNormalization = checkIfNormalizableFromRawData(
+      frequencies.data,
+      frequencies.pivots,
+      tree.nodes,
+      tree.visibility
+    );
+
+    if (!allowNormalization) {
+      controls.normalizeFrequencies = false;
+    }
+
     frequencies.matrix = computeMatrixFromRawData(
       frequencies.data,
       frequencies.pivots,
@@ -792,6 +853,9 @@ export const createStateFromQueryOrJSONs = ({
       controls.normalizeFrequencies
     );
   }
+
+  /* if narratives then switch the query back to ?n=<SLIDE> for display */
+  if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
@@ -806,14 +870,14 @@ export const createTreeTooState = ({
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
-  const tree = Object.assign({}, oldState.tree);
+  const tree = { ...oldState.tree};
   tree.name = originalTreeUrl;
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
   controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls, dispatch);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);
@@ -830,18 +894,5 @@ export const createTreeTooState = ({
     tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
   );
 
-  // if (tipSelectedIdx) { /* i.e. query.s was set */
-  //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
-  //   tree.tipRadiiVersion = 1;
-  // }
   return {tree, treeToo, controls};
 };
-
-function addEndOfNarrativeBlock(narrativeBlocks) {
-  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
-  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
-    __html: undefined,
-    isEndOfNarrativeSlide: true
-  });
-  narrativeBlocks.push(endOfNarrativeSlide);
-}

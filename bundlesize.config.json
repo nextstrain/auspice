@@ -6,15 +6,15 @@
     },
     {
       "path": "./dist/auspice.chunk.+([0-9]).bundle.*.js",
-      "maxSize": "75 kB"
+      "maxSize": "100 kB"
     },
     {
-      "path": "./dist/auspice.chunk.core-vendors.bundle.9b6a9c4b675fe63ec02a.js",
+      "path": "./dist/auspice.chunk.core-vendors.bundle.*.js",
       "maxSize": "220 kB"
     },
     {
-      "path": "./dist/auspice.chunk.other-vendors.bundle.99f3458f271574f53feb.js",
-      "maxSize": "60 kB"
+      "path": "./dist/auspice.chunk.other-vendors.bundle.*.js",
+      "maxSize": "150 kB"
     },
     {
       "path": "./dist/auspice.chunk.locales.bundle.*.js",

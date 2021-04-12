@@ -28,10 +28,6 @@ export const RowContainer = styled.div`
   };
 })
 class ChooseLayout extends React.Component {
-  static propTypes = {
-    layout: PropTypes.string.isRequired,
-    dispatch: PropTypes.func.isRequired
-  }
 
   handleChangeLayoutClicked(userSelectedLayout) {
     const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
@@ -110,6 +106,10 @@ class ChooseLayout extends React.Component {
     );
   }
 }
+ChooseLayout.propTypes = {
+  layout: PropTypes.string.isRequired,
+  dispatch: PropTypes.func.isRequired
+};
 
 const WithTranslation = withTranslation()(ChooseLayout);
 export default WithTranslation;

@@ -1,4 +1,3 @@
-
 const registry = (() => {
   if (!process.env.EXTENSION_DATA) {
     // console.log("no EXTENSION_DATA found");
@@ -19,7 +18,6 @@ const registry = (() => {
 
   return extensions;
 })();
-
 
 export const getExtension = (what) => {
   if (registry[what]) {

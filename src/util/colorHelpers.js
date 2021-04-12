@@ -3,6 +3,7 @@ import { interpolateRgb } from "d3-interpolate";
 import scalePow from "d3-scale/src/pow";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { isValueValid } from "./globals";
 
 /**
  * Average over the visible colours for a given location
@@ -33,7 +34,6 @@ export const determineColorByGenotypeMutType = (colorBy) => {
   return false;
 };
 
-
 /**
 * what colorBy trait names are present in the tree but _not_ in the provided scale?
 * @param {Array} nodes - list of nodes
@@ -48,9 +48,10 @@ export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
     nodesToo.forEach((n) => valsInTree.push(getTraitFromNode(n, colorBy)));
   }
   valsInTree = [...new Set(valsInTree)];
-  return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
+  return valsInTree
+    .filter((x) => providedVals.indexOf(x) === -1)
+    .filter((x) => isValueValid(x));
 };
-
 
 /* a getter for the value of the colour attribute of the node provided for the currently set colour
 note this is not the colour HEX */
@@ -72,7 +73,6 @@ export const calcNodeColor = (tree, colorScale) => {
   return null;
 };
 
-
 // scale entropy such that higher entropy maps to a grayer less-certain branch
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.6;
@@ -81,7 +81,6 @@ export const branchOpacityFunction = scalePow()
   .domain([0, 2.0])
   .range([0.4, 1])
   .clamp(true);
-
 
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
@@ -106,7 +105,6 @@ export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
     return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
 };
-
 
 /**
  * Return an emphasized color

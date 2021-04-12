@@ -1,6 +1,6 @@
 import { sqrt as scaleSqrt } from "d3-scale/src/pow";
 import scaleLinear from "d3-scale/src/linear";
-import { hasExtension, getExtension } from "../util/extensions";
+import { hasExtension, getExtension } from "./extensions";
 
 export const colorOptions = {
   country: {key: "country", legendTitle: "Country", menuItem: "country", type: "discrete"},
@@ -204,3 +204,49 @@ export const isValueValid = (value) => {
   // booleans, valid strings & numbers are valid.
   return true;
 };
+export const strainSymbol = Symbol('strain');
+export const genotypeSymbol = Symbol('genotype');
+
+/**
+ * Address to fetch tiles from (including access key).
+ * We currently set a default key to fetch these from a Mapbox API.
+ * This API is set to allow tiles to be served for local installs and nextstrain-related projects only.
+ * See https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html for more.
+ */
+export const getMapTilesSettings = () => {
+  if (hasExtension("mapTiles")) {
+    return getExtension("mapTiles");
+  }
+  /* defaults */
+  const api = 'https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw';
+  return {
+    api,
+    attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>',
+    mapboxWordmark: true
+  };
+};
+
+const aminoAcids = {
+  A: "Alanine",
+  R: "Arginine",
+  N: "Asparagine",
+  D: "Aspartic acid",
+  C: "Cysteine",
+  Q: "Glutamine",
+  E: "Glutamic acid",
+  G: "Glycine",
+  H: "Histidine",
+  I: "Isoleucine",
+  L: "Leucine",
+  K: "Lysine",
+  M: "Methionine",
+  F: "Phenylalanine",
+  P: "Proline",
+  S: "Serine",
+  T: "Threonine",
+  W: "Tryptophan",
+  Y: "Tyrosine",
+  V: "Valine"
+};
+
+export const getAminoAcidName = (x) => aminoAcids[x.toUpperCase()] || "Unknown";

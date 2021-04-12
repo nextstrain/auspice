@@ -86,7 +86,6 @@ export const drawVaccines = function drawVaccines() {
     .on("click", this.callbacks.onTipClick);
 };
 
-
 /**
  * adds all the tip circles to the svg, they have class tip
  * @return {null}
@@ -230,7 +229,6 @@ export const drawBranches = function drawBranches() {
   timerEnd("drawBranches");
 };
 
-
 /**
  * draws the regression line in the svg and adds a text with the rate estimate
  * @return {null}
@@ -279,7 +277,6 @@ export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
 };
 
-
 /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
 cause the branches to not appear, we're falling back to the previous solution which
 doesn't use gradients. Calls to `updateColorBy` are therefore unnecessary.
@@ -318,7 +315,6 @@ export const updateColorBy = function updateColorBy() {};
 //     }
 //   });
 // };
-
 
 /** given a node `d` which is being hovered, update it's colour to emphasize
  * that it's being hovered. This updates the SVG element stroke style in-place
@@ -365,7 +361,6 @@ export const branchStrokeForHover = function branchStrokeForHover(d) {
   if (!d) { return; }
   handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
 };
-
 
 function getRateEstimate(regression, maxDivergence) {
   /* Prior to Jan 2020, the divergence measure was always "subs per site per year"

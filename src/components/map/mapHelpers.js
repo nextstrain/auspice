@@ -196,8 +196,7 @@ export const drawDemesAndTransmissions = (
       .style("stroke", (d) => { return d.color; })
       .style("pointer-events", "all")
       .attr("transform", (d) =>
-        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      )
+        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")")
       .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
       .on("mouseout", () => { dispatch(updateTipRadii()); });
   } else {
@@ -235,15 +234,13 @@ export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin,
       .data(individualArcs)
       .attr("transform", (d) =>
         /* copied from above. TODO. */
-        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      );
+        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")");
   } else {
     d3elems.demes
       .data(demeData)
       .attr("transform", (d) =>
         /* copied from above. TODO. */
-        "translate(" + d.coords.x + "," + d.coords.y + ")"
-      );
+        "translate(" + d.coords.x + "," + d.coords.y + ")");
   }
 
   d3elems.transmissions

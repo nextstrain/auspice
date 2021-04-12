@@ -15,7 +15,7 @@ class PanelToggles extends React.Component {
         display
         on={this.props.showTangle}
         callback={() => this.props.dispatch({type: TOGGLE_TANGLE})}
-        label={"Show Tanglegram"}
+        label="Show Tanglegram"
         style={{paddingTop: "10px"}}
       />
     );

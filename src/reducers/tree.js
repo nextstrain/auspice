@@ -28,16 +28,13 @@ export const getDefaultTreeState = () => {
   };
 };
 
-
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.tree;
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return { ...state, loaded: false};
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const newStates = {
@@ -46,35 +43,45 @@ const Tree = (state = getDefaultTreeState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
+        idxOfFilteredRoot: action.idxOfFilteredRoot,
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
         visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };
-      return Object.assign({}, state, newStates);
+      return { ...state, ...newStates};
     case types.UPDATE_TIP_RADII:
-      return Object.assign({}, state, {
+      return { ...state,
         tipRadii: action.data,
-        tipRadiiVersion: action.version
-      });
+        tipRadiiVersion: action.version};
     case types.NEW_COLORS:
-      return Object.assign({}, state, {
+      return { ...state,
         nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version
-      });
+        nodeColorsVersion: action.version};
     case types.TREE_TOO_DATA:
       return action.tree;
-    case types.ADD_COLOR_BYS:
+    case types.ADD_EXTRA_METADATA:
       // modify the node data in place, which will not trigger any redux updates
       state.nodes.forEach((node) => {
-        if (action.strains.has(node.name)) {
+        if (action.newNodeAttrs[node.name]) {
           if (!node.node_attrs) node.node_attrs = {};
-          for (const [trait, obj] of Object.entries(action.traits[node.name])) {
-            node.node_attrs[trait] = obj;
+          for (const [attrName, attrData] of Object.entries(action.newNodeAttrs[node.name])) {
+            node.node_attrs[attrName] = attrData;
           }
         }
       });
-      return state;
+      // add the new colorings to visibleStateCounts & totalStateCounts so that they can function as filters
+      return {
+        ...state,
+        visibleStateCounts: {
+          ...state.visibleStateCounts,
+          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), state.visibility, true)
+        },
+        totalStateCounts: {
+          ...state.totalStateCounts,
+          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
+        }
+      };
     default:
       return state;
   }

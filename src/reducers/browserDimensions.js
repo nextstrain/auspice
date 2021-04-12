@@ -11,9 +11,7 @@ const BrowserDimensions = (state = {
 }, action) => {
   switch (action.type) {
     case types.BROWSER_DIMENSIONS:
-      return Object.assign({}, state, {
-        browserDimensions: action.data
-      });
+      return { ...state, browserDimensions: action.data};
     default:
       return state;
   }

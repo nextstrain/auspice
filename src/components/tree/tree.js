@@ -26,8 +26,8 @@ class Tree extends React.Component {
     };
     this.tangleRef = undefined;
     this.state = {
-      hover: null,
-      selectedBranch: null,
+      // hover: null,
+      // selectedBranch: null,
       selectedTip: null,
       tree: null,
       treeToo: null
@@ -41,6 +41,7 @@ class Tree extends React.Component {
       }));
     };
   }
+
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
@@ -50,6 +51,7 @@ class Tree extends React.Component {
     }
     renderTree(this, false, newState.treeToo, props);
   }
+
   componentDidMount() {
     if (this.props.tree.loaded) {
       const newState = {};
@@ -61,6 +63,7 @@ class Tree extends React.Component {
       this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
+
   componentDidUpdate(prevProps) {
     let newState = {};
     let rightTreeUpdated = false;
@@ -82,8 +85,7 @@ class Tree extends React.Component {
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
-      let unusedNewState; // eslint-disable-line
-      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      [, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
       /* note, we don't incorporate unusedNewState into the state? why not? */
     }
 
@@ -97,14 +99,33 @@ class Tree extends React.Component {
   getStyles = () => {
     const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
       this.props.treeToo.idxOfInViewRootNode !== 0;
+
+    const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
+      this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
+    const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
+      this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
+    const activeZoomButton = filteredTree || filteredTreeToo;
+
     return {
-      resetTreeButton: {
+      treeButtonsDiv: {
         zIndex: 100,
         position: "absolute",
         right: 5,
-        top: 0,
+        top: 0
+      },
+      resetTreeButton: {
+        zIndex: 100,
+        display: "inline-block",
+        marginLeft: 4,
         cursor: activeResetTreeButton ? "pointer" : "auto",
         color: activeResetTreeButton ? darkGrey : lightGrey
+      },
+      zoomToSelectedButton: {
+        zIndex: 100,
+        dispaly: "inline-block",
+        cursor: activeZoomButton ? "pointer" : "auto",
+        color: activeZoomButton ? darkGrey : lightGrey,
+        pointerEvents: activeZoomButton ? "auto" : "none"
       }
     };
   };
@@ -120,6 +141,12 @@ class Tree extends React.Component {
       />
     );
   }
+
+  zoomToSelected = () => {
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+      root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
+    }));
+  };
 
   render() {
     const { t } = this.props;
@@ -166,15 +193,22 @@ class Tree extends React.Component {
         {this.props.showTreeToo ? <div id="treeSpacer" style={{width: spaceBetweenTrees}}/> : null}
         {this.props.showTreeToo ?
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
-          null
-        }
+          null}
         {this.props.narrativeMode ? null : (
-          <button
-            style={{...tabSingle, ...styles.resetTreeButton}}
-            onClick={this.redrawTree}
-          >
-            {t("Reset Layout")}
-          </button>
+          <div style={{...styles.treeButtonsDiv}}>
+            <button type="button"
+              style={{...tabSingle, ...styles.zoomToSelectedButton}}
+              onClick={this.zoomToSelected}
+            >
+              {t("Zoom to Selected")}
+            </button>
+            <button type="button"
+              style={{...tabSingle, ...styles.resetTreeButton}}
+              onClick={this.redrawTree}
+            >
+              {t("Reset Layout")}
+            </button>
+          </div>
         )}
       </Card>
     );

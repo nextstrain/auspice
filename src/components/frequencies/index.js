@@ -5,7 +5,7 @@ import 'd3-transition';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, drawProjectionInfo,
-  areListsEqual, drawStream, processMatrix, parseColorBy, normString } from "./functions";
+  drawStream, processMatrix, parseColorBy, normString } from "./functions";
 import "../../css/entropy.css";
 
 @connect((state) => {
@@ -29,9 +29,11 @@ class Frequencies extends React.Component {
     super(props);
     this.state = {maxY: 0};
   }
+
   calcChartGeom(width, height) {
     return {width, height, spaceLeft: 40, spaceRight: 10, spaceBottom: 20, spaceTop: 10};
   }
+
   recomputeRedrawAll(newState, props) {
     /* modifies newState object which you should then pass to setState */
     const chartGeom = this.calcChartGeom(props.width, props.height);
@@ -46,12 +48,11 @@ class Frequencies extends React.Component {
     drawStream(newState.svgStreamGroup, newState.scales, data, {...props});
     drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot, props.t);
   }
+
   recomputeRedrawPartial(oldState, oldProps, newProps) {
     /* we don't have to check width / height changes here - that's done in componentDidUpdate */
     const data = processMatrix({...newProps});
     const maxYChange = oldState.maxY !== data.maxY;
-    const catChange = !areListsEqual(oldState.categories, data.categories);
-    if (!maxYChange && !catChange) return false;
     const chartGeom = this.calcChartGeom(newProps.width, newProps.height);
     /* should the y scale be updated? */
     let newScales;
@@ -69,6 +70,7 @@ class Frequencies extends React.Component {
     }
     return {...oldState, scales: newScales, maxY: data.maxY, categories: data.categories};
   }
+
   componentDidMount() {
     /* things that only ever need to be done once, and _don't_ rely on the frequencies actually being loaded */
     const svg = select(this.domRef);
@@ -80,7 +82,8 @@ class Frequencies extends React.Component {
     }
     this.setState(newState);
   }
-  componentWillReceiveProps(nextProps) {
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.version === nextProps.version) {
       // no-op
     } else if (!this.props.loaded && nextProps.loaded) {
@@ -92,6 +95,7 @@ class Frequencies extends React.Component {
       if (newState) this.setState(newState);
     }
   }
+
   componentDidUpdate(prevProps) {
     if (prevProps.width !== this.props.width || prevProps.height !== this.props.height) {
       /* we could be cleverer here, but transitions on window size changes look rubbish anyways */
@@ -100,6 +104,7 @@ class Frequencies extends React.Component {
       this.setState(newState);
     }
   }
+
   render() {
     const { t } = this.props;
     const {tipCount, fullTipCount} = this.props.nodes[0];

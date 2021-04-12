@@ -103,7 +103,7 @@ const Container = styled.div`
 
 `;
 
-const EXPERIMENTAL_MainDisplayMarkdown = ({ narrativeBlock, width, mobile }) => {
+const MainDisplayMarkdown = ({ narrativeBlock, width, mobile }) => {
   return (
     <Container width={width} mobile={mobile}>
       <Suspense>
@@ -115,4 +115,4 @@ const EXPERIMENTAL_MainDisplayMarkdown = ({ narrativeBlock, width, mobile }) => 
 
 export default connect((state) => ({
   narrativeBlock: state.narrative.blocks[state.narrative.blockIdx]
-}))(EXPERIMENTAL_MainDisplayMarkdown);
+}))(MainDisplayMarkdown);

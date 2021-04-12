@@ -232,7 +232,6 @@ const BranchDescendents = ({node, t}) => {
   return <InfoLine name={name} value={value} padBelow/>;
 };
 
-
 /**
  * A React component to show vaccine information, if present
  * @param  {Object} props
@@ -319,10 +318,9 @@ const Container = ({node, panelDims, children}) => {
     styles.container.bottom = panelDims.height - yPos + yOffset;
   }
 
-
   return (
     <div style={styles.container}>
-      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+      <div className="tooltip" style={infoPanelStyles.tooltip}>
         {children}
       </div>
     </div>

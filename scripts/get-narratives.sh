@@ -28,3 +28,4 @@ unzip -o -j narratives/master.zip -d narratives
 rm narratives/master.zip
 
 echo "Done. Locally available narratives should be accessible from the splash page (normally localhost:4000)"
+

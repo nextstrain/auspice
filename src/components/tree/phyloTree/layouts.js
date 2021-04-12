@@ -34,7 +34,6 @@ export const setLayout = function setLayout(layout) {
   timerEnd("setLayout");
 };
 
-
 /**
  * assignes x,y coordinates for a rectancular layout
  * @return {null}
@@ -121,7 +120,6 @@ const unrootedPlaceSubtree = (node, nTips) => {
     }
   }
 };
-
 
 /**
  * calculates x,y coordinates for the unrooted layout. this is
@@ -231,7 +229,6 @@ export const setDistance = function setDistance(distanceAttribute) {
   timerEnd("setDistance");
 };
 
-
 /**
  * sets the range of the scales used to map the x,y coordinates to the screen
  * @param {margins} -- object with "right, left, top, bottom" margins
@@ -279,6 +276,10 @@ export const mapToScreen = function mapToScreen() {
     right: this.params.margins.right,
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
+  if (this.layout==="rect" || this.layout==="unrooted") {
+    // legend is 12px, but 6px is enough to prevent tips being obscured
+    tmpMargins.top += 6;
+  }
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
   if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
 

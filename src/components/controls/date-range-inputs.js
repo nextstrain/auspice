@@ -38,6 +38,7 @@ class DateRangeInputs extends React.Component {
     this.updateFromSliderNotDebounced = this.updateFromSlider.bind(this, false);
     this.updateFromSliderDebounced = this.updateFromSlider.bind(this, true);
   }
+
   maybeClearMapAnimationInterval() {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
       clearInterval(window.NEXTSTRAIN.animationTickReference);
@@ -48,6 +49,7 @@ class DateRangeInputs extends React.Component {
       });
     }
   }
+
   updateFromSlider(debounce, numDateValues) {
     /* debounce: boolean. TRUE: both debounce and quickdraw. */
     this.maybeClearMapAnimationInterval();
@@ -79,6 +81,7 @@ class DateRangeInputs extends React.Component {
     }
     return null;
   }
+
   render() {
     if (this.props.branchLengthsToDisplay === "divOnly") {
       return null;
@@ -108,5 +111,13 @@ class DateRangeInputs extends React.Component {
     );
   }
 }
+
+export const DateRangeInfo = (
+  <>
+    Use this slider to filter the data based on the sample date.
+    This may include inferred dates for ancestral nodes in the tree,
+    and thus the date range here can be wider than the sample collection range.
+  </>
+);
 
 export default DateRangeInputs;

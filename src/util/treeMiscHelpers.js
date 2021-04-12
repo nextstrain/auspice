@@ -1,4 +1,4 @@
-import { isValueValid } from "./globals";
+import { isValueValid, strainSymbol } from "./globals";
 
 /* --- TO IMPROVE -----
 These "getter" functions for node-related data require knowledge of
@@ -29,14 +29,17 @@ export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}=
   if (!node.node_attrs) return undefined;
 
   if (!entropy && !confidence) {
-    if (!node.node_attrs[trait]) return undefined;
+    if (!node.node_attrs[trait]) {
+      if (trait === strainSymbol) return node.name;
+      return undefined;
+    }
     const value = node.node_attrs[trait].value;
     if (!isValueValid(value)) return undefined;
     return value;
-  } else if (entropy) {
+  } if (entropy) {
     if (node.node_attrs[trait]) return node.node_attrs[trait].entropy;
     return undefined;
-  } else if (confidence) {
+  } if (confidence) {
     if (node.node_attrs[trait]) return node.node_attrs[trait].confidence;
     return undefined;
   }
@@ -77,15 +80,81 @@ export const getAttributeFromNodeByName = (node, attr) => {
     return node.node_attrs[attr];
   }
   return undefined;
-}
+};
 
 export const getAllAttributesFromNode = (node) => {
   if (node.node_attrs) {
     return Object.entries(node.node_attrs);
   }
-  return []
-}
+  return [];
+};
 
 /* see comment at top of this file */
 export const getUrlFromNode = (node) =>
   (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
+
+/**
+ * Traverses the tree and returns a set of genotype states such as
+ * {"nuc:123A", "S:418K"}.
+ * Note 1: Only variable sites are considered.
+ * Note 2: Basal states are included in the returned value.
+ */
+export function collectGenotypeStates(nodes) {
+  const observedStates = new Set();
+  nodes.forEach((n) => {
+    if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
+      Object.entries(n.branch_attrs.mutations).forEach(([gene, mutations]) => {
+        mutations.forEach((m) => {
+          const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)];
+          observedStates.add(`${gene} ${pos}${to}`);
+          observedStates.add(`${gene} ${pos}${from}`); // ancestral state, relative to this node
+        });
+      });
+    }
+  });
+  return observedStates;
+}
+
+/**
+ * Collect mutations from node `fromNode` to the root.
+ * Reversions (e.g. root -> A<pos>B -> B<pos>A -> fromNode) will not be reported
+ * Multiple mutations (e.g. root -> A<pos>B -> B<pos>C -> fromNode) will be represented as A<pos>C
+ * We may want to expand this function to take a second argument as the "stopping node"
+ * @param {TreeNode} fromNode
+ */
+export const collectMutations = (fromNode, include_nuc=false) => {
+  const mutations = {};
+  const walk = (n) => {
+    if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
+      Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
+        if ((gene === "nuc" && include_nuc) || gene !== "nuc") {
+          if (!mutations[gene]) mutations[gene] = {};
+          muts.forEach((m) => {
+            const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)]; // note: `pos` is a string
+            if (mutations[gene][pos]) {
+              mutations[gene][pos][0] = from; // mutation already seen => update ancestral state.
+            } else {
+              mutations[gene][pos] = [from, to];
+            }
+          });
+        }
+      });
+    }
+    const nIdx = n.arrayIdx;
+    const parent = n.parent;
+    if (parent && parent.arrayIdx !== nIdx) {
+      walk(parent);
+    }
+  };
+  walk(fromNode);
+  // update structure to be returned
+  Object.keys(mutations).forEach((gene) => {
+    mutations[gene] = Object.entries(mutations[gene])
+      .map(([pos, [from, to]]) => {
+        if (from===to) return undefined; // reversion to ancestral (root) state
+        return `${from}${pos}${to}`;
+      })
+      .filter((value) => !!value);
+  });
+  return mutations;
+};

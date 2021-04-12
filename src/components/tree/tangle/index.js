@@ -16,11 +16,11 @@ class Tangle extends React.Component {
     this.state = {
       left: 0,
       top: 31,
-      lookup: undefined,
       drawn: false
     };
     this.timeout = false;
   }
+
   shouldComponentUpdate(nextProps) {
     return (
       this.props.width !== nextProps.width ||
@@ -29,6 +29,7 @@ class Tangle extends React.Component {
       this.props.rightTreeName !== nextProps.rightTreeName
     );
   }
+
   drawLines(props) {
     if (!props) props = this.props; // eslint-disable-line
     const thickness = props.lookup.length > 750 ? 0.25 : props.lookup.length > 100 ? 0.5 : 1;
@@ -45,6 +46,7 @@ class Tangle extends React.Component {
       .attr("stroke", (idxs) => props.colors[idxs[0]])
       .attr("fill", 'none');
   }
+
   // transitionColors(newColors) {
   //   select(this.d3ref).selectAll(".tangleLine")
   //     .transition().duration(500)
@@ -56,18 +58,20 @@ class Tangle extends React.Component {
   //     .transition().duration(500)
   //     .attr("d", makeTipPath);
   // }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!this.state.drawn && nextProps.rightNodes[0].shell) {
       this.drawLines(nextProps);
       this.setState({drawn: true});
     }
   }
+
   componentDidMount() {
     if (!this.state.drawn && this.props.rightNodes[0].shell) {
       this.drawLines(this.props);
       this.setState({drawn: true});
     }
   }
+
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
     if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {
@@ -79,6 +83,7 @@ class Tangle extends React.Component {
       this.timeout = window.setTimeout(this.drawLines.bind(this), 1000);
     }
   }
+
   render() {
     const textStyles = {position: "absolute", top: 5, zIndex: 100, fontSize: 16, color: "#000", fontWeight: 500};
     const lefts = [this.props.width/2 - this.props.spaceBetweenTrees/2, this.props.width/2 + this.props.spaceBetweenTrees/2];

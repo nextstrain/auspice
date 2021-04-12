@@ -3,8 +3,8 @@ import { min, max } from "d3-array";
 import { transition } from "d3-transition";
 import { easeLinear } from "d3-ease";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { months, animationInterpolationDuration } from "../../../util/globals";
-import { numericToCalendar } from "../../../util/dateHelpers";
+import { animationInterpolationDuration } from "../../../util/globals";
+import { numericToDateObject, calendarToNumeric, getPreviousDate, getNextDate, dateToString, prettifyDate } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
   if ("majorGrid" in this.groups) {
@@ -46,111 +46,38 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
 };
 
 /**
- * Create the major-grid-line separation for divergence scales.
- * @param {numeric} range num years or amount of divergence present in current view
+ * Create the separation between major & minor grid lines for divergence scales.
+ * @param {numeric} range amount of divergence (subs/site/year _or_ num mutations) present in current view
  * @param {numeric} minorTicks num of minor ticks desired between each major step
  * @returns {object}
  *  - property `majorStep` {numeric}: space between major x-axis gridlines (measure of divergence)
  *  - property `minorStep` {numeric}: space between minor x-axis gridlines (measure of divergence)
  */
-const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
+const calculateDivGridSeperation = (range, minorTicks) => {
   /* make an informed guess of the step size to start with.
   E.g. 0.07 => step of 0.01, 70 => step size of 10 */
   const logRange = Math.floor(Math.log10(range));
   let majorStep = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
-
   if (range/majorStep < 2) { // if step > 0.5*range then make more fine-grained steps
     majorStep /= 5;
   } else if (range/majorStep <5) { // if step > 0.2*range then make more fine grained steps
     majorStep /= 2;
   }
-
   let numMinorTicks = minorTicks;
   if (majorStep===5 || majorStep===10) {
     numMinorTicks = 5;
   }
   const minorStep = majorStep / numMinorTicks;
-
   return {majorStep, minorStep};
 };
 
-/**
- * Create the major-grid-line separation for temporal view.
- * @param {numeric} timeRange num years in current view
- * @param {numeric} pxAvailable number of pixels available for the x axis
- * @returns {object}
- *  - property `majorStep` {numeric}: space between major x-axis gridlines (measure of time)
- *  - property `minorStep` {numeric}: space between minor x-axis gridlines (measure of time)
- */
-export const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
-  const rountToNearest = (n, p) => Math.ceil(n/p)*p;
-
-  const getMinorSpacing = (majorStep) => {
-    const timesToTry = [1/365.25, 1/52, 1/12, 1, 10, 100, 1000];
-    for (const t of timesToTry) {
-      const n = majorStep / t;
-      // max number we allow is 12 (so that a major grid of a year can have minor grids of a month)
-      if (n <= 12) return t;
-    }
-    return majorStep; // fallthrough. Only happens for _very_ large trees
-  };
-
-  /* in general, we find that 1 major point for every ~100px works well
-  for wider displays we shift up to 150px then 200px */
-  const nSteps = Math.floor(pxAvailable / (pxAvailable < 1200 ? 100 : 150)) || 1;
-
-  let majorStep = timeRange / nSteps;
-
-  /* For time views, it's nicer if the spacing is meaningful.
-  There's probably a better way to do this than cascading through levels */
-  if (majorStep > 100) {
-    majorStep = rountToNearest(majorStep, 100);
-  } else if (majorStep > 10) {
-    majorStep = rountToNearest(majorStep, 10);
-  } else if (majorStep > 1) {
-    majorStep = rountToNearest(majorStep, 1);
-  } else if (majorStep > (1/12)) {
-    /* each step is longer than a month, but shorter than a year */
-    majorStep = rountToNearest(majorStep, 1/12);
-  } else if (majorStep > (1/52)) {
-    /* each step is longer than a week, but shorter than a month */
-    majorStep = rountToNearest(majorStep, 1/52);
-  } else if (majorStep > (1/365.25)) {
-    /* each time step is longer than a day, but shorter than a week */
-    majorStep = rountToNearest(majorStep, 1/365.25);
-  } else {
-    majorStep = 1/365.25;
-  }
-  const minorStep = getMinorSpacing(majorStep);
-  return {majorStep, minorStep};
-};
-
-/**
- * Format the date to be displayed below major gridlines
- * @param {numeric} step num years between each major gridline. Can be decimal.
- * @param {numeric} numDate date in decimal format
- * @returns {string} date to be displayed below major gridline
- */
-export const createDisplayDate = (step, numDate) => {
-  if (step >= 1) {
-    return numDate.toFixed(Math.max(0, -Math.floor(Math.log10(step))));
-  }
-  const [year, month, day] = numericToCalendar(numDate).split("-");
-  if (step >= 1/12) {
-    return `${year}-${months[month]}`;
-  }
-  return `${year}-${months[month]}-${day}`;
-};
-
-
-const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxAvailable) => {
+const computeDivergenceGridPoints = (xmin, xmax, layout, minorTicks) => {
   const majorGridPoints = [];
   const minorGridPoints = [];
 
   /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
-  const {majorStep, minorStep} = distanceMeasure === "num_date" ?
-    calculateMajorGridSeperationForTime(xmax-xmin, Math.abs(pxAvailable)) :
-    calculateMajorGridSeperationForDivergence(xmax-xmin, minorTicks);
+  const {majorStep, minorStep} = calculateDivGridSeperation(xmax-xmin, minorTicks);
+
   const gridMin = Math.floor(xmin/majorStep)*majorStep;
   const minVis = layout==="radial" ? xmin : gridMin;
   const maxVis = xmax;
@@ -159,9 +86,7 @@ const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxA
     const pos = gridMin + majorStep*ii;
     majorGridPoints.push({
       position: pos,
-      name: distanceMeasure === "num_date" ?
-        createDisplayDate(majorStep, pos) :
-        pos.toFixed(Math.max(0, -Math.floor(Math.log10(majorStep)))),
+      name: pos.toFixed(Math.max(0, -Math.floor(Math.log10(majorStep)))),
       visibility: ((pos<minVis) || (pos>maxVis)) ? "hidden" : "visible",
       axis: "x"
     });
@@ -177,10 +102,115 @@ const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxA
   return {majorGridPoints, minorGridPoints};
 };
 
+/**
+ * Calculate the spacing between Major and Minor grid points. This is computed via a
+ * heuristic which takes into account (a) the available space (pixels) and (b) the
+ * time range to display.
+ * As major grid lines are (usually) labelled, we wish these to represent a consistent
+ * spacing of time, e.g. "3 months" or "7 years". Note that this means the actual time between
+ * grids may be very slightly different, as months, years etc can have different numbers of days.
+ * @param {numeric} timeRange numeric date range in current view (between right-most tip & left-most node)
+ * @param {numeric} pxAvailable number of pixels available
+ * @returns {object}
+ */
+const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
+  const [majorStep, minorStep] = [{unit: "DAY", n: 1}, {unit: "DAY", n: 0}];
+  const minPxBetweenMajorGrid = (pxAvailable < 1000 ? 130 : 180);
+  const timeBetweenMajorGrids = timeRange/(Math.floor(pxAvailable / minPxBetweenMajorGrid));
+  const levels = {
+    CENTURY: {t: 100, max: undefined},
+    DECADE: {t: 10, max: 5}, // i.e. spacing of 50 years is ok, but 60 jumps up to 100y spacing
+    FIVEYEAR: {t: 5, max: 1},
+    YEAR: {t: 1, max: 3}, // 4 year spacing not allowed (will use 5 year instead)
+    MONTH: {t: 1/12, max: 6}, // 7 month spacing not allowed
+    WEEK: {t: 1/52, max: 1}, // 2 week spacing not allowed - prefer months
+    DAY: {t: 1/365, max: 3}
+  };
+  const levelsKeys = Object.keys(levels);
+
+  /* calculate the best unit of time to fit into the allowed range */
+  majorStep.unit = "DAY"; // fallback value
+  for (let i=0; i<levelsKeys.length-1; i++) {
+    if (timeBetweenMajorGrids > levels[levelsKeys[i]].t) {
+      majorStep.unit = levelsKeys[i];
+      break;
+    }
+  }
+  /* how many of those "units" should ideally fit into each major grid separation? */
+  majorStep.n = Math.floor(timeBetweenMajorGrids/levels[majorStep.unit].t) || 1;
+  /* if the numer of units (per major grid) is above the allowed max, use a bigger unit */
+  if (levels[majorStep.unit].max && majorStep.n > levels[majorStep.unit].max) {
+    majorStep.unit = levelsKeys[levelsKeys.indexOf(majorStep.unit)-1];
+    majorStep.n = Math.floor(timeBetweenMajorGrids/levels[majorStep.unit].t) || 1;
+  }
+
+  /* Calculate best unit of time for the minor grid spacing */
+  if (majorStep.n > 1 || majorStep.unit === "DAY") {
+    minorStep.unit = majorStep.unit;
+  } else {
+    minorStep.unit = levelsKeys[levelsKeys.indexOf(majorStep.unit)+1];
+  }
+  /* how many of those "units" should form the separation of the minor grids? */
+  const majorSpacing = majorStep.n * levels[majorStep.unit].t;
+  minorStep.n = Math.ceil(levels[minorStep.unit].t/majorSpacing);
+
+  return {majorStep, minorStep};
+};
+
+/**
+ * Compute the major & minor temporal grid points for display.
+ * @param {numeric} xmin numeric date of minimum value in view
+ * @param {numeric} xmax numeric date of maximum value in view
+ * @param {numeric} pxAvailable pixels in which to display the date range (xmin, xmax)
+ * @returns {Object} properties: `majorGridPoints`, `minorGridPoints`
+ */
+export const computeTemporalGridPoints = (xmin, xmax, pxAvailable) => {
+  const [majorGridPoints, minorGridPoints] = [[], []];
+  const {majorStep, minorStep} = calculateTemporalGridSeperation(xmax-xmin, Math.abs(pxAvailable));
+
+  /* Major Grid Points */
+  const overallStopDate = getNextDate(majorStep.unit, numericToDateObject(xmax));
+  let proposedDate = getPreviousDate(majorStep.unit, numericToDateObject(xmin));
+  while (proposedDate < overallStopDate) {
+    majorGridPoints.push({
+      date: proposedDate,
+      position: calendarToNumeric(dateToString(proposedDate)),
+      name: prettifyDate(majorStep.unit, proposedDate),
+      visibility: 'visible',
+      axis: "x"
+    });
+    for (let i=0; i<majorStep.n; i++) {
+      proposedDate = getNextDate(majorStep.unit, proposedDate);
+    }
+  }
+
+  /* Minor Grid Points between each pair of major grid points */
+  if (minorStep.n) {
+    majorGridPoints.forEach((majorGridPoint, majorIdx) => {
+      proposedDate = getNextDate(minorStep.unit, majorGridPoint.date);
+      for (let i=0; i<minorStep.n-1; i++) {
+        proposedDate = getNextDate(minorStep.unit, proposedDate);
+      }
+      const stopDate = majorIdx===majorGridPoints.length-1 ? overallStopDate : majorGridPoints[majorIdx+1].date;
+      while (proposedDate < stopDate) {
+        minorGridPoints.push({
+          position: calendarToNumeric(dateToString(proposedDate)),
+          visibility: 'visible',
+          axis: "x"
+        });
+        for (let i=0; i<minorStep.n; i++) {
+          proposedDate = getNextDate(minorStep.unit, proposedDate);
+        }
+      }
+    });
+  }
+  return {majorGridPoints, minorGridPoints};
+};
+
 const computeYGridPoints = (ymin, ymax) => {
   const majorGridPoints = [];
   let yStep = 0;
-  yStep = calculateMajorGridSeperationForDivergence(ymax-ymin).majorStep;
+  yStep = calculateDivGridSeperation(ymax-ymin).majorStep;
   const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
   const gridYMin = Math.floor(ymin/yStep)*yStep;
   const maxYVis = ymax;
@@ -222,9 +252,9 @@ export const addGrid = function addGrid() {
   /* determine grid points (i.e. on the x/polar axis where lines/circles will be drawn through)
   Major grid points are thicker and have text
   Minor grid points have no text */
-  const {majorGridPoints, minorGridPoints} = computeXGridPoints(
-    xmin, xmax, layout, this.distance, this.params.minorTicks, xAxisPixels
-  );
+  const {majorGridPoints, minorGridPoints} = this.distance === "num_date" ?
+    computeTemporalGridPoints(xmin, xmax, xAxisPixels) :
+    computeDivergenceGridPoints(xmin, xmax, layout, this.params.minorTicks);
 
   /* HOF, which returns the fn which constructs the SVG path string
   to draw the axis lines (circles for radial trees).
@@ -325,7 +355,6 @@ export const addGrid = function addGrid() {
         .style("visibility", (d) => d.visibility)
         .style("stroke", this.params.minorGridStroke)
         .style("stroke-width", this.params.minorGridWidth);
-
 
   /* draw the text labels for majorGridPoints */
   this.groups.gridText.selectAll("*").remove();
@@ -468,7 +497,6 @@ export const showTemporalSlice = function showTemporalSlice() {
       .attr("height", height)
       .attr("fill", fill)
       .attr("transform", transform_endRegion);
-
 
     // Only apply animation if rectangle was already visible in the previous frame.
     // Unlike the startingRegion, this panel cannot depend

@@ -1,124 +1,247 @@
+import { rgb } from "d3-color";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
-import { ADD_COLOR_BYS } from "../types";
-import { csv_file_types, is_csv_or_tsv } from "./constants";
-
-let Papa;
-
-/**
- * A promise-ified version of Papa.parse()
- * A note on encoding here: It will be common that people drop CSVs from microsoft excel
- * in here annd, you guessed it, this causes all sorts of problems.
- * https://github.com/mholt/PapaParse/issues/169 suggests adding encoding: "ISO-8859-1"
- * to the config, which may work
- * @param {DataTransfer} file a DataTransfer object
- */
-const parseCsv = async (file) => {
-  if (!Papa) Papa = (await import("papaparse")).default;
-  return new Promise((resolve, reject) => {
-    if (!(is_csv_or_tsv(file))) {
-      reject(new Error("Cannot parse this filetype"));
-    }
-    Papa.parse(file, {
-      header: true,
-      complete: (results) => {
-        resolve(results);
-      },
-      error: (error) => {
-        reject(error);
-      },
-      encoding: "UTF-8",
-      comments: "#",
-      delimiter: (csv_file_types.includes(file.type)) ? "," : "\t",
-      skipEmptyLines: true,
-      dynamicTyping: false
-    });
-  });
-};
-
+import { ADD_EXTRA_METADATA } from "../types";
+import { parseCsvTsv } from "./parseCsvTsv";
 
 const handleMetadata = async (dispatch, getState, file) => {
-  let csvData, errors, csvMeta;
+  const fileName = file.name;
+
   try {
-    ({data: csvData, errors, meta: csvMeta} = await parseCsv(file));
+    /* Parse & interrogate the CSV file */
+    const {errors, data, meta} = await parseCsvTsv(file);
     if (errors.length) {
       console.error(errors);
       throw new Error(errors.map((e) => e.message).join(", "));
     }
+    const {coloringInfo, strainKey, latLongKeys, ignoredFields} = processHeader(meta.fields);
+    const rows = {};
+    data.forEach((d) => {rows[d[strainKey]]=d;});
+
+    /* For each coloring, extract values defined in each row etc */
+    const newNodeAttrs = {};
+    const newColorings = processColorings(newNodeAttrs, coloringInfo, rows, fileName); // modifies `newNodeAttrs`
+    const newGeoResolution = latLongKeys ? processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) : undefined;
+    /* Fix errors in data & dispatch warnings here, as we cannot dispatch in the reducers */
+    const ok = checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName);
+    if (!ok) return undefined;
+
+    dispatch({type: ADD_EXTRA_METADATA, newColorings, newGeoResolution, newNodeAttrs});
+    return dispatch(successNotification({
+      message: `Adding metadata from ${fileName}`,
+      details: `${Object.keys(newColorings).length} new coloring${Object.keys(newColorings).length > 1 ? "s" : ""} for ${Object.keys(newNodeAttrs).length} node${Object.keys(newNodeAttrs).length > 1 ? "s" : ""}`
+    }));
+
   } catch (err) {
     return dispatch(errorNotification({
-      message: `Parsing of ${file.name} failed`,
+      message: `Parsing of ${fileName} failed`,
       details: err.message
     }));
   }
-
-  const strainKey = csvMeta.fields[0];
-  const {controls, tree} = getState();
-  const newColorByNames = [];
-  const colorBysIgnored = [];
-  /* currently we cannot process metadata fields which are defined as properties on a node, rather than trait properties
-  These could be included on a case-by-case basis */
-  const fieldsToIgnore = new Set(["name", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
-  csvMeta.fields.slice(1).forEach((colorBy) => {
-    if (controls.coloringsPresentOnTree.has(colorBy) || fieldsToIgnore.has(colorBy)) {
-      colorBysIgnored.push(colorBy);
-    } else {
-      newColorByNames.push(colorBy);
-    }
-  });
-  const strainsToProcess = new Set();
-  const dataToProcess = {};
-  const taxaInCsvButNotInTree = [];
-  const allStrainNames = new Set(tree.nodes.map((n) => n.name)); // can be internal nodes
-  csvData.forEach((d) => {
-    const strain = d[strainKey];
-    if (allStrainNames.has(strain)) {
-      strainsToProcess.add(strain);
-      dataToProcess[strain] = {};
-      newColorByNames.forEach((colorBy) => {
-        if (d[colorBy]) {
-          dataToProcess[strain][colorBy] = {value: d[colorBy]};
-        }
-      });
-    } else {
-      taxaInCsvButNotInTree.push(strain);
-    }
-  });
-
-  /* CHECK FOR ERRORS */
-  if (strainsToProcess.size === 0 || newColorByNames.length === 0) {
-    return dispatch(errorNotification({
-      message: `${file.name} had no (relevent) information`,
-      details: newColorByNames.length === 0 ? "No columns to add as colorings" : "No taxa which match those in the tree"
-    }));
-  }
-
-  /* DISPATCH APPROPRIATE WARNINGS */
-  if (taxaInCsvButNotInTree.length) {
-    const n = taxaInCsvButNotInTree.length;
-    dispatch(warningNotification({
-      message: `Ignoring ${n} taxa which ${n > 1 ? "don't" : "doesn't"} appear in the tree!`,
-      details: taxaInCsvButNotInTree.join(", ")
-    }));
-    console.warn("Ignoring these taxa from the CSV as they don't appear in the tree:", taxaInCsvButNotInTree);
-  }
-  if (colorBysIgnored.length) {
-    dispatch(warningNotification({
-      message: `Ignoring ${colorBysIgnored.length} CSV fields as they are already set as colorings or are "special" cases to be ignored`,
-      details: colorBysIgnored.join(", ")
-    }));
-  }
-
-  /* DISPATCH NEW COLORINGS & SUCCESS NOTIFICATION */
-  const newColorings = {};
-  newColorByNames.forEach((title) => {
-    // TODO -- let the CSV define the type
-    newColorings[title] = {title, type: "categorical"};
-  });
-  dispatch({type: ADD_COLOR_BYS, newColorings, strains: strainsToProcess, traits: dataToProcess});
-  return dispatch(successNotification({
-    message: "Adding metadata from " + file.name,
-    details: `${newColorByNames.length} new field${newColorByNames.length > 1 ? "s" : ""} for ${strainsToProcess.size} node${strainsToProcess.size > 1 ? "s" : ""}`
-  }));
 };
 
 export default handleMetadata;
+
+/* ---------------------- helper functions to parse data ---------------------------- */
+
+function processHeader(fields) {
+  const strainKey = fields[0];
+
+  /* There are a number of "special case" columns we currently ignore */
+  const fieldsToIgnore = new Set(["name", "div", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
+  fieldsToIgnore.add("num_date").add("year").add("month").add("date"); /* TODO - implement date parsing */
+  const latLongFields = new Set(["__latitude", "__longitude", "latitude", "longitude"]);
+  const ignoredFields = new Set();
+
+  const coloringInfo = fields.slice(1)
+    .map((fieldName) => {
+      if (fieldsToIgnore.has(fieldName)) {
+        ignoredFields.add(fieldName);
+        return null;
+      }
+      if (latLongFields.has(fieldName)) {
+        return null;
+      }
+      let name = fieldName;
+      const lookupKey = fieldName;
+      const scaleType = "categorical"; // TODO
+      /* interpret column names using microreact-style syntax */
+      if (fieldName.includes("__")) {
+        const [prefix, suffix] = fieldName.split("__");
+        if (["shape", "colour", "color"].includes(suffix)) {
+          ignoredFields.add(fieldName);
+          return null;
+        }
+        if (suffix === "autocolour") {
+          name = prefix; /* MicroReact uses this to colour things, but we do this by default */
+        }
+      }
+      return {name, lookupKey, scaleKey: undefined, scaleType};
+    })
+    .filter((x) => !!x)
+    .map((data) => {
+      if (fields.includes(`${data.name}__colour`)) {
+        data.scaleKey = `${data.name}__colour`;
+      } else if (fields.includes(`${data.name}__color`)) {
+        data.scaleKey = `${data.name}__color`;
+      }
+      return data;
+    });
+
+  /* check for the presense of lat/long fields */
+  const latLongKeys = (fields.includes("latitude") && fields.includes("longitude")) ?
+    {latitude: "latitude", longitude: "longitude"} :
+    (fields.includes("__latitude") && fields.includes("__longitude")) ?
+      {latitude: "__latitude", longitude: "__longitude"} :
+      undefined;
+
+  return {coloringInfo, header: fields, strainKey, latLongKeys, ignoredFields};
+}
+
+/**
+ * Add colorings defined by the CSV header (`coloringInfo`) and specified in each CSV
+ * row (`rows`) to the nodes (`newNodeAttrs`) and returns a `newColorings` object.
+ */
+function processColorings(newNodeAttrs, coloringInfo, rows, fileName) {
+  const newColorings = {};
+  for (const info of coloringInfo) {
+    const scaleMap = new Map(); // will only be populated if coloringInfo.scaleKey is defined
+
+    for (const [strain, row] of Object.entries(rows)) {
+      const value = row[info.lookupKey];
+      if (value) { // ignore empty strings (which arise from an empty CSV field)
+        if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
+        newNodeAttrs[strain][info.name] = {value};
+
+        if (info.scaleKey && row[info.scaleKey] && row[info.scaleKey].match(/^#[A-Fa-f0-9]{6}$/)) {
+          if (!scaleMap.has(value)) scaleMap.set(value, []);
+          scaleMap.get(value).push(row[info.scaleKey]);
+        }
+
+      }
+    }
+    newColorings[info.name] = {
+      title: info.name,
+      type: info.scaleType /* TODO - attempt to guess this if no info supplied */
+    };
+    if (scaleMap.size) newColorings[info.name].scale = makeScale(info.name, scaleMap);
+  }
+  /* Add a boolean scale for presence/absence in this file */
+  newColorings[fileName] = {title: fileName, type: 'boolean'};
+  Object.keys(rows).forEach((strain) => {
+    if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
+    /* Ideally the value here would be `true` but this causes UI issues in <Info> */
+    newNodeAttrs[strain][fileName] = {value: `Strains in ${fileName}`};
+  });
+  return newColorings;
+}
+
+function makeScale(colorBy, scaleMap) {
+  const scale = [];
+  for (const [traitValue, colors] of scaleMap) {
+    if (new Set(colors).size===1) {
+      scale.push([traitValue, colors[0]]);
+    } else {
+      // console.log(`Averaging colours for ${traitValue}`);
+      let r=0, g=0, b=0; // same algorithm as `getAverageColorFromNodes`
+      colors.forEach((c) => {
+        const tmpRGB = rgb(c);
+        r += tmpRGB.r;
+        g += tmpRGB.g;
+        b += tmpRGB.b;
+      });
+      const total = colors.length;
+      scale.push([traitValue, rgb(r/total, g/total, b/total).toString()]);
+    }
+  }
+  return scale;
+}
+
+/**
+ * Metadata defines lat-longs _per-sample_ which is orthogonal to Nextstrain's approach
+ * (where we associate coords to a metadata trait). The approach here is to create a new
+ * `node_attr` which represents the unique lat/longs provided here.
+ */
+function processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) {
+  const coordsStrains = new Map();
+  /* Collect groups of strains with identical lat/longs */
+  Object.entries(rows).forEach(([strain, row]) => {
+    const [latitude, longitude] = [Number(row[latLongKeys.latitude]), Number(row[latLongKeys.longitude])];
+    if (Number.isNaN(latitude) || Number.isNaN(longitude) || latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180) return;
+    const strKey = String(row[latLongKeys.latitude])+String(row[latLongKeys.longitude]);
+    if (!coordsStrains.has(strKey)) {
+      coordsStrains.set(strKey, {latitude, longitude, strains: new Set()});
+    }
+    coordsStrains.get(strKey).strains.add(strain);
+  });
+  /* invert map to link each strain to a dummy value with lat/longs */
+  const traitName = fileName+"_geo"; /* dummy trait name, but will be visible to the user! */
+  const newGeoResolution = {key: traitName, demes: {}};
+  let counter = 0;
+  coordsStrains.values().forEach(({latitude, longitude, strains}) => {
+    const traitValue = `deme_${counter++}`;/* dummy variable, but will be visible to the user! */
+    newGeoResolution.demes[traitValue] = {latitude, longitude};
+    strains.forEach((strain) => {
+      if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {};
+      newNodeAttrs[strain][traitName] = {value: traitValue};
+    });
+  });
+  return newGeoResolution;
+}
+
+function checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName) {
+  const {controls, tree} = getState();
+  const [droppedColorings, droppedNodes] = [new Set(), new Set()];
+
+  /* restrict the newNodeAttrs to nodes which are actually in the tree! */
+  const nodeNamesInTree = new Set(tree.nodes.map((n) => n.name)); // can be internal nodes
+  for (const name of Object.keys(newNodeAttrs)) {
+    if (!nodeNamesInTree.has(name)) {
+      droppedNodes.add(name);
+      delete newNodeAttrs[name];
+    }
+  }
+
+  /* restrict added colorings to those which have at least one valid value in the tree! */
+  for (const colorName of Object.keys(newColorings)) {
+    if (!Object.keys(newNodeAttrs).filter((strainName) => newNodeAttrs[strainName][colorName]).length) {
+      droppedColorings.add(colorName);
+      delete newColorings[colorName];
+    }
+  }
+  /* restrict added colorings to those _not_ currently present on the tree. This could be relaxed. TODO. */
+  for (const colorName of Object.keys(newColorings)) {
+    if (controls.coloringsPresentOnTree.has(colorName)) {
+      droppedColorings.add(colorName);
+      delete newColorings[colorName];
+    }
+  }
+  /* strip those droppedColorings out of `newNodeAttrs` */
+  for (const colorName of droppedColorings) {
+    for (const nodeAttr of Object.values(newNodeAttrs)) {
+      delete nodeAttr[colorName]; // Note that this works even if `colorName` is not a property
+    }
+  }
+
+  if (!Object.keys(newNodeAttrs).length || !Object.keys(newColorings).length) {
+    dispatch(errorNotification({
+      message: `${fileName} had no (relevent) information`,
+      details: Object.keys(newNodeAttrs).length ? "No columns to add as colorings" : "No taxa which match those in the tree"
+    }));
+    return false;
+  }
+
+  if (droppedColorings.size) {
+    dispatch(warningNotification({
+      message: `Ignoring ${droppedColorings.size} columns as they are already set as colorings or are "special" cases to be ignored`,
+      details: droppedColorings.join(", ")
+    }));
+  }
+  if (droppedNodes.size) {
+    dispatch(warningNotification({
+      message: `Ignoring ${droppedNodes.size} taxa (CSV rows) nodes (rows) as they don't appear in the tree`,
+      details: droppedNodes.join(", ")
+    }));
+  }
+
+  return true;
+}

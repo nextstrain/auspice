@@ -116,7 +116,6 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
   return arcs;
 };
 
-
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy) => {
 
   const demeData = []; /* deme array */
