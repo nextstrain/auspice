@@ -8,7 +8,7 @@ import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
-import { NoContentError } from "../util/exceptions";
+import { NoContentError, RedirectToAnotherNextstrainPage } from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
 
@@ -186,6 +186,13 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         displayComponent: "splash",
         pushState: true
       });
+    }
+    if (err instanceof RedirectToAnotherNextstrainPage) {
+      // Code review required: this doesn't force the redirect to be on the same origin, but
+      // presumably this is a good idea!
+      console.log("REDIRECT TO", window.location.origin+err.redirectUrl);
+      window.location.href = new URL(err.redirectUrl, window.location.origin).href;
+      return undefined; // don't dispatch as we're redirecting
     }
     console.error(err, err.message);
     dispatch(goTo404(`Couldn't load JSONs for ${url}`));
