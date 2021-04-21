@@ -4,7 +4,7 @@ const express = require("express");
 const csrf = require('csurf');
 const esapi = require("node-esapi");
 const cookieParser = require('cookie-parser');
-
+const aes =  require('crypto-js/aes');
 const csrfProtection = csrf({cookie: true});
 const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
@@ -91,7 +91,7 @@ const run = (args) => {
     const {port} = server.address();
     console.log(chalk.blueBright("Access the client at: ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(`Serving auspice version ${version}${args.extend ? " with extensions" : ""}.`);
-    utils.log(handlerMsg);
+    utils.log(aes(handlerMsg));
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
