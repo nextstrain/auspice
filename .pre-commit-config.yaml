@@ -4,7 +4,7 @@ repos:
     hooks:
     -   id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
-        exclude: 'data/covid19_il.json'  
+        exclude: ^(data\/covid19_il.json|data\/covid19.json)$
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.5.0
     hooks:
