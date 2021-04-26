@@ -220,8 +220,6 @@ export const getMapTilesSettings = () => {
   /* defaults */
   let access_token = "no_access_token";
   if (process.env.MAPBOX_API_TOKEN !== undefined) access_token = process.env.MAPBOX_API_TOKEN;
-  console.log(process.env.MAPBOX_API_TOKEN);
-  console.log(access_token);
   const api = `https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=${access_token}`;
   return {
     api,
