@@ -89,12 +89,14 @@ const generateConfig = ({extensionPath, devMode=true, customOutputPath, analyzeB
   const plugins = devMode ? [
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new webpack.EnvironmentPlugin(['MAPBOX_API_TOKEN']),
     pluginProcessEnvData,
     new webpack.NoEmitOnErrorsPlugin(),
     pluginHtml,
     cleanWebpackPlugin
   ] : [
     new LodashModuleReplacementPlugin(),
+    new webpack.EnvironmentPlugin(['MAPBOX_API_TOKEN']),
     pluginProcessEnvData,
     pluginCompress,
     pluginHtml,
