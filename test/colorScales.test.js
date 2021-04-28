@@ -1,4 +1,4 @@
-import { unknownColor, createScaleFromProvidedScaleMap } from "../src/util/colorScale";
+import { unknownColor, createNonContinuousScaleFromProvidedScaleMap } from "../src/util/colorScale";
 
 const crypto = require("crypto");
 
@@ -7,7 +7,7 @@ const crypto = require("crypto");
 test("Test that a JSON-provided scale results in nodes using the correct colours", () => {
   const nodes = makeNodes(50, {country: ['A', 'B', 'D', undefined]});
   const providedScale = [['A', 'AMBER'], ['B', 'BLUE'], ['C', "CYAN"]];
-  const {colorScale} = createScaleFromProvidedScaleMap("country", providedScale, nodes, undefined);
+  const {colorScale} = createNonContinuousScaleFromProvidedScaleMap("country", providedScale, nodes, undefined);
   expect(colorScale('A')).toEqual("AMBER");
   expect(colorScale('B')).toEqual("BLUE");
   expect(colorScale('C')).toEqual("CYAN"); // Note that 'C' is in the colorMap, even though it is not defined on tree
@@ -18,7 +18,7 @@ test("Test that a JSON-provided scale results in nodes using the correct colours
 test("Test that a misformatted JSON-provided scale throws an error", () => {
   const nodes = makeNodes(50, {country: ['A', 'B', 'D', undefined]});
   const providedScale = {A: 'AMBER', B: 'BLUE', C: "CYAN"};
-  expect(() => {createScaleFromProvidedScaleMap("country", providedScale, nodes, undefined);})
+  expect(() => {createNonContinuousScaleFromProvidedScaleMap("country", providedScale, nodes, undefined);})
     .toThrow(/has defined a scale which wasn't an array/);
 });
 
