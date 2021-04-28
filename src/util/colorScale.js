@@ -33,7 +33,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const colorings = metadata.colorings;
     const treeTooNodes = treeToo ? treeToo.nodes : undefined;
     let continuous = false;
-    let colorScale, legendValues, legendBounds;
+    let colorScale, legendValues, legendBounds, legendLabels;
 
     let genotype;
     if (isColorByGenotype(colorBy) && controls.geneLength) {
@@ -45,7 +45,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
     } else if (colorings && colorings[colorBy]) {
       if (scaleType === "continuous") {
-        ({continuous, colorScale, legendBounds, legendValues} = createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+        ({continuous, colorScale, legendBounds, legendValues} =
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
@@ -60,6 +61,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       } else {
         throw new Error(`ColorBy ${colorBy} invalid type -- ${scaleType}`);
       }
+
+      /* Use user-defined `legend` data (if any) to define custom legend elements */
+      const legendData = parseUserProvidedLegendData(colorings[colorBy].legend, legendValues, scaleType);
+      if (legendData) {
+        ({legendValues, legendLabels, legendBounds} = legendData);
+      }
+
     } else {
       throw new Error('Error in logic for processing colorings');
     }
@@ -82,6 +90,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues,
       legendBounds,
+      legendLabels,
       genotype,
       scaleType: scaleType,
       visibleLegendValues: visibleLegendValues
@@ -236,7 +245,6 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   }
   const scale = scaleLinear().domain(domain).range(range);
 
-  /* construct the legend values & their respective bounds */
   let legendValues;
   switch (colorBy) {
     case "lbi":
@@ -359,4 +367,59 @@ function _validateContinuousAnchorPoints(providedScale) {
   );
   if (ap.length<2) return false; // need at least 2 valid points
   return ap;
+}
+
+/**
+ * Parse the user-defined `legend` for a given coloring to produce legendValues, legendLabels and legendBounds.
+ *
+ * @param {Array|undefined} providedLegend JSON-defined `legend` array of objects. Object keys:
+ *        `value` used to compute the legend swatch colour. The type of this depends on the scaleType.
+ *                Continuous scales demand numeric values, however few restrictions are placed on other scales.
+ *        `display` -> string|numeric. Optional. Displayed in the legend. Falls back to `value` if missing.
+ *        `bounds` -> array of 2 numerics. Optional. Custom legendBounds. Only considered for continuous scales.
+ * @param {Array} currentLegendValues Dynamically generated legendValues (via traversal of tree(s)).
+ * @param {string} scaleType
+ * @returns {false|object}. Returned object has keys:
+ *        `legendValues` -> array of numeric legend values for display
+ *        `legendBounds` -> {object|undefined} See `createLegendBounds()` for format
+ *        `legendLabels` -> {Map|undefined} A map of legendValues to a value for display in the legend.
+ */
+function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
+  if (!Array.isArray(providedLegend)) return false;
+
+  if (scaleType!=="continuous") {
+    console.error("Legend data is only currently usable for continuous scales and will be ignored.");
+    return false;
+  }
+
+  const data = providedLegend.filter((d) => typeof d.value === "number");
+  if (!data.length) return false;
+  const legendValues = data.map((d) => d.value);
+
+  const legendLabels = new Map(
+    data.map((d) => {
+      return (typeof d.display === "string" || typeof d.display === "number") ? [d.value, d.display] : [d.value, d.value];
+    })
+  );
+
+  const boundArrays = data.map((d) => d.bounds)
+    .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
+    .map(([a, b]) => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
+    .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
+      for (let i=0; i<idx; i++) {
+        const previousBound = arr[i];
+        if ((a < previousBound[1] && a > previousBound[0]) || (b < previousBound[1] && b > previousBound[0])) {
+          console.error(`Legend bounds must not overlap. Check [${a}, ${b}] and [${previousBound[0]}, ${previousBound[1]}]. Auspice will create its own bounds.`);
+          return false;
+        }
+      }
+      return true;
+    });
+  let legendBounds = {};
+  if (boundArrays.length===legendValues.length) {
+    legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
+  } else {
+    legendBounds = createLegendBounds(legendValues);
+  }
+  return {legendValues, legendLabels, legendBounds};
 }

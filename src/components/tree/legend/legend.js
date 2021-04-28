@@ -139,6 +139,9 @@ class Legend extends React.Component {
   }
 
   styleLabelText(label) {
+    if (this.props.colorScale.legendLabels && this.props.colorScale.legendLabels.has(label)) {
+      return this.props.colorScale.legendLabels.get(label);
+    }
     /* depending on the colorBy, we display different labels! */
     if (this.props.colorBy === "num_date") {
       const legendValues = this.props.colorScale.visibleLegendValues;
