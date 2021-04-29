@@ -6,7 +6,8 @@ const fs = require("fs");
 const express = require("express");
 const csrf = require("csurf");
 const cookieParser = require('cookie-parser');
-const aes =  require('crypto-js/aes');
+const aes = require('crypto-js/aes');
+
 const csrfProtection = csrf({cookie: true});
 const esapi = require("node-esapi");
 const expressStaticGzip = require("express-static-gzip");
@@ -142,7 +143,7 @@ const run = (args) => {
     const {port} = server.address();
     console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(auspiceBuild.message);
-    utils.log(aes.encrypt(handlerMsg,'').toString());
+    utils.log(aes.encrypt(handlerMsg, '').toString());
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (error) => {
     if (error.code === 'EADDRINUSE') {
