@@ -4,19 +4,18 @@ import { getTraitFromNode } from "../util/treeMiscHelpers";
 
 /**
 * equates a single tip and a legend element
-* exact match is required for categorical qunantities such as genotypes, regions
-* continuous variables need to fall into the interal (lower_bound[leg], leg]
-* @param selectedLegendItem - value of the selected tip attribute (numeric or string)
-* @param node - node (tip) in question
-* @param legendBoundsMap - if falsey, then exact match required. Else contains bounds for match.
-* @param colorScale - used to get the value of the attribute being used for colouring
+* exact match is required for categorical quantities such as genotypes, regions
+* continuous variables need to fall into the interval (lower_bound, upper_bound]
+* @param {string|number} selectedLegendItem e.g. "USA" or 2021
+* @param {object} node - node (tip) in question
+* @param {object} colorScale - used to get the value of the attribute being used for colouring
 * @returns bool
 */
 const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
   if (colorScale.continuous) {
     return (nodeAttr <= colorScale.legendBounds[selectedLegendItem][1]) &&
-           (nodeAttr >= colorScale.legendBounds[selectedLegendItem][0]);
+           (nodeAttr > colorScale.legendBounds[selectedLegendItem][0]);
   }
   return nodeAttr === selectedLegendItem;
 };
