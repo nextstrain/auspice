@@ -387,13 +387,14 @@ function _validateContinuousAnchorPoints(providedScale) {
 function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
   if (!Array.isArray(providedLegend)) return false;
 
-  if (scaleType!=="continuous") {
-    console.error("Legend data is only currently usable for continuous scales and will be ignored.");
+  const data = scaleType==="continuous" ?
+    providedLegend.filter((d) => typeof d.value === "number") : // continuous scales _must_ have numeric stops
+    providedLegend.filter((d) => currentLegendValues.includes(d.value)); // other scales require the value to exist
+  if (!data.length) {
+    console.warn("Provided legend info for this coloring doesn't match any values in the tree!");
     return false;
   }
 
-  const data = providedLegend.filter((d) => typeof d.value === "number");
-  if (!data.length) return false;
   const legendValues = data.map((d) => d.value);
 
   const legendLabels = new Map(
@@ -402,24 +403,26 @@ function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleT
     })
   );
 
-  const boundArrays = data.map((d) => d.bounds)
-    .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
-    .map(([a, b]) => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
-    .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
-      for (let i=0; i<idx; i++) {
-        const previousBound = arr[i];
-        if ((a < previousBound[1] && a > previousBound[0]) || (b < previousBound[1] && b > previousBound[0])) {
-          console.error(`Legend bounds must not overlap. Check [${a}, ${b}] and [${previousBound[0]}, ${previousBound[1]}]. Auspice will create its own bounds.`);
-          return false;
-        }
-      }
-      return true;
-    });
   let legendBounds = {};
-  if (boundArrays.length===legendValues.length) {
-    legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
-  } else {
-    legendBounds = createLegendBounds(legendValues);
+  if (scaleType==="continuous") {
+    const boundArrays = data.map((d) => d.bounds)
+      .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
+      .map(([a, b]) => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
+      .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
+        for (let i=0; i<idx; i++) {
+          const previousBound = arr[i];
+          if ((a < previousBound[1] && a > previousBound[0]) || (b < previousBound[1] && b > previousBound[0])) {
+            console.warn(`Legend bounds must not overlap. Check [${a}, ${b}] and [${previousBound[0]}, ${previousBound[1]}]. Auspice will create its own bounds.`);
+            return false;
+          }
+        }
+        return true;
+      });
+    if (boundArrays.length===legendValues.length) {
+      legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
+    } else {
+      legendBounds = createLegendBounds(legendValues);
+    }
   }
   return {legendValues, legendLabels, legendBounds};
 }
