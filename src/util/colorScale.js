@@ -33,7 +33,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const colorings = metadata.colorings;
     const treeTooNodes = treeToo ? treeToo.nodes : undefined;
     let continuous = false;
-    let colorScale, legendValues, legendBounds;
+    let colorScale, legendValues, legendBounds, legendLabels;
 
     let genotype;
     if (isColorByGenotype(colorBy) && controls.geneLength) {
@@ -41,13 +41,15 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
     }
     const scaleType = genotype ? "categorical" : colorings[colorBy].type;
-
     if (genotype) {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
     } else if (colorings && colorings[colorBy]) {
-      if (colorings[colorBy].scale) { /* scale set via JSON */
+      if (scaleType === "continuous") {
+        ({continuous, colorScale, legendBounds, legendValues} =
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+      } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
-          createScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+          createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (scaleType === "categorical") {
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = createDiscreteScale(legendValues, "categorical");
@@ -56,11 +58,16 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       } else if (scaleType === "boolean") {
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = booleanColorScale;
-      } else if (scaleType === "continuous") {
-        ({continuous, colorScale, legendBounds, legendValues} = createContinuousScale(colorBy, tree.nodes, treeTooNodes));
       } else {
         throw new Error(`ColorBy ${colorBy} invalid type -- ${scaleType}`);
       }
+
+      /* Use user-defined `legend` data (if any) to define custom legend elements */
+      const legendData = parseUserProvidedLegendData(colorings[colorBy].legend, legendValues, scaleType);
+      if (legendData) {
+        ({legendValues, legendLabels, legendBounds} = legendData);
+      }
+
     } else {
       throw new Error('Error in logic for processing colorings');
     }
@@ -83,6 +90,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues,
       legendBounds,
+      legendLabels,
       genotype,
       scaleType: scaleType,
       visibleLegendValues: visibleLegendValues
@@ -104,7 +112,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   }
 };
 
-export function createScaleFromProvidedScaleMap(colorBy, providedScale, t1nodes, t2nodes) {
+export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedScale, t1nodes, t2nodes) {
   // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
   if (!Array.isArray(providedScale)) {
     throw new Error(`${colorBy} has defined a scale which wasn't an array`);
@@ -189,7 +197,7 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
-function createContinuousScale(colorBy, t1nodes, t2nodes) {
+function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   // console.log("making a continuous color scale for ", colorBy);
   let minMax;
   switch (colorBy) {
@@ -202,38 +210,41 @@ function createContinuousScale(colorBy, t1nodes, t2nodes) {
       minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
   }
 
+  /* user-defined anchor points across the scale */
+  const anchorPoints = _validateContinuousAnchorPoints(providedScale);
+
   /* make the continuous scale */
   let domain, range;
-  switch (colorBy) {
-    case "num_date":
-      /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-      let rootDate = getTraitFromNode(t1nodes[0], "num_date");
-      let vals = t1nodes.filter((n) => !n.hasChildren)
-        .map((n) => getTraitFromNode(n, "num_date"));
-      if (t2nodes) {
-        const treeTooRootDate = getTraitFromNode(t2nodes[0], "num_date");
-        if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
-        vals.concat(
-          t2nodes.filter((n) => !n.hasChildren)
-            .map((n) => getTraitFromNode(n, "num_date"))
-        );
-      }
-      vals = vals.sort();
-      domain = [rootDate];
-      const n = 10;
-      const spaceBetween = parseInt(vals.length / (n - 1), 10);
-      for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
-      domain.push(vals[vals.length-1]);
-      domain = [...new Set(domain)]; /* filter to unique values only */
-      range = colors[domain.length]; /* use the right number of colours */
-      break;
-    default:
-      range = colors[9];
-      domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
+  if (anchorPoints) {
+    domain = anchorPoints.map((pt) => pt[0]);
+    range = anchorPoints.map((pt) => pt[1]);
+  } else if (colorBy==="num_date") {
+    /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
+    let rootDate = getTraitFromNode(t1nodes[0], "num_date");
+    let vals = t1nodes.filter((n) => !n.hasChildren)
+      .map((n) => getTraitFromNode(n, "num_date"));
+    if (t2nodes) {
+      const treeTooRootDate = getTraitFromNode(t2nodes[0], "num_date");
+      if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
+      vals.concat(
+        t2nodes.filter((n) => !n.hasChildren)
+          .map((n) => getTraitFromNode(n, "num_date"))
+      );
+    }
+    vals = vals.sort();
+    domain = [rootDate];
+    const n = 10;
+    const spaceBetween = parseInt(vals.length / (n - 1), 10);
+    for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
+    domain.push(vals[vals.length-1]);
+    domain = [...new Set(domain)]; /* filter to unique values only */
+    range = colors[domain.length]; /* use the right number of colours */
+  } else {
+    range = colors[9];
+    domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
   }
   const scale = scaleLinear().domain(domain).range(range);
 
-  /* construct the legend values & their respective bounds */
   let legendValues;
   switch (colorBy) {
     case "lbi":
@@ -345,4 +356,73 @@ function createLegendBounds(legendValues) {
   }
   legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
   return legendBounds;
+}
+
+function _validateContinuousAnchorPoints(providedScale) {
+  if (!Array.isArray(providedScale)) return false;
+  const ap = providedScale.filter((item) =>
+    Array.isArray(item) && item.length===2 &&
+    typeof item[0]==="number" && // idx0 is the numerical value to anchor against
+    typeof item[1]==="string" && item[1].match(/#[0-9A-Fa-f]{6}/) // schema demands full-length colour hexes
+  );
+  if (ap.length<2) return false; // need at least 2 valid points
+  return ap;
+}
+
+/**
+ * Parse the user-defined `legend` for a given coloring to produce legendValues, legendLabels and legendBounds.
+ *
+ * @param {Array|undefined} providedLegend JSON-defined `legend` array of objects. Object keys:
+ *        `value` used to compute the legend swatch colour. The type of this depends on the scaleType.
+ *                Continuous scales demand numeric values, however few restrictions are placed on other scales.
+ *        `display` -> string|numeric. Optional. Displayed in the legend. Falls back to `value` if missing.
+ *        `bounds` -> array of 2 numerics. Optional. Custom legendBounds. Only considered for continuous scales.
+ * @param {Array} currentLegendValues Dynamically generated legendValues (via traversal of tree(s)).
+ * @param {string} scaleType
+ * @returns {false|object}. Returned object has keys:
+ *        `legendValues` -> array of numeric legend values for display
+ *        `legendBounds` -> {object|undefined} See `createLegendBounds()` for format
+ *        `legendLabels` -> {Map|undefined} A map of legendValues to a value for display in the legend.
+ */
+function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
+  if (!Array.isArray(providedLegend)) return false;
+
+  const data = scaleType==="continuous" ?
+    providedLegend.filter((d) => typeof d.value === "number") : // continuous scales _must_ have numeric stops
+    providedLegend.filter((d) => currentLegendValues.includes(d.value)); // other scales require the value to exist
+  if (!data.length) {
+    console.warn("Provided legend info for this coloring doesn't match any values in the tree!");
+    return false;
+  }
+
+  const legendValues = data.map((d) => d.value);
+
+  const legendLabels = new Map(
+    data.map((d) => {
+      return (typeof d.display === "string" || typeof d.display === "number") ? [d.value, d.display] : [d.value, d.value];
+    })
+  );
+
+  let legendBounds = {};
+  if (scaleType==="continuous") {
+    const boundArrays = data.map((d) => d.bounds)
+      .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
+      .map(([a, b]) => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
+      .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
+        for (let i=0; i<idx; i++) {
+          const previousBound = arr[i];
+          if ((a < previousBound[1] && a > previousBound[0]) || (b < previousBound[1] && b > previousBound[0])) {
+            console.warn(`Legend bounds must not overlap. Check [${a}, ${b}] and [${previousBound[0]}, ${previousBound[1]}]. Auspice will create its own bounds.`);
+            return false;
+          }
+        }
+        return true;
+      });
+    if (boundArrays.length===legendValues.length) {
+      legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
+    } else {
+      legendBounds = createLegendBounds(legendValues);
+    }
+  }
+  return {legendValues, legendLabels, legendBounds};
 }
