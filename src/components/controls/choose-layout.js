@@ -9,7 +9,7 @@ import { withTranslation } from 'react-i18next';
 import Select from "react-select/lib/Select";
 import * as icons from "../framework/svg-icons";
 import { controlsWidth } from "../../util/globals";
-import { collectAvailableScatterVariables, validateScatterVariables} from "../../util/scatterplotHelpers";
+import { collectAvailableScatterVariables, validateScatterVariables, addScatterAxisInfo} from "../../util/scatterplotHelpers";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
@@ -30,8 +30,9 @@ export const RowContainer = styled.div`
     layout: state.controls.layout,
     scatterVariables: state.controls.scatterVariables,
     colorBy: state.controls.colorBy,
-    distanceMeasure: state.controls.distanceMeasure,
-    colorings: state.metadata.colorings,
+    controls: state.controls,
+    tree: state.tree,
+    metadata: state.metadata,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
@@ -48,12 +49,15 @@ class ChooseLayout extends React.Component {
       const scatterVariables = modifiedScatterVariables ?
         {...this.props.scatterVariables, ...modifiedScatterVariables} :
         this.props.scatterVariables;
+      if (layout==="scatter" && (!scatterVariables.xContinuous || !scatterVariables.yContinuous)) {
+        scatterVariables.showRegression= false;
+      }
       this.props.dispatch({type: CHANGE_LAYOUT, layout, scatterVariables});
     };
   }
 
   renderScatterplotAxesSelector() {
-    const options = collectAvailableScatterVariables(this.props.colorings);
+    const options = collectAvailableScatterVariables(this.props.metadata.colorings);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];
     const selectedY = options.filter((o) => o.value===this.props.scatterVariables.y)[0];
     const miscSelectProps = {options, clearable: false, searchable: false, multi: false, valueKey: "label"};
@@ -66,7 +70,10 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selectedX}
-              onChange={(value) => this.updateLayout("scatter", {x: value.value, xLabel: value.label})}
+              onChange={(value) => this.updateLayout(
+                "scatter",
+                addScatterAxisInfo({x: value.value, xLabel: value.label}, "x", this.props.controls, this.props.tree, this.props.metadata)
+              )}
             />
           </ScatterSelectContainer>
         </ScatterVariableContainer>
@@ -77,7 +84,10 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selectedY}
-              onChange={(value) => this.updateLayout("scatter", {y: value.value, yLabel: value.label})}
+              onChange={(value) => this.updateLayout(
+                "scatter",
+                addScatterAxisInfo({y: value.value, yLabel: value.label}, "y", this.props.controls, this.props.tree, this.props.metadata)
+              )}
             />
           </ScatterSelectContainer>
         </ScatterVariableContainer>
@@ -98,15 +108,21 @@ class ChooseLayout extends React.Component {
           />
         </ScatterVariableContainer>
         <div style={{paddingTop: "2px"}}/>
-        <ScatterVariableContainer>
-          <Toggle
-            display
-            on={this.props.scatterVariables.showRegression}
-            callback={() => this.updateLayout(this.props.layout, {showRegression: !this.props.scatterVariables.showRegression})}
-            label={"Show regression"}
-          />
-        </ScatterVariableContainer>
-        <div style={{paddingTop: "2px"}}/>
+        {
+          (this.props.scatterVariables.xContinuous && this.props.scatterVariables.yContinuous) && (
+            <>
+              <ScatterVariableContainer>
+                <Toggle
+                  display
+                  on={this.props.scatterVariables.showRegression}
+                  callback={() => this.updateLayout(this.props.layout, {showRegression: !this.props.scatterVariables.showRegression})}
+                  label={"Show regression"}
+                />
+              </ScatterVariableContainer>
+              <div style={{paddingTop: "2px"}}/>
+            </>
+          )
+        }
       </>
     );
   }
@@ -157,7 +173,7 @@ class ChooseLayout extends React.Component {
                   selected={selected === "clock"}
                   onClick={() => this.updateLayout(
                     "clock",
-                    validateScatterVariables(this.props.scatterVariables, this.props.colorings, this.props.distanceMeasure, this.props.colorBy, true)
+                    validateScatterVariables(this.props.controls, this.props.metadata, this.props.tree, true)
                   )}
                 >
                   {t("sidebar:clock")}
@@ -174,7 +190,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "scatter"}
             onClick={() => this.updateLayout(
               "scatter",
-              validateScatterVariables(this.props.scatterVariables, this.props.colorings, this.props.distanceMeasure, this.props.colorBy, false)
+              validateScatterVariables(this.props.controls, this.props.metadata, this.props.tree, false)
             )}
           >
             {t("sidebar:scatter")}

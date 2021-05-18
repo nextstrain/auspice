@@ -1,10 +1,12 @@
-
+import { calcColorScale } from "./colorScale";
 
 export function collectAvailableScatterVariables(colorings) {
   // todo: genotype (special case)
+  // Note for implementation of genotype - be careful with calls to `calcColorScale` (e.g. from `validateScatterVariables`)
+  // as one of the side effects of that function is setting the genotype on nodes
   const options = Object.keys(colorings)
     .filter((key) => key!=="gt")
-    .filter((key) => colorings[key].type==="continuous") // work needed to render non-continuous scales in PhyloTree
+    .filter((key) => colorings[key].type!=="boolean")
     .map((key) => ({
       value: key,
       label: colorings[key].title || key
@@ -16,8 +18,10 @@ export function collectAvailableScatterVariables(colorings) {
 /**
  * Return a (validated) `scatterVariables` object, given any existing scatterVariables (which may themselves be invalid)
  */
-export function validateScatterVariables(existingScatterVariables={}, colorings, distanceMeasure, colorBy, isClock) {
-  const availableOptions = collectAvailableScatterVariables(colorings);
+export function validateScatterVariables(controls, metadata, tree, isClock) {
+  const {distanceMeasure, colorBy } = controls;
+  const existingScatterVariables = {...controls.scatterVariables};
+  const availableOptions = collectAvailableScatterVariables(metadata.colorings);
   const scatterVariables = {};
   // default is to show branches, unless the existing state says otherwise
   scatterVariables.showBranches = Object.prototype.hasOwnProperty.call(existingScatterVariables, "showBranches") ?
@@ -35,6 +39,10 @@ export function validateScatterVariables(existingScatterVariables={}, colorings,
     const yOption = _getFirstMatchingOption(availableOptions, [existingScatterVariables.y, colorBy], xOption.value);
     scatterVariables.y = yOption.value;
     scatterVariables.yLabel = yOption.label;
+    for (const axis of ["x", "y"]) {
+      addScatterAxisInfo(scatterVariables, axis, controls, tree, metadata);
+    }
+    if (!scatterVariables.xContinuous || !scatterVariables.yContinuous) scatterVariables.showRegression= false;
   }
   return scatterVariables;
 }
@@ -61,4 +69,36 @@ function _getFirstMatchingOption(options, tryTheseFirst, notThisValue) {
     }
   }
   return undefined;
+}
+
+/**
+ * Given a colorBy and a scatterplot axes, calculate whether the axes is
+ * continous or not. If not, calculate the domain. For this we use the same code
+ * as colour scale construction to find a domain. There are opportunities for refactoring here
+ * to improve performance, as we only use two properties from the returned object.
+ * Similarly, if one of the axes variables is the current colorBy, we could avoid recalculating this.
+ * @param {Object} scatterVariables
+ * @param {string} axis values: "x" or "y"
+ * @param {Object} controls
+ * @param {Object} controls
+ * @param {Object} metadata
+ * @returns {Object} the `scatterVariables` param with modifications
+ * @sideEffects adds keys `${axis}Continuous`, `${axis}Domain` to the `scatterVariables` param.
+ */
+export function addScatterAxisInfo(scatterVariables, axis, controls, tree, metadata) {
+  const axisVar = scatterVariables[axis];
+  if (["div", "num_date"].includes(axisVar) || metadata.colorings[axisVar].type==="continuous") {
+    scatterVariables[`${axis}Continuous`] = true;
+    scatterVariables[`${axis}Domain`] = undefined;
+    return scatterVariables;
+  }
+  const {domain, scaleType} = calcColorScale(scatterVariables[axis], controls, tree, null, metadata);
+  if (scaleType==="continuous") {
+    scatterVariables[`${axis}Continuous`] = true;
+    scatterVariables[`${axis}Domain`] = undefined;
+    return scatterVariables;
+  }
+  scatterVariables[`${axis}Continuous`] = false;
+  scatterVariables[`${axis}Domain`] = domain.slice();
+  return scatterVariables;
 }

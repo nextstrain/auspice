@@ -33,7 +33,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const colorings = metadata.colorings;
     const treeTooNodes = treeToo ? treeToo.nodes : undefined;
     let continuous = false;
-    let colorScale, legendValues, legendBounds, legendLabels;
+    let colorScale, legendValues, legendBounds, legendLabels, domain;
 
     let genotype;
     if (isColorByGenotype(colorBy) && controls.geneLength) {
@@ -61,6 +61,10 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       } else {
         throw new Error(`ColorBy ${colorBy} invalid type -- ${scaleType}`);
       }
+
+      /* We store a copy of the `domain`, which for non-continuous scales is a ordered list of values for this colorBy,
+      for future list */
+      if (scaleType !== 'continuous') domain = legendValues.slice();
 
       /* Use user-defined `legend` data (if any) to define custom legend elements */
       const legendData = parseUserProvidedLegendData(colorings[colorBy].legend, legendValues, scaleType);
@@ -92,6 +96,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       legendBounds,
       legendLabels,
       genotype,
+      domain,
       scaleType: scaleType,
       visibleLegendValues: visibleLegendValues
     };
@@ -107,6 +112,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       legendBounds: createLegendBounds(["unknown"]),
       genotype: null,
       scaleType: null,
+      domain: null,
       visibleLegendValues: ["unknown"]
     };
   }

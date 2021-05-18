@@ -568,7 +568,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   // todo: these should be JSON definable (via display_defaults)
   if (state.layout==="scatter" || state.layout==="clock") {
     state.scatterVariables = validateScatterVariables(
-      state.scatterVariables, metadata.colorings, state.distanceMeasure, state.colorBy, state.layout==="clock"
+      state, metadata, tree, state.layout==="clock"
     );
     if (query.scatterX && query.scatterX!==state.scatterVariables.x) delete query.scatterX;
     if (query.scatterY && query.scatterY!==state.scatterVariables.y) delete query.scatterY;
