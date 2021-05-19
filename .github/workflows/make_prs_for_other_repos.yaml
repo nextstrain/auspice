@@ -1,0 +1,44 @@
+name: "Make PRs for Nextstrain projects which depend on Auspice"
+on:
+  pull_request:
+jobs:
+  make-pr-on-nextstrain-dot-org: # <job_id>
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Checkout nextstrain.org repo
+        uses: actions/checkout@v2
+        with:
+          repository: nextstrain/nextstrain.org
+      - name: Install Auspice from PRs HEAD commit
+        if: ${{ github.event_name == 'pull_request' }}
+        # Note: $GITHUB_SHA is _not_ the same commit as the HEAD commit on the PR branch
+        # see https://github.community/t/github-sha-not-the-same-as-the-triggering-commit/18286/2
+        shell: bash
+        run: |
+          AUSPICE_COMMIT=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
+          echo "auspice_commit=$AUSPICE_COMMIT" >> $GITHUB_ENV
+          npm ci
+          npm install nextstrain/auspice#${AUSPICE_COMMIT}
+          git add package.json package-lock.json
+      - name: Create Pull Request for testing on nextstrain.org repo
+        if: ${{ github.event_name == 'pull_request' }}
+        id: cpr
+        uses: peter-evans/create-pull-request@v3
+        with:
+          token: ${{ secrets.JAMES_PAT }}
+          branch: "auspice-pr-${{ github.event.pull_request.number }}"
+          commit-message: "[testing only] upgrade auspice to ${{ env.auspice_commit }}"
+          title: 'Test auspice PR ${{ github.event.pull_request.number }}'
+          body: |
+            This PR has been created to test Auspice from [PR ${{ github.event.pull_request.number }}](https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }})
+
+            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice)
+          draft: true
+          delete-branch: true
+      - name: Check outputs
+        run: |
+          echo "Nextstrain.org PR: ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL: ${{ steps.cpr.outputs.pull-request-url }}"
