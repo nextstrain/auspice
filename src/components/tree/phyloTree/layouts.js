@@ -274,12 +274,12 @@ export const setDistance = function setDistance(distanceAttribute) {
 export const setScales = function setScales(margins) {
 
   if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
-    this.xScale = scalePoint().round(true).align(0.5);
+    this.xScale = scalePoint().round(false).align(0.5);
   } else {
     this.xScale = scaleLinear();
   }
   if (this.layout==="scatter" && !this.scatterVariables.yContinuous) {
-    this.yScale = scalePoint().round(true).align(0.5);
+    this.yScale = scalePoint().round(false).align(0.5);
   } else {
     this.yScale = scaleLinear();
   }
@@ -384,6 +384,7 @@ export const mapToScreen = function mapToScreen() {
   } else {
     const seenValues = new Set(nodesInDomain.map((d) => d.x));
     xDomain = this.scatterVariables.xDomain.filter((v) => seenValues.has(v));
+    padCategoricalScales(xDomain, this.xScale);
   }
 
   if (this.layout!=="scatter" || this.scatterVariables.yContinuous) {
@@ -403,6 +404,7 @@ export const mapToScreen = function mapToScreen() {
   } else {
     const seenValues = new Set(nodesInDomain.map((d) => d.y));
     yDomain = this.scatterVariables.yDomain.filter((v) => seenValues.has(v));
+    padCategoricalScales(yDomain, this.yScale);
   }
 
   /* Radial / Unrooted layouts need to be square since branch lengths
@@ -505,3 +507,10 @@ export const mapToScreen = function mapToScreen() {
   }
   timerEnd("mapToScreen");
 };
+
+function padCategoricalScales(domain, scale) {
+  if (domain.length<=4) return scale.padding(0.4);
+  if (domain.length<=6) return scale.padding(0.3);
+  if (domain.length<=10) return scale.padding(0.2);
+  return scale.padding(0.1);
+}
