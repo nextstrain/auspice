@@ -1,6 +1,3 @@
-/* eslint-disable react/jsx-no-bind */
-/* ^^^ We can get away with this because <ChooseLayout> doesn't rerender frequently, but fixes are welcome */
-
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
@@ -9,9 +6,9 @@ import { withTranslation } from 'react-i18next';
 import Select from "react-select/lib/Select";
 import * as icons from "../framework/svg-icons";
 import { controlsWidth } from "../../util/globals";
-import { collectAvailableScatterVariables, validateScatterVariables, addScatterAxisInfo} from "../../util/scatterplotHelpers";
-import { CHANGE_LAYOUT } from "../../actions/types";
+import { collectAvailableScatterVariables} from "../../util/scatterplotHelpers";
 import { SidebarSubtitle, SidebarButton } from "./styles";
+import { changeLayout } from "../../actions/layout";
 import Toggle from "./toggle";
 
 
@@ -29,10 +26,7 @@ export const RowContainer = styled.div`
   return {
     layout: state.controls.layout,
     scatterVariables: state.controls.scatterVariables,
-    colorBy: state.controls.colorBy,
-    controls: state.controls,
-    tree: state.tree,
-    metadata: state.metadata,
+    colorings: state.metadata.colorings,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
@@ -42,22 +36,8 @@ class ChooseLayout extends React.Component {
     layout: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
   }
-  constructor(props) {
-    super(props);
-    this.updateLayout = (layout, modifiedScatterVariables=undefined) => {
-      if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) return;
-      const scatterVariables = modifiedScatterVariables ?
-        {...this.props.scatterVariables, ...modifiedScatterVariables} :
-        this.props.scatterVariables;
-      if (layout==="scatter" && (!scatterVariables.xContinuous || !scatterVariables.yContinuous)) {
-        scatterVariables.showRegression= false;
-      }
-      this.props.dispatch({type: CHANGE_LAYOUT, layout, scatterVariables});
-    };
-  }
-
   renderScatterplotAxesSelector() {
-    const options = collectAvailableScatterVariables(this.props.metadata.colorings);
+    const options = collectAvailableScatterVariables(this.props.colorings);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];
     const selectedY = options.filter((o) => o.value===this.props.scatterVariables.y)[0];
     const miscSelectProps = {options, clearable: false, searchable: false, multi: false, valueKey: "label"};
@@ -70,10 +50,7 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selectedX}
-              onChange={(value) => this.updateLayout(
-                "scatter",
-                addScatterAxisInfo({x: value.value, xLabel: value.label}, "x", this.props.controls, this.props.tree, this.props.metadata)
-              )}
+              onChange={(value) => this.props.dispatch(changeLayout({x: value.value, xLabel: value.label}))}
             />
           </ScatterSelectContainer>
         </ScatterVariableContainer>
@@ -84,10 +61,7 @@ class ChooseLayout extends React.Component {
             <Select
               {...miscSelectProps}
               value={selectedY}
-              onChange={(value) => this.updateLayout(
-                "scatter",
-                addScatterAxisInfo({y: value.value, yLabel: value.label}, "y", this.props.controls, this.props.tree, this.props.metadata)
-              )}
+              onChange={(value) => this.props.dispatch(changeLayout({y: value.value, yLabel: value.label}))}
             />
           </ScatterSelectContainer>
         </ScatterVariableContainer>
@@ -103,7 +77,7 @@ class ChooseLayout extends React.Component {
           <Toggle
             display
             on={this.props.scatterVariables.showBranches}
-            callback={() => this.updateLayout(this.props.layout, {showBranches: !this.props.scatterVariables.showBranches})}
+            callback={() => this.props.dispatch(changeLayout({showBranches: !this.props.scatterVariables.showBranches}))}
             label={"Show branches"}
           />
         </ScatterVariableContainer>
@@ -115,7 +89,7 @@ class ChooseLayout extends React.Component {
                 <Toggle
                   display
                   on={this.props.scatterVariables.showRegression}
-                  callback={() => this.updateLayout(this.props.layout, {showRegression: !this.props.scatterVariables.showRegression})}
+                  callback={() => this.props.dispatch(changeLayout({showRegression: !this.props.scatterVariables.showRegression}))}
                   label={"Show regression"}
                 />
               </ScatterVariableContainer>
@@ -140,7 +114,7 @@ class ChooseLayout extends React.Component {
           <RectangularTreeIcon width={25} selected={selected === "rect"}/>
           <SidebarButton
             selected={selected === "rect"}
-            onClick={() => this.updateLayout("rect")}
+            onClick={() => this.props.dispatch(changeLayout({layout: "rect"}))}
           >
             {t("sidebar:rectangular")}
           </SidebarButton>
@@ -149,7 +123,7 @@ class ChooseLayout extends React.Component {
           <RadialTreeIcon width={25} selected={selected === "radial"}/>
           <SidebarButton
             selected={selected === "radial"}
-            onClick={() => this.updateLayout("radial")}
+            onClick={() => this.props.dispatch(changeLayout({layout: "radial"}))}
           >
             {t("sidebar:radial")}
           </SidebarButton>
@@ -158,7 +132,7 @@ class ChooseLayout extends React.Component {
           <UnrootedTreeIcon width={25} selected={selected === "unrooted"}/>
           <SidebarButton
             selected={selected === "unrooted"}
-            onClick={() => this.updateLayout("unrooted")}
+            onClick={() => this.props.dispatch(changeLayout({layout: "unrooted"}))}
           >
             {t("sidebar:unrooted")}
           </SidebarButton>
@@ -171,10 +145,7 @@ class ChooseLayout extends React.Component {
                 <ClockIcon width={25} selected={selected === "clock"}/>
                 <SidebarButton
                   selected={selected === "clock"}
-                  onClick={() => this.updateLayout(
-                    "clock",
-                    validateScatterVariables(this.props.controls, this.props.metadata, this.props.tree, true)
-                  )}
+                  onClick={() => this.props.dispatch(changeLayout({layout: "clock"}))}
                 >
                   {t("sidebar:clock")}
                 </SidebarButton>
@@ -188,10 +159,7 @@ class ChooseLayout extends React.Component {
           <ScatterIcon width={25} selected={selected === "scatter"}/>
           <SidebarButton
             selected={selected === "scatter"}
-            onClick={() => this.updateLayout(
-              "scatter",
-              validateScatterVariables(this.props.controls, this.props.metadata, this.props.tree, false)
-            )}
+            onClick={() => this.props.dispatch(changeLayout({layout: "scatter"}))}
           >
             {t("sidebar:scatter")}
           </SidebarButton>
