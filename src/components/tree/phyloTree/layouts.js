@@ -438,6 +438,8 @@ export const mapToScreen = function mapToScreen() {
   // for scatterplots we do an additional iteration as some values may be missing
   // & we want to avoid rendering these
   if (this.layout==="scatter") {
+    if (!this.scatterVariables.yContinuous) jitter("y", this.yScale, this.nodes);
+    if (!this.scatterVariables.xContinuous) jitter("x", this.xScale, this.nodes);
     this.nodes.forEach((d) => {
       if (isNaN(d.xTip)) d.xTip = hiddenXPosition;
       if (isNaN(d.yTip)) d.yTip=hiddenYPosition;
@@ -513,4 +515,26 @@ function padCategoricalScales(domain, scale) {
   if (domain.length<=6) return scale.padding(0.3);
   if (domain.length<=10) return scale.padding(0.2);
   return scale.padding(0.1);
+}
+
+/**
+ * Add jitter to the already-computed node positions.
+ */
+function jitter(axis, scale, nodes) {
+  const step = scale.step();
+  if (step < 50) return; // don't jitter if there's little space between bands
+  const rand = []; // pre-compute a small set of pseudo random numbers for speed
+  for (let i=1e2; i--;) {
+    rand.push((Math.random()-0.5)*step*0.5); // occupy 50%
+  }
+  const [base, tip, randLen] = [`${axis}Base`, `${axis}Tip`, rand.length];
+  let j = 0;
+  function recurse(n) {
+    n[base] = n.parent[tip];
+    n[tip] += rand[j++];
+    if (j>=randLen) j=0;
+    if (!n.children) return;
+    for (const child of n.children) recurse(child);
+  }
+  recurse(nodes[0]);
 }
