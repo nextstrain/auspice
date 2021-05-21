@@ -86,6 +86,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     if (this.scatterVariables.x==="div") {
       d.x = getDivFromNode(d.n);
       d.px = getDivFromNode(d.n.parent);
+    } else if (this.scatterVariables.x==="gt") {
+      d.x = d.n.currentGt;
+      d.px = d.n.parent.currentGt;
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(d.n.parent, this.scatterVariables.x);
@@ -94,6 +97,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     if (this.scatterVariables.y==="div") {
       d.y = getDivFromNode(d.n);
       d.py = getDivFromNode(d.n.parent);
+    } else if (this.scatterVariables.y==="gt") {
+      d.y = d.n.currentGt;
+      d.py = d.n.parent.currentGt;
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(d.n.parent, this.scatterVariables.y);

@@ -27,6 +27,7 @@ export const RowContainer = styled.div`
     layout: state.controls.layout,
     scatterVariables: state.controls.scatterVariables,
     colorings: state.metadata.colorings,
+    colorBy: state.controls.colorBy,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
@@ -37,7 +38,7 @@ class ChooseLayout extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
   renderScatterplotAxesSelector() {
-    const options = collectAvailableScatterVariables(this.props.colorings);
+    const options = collectAvailableScatterVariables(this.props.colorings, this.props.colorBy);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];
     const selectedY = options.filter((o) => o.value===this.props.scatterVariables.y)[0];
     const miscSelectProps = {options, clearable: false, searchable: false, multi: false, valueKey: "label"};

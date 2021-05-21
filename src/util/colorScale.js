@@ -43,6 +43,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const scaleType = genotype ? "categorical" : colorings[colorBy].type;
     if (genotype) {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
+      domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
       if (scaleType === "continuous") {
         ({continuous, colorScale, legendBounds, legendValues} =
@@ -112,7 +113,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       legendBounds: createLegendBounds(["unknown"]),
       genotype: null,
       scaleType: null,
-      domain: null,
+      domain: [],
       visibleLegendValues: ["unknown"]
     };
   }

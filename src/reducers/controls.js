@@ -219,6 +219,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
         colorScale: action.colorScale,
         colorByConfidence: doesColorByHaveConfidence(state, action.colorBy)
       });
+      if (action.scatterVariables) {
+        newState.scatterVariables = action.scatterVariables;
+      }
       return newState;
     }
     case types.CHANGE_GEO_RESOLUTION:
