@@ -2,9 +2,23 @@
 title: Changelog
 ---
 
+* Scatterplot improvements:
+  * Non-continuous variables can now be used, which allows all colourings (including Genotype, if that's the current colouring) to be scatterplot variables.
+  * Jittering is applied when the spacing between axis variables is more than 50 pixels.
+  * See [PR 1346](https://github.com/nextstrain/auspice/pull/1346) for more.
+* Normalized frequency values now tend to zero in the absence of data.
+See [PR 1325](https://github.com/nextstrain/auspice/pull/1325) for more.
+* Colour scale improvements:
+  * Continuous colourings can provide a scale, which we interpolate between to get the colour scheme
+  * Custom legend data can be provided, including display text and, for continuous variables, bounds to map legend entries to values in the data.
+  * Displayed legend entires may be restricted by specifying them in the dataset JSON.
+  * See [PR 1340](https://github.com/nextstrain/auspice/pull/1340) for more.
+* Filtering via the sidebar UI now returns options which match each of the space-separated queries, rather than requiring an exact match of the query.
+See [PR 1344](https://github.com/nextstrain/auspice/pull/1344) for more.
+* Legend text now takes the maximum available space. 
+See [PR 1328](https://github.com/nextstrain/auspice/pull/1328) for more.
+
 ## version 2.25.1 - 2021/04/07
-
-
 * Bugfix for cases where certain interactions with scatterplot variables would cause auspice to crash.
 See [PR 1332](https://github.com/nextstrain/auspice/pull/1332) for more.
 
