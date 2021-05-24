@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.26.0 - 2021/05/25
+
+
 * Scatterplot improvements:
   * Non-continuous variables can now be used, which allows all colourings (including Genotype, if that's the current colouring) to be scatterplot variables.
   * Jittering is applied when the spacing between axis variables is more than 50 pixels.
