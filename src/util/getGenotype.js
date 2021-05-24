@@ -104,3 +104,8 @@ export const decodeGenotypeFilters = (query) => {
     .map((value) => ({active: true, value})); // all URL filters _start_ active
 };
 
+export const makeGenotypeLabel = (colorBy) => {
+  const genotype = isColorByGenotype(colorBy) ? decodeColorByGenotype(colorBy) : false;
+  if (!genotype) return false;
+  return `Genotype ${genotype.gene}: ${genotype.positions.join(", ")}`;
+};

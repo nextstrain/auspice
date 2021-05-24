@@ -245,6 +245,13 @@ export const addGrid = function addGrid() {
     (this.layout!=="scatter" && this.distance==="num_date")
   ) {
     xGridPoints = computeTemporalGridPoints(xmin, xmax, xAxisPixels, "x");
+  } else if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
+    xGridPoints = {
+      majorGridPoints: this.xScale.domain().map((name) => ({
+        name, visibility: "visible", axis: "x", position: name
+      })),
+      minorGridPoints: []
+    };
   } else {
     xGridPoints = computeNumericGridPoints(xmin, xmax, layout, this.params.minorTicks, "x");
   }
@@ -319,6 +326,10 @@ export const addGrid = function addGrid() {
       const yAxisPixels = this.yScale.range()[1] - this.yScale.range()[0];
       const temporalGrid = computeTemporalGridPoints(ymin, ymax, yAxisPixels, "y");
       majorGridPoints.push(...temporalGrid.majorGridPoints);
+    } else if (this.layout==="scatter" && !this.scatterVariables.yContinuous) {
+      majorGridPoints.push(...this.yScale.domain().map((name) => ({
+        name, visibility: "visible", axis: "y", position: name
+      })));
     } else {
       const numericGrid = computeNumericGridPoints(ymin, ymax, layout, 1, "y");
       majorGridPoints.push(...numericGrid.majorGridPoints);

@@ -3,10 +3,12 @@ import thunk from "redux-thunk";
 import { changeURLMiddleware } from "../middleware/changeURL";
 import rootReducer from "../reducers";
 import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-line no-unused-vars
+import { keepScatterplotStateInSync } from "../middleware/scatterplot";
 
 const configureStore = (initialState) => {
   const middleware = [
     thunk,
+    keepScatterplotStateInSync,
     changeURLMiddleware, // eslint-disable-line comma-dangle
     // loggingMiddleware
   ];

@@ -1,6 +1,8 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
 import { min, max } from "d3-array";
+import scaleLinear from "d3-scale/src/linear";
+import {point as scalePoint} from "d3-scale/src/band";
 import { addLeafCount} from "./helpers";
 import { calculateRegressionThroughRoot, calculateRegressionWithFreeIntercept } from "./regression";
 import { timerStart, timerEnd } from "../../../util/perf";
@@ -84,6 +86,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     if (this.scatterVariables.x==="div") {
       d.x = getDivFromNode(d.n);
       d.px = getDivFromNode(d.n.parent);
+    } else if (this.scatterVariables.x==="gt") {
+      d.x = d.n.currentGt;
+      d.px = d.n.parent.currentGt;
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(d.n.parent, this.scatterVariables.x);
@@ -92,6 +97,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     if (this.scatterVariables.y==="div") {
       d.y = getDivFromNode(d.n);
       d.py = getDivFromNode(d.n.parent);
+    } else if (this.scatterVariables.y==="gt") {
+      d.y = d.n.currentGt;
+      d.py = d.n.parent.currentGt;
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(d.n.parent, this.scatterVariables.y);
@@ -259,10 +267,23 @@ export const setDistance = function setDistance(distanceAttribute) {
 
 
 /**
- * sets the range of the scales used to map the x,y coordinates to the screen
+ * Initializes and sets the range of the scales (this.xScale, this.yScale)
+ * which are used to map the x,y coordinates to the screen
  * @param {margins} -- object with "right, left, top, bottom" margins
  */
 export const setScales = function setScales(margins) {
+
+  if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
+    this.xScale = scalePoint().round(false).align(0.5);
+  } else {
+    this.xScale = scaleLinear();
+  }
+  if (this.layout==="scatter" && !this.scatterVariables.yContinuous) {
+    this.yScale = scalePoint().round(false).align(0.5);
+  } else {
+    this.yScale = scaleLinear();
+  }
+
   const width = parseInt(this.svg.attr("width"), 10);
   const height = parseInt(this.svg.attr("height"), 10);
   if (this.layout === "radial" || this.layout === "unrooted") {
@@ -276,7 +297,7 @@ export const setScales = function setScales(margins) {
     this.yScale.range([0.5 * ySlack + margins["top"] || 0, height - 0.5 * ySlack - (margins["bottom"] || 0)]);
 
   } else {
-    // for rectancular layout, allow flipping orientation of left right and top/botton
+    // for rectangular layout, allow flipping orientation of left/right and top/bottom
     if (this.params.orientation[0] > 0) {
       this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
     } else {
@@ -331,62 +352,77 @@ export const mapToScreen = function mapToScreen() {
   /* set the range of the x & y scales */
   this.setScales(tmpMargins);
 
-  /* find minimum & maximum x & y values */
-  let [minY, maxY, minX, maxX] = [1000000, -100000, 1000000, -100000];
   let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
     nodesInDomain = nodesInDomain.filter((d) => d.terminal);
   }
-  nodesInDomain.forEach((d) => {
-    if (d.x > maxX) maxX = d.x;
-    if (d.y > maxY) maxY = d.y;
-    if (d.x < minX) minX = d.x;
-    if (d.y < minY) minY = d.y;
-  });
 
-  /* fixes state of 0 length domain */
-  if (minX === maxX) {
-    minX -= 0.005;
-    maxX += 0.005;
+  /* Compute the domains to pass to the d3 scales for the x & y axes */
+  let xDomain, yDomain, spanX, spanY;
+  if (this.layout!=="scatter" || this.scatterVariables.xContinuous) {
+    let [minX, maxX] = [1000000, -100000];
+    nodesInDomain.forEach((d) => {
+      if (d.x < minX) minX = d.x;
+      if (d.x > maxX) maxX = d.x;
+    });
+    /* fixes state of 0 length domain */
+    if (minX === maxX) {
+      minX -= 0.005;
+      maxX += 0.005;
+    }
+    /* Don't allow tiny x-axis domains -- e.g. if zoomed into a polytomy where the
+    divergence values are all tiny, then we don't want to display the tree topology */
+    const minimumXAxisSpan = 1E-8;
+    spanX = maxX-minX;
+    if (spanX < minimumXAxisSpan) {
+      maxX = minimumXAxisSpan - minX;
+      spanX = minimumXAxisSpan;
+    }
+    xDomain = [minX, maxX];
+  } else {
+    const seenValues = new Set(nodesInDomain.map((d) => d.x));
+    xDomain = this.scatterVariables.xDomain.filter((v) => seenValues.has(v));
+    padCategoricalScales(xDomain, this.xScale);
   }
 
-  /* slightly pad min and max y to account for small clades */
-  if (inViewTerminalNodes.length < 30) {
-    const delta = 0.05 * (maxY - minY);
-    minY -= delta;
-    maxY += delta;
+  if (this.layout!=="scatter" || this.scatterVariables.yContinuous) {
+    let [minY, maxY] = [1000000, -100000];
+    nodesInDomain.forEach((d) => {
+      if (d.y < minY) minY = d.y;
+      if (d.y > maxY) maxY = d.y;
+    });
+    /* slightly pad min and max y to account for small clades */
+    if (inViewTerminalNodes.length < 30) {
+      const delta = 0.05 * (maxY - minY);
+      minY -= delta;
+      maxY += delta;
+    }
+    spanY = maxY-minY;
+    yDomain = [minY, maxY];
+  } else {
+    const seenValues = new Set(nodesInDomain.map((d) => d.y));
+    yDomain = this.scatterVariables.yDomain.filter((v) => seenValues.has(v));
+    padCategoricalScales(yDomain, this.yScale);
   }
 
-  /* Don't allow tiny x-axis domains -- e.g. if zoomed into a polytomy where the
-  divergence values are all tiny, then we don't want to display the tree topology */
-  const minimumXAxisSpan = 1E-8;
-  let spanX = maxX-minX;
-  if (spanX < minimumXAxisSpan) {
-    maxX = minimumXAxisSpan - minX;
-    spanX = minimumXAxisSpan;
-  }
-
-  /* set the domain of the x & y scales */
+  /* Radial / Unrooted layouts need to be square since branch lengths
+  depend on this */
   if (this.layout === "radial" || this.layout === "unrooted") {
-    // handle "radial and unrooted differently since they need to be square
-    // since branch length move in x and y direction
-    // TODO: should be tied to svg dimensions
-    const spanY = maxY-minY;
     const maxSpan = max([spanY, spanX]);
     const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
     const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
-    this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
-    this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
-  } else if (this.layout==="clock" || this.layout==="scatter") {
-    // same as rectangular, but flipped yscale
-    this.xScale.domain([minX, maxX]);
-    this.yScale.domain([maxY, minY]);
-  } else { // rectangular
-    this.xScale.domain([minX, maxX]);
-    this.yScale.domain([minY, maxY]);
+    xDomain = [xDomain[0]-xSlack, xDomain[0]+maxSpan-xSlack];
+    yDomain = [yDomain[0]-ySlack, yDomain[0]+maxSpan-ySlack];
   }
+  /* Clock & Scatter plots flip the yDomain */
+  if (this.layout === "clock" || this.layout === "scatter") {
+    yDomain.reverse();
+  }
+
+  this.xScale.domain(xDomain);
+  this.yScale.domain(yDomain);
 
   const hiddenYPosition = this.yScale.range()[1] + 100;
   const hiddenXPosition = this.xScale.range()[0] - 100;
@@ -402,6 +438,8 @@ export const mapToScreen = function mapToScreen() {
   // for scatterplots we do an additional iteration as some values may be missing
   // & we want to avoid rendering these
   if (this.layout==="scatter") {
+    if (!this.scatterVariables.yContinuous) jitter("y", this.yScale, this.nodes);
+    if (!this.scatterVariables.xContinuous) jitter("x", this.xScale, this.nodes);
     this.nodes.forEach((d) => {
       if (isNaN(d.xTip)) d.xTip = hiddenXPosition;
       if (isNaN(d.yTip)) d.yTip=hiddenYPosition;
@@ -471,3 +509,32 @@ export const mapToScreen = function mapToScreen() {
   }
   timerEnd("mapToScreen");
 };
+
+function padCategoricalScales(domain, scale) {
+  if (domain.length<=4) return scale.padding(0.4);
+  if (domain.length<=6) return scale.padding(0.3);
+  if (domain.length<=10) return scale.padding(0.2);
+  return scale.padding(0.1);
+}
+
+/**
+ * Add jitter to the already-computed node positions.
+ */
+function jitter(axis, scale, nodes) {
+  const step = scale.step();
+  if (step < 50) return; // don't jitter if there's little space between bands
+  const rand = []; // pre-compute a small set of pseudo random numbers for speed
+  for (let i=1e2; i--;) {
+    rand.push((Math.random()-0.5)*step*0.5); // occupy 50%
+  }
+  const [base, tip, randLen] = [`${axis}Base`, `${axis}Tip`, rand.length];
+  let j = 0;
+  function recurse(n) {
+    n[base] = n.parent[tip];
+    n[tip] += rand[j++];
+    if (j>=randLen) j=0;
+    if (!n.children) return;
+    for (const child of n.children) recurse(child);
+  }
+  recurse(nodes[0]);
+}

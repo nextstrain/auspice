@@ -123,7 +123,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.layout,
-        canRenderBranchLabels: (action.layout!=="scatter" && action.layout!=="clock") || (action.scatterVariables && action.scatterVariables.showBranches),
+        canRenderBranchLabels: action.canRenderBranchLabels,
         scatterVariables: action.scatterVariables,
         /* temporal confidence can only be displayed for rectangular trees */
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
@@ -219,6 +219,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
         colorScale: action.colorScale,
         colorByConfidence: doesColorByHaveConfidence(state, action.colorBy)
       });
+      if (action.scatterVariables) {
+        newState.scatterVariables = action.scatterVariables;
+      }
       return newState;
     }
     case types.CHANGE_GEO_RESOLUTION:

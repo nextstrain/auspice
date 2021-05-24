@@ -1,4 +1,3 @@
-import scaleLinear from "d3-scale/src/linear";
 import { createDefaultParams } from "./defaultParams";
 import { createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
@@ -38,8 +37,6 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
   });
   this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
   setYValues(this.nodes);
-  this.xScale = scaleLinear();
-  this.yScale = scaleLinear();
   this.zoomNode = this.nodes[idxOfInViewRootNode];
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
