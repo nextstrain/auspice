@@ -3,18 +3,14 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, legendMaxLength, fastTransitionDuration, months } from "../../../util/globals";
+import { fastTransitionDuration, months } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { TOGGLE_LEGEND } from "../../../actions/types";
 
-const svg = {
-  position: "absolute",
-  top: 26,
-  borderRadius: 4,
-  zIndex: 1000,
-  userSelect: "none"
-};
+const ITEM_RECT_SIZE = 15;
+const LEGEND_SPACING = 4;
+const COLUMN_WIDTH = 145;
 
 @connect((state) => {
   return {
@@ -47,7 +43,7 @@ class Legend extends React.Component {
     const nItems = this.props.colorScale.visibleLegendValues.length;
     const titlePadding = 20;
     return Math.ceil(nItems / 2) *
-      (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
+      (ITEM_RECT_SIZE + LEGEND_SPACING) + LEGEND_SPACING + titlePadding || 100;
   }
 
   getSVGWidth() {
@@ -57,14 +53,12 @@ class Legend extends React.Component {
     return this.getTitleWidth() + 20;
   }
 
-  getTransformationForLegendItem(i) {
-    const count = this.props.colorScale.visibleLegendValues.length;
-    const stack = Math.ceil(count / 2);
-    const fromRight = Math.floor(i / stack);
-    const fromTop = (i % stack);
-    const horz = fromRight * 145 + 10;
-    const vert = fromTop * (legendRectSize + legendSpacing);
-    return "translate(" + horz + "," + vert + ")";
+  getTransformationForLegendItem(maxNumPerColumn, itemIdx) {
+    const colIdx = Math.floor(itemIdx/maxNumPerColumn);
+    const colPos = colIdx * COLUMN_WIDTH + 10;
+    const rowIdx = (itemIdx % maxNumPerColumn); // hardcoded for 2 rows
+    const rowPos = rowIdx * (ITEM_RECT_SIZE + LEGEND_SPACING);
+    return `translate(${colPos},${rowPos})`;
   }
   getTitleString() {
     if (isColorByGenotype(this.props.colorBy)) {
@@ -162,22 +156,24 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendItems() {
-    const items = this.props.colorScale.visibleLegendValues
+    const values = this.props.colorScale.visibleLegendValues;
+    const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
+    const items = values
       .filter((d) => d !== undefined)
       .map((d, i) => {
         return (
           <LegendItem
             dispatch={this.props.dispatch}
-            legendRectSize={legendRectSize}
-            legendSpacing={legendSpacing}
-            legendMaxLength={legendMaxLength}
+            legendRectSize={ITEM_RECT_SIZE}
+            legendSpacing={LEGEND_SPACING}
             rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
-            transform={this.getTransformationForLegendItem(i)}
+            transform={this.getTransformationForLegendItem(maxNumPerColumn, i)}
             key={d}
             value={d}
             label={this.styleLabelText(d)}
             index={i}
+            clipId={i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
           />
         );
       });
@@ -190,32 +186,26 @@ class Legend extends React.Component {
     //   }}>
     return (
       <g id="ItemsContainer">
-        <rect width="290" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
+        <rect width={this.getSVGWidth()} height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
+        <clipPath id="legendFirstColumnClip">
+          <rect x="0" y="0" width={COLUMN_WIDTH-5} height={this.getSVGHeight()} fill="rgb(150, 154, 223)"/>
+        </clipPath>
         <g id="Items" transform="translate(0,20)">
           {items}
         </g>
       </g>
     );
   }
-
-  getStyles() {
-    return {
-      svgLeft: {
-        ...svg,
-        left: 5
-      },
-      svgRight: {
-        ...svg,
-        right: 5
-      }
+  getContainerStyles() {
+    const styles = {
+      position: "absolute",
+      top: 26,
+      borderRadius: 4,
+      zIndex: 1000,
+      userSelect: "none"
     };
-  }
-
-  getSVGStyle() {
-    const styles = this.getStyles();
-
-    if (this.props.right) { return styles.svgRight; }
-    return styles.svgLeft;
+    styles[this.props.right ? "right" : "left"] = 5;
+    return styles;
   }
 
   getArrowOffset() {
@@ -240,7 +230,7 @@ class Legend extends React.Component {
         id="TreeLegendContainer"
         width={this.getSVGWidth()}
         height={this.getSVGHeight()}
-        style={this.getSVGStyle()}
+        style={this.getContainerStyles()}
       >
         {this.legendItems()}
         <g
