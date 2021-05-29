@@ -69,39 +69,33 @@ class ChooseLayout extends React.Component {
       </>
     );
   }
-
-  renderScatterplotToggles() {
+  renderBranchToggle() {
     return (
-      <>
-        <div style={{paddingTop: "2px"}}/>
-        <ScatterVariableContainer>
-          <Toggle
-            display
-            on={this.props.scatterVariables.showBranches}
-            callback={() => this.props.dispatch(changeLayout({showBranches: !this.props.scatterVariables.showBranches}))}
-            label={"Show branches"}
-          />
-        </ScatterVariableContainer>
-        <div style={{paddingTop: "2px"}}/>
-        {
-          (this.props.scatterVariables.xContinuous && this.props.scatterVariables.yContinuous) && (
-            <>
-              <ScatterVariableContainer>
-                <Toggle
-                  display
-                  on={this.props.scatterVariables.showRegression}
-                  callback={() => this.props.dispatch(changeLayout({showRegression: !this.props.scatterVariables.showRegression}))}
-                  label={"Show regression"}
-                />
-              </ScatterVariableContainer>
-              <div style={{paddingTop: "2px"}}/>
-            </>
-          )
-        }
-      </>
+      <ScatterVariableContainer padAbove>
+        <Toggle
+          display
+          on={this.props.scatterVariables.showBranches}
+          callback={() => this.props.dispatch(changeLayout({showBranches: !this.props.scatterVariables.showBranches}))}
+          label={"Show branches"}
+        />
+      </ScatterVariableContainer>
     );
   }
-
+  renderRegressionToggle() {
+    if (this.props.layout === "scatter" && !(this.props.scatterVariables.xContinuous && this.props.scatterVariables.yContinuous)) {
+      return null; // scatterplot regressions only available if _both_ variables are continuous
+    }
+    return (
+      <ScatterVariableContainer padAbove>
+        <Toggle
+          display
+          on={this.props.scatterVariables.showRegression}
+          callback={() => this.props.dispatch(changeLayout({showRegression: !this.props.scatterVariables.showRegression}))}
+          label={"Show regression"}
+        />
+      </ScatterVariableContainer>
+    );
+  }
   render() {
     const { t } = this.props;
     if (this.props.showTreeToo) return null;
@@ -150,7 +144,8 @@ class ChooseLayout extends React.Component {
                 >
                   {t("sidebar:clock")}
                 </SidebarButton>
-                {selected==="clock" && this.renderScatterplotToggles()}
+                {selected==="clock" && this.renderBranchToggle()}
+                {selected==="clock" && this.renderRegressionToggle()}
               </RowContainer>
             ) :
             null
@@ -164,12 +159,9 @@ class ChooseLayout extends React.Component {
           >
             {t("sidebar:scatter")}
           </SidebarButton>
-          {selected==="scatter" && (
-            <>
-              {this.renderScatterplotAxesSelector()}
-              {this.renderScatterplotToggles()}
-            </>
-          )}
+          {selected==="scatter" && this.renderScatterplotAxesSelector()}
+          {selected==="scatter" && this.renderBranchToggle()}
+          {selected==="scatter" && this.renderRegressionToggle()}
         </RowContainer>
       </div>
     );
@@ -191,7 +183,7 @@ const ScatterVariableContainer = styled.div`
   flex-shrink: 1;
   flex-basis: auto;
   align-self: auto;
-  padding: 0px 0px 2px 15px;
+  padding: ${(props) => props.padAbove?"2":"0"}px 0px 2px 15px;
 `;
 
 const ScatterAxisName = styled.div`
