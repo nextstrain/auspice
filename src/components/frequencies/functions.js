@@ -203,7 +203,7 @@ export const removeStream = (svg) => {
 };
 
 const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
-  categories[i] === unassigned_label ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
+  categories[i] === unassigned_label ? "#ADB1B3" : rgb(colorScale.scale(categories[i])).toString();
 
 function handleMouseOver() {
   select(this).attr("opacity", 1);

@@ -11,7 +11,7 @@ import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
 
-export const unknownColor = "#AAAAAA";
+export const unknownColor = "#ADB1B3";
 
 /**
  * calculate the color scale.
@@ -130,7 +130,7 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   const extraVals = getExtraVals(t1nodes, t2nodes, colorBy, domain);
   if (extraVals.length) { // we must add these to the domain + provide a color value
     domain = domain.concat(extraVals);
-    const extraColors = createListOfColors(extraVals.length, [rgb(180, 180, 180), rgb(90, 90, 90)]);
+    const extraColors = createListOfColors(extraVals.length, ["#BDC3C6", "#868992"]);
     extraVals.forEach((val, idx) => {
       colorMap.set(val, extraColors[idx]);
     });
