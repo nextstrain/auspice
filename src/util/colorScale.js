@@ -130,7 +130,7 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   const extraVals = getExtraVals(t1nodes, t2nodes, colorBy, domain);
   if (extraVals.length) { // we must add these to the domain + provide a color value
     domain = domain.concat(extraVals);
-    const extraColors = createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]);
+    const extraColors = createListOfColors(extraVals.length, [rgb(180, 180, 180), rgb(90, 90, 90)]);
     extraVals.forEach((val, idx) => {
       colorMap.set(val, extraColors[idx]);
     });
