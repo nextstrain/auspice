@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.27.0 - 2021/06/05
+
+
 
 * Adjust greyscale colour ramp.
 See [PR 1353](https://github.com/nextstrain/auspice/pull/1353) for more.
