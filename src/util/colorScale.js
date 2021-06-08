@@ -339,7 +339,7 @@ function createDiscreteScale(domain, type) {
   let colorList;
   if (type==="ordinal" || type==="categorical") {
     /* TODO: use different colours! */
-    colorList = domain.length <= colors.length ?
+    colorList = domain.length < colors.length ?
       colors[domain.length].slice() :
       colors[colors.length - 1].slice();
   }
