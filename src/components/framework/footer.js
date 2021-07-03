@@ -20,39 +20,43 @@ const FooterStyles = styled.div`
   color: rgb(136, 136, 136);
   line-height: 1.4;
 
+  p {
+    font-weight: 300;
+  }
+
   h1 {
     font-weight: 700;
-    font-size: 2.2em;
+    font-size: 2.50em;
     margin: 0.2em 0;
   }
 
   h2 {
     font-weight: 600;
-    font-size: 2em;
+    font-size: 2.15em;
     margin: 0.2em 0;
   }
 
   h3 {
     font-weight: 500;
-    font-size: 1.8em;
+    font-size: 1.70em;
     margin: 0.2em 0;
   }
 
   h4 {
     font-weight: 500;
-    font-size: 1.6em;
+    font-size: 1.25em;
     margin: 0.1em 0;
   }
 
   h5 {
     font-weight: 500;
-    font-size: 1.4em;
+    font-size: 1.0em;
     margin: 0.1em 0;
   }
 
   h6 {
     font-weight: 500;
-    font-size: 1.2em;
+    font-size: 0.85em;
     margin: 0.1em 0;
   }
 
