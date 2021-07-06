@@ -2,15 +2,16 @@
 title: Changelog
 ---
 
+* Remove ability to download metadata TSV from GISAID datasets. Replace with acknowledgments TSV. See [PR 1366](https://github.com/nextstrain/auspice/pull/1366).
+* Cleanup header fields when downloading metadata TSV, including switch to use name (eg `pango_lineage`) instead of title (eg `PANGO lineage`). See [PR 1367](https://github.com/nextstrain/auspice/pull/1367).
+* Update styling of footer text. See [PR 1364](https://github.com/nextstrain/auspice/pull/1364).
+
 ## version 2.27.0 - 2021/06/05
-
-
 
 * Adjust greyscale colour ramp.
 See [PR 1353](https://github.com/nextstrain/auspice/pull/1353) for more.
 * (Bugfix) Fixed the situation where the regression toggle would not appear for clock layouts.
 See [PR 1352](https://github.com/nextstrain/auspice/pull/1352) for more.
-
 
 ## version 2.26.0 - 2021/05/25
 * Scatterplot improvements:
@@ -26,7 +27,7 @@ See [PR 1325](https://github.com/nextstrain/auspice/pull/1325) for more.
   * See [PR 1340](https://github.com/nextstrain/auspice/pull/1340) for more.
 * Filtering via the sidebar UI now returns options which match each of the space-separated queries, rather than requiring an exact match of the query.
 See [PR 1344](https://github.com/nextstrain/auspice/pull/1344) for more.
-* Legend text now takes the maximum available space. 
+* Legend text now takes the maximum available space.
 See [PR 1328](https://github.com/nextstrain/auspice/pull/1328) for more.
 
 ## version 2.25.1 - 2021/04/07
@@ -170,7 +171,7 @@ This version reverts the change to URL parsing introduced in 2.18.2 which broke 
 * Improve parsing of auspice URLs with colon characters in the pathname. See [PR 1210](https://github.com/nextstrain/auspice/pull/1210).
 
 ## version 2.18.1 - 2020/08/07
-* Add between-paragraph padding for text rendering in (non-mobile) narratives. 
+* Add between-paragraph padding for text rendering in (non-mobile) narratives.
 
 ## version 2.18.0 - 2020/08/03
 * Parse narratives client side.
@@ -233,7 +234,7 @@ See [PR 1166](https://github.com/nextstrain/auspice/pull/1166).
 [See PR 1126](https://github.com/nextstrain/auspice/pull/1126) for more.
 * Add a toggle for whether or not to show transmission lines on the map.
 [See PR 1147](https://github.com/nextstrain/auspice/pull/1147) and [PR 1103](https://github.com/nextstrain/auspice/pull/1147) for more.
-* Dynamically adjust deme circle size on the map when filtering. 
+* Dynamically adjust deme circle size on the map when filtering.
 [See PR 1135](https://github.com/nextstrain/auspice/pull/1135) for more.
 * Allow the genomic diversity data (the data behind the entropy panel) to be downloaded as a TSV.
 [See PR 1144](https://github.com/nextstrain/auspice/pull/1144) for more.
@@ -244,7 +245,7 @@ See [PR 1166](https://github.com/nextstrain/auspice/pull/1166).
 #### Other
 * Temporarily disable integration tests from the GitHub CI. [See PR 1148](https://github.com/nextstrain/auspice/pull/1148) for more.
 * Add a CC-BY license for the downloaded SVG (screenshots) . [See PR 1140](https://github.com/nextstrain/auspice/pull/1140) for more.
-* Improvement in code which decides which footers to show. 
+* Improvement in code which decides which footers to show.
 [See PR 1118](https://github.com/nextstrain/auspice/pull/1118) for more.
 * Documentation improvements -- see [PR 1127](https://github.com/nextstrain/auspice/pull/1127) for more.
 * Fix an error in map positioning in some narrative slides. [See PR 958](https://github.com/nextstrain/auspice/pull/958) for more.
@@ -298,7 +299,7 @@ This will allow narratives to render slides with the CI displayed.
 [See PR 1046](https://github.com/nextstrain/auspice/pull/1046)
 * Add the ability to export per-strain metadata of only those strains currently being displayed.
 [See PR 1067](https://github.com/nextstrain/auspice/pull/1067)
-* Move to using `react-icons` which allows the removal of the font-awesome CSS. 
+* Move to using `react-icons` which allows the removal of the font-awesome CSS.
 This improves ease-of-use and reduces the bundle size.
 [See PR 1065](https://github.com/nextstrain/auspice/pull/1065), [PR 1041](https://github.com/nextstrain/auspice/pull/1041)
 & [PR 1073](https://github.com/nextstrain/auspice/pull/1073)
@@ -378,8 +379,8 @@ This improves ease-of-use and reduces the bundle size.
 * Update Spanish locale data (still in a partially complete state).
 See [commit f9c8ad2](https://github.com/nextstrain/auspice/commit/f9c8ad209a1e5d304fc6f15ec708f3d0be3dec43)
 * Reorganisation and general improvements to documentation around contributing to auspice development.
-[See PR 978](https://github.com/nextstrain/auspice/pull/978), 
-[commit 707f563](https://github.com/nextstrain/auspice/commit/707f563aab0a62e0504e393af0cd23da3e4504e0) and 
+[See PR 978](https://github.com/nextstrain/auspice/pull/978),
+[commit 707f563](https://github.com/nextstrain/auspice/commit/707f563aab0a62e0504e393af0cd23da3e4504e0) and
 [commit 9f002c9](https://github.com/nextstrain/auspice/commit/9f002c96a676e4603b7b9c06ef7df8a26be6d04c)
 * Fix a bug where the narrative table styling introduced in 2.9.0 were applied outside the narratives.
 * Fix all linting errors and warnings (potentially the first time this has happened!)
