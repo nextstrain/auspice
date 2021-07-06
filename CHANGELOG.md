@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.28.0 - 2021/07/05
+
+
 * Remove ability to download metadata TSV from GISAID datasets. Replace with acknowledgments TSV. See [PR 1366](https://github.com/nextstrain/auspice/pull/1366).
 * Cleanup header fields when downloading metadata TSV, including switch to use name (eg `pango_lineage`) instead of title (eg `PANGO lineage`). See [PR 1367](https://github.com/nextstrain/auspice/pull/1367).
 * Update styling of footer text. See [PR 1364](https://github.com/nextstrain/auspice/pull/1364).
