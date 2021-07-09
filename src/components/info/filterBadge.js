@@ -64,7 +64,7 @@ const SelectedFilterTextContainer = styled(BaseContainer)`
 
 const BadgeContainer = styled.div`
   background-color: #E9F2F6;
-  ${(props) => props.striped ? 'background: repeating-linear-gradient(135deg, #E9F2F6, #E9F2F6 5px, transparent 5px, transparent 10px);' : ''};
+  ${(props) => props.striped ? 'background: repeating-linear-gradient(135deg, #E9F2F6, #E9F2F6 5px, #FFFFFF 5px, #FFFFFF 10px);' : ''};
   display: inline-block;
   font-size: 14px;
   border-radius: 2px;
