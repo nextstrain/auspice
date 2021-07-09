@@ -98,7 +98,10 @@ class FilterData extends React.Component {
       return {
         filterName,
         displayName: filterBadgeDisplayName(n, this.getFilterTitle(filterName)),
-        remove: () => {this.props.dispatch(applyFilter("set", filterName, []));}
+        anyFiltersActive: () => this.props.activeFilters[filterName].filter((f) => f.active).length>0,
+        remove: () => {this.props.dispatch(applyFilter("set", filterName, []));},
+        activate: () => {this.props.dispatch(applyFilter("add", filterName, this.props.activeFilters[filterName].map((f) => f.value)));},
+        inactivate: () => {this.props.dispatch(applyFilter("inactivate", filterName, this.props.activeFilters[filterName].map((f) => f.value)));}
       };
     });
   }
@@ -138,9 +141,12 @@ class FilterData extends React.Component {
             {inUseFilters.map((filter) => (
               <div style={{display: 'inline-block', margin: '2px'}} key={filter.displayName}>
                 <FilterBadge
-                  active
+                  active={filter.anyFiltersActive()}
+                  canMakeInactive
                   id={filter.displayName}
                   remove={filter.remove}
+                  activate={filter.activate}
+                  inactivate={filter.inactivate}
                   onHoverMessage={`Data is currently filtered by ${filter.displayName}`}
                 >
                   {filter.displayName}
