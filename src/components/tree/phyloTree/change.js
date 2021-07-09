@@ -296,7 +296,7 @@ export const change = function change({
   if (changeVisibility) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
-    elemsToUpdate.add(".tip").add(".tipLabel");
+    elemsToUpdate.add(".tip").add(".tipLabel").add(".branchLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
     nodePropsToModify.visibility = visibility;
   }
