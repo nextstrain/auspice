@@ -125,5 +125,5 @@ export const clearSelectedTip = function clearSelectedTip(d) {
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
-  this.props.dispatch(applyFilter("remove", strainSymbol, [d.n.name]));
+  this.props.dispatch(applyFilter("inactivate", strainSymbol, [d.n.name]));
 };
