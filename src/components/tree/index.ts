@@ -16,6 +16,7 @@ const Tree = connect((state: RootState) => ({
   temporalConfidence: state.controls.temporalConfidence,
   distanceMeasure: state.controls.distanceMeasure,
   explodeAttr: state.controls.explodeAttr,
+  focus: state.controls.focus,
   colorScale: state.controls.colorScale,
   colorings: state.metadata.colorings,
   genomeMap: state.entropy.genomeMap,

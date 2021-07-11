@@ -258,6 +258,7 @@ export const change = function change({
   /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
+  newFocus = undefined,
   updateLayout = undefined, // todo - this seems identical to `newLayout`
   newBranchLabellingKey = undefined,
   showAllBranchLabels = undefined,
@@ -313,7 +314,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || newFocus || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -359,8 +360,10 @@ export const change = function change({
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance || updateLayout) this.setDistance(newDistance);
-  /* layout (must run after distance) */
-  if (newDistance || newLayout || updateLayout || changeNodeOrder) {
+  /* focus */
+  if (newFocus || updateLayout) setDisplayOrder(this.nodes, newFocus);
+  /* layout (must run after distance and focus) */
+  if (newDistance || newLayout || newFocus || updateLayout || changeNodeOrder) {
     this.setLayout(newLayout || this.layout, scatterVariables);
   }
   /* show confidences - set this param which actually adds the svg paths for
@@ -377,6 +380,7 @@ export const change = function change({
     newDistance ||
     newLayout ||
     changeNodeOrder ||
+    newFocus ||
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||

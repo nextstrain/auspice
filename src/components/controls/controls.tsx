@@ -18,12 +18,14 @@ import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
 import { PanelSection } from "./panelSection";
+import ToggleFocus from "./toggle-focus";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
 import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
-  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
+  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo,
+  ToggleFocusInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
@@ -64,6 +66,7 @@ function Controls() {
           tooltip={TreeInfo}
           options={<>
             <ChooseLayout />
+            <ToggleFocus tooltip={ToggleFocusInfo} />
             <ChooseMetric />
             <ChooseBranchLabelling />
             <ChooseTipLabel />
