@@ -4,6 +4,7 @@ import { defaultGeoResolution,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
+  defaultFocus,
   controlsHiddenWidth,
   strainSymbol,
   twoColumnBreakpoint } from "../util/globals";
@@ -17,6 +18,7 @@ type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
 interface Defaults {
   distanceMeasure: string
   layout: Layout
+  focus: boolean
   geoResolution: string
   filters: Record<string, any>
   filtersInFooter: string[]
@@ -34,6 +36,7 @@ export interface BasicControlsState {
   panelsToDisplay: string[]
   showTreeToo: boolean
   canTogglePanelLayout: boolean
+  focus: boolean
 
   // This allows arbitrary prop names while TypeScript adoption is incomplete.
   // TODO: add all other props explicitly and remove this.
@@ -60,6 +63,7 @@ export const getDefaultControlsState = () => {
   const defaults: Defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
+    focus: defaultFocus,
     geoResolution: defaultGeoResolution,
     filters: {},
     filtersInFooter: [],
@@ -87,6 +91,7 @@ export const getDefaultControlsState = () => {
     layout: defaults.layout,
     scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
+    focus: defaults.focus,
     dateMin,
     dateMinNumeric,
     dateMax,
@@ -209,7 +214,10 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return Object.assign({}, state, updatesToState);
     }
-      case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
+    case types.TOGGLE_FOCUS: {
+      return {...state, focus: !state.focus}
+    }
+    case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };
       if (action.dateMin) {
         newDates.dateMin = action.dateMin;

@@ -270,6 +270,7 @@ export const change = function change({
   tipRadii = undefined,
   branchThickness = undefined,
   /* other data */
+  focus = undefined,
   scatterVariables = undefined
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -323,7 +324,7 @@ export const change = function change({
   }
 
   if (changeNodeOrder) {
-    setDisplayOrder(this.nodes);
+    setDisplayOrder({nodes: this.nodes, focus});
     this.setDistance();
   }
 
@@ -359,7 +360,9 @@ export const change = function change({
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance || updateLayout) this.setDistance(newDistance);
-  /* layout (must run after distance) */
+  /* focus */
+  if (updateLayout) setDisplayOrder({nodes: this.nodes, focus});
+  /* layout (must run after distance and focus) */
   if (newDistance || newLayout || updateLayout || changeNodeOrder) {
     this.setLayout(newLayout || this.layout, scatterVariables);
   }
