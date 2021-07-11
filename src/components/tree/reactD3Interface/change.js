@@ -7,6 +7,14 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   const oldTreeRedux = mainTree ? oldProps.tree : oldProps.treeToo;
   const newTreeRedux = mainTree ? newProps.tree : newProps.treeToo;
 
+  /* zoom to a clade / reset zoom to entire tree */
+  const zoomChange = oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode;
+
+  const dateRangeChange = oldProps.dateMinNumeric !== newProps.dateMinNumeric ||
+                          oldProps.dateMaxNumeric !== newProps.dateMaxNumeric;
+
+  const filterChange = oldTreeRedux.filters !== newTreeRedux.filters;
+
   /* do any properties on the tree object need to be updated?
   Note that updating properties itself won't trigger any visual changes */
   phylotree.dateRange = [newProps.dateMinNumeric, newProps.dateMaxNumeric];
@@ -49,6 +57,17 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.changeNodeOrder = true;
   }
 
+  /* enable/disable focus */
+  if (oldProps.focus !== newProps.focus) {
+    args.newFocus = newProps.focus;
+    args.updateLayout = true;
+  }
+  /* re-focus on changes */
+  else if (oldProps.focus && (zoomChange || dateRangeChange || filterChange)) {
+    args.newFocus = true;
+    args.updateLayout = true;
+  }
+
   /* change in key used to define branch labels, tip labels */
   if (oldProps.canRenderBranchLabels===true && newProps.canRenderBranchLabels===false) {
     args.newBranchLabellingKey = "none";
@@ -86,8 +105,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
 
-  /* zoom to a clade / reset zoom to entire tree */
-  if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
+  if (zoomChange) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
     newState.selectedNode = {};

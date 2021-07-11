@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -33,19 +34,20 @@ export const applyToChildren = (phyloNode, func) => {
  * of nodes in a rectangular tree.
  * If `yCounter` is undefined then we wish to hide the node and all descendants of it
  * @param {PhyloNode} node
+ * @param {function} getDisplayOrder
  * @param {int|undefined} yCounter
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
  */
-export const setDisplayOrderRecursively = (node, yCounter) => {
+export const setDisplayOrderRecursively = (node, getDisplayOrder, yCounter) => {
   const children = node.n.children; // (redux) tree node
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, yCounter);
+      yCounter = setDisplayOrderRecursively(children[i].shell, getDisplayOrder, yCounter);
     }
   } else {
-    node.displayOrder = (node.n.fullTipCount===0 || yCounter===undefined) ? yCounter : ++yCounter;
-    node.displayOrderRange = [yCounter, yCounter];
+    node.displayOrder = (node.n.fullTipCount===0 || yCounter===undefined) ? yCounter : yCounter + getDisplayOrder(node);
+    node.displayOrderRange = [node.displayOrder, node.displayOrder];
     return yCounter;
   }
   /* if here, then all children have displayOrders, but we don't. */
@@ -78,9 +80,11 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
  * @param {Array<PhyloNode>} nodes
+ * @param {boolean} focus
  * @returns {undefined}
  */
-export const setDisplayOrder = (nodes) => {
+export const setDisplayOrder = (nodes, focus) => {
+  const getDisplayOrder = getDisplayOrderCallback(nodes, focus);
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
@@ -88,9 +92,9 @@ export const setDisplayOrder = (nodes) => {
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
-      setDisplayOrderRecursively(nodes[subtree.arrayIdx], undefined);
+      setDisplayOrderRecursively(nodes[subtree.arrayIdx], getDisplayOrder, undefined);
     } else {
-      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], yCounter);
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], getDisplayOrder, yCounter);
       yCounter+=spaceBetweenSubtrees;
     }
   }
@@ -99,6 +103,51 @@ export const setDisplayOrder = (nodes) => {
   nodes[0].displayOrderRange = [undefined, undefined];
 };
 
+/**
+ * @param {Array<PhyloNode>} nodes
+ * @param {boolean} focus
+ * @returns fn to return a display order (y position) for a node
+ */
+function getDisplayOrderCallback(nodes, focus) {
+  /**
+   * Start at 0 and increase with each node.
+   * Note that this value is shared across invocations of the callback.
+   */
+  let displayOrder = 0;
+
+  /**
+   * Keep track of whether the previous node was selected
+   */
+  let previousWasVisible;
+
+  if (focus) {
+    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
+    const yProportionUnfocused = 1 - yProportionFocused;
+    const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
+    const yPerUnfocused = (yProportionUnfocused * nodes.length) / (nodes.length - numVisible);
+
+    return (node) => {
+      // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
+      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
+        displayOrder += yPerFocused;
+      } else {
+        displayOrder += yPerUnfocused;
+      }
+
+      // Update for the next node
+      previousWasVisible = node.visibility === NODE_VISIBLE;
+
+      return displayOrder;
+    };
+  } else {
+    // No focus: 1 unit per node
+    return (_node) => {
+      displayOrder += 1;
+      return displayOrder;
+    };
+  }
+}
 
 export const formatDivergence = (divergence) => {
   return divergence > 1 ?

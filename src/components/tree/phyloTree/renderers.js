@@ -7,6 +7,7 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
  * @param {string} distance       -- the property used as branch length, e.g. div or num_date
+ * @param {string} focus          -- whether to focus on filtered nodes
  * @param {object} parameters     -- an object that contains options that will be added to this.params
  * @param {object} callbacks      -- an object with call back function defining mouse behavior
  * @param {array} branchThickness -- array of branch thicknesses (same ordering as tree nodes)
@@ -21,7 +22,7 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {object} scatterVariables  -- {x, y} properties to map nodes => scatterplot (only used if layout="scatter")
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
+export const render = function render(svg, layout, distance, focus, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -40,7 +41,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder(this.nodes);
+  setDisplayOrder(this.nodes, focus);
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();
