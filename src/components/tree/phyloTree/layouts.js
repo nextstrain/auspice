@@ -7,6 +7,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -288,6 +289,57 @@ export const setDistance = function setDistance(distanceAttribute) {
   timerEnd("setDistance");
 };
 
+/**
+ * given nodes add y values (node.displayOrder) to every node
+ * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
+ * Nodes must have parent child links established (via createChildrenAndParents)
+ * PhyloTree can subsequently use this information. Accessed by prototypes
+ * rectangularLayout, radialLayout, createChildrenAndParents
+ * side effects: node.displayOrder and node.displayOrderRange (i.e. in the phyloTree node)
+ */
+export const calcYValues = (nodes, focus) => {
+  let total = 0; /* cumulative counter of y value at tip */
+  let calcY; /* fn called calcY(node) to return some amount of y value at a tip */
+  if (focus && 'visibility' in nodes[0]) {
+    const numberOfTips = nodes.length;
+    const numTipsVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const yPerVisible = (0.8 * numberOfTips) / numTipsVisible;
+    const yPerNotVisible = (0.2 * numberOfTips) / (numberOfTips - numTipsVisible);
+    calcY = (node) => {
+      total += node.visibility === NODE_VISIBLE ? yPerVisible : yPerNotVisible;
+      return total;
+    };
+  } else { /* fall back to no focus */
+    calcY = () => ++total;
+  }
+
+  const recurse = (node) => {
+    const children = node.n.children; // (redux) tree node
+    if (children && children.length) {
+      for (let i = children.length - 1; i >= 0; i--) {
+        recurse(children[i].shell);
+      }
+    } else {
+      node.displayOrder = calcY(node);
+      node.displayOrderRange = [node.displayOrder, node.displayOrder];
+      return;
+    }
+    /* if here, then all children have yvalues, but we dont. */
+    node.displayOrder = children.reduce((acc, d) => acc + d.shell.displayOrder, 0) / children.length;
+    node.displayOrderRange = [children[0].shell.displayOrder, children[children.length - 1].shell.displayOrder];
+  };
+  recurse(nodes[0]);
+};
+
+/**
+ * Recalculates y values based on focus setting
+ * @param treeFocus -- whether to focus on filtered nodes
+ */
+export const setTreeFocus = function setTreeFocus(treeFocus) {
+  timerStart("setTreeFocus");
+  calcYValues(this.nodes, treeFocus || false);
+  timerEnd("setTreeFocus");
+};
 
 /**
  * Initializes and sets the range of the scales (this.xScale, this.yScale)
