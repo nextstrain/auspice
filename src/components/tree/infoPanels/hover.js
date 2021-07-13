@@ -281,9 +281,22 @@ const AttributionInfo = ({node}) => {
 };
 
 const Container = ({node, panelDims, children}) => {
+
   const xOffset = 10;
   const yOffset = 10;
-  const width = 200;
+
+  let width = 200;
+  if (panelDims.width < 420) {
+    width = 200;
+  } else if (panelDims.width < 460) {
+    width = 220;
+  } else if (panelDims.width < 500) {
+    width = 240;
+  } else if (panelDims.width < 540) {
+    width = 260;
+  } else {
+    width = 280;
+  }
 
   /* this adjusts the x-axis for the right tree in dual tree view */
   const xPos = node.shell.that.params.orientation[0] === -1 ?
@@ -308,7 +321,7 @@ const Container = ({node, panelDims, children}) => {
       wordBreak: "break-word"
     }
   };
-  if (xPos < panelDims.width * 0.6) {
+  if (xPos < panelDims.width * 0.5) {
     styles.container.left = xPos + xOffset;
   } else {
     styles.container.right = panelDims.width - xPos + xOffset;
