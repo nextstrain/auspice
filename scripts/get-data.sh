@@ -59,13 +59,13 @@ data_files=(
   "flu_seasonal_yam_na_6y.json" "flu_seasonal_yam_na_6y_tip-frequencies.json" "flu_seasonal_yam_na_6y_root-sequence.json" \
   "flu_seasonal_yam_na_12y.json" "flu_seasonal_yam_na_12y_tip-frequencies.json" "flu_seasonal_yam_na_12y_root-sequence.json" \
   ##############            LATEST CORE SARS-CoV-2 (COVID-19) BUILDS            ##############
-  "ncov_global.json" "ncov_global_tip-frequencies.json" \
-  "ncov_africa.json" "ncov_africa_tip-frequencies.json" \
-  "ncov_asia.json" "ncov_asia_tip-frequencies.json" \
-  "ncov_europe.json" "ncov_europe_tip-frequencies.json" \
-  "ncov_north-america.json" "ncov_north-america_tip-frequencies.json" \
-  "ncov_oceania.json" "ncov_oceania_tip-frequencies.json" \
-  "ncov_south-america.json" "ncov_south-america_tip-frequencies.json" \
+  "ncov_gisaid_global.json" "ncov_gisaid_global_tip-frequencies.json" \
+  "ncov_gisaid_africa.json" "ncov_gisaid_africa_tip-frequencies.json" \
+  "ncov_gisaid_asia.json" "ncov_gisaid_asia_tip-frequencies.json" \
+  "ncov_gisaid_europe.json" "ncov_gisaid_europe_tip-frequencies.json" \
+  "ncov_gisaid_north-america.json" "ncov_gisaid_north-america_tip-frequencies.json" \
+  "ncov_gisaid_oceania.json" "ncov_gisaid_oceania_tip-frequencies.json" \
+  "ncov_gisaid_south-america.json" "ncov_gisaid_south-america_tip-frequencies.json" \
   ##############            TIMESTAMPED  SARS-CoV-2 BUILDS USED IN NARRATIVES           #############
   "ncov_2020-01-23.json" "ncov_2020-01-25.json" "ncov_2020-01-26.json" "ncov_2020-01-30.json" \
   "ncov_2020-03-04.json" "ncov_2020-03-05.json" "ncov_2020-03-11.json" "ncov_2020-03-13.json" \
