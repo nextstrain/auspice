@@ -2,8 +2,20 @@
 title: Changelog
 ---
 
-## version 2.28.0 - 2021/07/05
+* Branch labels are no longer displayed if the branch is not in the selected view.
+See [PR 1370](https://github.com/nextstrain/auspice/pull/1370) for more.
+* Clicking on a tip and then closing the info-box will result in that tip remaining as a inactivated filter.
+See [PR 1372](https://github.com/nextstrain/auspice/pull/1372) for more.
+* Category filters in the sidebar can now be used to inactivate all active filters in a category, and if all are inactive then this may be used to re-activate them all.
+See [PR 1371](https://github.com/nextstrain/auspice/pull/1371) for more.
+* On-hover tooltip widths are improved for the tree. See [PR 1375](https://github.com/nextstrain/auspice/pull/1375) for more.
+* [bugfix] Colour scales can now have 37 values. See [PR 1355](https://github.com/nextstrain/auspice/pull/1355) for more.
 
+#### Minor updates
+* Docs updates
+* Updated files fetched by `npm run get-data`
+
+## version 2.28.0 - 2021/07/05
 
 * Remove ability to download metadata TSV from GISAID datasets. Replace with acknowledgments TSV. See [PR 1366](https://github.com/nextstrain/auspice/pull/1366).
 * Cleanup header fields when downloading metadata TSV, including switch to use name (eg `pango_lineage`) instead of title (eg `PANGO lineage`). See [PR 1367](https://github.com/nextstrain/auspice/pull/1367).
