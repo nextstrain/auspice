@@ -11,7 +11,7 @@ install:
 script:
 - npm run build
 after_success:
-- if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "release" ]]; then
+- if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "release" && "$TRAVIS_NODE_VERSION" == "14" ]]; then
     npm run rebuild-docker-image;
     npm config set //registry.npmjs.org/:_authToken="$NPM_TOKEN";
     npm publish;
