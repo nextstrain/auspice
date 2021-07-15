@@ -72,26 +72,24 @@ const branchLabelFontWeight = (key) => {
  * @param {str} key e.g. "aa" or "clade"
  * @param {str} layout
  * @param {int} totalTipsInView visible tips also in view
- * @return {func||str} Returns either a string ("visible") or a function.
- *                     The function returned is handed nodes and returns either
- *                     "visible" or "hidden". This function should only be
- *                     provided nodes for which the label exists on that node.
+ * @return {func} Returns a function with 1 argument: the current node (branch).
+ *                This fn will return "visible" or "hidden".
+ *                NOTE: the fn should only be provided nodes which have a label.
  */
-const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
-  if (key !== "aa") return "visible";
+const createBranchLabelVisibility = (key, layout, totalTipsInView) => (d) => {
+  if (d.visibility !== NODE_VISIBLE) return "hidden";
+  if (key!=="aa") return "visible";
   const magicTipFractionToShowBranchLabel = 0.05;
-  return (d) => {
-    if (layout !== "rect") {
-      return "hidden";
-    }
-    /* if the number of _visible_ tips descending from this node are over the
-    magicTipFractionToShowBranchLabel (c/w the total numer of _visible_ and
-    _inView_ tips then display the label */
-    if (d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView) {
-      return "visible";
-    }
+  if (layout !== "rect") {
     return "hidden";
-  };
+  }
+  /* if the number of _visible_ tips descending from this node are over the
+  magicTipFractionToShowBranchLabel (c/w the total number of _visible_ and
+  _inView_ tips then display the label */
+  if (d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView) {
+    return "visible";
+  }
+  return "hidden";
 };
 
 export const updateBranchLabels = function updateBranchLabels(dt) {
