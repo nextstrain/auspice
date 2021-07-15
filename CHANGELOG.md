@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.29.0 - 2021/07/15
+
+
 * Branch labels are no longer displayed if the branch is not in the selected view.
 See [PR 1370](https://github.com/nextstrain/auspice/pull/1370) for more.
 * Clicking on a tip and then closing the info-box will result in that tip remaining as a inactivated filter.
