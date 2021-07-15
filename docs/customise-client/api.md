@@ -148,5 +148,6 @@ If you are distributing your own version of auspice (i.e. not running it locally
 }
 ```
 
+Please see [this discussion post](https://discussion.nextstrain.org/t/build-with-newest-nextstrain-ncov-has-api-requests-to-mapbox-403-forbidden/396/11?u=james) for a hands-on guide to setting custom map tile info.
 For some examples of other tile sets you may use, see the [OpenStreetMap wiki](https://wiki.openstreetmap.org/wiki/Tile_servers), and please remember to adhere to the licenses and terms of use for each tile server.
 The API address contains parameters as specified by the [Leaflet API](https://docs.mapbox.com/api/overview/).
