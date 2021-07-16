@@ -4,9 +4,12 @@ title: Changelog
 
 ## version 2.29.1 - 2021/07/16
 
+* Update TravisCI script to improve how we publish Auspice to npm. 
+See [PR 1380](https://github.com/nextstrain/auspice/pull/1380) for more.
 
 ## version 2.29.0 - 2021/07/15
 
+**Note: this version may not install from npm. Please use v2.29.1 instead**
 
 * Branch labels are no longer displayed if the branch is not in the selected view.
 See [PR 1370](https://github.com/nextstrain/auspice/pull/1370) for more.
