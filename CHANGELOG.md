@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.29.1 - 2021/07/16
+
+
 ## version 2.29.0 - 2021/07/15
 
 
