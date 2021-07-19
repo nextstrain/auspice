@@ -116,7 +116,9 @@ git lfs ls-files # list LFS tracked tiles
 
 The main Nextstrain documentation is available at [docs.nextstrain.org](https://docs.nextstrain.org/en/latest/index.html). That documentation is built from the [docs.nextstrain.org GitHub repo](https://github.com/nextstrain/docs.nextstrain.org/) -- see the [contributing page for docs.nextstrain.org](https://docs.nextstrain.org/en/latest/guides/contribute/documentation.html) for more details on how to contribute to that documentation.
 
-The Auspice technical reference guide is available at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/stable/index.html). That documentation is built from the Auspice GitHub repo -- see the [docs/README](https://github.com/nextstrain/auspice/tree/master/docs#auspice-read-the-docs-documentation) within the `docs` directory for more details and on how to contribute to that documentation.
+The Auspice technical reference guide is available at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/stable/index.html). That documentation is built from the files in this repo in the `./docs` folder.
+
+To build the Auspice documentation locally, run `npm run build-docs` and open `docs/_build/html/index.html`.
 
 ## Contributing to Internationalization and Localization (i18n/l18n)
 
