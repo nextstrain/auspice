@@ -88,23 +88,39 @@ const MutationTable = ({mutations}) => {
 
 const AccessionAndUrl = ({node}) => {
   /* If `gisaid_epi_isl` or `genbank_accession` exist as node attrs, these preempt normal use of `accession` and `url`.
-  These special values were introduced during the 2019 nCoV outbreak. */
+  These special values were introduced during the SARS-CoV-2 pandemic. */
   const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
   const genbank_accession = getTraitFromNode(node, "genbank_accession");
+  let gisaid_epi_isl_url = null;
+  let genbank_accession_url = null;
   if (isValueValid(gisaid_epi_isl)) {
-    return (
-      <>
-        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl.split("_")[2]} url={"https://gisaid.org"}/>
-        {isValueValid(genbank_accession) ?
-          <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
-          null
-        }
-      </>
-    );
+    const gisaid_epi_isl_number = gisaid_epi_isl.split("_")[2];
+    // slice has to count from the end of the string rather than the beginning to deal with EPI ISLs of different lengths, eg
+    // https://www.epicov.org/acknowledgement/67/98/EPI_ISL_406798.json
+    // https://www.epicov.org/acknowledgement/99/98/EPI_ISL_2839998.json
+    if (gisaid_epi_isl_number.length > 4) {
+      gisaid_epi_isl_url = "https://www.epicov.org/acknowledgement/" + gisaid_epi_isl_number.slice(-4, -2) + "/" + gisaid_epi_isl_number.slice(-2) + "/" + gisaid_epi_isl + ".json";
+    } else {
+      gisaid_epi_isl_url = "https://gisaid.org";
+    }
   }
   if (isValueValid(genbank_accession)) {
+    genbank_accession_url = "https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession;
+  }
+  if (isValueValid(gisaid_epi_isl) && isValueValid(genbank_accession)) {
     return (
-      <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
+      <>
+        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl} url={gisaid_epi_isl_url}/>
+        <Link title={"Genbank accession"} value={genbank_accession} url={genbank_accession_url}/>
+      </>
+    );
+  } else if (isValueValid(gisaid_epi_isl)) {
+    return (
+      <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl} url={gisaid_epi_isl_url}/>
+    );
+  } else if (isValueValid(genbank_accession)) {
+    return (
+      <Link title={"Genbank accession"} value={genbank_accession} url={genbank_accession_url}/>
     );
   }
 
