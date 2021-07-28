@@ -33,10 +33,10 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
       .attr('class', 'temporalWindowEnd');
   }
   if (!("majorGrid" in groups)) {
-    groups.majorGrid = svg.append("g").attr("id", "majorGrid");
+    groups.majorGrid = svg.append("g").attr("id", "majorGrid").attr("clip-path", "url(#treeClip)");
   }
   if (!("minorGrid" in groups)) {
-    groups.minorGrid = svg.append("g").attr("id", "minorGrid");
+    groups.minorGrid = svg.append("g").attr("id", "minorGrid").attr("clip-path", "url(#treeClip)");
   }
   if (!("gridText" in groups)) {
     groups.gridText = svg.append("g").attr("id", "gridText");

@@ -490,7 +490,10 @@ export const mapToScreen = function mapToScreen() {
   timerEnd("mapToScreen");
 };
 
+const JITTER_MIN_STEP_SIZE = 50; // pixels
+
 function padCategoricalScales(domain, scale) {
+  if (scale.step() > JITTER_MIN_STEP_SIZE) return scale.padding(0.5); // balanced padding when we can jitter
   if (domain.length<=4) return scale.padding(0.4);
   if (domain.length<=6) return scale.padding(0.3);
   if (domain.length<=10) return scale.padding(0.2);
@@ -502,7 +505,7 @@ function padCategoricalScales(domain, scale) {
  */
 function jitter(axis, scale, nodes) {
   const step = scale.step();
-  if (step < 50) return; // don't jitter if there's little space between bands
+  if (scale.step() <= JITTER_MIN_STEP_SIZE) return;
   const rand = []; // pre-compute a small set of pseudo random numbers for speed
   for (let i=1e2; i--;) {
     rand.push((Math.random()-0.5)*step*0.5); // occupy 50%

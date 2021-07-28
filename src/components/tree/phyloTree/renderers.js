@@ -45,6 +45,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   });
 
   /* draw functions */
+  this.setClipMask();
   if (this.params.showGrid) {
     this.addGrid();
     this.showTemporalSlice();
@@ -99,7 +100,7 @@ export const drawTips = function drawTips() {
   const params = this.params;
 
   if (!("tips" in this.groups)) {
-    this.groups.tips = this.svg.append("g").attr("id", "tips");
+    this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
   }
   this.groups.tips
     .selectAll(".tip")
@@ -173,7 +174,7 @@ export const drawBranches = function drawBranches() {
   /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
   Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
   if (!("branchTee" in this.groups)) {
-    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
+    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
   }
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
@@ -207,7 +208,7 @@ export const drawBranches = function drawBranches() {
   this.updateColorBy();
   /* PART 2b: Draw the stems */
   if (!("branchStem" in this.groups)) {
-    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
+    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
   }
   this.groups.branchStem
     .selectAll('.branch')
@@ -246,7 +247,7 @@ export const drawRegression = function drawRegression() {
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
 
   if (!("regression" in this.groups)) {
-    this.groups.regression = this.svg.append("g").attr("id", "regression");
+    this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", "url(#treeClip)");
   }
 
   this.groups.regression
@@ -370,4 +371,35 @@ export const branchStrokeForLeave = function branchStrokeForLeave(d) {
 export const branchStrokeForHover = function branchStrokeForHover(d) {
   if (!d) { return; }
   handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
+};
+
+/**
+ * Create / update the clipping mask which is attached to branches, tips, branch-labels
+ * and regression lines. In theory, we can clip to exactly the {xy}Scale range, however
+ * in practice, elements (or portions of elements) render outside this.
+ */
+export const setClipMask = function setClipMask() {
+  const [xMin, xMax, yMin, yMax] = [...this.xScale.range(), ...this.yScale.range()];
+  const x0 = xMin - 5;
+  const width = xMax - xMin + 20;  // RHS overflow is not problematic
+  const y0 = yMin - 15;            // some overflow at top is ok
+  const height = yMax - yMin + 20; // extra padding to allow tips & lowest major axis line to render
+
+  if (!this.groups.clipPath) {
+    this.groups.clipPath = this.svg.append("g").attr("id", "clipGroup");
+    this.groups.clipPath.append("clipPath")
+        .attr("id", "treeClip")
+      .append("rect")
+        .attr("x", x0)
+        .attr("y", y0)
+        .attr("width", width)
+        .attr("height", height);
+  } else {
+    this.groups.clipPath.select('rect')
+      .attr("x", x0)
+      .attr("y", y0)
+      .attr("width", width)
+      .attr("height", height);
+  }
+
 };

@@ -55,6 +55,7 @@ PhyloTree.prototype.render = renderers.render;
 PhyloTree.prototype.clearSVG = renderers.clearSVG;
 
 /* D R A W I N G    F U N C T I O N S */
+PhyloTree.prototype.setClipMask = renderers.setClipMask;
 PhyloTree.prototype.drawTips = renderers.drawTips;
 PhyloTree.prototype.drawBranches = renderers.drawBranches;
 PhyloTree.prototype.drawVaccines = renderers.drawVaccines;

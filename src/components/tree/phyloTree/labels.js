@@ -130,7 +130,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
   const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
 
   if (!("branchLabels" in this.groups)) {
-    this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels");
+    this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels").attr("clip-path", "url(#treeClip)");
   }
   this.groups.branchLabels
     .selectAll(".branchLabel")
