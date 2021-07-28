@@ -409,7 +409,7 @@ export const addGrid = function addGrid() {
         .style("fill", this.params.tickLabelFill)
         .style("text-anchor", "middle")
         .attr("x", Math.abs(this.xScale.range()[1]-this.xScale.range()[0]) / 2)
-        .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
+        .attr("y", parseInt(this.svg.attr("height"), 10) - 1);
   }
   if (yAxisLabel) {
     this.groups.axisText
@@ -453,7 +453,7 @@ export const showTemporalSlice = function showTemporalSlice() {
   const rightHandTree = this.params.orientation[0] === -1;
   const rootXPos = this.xScale(this.nodes[0].x);
   let totalWidth = rightHandTree ? this.xScale.range()[0] : this.xScale.range()[1];
-  totalWidth += (this.params.margins.left + this.params.margins.right);
+  totalWidth += (this.margins.left + this.margins.right);
 
   /* the gray region between the root (ish) and the minimum date */
   if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
@@ -488,13 +488,13 @@ export const showTemporalSlice = function showTemporalSlice() {
 
   /* the gray region between the maximum selected date and the last tip */
   let xStart_endRegion = xWindow[1]; // starting X coordinate of the "end" rectangle
-  let width_endRegion = totalWidth - this.params.margins.right - xWindow[1];
+  let width_endRegion = totalWidth - this.margins.right - xWindow[1];
 
-  let transform_endRegion = `translate(${totalWidth - this.params.margins.right},0) scale(-1,1)`;
+  let transform_endRegion = `translate(${totalWidth - this.margins.right},0) scale(-1,1)`;
   // With a right hand tree, the coordinate system flips (right to left)
   if (rightHandTree) {
-    xStart_endRegion = this.params.margins.right;
-    width_endRegion = xWindow[1] - this.params.margins.right;
+    xStart_endRegion = this.margins.right;
+    width_endRegion = xWindow[1] - this.margins.right;
     transform_endRegion = `translate(${xStart_endRegion},0)`;
   }
 

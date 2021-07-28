@@ -271,15 +271,15 @@ export const setDistance = function setDistance(distanceAttribute) {
  * which are used to map the x,y coordinates to the screen
  * @param {margins} -- object with "right, left, top, bottom" margins
  */
-export const setScales = function setScales(margins) {
+export const setScales = function setScales() {
 
   if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
-    this.xScale = scalePoint().round(false).align(0.5);
+    this.xScale = scalePoint().round(false).align(0.5).padding(0.5);
   } else {
     this.xScale = scaleLinear();
   }
   if (this.layout==="scatter" && !this.scatterVariables.yContinuous) {
-    this.yScale = scalePoint().round(false).align(0.5);
+    this.yScale = scalePoint().round(false).align(0.5).padding(0.5);
   } else {
     this.yScale = scaleLinear();
   }
@@ -288,25 +288,25 @@ export const setScales = function setScales(margins) {
   const height = parseInt(this.svg.attr("height"), 10);
   if (this.layout === "radial" || this.layout === "unrooted") {
     // Force Square: TODO, harmonize with the map to screen
-    const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
-    const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
+    const xExtend = width - this.margins.left - this.margins.right;
+    const yExtend = height - this.margins.bottom - this.margins.top;
     const minExtend = min([xExtend, yExtend]);
     const xSlack = xExtend - minExtend;
     const ySlack = yExtend - minExtend;
-    this.xScale.range([0.5 * xSlack + margins["left"] || 0, width - 0.5 * xSlack - (margins["right"] || 0)]);
-    this.yScale.range([0.5 * ySlack + margins["top"] || 0, height - 0.5 * ySlack - (margins["bottom"] || 0)]);
+    this.xScale.range([0.5 * xSlack + this.margins.left, width - 0.5 * xSlack - this.margins.right]);
+    this.yScale.range([0.5 * ySlack + this.margins.top, height - 0.5 * ySlack - this.margins.bottom]);
 
   } else {
     // for rectangular layout, allow flipping orientation of left/right and top/bottom
     if (this.params.orientation[0] > 0) {
-      this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
+      this.xScale.range([this.margins.left, width - this.margins.right]);
     } else {
-      this.xScale.range([width - (margins["right"] || 0), margins["left"] || 0]);
+      this.xScale.range([width - this.margins.right, this.margins.left]);
     }
     if (this.params.orientation[1] > 0) {
-      this.yScale.range([margins["top"] || 0, height - (margins["bottom"] || 0)]);
+      this.yScale.range([this.margins.top, height - this.margins.bottom]);
     } else {
-      this.yScale.range([height - (margins["bottom"] || 0), margins["top"] || 0]);
+      this.yScale.range([height - this.margins.bottom, this.margins.top]);
     }
   }
 };
@@ -318,39 +318,19 @@ export const setScales = function setScales(margins) {
 */
 export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
-  /* pad margins if tip labels are visible */
-  /* padding width based on character count */
-  const tmpMargins = {
-    left: this.params.margins.left,
-    right: this.params.margins.right,
-    top: this.params.margins.top,
-    bottom: this.params.margins.bottom};
-  if (this.layout==="rect" || this.layout==="unrooted" || this.layout==="scatter") {
-    // legend is 12px, but 6px is enough to prevent tips being obscured
-    tmpMargins.top += 6;
-  }
+
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
-  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
 
-    let fontSize = this.params.tipLabelFontSizeL1;
-    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
-      fontSize = this.params.tipLabelFontSizeL2;
-    }
-    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
-      fontSize = this.params.tipLabelFontSizeL3;
-    }
+  /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
+  this.margins = {
+    left: (this.layout==="scatter" || this.layout==="clock") ? 40 : 5, // space for y-axis label
+    right: 5 + getTipLabelPadding(this.params, inViewTerminalNodes),
+    top: this.layout==="radial" ? 10 : 15, // avoid tips rendering behind legend
+    bottom: 35 // space for x-axis labels
+  };
 
-    let padBy = 0;
-    inViewTerminalNodes.forEach((d) => {
-      if (padBy < d.n.name.length) {
-        padBy = 0.65 * d.n.name.length * fontSize;
-      }
-    });
-    tmpMargins.right += padBy;
-  }
-
-  /* set the range of the x & y scales */
-  this.setScales(tmpMargins);
+  /* construct & set the range of the x & y scales */
+  this.setScales();
 
   let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
@@ -537,4 +517,26 @@ function jitter(axis, scale, nodes) {
     for (const child of n.children) recurse(child);
   }
   recurse(nodes[0]);
+}
+
+
+function getTipLabelPadding(params, inViewTerminalNodes) {
+  let padBy = 0;
+  if (inViewTerminalNodes.length < params.tipLabelBreakL1) {
+
+    let fontSize = params.tipLabelFontSizeL1;
+    if (inViewTerminalNodes.length < params.tipLabelBreakL2) {
+      fontSize = params.tipLabelFontSizeL2;
+    }
+    if (inViewTerminalNodes.length < params.tipLabelBreakL3) {
+      fontSize = params.tipLabelFontSizeL3;
+    }
+
+    inViewTerminalNodes.forEach((d) => {
+      if (padBy < d.n.name.length) {
+        padBy = 0.65 * d.n.name.length * fontSize;
+      }
+    });
+  }
+  return padBy;
 }
