@@ -1,6 +1,6 @@
 import { warningNotification } from "../notifications";
 import handleMetadata from "./metadata";
-import { is_csv_or_tsv } from "./constants";
+import { isAcceptedFileType } from "./constants";
 
 
 /**
@@ -18,13 +18,13 @@ const handleFilesDropped = (files) => (dispatch, getState) => {
 
   const file = files[0];
 
-  if (is_csv_or_tsv(file)) {
+  if (isAcceptedFileType(file)) {
     return handleMetadata(dispatch, getState, file);
   }
 
   return dispatch(warningNotification({
     message: `Cannot parse ${file.name}`,
-    details: `Currently only CSV & TSV files are allowed, not ${file.type}`
+    details: `Currently only CSV/TSV/XLSX files are allowed, not ${file.type}`
   }));
 };
 

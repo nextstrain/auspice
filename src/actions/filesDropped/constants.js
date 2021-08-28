@@ -2,17 +2,20 @@
     Defines acceptable file types for the auspice drag & drop functionality.
 */
 
-const csv_file_types = ["text/csv", "application/vnd.ms-excel"];
-
-// Add MacOS & Linux .tsv to accepted file types
-const accepted_file_types = csv_file_types.concat("text/tab-separated-values");
+const acceptedFileTypes = [
+  "text/csv",
+  "text/tab-separated-values",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+];
 
 // Handle Windows .tsv edge case with empty file type
-const is_windows_tsv = (file) => file.type === "" && file.name.endsWith('.tsv');
+const isWindowsTsv = (file) => file.type === "" && file.name.endsWith('.tsv');
 
-const is_csv_or_tsv = (file) => accepted_file_types.includes(file.type) || is_windows_tsv(file);
+// Handle Excel exported .csv files
+const isExcelCsv = (file) => file.type === "application/vnd.ms-excel" && file.name.endsWith('.csv');
+
+const isAcceptedFileType = (file) => acceptedFileTypes.includes(file.type) || isWindowsTsv(file) || isExcelCsv(file);
 
 export {
-  csv_file_types,
-  is_csv_or_tsv
+  isAcceptedFileType
 };

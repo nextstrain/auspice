@@ -6,38 +6,49 @@ import { parseCsvTsv } from "./parseCsvTsv";
 
 const handleMetadata = async (dispatch, getState, file) => {
   const fileName = file.name;
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    try {
+      const XLSX = (await import("xlsx/xlsx.mini")).default;
+      /* Convert accepted dropped file to CSV string */
+      /* If dropped file is Excel workbook, only reads in the data from the first sheet */
+      const workbook = XLSX.read(event.target.result, { type: 'binary' });
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+      const sheetAsCsv = XLSX.utils.sheet_to_csv(firstSheet);
 
-  try {
-    /* Parse & interrogate the CSV file */
-    const {errors, data, meta} = await parseCsvTsv(file);
-    if (errors.length) {
-      console.error(errors);
-      throw new Error(errors.map((e) => e.message).join(", "));
+      /* All accepted file formats have been converted to CSV string by xlsx */
+      /* Use papaparse to parse & interrogate the CSV string */
+      const {errors, data, meta} = await parseCsvTsv(sheetAsCsv);
+      if (errors.length) {
+        console.error(errors);
+        throw new Error(errors.map((e) => e.message).join(", "));
+      }
+      const {coloringInfo, strainKey, latLongKeys, ignoredFields} = processHeader(meta.fields);
+      const rows = {};
+      data.forEach((d) => {rows[d[strainKey]]=d;});
+
+      /* For each coloring, extract values defined in each row etc */
+      const newNodeAttrs = {};
+      const newColorings = processColorings(newNodeAttrs, coloringInfo, rows, fileName); // modifies `newNodeAttrs`
+      const newGeoResolution = latLongKeys ? processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) : undefined;
+      /* Fix errors in data & dispatch warnings here, as we cannot dispatch in the reducers */
+      const ok = checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName);
+      if (!ok) return undefined;
+
+      dispatch({type: ADD_EXTRA_METADATA, newColorings, newGeoResolution, newNodeAttrs});
+      return dispatch(successNotification({
+        message: `Adding metadata from ${fileName}`,
+        details: `${Object.keys(newColorings).length} new coloring${Object.keys(newColorings).length > 1 ? "s" : ""} for ${Object.keys(newNodeAttrs).length} node${Object.keys(newNodeAttrs).length > 1 ? "s" : ""}`
+      }));
+    } catch (err) {
+      return dispatch(errorNotification({
+        message: `Parsing of ${fileName} failed`,
+        details: err.message
+      }));
     }
-    const {coloringInfo, strainKey, latLongKeys, ignoredFields} = processHeader(meta.fields);
-    const rows = {};
-    data.forEach((d) => {rows[d[strainKey]]=d;});
+  };
 
-    /* For each coloring, extract values defined in each row etc */
-    const newNodeAttrs = {};
-    const newColorings = processColorings(newNodeAttrs, coloringInfo, rows, fileName); // modifies `newNodeAttrs`
-    const newGeoResolution = latLongKeys ? processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) : undefined;
-    /* Fix errors in data & dispatch warnings here, as we cannot dispatch in the reducers */
-    const ok = checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName);
-    if (!ok) return undefined;
-
-    dispatch({type: ADD_EXTRA_METADATA, newColorings, newGeoResolution, newNodeAttrs});
-    return dispatch(successNotification({
-      message: `Adding metadata from ${fileName}`,
-      details: `${Object.keys(newColorings).length} new coloring${Object.keys(newColorings).length > 1 ? "s" : ""} for ${Object.keys(newNodeAttrs).length} node${Object.keys(newNodeAttrs).length > 1 ? "s" : ""}`
-    }));
-
-  } catch (err) {
-    return dispatch(errorNotification({
-      message: `Parsing of ${fileName} failed`,
-      details: err.message
-    }));
-  }
+  return reader.readAsBinaryString(file);
 };
 
 export default handleMetadata;
