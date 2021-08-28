@@ -8,7 +8,7 @@ let Papa; /* lazyily imported once a file is dropped on */
  * to the config, which may work
  * @param {string} csvString a string of delimited text
  */
-export const parseCsvTsv = async (csvString) => {
+export const parseCsv = async (csvString) => {
   if (!Papa) Papa = (await import("papaparse")).default;
   return new Promise((resolve, reject) => {
     Papa.parse(csvString, {

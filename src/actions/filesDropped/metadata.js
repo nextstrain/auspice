@@ -1,7 +1,7 @@
 import { rgb } from "d3-color";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
 import { ADD_EXTRA_METADATA } from "../types";
-import { parseCsvTsv } from "./parseCsvTsv";
+import { parseCsv } from "./parseCsv";
 
 
 const handleMetadata = async (dispatch, getState, file) => {
@@ -18,7 +18,7 @@ const handleMetadata = async (dispatch, getState, file) => {
 
       /* All accepted file formats have been converted to CSV string by xlsx */
       /* Use papaparse to parse & interrogate the CSV string */
-      const {errors, data, meta} = await parseCsvTsv(sheetAsCsv);
+      const {errors, data, meta} = await parseCsv(sheetAsCsv);
       if (errors.length) {
         console.error(errors);
         throw new Error(errors.map((e) => e.message).join(", "));
