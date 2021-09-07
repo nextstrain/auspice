@@ -1,5 +1,3 @@
-import { csv_file_types, is_csv_or_tsv } from "./constants";
-
 let Papa; /* lazyily imported once a file is dropped on */
 
 /**
@@ -8,15 +6,12 @@ let Papa; /* lazyily imported once a file is dropped on */
  * in here annd, you guessed it, this causes all sorts of problems.
  * https://github.com/mholt/PapaParse/issues/169 suggests adding encoding: "ISO-8859-1"
  * to the config, which may work
- * @param {DataTransfer} file a DataTransfer object
+ * @param {string} csvString a string of delimited text
  */
-export const parseCsvTsv = async (file) => {
+export const parseCsv = async (csvString) => {
   if (!Papa) Papa = (await import("papaparse")).default;
   return new Promise((resolve, reject) => {
-    if (!(is_csv_or_tsv(file))) {
-      reject(new Error("Cannot parse this filetype"));
-    }
-    Papa.parse(file, {
+    Papa.parse(csvString, {
       header: true,
       complete: (results) => {
         resolve(results);
@@ -26,7 +21,7 @@ export const parseCsvTsv = async (file) => {
       },
       encoding: "UTF-8",
       comments: "#",
-      delimiter: (csv_file_types.includes(file.type)) ? "," : "\t",
+      delimiter: ",",
       skipEmptyLines: true,
       dynamicTyping: false
     });

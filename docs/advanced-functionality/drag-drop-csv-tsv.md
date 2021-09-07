@@ -1,15 +1,17 @@
-# Adding extra metadata via CSV/TSV
+# Adding extra metadata via CSV/TSV/XLSX
 
 A common use case is to have additional metadata which you would like to add to the current dataset.
 If you created the dataset itself, then you may wish to keep certain data out of the dataset, as it may change frequently or be sensitive information which you don't want to share publicly.
 
-Additional metadata (CSV / TSV file(s)) can be dragged onto an existing dataset in Auspice.
+Additional metadata (CSV / TSV / XLSX file(s)) can be dragged onto an existing dataset in Auspice.
 These extra data are processed within the browser, so no information leaves the client, which can be useful for viewing private metadata.
 
 The general format is compatible with other popular tools such as [MicroReact](https://microreact.org/).
 The first column defines the names of the strains / samples in the tree, while the first row (header row) defines the metadata names.
+You can add as many columns you want, each will result in a different colouring of the data being made available.
 The separator can be either a tab character or a comma & the file extension should be `.tsv` or `.csv`, respectively.
-You can add as many columns you want, each will result in a different colouring of the data being made available
+Excel files with file extension `.xlsx` are also supported, but the metadata must be in the first sheet of the workbook.
+Older Excel files with the `.xls` extension are not supported.
 
 ## Example:
 
@@ -44,7 +46,7 @@ USVI/42/2016	C	#710000	0	-120
 Most metadata columns will be added as colourings; once the data has been added they should appear as new entries in the "Color By" dropdown (Left-hand sidebar of Auspice).
 This means you can also filter by these traits using the "Filter Data" box.
 
-An extra colouring is automatically created to represent the set of samples which were in the CSV/TSV file -- this allows you to easily filter the dataset to just those samples which you had in your metadata file.
+An extra colouring is automatically created to represent the set of samples which were in the CSV/TSV/XLSX file -- this allows you to easily filter the dataset to just those samples which you had in your metadata file.
 
 You can choose the colours you want to associate with values by adding in a separate column with the same name + `__colour` (see above example), or the suffix `__color` may also be used.
 Currently the values in this column must be hex values such as `#3498db` (blue).
