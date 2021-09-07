@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.30.0 - 2021/09/07
+
+
 * Narratives can now load sidecar files and second trees.
 This allows allowing frequency panel display, colouring by root-sequence, and tanglegrams. 
 See [PR 1305](https://github.com/nextstrain/auspice/pull/1305) for more.
