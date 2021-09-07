@@ -2,6 +2,17 @@
 title: Changelog
 ---
 
+* Narratives can now load sidecar files and second trees.
+This allows allowing frequency panel display, colouring by root-sequence, and tanglegrams. 
+See [PR 1305](https://github.com/nextstrain/auspice/pull/1305) for more.
+* Excel (`.xlsx`) files can be used as additional metadata for drag-and-drop.
+See [PR 1386](https://github.com/nextstrain/auspice/pull/1386) for more.
+* Trees are now clipped to improve axes visibility.
+See [PR 1383](https://github.com/nextstrain/auspice/pull/1383) for more.
+* Improved accession URL creation. 
+See [PR 1382](https://github.com/nextstrain/auspice/pull/1382) for more.
+* minor documentation improvements.
+
 ## version 2.29.1 - 2021/07/16
 
 * Update TravisCI script to improve how we publish Auspice to npm. 
