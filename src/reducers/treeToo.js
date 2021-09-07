@@ -5,20 +5,18 @@ that the tree is loaded as they are set on the same action */
 
 const treeToo = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
-    // case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
-    // case types.CLEAN_START:
-    //   return action.tree;
     case types.DATA_INVALID:
       return Object.assign({}, state, {
         loaded: false
       });
     case types.REMOVE_TREE_TOO:
       return getDefaultTreeState();
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       if (action.treeToo) {
         return action.treeToo;
       }
-      return state;
+      return getDefaultTreeState();
     case types.TREE_TOO_DATA:
       return action.treeToo;
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */

@@ -200,10 +200,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.CLEAN_START:
       if (action.pathnameShouldBe && !action.narrative) {
         pathname = action.pathnameShouldBe;
+        break;
       }
       /* we also double check that if there are 2 trees both are represented
       in the URL */
-      if (action.tree.name && action.treeToo && action.treeToo.name) {
+      if (action.tree.name && action.treeToo && action.treeToo.name && !action.narrative) {
         const treeUrlShouldBe = `${action.tree.name}:${action.treeToo.name}`;
         if (!window.location.pathname.includes(treeUrlShouldBe)) {
           pathname = treeUrlShouldBe;
@@ -244,6 +245,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   }
 
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
+  if (state.narrative.display) {
+    Object.keys(query).filter((q) => q!=='n').forEach((k) => delete query[k]);
+  }
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/').replace(/%3A/g, ':');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}

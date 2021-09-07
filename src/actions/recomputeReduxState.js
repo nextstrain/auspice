@@ -6,6 +6,7 @@ import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
+import { getDefaultFrequenciesState } from "../reducers/frequencies";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -747,6 +748,8 @@ export const createStateFromQueryOrJSONs = ({
     metadata = createMetadataStateFromJSON(json);
     /* entropy state */
     entropy = entropyCreateState(metadata.genomeAnnotations);
+    /* ensure default frequencies state */
+    frequencies = getDefaultFrequenciesState();
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
