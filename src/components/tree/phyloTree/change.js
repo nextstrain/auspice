@@ -219,6 +219,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
   /* STEP 2: move tips */
   const step2 = () => {
     if (!--inProgress) { /* decrement counter. When hits 0 run block */
+      this.setClipMask();
       const updateTips = createUpdateCall(".tip", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".tip", updateTips, transitionTimeMoveTips);
       setTimeout(step3, transitionTimeMoveTips);
@@ -370,6 +371,9 @@ export const change = function change({
   }
 
   /* Finally, actually change the SVG elements themselves */
+  if (svgHasChangedDimensions) {
+    this.setClipMask();
+  }
   const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   extras.hideTipLabels = animationInProgress;
