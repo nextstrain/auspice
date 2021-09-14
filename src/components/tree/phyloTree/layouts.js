@@ -360,6 +360,10 @@ export const mapToScreen = function mapToScreen() {
       maxX = minimumXAxisSpan - minX;
       spanX = minimumXAxisSpan;
     }
+    /* In rectangular mode, if the tree has been zoomed, leave some room to display the (clade's) root branch */
+    if (this.layout==="rect" && this.zoomNode.n.arrayIdx!==0) {
+      minX -= (maxX-minX)/20; // 5%
+    }
     xDomain = [minX, maxX];
   } else {
     const seenValues = new Set(nodesInDomain.map((d) => d.x));
