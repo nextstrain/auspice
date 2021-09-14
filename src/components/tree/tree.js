@@ -1,6 +1,6 @@
 import React from "react";
 import { withTranslation } from "react-i18next";
-import { FaReplyAll } from "react-icons/fa";
+import { FaSearchMinus } from "react-icons/fa";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -219,7 +219,7 @@ class Tree extends React.Component {
               style={{...tabSingle, ...styles.zoomOutButton}}
               onClick={this.zoomBack}
             >
-              <FaReplyAll/>
+              <FaSearchMinus/>
             </button>
             <button
               style={{...tabSingle, ...styles.zoomToSelectedButton}}
