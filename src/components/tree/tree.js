@@ -106,8 +106,8 @@ class Tree extends React.Component {
       this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
     const activeZoomButton = filteredTree || filteredTreeToo;
 
-    // TODO - consider second tree!
-    const treeIsZoomed = this.props.tree.idxOfInViewRootNode!==0;
+    const treeIsZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
+      this.props.treeToo.idxOfInViewRootNode !== 0;
 
     return {
       treeButtonsDiv: {
@@ -160,9 +160,18 @@ class Tree extends React.Component {
   };
 
   zoomBack = () => {
-    // todo - this only acts on the main (left) tree
-    const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
-    const root = [getParentBeyondPolytomy(rootNode, this.props.distanceMeasure).arrayIdx, undefined];
+    let newRoot, newRootToo;
+    // Zoom out of main tree if index of root node is not 0
+    if (this.props.tree.idxOfInViewRootNode !== 0) {
+      const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
+      newRoot = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure).arrayIdx;
+    }
+    // Also zoom out of second tree if index of root node is not 0
+    if (this.props.treeToo.idxOfInViewRootNode !== 0) {
+      const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
+      newRootToo = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure).arrayIdx;
+    }
+    const root = [newRoot, newRootToo];
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
   }
 
