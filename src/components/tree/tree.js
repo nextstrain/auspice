@@ -1,9 +1,11 @@
 import React from "react";
 import { withTranslation } from "react-i18next";
+import { FaSearchMinus } from "react-icons/fa";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
+import { getParentBeyondPolytomy } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
@@ -104,6 +106,9 @@ class Tree extends React.Component {
       this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
     const activeZoomButton = filteredTree || filteredTreeToo;
 
+    const treeIsZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
+      this.props.treeToo.idxOfInViewRootNode !== 0;
+
     return {
       treeButtonsDiv: {
         zIndex: 100,
@@ -120,10 +125,18 @@ class Tree extends React.Component {
       },
       zoomToSelectedButton: {
         zIndex: 100,
-        dispaly: "inline-block",
+        display: "inline-block",
         cursor: activeZoomButton ? "pointer" : "auto",
         color: activeZoomButton ? darkGrey : lightGrey,
         pointerEvents: activeZoomButton ? "auto" : "none"
+      },
+      zoomOutButton: {
+        zIndex: 100,
+        display: "inline-block",
+        cursor: treeIsZoomed ? "pointer" : "auto",
+        color: treeIsZoomed ? darkGrey : lightGrey,
+        pointerEvents: treeIsZoomed ? "auto" : "none",
+        marginRight: "4px"
       }
     };
   };
@@ -145,6 +158,22 @@ class Tree extends React.Component {
       root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
     }));
   };
+
+  zoomBack = () => {
+    let newRoot, newRootToo;
+    // Zoom out of main tree if index of root node is not 0
+    if (this.props.tree.idxOfInViewRootNode !== 0) {
+      const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
+      newRoot = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure).arrayIdx;
+    }
+    // Also zoom out of second tree if index of root node is not 0
+    if (this.props.treeToo.idxOfInViewRootNode !== 0) {
+      const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
+      newRootToo = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure).arrayIdx;
+    }
+    const root = [newRoot, newRootToo];
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
+  }
 
   render() {
     const { t } = this.props;
@@ -195,6 +224,12 @@ class Tree extends React.Component {
         }
         {this.props.narrativeMode ? null : (
           <div style={{...styles.treeButtonsDiv}}>
+            <button
+              style={{...tabSingle, ...styles.zoomOutButton}}
+              onClick={this.zoomBack}
+            >
+              <FaSearchMinus/>
+            </button>
             <button
               style={{...tabSingle, ...styles.zoomToSelectedButton}}
               onClick={this.zoomToSelected}
