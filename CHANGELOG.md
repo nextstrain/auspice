@@ -2,8 +2,10 @@
 title: Changelog
 ---
 
-## version 2.30.0 - 2021/09/07
+* Improvements to our ability to zoom out in a tree, both by exposing the root branch and via a new icon next to "Zoom to Selected".
+See [PR 1392](https://github.com/nextstrain/auspice/pull/1392) for more.
 
+## version 2.30.0 - 2021/09/07
 
 * Narratives can now load sidecar files and second trees.
 This allows allowing frequency panel display, colouring by root-sequence, and tanglegrams. 
