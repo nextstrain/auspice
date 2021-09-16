@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.31.0 - 2021/09/16
+
+
 * Improvements to our ability to zoom out in a tree, both by exposing the root branch and via a new icon next to "Zoom to Selected".
 See [PR 1392](https://github.com/nextstrain/auspice/pull/1392) for more.
 
