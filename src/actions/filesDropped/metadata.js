@@ -12,7 +12,7 @@ const handleMetadata = async (dispatch, getState, file) => {
       const XLSX = (await import("xlsx/xlsx.mini")).default;
       /* Convert accepted dropped file to CSV string */
       /* If dropped file is Excel workbook, only reads in the data from the first sheet */
-      const workbook = XLSX.read(event.target.result, { type: 'binary' });
+      const workbook = XLSX.read(event.target.result, { type: 'binary', raw: true });
       const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
       const sheetAsCsv = XLSX.utils.sheet_to_csv(firstSheet);
 
