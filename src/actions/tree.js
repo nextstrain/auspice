@@ -49,7 +49,7 @@ export const applyInViewNodesToTree = (idx, tree) => {
  * @return {function} a function to be handled by redux (thunk)
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], cladeSelected = undefined} = {}
+  {root = [undefined, undefined], cladeSelected = undefined, revertTreeZoom = false} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
@@ -61,6 +61,19 @@ export const updateVisibleTipsAndBranchThicknesses = (
     if (!tree.nodes) {return;}
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
+
+    if (revertTreeZoom) {
+      // NOTE: currently this functionality is only implemented for the main tree
+      // any implementation for two trees will have to consider the order of zoom operations across the trees
+      const len = tree.idxOfInViewRootNodeHistory.length;
+      if (len===0) {
+        console.error("Error trying to revert tree zoom with no history");
+        return;
+      }
+      root[0] = tree.idxOfInViewRootNodeHistory[len-1];
+      root[1] = undefined;
+    }
+
     const rootIdxTree1 = applyInViewNodesToTree(root[0], tree);
 
     const data = calculateVisiblityAndBranchThickness(
@@ -110,6 +123,15 @@ export const updateVisibleTipsAndBranchThicknesses = (
       visibility: dispatchObj.visibility,
       visibilityToo: dispatchObj.visibilityToo
     });
+
+    /* update the history stack for zoom levels (if we are zooming) */
+    if (tree.idxOfFilteredRoot !== dispatchObj.idxOfInViewRootNode) {
+      if (revertTreeZoom) {
+        dispatchObj.idxOfInViewRootNodeHistory = tree.idxOfInViewRootNodeHistory.slice(0, -1);
+      } else {
+        dispatchObj.idxOfInViewRootNodeHistory = [...tree.idxOfInViewRootNodeHistory, tree.idxOfInViewRootNode];
+      }
+    }
 
     /* D I S P A T C H */
     dispatch(dispatchObj);

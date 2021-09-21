@@ -1,6 +1,6 @@
 import React from "react";
 import { withTranslation } from "react-i18next";
-import { FaSearchMinus } from "react-icons/fa";
+import { FaSearchMinus, FaReply } from "react-icons/fa";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -10,6 +10,7 @@ import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
+import { StyledTooltip } from "../controls/styles";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
@@ -109,6 +110,8 @@ class Tree extends React.Component {
     const treeIsZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
       this.props.treeToo.idxOfInViewRootNode !== 0;
 
+    const treeCanReturnToPreviousZoom = !!this.props.tree.idxOfInViewRootNodeHistory.length;
+
     return {
       treeButtonsDiv: {
         zIndex: 100,
@@ -137,6 +140,17 @@ class Tree extends React.Component {
         color: treeIsZoomed ? darkGrey : lightGrey,
         pointerEvents: treeIsZoomed ? "auto" : "none",
         marginRight: "4px"
+      },
+      revertTreeZoomButton: {
+        zIndex: 100,
+        display: "inline-block",
+        cursor: treeCanReturnToPreviousZoom ? "pointer" : "auto",
+        color: treeCanReturnToPreviousZoom ? darkGrey : lightGrey,
+        pointerEvents: treeCanReturnToPreviousZoom ? "auto" : "none",
+        marginRight: "4px"
+      },
+      helpTooltip: {
+        textTransform: "none"
       }
     };
   };
@@ -158,6 +172,10 @@ class Tree extends React.Component {
       root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
     }));
   };
+
+  revertTreeZoom = () => {
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({revertTreeZoom: true}));
+  }
 
   zoomBack = () => {
     let newRoot, newRootToo;
@@ -224,6 +242,20 @@ class Tree extends React.Component {
         }
         {this.props.narrativeMode ? null : (
           <div style={{...styles.treeButtonsDiv}}>
+            { this.props.showTreeToo ?
+              null :
+              (<button
+                style={{...tabSingle, ...styles.revertTreeZoomButton, ...styles.helpTooltip}}
+                onClick={this.revertTreeZoom}
+                data-tip
+                data-for="revertTreeZoom"
+              >
+                <FaReply/>
+                <StyledTooltip place="bottom" type="dark" effect="solid" id="revertTreeZoom">
+                  Go back to the previous zoom state
+                </StyledTooltip>
+              </button>)
+            }
             <button
               style={{...tabSingle, ...styles.zoomOutButton}}
               onClick={this.zoomBack}
