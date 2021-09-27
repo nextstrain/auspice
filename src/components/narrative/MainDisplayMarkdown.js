@@ -92,6 +92,7 @@ const Container = styled.div`
     margin-right: 30px;
     margin-top: 2px;
     margin-bottom: 2px;
+    max-width: 100%;
   }
 
   table, th, td {
