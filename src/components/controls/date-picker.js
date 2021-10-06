@@ -13,7 +13,7 @@ const DateInput = styled.input`
   float: ${(props) => props.right ? "right" : "left"};
 `;
 
-const DatePicker = ({ value, onChange, right }) => {
+const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
   const [editing, setEditing] = React.useState(false);
   function processNewValue(newValue) {
     setEditing(false);
@@ -24,8 +24,21 @@ const DatePicker = ({ value, onChange, right }) => {
       processNewValue(e.target.value);
     }
   }
+  function onBlur(e) {
+    processNewValue(e.target.value);
+  }
   if (editing) {
-    return <DateInput type="text" defaultValue={value} onKeyUp={onKeyUp} right={right} />;
+    return (
+      <DateInput
+        type="date"
+        defaultValue={value}
+        min={minDate}
+        max={maxDate}
+        onKeyUp={onKeyUp}
+        onBlur={onBlur}
+        right={right}
+      />
+    );
   }
   return <DateLabel onClick={() => setEditing(true)} right={right}>{value}</DateLabel>;
 };

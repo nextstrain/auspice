@@ -100,8 +100,18 @@ class DateRangeInputs extends React.Component {
         </div>
         <div style={{height: 5}}/>
         <div style={{width: controlsWidth}}>
-          <DatePicker value={this.props.dateMin} onChange={this.updateMinFromDatePicker} />
-          <DatePicker value={this.props.dateMax} onChange={this.updateMaxFromDatePicker} right />
+          <DatePicker
+            value={this.props.dateMin}
+            minDate={this.props.absoluteDateMin}
+            maxDate={this.props.dateMax}
+            onChange={this.updateMinFromDatePicker}
+          />
+          <DatePicker right
+            value={this.props.dateMax}
+            minDate={this.props.dateMin}
+            maxDate={this.props.absoluteDateMax}
+            onChange={this.updateMaxFromDatePicker}
+          />
         </div>
       </div>
     );
