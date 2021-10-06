@@ -1,5 +1,7 @@
 import React from "react";
 import styled from 'styled-components';
+import { MdDateRange } from "react-icons/md";
+import { FiSave } from "react-icons/fi";
 
 const DateLabel = styled.div`
   font-family: ${(props) => props.theme["font-family"]};
@@ -7,10 +9,17 @@ const DateLabel = styled.div`
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
-  float: ${(props) => props.right ? "right" : "left"};
 `;
-const DateInput = styled.input`
+const FloatDiv = styled.div`
   float: ${(props) => props.right ? "right" : "left"};
+  max-width: 50%;
+`;
+const CalendarSpan = styled.span`
+  font-family: ${(props) => props.theme["font-family"]};
+  font-size: 12px;
+  font-weight: 400;
+  color: ${(props) => props.theme.color};
+  padding: 0 5px;
 `;
 
 const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
@@ -28,19 +37,23 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
     processNewValue(e.target.value);
   }
   if (editing) {
-    return (
-      <DateInput
-        type="date"
-        defaultValue={value}
-        min={minDate}
-        max={maxDate}
-        onKeyUp={onKeyUp}
-        onBlur={onBlur}
-        right={right}
-      />
-    );
+    const inputElement = <input
+      type="date"
+      defaultValue={value}
+      min={minDate}
+      max={maxDate}
+      onKeyUp={onKeyUp}
+      onBlur={onBlur}
+    />;
+    const saveIcon = <CalendarSpan onClick={() => setEditing(false)}><FiSave /></CalendarSpan>;
+    const labelValue = right ? <>{inputElement}{saveIcon}</> : <>{saveIcon}{inputElement}</>;
+    return <FloatDiv right={right}>{labelValue}</FloatDiv>;
   }
-  return <DateLabel onClick={() => setEditing(true)} right={right}>{value}</DateLabel>;
+  const calenderIcon = <CalendarSpan onClick={() => setEditing(true)}><MdDateRange /></CalendarSpan>;
+  const labelValue = right ? <>{value}{calenderIcon}</> : <>{calenderIcon}{value}</>;
+  return <FloatDiv right={right}>
+    <DateLabel>{labelValue}</DateLabel>
+  </FloatDiv>;
 };
 
 export default DatePicker;
