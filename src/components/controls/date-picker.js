@@ -12,7 +12,7 @@ const IconSpan = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
-  padding: 0 5px;
+  margin: 0 5px;
   cursor: pointer;
 `;
 const DateLabel = styled.div`
