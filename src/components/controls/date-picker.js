@@ -13,6 +13,7 @@ const IconSpan = styled.span`
   font-weight: 400;
   color: ${(props) => props.theme.color};
   padding: 0 5px;
+  cursor: pointer;
 `;
 const DateLabel = styled.div`
   font-family: ${(props) => props.theme["font-family"]};
