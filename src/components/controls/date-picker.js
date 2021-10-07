@@ -15,7 +15,7 @@ const IconSpan = styled.span`
   margin: 0 5px;
   cursor: pointer;
 `;
-const DateLabel = styled.div`
+const DateText = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
   margin-bottom: 5px;
   font-size: 12px;
@@ -37,24 +37,30 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
   function onBlur(e) {
     processNewValue(e.target.value);
   }
+  let content;
   if (editing) {
-    const inputElement = <input
-      type="date"
-      defaultValue={value}
-      min={minDate}
-      max={maxDate}
-      onKeyUp={onKeyUp}
-      onBlur={onBlur}
-    />;
+    const dateInput = (
+      <input
+        type="date"
+        defaultValue={value}
+        min={minDate}
+        max={maxDate}
+        onKeyUp={onKeyUp}
+        onBlur={onBlur}
+      />
+    );
     const saveIcon = <IconSpan onClick={() => setEditing(false)}><FiSave /></IconSpan>;
-    const labelValue = right ? <>{inputElement}{saveIcon}</> : <>{saveIcon}{inputElement}</>;
-    return <FloatDiv right={right}>{labelValue}</FloatDiv>;
+    content = right ? <>{dateInput}{saveIcon}</> : <>{saveIcon}{dateInput}</>;
+  } else {
+    const dateLabel = <DateText>{value}</DateText>;
+    const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
+    content = right ? <>{dateLabel}{calenderIcon}</> : <>{calenderIcon}{dateLabel}</>;
   }
-  const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
-  const labelValue = right ? <>{value}{calenderIcon}</> : <>{calenderIcon}{value}</>;
-  return <FloatDiv right={right}>
-    <DateLabel>{labelValue}</DateLabel>
-  </FloatDiv>;
+  return (
+    <FloatDiv right={right}>
+      {content}
+    </FloatDiv>
+  );
 };
 
 export default DatePicker;
