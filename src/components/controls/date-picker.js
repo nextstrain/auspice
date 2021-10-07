@@ -7,20 +7,16 @@ const FloatDiv = styled.div`
   float: ${(props) => props.right ? "right" : "left"};
   max-width: 50%;
 `;
-const IconSpan = styled.span`
-  font-family: ${(props) => props.theme["font-family"]};
-  font-size: 12px;
-  font-weight: 400;
-  color: ${(props) => props.theme.color};
-  margin: 0 5px;
-  cursor: pointer;
-`;
-const DateText = styled.span`
+const TextSpan = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
   margin-bottom: 5px;
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
+`;
+const IconSpan = styled(TextSpan)`
+  margin: 0 3px;
+  cursor: pointer;
 `;
 
 const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
@@ -52,7 +48,7 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
     const saveIcon = <IconSpan onClick={() => setEditing(false)}><FiSave /></IconSpan>;
     content = right ? <>{dateInput}{saveIcon}</> : <>{saveIcon}{dateInput}</>;
   } else {
-    const dateLabel = <DateText>{value}</DateText>;
+    const dateLabel = <TextSpan>{value}</TextSpan>;
     const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
     content = right ? <>{dateLabel}{calenderIcon}</> : <>{calenderIcon}{dateLabel}</>;
   }
