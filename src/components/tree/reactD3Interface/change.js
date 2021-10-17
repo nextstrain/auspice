@@ -88,7 +88,6 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
-    newState.selectedBranch = newTreeRedux.idxOfInViewRootNode === 0 ? null : rootNode;
     newState.selectedTip = null;
     newState.hovered = null;
     if (newProps.layout === "unrooted") {

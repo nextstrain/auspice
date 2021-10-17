@@ -29,7 +29,6 @@ class Tree extends React.Component {
     this.tangleRef = undefined;
     this.state = {
       hover: null,
-      selectedBranch: null,
       selectedTip: null,
       tree: null,
       treeToo: null
