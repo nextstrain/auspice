@@ -16,6 +16,7 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
 import { untangleTreeToo } from "./tangle/untangling";
+import { sortByGeneOrder } from "../../util/treeMiscHelpers";
 
 export const spaceBetweenTrees = 100;
 
@@ -58,6 +59,7 @@ class Tree extends React.Component {
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
+      newState.geneSortFn = sortByGeneOrder(this.props.metadata.genomeAnnotations);
       this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
@@ -188,6 +190,7 @@ class Tree extends React.Component {
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
+          geneSortFn={this.state.geneSortFn}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
           t={t}
         />
@@ -195,6 +198,7 @@ class Tree extends React.Component {
           clearSelectedNode={this.clearSelectedNode}
           selectedNode={this.state.selectedNode}
           colorings={this.props.metadata.colorings}
+          geneSortFn={this.state.geneSortFn}
           t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (

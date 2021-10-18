@@ -67,17 +67,12 @@ const Button = styled.button`
  * todo: sort genes by position in genome
  * todo: provide in-app links from mutations to color-bys? filters?
  */
-const MutationTable = ({node, isTip}) => {
-  const geneSortFn = (a, b) => {
-    if (a[0]==="nuc") return 1;
-    if (b[0]==="nuc") return -1;
-    return a[0]<b[0] ? -1 : 1;
-  };
+const MutationTable = ({node, geneSortFn, isTip}) => {
   const mutSortFn = (a, b) => {
     const [aa, bb] = [parseInt(a.slice(1, -1), 10), parseInt(b.slice(1, -1), 10)];
     return aa<bb ? -1 : 1;
   };
-  const displayGeneMutations = ([gene, muts]) => {
+  const displayGeneMutations = (gene, muts) => {
     if (gene==="nuc" && isTip && muts.length>10) {
       return (
         <div key={gene} style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
@@ -109,9 +104,9 @@ const MutationTable = ({node, isTip}) => {
     <tr key={"Mutations"}>
       <th style={infoPanelStyles.item}>{title}</th>
       <td style={infoPanelStyles.item}>{
-        Object.entries(mutations)
+        Object.keys(mutations)
           .sort(geneSortFn)
-          .map(displayGeneMutations)
+          .map((gene) => displayGeneMutations(gene, mutations[gene]))
       }</td>
     </tr>
   );
@@ -295,7 +290,7 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, t}) => {
+const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, geneSortFn, t}) => {
   if (selectedNode.event!=="click") {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
@@ -325,7 +320,7 @@ const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, t}) => {
             ))}
             {isTip && <AccessionAndUrl node={node}/>}
             {item("", "")}
-            <MutationTable node={node} isTip={isTip}/>
+            <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTip}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

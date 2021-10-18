@@ -141,8 +141,9 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
  * A React Component to Display AA / NT mutations, if present.
  * @param  {Object} props
  * @param  {Object} props.node     branch node which is currently highlighted
+ * @param  {Object} props.geneSortFn function to sort a list of genes
  */
-const Mutations = ({node, t}) => {
+const Mutations = ({node, geneSortFn, t}) => {
   if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
   const elements = []; // elements to render
   const mutations = node.branch_attrs.mutations;
@@ -183,7 +184,9 @@ const Mutations = ({node, t}) => {
 
   /* --------- AMINO ACID MUTATIONS --------------- */
   /* AA mutations are found at `mutations[prot_name]` -> Array of strings */
-  const prots = Object.keys(mutations).filter((v) => v !== "nuc");
+  const prots = Object.keys(mutations)
+    .sort(geneSortFn)
+    .filter((v) => v !== "nuc");
 
   const mutationsToDisplay = {};
   let shouldDisplay = false;
@@ -355,6 +358,7 @@ const HoverInfoPanel = ({
   colorScale,
   panelDims,
   colorings,
+  geneSortFn,
   t
 }) => {
   if (selectedNode.event !== "hover") return null;
@@ -367,7 +371,7 @@ const HoverInfoPanel = ({
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>
-          <Mutations node={node} t={t}/>
+          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
@@ -376,7 +380,7 @@ const HoverInfoPanel = ({
       ) : (
         <>
           <BranchDescendents node={node} t={t}/>
-          <Mutations node={node} t={t}/>
+          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>

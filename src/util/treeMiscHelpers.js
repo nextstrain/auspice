@@ -171,3 +171,32 @@ export const collectMutations = (fromNode, include_nuc=false) => {
   });
   return mutations;
 };
+
+
+/**
+ * Returns a function which will sort a list, where each element in the list
+ * is a gene name. Sorted by start position of the gene, with "nuc" last.
+ */
+export const sortByGeneOrder = (genomeAnnotations) => {
+  if (!(genomeAnnotations instanceof Object)) {
+    return (a, b) => {
+      if (a==="nuc") return 1;
+      if (b==="nuc") return -1;
+      return 0;
+    };
+  }
+  const geneOrder = Object.entries(genomeAnnotations)
+    .sort((a, b) => {
+      if (b[0]==="nuc") return -1; // show nucleotide "gene" last
+      if (a[1].start < b[1].start) return -1;
+      if (a[1].start > b[1].start) return 1;
+      return 0;
+    })
+    .map(([name]) => name);
+
+  return (a, b) => {
+    if (geneOrder.indexOf(a) < geneOrder.indexOf(b)) return -1;
+    if (geneOrder.indexOf(a) > geneOrder.indexOf(b)) return 1;
+    return 0;
+  };
+};
