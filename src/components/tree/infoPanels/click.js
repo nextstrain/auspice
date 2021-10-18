@@ -1,4 +1,5 @@
 import React from "react";
+import styled from 'styled-components';
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
@@ -51,6 +52,14 @@ const Link = ({url, title, value}) => (
   </tr>
 );
 
+const Button = styled.button`
+  border: 0px;
+  background-color: inherit;
+  cursor: pointer;
+  outline: 0;
+  text-decoration: underline;
+`;
+
 /**
  * Render a 2-column table of gene -> mutations.
  * Rows are sorted by gene name, alphabetically, with "nuc" last.
@@ -68,16 +77,32 @@ const MutationTable = ({node, isTip}) => {
     const [aa, bb] = [parseInt(a.slice(1, -1), 10), parseInt(b.slice(1, -1), 10)];
     return aa<bb ? -1 : 1;
   };
+  const displayGeneMutations = ([gene, muts]) => {
+    if (gene==="nuc" && isTip && muts.length>10) {
+      return (
+        <div key={gene} style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
+          <Button onClick={() => {navigator.clipboard.writeText(muts.sort(mutSortFn).join(", "));}}>
+            {`${muts.length} nucleotide mutations, click to copy to clipboard`}
+          </Button>
+        </div>
+      );
+    }
+    return (
+      <div key={gene} style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
+        {gene}: {muts.sort(mutSortFn).join(", ")}
+      </div>
+    );
+  };
 
   let mutations;
   if (isTip) {
-    mutations = collectMutations(node);
+    mutations = collectMutations(node, true);
   } else if (node.branch_attrs && node.branch_attrs.mutations && Object.keys(node.branch_attrs.mutations).length) {
     mutations = node.branch_attrs.mutations;
   }
   if (!mutations) return null;
 
-  const title = isTip ? "Amino acid changes from root" : "Mutations on branch";
+  const title = isTip ? "Mutations from root" : "Mutations on branch";
 
   // we encode the table here (rather than via `item()`) to set component keys appropriately
   return (
@@ -86,11 +111,7 @@ const MutationTable = ({node, isTip}) => {
       <td style={infoPanelStyles.item}>{
         Object.entries(mutations)
           .sort(geneSortFn)
-          .map(([gene, muts]) => (
-            <div style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
-              {gene}: {muts.sort(mutSortFn).join(", ")}
-            </div>
-          ))
+          .map(displayGeneMutations)
       }</td>
     </tr>
   );
