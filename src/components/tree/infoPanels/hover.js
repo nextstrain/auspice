@@ -349,7 +349,7 @@ const Comment = ({children}) => (
 );
 
 const HoverInfoPanel = ({
-  hovered,
+  selectedNode,
   colorBy,
   colorByConfidence,
   colorScale,
@@ -357,13 +357,13 @@ const HoverInfoPanel = ({
   colorings,
   t
 }) => {
-  if (!hovered) return null;
-  const node = hovered.d.n;
+  if (selectedNode.event !== "hover") return null;
+  const node = selectedNode.node.n;
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
 
   return (
     <Container node={node} panelDims={panelDims}>
-      {hovered.type === ".tip" ? (
+      {selectedNode.type === "tip" ? (
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>
@@ -382,6 +382,7 @@ const HoverInfoPanel = ({
           <Comment>
             {idxOfInViewRootNode === node.arrayIdx ? t('Click to zoom out to parent clade') : t('Click to zoom into clade')}
           </Comment>
+          <Comment>{t("Shift + Click to display more info")}</Comment>
         </>
       )}
     </Container>

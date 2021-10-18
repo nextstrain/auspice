@@ -7,7 +7,7 @@ import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
 import { getParentBeyondPolytomy } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
-import TipClickedPanel from "./infoPanels/click";
+import NodeClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
@@ -28,13 +28,12 @@ class Tree extends React.Component {
     };
     this.tangleRef = undefined;
     this.state = {
-      hover: null,
-      selectedTip: null,
+      selectedNode: {},
       tree: null,
       treeToo: null
     };
     /* bind callbacks */
-    this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
+    this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
     // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
@@ -184,7 +183,7 @@ class Tree extends React.Component {
           <Legend width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
-          hovered={this.state.hovered}
+          selectedNode={this.state.selectedNode}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
@@ -192,9 +191,9 @@ class Tree extends React.Component {
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
           t={t}
         />
-        <TipClickedPanel
-          goAwayCallback={this.clearSelectedTip}
-          tip={this.state.selectedTip}
+        <NodeClickedPanel
+          clearSelectedNode={this.clearSelectedNode}
+          selectedNode={this.state.selectedNode}
           colorings={this.props.metadata.colorings}
           t={t}
         />

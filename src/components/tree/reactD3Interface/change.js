@@ -15,8 +15,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   /* catch selectedStrain dissapearence seperately to visibility and remove modal */
   if (oldTreeRedux.selectedStrain && !newTreeRedux.selectedStrain) {
     /* TODO change back the tip radius */
-    newState.selectedTip = null;
-    newState.hovered = null;
+    newState.selectedNode = {};
   }
   /* colorBy change? */
   if (!!newTreeRedux.nodeColorsVersion &&
@@ -88,8 +87,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
-    newState.selectedTip = null;
-    newState.hovered = null;
+    newState.selectedNode = {};
     if (newProps.layout === "unrooted") {
       args.updateLayout = true;
     }

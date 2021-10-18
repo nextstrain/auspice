@@ -255,14 +255,14 @@ const Trait = ({node, trait, colorings}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
-  if (!tip) {return null;}
+const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, t}) => {
+  if (selectedNode.event!=="click") {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
-  const node = tip.n;
+  const node = selectedNode.node.n;
   const mutationsToRoot = collectMutations(node);
   return (
-    <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
+    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
         <StrainName>{node.name}</StrainName>
         <table>
@@ -286,4 +286,4 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
   );
 };
 
-export default TipClickedPanel;
+export default NodeClickedPanel;
