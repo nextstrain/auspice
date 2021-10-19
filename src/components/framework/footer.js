@@ -218,7 +218,7 @@ class Footer extends React.Component {
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     const activeFilterItems = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
     const title = (<div>
-      {t("Filter by {{filterTitle}}", {filterTitle: filterTitle})}
+      {t("Filter by {{filterTitle}}", {filterTitle: filterTitle}) + ` (n=${totalStateCount.size})`}
       {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", t("Clear {{filterName}} filter", { filterName: filterName})) : null}
     </div>);
     return (
