@@ -94,8 +94,8 @@ const FooterStyles = styled.div`
   }
 
   .line {
-    margin-top: 20px;
-    margin-bottom: 20px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     border-bottom: 1px solid #CCC;
   }
 
@@ -168,9 +168,8 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => (
 const TitleContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  border-top: 1px solid #F0F0F0;
   margin: 0px;
-  padding: 15px 10px 10px 10px;
+  padding: 0px;
 `;
 const IconContainer = styled.span`
   font-size: 22px;
