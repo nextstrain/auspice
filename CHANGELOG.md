@@ -2,9 +2,18 @@
 title: Changelog
 ---
 
+
+* Tree info boxes are now improved, and you can shift+click on a branch to see more information about that branch.
+See [PR 1420](https://github.com/nextstrain/auspice/pull/1420) for more.
+* Filters in footer are now expandable to improve usability and discoverability of the true footer.
+See [PR 1414](https://github.com/nextstrain/auspice/pull/1414) for more.
+* Fixed a bug with CSV (drag & drop) parsing. See [PR 1401](https://github.com/nextstrain/auspice/pull/1401) for more.
+* Removed unnecessary postinstall step. See [PR 1419](https://github.com/nextstrain/auspice/pull/1419) for more.
+* Improved image sizing in narratives. See [PR 1408](https://github.com/nextstrain/auspice/pull/1408) for more.
+* Improved documentation around how to build auspice documentation!
+
+
 ## version 2.31.0 - 2021/09/16
-
-
 * Improvements to our ability to zoom out in a tree, both by exposing the root branch and via a new icon next to "Zoom to Selected".
 See [PR 1392](https://github.com/nextstrain/auspice/pull/1392) for more.
 
