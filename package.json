@@ -101,6 +101,7 @@
     "query-string": "^4.2.3",
     "react": "^16.8.6",
     "react-addons-css-transition-group": "^15.6.0",
+    "react-collapsible": "^2.8.4",
     "react-dom": "^16.8.6",
     "react-ga": "^2.2.0",
     "react-helmet": "^5.2.1",
