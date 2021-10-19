@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.32.0 - 2021/10/20
+
+
 
 * Tree info boxes are now improved, and you can shift+click on a branch to see more information about that branch.
 See [PR 1420](https://github.com/nextstrain/auspice/pull/1420) for more.
