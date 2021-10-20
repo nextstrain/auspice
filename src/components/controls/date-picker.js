@@ -9,14 +9,15 @@ const FloatDiv = styled.div`
 `;
 const TextSpan = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
-  margin-bottom: 5px;
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
   cursor: pointer;
 `;
 const IconSpan = styled(TextSpan)`
+  font-size: 16px;
   margin: 0 3px;
+  vertical-align: middle;
 `;
 
 const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
