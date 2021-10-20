@@ -13,10 +13,10 @@ const TextSpan = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
+  cursor: pointer;
 `;
 const IconSpan = styled(TextSpan)`
   margin: 0 3px;
-  cursor: pointer;
 `;
 
 const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
@@ -48,7 +48,7 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
     const saveIcon = <IconSpan onClick={() => setEditing(false)}><FiSave /></IconSpan>;
     content = right ? <>{dateInput}{saveIcon}</> : <>{saveIcon}{dateInput}</>;
   } else {
-    const dateLabel = <TextSpan>{value}</TextSpan>;
+    const dateLabel = <TextSpan onClick={() => setEditing(true)}>{value}</TextSpan>;
     const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
     content = right ? <>{dateLabel}{calenderIcon}</> : <>{calenderIcon}{dateLabel}</>;
   }
