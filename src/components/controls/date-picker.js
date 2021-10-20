@@ -5,7 +5,6 @@ import { FiSave } from "react-icons/fi";
 
 const FloatDiv = styled.div`
   float: ${(props) => props.right ? "right" : "left"};
-  max-width: 50%;
 `;
 const TextSpan = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
