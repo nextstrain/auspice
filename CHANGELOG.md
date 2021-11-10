@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.32.1 - 2021/11/11
+
+
 ## version 2.32.0 - 2021/10/20
 
 
