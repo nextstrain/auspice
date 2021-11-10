@@ -21,7 +21,7 @@ Please see the [project boards](https://github.com/orgs/nextstrain/projects) for
 
 ## Contributing code
 
-Code contributions are welcomed! [Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice from source.
+Code contributions are welcomed! [Please see the main auspice docs](https://docs.nextstrain.org/projects/auspice/en/latest/introduction/install.html) for details on how to install and run auspice from source.
 
 Please comment on an open issue if you are working on it.
 For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
