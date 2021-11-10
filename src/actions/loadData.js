@@ -52,7 +52,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       dispatch({type: types.DATA_INVALID}); // "resets" state
     }
     const query = queryString.parse(search);
-    if (url.includes("narratives")) {
+    if (url.includes("/narratives/")) {
       loadNarrative(dispatch, url, query);
     } else {
       warnDeprecatedQuerySyntax(dispatch, query);
