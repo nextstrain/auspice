@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 
 import Toggle from "./toggle";
-import { togglePanelDisplay } from "../../actions/misc";
+import { togglePanelDisplay } from "../../actions/panelDisplay";
 
 @connect((state) => ({
   panelsAvailable: state.controls.panelsAvailable,
