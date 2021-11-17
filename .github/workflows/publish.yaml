@@ -1,0 +1,20 @@
+name: Publish to NPM
+on:
+  push:
+    branches:
+      - release
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - run: node --version
+      - run: npm install
+      - run: npm run rebuild-docker-image
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
