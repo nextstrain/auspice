@@ -19,6 +19,7 @@ import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
+import { hasMultipleGridPanels } from "./panelDisplay";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -79,7 +80,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
-    if (state.panelsToDisplay.indexOf("map") === -1 || state.panelsToDisplay.indexOf("tree") === -1) {
+    if (!hasMultipleGridPanels(state.panelsToDisplay)) {
       state["panelLayout"] = "full";
     }
   }
@@ -292,7 +293,7 @@ const modifyStateViaMetadata = (state, metadata) => {
 
   /* if only map or only tree, then panelLayout must be full */
   /* note - this will be overwritten by the URL query */
-  if (state.panelsAvailable.indexOf("map") === -1 || state.panelsAvailable.indexOf("tree") === -1) {
+  if (!hasMultipleGridPanels(state.panelsToDisplay)) {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }

@@ -11,6 +11,7 @@ import { defaultGeoResolution,
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
+import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -206,9 +207,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,
         panelLayout: action.panelLayout,
-        canTogglePanelLayout:
-          action.panelsToDisplay.indexOf("tree") !== -1 &&
-          action.panelsToDisplay.indexOf("map") !== -1
+        canTogglePanelLayout: hasMultipleGridPanels(action.panelsToDisplay)
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
@@ -255,7 +254,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         showTreeToo: undefined,
         showTangle: false,
-        canTogglePanelLayout: state.panelsAvailable.indexOf("map") !== -1,
+        canTogglePanelLayout: hasMultipleGridPanels(state.panelsAvailable),
         panelsToDisplay: state.panelsAvailable.slice()
       });
     case types.TOGGLE_TANGLE:
@@ -277,7 +276,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         newState = {
           ...newState,
           geoResolution: action.newGeoResolution.key,
-          canTogglePanelLayout: true,
+          canTogglePanelLayout: hasMultipleGridPanels([...state.panelsToDisplay, "map"]),
           panelsAvailable: [...state.panelsAvailable, "map"],
           panelsToDisplay: [...state.panelsToDisplay, "map"]
         };
