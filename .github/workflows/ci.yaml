@@ -69,3 +69,19 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npx bundlesize
+  publish:
+    if: ${{ github.ref == 'refs/heads/release' }}
+    needs: [build, unit-test, smoke-test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - run: node --version
+      - run: npm ci
+      - run: npm run rebuild-docker-image
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
