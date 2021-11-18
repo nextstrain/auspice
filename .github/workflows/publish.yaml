@@ -17,7 +17,7 @@ jobs:
           node-version: 14
           registry-url: https://registry.npmjs.org/
       - run: node --version
-      - run: npm install
+      - run: npm ci
       - run: npm run rebuild-docker-image
       - run: npm publish
         env:
