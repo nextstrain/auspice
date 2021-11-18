@@ -33,7 +33,7 @@ jobs:
           commit-message: "[testing only] upgrade auspice to ${{ env.auspice_commit }}"
           author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
           committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          title: '[bot] Test auspice PR ${{ github.event.pull_request.number }}'
+          title: '[bot] [DO NOT MERGE] Test auspice PR ${{ github.event.pull_request.number }}'
           body: |
             This PR has been created to test Auspice from [PR ${{ github.event.pull_request.number }}](https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }})
 
