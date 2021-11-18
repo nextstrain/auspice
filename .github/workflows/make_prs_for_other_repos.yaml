@@ -28,10 +28,12 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.JAMES_PAT }}
+          token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
           branch: "auspice-pr-${{ github.event.pull_request.number }}"
           commit-message: "[testing only] upgrade auspice to ${{ env.auspice_commit }}"
-          title: 'Test auspice PR ${{ github.event.pull_request.number }}'
+          author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
+          committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
+          title: '[bot] Test auspice PR ${{ github.event.pull_request.number }}'
           body: |
             This PR has been created to test Auspice from [PR ${{ github.event.pull_request.number }}](https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }})
 
