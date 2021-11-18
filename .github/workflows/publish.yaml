@@ -1,8 +1,12 @@
 name: Publish to NPM
 on:
-  push:
+  workflow_run:
     branches:
       - release
+    workflows:
+      - ci
+    types:
+      - completed
 jobs:
   publish:
     runs-on: ubuntu-latest
