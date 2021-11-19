@@ -2,17 +2,31 @@ on:
   push:
     branches:
       - master
+      - release
   pull_request:
 name: ci
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --version
+      - run: npm ci
+      - run: npm run build
   unit-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [10]
+        node: [12, 14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
       - run: node --version
@@ -22,10 +36,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [10]
+        node: [12, 14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
@@ -35,20 +49,39 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [10]
+        node: [12, 14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
-      - run: npm install
+      - run: npm ci
       - run: npm run lint
   bundlesize:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [12, 14, 16]
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v2
         with:
-          node-version: 10
-      - run: npm install
+          node-version: ${{ matrix.node }}
+      - run: npm ci
       - run: npx bundlesize
+  publish:
+    if: ${{ github.ref == 'refs/heads/release' }}
+    needs: [build, unit-test, smoke-test, lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          registry-url: https://registry.npmjs.org/
+      - run: node --version
+      - run: npm ci
+      - run: npm run rebuild-docker-image
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
