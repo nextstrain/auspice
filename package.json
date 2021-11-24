@@ -124,7 +124,7 @@
     "yaml-front-matter": "^4.0.0"
   },
   "devDependencies": {
-    "babel-eslint": "^10.0.1",
+    "@babel/eslint-parser": "^7.16.3",
     "bundlesize": "^0.18.1",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
