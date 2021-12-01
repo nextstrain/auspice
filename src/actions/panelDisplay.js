@@ -17,6 +17,7 @@ export const togglePanelDisplay = (panelName) => (dispatch, getState) => {
     panelsToDisplay = controls.panelsToDisplay.slice();
     panelsToDisplay.splice(idx, 1);
   }
-  const panelLayout = hasMultipleGridPanels(panelsToDisplay) ? controls.panelLayout : "full";
-  dispatch({type: TOGGLE_PANEL_DISPLAY, panelsToDisplay, panelLayout});
+  const canTogglePanelLayout = hasMultipleGridPanels(panelsToDisplay);
+  const panelLayout = canTogglePanelLayout ? controls.panelLayout : "full";
+  dispatch({type: TOGGLE_PANEL_DISPLAY, panelsToDisplay, panelLayout, canTogglePanelLayout});
 };

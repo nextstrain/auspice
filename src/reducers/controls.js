@@ -207,7 +207,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,
         panelLayout: action.panelLayout,
-        canTogglePanelLayout: hasMultipleGridPanels(action.panelsToDisplay)
+        canTogglePanelLayout: action.canTogglePanelLayout
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
