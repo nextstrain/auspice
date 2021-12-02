@@ -80,7 +80,8 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
-    if (!hasMultipleGridPanels(state.panelsToDisplay)) {
+    state.canTogglePanelLayout = hasMultipleGridPanels(state.panelsToDisplay);
+    if (!state.canTogglePanelLayout) {
       state["panelLayout"] = "full";
     }
   }
