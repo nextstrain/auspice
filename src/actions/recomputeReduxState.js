@@ -71,12 +71,10 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.r) {
     state["geoResolution"] = query.r;
   }
-  if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
-    state["panelLayout"] = query.p;
-  }
-  if (query.tl) {
-    state["tipLabelKey"] = query.tl;
-  }
+  /**
+   * `query.d` should be processed before `query.p` since the panels to be
+   * displayed affects the panel layout.
+   */
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
@@ -84,6 +82,12 @@ const modifyStateViaURLQuery = (state, query) => {
     if (!state.canTogglePanelLayout) {
       state["panelLayout"] = "full";
     }
+  }
+  if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
+    state["panelLayout"] = query.p;
+  }
+  if (query.tl) {
+    state["tipLabelKey"] = query.tl;
   }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
