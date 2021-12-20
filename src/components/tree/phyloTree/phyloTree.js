@@ -1,5 +1,5 @@
 import { createDefaultParams } from "./defaultParams";
-import { createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
+import { createChildrenAndParentsReturnNumTips, setDisplayOrder } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -36,7 +36,7 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
     return phyloNode;
   });
   this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
-  setYValues(this.nodes);
+  setDisplayOrder(this.nodes);
   this.zoomNode = this.nodes[idxOfInViewRootNode];
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});

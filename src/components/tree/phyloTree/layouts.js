@@ -57,7 +57,7 @@ export const setLayout = function setLayout(layout, scatterVariables) {
  */
 export const rectangularLayout = function rectangularLayout() {
   this.nodes.forEach((d) => {
-    d.y = d.n.yvalue; // precomputed y-values
+    d.y = d.displayOrder; // precomputed y-values
     d.x = d.depth;    // depth according to current distance
     d.px = d.pDepth;  // parent positions
     d.py = d.y;
@@ -196,9 +196,9 @@ export const radialLayout = function radialLayout() {
   const nTips = this.numberOfTips;
   const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
-    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
-    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
-    d.angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
+    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / nTips;
+    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / nTips;
+    d.angle = 2.0 * 0.95 * Math.PI * d.displayOrder / nTips;
     d.y = (d.depth - offset) * Math.cos(d.angle);
     d.x = (d.depth - offset) * Math.sin(d.angle);
     d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);
@@ -459,7 +459,7 @@ export const mapToScreen = function mapToScreen() {
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
-      const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
+      const childrenY = [this.yScale(d.displayOrderRange[0]), this.yScale(d.displayOrderRange[1])];
       // Note that a branch cannot be perfectly horizontal and also have a (linear) gradient applied to it
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
       // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
@@ -474,8 +474,8 @@ export const mapToScreen = function mapToScreen() {
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;
     const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
-    this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.yRange[0]);});
-    this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.yRange[1]);});
+    this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.displayOrderRange[0]);});
+    this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.displayOrderRange[1]);});
     this.nodes.forEach((d, i) => {
       d.branch =[
         " M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString() +

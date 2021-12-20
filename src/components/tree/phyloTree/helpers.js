@@ -61,11 +61,11 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
   nodes.forEach((d) => {
     d.parent = d.n.parent.shell;
     if (d.terminal) {
-      d.yRange = [d.n.yvalue, d.n.yvalue];
+      d.orderRange = [d.displayOrder, d.displayOrder];
       d.children = null;
       numTips++;
     } else {
-      d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
+      d.orderRange = [d.n.children[0].shell.displayOrder, d.n.children[d.n.children.length - 1].shell.displayOrder];
       d.children = [];
       for (let i = 0; i < d.n.children.length; i++) {
         d.children.push(d.n.children[i].shell);
@@ -75,33 +75,33 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
   return numTips;
 };
 
-/** setYValuesRecursively
+/** setDisplayOrderRecursively
  */
-export const setYValuesRecursively = (node, yCounter) => {
+export const setDisplayOrderRecursively = (node, yCounter) => {
   if (node.children) {
     for (let i = node.children.length - 1; i >= 0; i--) {
-      yCounter = setYValuesRecursively(node.children[i], yCounter);
+      yCounter = setDisplayOrderRecursively(node.children[i], yCounter);
     }
   } else {
-    node.n.yvalue = ++yCounter;
-    node.yRange = [yCounter, yCounter];
+    node.displayOrder = ++yCounter;
+    node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
-  /* if here, then all children have yvalues, but we dont. */
-  node.n.yvalue = node.children.reduce((acc, d) => acc + d.n.yvalue, 0) / node.children.length;
-  node.yRange = [node.n.children[0].yvalue, node.n.children[node.n.children.length - 1].yvalue];
+  /* if here, then all children have displayOrders, but we dont. */
+  node.displayOrder = node.children.reduce((acc, d) => acc + d.displayOrder, 0) / node.children.length;
+  node.displayOrderRange = [node.n.children[0].shell.displayOrder, node.n.children[node.n.children.length - 1].shell.displayOrder];
   return yCounter;
 };
 
-/** setYValues
- * given nodes, this fn sets node.yvalue for each node
+/** setDisplayOrder
+ * given nodes, this fn sets <phyloNode>.displayOrder for each node
  * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
  * Nodes must have parent child links established (via createChildrenAndParents)
  * PhyloTree can subsequently use this information. Accessed by prototypes
  * rectangularLayout, radialLayout, createChildrenAndParents
- * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
+ * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
  */
-export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
+export const setDisplayOrder = (nodes) => setDisplayOrderRecursively(nodes[0], 0);
 
 
 export const formatDivergence = (divergence) => {
