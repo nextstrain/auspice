@@ -1,6 +1,6 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId } from "./helpers";
+import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 /**
@@ -30,6 +30,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.dateRange = dateRange;
 
   /* set x, y values & scale them to the screen */
+  setDisplayOrder(this.nodes);
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();
@@ -189,6 +190,7 @@ export const drawBranches = function drawBranches() {
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
       .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("visibility", getBranchVisibility)
       .style("fill", "none")
       .style("pointer-events", "auto")
       .on("mouseover", this.callbacks.onBranchHover)
