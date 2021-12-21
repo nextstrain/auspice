@@ -9,28 +9,41 @@ import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers
 import { createVisibleLegendValues } from "../util/colorScale";
 
 
+/**
+ * Updates the `inView` property of nodes which depends on the currently selected
+ * root index (i.e. what node the tree is zoomed into).
+ * Note that this property is historically the remit of PhyloTree, however this function
+ * may be called before those objects are created; in this case we store the property on
+ * the tree node itself.
+ * @param {Int} idx - index of displayed root node
+ * @param {ReduxTreeState} tree
+ */
 export const applyInViewNodesToTree = (idx, tree) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
-  if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
-    /* a bit hacky, should be somewhere else */
+  if (tree.nodes[0].shell) {
     tree.nodes.forEach((d) => {
       d.shell.inView = false;
       d.shell.update = true;
     });
-    if (tree.nodes[validIdxRoot].shell.terminal) {
-      applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
-    } else {
+    if (tree.nodes[validIdxRoot].hasChildren) {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+    } else {
+      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d) => {d.inView = true;});
     }
   } else {
+    /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
-    if (!tree.nodes[validIdxRoot].hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot].parent, (d) => {d.inView = true;});
-    } else {
-      applyToChildren(tree.nodes[validIdxRoot], (d) => {d.inView = true;});
-    }
+    /* note that we cannot use `applyToChildren` as that operates on PhyloNodes */
+    const _markChildrenInView = (node) => {
+      node.inView = true;
+      if (node.children) {
+        for (const child of node.children) _markChildrenInView(child);
+      }
+    };
+    const startingNode = tree.nodes[validIdxRoot].hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot].parent;
+    _markChildrenInView(startingNode);
   }
 
   return validIdxRoot;

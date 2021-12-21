@@ -29,12 +29,6 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.dateRange = dateRange;
 
-  /* set x, y values & scale them to the screen */
-  setDisplayOrder(this.nodes);
-  this.setDistance(distance);
-  this.setLayout(layout, scatterVariables);
-  this.mapToScreen();
-
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
     d.branchStroke = branchStroke[i];
@@ -44,6 +38,12 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d["stroke-width"] = branchThickness[i];
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
+
+  /* set x, y values & scale them to the screen */
+  setDisplayOrder(this.nodes);
+  this.setDistance(distance);
+  this.setLayout(layout, scatterVariables);
+  this.mapToScreen();
 
   /* draw functions */
   this.setClipMask();
@@ -99,13 +99,12 @@ export const drawVaccines = function drawVaccines() {
 export const drawTips = function drawTips() {
   timerStart("drawTips");
   const params = this.params;
-
   if (!("tips" in this.groups)) {
     this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
   }
   this.groups.tips
     .selectAll(".tip")
-    .data(this.nodes.filter((d) => d.terminal))
+    .data(this.nodes.filter((d) => !d.n.hasChildren))
     .enter()
     .append("circle")
     .attr("class", "tip")
@@ -182,7 +181,7 @@ export const drawBranches = function drawBranches() {
   } else {
     this.groups.branchTee
       .selectAll('.branch')
-      .data(this.nodes.filter((d) => !d.terminal))
+      .data(this.nodes.filter((d) => d.n.hasChildren))
       .enter()
       .append("path")
       .attr("class", "branch T")
@@ -332,14 +331,13 @@ export const updateColorBy = function updateColorBy() {};
 /** given a node `d` which is being hovered, update it's colour to emphasize
  * that it's being hovered. This updates the SVG element stroke style in-place
  * _or_ updates the SVG gradient def in place.
- * @param {obj} d node
+ * @param {PhyloNode} d node
  * @param {string} c1 colour of the parent (start of the branch)
  * @param {string} c2 colour of the node (end of the branch)
  */
 const handleBranchHoverColor = (d, c1, c2) => {
   if (!d) { return; }
-
-  const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  const id = `T${d.that.id}_${d.n.parent.arrayIdx}_${d.n.arrayIdx}`;
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
   const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
@@ -349,7 +347,7 @@ const handleBranchHoverColor = (d, c1, c2) => {
   }
   const sel = d.that.svg.select(getDomId("#branchS", d.n.name));
   if (!sel.empty()) {
-    if (d.branchStroke === d.parent.branchStroke) {
+    if (d.branchStroke === d.n.parent.shell.branchStroke) {
       sel.style("stroke", c2);
     } else {
       // console.log("going to gradient " + el.attr("id"));
@@ -367,12 +365,12 @@ const handleBranchHoverColor = (d, c1, c2) => {
 
 export const branchStrokeForLeave = function branchStrokeForLeave(d) {
   if (!d) { return; }
-  handleBranchHoverColor(d, d.parent.branchStroke, d.branchStroke);
+  handleBranchHoverColor(d, d.n.parent.shell.branchStroke, d.branchStroke);
 };
 
 export const branchStrokeForHover = function branchStrokeForHover(d) {
   if (!d) { return; }
-  handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
+  handleBranchHoverColor(d, getEmphasizedColor(d.n.parent.shell.branchStroke), getEmphasizedColor(d.branchStroke));
 };
 
 /**

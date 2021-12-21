@@ -35,7 +35,8 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
 /**
 * for each node, calculate the number of subtending tips which are visible
 * side effects: n.tipCount for each node
-*  @param root - deserialized JSON root to begin traversal
+* @param {Node} node - deserialized JSON root to begin traversal
+* @param {Array<Int>} visibility
 */
 export const calcTipCounts = (node, visibility) => {
   node.tipCount = 0;
@@ -51,7 +52,7 @@ export const calcTipCounts = (node, visibility) => {
 
 /**
  * calculate the total number of tips in the tree
- * @param {Array} nodes flat list of all nodes
+ * @param {Array<Node>} nodes flat list of all nodes
  */
 export const calcTotalTipsInTree = (nodes) => {
   let count = 0;

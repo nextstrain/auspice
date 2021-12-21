@@ -15,72 +15,53 @@ export const getDomId = (type, strain) => {
  * computes a measure of the total number of leaves for each node in
  * the tree, weighting leaves differently if they are inView.
  * Note: function is recursive
- * @param {obj} node -- root node of the tree
+ * @param {PhyloNode} node -- root node of the tree
  * @returns {undefined}
  * @sideEffects sets `node.leafCount` {number} for all nodes
  */
 export const addLeafCount = (node) => {
-  if (node.terminal && node.inView) {
+  const terminal = !node.n.hasChildren;
+  if (terminal && node.inView) {
     node.leafCount = 1;
-  } else if (node.terminal && !node.inView) {
+  } else if (terminal && !node.inView) {
     node.leafCount = 0.15;
   } else {
     node.leafCount = 0;
-    for (let i = 0; i < node.children.length; i++) {
-      addLeafCount(node.children[i]);
-      node.leafCount += node.children[i].leafCount;
+    for (const child of node.n.children) {
+      const phyloChild = child.shell;
+      addLeafCount(phyloChild);
+      node.leafCount += phyloChild.leafCount;
     }
   }
 };
 
 
-/*
+/**
  * this function takes a call back and applies it recursively
  * to all child nodes, including internal nodes
- * @params:
- *   node -- node to whose children the function is to be applied
- *   func -- call back function to apply
+ * @param {PhyloNode} node
+ * @param {Function} func - function to apply to each children. Is passed a single argument, the <PhyloNode> of the children.
  */
-export const applyToChildren = (node, func) => {
-  func(node);
-  if (node.terminal || node.children === undefined) { // in case clade set by URL, terminal hasn't been set yet!
+export const applyToChildren = (phyloNode, func) => {
+  func(phyloNode);
+  const node = phyloNode.n;
+  if ((!node.hasChildren) || (node.children === undefined)) { // in case clade set by URL, terminal hasn't been set yet!
     return;
   }
-  for (let i = 0; i < node.children.length; i++) {
-    applyToChildren(node.children[i], func);
+  for (const child of node.children) {
+    applyToChildren(child.shell, func);
   }
-};
-
-
-/*
-* given nodes, create the children and parent properties.
-* modifies the nodes argument in place
-*/
-export const createChildrenAndParentsReturnNumTips = (nodes) => {
-  let numTips = 0;
-  nodes.forEach((d) => {
-    d.parent = d.n.parent.shell;
-    if (d.terminal) {
-      d.orderRange = [d.displayOrder, d.displayOrder];
-      d.children = null;
-      numTips++;
-    } else {
-      d.orderRange = [d.n.children[0].shell.displayOrder, d.n.children[d.n.children.length - 1].shell.displayOrder];
-      d.children = [];
-      for (let i = 0; i < d.n.children.length; i++) {
-        d.children.push(d.n.children[i].shell);
-      }
-    }
-  });
-  return numTips;
 };
 
 /** setDisplayOrderRecursively
+ * @param {PhyloNode} node
+ * @param {int} yCounter
  */
 export const setDisplayOrderRecursively = (node, yCounter) => {
-  if (node.children) {
-    for (let i = node.children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(node.children[i], yCounter);
+  const children = node.n.children; // (redux) tree node
+  if (children) {
+    for (let i = children.length - 1; i >= 0; i--) {
+      yCounter = setDisplayOrderRecursively(children[i].shell, yCounter);
     }
   } else {
     node.displayOrder = ++yCounter;
@@ -88,8 +69,8 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
     return yCounter;
   }
   /* if here, then all children have displayOrders, but we dont. */
-  node.displayOrder = node.children.reduce((acc, d) => acc + d.displayOrder, 0) / node.children.length;
-  node.displayOrderRange = [node.n.children[0].shell.displayOrder, node.n.children[node.n.children.length - 1].shell.displayOrder];
+  node.displayOrder = children.reduce((acc, d) => acc + d.shell.displayOrder, 0) / children.length;
+  node.displayOrderRange = [children[0].shell.displayOrder, children[children.length - 1].shell.displayOrder];
   return yCounter;
 };
 
@@ -100,6 +81,7 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
  * PhyloTree can subsequently use this information. Accessed by prototypes
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
+ * @param {Array<PhyloNode>} nodes
  */
 export const setDisplayOrder = (nodes) => setDisplayOrderRecursively(nodes[0], 0);
 

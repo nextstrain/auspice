@@ -4,7 +4,7 @@ import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMisc
 /**
 * for each node, calculate the number of subtending tips (alive or dead)
 * side effects: n.fullTipCount for each node
-*  @param root - deserialized JSON root to begin traversal
+* @param {Node} node - deserialized JSON root to begin traversal
 */
 const calcFullTipCounts = (node) => {
   node.fullTipCount = 0;

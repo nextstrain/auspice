@@ -14,7 +14,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const xPad = this.params.tipLabelPadX;
   const yPad = this.params.tipLabelPadY;
 
-  const inViewTips = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
+  const inViewTips = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   const inViewVisibleTips = inViewTips.filter((d) => d.visibility === NODE_VISIBLE);
 

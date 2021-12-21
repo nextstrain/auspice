@@ -589,10 +589,9 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
 };
 
 const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsState, dispatch) => {
-  /* calculate new branch thicknesses & visibility */
+  /* calculate the index of the (in-view) root note, which depends on any selected zoom */
   let newIdxRoot = oldState.idxOfInViewRootNode;
   if (zoomSelected) {
-    // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
     const [labelName, labelValue] = zoomSelected.split(":");
     const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     oldState.selectedClade = zoomSelected;
@@ -601,6 +600,8 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
     oldState.selectedClade = undefined;
     newIdxRoot = applyInViewNodesToTree(0, oldState);
   }
+
+  /* calculate new branch thickesses & visibility, as this depends on the root note */
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,

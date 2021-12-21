@@ -41,7 +41,7 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
   for (let i=0; i<phylotree2.nodes.length; i++) {
     const phyloNode = phylotree2.nodes[i];
     const reduxNode = phyloNode.n;
-    if (phyloNode.children) {
+    if (reduxNode.children) {
 
       /* step 1: find the left-most y value descendent from this node.
       This is needed to recursively set new y-values downstream of this node
@@ -59,12 +59,10 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
       const originalStartingY = leftMostNode.shell.displayOrder - 1; // setDisplayOrderRecursively expects the previous Y value
 
       /* step 2: reverse the children, recalc the y-values, and see if things improved */
-      phyloNode.children.reverse();
       reduxNode.children.reverse();
       setDisplayOrderRecursively(phyloNode, originalStartingY);
       const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
       if (correlation > new_corr) {
-        phyloNode.children.reverse();
         reduxNode.children.reverse();
         setDisplayOrderRecursively(phyloNode, originalStartingY);
         // setDisplayOrderRecursively(phylotree2.nodes[0], 0);
@@ -76,10 +74,10 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
 };
 
 export const untangleTreeToo = (phylotree1, phylotree2) => {
-  console.time("untangle");
+  // console.time("untangle");
   // const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
   // console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
   setDisplayOrder(phylotree2.nodes);
-  console.timeEnd("untangle");
+  // console.timeEnd("untangle");
 };

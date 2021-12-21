@@ -123,20 +123,19 @@ export const scatterplotLayout = function scatterplotLayout() {
 
 };
 
-/*
+/**
  * Utility function for the unrooted tree layout.
  * assigns x,y coordinates to the subtree starting in node
- * @params:
- *   node -- root of the subtree.
- *   nTips -- total number of tips in the tree.
+ * @param {PhyloNode} node
+ * @param {Int} nTips - total number of tips in the tree.
  */
 const unrootedPlaceSubtree = (node, nTips) => {
   node.x = node.px + node.branchLength * Math.cos(node.tau + node.w * 0.5);
   node.y = node.py + node.branchLength * Math.sin(node.tau + node.w * 0.5);
   let eta = node.tau; // eta is the cumulative angle for the wedges in the layout
-  if (!node.terminal) {
-    for (let i = 0; i < node.children.length; i++) {
-      const ch = node.children[i];
+  if (node.n.hasChildren) {
+    for (let i = 0; i < node.n.children.length; i++) {
+      const ch = node.n.children[i].shell; // ch is a <PhyloNode>
       ch.w = 2 * Math.PI * ch.leafCount / nTips;
       ch.tau = eta;
       eta += ch.w;
@@ -169,13 +168,15 @@ export const unrootedLayout = function unrootedLayout() {
   this.nodes[0].w = 2 * Math.PI;
   this.nodes[0].tau = 0;
   let eta = 1.5 * Math.PI;
-  for (let i = 0; i < this.nodes[0].children.length; i++) {
-    this.nodes[0].children[i].px = 0;
-    this.nodes[0].children[i].py = 0;
-    this.nodes[0].children[i].w = 2.0 * Math.PI * this.nodes[0].children[i].leafCount / nTips;
-    this.nodes[0].children[i].tau = eta;
-    eta += this.nodes[0].children[i].w;
-    unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
+  const children = this.nodes[0].n.children; // <Node> not <PhyloNode>
+  for (let i = 0; i < children.length; i++) {
+    const phyloNode = children[i].shell;
+    phyloNode.px = 0;
+    phyloNode.py = 0;
+    phyloNode.w = 2.0 * Math.PI * phyloNode.leafCount / nTips;
+    phyloNode.tau = eta;
+    eta += phyloNode.w;
+    unrootedPlaceSubtree(phyloNode, nTips);
   }
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
@@ -319,7 +320,7 @@ export const setScales = function setScales() {
 export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
 
-  const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
+  const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
   this.margins = {
@@ -336,7 +337,7 @@ export const mapToScreen = function mapToScreen() {
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
-    nodesInDomain = nodesInDomain.filter((d) => d.terminal);
+    nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
 
   /* Compute the domains to pass to the d3 scales for the x & y axes */
@@ -457,15 +458,15 @@ export const mapToScreen = function mapToScreen() {
       this.nodes.forEach((d) => {d.branch=[];});
     }
   } else if (this.layout==="rect") {
-    this.nodes.forEach((d) => {
-      const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
-      const childrenY = [this.yScale(d.displayOrderRange[0]), this.yScale(d.displayOrderRange[1])];
+    this.nodes.forEach((d) => { // d is a <PhyloNode>
+      const stem_offset = 0.5*(d.n.parent.shell["stroke-width"] - d["stroke-width"]) || 0.0;
+      const stemRange = [this.yScale(d.displayOrderRange[0]), this.yScale(d.displayOrderRange[1])];
       // Note that a branch cannot be perfectly horizontal and also have a (linear) gradient applied to it
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
       // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
       d.branch =[
         [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`],
-        [` M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`]
+        [` M ${d.xTip},${stemRange[0]} L ${d.xTip},${stemRange[1]}`]
       ];
       if (this.params.confidence) {
         d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
@@ -473,7 +474,7 @@ export const mapToScreen = function mapToScreen() {
     });
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;
-    const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
+    const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.n.parent.shell["stroke-width"] - d["stroke-width"]) || 0.0);});
     this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.displayOrderRange[0]);});
     this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.displayOrderRange[1]);});
     this.nodes.forEach((d, i) => {
@@ -482,7 +483,7 @@ export const mapToScreen = function mapToScreen() {
         " "+(d.yBase-stem_offset_radial[i]*Math.cos(d.angle)).toString() +
         " L "+d.xTip.toString()+" "+d.yTip.toString(), ""
       ];
-      if (!d.terminal) {
+      if (d.n.hasChildren) {
         d.branch[1] =[" M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
         " A "+(this.xScale(d.depth)-this.xScale(offset)).toString()+" "+
         (this.yScale(d.depth)-this.yScale(offset)).toString()+
@@ -516,12 +517,12 @@ function jitter(axis, scale, nodes) {
   }
   const [base, tip, randLen] = [`${axis}Base`, `${axis}Tip`, rand.length];
   let j = 0;
-  function recurse(n) {
-    n[base] = n.parent[tip];
-    n[tip] += rand[j++];
+  function recurse(phyloNode) {
+    phyloNode[base] = phyloNode.n.parent.shell[tip];
+    phyloNode[tip] += rand[j++];
     if (j>=randLen) j=0;
-    if (!n.children) return;
-    for (const child of n.children) recurse(child);
+    if (!phyloNode.n.hasChildren) return;
+    for (const child of phyloNode.n.children) recurse(child.shell);
   }
   recurse(nodes[0]);
 }
