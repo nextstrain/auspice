@@ -52,6 +52,19 @@ export const setLayout = function setLayout(layout, scatterVariables) {
 
 
 /**
+ * Gets the parent node to be used for stem / branch calculation.
+ * Most of the time this is the same as `d.n.parent` however it is not in the
+ * case of the root nodes for subtrees (e.g. exploded trees).
+ * @param {Node} n
+ * @returns {Node}
+ */
+const stemParent = (n) => {
+  return (n.parent.name === "__ROOT" && n.parentInfo.original) ?
+    n.parentInfo.original :
+    n.parent;
+};
+
+/**
  * assignes x,y coordinates for a rectancular layout
  * @return {null}
  */
@@ -85,24 +98,24 @@ export const scatterplotLayout = function scatterplotLayout() {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
       d.x = getDivFromNode(d.n);
-      d.px = getDivFromNode(d.n.parent);
+      d.px = getDivFromNode(stemParent(d.n));
     } else if (this.scatterVariables.x==="gt") {
       d.x = d.n.currentGt;
-      d.px = d.n.parent.currentGt;
+      d.px = stemParent(d.n).currentGt;
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
-      d.px = getTraitFromNode(d.n.parent, this.scatterVariables.x);
+      d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
     }
     // set y and parent  values
     if (this.scatterVariables.y==="div") {
       d.y = getDivFromNode(d.n);
-      d.py = getDivFromNode(d.n.parent);
+      d.py = getDivFromNode(stemParent(d.n));
     } else if (this.scatterVariables.y==="gt") {
       d.y = d.n.currentGt;
-      d.py = d.n.parent.currentGt;
+      d.py = stemParent(d.n).currentGt;
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
-      d.py = getTraitFromNode(d.n.parent, this.scatterVariables.y);
+      d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
     }
   });
 
@@ -240,20 +253,19 @@ export const setDistance = function setDistance(distanceAttribute) {
     this.distance = "div"; // fallback to div
   }
 
-
   // todo - can the following loops be skipped for scatterplots?
 
   // assign node and parent depth
   if (this.distance === "div") {
     this.nodes.forEach((d) => {
       d.depth = getDivFromNode(d.n);
-      d.pDepth = getDivFromNode(d.n.parent);
+      d.pDepth = getDivFromNode(stemParent(d.n));
       d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
     });
   } else {
     this.nodes.forEach((d) => {
       d.depth = getTraitFromNode(d.n, "num_date");
-      d.pDepth = getTraitFromNode(d.n.parent, "num_date");
+      d.pDepth = getTraitFromNode(stemParent(d.n), "num_date");
       d.conf = getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth];
     });
   }
@@ -459,7 +471,7 @@ export const mapToScreen = function mapToScreen() {
     }
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => { // d is a <PhyloNode>
-      const stem_offset = 0.5*(d.n.parent.shell["stroke-width"] - d["stroke-width"]) || 0.0;
+      const stem_offset = 0.5*(stemParent(d.n).shell["stroke-width"] - d["stroke-width"]) || 0.0;
       const stemRange = [this.yScale(d.displayOrderRange[0]), this.yScale(d.displayOrderRange[1])];
       // Note that a branch cannot be perfectly horizontal and also have a (linear) gradient applied to it
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
@@ -474,7 +486,7 @@ export const mapToScreen = function mapToScreen() {
     });
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;
-    const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.n.parent.shell["stroke-width"] - d["stroke-width"]) || 0.0);});
+    const stem_offset_radial = this.nodes.map((d) => {return (0.5*(stemParent(d.n).shell["stroke-width"] - d["stroke-width"]) || 0.0);});
     this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.displayOrderRange[0]);});
     this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.displayOrderRange[1]);});
     this.nodes.forEach((d, i) => {
@@ -518,7 +530,7 @@ function jitter(axis, scale, nodes) {
   const [base, tip, randLen] = [`${axis}Base`, `${axis}Tip`, rand.length];
   let j = 0;
   function recurse(phyloNode) {
-    phyloNode[base] = phyloNode.n.parent.shell[tip];
+    phyloNode[base] = stemParent(phyloNode.n).shell[tip];
     phyloNode[tip] += rand[j++];
     if (j>=randLen) j=0;
     if (!phyloNode.n.hasChildren) return;

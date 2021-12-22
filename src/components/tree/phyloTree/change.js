@@ -323,6 +323,7 @@ export const change = function change({
 
   if (changeNodeOrder) {
     setDisplayOrder(this.nodes);
+    this.setDistance();
   }
 
   /* change the requested properties on the nodes */

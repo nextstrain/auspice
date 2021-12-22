@@ -132,6 +132,20 @@ const appendParentsToTree = (root) => {
   }
 };
 
+/**
+ * Currently this is limited in scope, but is intended to parse
+ * information on a branch_attr indicating information about minor/
+ * major parents (e.g. recombination, subtree position in another tree).
+ * @param {Array<Node>} nodes
+ */
+const addParentInfo = (nodes) => {
+  nodes.forEach((n) => {
+    n.parentInfo = {
+      original: n.parent
+    };
+  });
+};
+
 export const treeJsonToState = (treeJSON) => {
   const trees = Array.isArray(treeJSON) ? treeJSON : [treeJSON];
   const nodesArray = [];
@@ -143,6 +157,7 @@ export const treeJsonToState = (treeJSON) => {
   }
   nodesArray.unshift(makeSubtreeRootNode(nodesArray, subtreeIndicies));
   const nodes = processNodes(nodesArray);
+  addParentInfo(nodesArray);
   const vaccines = nodes.filter((d) => {
     const v = getVaccineFromNode(d);
     return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
