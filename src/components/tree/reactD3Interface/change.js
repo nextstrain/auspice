@@ -50,6 +50,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newDistance = newProps.distanceMeasure;
   }
 
+  /* explode! */
+  if (oldProps.explodeAttr !== newProps.explodeAttr) {
+    args.changeNodeOrder = true;
+  }
+
   /* change in key used to define branch labels, tip labels */
   if (oldProps.canRenderBranchLabels===true && newProps.canRenderBranchLabels===false) {
     args.newBranchLabellingKey = "none";

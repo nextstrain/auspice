@@ -59,7 +59,7 @@ export const applyToChildren = (phyloNode, func) => {
  */
 export const setDisplayOrderRecursively = (node, yCounter) => {
   const children = node.n.children; // (redux) tree node
-  if (children) {
+  if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
       yCounter = setDisplayOrderRecursively(children[i].shell, yCounter);
     }

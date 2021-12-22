@@ -7,6 +7,8 @@ import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { createVisibleLegendValues } from "../util/colorScale";
+import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { warningNotification } from "./notifications";
 
 
 /**
@@ -295,3 +297,81 @@ export const applyFilter = (mode, trait, values) => {
 export const toggleTemporalConfidence = () => ({
   type: types.TOGGLE_TEMPORAL_CONF
 });
+
+
+/**
+ * restore original state by iterating over all nodes and restoring children to unexplodedChildren (as necessary)
+ * @param {Array<Node>} nodes
+ */
+const _resetExpodedTree = (nodes) => {
+  nodes.forEach((n) => {
+    if (n.hasOwnProperty('unexplodedChildren')) { // eslint-disable-line
+      n.children = n.unexplodedChildren;
+      n.hasChildren = true;
+      delete n.unexplodedChildren;
+      for (const child of n.children) {
+        child.parent = n;
+      }
+    }
+  });
+};
+
+/**
+ * Recursive function which traverses the tree modifying parent -> child links in order to
+ * create subtrees where branches have different attrs.
+ * Note: because the children of a node may change, we store the previous (unexploded) children
+ * as `unexplodedChildren` so we can return to the original tree.
+ * @param {Node} root - root node of entire tree
+ * @param {Node} node - current node being traversed
+ * @param {String} attr - trait name to determine if a child should become subtree
+ */
+const _traverseAndCreateSubtrees = (root, node, attr) => {
+  // store original children so we traverse the entire tree
+  const originalChildren = node.hasChildren ? [...node.children] : [];
+
+  if (node.arrayIdx === 0) { // __ROOT will hold all (expoded) subtrees
+    node.unexplodedChildren = originalChildren;
+  } else if (node.hasChildren) {
+    const parentTrait = getTraitFromNode(node, attr);
+    if (parentTrait) {
+      // find (indicies of) children who have (defined and) different traits. These will become subtrees.
+      const childrenToPrune = node.children
+        .map((c) => getTraitFromNode(c, attr))
+        .map((childTrait, idx) => (childTrait && childTrait!==parentTrait) ? idx : undefined)
+        .filter((v) => v!==undefined);
+      if (childrenToPrune.length) {
+        childrenToPrune.forEach((idx) => {
+          const subtreeRootNode = node.children[idx];
+          root.children.push(subtreeRootNode);
+          subtreeRootNode.parent = root;
+        });
+        node.unexplodedChildren = originalChildren;
+        node.children = node.children.filter((c, idx) => {
+          return !childrenToPrune.includes(idx);
+        });
+        /* it may be the case that the node now has no children (they're all subtrees!) */
+        if (node.children.length===0) {
+          node.hasChildren = false;
+        }
+      }
+    }
+  }
+  for (const originalChild of originalChildren) { // this may jump into subtrees
+    _traverseAndCreateSubtrees(root, originalChild, attr);
+  }
+};
+
+export const explodeTree = (attr) => (dispatch, getState) => {
+  const {tree} = getState();
+  _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
+  if (attr) {
+    const root = tree.nodes[0];
+    _traverseAndCreateSubtrees(root, root, attr);
+
+    if (root.unexplodedChildren.length === root.children.length) {
+      dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
+      return;
+    }
+  }
+  dispatch({type: types.CHANGE_EXPLODE_ATTR, value: attr});
+};

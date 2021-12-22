@@ -61,6 +61,7 @@ export const getDefaultControlsState = () => {
     colorBy: defaults.colorBy,
     colorByConfidence: { display: false, on: false },
     colorScale: undefined,
+    explodeAttr: undefined,
     selectedBranchLabel: "none",
     canRenderBranchLabels: true,
     analysisSlider: false,
@@ -109,6 +110,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         selectedNode: null
       });
+    case types.CHANGE_EXPLODE_ATTR:
+      return Object.assign({}, state, { explodeAttr: action.value });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:
