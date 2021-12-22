@@ -309,6 +309,27 @@ function getDiscreteValuesFromTree(nodes, nodesToo, attr) {
 }
 
 /**
+ * A helper function for when we wish to know the order a trait's values _would_ be displayed.
+ * The trait does not need to be the current colouring.
+ * This code is in this file to help future refactors, as the colorScale code has grown a lot
+ * and could be greatly improved.                                             james, dec 2021
+ */
+export function getLegendOrder(attr, coloringInfo, nodesA, nodesB) {
+  if (isColorByGenotype(attr)) {
+    console.warn("legend ordering for genotypes not yet implemented");
+    return [];
+  }
+  if (coloringInfo.type === "continuous") {
+    console.warn("legend ordering for continuous scales not yet implemented");
+    return [];
+  }
+  if (coloringInfo.scale) { /* scale set via JSON */
+    return createNonContinuousScaleFromProvidedScaleMap(attr, coloringInfo.scale, nodesA, nodesB).legendValues;
+  }
+  return getDiscreteValuesFromTree(nodesA, nodesB, attr);
+}
+
+/**
  * Dynamically create legend values based on visibility for ordinal and categorical scale types.
  */
 export function createVisibleLegendValues({colorBy, scaleType, genotype, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) {

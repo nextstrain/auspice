@@ -6,7 +6,7 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
-import { createVisibleLegendValues } from "../util/colorScale";
+import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
 import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
 
@@ -361,17 +361,37 @@ const _traverseAndCreateSubtrees = (root, node, attr) => {
   }
 };
 
+/**
+ * sort the subtrees by the order the trait would appear in the legend
+ */
+const _orderSubtrees = (metadata, nodes, attr) => {
+  const attrValueOrder = getLegendOrder(attr, metadata.colorings[attr], nodes, undefined);
+  nodes[0].children.sort((childA, childB) => {
+    const [attrA, attrB] = [getTraitFromNode(childA, attr), getTraitFromNode(childB, attr)];
+    if (attrValueOrder.length) {
+      const [idxA, idxB] = [attrValueOrder.indexOf(attrA), attrValueOrder.indexOf(attrB)];
+      if (idxA===-1 && idxB===-1) return -1; // neither in legend => preserve order
+      if (idxB===-1) return -1;              // childA in legend, childB not => sort A before B
+      if (idxA < idxB) return -1;            // childA before childB => sort a before b
+      if (idxA > idxB) return 1;             // and vice versa
+      return 0;
+    }
+    // fallthrough, if there's no available legend order, is to simply sort alphabetically
+    return attrA > attrB ? -1 : 1;
+  });
+};
+
 export const explodeTree = (attr) => (dispatch, getState) => {
-  const {tree} = getState();
+  const {tree, metadata} = getState();
   _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
   if (attr) {
     const root = tree.nodes[0];
     _traverseAndCreateSubtrees(root, root, attr);
-
     if (root.unexplodedChildren.length === root.children.length) {
       dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
       return;
     }
+    _orderSubtrees(metadata, tree.nodes, attr);
   }
   dispatch({type: types.CHANGE_EXPLODE_ATTR, value: attr});
 };
