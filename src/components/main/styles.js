@@ -11,7 +11,7 @@ export const PanelsContainer = styled.div`
   height: ${(props) => props.height+"px"};
   width: ${(props) => props.width+"px"};
   overflow-x: hidden;
-  overflow-y: scroll;
+  overflow-y: auto;
   left: ${(props) => props.left+"px"};
 `;
 
