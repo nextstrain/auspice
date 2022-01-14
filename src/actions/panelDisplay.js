@@ -1,8 +1,8 @@
 import { intersection } from "lodash";
 import { TOGGLE_PANEL_DISPLAY } from "./types";
 
-const gridPanels = ["tree", "map"];
-const numberOfGridPanels = (panels) => intersection(panels, gridPanels).length;
+const gridPanels = ["tree", "measurements", "map"];
+export const numberOfGridPanels = (panels) => intersection(panels, gridPanels).length;
 export const hasMultipleGridPanels = (panels) => numberOfGridPanels(panels) > 1;
 
 export const togglePanelDisplay = (panelName) => (dispatch, getState) => {

@@ -13,6 +13,7 @@ import DownloadModal from "../download/downloadModal";
 import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped";
 import { TOGGLE_SIDEBAR } from "../../actions/types";
+import { numberOfGridPanels } from "../../actions/panelDisplay";
 import AnimationController from "../framework/animationController";
 import { calcUsableWidth } from "../../util/computeResponsive";
 import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
@@ -26,6 +27,7 @@ import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
 
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
+const Measurements = lazy(() => import("../measurements"));
 
 
 @connect((state) => ({
@@ -41,7 +43,8 @@ const Frequencies = lazy(() => import("../frequencies"));
   sidebarOpen: state.controls.sidebarOpen,
   showOnlyPanels: state.controls.showOnlyPanels,
   treeName: state.tree.name,
-  secondTreeName: state.controls.showTreeToo
+  secondTreeName: state.controls.showTreeToo,
+  measurementsLoaded: state.measurements.loaded
 }))
 class Main extends React.Component {
   constructor(props) {
@@ -81,11 +84,22 @@ class Main extends React.Component {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }
 
-  shouldShowMapLegend() {
-    const showingTree = this.props.panelsToDisplay.includes("tree");
-    const inGrid = this.props.panelLayout !== "grid";
+  inGrid() {
+    return this.props.panelLayout === "grid";
+  }
 
-    return !showingTree || inGrid;
+  shouldShowMeasurementsLegend() {
+    const showingTree = this.props.panelsToDisplay.includes("tree");
+    return !showingTree || !this.inGrid();
+  }
+
+  shouldMapBeInGrid() {
+    const evenNumberOfGridPanels = numberOfGridPanels(this.props.panelsToDisplay) % 2 === 0;
+    return this.inGrid() && evenNumberOfGridPanels;
+  }
+
+  shouldShowMapLegend() {
+    return !this.shouldMapBeInGrid();
   }
 
   render() {
@@ -113,8 +127,8 @@ class Main extends React.Component {
     const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
       calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.state.mobileDisplay);
     const overlayHandler = () => {this.props.dispatch({type: TOGGLE_SIDEBAR, value: false});};
-    const {big, chart} =
-      calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
+    const {full, grid, chart} =
+      calcPanelDims(this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     /* We use tree name(s) as a react key so that components remount when datasets change */
     const keyName = `${this.props.treeName}${this.props.secondTreeName ? `:${this.props.secondTreeName}` : ''}`;
     return (
@@ -145,8 +159,35 @@ class Main extends React.Component {
             renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
           }
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
-          {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} key={keyName} /> : null}
-          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} key={keyName+"_map"} justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
+          {this.props.panelsToDisplay.includes("tree") ?
+            <Tree
+              width={this.inGrid() ? grid.width : full.width}
+              height={this.inGrid() ? grid.height : full.height}
+              key={keyName}
+            /> :
+            null
+          }
+          {this.props.panelsToDisplay.includes("measurements") && this.props.measurementsLoaded ?
+            <Suspense fallback={null}>
+              <Measurements
+                width={this.inGrid() ? grid.width : full.width}
+                height={this.inGrid() ? grid.height : full.height}
+                key={keyName+"_measurements"}
+                showLegend={this.shouldShowMeasurementsLegend()}
+              />
+            </Suspense> :
+            null
+          }
+          {this.props.panelsToDisplay.includes("map") ?
+            <Map
+              width={this.shouldMapBeInGrid() ? grid.width : full.width}
+              height={this.shouldMapBeInGrid() ? grid.height : full.height}
+              key={keyName+"_map"}
+              justGotNewDatasetRenderNewMap={false}
+              legend={this.shouldShowMapLegend()}
+            /> :
+            null
+          }
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
               <Entropy width={chart.width} height={chart.height} key={keyName+"_entropy"}/>
