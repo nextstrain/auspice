@@ -22,6 +22,36 @@ export const RowContainer = styled.div`
   padding: 0px 5px 1px 5px;
 `;
 
+const ScatterVariableContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-content: stretch;
+  flex-wrap: nowrap;
+  height: 100%;
+  order: 0;
+  flex-grow: 0;
+  flex-shrink: 1;
+  flex-basis: auto;
+  align-self: auto;
+  padding: ${(props) => props.padAbove?"2":"0"}px 0px 2px 15px;
+`;
+
+const ScatterAxisName = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 18px;
+  font-size: 14px;
+  font-weight: 400;
+  font-family: ${(props) => props.theme["font-family"]};
+  color: ${(props) => props.theme.color};
+`;
+
+const ScatterSelectContainer = styled.div`
+  width: ${controlsWidth-18}px;
+  font-size: 12px;
+`;
+
 @connect((state) => {
   return {
     layout: state.controls.layout,
@@ -171,33 +201,3 @@ class ChooseLayout extends React.Component {
 const WithTranslation = withTranslation()(ChooseLayout);
 export default WithTranslation;
 
-
-const ScatterVariableContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-content: stretch;
-  flex-wrap: nowrap;
-  height: 100%;
-  order: 0;
-  flex-grow: 0;
-  flex-shrink: 1;
-  flex-basis: auto;
-  align-self: auto;
-  padding: ${(props) => props.padAbove?"2":"0"}px 0px 2px 15px;
-`;
-
-const ScatterAxisName = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-width: 18px;
-  font-size: 14px;
-  font-weight: 400;
-  font-family: ${(props) => props.theme["font-family"]};
-  color: ${(props) => props.theme.color};
-`;
-
-const ScatterSelectContainer = styled.div`
-  width: ${controlsWidth-18}px;
-  font-size: 12px;
-`;
