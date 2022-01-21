@@ -129,18 +129,17 @@ export function collectGenotypeStates(nodes) {
 }
 
 /**
- * Collect mutations from node `fromNode` to the root.
- * Reversions (e.g. root -> A<pos>B -> B<pos>A -> fromNode) will not be reported
- * Multiple mutations (e.g. root -> A<pos>B -> B<pos>C -> fromNode) will be represented as A<pos>C
- * We may want to expand this function to take a second argument as the "stopping node"
- * @param {TreeNode} fromNode
+ * Walk from the proivided node back to the root, collecting all mutations as we go.
+ * Multiple mutations (e.g. root -> A<pos>B -> B<pos>C -> fromNode) will be collapsed to as A<pos>C
+ * Reversions to root (e.g. root -> A<pos>B -> B<pos>A -> fromNode) will be reported as A<pos>A
+ * Returned structure is <returnedObject>.<geneName>.<position> = [<from>, <to>]
  */
-export const collectMutations = (fromNode, include_nuc=false) => {
+export const getSeqChanges = (fromNode) => {
   const mutations = {};
   const walk = (n) => {
     if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
       Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
-        if ((gene === "nuc" && include_nuc) || gene !== "nuc") {
+        if ((gene === "nuc") || gene !== "nuc") {
           if (!mutations[gene]) mutations[gene] = {};
           muts.forEach((m) => {
             const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)]; // note: `pos` is a string
@@ -160,34 +159,118 @@ export const collectMutations = (fromNode, include_nuc=false) => {
     }
   };
   walk(fromNode);
-  // update structure to be returned
-  Object.keys(mutations).forEach((gene) => {
-    mutations[gene] = Object.entries(mutations[gene])
-      .map(([pos, [from, to]]) => {
-        if (from===to) return undefined; // reversion to ancestral (root) state
-        return `${from}${pos}${to}`;
-      })
-      .filter((value) => !!value);
-  });
   return mutations;
 };
 
 
 /**
+ * Categorise each mutation into one or more of the following categories:
+ * (i) unique mutations (those which are only observed once)
+ * (ii) homoplasies (mutation observed elsewhere on the tree)
+ * (iii) gaps
+ * (iv) Ns (only applicable for nucleotides)
+ * (v) reversions to root (these will also be in (i) or (ii))
+ */
+export const categoriseMutations = (mutations, observedMutations, seqChangesToRoot) => {
+  const categorisedMutations = {};
+  for (const gene of Object.keys(mutations)) {
+    const categories = { unique: [], homoplasies: [], gaps: [], reversionsToRoot: []};
+    const isNuc = gene==="nuc";
+    if (isNuc) categories.ns = [];
+    mutations[gene].forEach((mut) => {
+      const newChar = mut.slice(-1);
+      if (newChar==="-") {
+        categories.gaps.push(mut);
+      } else if (isNuc && newChar==="N") {
+        categories.ns.push(mut);
+      } else if (observedMutations[`${gene}:${mut}`] > 1) {
+        categories.homoplasies.push(mut);
+      } else {
+        categories.unique.push(mut);
+      }
+      // check to see if this mutation is a reversion to root
+      const pos = mut.slice(1, -1);
+      if (newChar!=="-" && newChar!=="N" && seqChangesToRoot[gene] &&
+      seqChangesToRoot[gene][pos] && seqChangesToRoot[gene][pos][0]===seqChangesToRoot[gene][pos][1]) {
+        categories.reversionsToRoot.push(mut);
+      }
+    });
+    categorisedMutations[gene]=categories;
+  }
+  return categorisedMutations;
+};
+
+/**
+ * Categorise each seq change into one or more of the following categories:
+ * (i) changes mutations (those which are only observed once)
+ * (ii) reversions to root (these will _not_ be in (i) because they're not technically a change)
+ * (iii) gaps
+ * (iv) Ns (only applicable for nucleotides)
+ */
+export const categoriseSeqChanges = (seqChangesToRoot) => {
+  const categorisedSeqChanges = {};
+  for (const gene of Object.keys(seqChangesToRoot)) {
+    const categories = { changes: [], gaps: [], reversionsToRoot: []};
+    const isNuc = gene==="nuc";
+    if (isNuc) categories.ns = [];
+    for (const [pos, fromTo] of Object.entries(seqChangesToRoot[gene])) {
+      const mut = `${fromTo[0]}${pos}${fromTo[1]}`;
+      if (fromTo[1]==="-") {
+        categories.gaps.push(mut);
+      } else if (isNuc && fromTo[1]==="N") {
+        categories.ns.push(mut);
+      } else if (fromTo[0]===fromTo[1]) {
+        categories.reversionsToRoot.push(mut);
+      } else {
+        categories.changes.push(mut);
+      }
+    }
+    categorisedSeqChanges[gene]=categories;
+  }
+  return categorisedSeqChanges;
+};
+
+
+/**
+ * Return the mutations on the branch split into (potentially overlapping) categories
+ * @param {Object} branchNode
+ * @param {Object} observedMutations all observed mutations on the tree
+ * @returns {Object}
+ */
+export const getBranchMutations = (branchNode, observedMutations) => {
+  const mutations = branchNode.branch_attrs && branchNode.branch_attrs.mutations;
+  const seqChangesToRoot = branchNode.parent===branchNode ? {} : getSeqChanges(branchNode, mutations);
+  const categorisedMutations = categoriseMutations(mutations, observedMutations, seqChangesToRoot);
+  return categorisedMutations;
+};
+
+/**
+ * Return the changes between the terminal node and the root, split into (potentially overlapping) categories
+ * @param {Object} tipNode
+ * @returns {Object}
+ */
+export const getTipChanges = (tipNode) => {
+  const mutations = tipNode.branch_attrs && tipNode.branch_attrs.mutations;
+  const seqChanges = getSeqChanges(tipNode, mutations);
+  const categorisedSeqChanges = categoriseSeqChanges(seqChanges);
+  return categorisedSeqChanges;
+};
+
+/**
  * Returns a function which will sort a list, where each element in the list
- * is a gene name. Sorted by start position of the gene, with "nuc" last.
+ * is a gene name. Sorted by start position of the gene, with "nuc" first.
  */
 export const sortByGeneOrder = (genomeAnnotations) => {
   if (!(genomeAnnotations instanceof Object)) {
     return (a, b) => {
-      if (a==="nuc") return 1;
-      if (b==="nuc") return -1;
+      if (a==="nuc") return -1;
+      if (b==="nuc") return 1;
       return 0;
     };
   }
   const geneOrder = Object.entries(genomeAnnotations)
     .sort((a, b) => {
-      if (b[0]==="nuc") return -1; // show nucleotide "gene" last
+      if (b[0]==="nuc") return 1; // show nucleotide "gene" first
       if (a[1].start < b[1].start) return -1;
       if (a[1].start > b[1].start) return 1;
       return 0;

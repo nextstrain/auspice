@@ -1,4 +1,4 @@
-import { collectMutations, getUrlFromNode, getAccessionFromNode } from "../src/util/treeMiscHelpers";
+import { getUrlFromNode, getAccessionFromNode, getBranchMutations } from "../src/util/treeMiscHelpers";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
 
 /**
@@ -6,11 +6,11 @@ import { treeJsonToState } from "../src/util/treeJsonProcessing";
  * root to tipX mutations:
  *      single mutation at position 100 in gene "GENE" of A->B
  *      a reversion of C->D->C at position 200
- *      multiple mutations at 300 E->F->G
+ *      multiple mutations at 300 E->F->G (F300G is a homoplasy)
  * root to tipY mutations:
  *      ["A100B", "C200D", "E300F"]
  * root to tipZ mutations:
- *      the three root mutations + a duplicated mutation present on tipX ("F300G")
+ *      the three root mutations + F300G (homoplasy)
  */
 const dummyTree = treeJsonToState({
   name: "ROOT",
@@ -33,23 +33,12 @@ const dummyTree = treeJsonToState({
         },
         { // 3rd child of node1
           name: "tipZ",
-          branch_attrs: {mutations: {GENE: ["F300G"]}}
+          branch_attrs: {mutations: {GENE: ["F300G", "B100A"]}}
         }
       ]
     }
   ]
 });
-
-
-test("Tip->root mutations are correctly parsed", () => {
-  const tipXMutations = collectMutations(getNodeByName(dummyTree.nodes, "tipX")).GENE;
-  const tipYMutations = collectMutations(getNodeByName(dummyTree.nodes, "tipY")).GENE;
-  expect(tipXMutations.sort())
-    .toEqual(["A100B", "E300G"].sort()); // note that pos 200 (reversion) has no mutations here
-  expect(tipYMutations.sort())
-    .toEqual(["A100B", "C200D", "E300F"].sort());
-});
-
 
 describe('Parse and summarise mutations', () => {
   test("Collection of all mutations", () => {
@@ -62,9 +51,38 @@ describe('Parse and summarise mutations', () => {
         "GENE:E300F": 1,
         "GENE:D200C": 1,
         "GENE:F300G": 2,
+        "GENE:B100A": 1,
       });
   });
+
+  test("Branch mutations are correctly interpreted", () => {
+    const node_1 = getBranchMutations(
+      getNodeByName(dummyTree.nodes, "node1"),
+      dummyTree.observedMutations
+    );
+    expect(node_1).toEqual({
+      GENE: {
+        unique: ["A100B", "C200D", "E300F"],
+        homoplasies: [],
+        gaps: [],
+        reversionsToRoot: []
+      }
+    });
+    const node_1_1 = getBranchMutations(
+      getNodeByName(dummyTree.nodes, "node1.1"),
+      dummyTree.observedMutations
+    );
+    expect(node_1_1).toEqual({
+      GENE: {
+        unique: ["D200C"],
+        homoplasies: ["F300G"],
+        gaps: [],
+        reversionsToRoot: ["D200C"]
+      }
+    });
+  });
 });
+
 
 function getNodeByName(tree, name) {
   let namedNode;

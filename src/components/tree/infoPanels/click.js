@@ -1,10 +1,10 @@
 import React from "react";
-import styled from 'styled-components';
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
-  getAccessionFromNode, getUrlFromNode, collectMutations } from "../../../util/treeMiscHelpers";
+  getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
+import { MutationTable } from "./MutationTable";
 
 export const styles = {
   container: {
@@ -51,67 +51,6 @@ const Link = ({url, title, value}) => (
     </td>
   </tr>
 );
-
-const Button = styled.button`
-  border: 0px;
-  background-color: inherit;
-  cursor: pointer;
-  outline: 0;
-  text-decoration: underline;
-`;
-
-/**
- * Render a 2-column table of gene -> mutations.
- * Rows are sorted by gene name, alphabetically, with "nuc" last.
- * Mutations are sorted by genomic position.
- * todo: sort genes by position in genome
- * todo: provide in-app links from mutations to color-bys? filters?
- */
-const MutationTable = ({node, geneSortFn, isTip}) => {
-  const mutSortFn = (a, b) => {
-    const [aa, bb] = [parseInt(a.slice(1, -1), 10), parseInt(b.slice(1, -1), 10)];
-    return aa<bb ? -1 : 1;
-  };
-  const displayGeneMutations = (gene, muts) => {
-    if (gene==="nuc" && isTip && muts.length>10) {
-      return (
-        <div key={gene} style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
-          <Button onClick={() => {navigator.clipboard.writeText(muts.sort(mutSortFn).join(", "));}}>
-            {`${muts.length} nucleotide mutations, click to copy to clipboard`}
-          </Button>
-        </div>
-      );
-    }
-    return (
-      <div key={gene} style={{...infoPanelStyles.item, ...{fontWeight: 300}}}>
-        {gene}: {muts.sort(mutSortFn).join(", ")}
-      </div>
-    );
-  };
-
-  let mutations;
-  if (isTip) {
-    mutations = collectMutations(node, true);
-  } else if (node.branch_attrs && node.branch_attrs.mutations && Object.keys(node.branch_attrs.mutations).length) {
-    mutations = node.branch_attrs.mutations;
-  }
-  if (!mutations) return null;
-
-  const title = isTip ? "Mutations from root" : "Mutations on branch";
-
-  // we encode the table here (rather than via `item()`) to set component keys appropriately
-  return (
-    <tr key={"Mutations"}>
-      <th style={infoPanelStyles.item}>{title}</th>
-      <td style={infoPanelStyles.item}>{
-        Object.keys(mutations)
-          .sort(geneSortFn)
-          .map((gene) => displayGeneMutations(gene, mutations[gene]))
-      }</td>
-    </tr>
-  );
-};
-
 
 const AccessionAndUrl = ({node}) => {
   /* If `gisaid_epi_isl` or `genbank_accession` exist as node attrs, these preempt normal use of `accession` and `url`.
@@ -290,7 +229,7 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, geneSortFn, t}) => {
+const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
   if (selectedNode.event!=="click") {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
@@ -320,9 +259,9 @@ const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, geneSortF
             ))}
             {isTip && <AccessionAndUrl node={node}/>}
             {item("", "")}
-            <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTip}/>
           </tbody>
         </table>
+        <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTip} observedMutations={observedMutations}/>
         <p style={infoPanelStyles.comment}>
           {t("Click outside this box to go back to the tree")}
         </p>

@@ -197,6 +197,7 @@ class Tree extends React.Component {
         <NodeClickedPanel
           clearSelectedNode={this.clearSelectedNode}
           selectedNode={this.state.selectedNode}
+          observedMutations={this.props.tree.observedMutations}
           colorings={this.props.metadata.colorings}
           geneSortFn={this.state.geneSortFn}
           t={t}
