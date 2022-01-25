@@ -22,6 +22,7 @@ export const getDefaultTreeState = () => {
     idxOfInViewRootNode: 0,
     visibleStateCounts: {},
     totalStateCounts: {},
+    observedMutations: {},
     availableBranchLabels: [],
     selectedStrain: undefined,
     selectedClade: undefined

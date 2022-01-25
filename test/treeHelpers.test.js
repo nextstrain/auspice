@@ -2,13 +2,15 @@ import { collectMutations, getUrlFromNode, getAccessionFromNode } from "../src/u
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
 
 /**
- * `dummyTree` is a simple tree with two tips: tipX and tipY
+ * `dummyTree` is a simple tree with three tips: tipX-Z
  * root to tipX mutations:
  *      single mutation at position 100 in gene "GENE" of A->B
  *      a reversion of C->D->C at position 200
  *      multiple mutations at 300 E->F->G
  * root to tipY mutations:
  *      ["A100B", "C200D", "E300F"]
+ * root to tipZ mutations:
+ *      the three root mutations + a duplicated mutation present on tipX ("F300G")
  */
 const dummyTree = treeJsonToState({
   name: "ROOT",
@@ -28,20 +30,40 @@ const dummyTree = treeJsonToState({
         },
         { // start 2nd child of node1
           name: "tipY"
+        },
+        { // 3rd child of node1
+          name: "tipZ",
+          branch_attrs: {mutations: {GENE: ["F300G"]}}
         }
       ]
     }
   ]
-}).nodes;
+});
 
 
 test("Tip->root mutations are correctly parsed", () => {
-  const tipXMutations = collectMutations(getNodeByName(dummyTree, "tipX")).GENE;
-  const tipYMutations = collectMutations(getNodeByName(dummyTree, "tipY")).GENE;
+  const tipXMutations = collectMutations(getNodeByName(dummyTree.nodes, "tipX")).GENE;
+  const tipYMutations = collectMutations(getNodeByName(dummyTree.nodes, "tipY")).GENE;
   expect(tipXMutations.sort())
     .toEqual(["A100B", "E300G"].sort()); // note that pos 200 (reversion) has no mutations here
   expect(tipYMutations.sort())
     .toEqual(["A100B", "C200D", "E300F"].sort());
+});
+
+
+describe('Parse and summarise mutations', () => {
+  test("Collection of all mutations", () => {
+    // note that the function we are testing, collectObservedMutations,
+    // is part of treeJsonToState so we are testing it indirectly
+    expect(dummyTree.observedMutations)
+      .toEqual({ // exactly equal all Obj keys and values
+        "GENE:A100B": 1,
+        "GENE:C200D": 1,
+        "GENE:E300F": 1,
+        "GENE:D200C": 1,
+        "GENE:F300G": 2,
+      });
+  });
 });
 
 function getNodeByName(tree, name) {
