@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
@@ -8,8 +8,11 @@ import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
+import { hasExtension, getExtension } from "../../util/extensions";
 
 const logoPNG = require("../../images/favicon.png");
+
+const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -101,9 +104,8 @@ class FinePrint extends React.Component {
             {"Auspice v" + version}
           </Flex>
           <div style={{height: "5px"}}/>
-          <Flex className='finePrint'>
-            {getCitation()}
-          </Flex>
+          {getCustomFinePrint()}
+          {getCitation()}
         </div>
       </FinePrintStyles>
     );
@@ -115,7 +117,7 @@ export default WithTranslation;
 
 export function getCitation() {
   return (
-    <span>
+    <Flex className='finePrint'>
       <a className='logoContainer' href="https://nextstrain.org">
         <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
       </a>
@@ -124,6 +126,22 @@ export function getCitation() {
         {publications.nextstrain.author} <i>{publications.nextstrain.journal}</i>
       </a>
       {")"}
-    </span>
+    </Flex>
+  );
+}
+
+export function getCustomFinePrint() {
+  const markdown = hasExtension("finePrint")
+    ? getExtension("finePrint")
+    : null;
+
+  if (!markdown) return null;
+
+  return (
+    <Suspense fallback={<></>}>
+      <Flex className='finePrint'>
+        <MarkdownDisplay mdstring={markdown} />
+      </Flex>
+    </Suspense>
   );
 }
