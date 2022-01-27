@@ -3,7 +3,8 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
+  getFullAuthorInfoFromNode, getTipChanges } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 
@@ -138,12 +139,42 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
 };
 
 /**
+ * A React Component to display summary counts of changes between a tip node & the root
+ * @param  {Object} props
+ * @param  {Object} props.node     branch node which is currently highlighted
+ */
+const TipMutations = ({node, t}) => {
+  const changes = getTipChanges(node);
+  if (!changes.nuc) return null; // can happen on trees with no mutations defined
+  const nucCounts = {changes: 0, gaps: 0, reversionsToRoot: 0, ns: 0};
+  const aaCounts = {changes: 0, gaps: 0, reversionsToRoot: 0};
+  Object.keys(changes)
+    .forEach((gene) => {
+      Object.entries(changes[gene]).forEach(([key, muts]) => {
+        if (gene==="nuc") {
+          nucCounts[key] += muts.length;
+        } else {
+          aaCounts[key] += muts.length;
+        }
+      });
+    });
+  let ntSummary = `${nucCounts.changes}${nucCounts.reversionsToRoot ? ` + ${nucCounts.reversionsToRoot} reversions to root`: ''}`;
+  ntSummary += `${nucCounts.gaps ? ` + ${nucCounts.gaps} gaps`: ''}${nucCounts.nt ? ` + ${nucCounts.nt} Ns`: ''}`;
+  let aaSummary = `${aaCounts.changes}${aaCounts.reversionsToRoot ? ` + ${aaCounts.reversionsToRoot} reversions to root`: ''}`;
+  aaSummary += `${aaCounts.gaps ? ` + ${aaCounts.gaps} gaps`: ''}`;
+  return [
+    <InfoLine name={t("Nucleotide changes")+":"} value={ntSummary} key="nuc"/>,
+    <InfoLine name={t("Amino Acid changes")+":"} value={aaSummary} key="aa"/>
+  ];
+};
+
+/**
  * A React Component to Display AA / NT mutations, if present.
  * @param  {Object} props
  * @param  {Object} props.node     branch node which is currently highlighted
  * @param  {Object} props.geneSortFn function to sort a list of genes
  */
-const Mutations = ({node, geneSortFn, t}) => {
+const BranchMutations = ({node, geneSortFn, t}) => {
   if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
   const elements = []; // elements to render
   const mutations = node.branch_attrs.mutations;
@@ -371,7 +402,7 @@ const HoverInfoPanel = ({
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>
-          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
+          <TipMutations node={node} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
@@ -380,7 +411,7 @@ const HoverInfoPanel = ({
       ) : (
         <>
           <BranchDescendents node={node} t={t}/>
-          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
+          <BranchMutations node={node} geneSortFn={geneSortFn} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>
