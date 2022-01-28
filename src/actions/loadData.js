@@ -4,6 +4,7 @@ import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
+import { loadMeasurements } from "./measurements";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
@@ -263,6 +264,7 @@ function Dataset(name) {
   this.apiCalls.main = `${getServerAddress()}/getDataset?prefix=${name}`;
   this.apiCalls.tipFrequencies = `${this.apiCalls.main}&type=tip-frequencies`;
   this.apiCalls.rootSequence = `${this.apiCalls.main}&type=root-sequence`;
+  this.apiCalls.measurements = `${this.apiCalls.main}&type=measurements`;
   this.apiCalls.getAvailable = `${getServerAddress()}/getAvailable?prefix=${name}`;
 }
 Dataset.prototype.fetchMain = function fetchMain() {
@@ -292,6 +294,12 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
       .catch(() => {}); // it's not unexpected to be missing the root-sequence JSON
   }
+  if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
+    this.measurements = fetchJSON(this.apiCalls.measurements)
+      .catch((err) => {
+        console.error("Failed to fetch measurements collections", err.message);
+      });
+  }
 };
 Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
   // Helper function to load (dispatch) the visualisation of sidecar files
@@ -306,6 +314,14 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
     dispatch({type: types.SET_ROOT_SEQUENCE, data});
     dispatch(updateColorByWithRootSequenceData());
   });
+  if (this.measurements) {
+    this.measurements
+      .then((data) => dispatch(loadMeasurements(data)))
+      .catch((err) => {
+        console.error("Failed to load measurements collections", err.message);
+        dispatch(warningNotification({message: "Failed to load measurements collections"}));
+      });
+  }
 };
 Dataset.prototype.fetchAvailable = async function fetchSidecars() {
   this.available = fetchJSON(this.apiCalls.getAvailable);

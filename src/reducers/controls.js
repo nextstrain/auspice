@@ -89,7 +89,11 @@ export const getDefaultControlsState = () => {
     mapLegendOpen: undefined,
     showOnlyPanels: false,
     showTransmissionLines: true,
-    normalizeFrequencies: true
+    normalizeFrequencies: true,
+    measurementsGroupBy: undefined,
+    measurementsDisplay: "mean",
+    measurementsShowOverallMean: true,
+    measurementsShowThreshold: true
   };
 };
 
@@ -296,6 +300,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return state;
     }
+    case types.LOAD_MEASUREMENTS:
+      return {...state, ...action.controls};
     default:
       return state;
   }
