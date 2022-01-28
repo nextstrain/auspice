@@ -1,5 +1,6 @@
 import { getUrlFromNode, getAccessionFromNode, getBranchMutations } from "../src/util/treeMiscHelpers";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
+import { parseIntervalsOfNsOrGaps } from "../src/components/tree/infoPanels/MutationTable";
 
 /**
  * `dummyTree` is a simple tree with three tips: tipX-Z
@@ -126,4 +127,19 @@ describe('Extract various values from node_attrs', () => {
       .toStrictEqual({accession: "MK049251", url: undefined}); // invalid URL
   });
 
+});
+
+test("Parse intervals of gaps or Ns", () => {
+  expect(parseIntervalsOfNsOrGaps(["T200N", "T100N", "C101N", "G102N"]))
+    .toStrictEqual(
+      [{start: 100, end: 102, count: 3, char: 'N'}, {start: 200, end: 200, count: 1, char: 'N'}]
+    );
+  expect(parseIntervalsOfNsOrGaps(["T5N", "T3N", "C1N", "G7N"]))
+    .toStrictEqual(
+      [{start: 1, end: 1, count: 1, char: 'N'}, {start: 3, end: 3, count: 1, char: 'N'}, {start: 5, end: 5, count: 1, char: 'N'}, {start: 7, end: 7, count: 1, char: 'N'}]
+    );
+  expect(parseIntervalsOfNsOrGaps(["T5-", "T3-", "C4-", "G7-", "G8-"]))
+    .toStrictEqual(
+      [{start: 3, end: 5, count: 3, char: '-'}, {start: 7, end: 8, count: 2, char: '-'}]
+    );
 });

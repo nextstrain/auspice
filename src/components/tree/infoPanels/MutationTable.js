@@ -18,6 +18,27 @@ const mutSortFn = (a, b) => {
   return aa<bb ? -1 : 1;
 };
 
+/**
+ * Given a list of Ns or gaps, group them into runs of Ns
+ * Returns a list of objects with properties `start` and `end` (both 1-based and
+ * both are either a gap or an N), as well as `count` (number of Ns or gaps).
+ * @param {mutationString[]} muts
+ * @returns {intervalObject[]}
+ */
+export const parseIntervalsOfNsOrGaps = (muts) => {
+  const runs = [];
+  muts.sort(mutSortFn).forEach((m, idx) => {
+    const pos = parseInt(m.slice(1, -1), 10);
+    if (idx===0 || pos!==runs[runs.length-1].end+1) {
+      runs.push({start: pos, end: pos, count: 1, char: m.slice(-1)});
+    } else {
+      runs[runs.length-1].end = pos;
+      runs[runs.length-1].count+=1;
+    }
+  });
+  return runs;
+};
+
 const Heading = styled.p`
   margin-top: 12px;
   margin-bottom: 4px;
@@ -37,12 +58,27 @@ const TableFirstColumn = styled.td`
   white-space: nowrap;
   vertical-align: baseline;
 `;
-const ListOfMutations = ({title, muts}) => (
-  <MutationLine>
-    <SubHeading key={title}>{title}</SubHeading>
-    <MutationList>{muts.sort(mutSortFn).join(", ")}</MutationList>
-  </MutationLine>
-);
+const ListOfMutations = ({name, muts, displayAsIntervals, isNuc}) => {
+  let mutString, title;
+  if (displayAsIntervals) {
+    const intervals = parseIntervalsOfNsOrGaps(muts);
+    title = `${name} (${intervals.length} regions, ${muts.length}${isNuc?'bp':' codons'}):`;
+    mutString = intervals.map((interval) =>
+      interval.count===1 ?
+        `${interval.start}` :
+        `${interval.start}..${interval.end} (${interval.count} ${isNuc?'bp':'codons'})`
+    ).join(", ");
+  } else {
+    title = `${name} (${muts.length}):`;
+    mutString = muts.sort(mutSortFn).join(", ");
+  }
+  return (
+    <MutationLine>
+      <SubHeading key={name}>{title}</SubHeading>
+      <MutationList>{mutString}</MutationList>
+    </MutationLine>
+  );
+};
 
 const mutCategoryLookup = {
   unique: "Unique",
@@ -83,8 +119,10 @@ const displayGeneMutations = (gene, mutsPerCat) => {
           (key in mutsPerCat && mutsPerCat[key].length) ?
             (<ListOfMutations
               key={name}
-              title={`${name} (${mutsPerCat[key].length}):`}
+              name={name}
               muts={mutsPerCat[key]}
+              displayAsIntervals={key==="gaps" || key==="ns"}
+              isNuc={gene==="nuc"}
             />) :
             null
         ))}
