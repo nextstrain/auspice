@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { isEqual } from "lodash";
 import Select from "react-select/lib/Select";
 import { changeMeasurementsCollection } from "../../actions/measurements";
+import { CHANGE_MEASUREMENTS_GROUP_BY } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 
@@ -24,8 +25,20 @@ const collectionOptionsSelector = (collections) => {
 
 const MeasurementsOptions = () => {
   const dispatch = useDispatch();
-  const collectionDisplayed = useSelector((state) => state.measurements.collectionToDisplay.key);
+  const collection = useSelector((state) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state) => collectionOptionsSelector(state.measurements.collections), isEqual);
+  const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+
+  // Create grouping options for the Select library
+  let groupingOptions = [];
+  if (collection.groupings) {
+    groupingOptions = collection.groupings.map((grouping) => {
+      return {
+        value: grouping,
+        label: collection.fields.get(grouping).title
+      };
+    });
+  }
 
   return (
     <div id="measurementsControls">
@@ -36,13 +49,33 @@ const MeasurementsOptions = () => {
         <Select
           name="measurementsCollections"
           id="measurementsCollections"
-          value={collectionDisplayed}
+          value={collection.key}
           options={collectionOptions}
           clearable={false}
           searchable={false}
           multi={false}
           onChange={(opt) => {
             dispatch(changeMeasurementsCollection(opt.value));
+          }}
+        />
+      </div>
+      <SidebarSubtitle>
+        {"Group By"}
+      </SidebarSubtitle>
+      <div style={{ marginBottom: 10, width: controlsWidth, fontSize: 14}}>
+        <Select
+          name="measurementsGroupings"
+          id="measurementsGroupings"
+          value={groupBy}
+          options={groupingOptions}
+          clearable={false}
+          searchable={false}
+          multi={false}
+          onChange={(opt) => {
+            dispatch({
+              type: CHANGE_MEASUREMENTS_GROUP_BY,
+              data: opt.value
+            });
           }}
         />
       </div>
