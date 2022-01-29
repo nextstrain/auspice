@@ -170,3 +170,9 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         .attr("r", layout.circleRadius);
   });
 };
+
+export const colorMeasurementsSVG = (ref, treeStrainColors) => {
+  const svg = select(ref);
+  svg.selectAll(`.${classes.rawMeasurements}`)
+    .style("fill", (d) => treeStrainColors[d.strain]);
+};

@@ -10,7 +10,8 @@ import {
   createYScale,
   groupMeasurements,
   clearMeasurementsSVG,
-  drawMeasurementsSVG
+  drawMeasurementsSVG,
+  colorMeasurementsSVG
 } from "./measurementsD3";
 
 /**
@@ -30,21 +31,28 @@ const useDeepCompareMemo = (value) => {
 
 /**
  * A custom React Redux Selector that reduces the tree redux state to an object
- * with the terminal strain names and their visibility.
+ * with the terminal strain names and their corresponding properties that
+ * are relevant for the Measurement's panel.
  *
- * Depends on tree.visibility having the visibility values in an array that
- * has the same order as tree.nodes
+ * tree.visiblity and tree.nodeColors need to be an arrays that have the same
+ * order as tree.nodes
  * @param {Object} tree
- * @returns {Object<string,number>}
+ * @returns {Object<string,Object>}
  */
-const treeStrainVisibilitySelector = (tree) => {
-  return tree.nodes.reduce((treeStrainVisibility, node, index) => {
-    // Only store visibility of terminal strain nodes
+const treeStrainPropertySelector = (tree) => {
+  const intitialTreeStrainProperty = {
+    treeStrainVisibility: {},
+    treeStrainColors: {}
+  };
+  return tree.nodes.reduce((treeStrainProperty, node, index) => {
+    const { treeStrainVisibility, treeStrainColors } = treeStrainProperty;
+    // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
       treeStrainVisibility[node.name] = tree.visibility[index];
+      treeStrainColors[node.name] = tree.nodeColors[index];
     }
-    return treeStrainVisibility;
-  }, {});
+    return treeStrainProperty;
+  }, intitialTreeStrainProperty);
 };
 
 /**
@@ -63,7 +71,7 @@ const filterToTreeVisibileStrains = (measurements, treeStrainVisibility) => {
 
 const Measurements = ({height, width, showLegend}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
-  const treeStrainVisibility = useSelector((state) => treeStrainVisibilitySelector(state.tree), isEqual);
+  const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state.tree), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
   const { title, x_axis_label, threshold, fields, measurements } = collection;
@@ -86,6 +94,11 @@ const Measurements = ({height, width, showLegend}) => {
     clearMeasurementsSVG(d3Ref.current);
     drawMeasurementsSVG(d3Ref.current, svgData);
   }, [svgData]);
+
+  // Color the SVG when SVG is re-drawn or when colors have changed
+  useEffect(() => {
+    colorMeasurementsSVG(d3Ref.current, treeStrainColors);
+  }, [svgData, treeStrainColors]);
 
   const getPanelTitle = () => {
     return `${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`;
