@@ -110,7 +110,9 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       .attr("y1", layout.topPadding)
       .attr("y2", svgHeight - layout.bottomPadding)
       .attr("stroke-width", layout.thresholdStrokeWidth)
-      .attr("stroke", layout.thresholdStroke);
+      .attr("stroke", layout.thresholdStroke)
+      // Hide threshold by default since another function will toggle display
+      .attr("display", "none");
   }
 
   // Add x-axis to the bottom of the SVG
@@ -195,4 +197,11 @@ export const setHoverTransition = (ref, handleHoverMeasurement) => {
       // sets hover data state to null to hide the hover panel display
       handleHoverMeasurement(null);
     });
+};
+
+export const toggleThreshold = (ref, showThreshold) => {
+  const displayAttr = showThreshold ? null : "none";
+  select(ref)
+    .select(`.${classes.threshold}`)
+      .attr("display", displayAttr);
 };

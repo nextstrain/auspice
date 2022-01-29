@@ -15,7 +15,8 @@ import {
   colorMeasurementsSVG,
   getMeasurementDOMId,
   svgContainerDOMId,
-  setHoverTransition
+  setHoverTransition,
+  toggleThreshold
 } from "./measurementsD3";
 
 /**
@@ -77,6 +78,7 @@ const Measurements = ({height, width, showLegend}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state.tree), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
   const { title, x_axis_label, threshold, fields, measurements } = collection;
 
@@ -135,6 +137,10 @@ const Measurements = ({height, width, showLegend}) => {
 
     setHoverTransition(d3Ref.current, handleHoverMeasurement);
   }, [svgData, fields, groupBy]);
+
+  useEffect(() => {
+    toggleThreshold(d3Ref.current, showThreshold);
+  }, [svgData, showThreshold]);
 
   const getPanelTitle = () => {
     return `${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`;
