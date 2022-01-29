@@ -300,7 +300,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return state;
     }
-    case types.LOAD_MEASUREMENTS:
+    case types.LOAD_MEASUREMENTS: /* fallthrough */
+    case types.CHANGE_MEASUREMENTS_COLLECTION:
       return {...state, ...action.controls};
     default:
       return state;

@@ -21,10 +21,11 @@ import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo, FrequencyInfo} from "./miscInfoText";
+import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
 import { AnnotatedHeader } from "./annotatedHeader";
+import MeasurementsOptions from "./measurementsOptions";
 
-function Controls({mapOn, frequenciesOn, mobileDisplay}) {
+function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
   const { t } = useTranslation();
 
   return (
@@ -49,6 +50,13 @@ function Controls({mapOn, frequenciesOn, mobileDisplay}) {
       <ChooseTipLabel />
       <ChooseSecondTree />
       <ToggleTangle />
+
+      {measurementsOn ? (
+        <span style={{ marginTop: "10px" }}>
+          <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo} mobile={mobileDisplay}/>
+          <MeasurementsOptions />
+        </span>
+      ) : null}
 
       {mapOn ? (
         <span style={{ marginTop: "10px" }}>

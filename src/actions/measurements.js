@@ -1,5 +1,5 @@
 import { pick } from "lodash";
-import { LOAD_MEASUREMENTS } from "./types";
+import { CHANGE_MEASUREMENTS_COLLECTION, LOAD_MEASUREMENTS } from "./types";
 
 /**
  * Find the collection within collections that has a key matching the provided
@@ -115,6 +115,17 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
   dispatch({
     type: LOAD_MEASUREMENTS,
     collections,
+    collectionToDisplay,
+    controls: getCollectionDisplayControls(controls, collectionToDisplay)
+  });
+};
+
+export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey);
+
+  dispatch({
+    type: CHANGE_MEASUREMENTS_COLLECTION,
     collectionToDisplay,
     controls: getCollectionDisplayControls(controls, collectionToDisplay)
   });
