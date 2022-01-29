@@ -1,7 +1,8 @@
-import { extent, groups } from "d3-array";
+import { extent, groups, mean, deviation } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
+import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
 
 /* C O N S T A N T S */
@@ -17,7 +18,10 @@ const layout = {
   thresholdStrokeWidth: 2,
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
-  subplotFillOpacity: "0.15"
+  subplotFillOpacity: "0.15",
+  diamondSize: 25,
+  standardDeviationStroke: 2,
+  overallMeanColor: "#000"
 };
 
 const classes = {
@@ -26,7 +30,8 @@ const classes = {
   threshold: "measurementThreshold",
   subplot: "measurementSubplot",
   subplotBackground: "measurementSubplotBackground",
-  rawMeasurements: "rawMeasurements"
+  rawMeasurements: "rawMeasurements",
+  overallMean: "measurementsOverallMean"
 };
 
 export const svgContainerDOMId = "measurementsSVGContainer";
@@ -84,6 +89,37 @@ export const clearMeasurementsSVG = (ref) => {
   select(ref)
     .attr("height", null)
     .selectAll("*").remove();
+};
+
+const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, color, xScale, yValue) => {
+  const meanAndStandardDeviation = {
+    mean: mean(values),
+    standardDeviation: deviation(values)
+  };
+  // Container for both mean and standard deviation
+  const container = d3ParentNode.append("g")
+    .attr("class", containerClass)
+    .attr("display", "none")
+    .selectAll("meanAndStandardDeviation")
+    .data([meanAndStandardDeviation])
+    .enter();
+
+  container.append("path")
+    .attr("class", "mean")
+    .attr("transform", (d) => `translate(${xScale(d.mean)}, ${yValue})`)
+    .attr("d", symbol().type(symbolDiamond).size(layout.diamondSize))
+    .attr("fill", color);
+
+  if (meanAndStandardDeviation.standardDeviation !== undefined) {
+    container.append("line")
+      .attr("class", "standardDeviation")
+      .attr("x1", (d) => xScale(d.mean - d.standardDeviation))
+      .attr("x2", (d) => xScale(d.mean + d.standardDeviation))
+      .attr("y1", yValue)
+      .attr("y2", yValue)
+      .attr("stroke-width", layout.standardDeviationStroke)
+      .attr("stroke", color);
+  }
 };
 
 export const drawMeasurementsSVG = (ref, svgData) => {
@@ -171,6 +207,16 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         .attr("cx", (d) => xScale(d.value))
         .attr("cy", (d) => yScale(d.measurementJitter))
         .attr("r", layout.circleRadius);
+
+    // Draw overall mean and standard deviation for measurement values
+    drawMeanAndStandardDeviation(
+      measurements.map((d) => d.value),
+      subplot,
+      classes.overallMean,
+      layout.overallMeanColor,
+      xScale,
+      layout.subplotHeight / 2
+    );
   });
 };
 
@@ -199,9 +245,9 @@ export const setHoverTransition = (ref, handleHoverMeasurement) => {
     });
 };
 
-export const toggleThreshold = (ref, showThreshold) => {
-  const displayAttr = showThreshold ? null : "none";
+export const toggleDisplay = (ref, elementClass, displayOn) => {
+  const displayAttr = displayOn ? null : "none";
   select(ref)
-    .select(`.${classes.threshold}`)
+    .selectAll(`.${classes[elementClass]}`)
       .attr("display", displayAttr);
 };

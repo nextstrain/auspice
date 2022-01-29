@@ -3,7 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { isEqual } from "lodash";
 import Select from "react-select/lib/Select";
 import { changeMeasurementsCollection } from "../../actions/measurements";
-import { CHANGE_MEASUREMENTS_GROUP_BY, TOGGLE_MEASUREMENTS_THRESHOLD } from "../../actions/types";
+import {
+  CHANGE_MEASUREMENTS_GROUP_BY,
+  TOGGLE_MEASUREMENTS_OVERALL_MEAN,
+  TOGGLE_MEASUREMENTS_THRESHOLD
+} from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 import Toggle from "./toggle";
@@ -29,6 +33,7 @@ const MeasurementsOptions = () => {
   const collection = useSelector((state) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state) => collectionOptionsSelector(state.measurements.collections), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
 
   // Create grouping options for the Select library
@@ -81,6 +86,13 @@ const MeasurementsOptions = () => {
           }}
         />
       </div>
+      <Toggle
+        style={{ padding: "10px 0px"}}
+        display
+        on={showOverallMean}
+        label="Show overall mean ± SD"
+        callback={() => dispatch({type: TOGGLE_MEASUREMENTS_OVERALL_MEAN, data: !showOverallMean})}
+      />
       <Toggle
         // Only display threshold toggle if the collection has a valid threshold
         display={typeof collection.threshold === "number"}

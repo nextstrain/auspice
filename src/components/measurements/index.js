@@ -16,7 +16,7 @@ import {
   getMeasurementDOMId,
   svgContainerDOMId,
   setHoverTransition,
-  toggleThreshold
+  toggleDisplay
 } from "./measurementsD3";
 
 /**
@@ -78,6 +78,7 @@ const Measurements = ({height, width, showLegend}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state.tree), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
   const { title, x_axis_label, threshold, fields, measurements } = collection;
@@ -139,7 +140,11 @@ const Measurements = ({height, width, showLegend}) => {
   }, [svgData, fields, groupBy]);
 
   useEffect(() => {
-    toggleThreshold(d3Ref.current, showThreshold);
+    toggleDisplay(d3Ref.current, "overallMean", showOverallMean);
+  }, [svgData, showOverallMean]);
+
+  useEffect(() => {
+    toggleDisplay(d3Ref.current, "threshold", showThreshold);
   }, [svgData, showThreshold]);
 
   const getPanelTitle = () => {
