@@ -2,6 +2,7 @@ import { extent, groups } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
 import { select } from "d3-selection";
+import { orderBy } from "lodash";
 
 /* C O N S T A N T S */
 const layout = {
@@ -10,8 +11,9 @@ const layout = {
   topPadding: 20,
   bottomPadding: 50,
   subplotHeight: 100,
-  subplotPadding: 20,
+  subplotPadding: 2,
   circleRadius: 3,
+  circleHoverRadius: 5,
   thresholdStrokeWidth: 2,
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
@@ -27,7 +29,8 @@ const classes = {
   rawMeasurements: "rawMeasurements"
 };
 
-const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
+export const svgContainerDOMId = "measurementsSVGContainer";
+export const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
 
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
@@ -71,12 +74,10 @@ export const createYScale = (measurements) => {
  */
 export const groupMeasurements = (measurements, groupBy) => {
   const groupedMeasurements = groups(measurements, (d) => d[groupBy]);
-  /*
-   * Using a[1] and b[1] since d3.groups returns a nested array where the
-   * first element is the groupBy field value and the second element is the
-   * array of measurements
-   */
-  return groupedMeasurements.sort((a, b) => b[1].length - a[1].length);
+  return orderBy(
+    groupedMeasurements,
+    ([, groupingMeasurements]) => groupingMeasurements.length,
+    "desc");
 };
 
 export const clearMeasurementsSVG = (ref) => {
@@ -175,4 +176,23 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements}`)
     .style("fill", (d) => treeStrainColors[d.strain]);
+};
+
+export const setHoverTransition = (ref, handleHoverMeasurement) => {
+  const svg = select(ref);
+  svg.selectAll(`.${classes.rawMeasurements}`)
+    .on("mouseover", (d, i, elements) => {
+      select(elements[i]).transition()
+        .duration("100")
+        .attr("r", layout.circleHoverRadius);
+      // sets hover data state to trigger the hover panel display
+      handleHoverMeasurement(d);
+    })
+    .on("mouseout", (_, i, elements) => {
+      select(elements[i]).transition()
+        .duration("200")
+        .attr("r", layout.circleRadius);
+      // sets hover data state to null to hide the hover panel display
+      handleHoverMeasurement(null);
+    });
 };

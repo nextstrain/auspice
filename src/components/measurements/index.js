@@ -1,17 +1,21 @@
-import React, { useRef, useEffect, useMemo } from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { isEqual } from "lodash";
+import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";
+import HoverPanel from "./hoverPanel";
 import {
   createXScale,
   createYScale,
   groupMeasurements,
   clearMeasurementsSVG,
   drawMeasurementsSVG,
-  colorMeasurementsSVG
+  colorMeasurementsSVG,
+  getMeasurementDOMId,
+  svgContainerDOMId,
+  setHoverTransition
 } from "./measurementsD3";
 
 /**
@@ -79,6 +83,9 @@ const Measurements = ({height, width, showLegend}) => {
   // Ref to access the D3 SVG
   const d3Ref = useRef(null);
 
+  // State for storing data for the HoverPanel
+  const [hoverData, setHoverData] = useState(null);
+
   // Filter and group measurements
   const filteredMeasurements = filterToTreeVisibileStrains(measurements, treeStrainVisibility);
   const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy);
@@ -100,6 +107,35 @@ const Measurements = ({height, width, showLegend}) => {
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
   }, [svgData, treeStrainColors]);
 
+  // Set up handle hover function and hover transitions
+  useEffect(() => {
+    // Creating function within useEffect so it doesn't get flagged as dependency
+    const handleHoverMeasurement = (measurement) => {
+      let newHoverData = null;
+      if (measurement !== null) {
+        // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
+        const displayFields = Object.keys(measurement).filter((field) => fields.has(field));
+        // Order fields for display
+        const fieldOrder = [...fields.keys()];
+        const orderedFields = orderBy(displayFields, (field) => fieldOrder.indexOf(field));
+        // Create a Map of measurement's data to save order of fields
+        const measurementData = new Map();
+        orderedFields.forEach((field) => {
+          measurementData.set(fields.get(field).title, measurement[field]);
+        });
+        // HoverPanel expects an element id and the data for display
+        newHoverData = {
+          elementId: getMeasurementDOMId(measurement),
+          containerId: svgContainerDOMId,
+          data: measurementData
+        };
+      }
+      setHoverData(newHoverData);
+    };
+
+    setHoverTransition(d3Ref.current, handleHoverMeasurement);
+  }, [svgData, fields, groupBy]);
+
   const getPanelTitle = () => {
     return `${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`;
   };
@@ -120,7 +156,12 @@ const Measurements = ({height, width, showLegend}) => {
           <Legend right width={width}/>
         </ErrorBoundary>
       }
-      <div id="measurementsSVGContainer" style={getSVGContainerStyle()}>
+      <div id={svgContainerDOMId} style={getSVGContainerStyle()}>
+        {hoverData &&
+          <HoverPanel
+            hoverData={hoverData}
+          />
+        }
         <svg
           id="d3MeasurementsSVG"
           width="100%"
