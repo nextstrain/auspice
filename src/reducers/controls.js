@@ -111,7 +111,10 @@ const Controls = (state = getDefaultControlsState(), action) => {
         selectedNode: null
       });
     case types.CHANGE_EXPLODE_ATTR:
-      return Object.assign({}, state, { explodeAttr: action.value });
+      return Object.assign({}, state, {
+        explodeAttr: action.explodeAttr,
+        colorScale: Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues })
+      });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:

@@ -9,6 +9,7 @@ import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers
 import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
 import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
+import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 
 
 /**
@@ -382,7 +383,7 @@ const _orderSubtrees = (metadata, nodes, attr) => {
 };
 
 export const explodeTree = (attr) => (dispatch, getState) => {
-  const {tree, metadata} = getState();
+  const {tree, metadata, controls} = getState();
   _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
   if (attr) {
     const root = tree.nodes[0];
@@ -393,5 +394,32 @@ export const explodeTree = (attr) => (dispatch, getState) => {
     }
     _orderSubtrees(metadata, tree.nodes, attr);
   }
-  dispatch({type: types.CHANGE_EXPLODE_ATTR, value: attr});
+  /* tree splitting necessitates recalculation of tip counts */
+  calcFullTipCounts(tree.nodes[0]);
+  calcTipCounts(tree.nodes[0], tree.visibility);
+  /* we default to zooming out completely whenever we explode the tree. There are nicer behaviours here,
+  such as re-calculating the MRCA of visible nodes, but this comes at the cost of increased complexity.
+  Note that the functions called here involve a lot of code duplication and are good targets for refactoring */
+  applyInViewNodesToTree(0, tree);
+  const visData = calculateVisiblityAndBranchThickness(
+    tree,
+    controls,
+    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
+  );
+  visData.idxOfInViewRootNode = 0;
+  visData.stateCountAttrs = Object.keys(controls.filters);
+  /* Changes in visibility require a recomputation of which legend items we wish to display */
+  visData.visibleLegendValues = createVisibleLegendValues({
+    colorBy: controls.colorBy,
+    genotype: controls.colorScale.genotype,
+    scaleType: controls.colorScale.scaleType,
+    legendValues: controls.colorScale.legendValues,
+    treeNodes: tree.nodes,
+    visibility: visData.visibility
+  });
+  dispatch({
+    type: types.CHANGE_EXPLODE_ATTR,
+    explodeAttr: attr,
+    ...visData
+  });
 };

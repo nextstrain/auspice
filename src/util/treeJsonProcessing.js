@@ -1,22 +1,6 @@
 import { getDefaultTreeState } from "../reducers/tree";
 import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
-
-/**
-* for each node, calculate the number of subtending tips (alive or dead)
-* side effects: n.fullTipCount for each node
-* @param {Node} node - deserialized JSON root to begin traversal
-*/
-const calcFullTipCounts = (node) => {
-  node.fullTipCount = 0;
-  if (typeof node.children !== "undefined") {
-    for (let i = 0; i < node.children.length; i++) {
-      calcFullTipCounts(node.children[i]);
-      node.fullTipCount += node.children[i].fullTipCount;
-    }
-  } else {
-    node.fullTipCount = 1;
-  }
-};
+import { calcFullTipCounts } from "./treeCountingHelpers";
 
 /**
  * Adds certain properties to the nodes array - for each node in nodes it adds

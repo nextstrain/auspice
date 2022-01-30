@@ -38,6 +38,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
       return Object.assign({}, state, {
         loaded: false
       });
+    case types.CHANGE_EXPLODE_ATTR: /* fall-through */
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const newStates = {
