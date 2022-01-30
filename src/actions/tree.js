@@ -30,6 +30,9 @@ export const applyInViewNodesToTree = (idx, tree) => {
     });
     if (tree.nodes[validIdxRoot].hasChildren) {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+    } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
+      // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
+      tree.nodes[validIdxRoot].shell.inView = true;
     } else {
       applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d) => {d.inView = true;});
     }
