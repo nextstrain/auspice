@@ -337,26 +337,23 @@ const _traverseAndCreateSubtrees = (root, node, attr) => {
     node.unexplodedChildren = originalChildren;
   } else if (node.hasChildren) {
     const parentTrait = getTraitFromNode(node, attr);
-    if (parentTrait) {
-      // find (indicies of) children who have (defined and) different traits. These will become subtrees.
-      const childrenToPrune = node.children
-        .map((c) => getTraitFromNode(c, attr))
-        .map((childTrait, idx) => (childTrait && childTrait!==parentTrait) ? idx : undefined)
-        .filter((v) => v!==undefined);
-      if (childrenToPrune.length) {
-        childrenToPrune.forEach((idx) => {
-          const subtreeRootNode = node.children[idx];
-          root.children.push(subtreeRootNode);
-          subtreeRootNode.parent = root;
-        });
-        node.unexplodedChildren = originalChildren;
-        node.children = node.children.filter((c, idx) => {
-          return !childrenToPrune.includes(idx);
-        });
-        /* it may be the case that the node now has no children (they're all subtrees!) */
-        if (node.children.length===0) {
-          node.hasChildren = false;
-        }
+    const childrenToPrune = node.children
+      .map((c) => getTraitFromNode(c, attr))
+      .map((childTrait, idx) => (childTrait!==parentTrait) ? idx : undefined)
+      .filter((v) => v!==undefined);
+    if (childrenToPrune.length) {
+      childrenToPrune.forEach((idx) => {
+        const subtreeRootNode = node.children[idx];
+        root.children.push(subtreeRootNode);
+        subtreeRootNode.parent = root;
+      });
+      node.unexplodedChildren = originalChildren;
+      node.children = node.children.filter((c, idx) => {
+        return !childrenToPrune.includes(idx);
+      });
+      /* it may be the case that the node now has no children (they're all subtrees!) */
+      if (node.children.length===0) {
+        node.hasChildren = false;
       }
     }
   }
