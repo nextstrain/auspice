@@ -54,10 +54,13 @@ export const applyToChildren = (phyloNode, func) => {
 };
 
 /** setDisplayOrderRecursively
+ * Calculates the display order of all nodes, which corresponds to the vertical position
+ * of nodes in a rectangular tree.
+ * If `yCounter` is undefined then we wish to hide the node and all descendants of it
  * @param {PhyloNode} node
- * @param {int} yCounter
+ * @param {int|undefined} yCounter
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
- * @returns {int} current yCounter after assignment to the tree originating from `node`
+ * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
  */
 export const setDisplayOrderRecursively = (node, yCounter) => {
   const children = node.n.children; // (redux) tree node
@@ -66,7 +69,7 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
       yCounter = setDisplayOrderRecursively(children[i].shell, yCounter);
     }
   } else {
-    node.displayOrder = ++yCounter;
+    node.displayOrder = (node.n.fullTipCount===0 || yCounter===undefined) ? yCounter : ++yCounter;
     node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
@@ -109,8 +112,12 @@ export const setDisplayOrder = (nodes) => {
   let yCounter = 0;
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
-    yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], yCounter);
-    yCounter+=spaceBetweenSubtrees;
+    if (subtree.fullTipCount===0) { // don't use screen space for this subtree
+      setDisplayOrderRecursively(nodes[subtree.arrayIdx], undefined);
+    } else {
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], yCounter);
+      yCounter+=spaceBetweenSubtrees;
+    }
   }
   /* note that nodes[0] is a dummy node holding each subtree */
   nodes[0].displayOrder = undefined;
