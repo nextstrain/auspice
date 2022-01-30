@@ -13,7 +13,8 @@ import { controlsWidth } from "../../util/globals";
  */
 @connect((state) => ({
   selected: state.controls.explodeAttr,
-  available: state.metadata.colorings
+  available: state.metadata.colorings,
+  showThisUI: !state.controls.showTreeToo
 }))
 class ChooseExplodeAttr extends React.Component {
   constructor(props) {
@@ -31,6 +32,7 @@ class ChooseExplodeAttr extends React.Component {
     return options;
   }
   render() {
+    if (!this.props.showThisUI) return null;
     const { t } = this.props;
     return (
       <div style={{paddingTop: 5}}>
