@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
+import { getTipColorAttribute } from "../../util/colorHelpers";
 import ErrorBoundary from "../../util/errorBoundry";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";
@@ -12,7 +13,9 @@ import {
   groupMeasurements,
   clearMeasurementsSVG,
   drawMeasurementsSVG,
+  drawMeansForColorBy,
   colorMeasurementsSVG,
+  changeMeasurementsDisplay,
   getMeasurementDOMId,
   svgContainerDOMId,
   setHoverTransition,
@@ -37,14 +40,17 @@ const useDeepCompareMemo = (value) => {
 /**
  * A custom React Redux Selector that reduces the tree redux state to an object
  * with the terminal strain names and their corresponding properties that
- * are relevant for the Measurement's panel.
+ * are relevant for the Measurement's panel. Uses the colorScale redux state to
+ * find the current color attribute per strain.
  *
  * tree.visiblity and tree.nodeColors need to be an arrays that have the same
  * order as tree.nodes
- * @param {Object} tree
+ * @param {Object} state
  * @returns {Object<string,Object>}
  */
-const treeStrainPropertySelector = (tree) => {
+const treeStrainPropertySelector = (state) => {
+  const { tree, controls } = state;
+  const { colorScale } = controls;
   const intitialTreeStrainProperty = {
     treeStrainVisibility: {},
     treeStrainColors: {}
@@ -54,7 +60,10 @@ const treeStrainPropertySelector = (tree) => {
     // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
       treeStrainVisibility[node.name] = tree.visibility[index];
-      treeStrainColors[node.name] = tree.nodeColors[index];
+      treeStrainColors[node.name] = {
+        attribute: getTipColorAttribute(node, colorScale),
+        color: tree.nodeColors[index]
+      };
     }
     return treeStrainProperty;
   }, intitialTreeStrainProperty);
@@ -76,8 +85,9 @@ const filterToTreeVisibileStrains = (measurements, treeStrainVisibility) => {
 
 const Measurements = ({height, width, showLegend}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
-  const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state.tree), isEqual);
+  const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const display = useSelector((state) => state.controls.measurementsDisplay);
   const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
@@ -105,10 +115,16 @@ const Measurements = ({height, width, showLegend}) => {
     drawMeasurementsSVG(d3Ref.current, svgData);
   }, [svgData]);
 
-  // Color the SVG when SVG is re-drawn or when colors have changed
+  // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
+    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
   }, [svgData, treeStrainColors]);
+
+  // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
+  useEffect(() => {
+    changeMeasurementsDisplay(d3Ref.current, display);
+  }, [svgData, treeStrainColors, display]);
 
   // Set up handle hover function and hover transitions
   useEffect(() => {

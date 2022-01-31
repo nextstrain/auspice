@@ -4,12 +4,13 @@ import { isEqual } from "lodash";
 import Select from "react-select/lib/Select";
 import { changeMeasurementsCollection } from "../../actions/measurements";
 import {
+  CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD
 } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
-import { SidebarSubtitle } from "./styles";
+import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
 
 /**
@@ -33,6 +34,7 @@ const MeasurementsOptions = () => {
   const collection = useSelector((state) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state) => collectionOptionsSelector(state.measurements.collections), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const display = useSelector((state) => state.controls.measurementsDisplay);
   const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
 
@@ -86,6 +88,21 @@ const MeasurementsOptions = () => {
           }}
         />
       </div>
+      <SidebarSubtitle>
+        {"Measurments Display"}
+      </SidebarSubtitle>
+      <SidebarButton
+        selected={display === "mean"}
+        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "mean" });}}
+      >
+        {"Mean ± SD"}
+      </SidebarButton>
+      <SidebarButton
+        selected={display === "raw"}
+        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "raw" });}}
+      >
+        {"Raw"}
+      </SidebarButton>
       <Toggle
         style={{ padding: "10px 0px"}}
         display

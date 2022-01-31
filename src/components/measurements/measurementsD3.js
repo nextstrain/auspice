@@ -12,7 +12,7 @@ const layout = {
   topPadding: 20,
   bottomPadding: 50,
   subplotHeight: 100,
-  subplotPadding: 2,
+  subplotPadding: 10,
   circleRadius: 3,
   circleHoverRadius: 5,
   thresholdStrokeWidth: 2,
@@ -31,11 +31,15 @@ const classes = {
   subplot: "measurementSubplot",
   subplotBackground: "measurementSubplotBackground",
   rawMeasurements: "rawMeasurements",
-  overallMean: "measurementsOverallMean"
+  rawMeasurementsGroup: "rawMeasurementsGroup",
+  overallMean: "measurementsOverallMean",
+  colorMean: "measurementsColorMean"
 };
 
 export const svgContainerDOMId = "measurementsSVGContainer";
 export const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
+const domIdRegex = new RegExp("[^\\w\\-_]+", "gi");
+const getSubplotDOMId = (groupingValue) => `measurment_subplot_${groupingValue.replace(domIdRegex, "_")}`;
 
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
@@ -170,6 +174,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
     // Make each subplot it's own SVG to re-use the same subplot yScale
     const subplot = svg.append("svg")
       .attr("class", classes.subplot)
+      .attr("id", getSubplotDOMId(groupingValue))
       .attr("width", "100%")
       .attr("height", layout.subplotHeight)
       .attr("y", prevSubplotBottom);
@@ -198,6 +203,8 @@ export const drawMeasurementsSVG = (ref, svgData) => {
 
     // Add circles for each measurement
     subplot.append("g")
+      .attr("class", classes.rawMeasurementsGroup)
+      .attr("display", "none")
       .selectAll("dot")
       .data(measurements)
       .enter()
@@ -223,7 +230,57 @@ export const drawMeasurementsSVG = (ref, svgData) => {
 export const colorMeasurementsSVG = (ref, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements}`)
-    .style("fill", (d) => treeStrainColors[d.strain]);
+    .style("fill", (d) => treeStrainColors[d.strain].color);
+};
+
+export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
+  const { xScale, groupedMeasurements } = svgData;
+  const svg = select(ref);
+  // Re move all current color by means
+  svg.selectAll(`.${classes.colorMean}`).remove();
+  // Calc and draw color by means for each group
+  groupedMeasurements.forEach(([groupingValue, measurements]) => {
+    // For each color-by attribute, create an array of measurement values and keep track of color
+    const colorByGroups = {};
+    measurements.forEach((measurement) => {
+      const { attribute, color } = treeStrainColors[measurement.strain];
+      colorByGroups[attribute] = colorByGroups[attribute] || {color: null, values: []};
+      colorByGroups[attribute].values.push(measurement.value);
+      if (!colorByGroups[attribute].color) {
+        colorByGroups[attribute].color = color;
+      }
+    });
+    // Plot mean/SD for each color-by attribute within subplot
+    const subplot = svg.select(`#${getSubplotDOMId(groupingValue)}`);
+    const numberOfColorByAttributes = Object.keys(colorByGroups).length;
+    // Calc space between means to evenly spread them within subplot
+    const ySpacing = (layout.subplotHeight - 2 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
+    let yValue = layout.subplotPadding;
+    Object.values(colorByGroups).forEach(({color, values}) => {
+      drawMeanAndStandardDeviation(
+        values,
+        subplot,
+        classes.colorMean,
+        color,
+        xScale,
+        yValue
+      );
+      // Increate yValue for next attribute mean
+      yValue += ySpacing;
+    });
+  });
+};
+
+export const changeMeasurementsDisplay = (ref, display) => {
+  const svg = select(ref);
+  const dataDisplayClasses = {
+    raw: classes.rawMeasurementsGroup,
+    mean: classes.colorMean
+  };
+  Object.entries(dataDisplayClasses).forEach(([displayOption, displayClass]) => {
+    svg.selectAll(`.${displayClass}`)
+      .attr("display", display === displayOption ? null : "none");
+  });
 };
 
 export const setHoverTransition = (ref, handleHoverMeasurement) => {

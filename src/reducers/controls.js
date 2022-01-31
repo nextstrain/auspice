@@ -309,6 +309,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return {...state, measurementsShowThreshold: action.data};
     case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN:
       return {...state, measurementsShowOverallMean: action.data};
+    case types.CHANGE_MEASUREMENTS_DISPLAY:
+      return {...state, measurementsDisplay: action.data};
     default:
       return state;
   }
