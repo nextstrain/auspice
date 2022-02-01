@@ -3,7 +3,7 @@ import { infoPanelStyles } from "../../globalStyles";
 
 const HoverPanel = ({hoverData}) => {
   if (hoverData === null) return null;
-  const { elementId, containerId, data } = hoverData;
+  const { mouseX, mouseY, containerId, data } = hoverData;
   const panelStyle = {
     position: "absolute",
     width: 200,
@@ -26,10 +26,9 @@ const HoverPanel = ({hoverData}) => {
   // Find the relative position of the hovered element to the hover panel's container div
   const container = document.getElementById(containerId);
   const containerPosition = container.getBoundingClientRect();
-  const elementPosition = document.getElementById(elementId).getBoundingClientRect();
   const relativePosition = {
-    top: elementPosition.top - containerPosition.top + container.scrollTop,
-    left: elementPosition.left - containerPosition.left
+    top: mouseY - containerPosition.top + container.scrollTop,
+    left: mouseX - containerPosition.left
   };
 
   // Position hover panel to the right of the element if hovered element

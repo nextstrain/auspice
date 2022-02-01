@@ -16,7 +16,6 @@ import {
   drawMeansForColorBy,
   colorMeasurementsSVG,
   changeMeasurementsDisplay,
-  getMeasurementDOMId,
   svgContainerDOMId,
   setHoverTransition,
   toggleDisplay
@@ -129,30 +128,42 @@ const Measurements = ({height, width, showLegend}) => {
   // Set up handle hover function and hover transitions
   useEffect(() => {
     // Creating function within useEffect so it doesn't get flagged as dependency
-    const handleHoverMeasurement = (measurement) => {
+    const handleHover = (data, dataType, mouseX, mouseY) => {
       let newHoverData = null;
-      if (measurement !== null) {
-        // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
-        const displayFields = Object.keys(measurement).filter((field) => fields.has(field));
-        // Order fields for display
-        const fieldOrder = [...fields.keys()];
-        const orderedFields = orderBy(displayFields, (field) => fieldOrder.indexOf(field));
-        // Create a Map of measurement's data to save order of fields
-        const measurementData = new Map();
-        orderedFields.forEach((field) => {
-          measurementData.set(fields.get(field).title, measurement[field]);
-        });
-        // HoverPanel expects an element id and the data for display
+      if (data !== null) {
+        // Create a Map of data to save order of fields
+        const newData = new Map();
+        if (dataType === "measurement") {
+          // Handle single measurment data
+          // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
+          const displayFields = Object.keys(data).filter((field) => fields.has(field));
+          // Order fields for display
+          const fieldOrder = [...fields.keys()];
+          const orderedFields = orderBy(displayFields, (field) => fieldOrder.indexOf(field));
+          orderedFields.forEach((field) => {
+            newData.set(fields.get(field).title, data[field]);
+          });
+        } else if (dataType === "mean") {
+          // Handle mean and standard deviation data
+          newData.set("mean", data.mean.toFixed(2));
+          newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
+        } else {
+          // Catch unknown data types
+          console.error(`"Unknown data type for hover panel: ${dataType}`);
+          // Display provided data without extra ordering or parsing
+          Object.entries(data).forEach(([key, value]) => newData.set(key, value));
+        }
         newHoverData = {
-          elementId: getMeasurementDOMId(measurement),
+          mouseX,
+          mouseY,
           containerId: svgContainerDOMId,
-          data: measurementData
+          data: newData
         };
       }
       setHoverData(newHoverData);
     };
 
-    setHoverTransition(d3Ref.current, handleHoverMeasurement);
+    setHoverTransition(d3Ref.current, handleHover);
   }, [svgData, fields, groupBy]);
 
   useEffect(() => {

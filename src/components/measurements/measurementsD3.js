@@ -1,7 +1,7 @@
 import { extent, groups, mean, deviation } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
-import { select } from "d3-selection";
+import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
 
@@ -33,11 +33,13 @@ const classes = {
   rawMeasurements: "rawMeasurements",
   rawMeasurementsGroup: "rawMeasurementsGroup",
   overallMean: "measurementsOverallMean",
-  colorMean: "measurementsColorMean"
+  colorMean: "measurementsColorMean",
+  mean: "mean",
+  standardDeviation: "standardDeviation"
 };
 
 export const svgContainerDOMId = "measurementsSVGContainer";
-export const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
+const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
 const domIdRegex = new RegExp("[^\\w\\-_]+", "gi");
 const getSubplotDOMId = (groupingValue) => `measurment_subplot_${groupingValue.replace(domIdRegex, "_")}`;
 
@@ -109,14 +111,14 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
     .enter();
 
   container.append("path")
-    .attr("class", "mean")
+    .attr("class", classes.mean)
     .attr("transform", (d) => `translate(${xScale(d.mean)}, ${yValue})`)
     .attr("d", symbol().type(symbolDiamond).size(layout.diamondSize))
     .attr("fill", color);
 
   if (meanAndStandardDeviation.standardDeviation !== undefined) {
     container.append("line")
-      .attr("class", "standardDeviation")
+      .attr("class", classes.standardDeviation)
       .attr("x1", (d) => xScale(d.mean - d.standardDeviation))
       .attr("x2", (d) => xScale(d.mean + d.standardDeviation))
       .attr("y1", yValue)
@@ -283,23 +285,36 @@ export const changeMeasurementsDisplay = (ref, display) => {
   });
 };
 
-export const setHoverTransition = (ref, handleHoverMeasurement) => {
+export const setHoverTransition = (ref, handleHover) => {
   const svg = select(ref);
+  // Handle hovers of raw measurements
   svg.selectAll(`.${classes.rawMeasurements}`)
     .on("mouseover", (d, i, elements) => {
       select(elements[i]).transition()
         .duration("100")
         .attr("r", layout.circleHoverRadius);
+
+      // Get mouse position for HoverPanel
+      const { clientX, clientY } = d3event;
       // sets hover data state to trigger the hover panel display
-      handleHoverMeasurement(d);
+      handleHover(d, "measurement", clientX, clientY);
     })
     .on("mouseout", (_, i, elements) => {
       select(elements[i]).transition()
         .duration("200")
         .attr("r", layout.circleRadius);
       // sets hover data state to null to hide the hover panel display
-      handleHoverMeasurement(null);
+      handleHover(null);
     });
+
+  // Handle hovers of mean and standard deviations
+  svg.selectAll(`.${classes.mean}, .${classes.standardDeviation}`)
+    .on("mouseover", (d) => {
+      // Get mouse position for HoverPanel
+      const { clientX, clientY } = d3event;
+      handleHover(d, "mean", clientX, clientY);
+    })
+    .on("mouseout", () => handleHover(null));
 };
 
 export const toggleDisplay = (ref, elementClass, displayOn) => {
