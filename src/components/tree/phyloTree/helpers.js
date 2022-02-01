@@ -56,6 +56,8 @@ export const applyToChildren = (phyloNode, func) => {
 /** setDisplayOrderRecursively
  * @param {PhyloNode} node
  * @param {int} yCounter
+ * @sideeffect modifies node.displayOrder and node.displayOrderRange
+ * @returns {int} current yCounter after assignment to the tree originating from `node`
  */
 export const setDisplayOrderRecursively = (node, yCounter) => {
   const children = node.n.children; // (redux) tree node
@@ -74,6 +76,22 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
   return yCounter;
 };
 
+/**
+ * heuristic function to return the appropriate spacing between subtrees for a given tree
+ * the returned value is to be interpreted as a count of the number of tips that would
+ * otherwise fit in the gap
+ */
+function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
+  if (numSubtrees===1 || numTips<10) {
+    return 0;
+  }
+  if (numSubtrees*2 > numTips) {
+    return 0;
+  }
+  return numTips/20; /* note that it's not actually 5% of vertical space,
+                     as the final max yCount = numTips + numSubtrees*numTips/20 */
+}
+
 /** setDisplayOrder
  * given nodes, this fn sets <phyloNode>.displayOrder for each node
  * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
@@ -82,8 +100,22 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
  * @param {Array<PhyloNode>} nodes
+ * @returns {undefined}
  */
-export const setDisplayOrder = (nodes) => setDisplayOrderRecursively(nodes[0], 0);
+export const setDisplayOrder = (nodes) => {
+  const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
+  const numTips = nodes[0].n.fullTipCount;
+  const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
+  let yCounter = 0;
+  /* iterate through each subtree, and add padding between each */
+  for (const subtree of nodes[0].n.children) {
+    yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], yCounter);
+    yCounter+=spaceBetweenSubtrees;
+  }
+  /* note that nodes[0] is a dummy node holding each subtree */
+  nodes[0].displayOrder = undefined;
+  nodes[0].displayOrderRange = [undefined, undefined];
+};
 
 
 export const formatDivergence = (divergence) => {
