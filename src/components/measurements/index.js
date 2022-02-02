@@ -69,23 +69,46 @@ const treeStrainPropertySelector = (state) => {
 };
 
 /**
- * Filters provided measurements to only measurements for strains that are
- * currently visible in the tree. Visibiity is indicated by the NODE_VISIBLE
- * value in the provided treeStrainVisibility object for strains.
+ * Filters provided measurements to measurements of strains that are currently
+ * visible in the tree adn that are included in the active measurements filters.
+ *
+ * Visibility is indicated by the numeric visibility value in the provided
+ * treeStrainVisibility object for strain.
  * @param {Array<Object>} measurements
  * @param {Object<string,number>} treeStrainVisibility
- * @returns {Array<Object>}
+ * @param {Object<string,Map>} filters
+ * @returns
  */
-const filterToTreeVisibileStrains = (measurements, treeStrainVisibility) => {
-  // Check visibility against global NODE_VISIBLE
+const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
+  // Checks visibility against global NODE_VISIBLE
   const isVisible = (visibility) => visibility === NODE_VISIBLE;
-  return measurements.filter((m) => isVisible(treeStrainVisibility[m.strain]));
+
+  // Find active filters to filter measurements
+  const activeFilters = {};
+  Object.entries(filters).forEach(([field, valuesMap]) => {
+    activeFilters[field] = activeFilters[field] || [];
+    valuesMap.forEach(({active}, fieldValue) => {
+      // Save array of active values for the field filter
+      if (active) activeFilters[field].push(fieldValue);
+    });
+  });
+
+  return measurements.filter((measurement) => {
+    // First check the strain is visible in the tree
+    if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
+    // Then check that the measurement contains values for all active filters
+    for (const [field, values] of Object.entries(activeFilters)) {
+      if (values.length > 0 && !values.includes(measurement[field])) return false;
+    }
+    return true;
+  });
 };
 
 const Measurements = ({height, width, showLegend}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
+  const filters = useSelector((state) => state.controls.measurementsFilters);
   const display = useSelector((state) => state.controls.measurementsDisplay);
   const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
@@ -99,8 +122,8 @@ const Measurements = ({height, width, showLegend}) => {
   const [hoverData, setHoverData] = useState(null);
 
   // Filter and group measurements
-  const filteredMeasurements = filterToTreeVisibileStrains(measurements, treeStrainVisibility);
-  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy);
+  const filteredMeasurements = filterMeasurements(measurements, treeStrainVisibility, filters);
+  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, filters[groupBy]);
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);

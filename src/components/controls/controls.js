@@ -40,7 +40,7 @@ function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
       <ColorBy />
 
       <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
-      <FilterData />
+      <FilterData measurementsOn={measurementsOn} />
 
       <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
       <ChooseLayout />

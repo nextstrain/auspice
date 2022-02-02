@@ -7,6 +7,7 @@ import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
+import { toggleSingleFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
 
@@ -23,7 +24,10 @@ const DEBOUNCE_TIME = 200;
     activeFilters: state.controls.filters,
     colorings: state.metadata.colorings,
     totalStateCounts: state.tree.totalStateCounts,
-    nodes: state.tree.nodes
+    nodes: state.tree.nodes,
+    measurementsFieldsMap: state.measurements.collectionToDisplay.fields,
+    measurementsFiltersMap: state.measurements.collectionToDisplay.filters,
+    measurementsFilters: state.controls.measurementsFilters
   };
 })
 class FilterData extends React.Component {
@@ -85,10 +89,26 @@ class FilterData extends React.Component {
           });
         });
     }
+    if (this.props.measurementsOn && this.props.measurementsFiltersMap && this.props.measurementsFieldsMap) {
+      this.props.measurementsFiltersMap.forEach(({values}, filterField) => {
+        const { title } = this.props.measurementsFieldsMap.get(filterField);
+        values.forEach((value) => {
+          options.push({
+            _type: "measurements", // custom field to differentiate measurements filters
+            label: `${title} → ${value}`,
+            value: [filterField, value]
+          });
+        });
+      });
+    }
     return options;
   }
   selectionMade = (sel) => {
-    this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
+    // Process measurment filters separately than tree filters
+    if (sel._type === "measurements") {
+      return this.props.dispatch(toggleSingleFilter(sel.value[0], sel.value[1], true));
+    }
+    return this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
   }
   summariseFilters = () => {
     const filterNames = Reflect.ownKeys(this.props.activeFilters)

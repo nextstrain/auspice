@@ -79,12 +79,23 @@ export const createYScale = (measurements) => {
 /**
  * Uses D3.groups() to aggregate measurements into a nested array of groups
  * The groups are sorted with the most number of measurements first.
+ *
+ * If groupByFilters Map is provided, sort the gruops by the order of the keys.
  * @param {Array<Object>} measurements
  * @param {string} groupBy
+ * @param {Map<string,Object>} groupByFilters
  * @returns {Array<Array<string, Array>>}
  */
-export const groupMeasurements = (measurements, groupBy) => {
+export const groupMeasurements = (measurements, groupBy, groupByFilters) => {
   const groupedMeasurements = groups(measurements, (d) => d[groupBy]);
+  if (groupByFilters) {
+    const sortGroupOrder = [...groupByFilters.keys()];
+    return orderBy(
+      groupedMeasurements,
+      ([groupingValue]) => sortGroupOrder.indexOf(groupingValue),
+      "asc"
+    );
+  }
   return orderBy(
     groupedMeasurements,
     ([, groupingMeasurements]) => groupingMeasurements.length,
