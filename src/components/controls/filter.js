@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
-import { toggleSingleFilter } from "../../actions/measurements";
+import { removeAllFieldFilters, toggleAllFieldFilters, toggleSingleFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
 
@@ -125,6 +125,18 @@ class FilterData extends React.Component {
       };
     });
   }
+  summariseMeasurementsFilters = () => {
+    return Object.entries(this.props.measurementsFilters).map(([field, valuesMap]) => {
+      const activeFiltersCount = Array.from(valuesMap.values()).reduce((prevCount, currentValue) => {
+        return currentValue.active ? prevCount + 1 : prevCount;
+      }, 0);
+      return {
+        field,
+        activeFiltersCount,
+        badgeTitle: `${activeFiltersCount} x ${this.props.measurementsFieldsMap.get(field).title}`
+      };
+    });
+  }
   render() {
     // options only need to be calculated a single time per render, and by adding a debounce
     // to `loadOptions` we don't slow things down by comparing queries to a large number of options
@@ -133,6 +145,7 @@ class FilterData extends React.Component {
     const filterOption = (option, filter) => filter.toLowerCase().split(" ").every((word) => option.label.toLowerCase().includes(word));
     const styles = this.getStyles();
     const inUseFilters = this.summariseFilters();
+    const measurementsFilters = this.summariseMeasurementsFilters();
     /* When filter categories were dynamically created (via metadata drag&drop) the `options` here updated but `<Async>`
     seemed to use a cached version of all values & wouldn't update. Changing the key forces a rerender, but it's not ideal */
     const divKey = String(Object.keys(this.props.activeFilters).length);
@@ -175,6 +188,28 @@ class FilterData extends React.Component {
             ))}
           </>
         ) : null}
+        {measurementsFilters.length ? (
+          <>
+            <SidebarSubtitle spaceAbove>
+              {"Currently selected measurements filters:"}
+            </SidebarSubtitle>
+            {measurementsFilters.map(({field, activeFiltersCount, badgeTitle}) => (
+              <div style={{display: 'inline-block', margin: '2px'}} key={badgeTitle}>
+                <FilterBadge
+                  active={activeFiltersCount > 0}
+                  canMakeInactive
+                  id={badgeTitle}
+                  remove={() => this.props.dispatch(removeAllFieldFilters(field))}
+                  activate={() => this.props.dispatch(toggleAllFieldFilters(field, true))}
+                  inactivate={() => this.props.dispatch(toggleAllFieldFilters(field, false))}
+                  onHoverMessage={`Measurements are currently filtered by ${badgeTitle}`}
+                >
+                  {badgeTitle}
+                </FilterBadge>
+              </div>
+            ))}
+          </>
+        ): null}
       </div>
     );
   }

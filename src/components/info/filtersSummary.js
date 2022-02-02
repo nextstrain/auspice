@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { applyFilter, changeDateFilter } from "../../actions/tree";
+import { toggleSingleFilter, removeSingleFilter } from "../../actions/measurements";
 import { strainSymbol, genotypeSymbol, getAminoAcidName } from "../../util/globals";
 import { FilterBadge, Tooltip } from "./filterBadge";
 import { styliseDateRange, pluralise } from "./datasetSummary";
@@ -39,7 +40,9 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    measurementsFilters: state.controls.measurementsFilters,
+    measurementsFields: state.measurements.collectionToDisplay.fields
   };
 })
 class FiltersSummary extends React.Component {
@@ -138,47 +141,87 @@ class FiltersSummary extends React.Component {
     if (!(this.props.dateMin===this.props.absoluteDateMin && this.props.dateMax===this.props.absoluteDateMax)) {
       filtersByCategory.push({name: 'temporal', badges: this.createFilterBadgesForTime()});
     }
-    if (!filtersByCategory.length) return null;
+
+    if (!filtersByCategory.length && !Object.keys(this.props.measurementsFilters).length) return null;
 
     return (
       <>
-        {t("Filtered to") + " "}
-        {filtersByCategory.map((filterCategory, idx) => {
-          const multipleFilterBadges = filterCategory.badges.length > 1;
-          const previousCategoriesRendered = idx!==0;
+        {filtersByCategory.length > 0 &&
+          <>
+            {t("Filtered to") + " "}
+            {filtersByCategory.map((filterCategory, idx) => {
+              const multipleFilterBadges = filterCategory.badges.length > 1;
+              const previousCategoriesRendered = idx!==0;
 
-          return (
-            <span style={{fontSize: "2rem", padding: "0px 2px"}} key={filterCategory.name}>
-              {previousCategoriesRendered && <Intersect id={'intersect'+idx}/>}
-              {multipleFilterBadges && openBracketBig} {/* multiple badges => surround with set notation */}
-              {filterCategory.badges.map((badge, badgeIdx) => {
-                if (Array.isArray(badge)) { // if `badge` is an array then we wish to render a set-within-a-set
-                  return (
-                    <span key={badge.map((b) => b.props.id).join("")}>
-                      {openBracketSmall}
-                      {badge.map((el, elIdx) => (
-                        <span key={el.props.id}>
-                          {el}
-                          {elIdx!==badge.length-1 && <Union/>}
+              return (
+                <span style={{fontSize: "2rem", padding: "0px 2px"}} key={filterCategory.name}>
+                  {previousCategoriesRendered && <Intersect id={'intersect'+idx}/>}
+                  {multipleFilterBadges && openBracketBig} {/* multiple badges => surround with set notation */}
+                  {filterCategory.badges.map((badge, badgeIdx) => {
+                    if (Array.isArray(badge)) { // if `badge` is an array then we wish to render a set-within-a-set
+                      return (
+                        <span key={badge.map((b) => b.props.id).join("")}>
+                          {openBracketSmall}
+                          {badge.map((el, elIdx) => (
+                            <span key={el.props.id}>
+                              {el}
+                              {elIdx!==badge.length-1 && <Union/>}
+                            </span>
+                          ))}
+                          {closeBracketSmall}
+                          {badgeIdx!==filterCategory.badges.length-1 && ", "}
                         </span>
-                      ))}
-                      {closeBracketSmall}
-                      {badgeIdx!==filterCategory.badges.length-1 && ", "}
-                    </span>
-                  );
-                }
-                return (
-                  <span key={badge.props.id}>
-                    {badge}
-                    {badgeIdx!==filterCategory.badges.length-1 && ", "}
-                  </span>
-                );
-              })}
-              {multipleFilterBadges && closeBracketBig}
-            </span>
-          );
-        })}
-        {". "}
+                      );
+                    }
+                    return (
+                      <span key={badge.props.id}>
+                        {badge}
+                        {badgeIdx!==filterCategory.badges.length-1 && ", "}
+                      </span>
+                    );
+                  })}
+                  {multipleFilterBadges && closeBracketBig}
+                </span>
+              );
+            })}
+            {". "}
+          </>
+        }
+        {Object.keys(this.props.measurementsFilters).length > 0 &&
+          <>
+            <br/>
+            {t("Measurements filtered to") + " "}
+            {Object.entries(this.props.measurementsFilters).map(([field, valuesMap], fieldIndex) => {
+              const fieldTitle = this.props.measurementsFields.get(field).title;
+              return (
+                <span key={field}>
+                  {openBracketBig}
+                  {`${fieldTitle}: `}
+                  {[...valuesMap].map(([fieldValue, {active}], valueIndex) => {
+                    return (
+                      <span key={fieldValue} style={{fontSize: "2rem", padding: "0px 2px"}}>
+                        <FilterBadge
+                          active={active}
+                          canMakeInactive
+                          id={String(fieldValue)}
+                          remove={() => this.props.dispatch(removeSingleFilter(field, fieldValue))}
+                          activate={() => this.props.dispatch(toggleSingleFilter(field, fieldValue, true))}
+                          inactivate={() => this.props.dispatch(toggleSingleFilter(field, fieldValue, false))}
+                          onHoverMessage={`Filtering measurements to this ${fieldTitle}`}
+                        >
+                          {fieldValue}
+                        </FilterBadge>
+                        {valueIndex < (valuesMap.size - 1) && ","}
+                      </span>
+                    );
+                  })}
+                  {closeBracketBig}
+                  {fieldIndex < (Object.keys(this.props.measurementsFilters).length - 1) && <Intersect/>}
+                </span>
+              );
+            })}
+          </>
+        }
       </>
     );
   }

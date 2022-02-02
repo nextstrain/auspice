@@ -197,3 +197,45 @@ export const toggleSingleFilter = (field, value, active) => (dispatch, getState)
     data: measurementsFilters
   });
 };
+
+export const removeSingleFilter = (field, value) => (dispatch, getState) => {
+  const { controls } = getState();
+  const measurementsFilters = {...controls.measurementsFilters};
+  measurementsFilters[field] = new Map(measurementsFilters[field]);
+  measurementsFilters[field].delete(value);
+
+  // If removing the single filter leaves 0 filters for the field, completely
+  // remove the field from the filters state
+  if (measurementsFilters[field].size === 0) {
+    delete measurementsFilters[field];
+  }
+
+  dispatch({
+    type: APPLY_MEASUREMENTS_FILTER,
+    data: measurementsFilters
+  });
+};
+
+export const removeAllFieldFilters = (field) => (dispatch, getState) => {
+  const { controls } = getState();
+  const measurementsFilters = {...controls.measurementsFilters};
+  delete measurementsFilters[field];
+
+  dispatch({
+    type: APPLY_MEASUREMENTS_FILTER,
+    data: measurementsFilters
+  });
+};
+
+export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => {
+  const { controls } = getState();
+  const measurementsFilters = {...controls.measurementsFilters};
+  measurementsFilters[field] = new Map(measurementsFilters[field]);
+  for (const fieldValue of measurementsFilters[field].keys()) {
+    measurementsFilters[field].set(fieldValue, {active});
+  }
+  dispatch({
+    type: APPLY_MEASUREMENTS_FILTER,
+    data: measurementsFilters
+  });
+};
