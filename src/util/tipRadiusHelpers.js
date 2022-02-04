@@ -11,7 +11,7 @@ import { getTraitFromNode } from "../util/treeMiscHelpers";
 * @param {object} colorScale - used to get the value of the attribute being used for colouring
 * @returns bool
 */
-const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
+export const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
   if (colorScale.continuous) {
     return (nodeAttr <= colorScale.legendBounds[selectedLegendItem][1]) &&

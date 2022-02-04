@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
 import { getTipColorAttribute } from "../../util/colorHelpers";
+import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundry";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";
@@ -36,6 +37,9 @@ const useDeepCompareMemo = (value) => {
   return ref.current;
 };
 
+// Checks visibility against global NODE_VISIBLE
+const isVisible = (visibility) => visibility === NODE_VISIBLE;
+
 /**
  * A custom React Redux Selector that reduces the tree redux state to an object
  * with the terminal strain names and their corresponding properties that
@@ -59,10 +63,27 @@ const treeStrainPropertySelector = (state) => {
     // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
       treeStrainVisibility[node.name] = tree.visibility[index];
-      treeStrainColors[node.name] = {
-        attribute: getTipColorAttribute(node, colorScale),
-        color: tree.nodeColors[index]
-      };
+      // Only store colors for visible strains since only measurmeents
+      // for visible strains will be displayed
+      if (isVisible(tree.visibility[index])) {
+        /*
+        * If the color scale is continuous, we want to group by the legend value
+        * instead of the specific strain attribute in order to combine all values
+        * within the legend bounds into a single group.
+        */
+        let attribute = getTipColorAttribute(node, colorScale);
+        if (colorScale.continuous) {
+          colorScale.visibleLegendValues.forEach((legendValue) => {
+            if (determineLegendMatch(legendValue, node, colorScale)) {
+              attribute = legendValue;
+            }
+          });
+        }
+        treeStrainColors[node.name] = {
+          attribute,
+          color: tree.nodeColors[index]
+        };
+      }
     }
     return treeStrainProperty;
   }, intitialTreeStrainProperty);
@@ -80,9 +101,6 @@ const treeStrainPropertySelector = (state) => {
  * @returns
  */
 const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
-  // Checks visibility against global NODE_VISIBLE
-  const isVisible = (visibility) => visibility === NODE_VISIBLE;
-
   // Find active filters to filter measurements
   const activeFilters = {};
   Object.entries(filters).forEach(([field, valuesMap]) => {
