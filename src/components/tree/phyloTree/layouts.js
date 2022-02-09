@@ -487,8 +487,6 @@ export const mapToScreen = function mapToScreen() {
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;
     const stem_offset_radial = this.nodes.map((d) => {return (0.5*(stemParent(d.n).shell["stroke-width"] - d["stroke-width"]) || 0.0);});
-    this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.displayOrderRange[0]);});
-    this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.displayOrderRange[1]);});
     this.nodes.forEach((d, i) => {
       d.branch =[
         " M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString() +
