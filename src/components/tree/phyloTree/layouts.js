@@ -3,7 +3,6 @@
 import { min, max } from "d3-array";
 import scaleLinear from "d3-scale/src/linear";
 import {point as scalePoint} from "d3-scale/src/band";
-import { addLeafCount} from "./helpers";
 import { calculateRegressionThroughRoot, calculateRegressionWithFreeIntercept } from "./regression";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
@@ -136,29 +135,34 @@ export const scatterplotLayout = function scatterplotLayout() {
 
 };
 
+
 /**
- * Utility function for the unrooted tree layout.
- * assigns x,y coordinates to the subtree starting in node
+ * Utility function for the unrooted tree layout. See `unrootedLayout` for details.
  * @param {PhyloNode} node
- * @param {Int} nTips - total number of tips in the tree.
+ * @param {number} totalLeafWeight
  */
-const unrootedPlaceSubtree = (node, nTips) => {
-  node.x = node.px + node.branchLength * Math.cos(node.tau + node.w * 0.5);
-  node.y = node.py + node.branchLength * Math.sin(node.tau + node.w * 0.5);
+const unrootedPlaceSubtree = (node, totalLeafWeight) => {
+  const branchLength = node.depth - node.pDepth;
+  node.x = node.px + branchLength * Math.cos(node.tau + node.w * 0.5);
+  node.y = node.py + branchLength * Math.sin(node.tau + node.w * 0.5);
   let eta = node.tau; // eta is the cumulative angle for the wedges in the layout
   if (node.n.hasChildren) {
     for (let i = 0; i < node.n.children.length; i++) {
       const ch = node.n.children[i].shell; // ch is a <PhyloNode>
-      ch.w = 2 * Math.PI * ch.leafCount / nTips;
+      ch.w = 2 * Math.PI * leafWeight(ch.n) / totalLeafWeight;
       ch.tau = eta;
       eta += ch.w;
       ch.px = node.x;
       ch.py = node.y;
-      unrootedPlaceSubtree(ch, nTips);
+      unrootedPlaceSubtree(ch, totalLeafWeight);
     }
   }
 };
 
+
+// TODO
+// can't use the .child approach, must use parent stem function
+// check internal nodes with 1 child don't increase .w
 
 /**
  * calculates x,y coordinates for the unrooted layout. this is
@@ -166,30 +170,35 @@ const unrootedPlaceSubtree = (node, nTips) => {
  * @return {null}
  */
 export const unrootedLayout = function unrootedLayout() {
-
-  // postorder iteration to determine leaf count of every node
-  addLeafCount(this.nodes[0]);
-  const nTips = this.nodes[0].leafCount;
-
-  // calculate branch length from depth
-  this.nodes.forEach((d) => {d.branchLength = d.depth - d.pDepth;});
-  // preorder iteration to layout nodes
-  this.nodes[0].x = 0;
-  this.nodes[0].y = 0;
-  this.nodes[0].px = 0;
-  this.nodes[0].py = 0;
-  this.nodes[0].w = 2 * Math.PI;
-  this.nodes[0].tau = 0;
+  /* the angle of a branch (i.e. the line leading to the node) is `tau + 0.5*w`
+    `tau` stores the previous angle which has been used
+    `w` is a measurement of the angle occupied by the clade defined by this node
+    `eta` is a temporary variable of `tau` + the `w` of each child visited thus far
+  Note 1: we don't consider this.nodes[0] as that's the (unrendered)
+          root which holds the subtrees. We instead start by defining the values
+          for each subtree's root, which will be used by the children of that root
+  Note 2: Angles will start from `eta` as defined below, and then cover ~2*Pi radians
+  */
+  const totalLeafWeight = leafWeight(this.nodes[0].n);
   let eta = 1.5 * Math.PI;
-  const children = this.nodes[0].n.children; // <Node> not <PhyloNode>
+  const children = this.nodes[0].n.children; // <Node>
+  this.nodes.forEach((d) => { // this shouldn't be necessary
+    d.x = undefined;
+    d.y = undefined;
+    d.px = undefined;
+    d.py = undefined;
+  });
   for (let i = 0; i < children.length; i++) {
-    const phyloNode = children[i].shell;
-    phyloNode.px = 0;
-    phyloNode.py = 0;
-    phyloNode.w = 2.0 * Math.PI * phyloNode.leafCount / nTips;
-    phyloNode.tau = eta;
-    eta += phyloNode.w;
-    unrootedPlaceSubtree(phyloNode, nTips);
+    const d = children[i].shell; // <PhyloNode>
+    d.w = 2.0 * Math.PI * leafWeight(d.n) / totalLeafWeight; // angle occupied by entire subtree
+    if (d.w>0) { // i.e. subtree has tips which should be drawn
+      const distFromOrigin = d.depth - this.nodes[0].depth;
+      d.px = distFromOrigin * Math.cos(eta + d.w * 0.5);
+      d.py = distFromOrigin * Math.sin(eta + d.w * 0.5);
+      d.tau = eta;
+      unrootedPlaceSubtree(d, totalLeafWeight);
+      eta += d.w;
+    }
   }
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
@@ -198,6 +207,10 @@ export const unrootedLayout = function unrootedLayout() {
       d.yCross = d.py + bL * Math.sin(d.tau + d.w * 0.5);
     });
   }
+  this.nodes.forEach((d) => { // remove properties which otherwise build up over time
+    delete d.tau;
+    delete d.w;
+  });
 };
 
 /**
@@ -557,4 +570,8 @@ function getTipLabelPadding(params, inViewTerminalNodes) {
     });
   }
   return padBy;
+}
+
+function leafWeight(node) {
+  return node.tipCount + 0.15*(node.fullTipCount-node.tipCount);
 }

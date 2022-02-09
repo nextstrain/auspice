@@ -12,31 +12,6 @@ export const getDomId = (type, strain) => {
 };
 
 /**
- * computes a measure of the total number of leaves for each node in
- * the tree, weighting leaves differently if they are inView.
- * Note: function is recursive
- * @param {PhyloNode} node -- root node of the tree
- * @returns {undefined}
- * @sideEffects sets `node.leafCount` {number} for all nodes
- */
-export const addLeafCount = (node) => {
-  const terminal = !node.n.hasChildren;
-  if (terminal && node.inView) {
-    node.leafCount = 1;
-  } else if (terminal && !node.inView) {
-    node.leafCount = 0.15;
-  } else {
-    node.leafCount = 0;
-    for (const child of node.n.children) {
-      const phyloChild = child.shell;
-      addLeafCount(phyloChild);
-      node.leafCount += phyloChild.leafCount;
-    }
-  }
-};
-
-
-/**
  * this function takes a call back and applies it recursively
  * to all child nodes, including internal nodes
  * @param {PhyloNode} node
