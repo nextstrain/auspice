@@ -37,7 +37,7 @@ class ChooseExplodeAttr extends React.Component {
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>
-          {t("sidebar:Explode tree by")}
+          {"[experimental] " + t("sidebar:Explode tree by")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <Select
