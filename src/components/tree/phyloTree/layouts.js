@@ -207,12 +207,12 @@ export const unrootedLayout = function unrootedLayout() {
  * @return {null}
  */
 export const radialLayout = function radialLayout() {
-  const nTips = this.numberOfTips;
+  const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
   const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
-    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / nTips;
-    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / nTips;
-    d.angle = 2.0 * 0.95 * Math.PI * d.displayOrder / nTips;
+    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / maxDisplayOrder;
+    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / maxDisplayOrder;
+    d.angle = 2.0 * 0.95 * Math.PI * d.displayOrder / maxDisplayOrder;
     d.y = (d.depth - offset) * Math.cos(d.angle);
     d.x = (d.depth - offset) * Math.sin(d.angle);
     d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);

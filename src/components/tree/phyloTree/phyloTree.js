@@ -33,7 +33,6 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = reduxNodes.filter((n) => !n.hasChildren).length;
   this.zoomNode = this.nodes[idxOfInViewRootNode];
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
