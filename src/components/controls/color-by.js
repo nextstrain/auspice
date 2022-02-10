@@ -213,7 +213,7 @@ class ColorBy extends React.Component {
           value={this.state.colorBySelected}
           options={colorOptions}
           clearable={false}
-          searchable={false}
+          searchable
           multi={false}
           onChange={(opt) => {
             this.replaceState({ colorBySelected: opt.value });
