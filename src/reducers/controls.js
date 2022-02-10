@@ -40,7 +40,6 @@ export const getDefaultControlsState = () => {
     defaults,
     available: undefined,
     canTogglePanelLayout: true,
-    selectedBranch: null,
     selectedNode: null,
     region: null,
     search: null,
@@ -102,14 +101,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return action.controls;
     case types.SET_AVAILABLE:
       return Object.assign({}, state, { available: action.data });
-    case types.BRANCH_MOUSEENTER:
-      return Object.assign({}, state, {
-        selectedBranch: action.data
-      });
-    case types.BRANCH_MOUSELEAVE:
-      return Object.assign({}, state, {
-        selectedBranch: null
-      });
     case types.NODE_MOUSEENTER:
       return Object.assign({}, state, {
         selectedNode: action.data

@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
-[![GitHub CI Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://github.com/nextstrain/auspice/actions?query=workflow%3Aci)
+[![Build Status](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml?query=branch:master)
 [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
@@ -73,7 +72,7 @@ curl http://data.nextstrain.org/ncov.json --compressed -o data/ncov.json
 ...
 ```
 
-If you've installed auspice from source, we have helper scripts to make all the datasets & narratives you see on nextstrain.org available locally:
+If you've installed auspice from source, we have a helper script to download a number of datasets for testing:
 
 ```bash
 # from the auspice src directory

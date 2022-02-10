@@ -13,7 +13,11 @@ export const onTipHover = function onTipHover(d) {
   phylotree.svg.select(getDomId("#tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
   this.setState({
-    hovered: {d, type: ".tip"}
+    selectedNode: {
+      node: d,
+      type: "tip",
+      event: "hover"
+    }
   });
 };
 
@@ -21,8 +25,11 @@ export const onTipClick = function onTipClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
   this.setState({
-    hovered: null,
-    selectedTip: d
+    selectedNode: {
+      node: d,
+      type: "tip",
+      event: "click"
+    }
   });
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
@@ -48,13 +55,30 @@ export const onBranchHover = function onBranchHover(d) {
 
   /* Set the hovered state so that an info box can be displayed */
   this.setState({
-    hovered: {d, type: ".branch"}
+    selectedNode: {
+      node: d,
+      type: "branch",
+      event: "hover"
+    }
   });
 };
 
 export const onBranchClick = function onBranchClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
+
+  /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
+  if (window.event.shiftKey) {
+    this.setState({
+      selectedNode: {
+        node: d,
+        type: "branch",
+        event: "click"
+      }
+    });
+    return;
+  }
+
   const root = [undefined, undefined];
   let cladeSelected;
   // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
@@ -89,6 +113,8 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
+  if (this.state.selectedNode.event!=="hover") return;
+
   /* Reset the stroke back to what it was before */
   branchStrokeForLeave(d);
 
@@ -97,33 +123,32 @@ export const onBranchLeave = function onBranchLeave(d) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
     tree.removeConfidence();
   }
-  /* Set hovered state to `null`, which will remove the info box */
-  if (this.state.hovered) {
-    this.setState({hovered: null});
-  }
+  /* Set selectedNode state to an empty object, which will remove the info box */
+  this.setState({selectedNode: {}});
 };
 
 export const onTipLeave = function onTipLeave(d) {
+  if (this.state.selectedNode.event!=="hover") return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  if (!this.state.selectedTip) {
+  if (!this.state.selectedNode) {
     phylotree.svg.select(getDomId("#tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
-  if (this.state.hovered) {
-    this.setState({hovered: null});
-  }
+  this.setState({selectedNode: {}});
 };
 
-/* clearSelectedTip when clicking to go away */
-export const clearSelectedTip = function clearSelectedTip(d) {
-  const phylotree = d.that.params.orientation[0] === 1 ?
+/* clearSelectedNode when clicking to remove the node-selected modal */
+export const clearSelectedNode = function clearSelectedNode(selectedNode) {
+  const phylotree = selectedNode.node.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select(getDomId("#tip", d.n.name))
+  phylotree.svg.select(getDomId("#tip", selectedNode.node.n.name))
     .attr("r", (dd) => dd["r"]);
-  this.setState({selectedTip: null, hovered: null});
-  /* restore the tip visibility! */
-  this.props.dispatch(applyFilter("inactivate", strainSymbol, [d.n.name]));
+  this.setState({selectedNode: {}});
+  if (selectedNode.type==="tip") {
+    /* restore the tip visibility! */
+    this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.node.n.name]));
+  }
 };

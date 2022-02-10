@@ -1,6 +1,6 @@
 {
   "name": "auspice",
-  "version": "2.31.0",
+  "version": "2.32.1",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
@@ -15,8 +15,6 @@
   },
   "main": "index.js",
   "scripts": {
-    "create-data-dir": "env bash ./scripts/create-data-dir.sh",
-    "postinstall": "npm run create-data-dir",
     "view": "node auspice.js view --verbose",
     "dev": "node auspice.js develop --verbose",
     "start": "npm run view",
@@ -103,6 +101,7 @@
     "query-string": "^4.2.3",
     "react": "^16.8.6",
     "react-addons-css-transition-group": "^15.6.0",
+    "react-collapsible": "^2.8.4",
     "react-dom": "^16.8.6",
     "react-ga": "^2.2.0",
     "react-helmet": "^5.2.1",

@@ -21,7 +21,7 @@ Please see the [project boards](https://github.com/orgs/nextstrain/projects) for
 
 ## Contributing code
 
-Code contributions are welcomed! [Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice from source.
+Code contributions are welcomed! [Please see the main auspice docs](https://docs.nextstrain.org/projects/auspice/en/latest/introduction/install.html) for details on how to install and run auspice from source.
 
 Please comment on an open issue if you are working on it.
 For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
@@ -165,4 +165,4 @@ If a translation of a particular string is not yet available, then auspice will 
 
 ## Releases & versioning
 
-New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as Travis-CI is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
+New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as the GitHub workflow is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).

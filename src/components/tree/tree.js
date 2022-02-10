@@ -7,7 +7,7 @@ import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
 import { getParentBeyondPolytomy } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
-import TipClickedPanel from "./infoPanels/click";
+import NodeClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
@@ -16,6 +16,7 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
 import { untangleTreeToo } from "./tangle/untangling";
+import { sortByGeneOrder } from "../../util/treeMiscHelpers";
 
 export const spaceBetweenTrees = 100;
 
@@ -28,14 +29,12 @@ class Tree extends React.Component {
     };
     this.tangleRef = undefined;
     this.state = {
-      hover: null,
-      selectedBranch: null,
-      selectedTip: null,
+      selectedNode: {},
       tree: null,
       treeToo: null
     };
     /* bind callbacks */
-    this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
+    this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
     // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
@@ -60,6 +59,7 @@ class Tree extends React.Component {
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
+      newState.geneSortFn = sortByGeneOrder(this.props.metadata.genomeAnnotations);
       this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
@@ -185,18 +185,20 @@ class Tree extends React.Component {
           <Legend width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
-          hovered={this.state.hovered}
+          selectedNode={this.state.selectedNode}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
+          geneSortFn={this.state.geneSortFn}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
           t={t}
         />
-        <TipClickedPanel
-          goAwayCallback={this.clearSelectedTip}
-          tip={this.state.selectedTip}
+        <NodeClickedPanel
+          clearSelectedNode={this.clearSelectedNode}
+          selectedNode={this.state.selectedNode}
           colorings={this.props.metadata.colorings}
+          geneSortFn={this.state.geneSortFn}
           t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
