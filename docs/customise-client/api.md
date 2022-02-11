@@ -23,7 +23,9 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 
 * `sidebarTheme` allows modifications to the aesthetics of the sidebar. See below.
 * `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
+* `splashComponent` a (relative) path to a JS file exporting a React component to be rendered as the splash page. See below.
 * `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
+* `finePrint` String of Markdown to add to the "fine print" at the bottom of pages.
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 * `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
 * `mapTiles` Specify the address (and other information) for the tiles used to render the map.
