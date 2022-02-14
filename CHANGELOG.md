@@ -2,6 +2,21 @@
 title: Changelog
 ---
 
+* (Experimental) Explode phylogeny into subtrees and allow multiple trees to be provided in the dataset.
+See [PR 1442](https://github.com/nextstrain/auspice/pull/1442) for more.
+* Categorise mutations to better understand sequence changes on branches and tips.
+See [PR 1449](https://github.com/nextstrain/auspice/pull/1449) for more.
+* Add a datepicker to allow precise changes to the selected date range.
+See [PR 1412](https://github.com/nextstrain/auspice/pull/1412) for more.
+* Allow build-time customizable fine print.
+See [PR 1448](https://github.com/nextstrain/auspice/pull/1448) for more.
+* Remove scrollbar in panels when no scrolling is possible
+See [PR 1439](https://github.com/nextstrain/auspice/pull/1439) for more.
+* Allow searching in the color-by dropdown.
+See [PR 1456](https://github.com/nextstrain/auspice/pull/1456) for more.
+
+There have also been internal changes related to how we run CI. These should not affect using Auspice as a library / CLI.
+
 ## version 2.32.1 - 2021/11/11
 * Fix URL parsing to allow the string "narratives" to be in a dataset without it being interpreted as a narrative itself. 
 See [PR 1428](https://github.com/nextstrain/auspice/pull/1428) for more.
