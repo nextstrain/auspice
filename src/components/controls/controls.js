@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import ColorBy, {ColorByInfo} from "./color-by";
 import DateRangeInputs, {DateRangeInfo} from "./date-range-inputs";
 import AnimationControls from "./animation-controls";
+import ChooseExplodeAttr from "./choose-explode-attr";
 import ChooseBranchLabelling from "./choose-branch-labelling";
 import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
@@ -43,6 +44,7 @@ function Controls({mapOn, frequenciesOn, mobileDisplay}) {
       <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
       <ChooseLayout />
       <ChooseMetric />
+      <ChooseExplodeAttr />
       <ChooseBranchLabelling />
       <ChooseTipLabel />
       <ChooseSecondTree />

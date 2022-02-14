@@ -1,5 +1,4 @@
 import { createDefaultParams } from "./defaultParams";
-import { createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -29,14 +28,11 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
       n: d, /* a back link to the redux node */
       x: 0,
       y: 0,
-      terminal: (typeof d.children === "undefined"),
       inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
     };
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
-  setYValues(this.nodes);
   this.zoomNode = this.nodes[idxOfInViewRootNode];
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});

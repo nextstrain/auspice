@@ -1,22 +1,6 @@
 import { getDefaultTreeState } from "../reducers/tree";
-import { getVaccineFromNode } from "./treeMiscHelpers";
-
-/**
-* for each node, calculate the number of subtending tips (alive or dead)
-* side effects: n.fullTipCount for each node
-*  @param root - deserialized JSON root to begin traversal
-*/
-const calcFullTipCounts = (node) => {
-  node.fullTipCount = 0;
-  if (typeof node.children !== "undefined") {
-    for (let i = 0; i < node.children.length; i++) {
-      calcFullTipCounts(node.children[i]);
-      node.fullTipCount += node.children[i].fullTipCount;
-    }
-  } else {
-    node.fullTipCount = 1;
-  }
-};
+import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
+import { calcFullTipCounts } from "./treeCountingHelpers";
 
 /**
  * Adds certain properties to the nodes array - for each node in nodes it adds
@@ -70,6 +54,21 @@ const visitNode = (node, hashMap, array) => {
   }
 };
 
+const makeSubtreeRootNode = (nodesArray, subtreeIndicies) => {
+  const node = {
+    name: "__ROOT",
+    node_attrs: {hidden: "always"},
+    children: subtreeIndicies.map((idx) => nodesArray[idx])
+  };
+  node.parent = node;
+  // ensure root has minimum observed divergence & date (across subtree roots)
+  const observedDivs = node.children.map((n) => getDivFromNode(n)).filter((div) => div!==undefined);
+  if (observedDivs.length) node.node_attrs.div = Math.min(...observedDivs);
+  const observedTimes = node.children.map((n) => getTraitFromNode(n, "num_date")).filter((num_date) => num_date!==undefined);
+  if (observedTimes.length) node.node_attrs.num_date = {value: Math.min(...observedTimes)};
+  return node;
+};
+
 /**
 *  Pre-order tree traversal visits each node using stack.
 *  Checks if leaf node based on node.children
@@ -117,10 +116,32 @@ const appendParentsToTree = (root) => {
   }
 };
 
+/**
+ * Currently this is limited in scope, but is intended to parse
+ * information on a branch_attr indicating information about minor/
+ * major parents (e.g. recombination, subtree position in another tree).
+ * @param {Array<Node>} nodes
+ */
+const addParentInfo = (nodes) => {
+  nodes.forEach((n) => {
+    n.parentInfo = {
+      original: n.parent
+    };
+  });
+};
+
 export const treeJsonToState = (treeJSON) => {
-  appendParentsToTree(treeJSON);
-  const nodesArray = flattenTree(treeJSON);
+  const trees = Array.isArray(treeJSON) ? treeJSON : [treeJSON];
+  const nodesArray = [];
+  const subtreeIndicies = [];
+  for (const treeRootNode of trees) {
+    appendParentsToTree(treeRootNode);
+    subtreeIndicies.push(nodesArray.length);
+    nodesArray.push(...flattenTree(treeRootNode));
+  }
+  nodesArray.unshift(makeSubtreeRootNode(nodesArray, subtreeIndicies));
   const nodes = processNodes(nodesArray);
+  addParentInfo(nodesArray);
   const vaccines = nodes.filter((d) => {
     const v = getVaccineFromNode(d);
     return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));

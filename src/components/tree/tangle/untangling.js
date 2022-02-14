@@ -1,4 +1,4 @@
-import { setYValuesRecursively, setYValues } from "../phyloTree/helpers";
+import { setDisplayOrderRecursively, setDisplayOrder } from "../phyloTree/helpers";
 
 
 /** calculatePearsonCorrelationCoefficient
@@ -11,10 +11,10 @@ import { setYValuesRecursively, setYValues } from "../phyloTree/helpers";
 const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   let count=0, my1=0, my2=0, sqy1=0, sqy2=0, y12=0;
   for (let i=0; i<phylotree2.nodes.length; i++) {
-    const n2=phylotree2.nodes[i].n;
-    if ((!n2.children) && phylotree1.strainToNode[n2.name]) {
-      const y1 = phylotree1.strainToNode[n2.name].n.yvalue;
-      const y2 = n2.yvalue;
+    const n2=phylotree2.nodes[i];
+    if ((!n2.n.children) && phylotree1.strainToNode[n2.n.name]) {
+      const y1 = phylotree1.strainToNode[n2.n.name].displayOrder;
+      const y2 = n2.displayOrder;
       count++;
       my1+=y1;
       my2+=y2;
@@ -41,7 +41,7 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
   for (let i=0; i<phylotree2.nodes.length; i++) {
     const phyloNode = phylotree2.nodes[i];
     const reduxNode = phyloNode.n;
-    if (phyloNode.children) {
+    if (reduxNode.children) {
 
       /* step 1: find the left-most y value descendent from this node.
       This is needed to recursively set new y-values downstream of this node
@@ -50,24 +50,22 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
       while (leftMostNode.hasChildren) {
         let nodeWithSmallestY = leftMostNode.children[0];
         leftMostNode.children.forEach((node) => {
-          if (node.yvalue < nodeWithSmallestY.yvalue) {
+          if (node.shell.displayOrder < nodeWithSmallestY.shell.displayOrder) {
             nodeWithSmallestY = node;
           }
         });
         leftMostNode = nodeWithSmallestY;
       }
-      const originalStartingY = leftMostNode.yvalue - 1; // setYValuesRecursively expects the previous Y value
+      const originalStartingY = leftMostNode.shell.displayOrder - 1; // setDisplayOrderRecursively expects the previous Y value
 
       /* step 2: reverse the children, recalc the y-values, and see if things improved */
-      phyloNode.children.reverse();
       reduxNode.children.reverse();
-      setYValuesRecursively(phyloNode, originalStartingY);
+      setDisplayOrderRecursively(phyloNode, originalStartingY);
       const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
       if (correlation > new_corr) {
-        phyloNode.children.reverse();
         reduxNode.children.reverse();
-        setYValuesRecursively(phyloNode, originalStartingY);
-        // setYValuesRecursively(phylotree2.nodes[0], 0);
+        setDisplayOrderRecursively(phyloNode, originalStartingY);
+        // setDisplayOrderRecursively(phylotree2.nodes[0], 0);
       } else {
         correlation = new_corr;
       }
@@ -80,6 +78,6 @@ export const untangleTreeToo = (phylotree1, phylotree2) => {
   // const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
   // console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
-  setYValues(phylotree2.nodes);
+  setDisplayOrder(phylotree2.nodes);
   // console.timeEnd("untangle");
 };

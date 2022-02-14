@@ -65,8 +65,8 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
 * If the node isn't visible, the thickness is 1.
 * Relies on the `tipCount` property of the nodes having been updated.
 * Pure.
-* @param nodes - JSON nodes
-* @param visibility - visibility array (1-1 with nodes)
+* @param {Array<Node>} nodes - JSON nodes
+* @param {Array<Int>} visibility - visibility array (1-1 with nodes)
 * @returns array of thicknesses (numeric)
 */
 const calcBranchThickness = (nodes, visibility) => {

@@ -6,31 +6,50 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
-import { createVisibleLegendValues } from "../util/colorScale";
+import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
+import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { warningNotification } from "./notifications";
+import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 
 
+/**
+ * Updates the `inView` property of nodes which depends on the currently selected
+ * root index (i.e. what node the tree is zoomed into).
+ * Note that this property is historically the remit of PhyloTree, however this function
+ * may be called before those objects are created; in this case we store the property on
+ * the tree node itself.
+ * @param {Int} idx - index of displayed root node
+ * @param {ReduxTreeState} tree
+ */
 export const applyInViewNodesToTree = (idx, tree) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
-  if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
-    /* a bit hacky, should be somewhere else */
+  if (tree.nodes[0].shell) {
     tree.nodes.forEach((d) => {
       d.shell.inView = false;
       d.shell.update = true;
     });
-    if (tree.nodes[validIdxRoot].shell.terminal) {
-      applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
-    } else {
+    if (tree.nodes[validIdxRoot].hasChildren) {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+    } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
+      // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
+      tree.nodes[validIdxRoot].shell.inView = true;
+    } else {
+      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d) => {d.inView = true;});
     }
   } else {
+    /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
-    if (!tree.nodes[validIdxRoot].hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot].parent, (d) => {d.inView = true;});
-    } else {
-      applyToChildren(tree.nodes[validIdxRoot], (d) => {d.inView = true;});
-    }
+    /* note that we cannot use `applyToChildren` as that operates on PhyloNodes */
+    const _markChildrenInView = (node) => {
+      node.inView = true;
+      if (node.children) {
+        for (const child of node.children) _markChildrenInView(child);
+      }
+    };
+    const startingNode = tree.nodes[validIdxRoot].hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot].parent;
+    _markChildrenInView(startingNode);
   }
 
   return validIdxRoot;
@@ -282,3 +301,125 @@ export const applyFilter = (mode, trait, values) => {
 export const toggleTemporalConfidence = () => ({
   type: types.TOGGLE_TEMPORAL_CONF
 });
+
+
+/**
+ * restore original state by iterating over all nodes and restoring children to unexplodedChildren (as necessary)
+ * @param {Array<Node>} nodes
+ */
+const _resetExpodedTree = (nodes) => {
+  nodes.forEach((n) => {
+    if (n.hasOwnProperty('unexplodedChildren')) { // eslint-disable-line
+      n.children = n.unexplodedChildren;
+      n.hasChildren = true;
+      delete n.unexplodedChildren;
+      for (const child of n.children) {
+        child.parent = n;
+      }
+    }
+  });
+};
+
+/**
+ * Recursive function which traverses the tree modifying parent -> child links in order to
+ * create subtrees where branches have different attrs.
+ * Note: because the children of a node may change, we store the previous (unexploded) children
+ * as `unexplodedChildren` so we can return to the original tree.
+ * @param {Node} root - root node of entire tree
+ * @param {Node} node - current node being traversed
+ * @param {String} attr - trait name to determine if a child should become subtree
+ */
+const _traverseAndCreateSubtrees = (root, node, attr) => {
+  // store original children so we traverse the entire tree
+  const originalChildren = node.hasChildren ? [...node.children] : [];
+
+  if (node.arrayIdx === 0) { // __ROOT will hold all (expoded) subtrees
+    node.unexplodedChildren = originalChildren;
+  } else if (node.hasChildren) {
+    const parentTrait = getTraitFromNode(node, attr);
+    const childrenToPrune = node.children
+      .map((c) => getTraitFromNode(c, attr))
+      .map((childTrait, idx) => (childTrait!==parentTrait) ? idx : undefined)
+      .filter((v) => v!==undefined);
+    if (childrenToPrune.length) {
+      childrenToPrune.forEach((idx) => {
+        const subtreeRootNode = node.children[idx];
+        root.children.push(subtreeRootNode);
+        subtreeRootNode.parent = root;
+      });
+      node.unexplodedChildren = originalChildren;
+      node.children = node.children.filter((c, idx) => {
+        return !childrenToPrune.includes(idx);
+      });
+      /* it may be the case that the node now has no children (they're all subtrees!) */
+      if (node.children.length===0) {
+        node.hasChildren = false;
+      }
+    }
+  }
+  for (const originalChild of originalChildren) { // this may jump into subtrees
+    _traverseAndCreateSubtrees(root, originalChild, attr);
+  }
+};
+
+/**
+ * sort the subtrees by the order the trait would appear in the legend
+ */
+const _orderSubtrees = (metadata, nodes, attr) => {
+  const attrValueOrder = getLegendOrder(attr, metadata.colorings[attr], nodes, undefined);
+  nodes[0].children.sort((childA, childB) => {
+    const [attrA, attrB] = [getTraitFromNode(childA, attr), getTraitFromNode(childB, attr)];
+    if (attrValueOrder.length) {
+      const [idxA, idxB] = [attrValueOrder.indexOf(attrA), attrValueOrder.indexOf(attrB)];
+      if (idxA===-1 && idxB===-1) return -1; // neither in legend => preserve order
+      if (idxB===-1) return -1;              // childA in legend, childB not => sort A before B
+      if (idxA < idxB) return -1;            // childA before childB => sort a before b
+      if (idxA > idxB) return 1;             // and vice versa
+      return 0;
+    }
+    // fallthrough, if there's no available legend order, is to simply sort alphabetically
+    return attrA > attrB ? -1 : 1;
+  });
+};
+
+export const explodeTree = (attr) => (dispatch, getState) => {
+  const {tree, metadata, controls} = getState();
+  _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
+  if (attr) {
+    const root = tree.nodes[0];
+    _traverseAndCreateSubtrees(root, root, attr);
+    if (root.unexplodedChildren.length === root.children.length) {
+      dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
+      return;
+    }
+    _orderSubtrees(metadata, tree.nodes, attr);
+  }
+  /* tree splitting necessitates recalculation of tip counts */
+  calcFullTipCounts(tree.nodes[0]);
+  calcTipCounts(tree.nodes[0], tree.visibility);
+  /* we default to zooming out completely whenever we explode the tree. There are nicer behaviours here,
+  such as re-calculating the MRCA of visible nodes, but this comes at the cost of increased complexity.
+  Note that the functions called here involve a lot of code duplication and are good targets for refactoring */
+  applyInViewNodesToTree(0, tree);
+  const visData = calculateVisiblityAndBranchThickness(
+    tree,
+    controls,
+    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
+  );
+  visData.idxOfInViewRootNode = 0;
+  visData.stateCountAttrs = Object.keys(controls.filters);
+  /* Changes in visibility require a recomputation of which legend items we wish to display */
+  visData.visibleLegendValues = createVisibleLegendValues({
+    colorBy: controls.colorBy,
+    genotype: controls.colorScale.genotype,
+    scaleType: controls.colorScale.scaleType,
+    legendValues: controls.colorScale.legendValues,
+    treeNodes: tree.nodes,
+    visibility: visData.visibility
+  });
+  dispatch({
+    type: types.CHANGE_EXPLODE_ATTR,
+    explodeAttr: attr,
+    ...visData
+  });
+};

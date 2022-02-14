@@ -9,7 +9,7 @@ import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
  * It does not consider which tips are inView / visible.
  */
 export function calculateRegressionThroughRoot(nodes) {
-  const terminalNodes = nodes.filter((d) => d.terminal);
+  const terminalNodes = nodes.filter((d) => !d.n.hasChildren);
   const nTips = terminalNodes.length;
   const offset = nodes[0].x;
   const XY = sum(
@@ -30,7 +30,7 @@ export function calculateRegressionThroughRoot(nodes) {
  * This function does not consider which tips are inView / visible.
  */
 export function calculateRegressionWithFreeIntercept(nodes) {
-  const terminalNodesWithXY = nodes.filter((d) => d.terminal && d.x!==undefined && d.y!==undefined);
+  const terminalNodesWithXY = nodes.filter((d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined);
   const nTips = terminalNodesWithXY.length;
   const meanX = sum(terminalNodesWithXY.map((d) => d.x))/nTips;
   const meanY = sum(terminalNodesWithXY.map((d) => d.y))/nTips;

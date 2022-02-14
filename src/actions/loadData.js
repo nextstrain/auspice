@@ -10,6 +10,7 @@ import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
 import { NoContentError } from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
+import { explodeTree } from "./tree";
 
 export function getDatasetNamesFromUrl(url) {
   let secondTreeUrl;
@@ -41,6 +42,12 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
   }
 
   const oldState = getState();
+
+  /* if the first tree is exploded, then reconstruct it before loading a second tree */
+  if (oldState.controls.explodeAttr) {
+    dispatch(explodeTree(undefined));
+  }
+
   const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl, dispatch});
   dispatch({type: types.TREE_TOO_DATA, ...newState});
 };
