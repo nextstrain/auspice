@@ -1,20 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import styled from 'styled-components';
 import Slider from "./slider";
+import DatePicker from "./date-picker";
 import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-
-const DateLabel = styled.div`
-  font-family: ${(props) => props.theme["font-family"]};
-  margin-bottom: 5px;
-  font-size: 12px;
-  font-weight: 400;
-  color: ${(props) => props.theme.color};
-  float: ${(props) => props.right ? "right" : "left"};
-`;
 
 @connect((state) => {
   return {
@@ -37,6 +28,8 @@ class DateRangeInputs extends React.Component {
     };
     this.updateFromSliderNotDebounced = this.updateFromSlider.bind(this, false);
     this.updateFromSliderDebounced = this.updateFromSlider.bind(this, true);
+    this.updateMinFromDatePicker = this.updateMinFromDatePicker.bind(this);
+    this.updateMaxFromDatePicker = this.updateMaxFromDatePicker.bind(this);
   }
   maybeClearMapAnimationInterval() {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
@@ -79,6 +72,12 @@ class DateRangeInputs extends React.Component {
     }
     return null;
   }
+  updateMinFromDatePicker(value) {
+    this.props.dispatch(changeDateFilter({newMin: value}));
+  }
+  updateMaxFromDatePicker(value) {
+    this.props.dispatch(changeDateFilter({newMax: value}));
+  }
   render() {
     if (this.props.branchLengthsToDisplay === "divOnly") {
       return null;
@@ -101,8 +100,18 @@ class DateRangeInputs extends React.Component {
         </div>
         <div style={{height: 5}}/>
         <div style={{width: controlsWidth}}>
-          <DateLabel>{this.props.dateMin}</DateLabel>
-          <DateLabel right>{this.props.dateMax}</DateLabel>
+          <DatePicker
+            value={this.props.dateMin}
+            minDate={this.props.absoluteDateMin}
+            maxDate={this.props.dateMax}
+            onChange={this.updateMinFromDatePicker}
+          />
+          <DatePicker right
+            value={this.props.dateMax}
+            minDate={this.props.dateMin}
+            maxDate={this.props.absoluteDateMax}
+            onChange={this.updateMaxFromDatePicker}
+          />
         </div>
       </div>
     );
