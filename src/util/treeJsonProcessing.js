@@ -130,6 +130,29 @@ const addParentInfo = (nodes) => {
   });
 };
 
+/**
+ * Collects all mutations on the tree
+ * @param  {Node[]} nodesArray
+ * @return {Object}
+ *         keys are mutations in gene:fromPosTo format (e.g. nuc:A123T)
+ *         values are integers representing occurrences on tree
+ * @todo   The original remit of this function was for homoplasy detection.
+ *         If storing all the mutations becomes an issue, we may be able use an array
+ *         of mutations observed more than once.
+ */
+const collectObservedMutations = (nodesArray) => {
+  const mutations = {};
+  nodesArray.forEach((n) => {
+    if (!n.branch_attrs || !n.branch_attrs.mutations) return;
+    Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
+      muts.forEach((mut) => {
+        mutations[`${gene}:${mut}`] ? mutations[`${gene}:${mut}`]++ : (mutations[`${gene}:${mut}`] = 1);
+      });
+    });
+  });
+  return mutations;
+};
+
 export const treeJsonToState = (treeJSON) => {
   const trees = Array.isArray(treeJSON) ? treeJSON : [treeJSON];
   const nodesArray = [];
@@ -147,7 +170,8 @@ export const treeJsonToState = (treeJSON) => {
     return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
   });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
+  const observedMutations = collectObservedMutations(nodesArray);
   return Object.assign({}, getDefaultTreeState(), {
-    nodes, vaccines, availableBranchLabels, loaded: true
+    nodes, vaccines, observedMutations, availableBranchLabels, loaded: true
   });
 };

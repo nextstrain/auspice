@@ -3,9 +3,11 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
+  getFullAuthorInfoFromNode, getTipChanges, getBranchMutations } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
+import { parseIntervalsOfNsOrGaps } from "./MutationTable";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -138,45 +140,73 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
 };
 
 /**
+ * A React Component to display summary counts of changes between a tip node & the root
+ * @param  {Object} props
+ * @param  {Object} props.node     branch node which is currently highlighted
+ */
+const TipMutations = ({node, t}) => {
+  const changes = getTipChanges(node);
+  if (!changes.nuc) return null; // can happen on trees with no mutations defined
+  const nucCounts = {changes: 0, gaps: 0, reversionsToRoot: 0, ns: 0};
+  const aaCounts = {changes: 0, gaps: 0, reversionsToRoot: 0};
+  Object.keys(changes)
+    .forEach((gene) => {
+      Object.entries(changes[gene]).forEach(([key, muts]) => {
+        if (gene==="nuc") {
+          nucCounts[key] += muts.length;
+        } else {
+          aaCounts[key] += muts.length;
+        }
+      });
+    });
+  let ntSummary = `${nucCounts.changes}${nucCounts.reversionsToRoot ? ` + ${nucCounts.reversionsToRoot} reversions to root`: ''}`;
+  ntSummary += `${nucCounts.gaps ? ` + ${nucCounts.gaps} gaps`: ''}${nucCounts.nt ? ` + ${nucCounts.nt} Ns`: ''}`;
+  let aaSummary = `${aaCounts.changes}${aaCounts.reversionsToRoot ? ` + ${aaCounts.reversionsToRoot} reversions to root`: ''}`;
+  aaSummary += `${aaCounts.gaps ? ` + ${aaCounts.gaps} gaps`: ''}`;
+  return [
+    <InfoLine name={t("Nucleotide changes")+":"} value={ntSummary} key="nuc"/>,
+    <InfoLine name={t("Amino Acid changes")+":"} value={aaSummary} key="aa"/>
+  ];
+};
+
+/**
  * A React Component to Display AA / NT mutations, if present.
  * @param  {Object} props
  * @param  {Object} props.node     branch node which is currently highlighted
  * @param  {Object} props.geneSortFn function to sort a list of genes
+ * @param  {Object} props.observedMutations counts of all observed mutations across the tree
+
  */
-const Mutations = ({node, geneSortFn, t}) => {
+const BranchMutations = ({node, geneSortFn, observedMutations, t}) => {
   if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
   const elements = []; // elements to render
   const mutations = node.branch_attrs.mutations;
 
+  const categorisedMutations = getBranchMutations(node, observedMutations);
+
+  const subset = (muts, maxNum) =>
+    muts.slice(0, Math.min(maxNum, muts.length)).join(", ") +
+    (muts.length > maxNum ? ` + ${muts.length-maxNum} more` : '');
+
   /* --------- NUCLEOTIDE MUTATIONS --------------- */
-  /* Nt mutations are found at `mutations.nuc` -> Array of strings */
-  if (mutations.nuc && mutations.nuc.length) {
-    const nDisplay = 9; // max number of mutations to display
-
-    const isMutGap = (mut) => mut.slice(-1) === "-" || mut.slice(0, 1) === "-";
-    const isMutUnknown = (mut) => mut.slice(-1) === "N" || mut.slice(0, 1) === "N";
-
-    // gather muts which aren't to/from a gap or a "N"
-    const nucs = mutations.nuc.filter((mut) => (!isMutGap(mut) && !(isMutUnknown(mut))));
-    const nucLen = nucs.length; // number of mutations that exist without N/-
-
-    let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
-    if (nucLen > nDisplay) {
-      m += " + " + t("{{x}} more", {x: nucLen - nDisplay});
+  if (categorisedMutations.nuc) {
+    const nDisplay = 5; // max number of mutations to display per category
+    if (categorisedMutations.nuc.unique.length) {
+      elements.push(<InfoLine name='Unique Nucleotide mutations:' value={subset(categorisedMutations.nuc.unique, nDisplay)} key="nuc_unique"/>);
     }
-
-    if (nucLen !== 0) {
-      elements.push(<InfoLine name={t("Nucleotide mutations")+":"} value={m} key="nuc"/>);
+    if (categorisedMutations.nuc.homoplasies.length) {
+      elements.push(<InfoLine name='Homoplasic mutations:' value={subset(categorisedMutations.nuc.homoplasies, nDisplay)} key="nuc_homoplasies"/>);
     }
-
-    const nGapMutations = mutations.nuc.filter((mut) => isMutGap(mut)).length;
-    if (nGapMutations) {
-      elements.push(<InfoLine name={`${t("Gaps")} ("-"):`} value={nGapMutations} key="gaps"/>);
+    if (categorisedMutations.nuc.reversionsToRoot.length) {
+      elements.push(<InfoLine name='Reversions to Root:' value={categorisedMutations.nuc.reversionsToRoot.length} key="nuc_rtr"/>);
     }
-
-    const nUnknownMutations = mutations.nuc.filter((mut) => isMutUnknown(mut)).length;
-    if (nUnknownMutations) {
-      elements.push(<InfoLine name='Ns:' value={nUnknownMutations} key="Ns"/>);
+    if (categorisedMutations.nuc.gaps.length) {
+      const value = `${parseIntervalsOfNsOrGaps(categorisedMutations.nuc.gaps).length} regions, ${categorisedMutations.nuc.gaps.length}bp.`;
+      elements.push(<InfoLine name='Gaps:' value={value} key="nuc_gaps"/>);
+    }
+    if (categorisedMutations.nuc.ns.length) {
+      const value = `${parseIntervalsOfNsOrGaps(categorisedMutations.nuc.ns).length} regions, ${categorisedMutations.nuc.ns.length}bp.`;
+      elements.push(<InfoLine name='Ns:' value={value} key="nuc_ns"/>);
     }
   } else {
     elements.push(<InfoLine name={t("No nucleotide mutations")} value="" key="nuc"/>);
@@ -359,6 +389,7 @@ const HoverInfoPanel = ({
   panelDims,
   colorings,
   geneSortFn,
+  observedMutations,
   t
 }) => {
   if (selectedNode.event !== "hover") return null;
@@ -371,7 +402,7 @@ const HoverInfoPanel = ({
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>
-          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
+          <TipMutations node={node} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
@@ -380,7 +411,7 @@ const HoverInfoPanel = ({
       ) : (
         <>
           <BranchDescendents node={node} t={t}/>
-          <Mutations node={node} geneSortFn={geneSortFn} t={t}/>
+          <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>
