@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.33.0 - 2022/02/15
+
+
 * (Experimental) Explode phylogeny into subtrees and allow multiple trees to be provided in the dataset.
 See [PR 1442](https://github.com/nextstrain/auspice/pull/1442) for more.
 * Categorise mutations to better understand sequence changes on branches and tips.
