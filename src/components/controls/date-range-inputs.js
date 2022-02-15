@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Slider from "./slider";
-import DatePicker from "./date-picker";
+import DateLabel from "./date-picker";
 import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
@@ -100,13 +100,13 @@ class DateRangeInputs extends React.Component {
         </div>
         <div style={{height: 5}}/>
         <div style={{width: controlsWidth}}>
-          <DatePicker
+          <DateLabel
             value={this.props.dateMin}
             minDate={this.props.absoluteDateMin}
             maxDate={this.props.dateMax}
             onChange={this.updateMinFromDatePicker}
           />
-          <DatePicker right
+          <DateLabel right
             value={this.props.dateMax}
             minDate={this.props.dateMin}
             maxDate={this.props.absoluteDateMax}
