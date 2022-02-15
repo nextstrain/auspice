@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Slider from "./slider";
-import DateLabel from "./date-picker";
+import DateLabel from "./date-label";
 import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
