@@ -41,7 +41,7 @@ const classes = {
 export const svgContainerDOMId = "measurementsSVGContainer";
 const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
 const domIdRegex = new RegExp("[^\\w\\-_]+", "gi");
-const getSubplotDOMId = (groupingValue) => `measurment_subplot_${groupingValue.replace(domIdRegex, "_")}`;
+const getSubplotDOMId = (groupingValue) => `measurement_subplot_${groupingValue.replace(domIdRegex, "_")}`;
 
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
@@ -80,7 +80,7 @@ export const createYScale = (measurements) => {
  * Uses D3.groups() to aggregate measurements into a nested array of groups
  * The groups are sorted with the most number of measurements first.
  *
- * If groupByFilters Map is provided, sort the gruops by the order of the keys.
+ * If groupByFilters Map is provided, sort the groups by the order of the keys.
  * @param {Array<Object>} measurements
  * @param {string} groupBy
  * @param {Map<string,Object>} groupByFilters

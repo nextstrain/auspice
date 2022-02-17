@@ -175,7 +175,7 @@ const Measurements = ({height, width, showLegend}) => {
         // Create a Map of data to save order of fields
         const newData = new Map();
         if (dataType === "measurement") {
-          // Handle single measurment data
+          // Handle single measurement data
           // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
           const displayFields = Object.keys(data).filter((field) => fields.has(field));
           // Order fields for display

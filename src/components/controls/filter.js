@@ -104,7 +104,7 @@ class FilterData extends React.Component {
     return options;
   }
   selectionMade = (sel) => {
-    // Process measurment filters separately than tree filters
+    // Process measurement filters separately than tree filters
     if (sel._type === "measurements") {
       return this.props.dispatch(toggleSingleFilter(sel.value[0], sel.value[1], true));
     }

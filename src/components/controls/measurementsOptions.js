@@ -89,7 +89,7 @@ const MeasurementsOptions = () => {
         />
       </div>
       <SidebarSubtitle>
-        {"Measurments Display"}
+        {"Measurements Display"}
       </SidebarSubtitle>
       <SidebarButton
         selected={display === "mean"}
