@@ -4,6 +4,7 @@ import { scaleLinear } from "d3-scale";
 import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
+import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals";
 
 /* C O N S T A N T S */
 const layout = {
@@ -39,7 +40,7 @@ const classes = {
 };
 
 export const svgContainerDOMId = "measurementsSVGContainer";
-const getMeasurementDOMId = (measurement) => `meaurement_${measurement.measurementId}`;
+const getMeasurementDOMId = (measurement) => `meaurement_${measurement[measurementIdSymbol]}`;
 const domIdRegex = new RegExp("[^\\w\\-_]+", "gi");
 const getSubplotDOMId = (groupingValue) => `measurement_subplot_${groupingValue.replace(domIdRegex, "_")}`;
 
@@ -70,7 +71,7 @@ export const createXScale = (panelWidth, measurements) => {
 export const createYScale = (measurements) => {
   return (
     scaleLinear()
-      .domain(extent(measurements, (m) => m.measurementJitter))
+      .domain(extent(measurements, (m) => m[measurementJitterSymbol]))
       .range([layout.subplotHeight, 0])
       .nice()
   );
@@ -227,7 +228,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         .attr("class", classes.rawMeasurements)
         .attr("id", (d) => getMeasurementDOMId(d))
         .attr("cx", (d) => xScale(d.value))
-        .attr("cy", (d) => yScale(d.measurementJitter))
+        .attr("cy", (d) => yScale(d[measurementJitterSymbol]))
         .attr("r", layout.circleRadius);
 
     // Draw overall mean and standard deviation for measurement values

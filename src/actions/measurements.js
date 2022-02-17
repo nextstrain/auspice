@@ -1,4 +1,5 @@
 import { pick } from "lodash";
+import { measurementIdSymbol, measurementJitterSymbol } from "../util/globals";
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
@@ -152,8 +153,8 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
 
       // Add jitter and stable id for each measurement to help visualization
       // Generate Gaussian jitter with a Box-Muller transform
-      measurement["measurementJitter"] = Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
-      measurement["measurementId"] = index;
+      measurement[measurementJitterSymbol] = Math.sqrt(-2*Math.log(Math.random()))*Math.cos(2*Math.PI*Math.random());
+      measurement[measurementIdSymbol] = index;
     });
   });
 
