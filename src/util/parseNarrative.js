@@ -11,12 +11,12 @@
 
 /* eslint no-param-reassign: off */
 
-const { loadFront } = require('yaml-front-matter');
+const { safeLoadFront } = require('yaml-front-matter');
 const queryString = require("query-string");
 
 
 const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
-  const frontMatter = loadFront(fileContents);
+  const frontMatter = safeLoadFront(fileContents);
 
   if (Object.keys(frontMatter).length === 1) {
     const notMarkdownError = new Error();
