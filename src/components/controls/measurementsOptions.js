@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { isEqual } from "lodash";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { changeMeasurementsCollection } from "../../actions/measurements";
 import {
   CHANGE_MEASUREMENTS_DISPLAY,
@@ -58,11 +58,11 @@ const MeasurementsOptions = () => {
         <Select
           name="measurementsCollections"
           id="measurementsCollections"
-          value={collection.key}
+          value={collectionOptions.filter(({value}) => value === collection.key)}
           options={collectionOptions}
-          clearable={false}
-          searchable={false}
-          multi={false}
+          isClearable={false}
+          isSearchable={false}
+          isMulti={false}
           onChange={(opt) => {
             dispatch(changeMeasurementsCollection(opt.value));
           }}
@@ -75,11 +75,11 @@ const MeasurementsOptions = () => {
         <Select
           name="measurementsGroupings"
           id="measurementsGroupings"
-          value={groupBy}
+          value={groupingOptions.filter(({value}) => value === groupBy)}
           options={groupingOptions}
-          clearable={false}
-          searchable={false}
-          multi={false}
+          isClearable={false}
+          isSearchable={false}
+          isMulti={false}
           onChange={(opt) => {
             dispatch({
               type: CHANGE_MEASUREMENTS_GROUP_BY,

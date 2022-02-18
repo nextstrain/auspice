@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { withTranslation } from 'react-i18next';
 import { CHANGE_TIP_LABEL_KEY } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
@@ -24,12 +24,13 @@ class ChooseTipLabel extends React.Component {
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <Select
-            value={findSelectedValue(this.props.selected, this.props.options)}
+            value={this.props.options.filter(({value}) => value === this.props.selected)}
+            // Select can't handle Symbols, so we have to convert to string for them
+            getOptionValue={(option) => option.value.toString()}
             options={this.props.options}
-            clearable={false}
-            searchable={false}
-            valueKey="label"
-            multi={false}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
             onChange={this.change}
           />
         </div>
@@ -55,12 +56,4 @@ export function collectAvailableTipLabelOptions(colorings) {
         return {value: key, label: value.title};
       })
   ];
-}
-
-/**
- * Find the currently selected option.
- * <Select> can't handle Symbols so we need to write our own algorithm.
- */
-function findSelectedValue(selected, options) {
-  return options.filter((o) => o.value===selected)[0];
 }

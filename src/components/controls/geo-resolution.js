@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { withTranslation } from "react-i18next";
 
 import { controlsWidth } from "../../util/globals";
@@ -38,11 +38,11 @@ class GeoResolution extends React.Component {
           <Select
             name="selectGeoResolution"
             id="selectGeoResolution"
-            value={this.props.geoResolution}
+            value={geoResolutionOptions.filter(({value}) => value === this.props.geoResolution)}
             options={geoResolutionOptions}
-            clearable={false}
-            searchable={false}
-            multi={false}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
             onChange={(opt) => {this.changeGeoResolution(opt.value);}}
           />
         </div>

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { withTranslation } from "react-i18next";
 import i18n from "i18next";
 
@@ -63,6 +63,7 @@ class Language extends React.Component {
 
   render() {
     const { t } = this.props;
+    const selectOptions = this.getlanguageOptions();
     return (
       <>
         <SidebarSubtitle spaceAbove>
@@ -72,11 +73,11 @@ class Language extends React.Component {
           <Select
             name="selectLanguage"
             id="selectLanguage"
-            value={this.props.language}
-            options={this.getlanguageOptions()}
-            clearable={false}
-            searchable={false}
-            multi={false}
+            value={selectOptions.filter(({value}) => value === this.props.language)}
+            options={selectOptions}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
             onChange={(opt) => {this.changeLanguage(opt.value);}}
           />
         </div>

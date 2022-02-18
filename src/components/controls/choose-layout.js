@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import * as icons from "../framework/svg-icons";
 import { controlsWidth } from "../../util/globals";
 import { collectAvailableScatterVariables} from "../../util/scatterplotHelpers";
@@ -41,7 +41,7 @@ class ChooseLayout extends React.Component {
     const options = collectAvailableScatterVariables(this.props.colorings, this.props.colorBy);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];
     const selectedY = options.filter((o) => o.value===this.props.scatterVariables.y)[0];
-    const miscSelectProps = {options, clearable: false, searchable: false, multi: false, valueKey: "label"};
+    const miscSelectProps = {options, isClearable: false, isSearchable: false, isMulti: false};
 
     return (
       <>
@@ -50,7 +50,7 @@ class ChooseLayout extends React.Component {
           <ScatterSelectContainer>
             <Select
               {...miscSelectProps}
-              value={selectedX}
+              value={options.filter(({value}) => value === selectedX.value)}
               onChange={(value) => this.props.dispatch(changeLayout({x: value.value, xLabel: value.label}))}
             />
           </ScatterSelectContainer>
@@ -61,7 +61,7 @@ class ChooseLayout extends React.Component {
           <ScatterSelectContainer>
             <Select
               {...miscSelectProps}
-              value={selectedY}
+              value={options.filter(({value}) => value === selectedY.value)}
               onChange={(value) => this.props.dispatch(changeLayout({y: value.value, yLabel: value.label}))}
             />
           </ScatterSelectContainer>

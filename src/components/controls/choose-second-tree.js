@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 
@@ -38,6 +38,8 @@ class ChooseSecondTree extends React.Component {
 
     if (this.props.showTreeToo) options.unshift("REMOVE");
 
+    const selectOptions = options.map((opt) => ({value: opt, label: opt}));
+
     return (
       <div>
         <SidebarSubtitle spaceAbove>
@@ -47,11 +49,11 @@ class ChooseSecondTree extends React.Component {
           <Select
             name="selectTreeToo"
             id="selectTreeToo"
-            value={this.props.showTreeToo}
-            options={options.map((opt) => ({value: opt, label: opt}))}
-            clearable={false}
-            searchable={false}
-            multi={false}
+            value={selectOptions.filter(({value}) => value === this.props.showTreeToo)}
+            options={selectOptions}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
             onChange={(opt) => {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});

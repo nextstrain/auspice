@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
@@ -19,14 +19,15 @@ class ChooseDatasetSelect extends React.Component {
     this.props.dispatch(changePage({path: newPath}));
   }
   render() {
+    const selectOptions = this.props.options || [];
     return (
       <div style={{width: controlsWidth, fontSize: 14}}>
         <Select
-          value={this.props.selected}
-          options={this.props.options || []}
-          clearable={false}
-          searchable={false}
-          multi={false}
+          value={selectOptions.filter(({value}) => value === this.props.selected)}
+          options={selectOptions}
+          isClearable={false}
+          isSearchable={false}
+          isMulti={false}
           onChange={(opt) => {
             if (opt.value !== this.props.selected) {
               this.changeDataset(`/${opt.value}`);

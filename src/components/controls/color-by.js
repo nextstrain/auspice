@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, nucleotide_gene } from "../../util/globals";
@@ -151,11 +151,11 @@ class ColorBy extends React.Component {
         name="selectGenotype"
         id="selectGenotype"
         placeholder="gene…"
-        value={this.state.geneSelected}
+        value={gtGeneOptions.filter(({value}) => value === this.state.geneSelected)}
         options={gtGeneOptions}
-        clearable={false}
-        searchable
-        multi={false}
+        isClearable={false}
+        isSearchable
+        isMulti={false}
         onChange={(opt) => {
           this.setState({ geneSelected: opt.value });
         }}
@@ -210,11 +210,11 @@ class ColorBy extends React.Component {
       <div style={styles.base} id="selectColorBy">
         <Select
           name="selectColorBy"
-          value={this.state.colorBySelected}
+          value={colorOptions.filter(({value}) => value === this.state.colorBySelected)}
           options={colorOptions}
-          clearable={false}
-          searchable
-          multi={false}
+          isClearable={false}
+          isSearchable
+          isMulti={false}
           onChange={(opt) => {
             this.replaceState({ colorBySelected: opt.value });
           }}

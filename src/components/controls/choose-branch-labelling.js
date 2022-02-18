@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
+import Select from "react-select";
 import { withTranslation } from 'react-i18next';
 
 import { CHANGE_BRANCH_LABEL } from "../../actions/types";
@@ -20,6 +20,7 @@ class ChooseBranchLabelling extends React.Component {
   render() {
     if (!this.props.canRenderBranchLabels) return null;
     const { t } = this.props;
+    const selectOptions = this.props.available.map((x) => ({value: x, label: x}));
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>
@@ -27,11 +28,11 @@ class ChooseBranchLabelling extends React.Component {
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <Select
-            value={this.props.selected}
-            options={this.props.available.map((x) => ({value: x, label: x}))}
-            clearable={false}
-            searchable={false}
-            multi={false}
+            value={selectOptions.filter(({value}) => value === this.props.selected)}
+            options={selectOptions}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
             onChange={this.change}
           />
         </div>
