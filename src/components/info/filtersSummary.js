@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { applyFilter, changeDateFilter } from "../../actions/tree";
-import { toggleSingleFilter, removeSingleFilter } from "../../actions/measurements";
+import { applyMeasurementFilter, removeSingleFilter } from "../../actions/measurements";
 import { strainSymbol, genotypeSymbol, getAminoAcidName } from "../../util/globals";
 import { FilterBadge, Tooltip } from "./filterBadge";
 import { styliseDateRange, pluralise } from "./datasetSummary";
@@ -205,8 +205,8 @@ class FiltersSummary extends React.Component {
                           canMakeInactive
                           id={String(fieldValue)}
                           remove={() => this.props.dispatch(removeSingleFilter(field, fieldValue))}
-                          activate={() => this.props.dispatch(toggleSingleFilter(field, fieldValue, true))}
-                          inactivate={() => this.props.dispatch(toggleSingleFilter(field, fieldValue, false))}
+                          activate={() => this.props.dispatch(applyMeasurementFilter(field, fieldValue, true))}
+                          inactivate={() => this.props.dispatch(applyMeasurementFilter(field, fieldValue, false))}
                           onHoverMessage={`Filtering measurements to this ${fieldTitle}`}
                         >
                           {fieldValue}

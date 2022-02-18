@@ -187,7 +187,7 @@ export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, get
  * Tried to use lodash.cloneDeep(), but it did not work for the nested Map
  * - Jover, 19 January 2022
  */
-export const toggleSingleFilter = (field, value, active) => (dispatch, getState) => {
+export const applyMeasurementFilter = (field, value, active) => (dispatch, getState) => {
   const { controls } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);

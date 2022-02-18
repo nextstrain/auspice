@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
-import { removeAllFieldFilters, toggleAllFieldFilters, toggleSingleFilter } from "../../actions/measurements";
+import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
 
@@ -106,7 +106,7 @@ class FilterData extends React.Component {
   selectionMade = (sel) => {
     // Process measurement filters separately than tree filters
     if (sel._type === "measurements") {
-      return this.props.dispatch(toggleSingleFilter(sel.value[0], sel.value[1], true));
+      return this.props.dispatch(applyMeasurementFilter(sel.value[0], sel.value[1], true));
     }
     return this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
   }
