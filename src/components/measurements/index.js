@@ -73,11 +73,9 @@ const treeStrainPropertySelector = (state) => {
         */
         let attribute = getTipColorAttribute(node, colorScale);
         if (colorScale.continuous) {
-          colorScale.visibleLegendValues.forEach((legendValue) => {
-            if (determineLegendMatch(legendValue, node, colorScale)) {
-              attribute = legendValue;
-            }
-          });
+          const matchingLegendValue = colorScale.visibleLegendValues
+            .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
+          if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
         }
         treeStrainColors[node.name] = {
           attribute,
