@@ -12,6 +12,7 @@ import { NoContentError } from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
 import { explodeTree } from "./tree";
+import { togglePanelDisplay } from "./panelDisplay";
 
 export function getDatasetNamesFromUrl(url) {
   let secondTreeUrl;
@@ -318,8 +319,13 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
     this.measurements
       .then((data) => dispatch(loadMeasurements(data)))
       .catch((err) => {
-        console.error("Failed to load measurements collections", err.message);
-        dispatch(warningNotification({message: "Failed to load measurements collections"}));
+        const errorMessage = "Failed to load measurements collections";
+        console.error(errorMessage, err.message);
+        dispatch(warningNotification({message: errorMessage}));
+        // Hide measurements panel
+        dispatch(togglePanelDisplay("measurements"));
+        // Save error message to display if user toggles panel again
+        dispatch({ type: types.UPDATE_MEASUREMENTS_ERROR, data: errorMessage });
       });
   }
 };

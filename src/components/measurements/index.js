@@ -5,6 +5,7 @@ import { NODE_VISIBLE } from "../../util/globals";
 import { getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundry";
+import Flex from "../framework/flex";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";
 import HoverPanel from "./hoverPanel";
@@ -244,17 +245,26 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
 const Measurements = ({height, width, showLegend}) => {
   const measurementsLoaded = useSelector((state) => state.measurements.loaded);
+  const measurementsError = useSelector((state) => state.measurements.error);
+
   const [title, setTitle] = useState("Measurements");
 
   return (
     <Card title={title}>
       {measurementsLoaded &&
-        <MeasurementsPlot
-          height={height}
-          width={width}
-          showLegend={showLegend}
-          setPanelTitle={setTitle}
-        />
+        (measurementsError ?
+          <Flex style={{ height, width}} direction="column" justifyContent="center">
+            <p style={{ textAlign: "center" }}>
+              {measurementsError}
+            </p>
+          </Flex> :
+          <MeasurementsPlot
+            height={height}
+            width={width}
+            showLegend={showLegend}
+            setPanelTitle={setTitle}
+          />
+        )
       }
     </Card>
   );

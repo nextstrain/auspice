@@ -1,6 +1,7 @@
-import { CHANGE_MEASUREMENTS_COLLECTION, LOAD_MEASUREMENTS } from "../actions/types";
+import { CHANGE_MEASUREMENTS_COLLECTION, LOAD_MEASUREMENTS, UPDATE_MEASUREMENTS_ERROR } from "../actions/types";
 
 const getDefaultMeasurementsState = () => ({
+  error: undefined,
   loaded: false,
   collections: [],
   collectionToDisplay: {}
@@ -20,6 +21,12 @@ const measurements = (state = getDefaultMeasurementsState(), action) => {
         ...state,
         loaded: true,
         collectionToDisplay: action.collectionToDisplay
+      };
+    case UPDATE_MEASUREMENTS_ERROR:
+      return {
+        ...state,
+        loaded: true,
+        error: action.data
       };
     default:
       return state;
