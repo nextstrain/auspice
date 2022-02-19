@@ -24,6 +24,8 @@ const layout = {
   standardDeviationStroke: 2,
   overallMeanColor: "#000"
 };
+// Display overall mean at the center of each subplot
+layout['overallMeanYValue'] = layout.subplotHeight / 2;
 
 const classes = {
   xAxis: "measurementXAxis",
@@ -267,7 +269,7 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
       classes.overallMean,
       layout.overallMeanColor,
       xScale,
-      layout.subplotHeight / 2,
+      layout.overallMeanYValue,
       handleHover
     );
   });
@@ -300,7 +302,9 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover)
     const subplot = svg.select(`#${getSubplotDOMId(groupingValue)}`);
     const numberOfColorByAttributes = Object.keys(colorByGroups).length;
     // Calc space between means to evenly spread them within subplot
-    const ySpacing = (layout.subplotHeight - 2 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
+    // 2 x subplotPadding for padding of top and bottom of each subplot
+    // 2 x subplotPadding for padding around the overall mean display
+    const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
     Object.values(colorByGroups).forEach(({color, values}) => {
       drawMeanAndStandardDeviation(
@@ -314,6 +318,12 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover)
       );
       // Increate yValue for next attribute mean
       yValue += ySpacing;
+      // If the next yValue is near the overall mean display,
+      // shift to below the overall mean display + subplotPadding
+      if (yValue > (layout.overallMeanYValue - layout.subplotPadding) &&
+          yValue < (layout.overallMeanYValue + layout.subplotPadding)) {
+        yValue = layout.overallMeanYValue + layout.subplotPadding;
+      }
     });
   });
 };
