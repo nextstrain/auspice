@@ -18,7 +18,6 @@ import {
   colorMeasurementsSVG,
   changeMeasurementsDisplay,
   svgContainerDOMId,
-  setHoverTransition,
   toggleDisplay
 } from "./measurementsD3";
 
@@ -146,64 +145,58 @@ const Measurements = ({height, width, showLegend}) => {
   const yScale = useMemo(() => createYScale(measurements), [measurements]);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupedMeasurements});
+  // Memoize handleHover function to avoid extra useEffect calls
+  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY) => {
+    let newHoverData = null;
+    if (data !== null) {
+      // Create a Map of data to save order of fields
+      const newData = new Map();
+      if (dataType === "measurement") {
+        // Handle single measurement data
+        // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
+        const displayFields = Object.keys(data).filter((field) => fields.has(field));
+        // Order fields for display
+        const fieldOrder = [...fields.keys()];
+        const orderedFields = orderBy(displayFields, (field) => fieldOrder.indexOf(field));
+        orderedFields.forEach((field) => {
+          newData.set(fields.get(field).title, data[field]);
+        });
+      } else if (dataType === "mean") {
+        // Handle mean and standard deviation data
+        newData.set("mean", data.mean.toFixed(2));
+        newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
+      } else {
+        // Catch unknown data types
+        console.error(`"Unknown data type for hover panel: ${dataType}`);
+        // Display provided data without extra ordering or parsing
+        Object.entries(data).forEach(([key, value]) => newData.set(key, value));
+      }
+      newHoverData = {
+        mouseX,
+        mouseY,
+        containerId: svgContainerDOMId,
+        data: newData
+      };
+    }
+    setHoverData(newHoverData);
+  }, [fields]);
 
   // Draw SVG from scratch
   useEffect(() => {
     clearMeasurementsSVG(d3Ref.current);
-    drawMeasurementsSVG(d3Ref.current, svgData);
-  }, [svgData]);
+    drawMeasurementsSVG(d3Ref.current, svgData, handleHover);
+  }, [svgData, handleHover]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
-    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
-  }, [svgData, treeStrainColors]);
+    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors, handleHover);
+  }, [svgData, treeStrainColors, handleHover]);
 
   // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
   useEffect(() => {
     changeMeasurementsDisplay(d3Ref.current, display);
   }, [svgData, treeStrainColors, display]);
-
-  // Set up handle hover function and hover transitions
-  useEffect(() => {
-    // Creating function within useEffect so it doesn't get flagged as dependency
-    const handleHover = (data, dataType, mouseX, mouseY) => {
-      let newHoverData = null;
-      if (data !== null) {
-        // Create a Map of data to save order of fields
-        const newData = new Map();
-        if (dataType === "measurement") {
-          // Handle single measurement data
-          // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
-          const displayFields = Object.keys(data).filter((field) => fields.has(field));
-          // Order fields for display
-          const fieldOrder = [...fields.keys()];
-          const orderedFields = orderBy(displayFields, (field) => fieldOrder.indexOf(field));
-          orderedFields.forEach((field) => {
-            newData.set(fields.get(field).title, data[field]);
-          });
-        } else if (dataType === "mean") {
-          // Handle mean and standard deviation data
-          newData.set("mean", data.mean.toFixed(2));
-          newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
-        } else {
-          // Catch unknown data types
-          console.error(`"Unknown data type for hover panel: ${dataType}`);
-          // Display provided data without extra ordering or parsing
-          Object.entries(data).forEach(([key, value]) => newData.set(key, value));
-        }
-        newHoverData = {
-          mouseX,
-          mouseY,
-          containerId: svgContainerDOMId,
-          data: newData
-        };
-      }
-      setHoverData(newHoverData);
-    };
-
-    setHoverTransition(d3Ref.current, handleHover);
-  }, [svgData, fields, groupBy]);
 
   useEffect(() => {
     toggleDisplay(d3Ref.current, "overallMean", showOverallMean);

@@ -109,7 +109,7 @@ export const clearMeasurementsSVG = (ref) => {
     .selectAll("*").remove();
 };
 
-const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, color, xScale, yValue) => {
+const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, color, xScale, yValue, handleHover) => {
   const meanAndStandardDeviation = {
     mean: mean(values),
     standardDeviation: deviation(values)
@@ -126,7 +126,13 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
     .attr("class", classes.mean)
     .attr("transform", (d) => `translate(${xScale(d.mean)}, ${yValue})`)
     .attr("d", symbol().type(symbolDiamond).size(layout.diamondSize))
-    .attr("fill", color);
+    .attr("fill", color)
+    .on("mouseover", (d) => {
+      // Get mouse position for HoverPanel
+      const { clientX, clientY } = d3event;
+      handleHover(d, "mean", clientX, clientY);
+    })
+    .on("mouseout", () => handleHover(null));
 
   if (meanAndStandardDeviation.standardDeviation !== undefined) {
     container.append("line")
@@ -136,11 +142,17 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
       .attr("y1", yValue)
       .attr("y2", yValue)
       .attr("stroke-width", layout.standardDeviationStroke)
-      .attr("stroke", color);
+      .attr("stroke", color)
+      .on("mouseover", (d) => {
+        // Get mouse position for HoverPanel
+        const { clientX, clientY } = d3event;
+        handleHover(d, "mean", clientX, clientY);
+      })
+      .on("mouseout", () => handleHover(null));
   }
 };
 
-export const drawMeasurementsSVG = (ref, svgData) => {
+export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
   const {xScale, yScale, x_axis_label, threshold, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
@@ -229,7 +241,24 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         .attr("id", (d) => getMeasurementDOMId(d))
         .attr("cx", (d) => xScale(d.value))
         .attr("cy", (d) => yScale(d[measurementJitterSymbol]))
-        .attr("r", layout.circleRadius);
+        .attr("r", layout.circleRadius)
+        .on("mouseover", (d, i, elements) => {
+          select(elements[i]).transition()
+            .duration("100")
+            .attr("r", layout.circleHoverRadius);
+
+          // Get mouse position for HoverPanel
+          const { clientX, clientY } = d3event;
+          // sets hover data state to trigger the hover panel display
+          handleHover(d, "measurement", clientX, clientY);
+        })
+        .on("mouseout", (_, i, elements) => {
+          select(elements[i]).transition()
+            .duration("200")
+            .attr("r", layout.circleRadius);
+          // sets hover data state to null to hide the hover panel display
+          handleHover(null);
+        });
 
     // Draw overall mean and standard deviation for measurement values
     drawMeanAndStandardDeviation(
@@ -238,7 +267,8 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       classes.overallMean,
       layout.overallMeanColor,
       xScale,
-      layout.subplotHeight / 2
+      layout.subplotHeight / 2,
+      handleHover
     );
   });
 };
@@ -249,7 +279,7 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
     .style("fill", (d) => treeStrainColors[d.strain].color);
 };
 
-export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
+export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover) => {
   const { xScale, groupedMeasurements } = svgData;
   const svg = select(ref);
   // Re move all current color by means
@@ -279,7 +309,8 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
         classes.colorMean,
         color,
         xScale,
-        yValue
+        yValue,
+        handleHover
       );
       // Increate yValue for next attribute mean
       yValue += ySpacing;
@@ -297,38 +328,6 @@ export const changeMeasurementsDisplay = (ref, display) => {
     svg.selectAll(`.${displayClass}`)
       .attr("display", display === displayOption ? null : "none");
   });
-};
-
-export const setHoverTransition = (ref, handleHover) => {
-  const svg = select(ref);
-  // Handle hovers of raw measurements
-  svg.selectAll(`.${classes.rawMeasurements}`)
-    .on("mouseover", (d, i, elements) => {
-      select(elements[i]).transition()
-        .duration("100")
-        .attr("r", layout.circleHoverRadius);
-
-      // Get mouse position for HoverPanel
-      const { clientX, clientY } = d3event;
-      // sets hover data state to trigger the hover panel display
-      handleHover(d, "measurement", clientX, clientY);
-    })
-    .on("mouseout", (_, i, elements) => {
-      select(elements[i]).transition()
-        .duration("200")
-        .attr("r", layout.circleRadius);
-      // sets hover data state to null to hide the hover panel display
-      handleHover(null);
-    });
-
-  // Handle hovers of mean and standard deviations
-  svg.selectAll(`.${classes.mean}, .${classes.standardDeviation}`)
-    .on("mouseover", (d) => {
-      // Get mouse position for HoverPanel
-      const { clientX, clientY } = d3event;
-      handleHover(d, "mean", clientX, clientY);
-    })
-    .on("mouseout", () => handleHover(null));
 };
 
 export const toggleDisplay = (ref, elementClass, displayOn) => {
