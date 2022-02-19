@@ -119,7 +119,7 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
   });
 };
 
-const Measurements = ({height, width, showLegend}) => {
+const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
@@ -181,6 +181,10 @@ const Measurements = ({height, width, showLegend}) => {
     setHoverData(newHoverData);
   }, [fields]);
 
+  useEffect(() => {
+    setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
+  }, [setPanelTitle, title, fields, groupBy]);
+
   // Draw SVG from scratch
   useEffect(() => {
     clearMeasurementsSVG(d3Ref.current);
@@ -206,10 +210,6 @@ const Measurements = ({height, width, showLegend}) => {
     toggleDisplay(d3Ref.current, "threshold", showThreshold);
   }, [svgData, showThreshold]);
 
-  const getPanelTitle = () => {
-    return `${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`;
-  };
-
   const getSVGContainerStyle = () => {
     return {
       overflowY: "auto",
@@ -220,7 +220,7 @@ const Measurements = ({height, width, showLegend}) => {
   };
 
   return (
-    <Card title={getPanelTitle()}>
+    <>
       {showLegend &&
         <ErrorBoundary>
           <Legend right width={width}/>
@@ -238,6 +238,24 @@ const Measurements = ({height, width, showLegend}) => {
           ref={d3Ref}
         />
       </div>
+    </>
+  );
+};
+
+const Measurements = ({height, width, showLegend}) => {
+  const measurementsLoaded = useSelector((state) => state.measurements.loaded);
+  const [title, setTitle] = useState("Measurements");
+
+  return (
+    <Card title={title}>
+      {measurementsLoaded &&
+        <MeasurementsPlot
+          height={height}
+          width={width}
+          showLegend={showLegend}
+          setPanelTitle={setTitle}
+        />
+      }
     </Card>
   );
 };

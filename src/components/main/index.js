@@ -21,7 +21,7 @@ import { Sidebar } from "./sidebar";
 import { calcPanelDims, calcStyles } from "./utils";
 import { PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
-import Spinner from "../framework/spinner";
+import Spinner, { PanelSpinner } from "../framework/spinner";
 import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
 import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
 
@@ -43,8 +43,7 @@ const Measurements = lazy(() => import("../measurements"));
   sidebarOpen: state.controls.sidebarOpen,
   showOnlyPanels: state.controls.showOnlyPanels,
   treeName: state.tree.name,
-  secondTreeName: state.controls.showTreeToo,
-  measurementsLoaded: state.measurements.loaded
+  secondTreeName: state.controls.showTreeToo
 }))
 class Main extends React.Component {
   constructor(props) {
@@ -167,8 +166,16 @@ class Main extends React.Component {
             /> :
             null
           }
-          {this.props.panelsToDisplay.includes("measurements") && this.props.measurementsLoaded ?
-            <Suspense fallback={null}>
+          {this.props.panelsToDisplay.includes("measurements") ?
+            <Suspense
+              fallback={
+                <PanelSpinner
+                  width={this.inGrid() ? grid.width : full.width}
+                  height={this.inGrid() ? grid.height : full.height}
+                  key={keyName + "_measurements_spinner"}
+                />
+              }
+            >
               <Measurements
                 width={this.inGrid() ? grid.width : full.width}
                 height={this.inGrid() ? grid.height : full.height}
