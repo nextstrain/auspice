@@ -5,6 +5,7 @@ import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
 import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals";
+import { getBrighterColor } from "../../util/colorHelpers";
 
 /* C O N S T A N T S */
 const layout = {
@@ -16,6 +17,7 @@ const layout = {
   subplotPadding: 10,
   circleRadius: 3,
   circleHoverRadius: 5,
+  circleStrokeWidth: 1,
   thresholdStrokeWidth: 2,
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
@@ -278,7 +280,9 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
 export const colorMeasurementsSVG = (ref, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements}`)
-    .style("fill", (d) => treeStrainColors[d.strain].color);
+    .style("stroke", (d) => treeStrainColors[d.strain].color)
+    .style("stroke-width", layout.circleStrokeWidth)
+    .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
 };
 
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover) => {
