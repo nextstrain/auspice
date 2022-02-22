@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import styled from 'styled-components';
 import { MdDateRange } from "react-icons/md";
 import { FiSave } from "react-icons/fi";
@@ -21,18 +21,22 @@ const IconSpan = styled(TextSpan)`
 
 const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
   const [editing, setEditing] = React.useState(false);
-  function processNewValue(newValue) {
+
+  const processNewValue = useCallback((newValue) => {
     setEditing(false);
     onChange(newValue);
-  }
-  function onKeyUp(e) {
+  }, [setEditing, onChange]);
+
+  const onKeyUp = useCallback((e) => {
     if (e.key === 'Enter') {
       processNewValue(e.target.value);
     }
-  }
-  function onBlur(e) {
+  }, [processNewValue]);
+
+  const onBlur = useCallback((e) => {
     processNewValue(e.target.value);
-  }
+  }, [processNewValue]);
+
   let content;
   if (editing) {
     const dateInput = (
