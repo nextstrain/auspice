@@ -113,13 +113,10 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
      * First add fields from JSON to keep user's ordering
      * Then loop over measurements to add any remaining fields
      */
-    const collectionFieldsArray = collection.fields;
-    collection.fields = new Map();
-    if (collectionFieldsArray && collectionFieldsArray.length > 0) {
-      collectionFieldsArray.forEach(({key, title}) => {
-        collection.fields.set(key, {title: title || key});
-      });
-    }
+    collection.fields = new Map(
+      (collection.fields || [])
+        .map(({key, title}) => [key, {title: title || key}])
+    );
 
     /**
      * Create filters Map for easier access of values and to keep ordering
@@ -128,12 +125,10 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
      * If there are no JSON defined filters, then add all fields as filters
      */
     const collectionFiltersArray = collection.filters;
-    collection.filters = new Map();
-    if (collectionFiltersArray && collectionFiltersArray.length > 0) {
-      collectionFiltersArray.forEach((filterField) => {
-        collection.filters.set(filterField, {values: new Set()});
-      });
-    }
+    collection.filters = new Map(
+      (collection.filters || [])
+        .map((filterField) => [filterField, {values: new Set()}])
+    );
 
     collection.measurements.forEach((measurement, index) => {
       Object.entries(measurement).forEach(([field, fieldValue]) => {
