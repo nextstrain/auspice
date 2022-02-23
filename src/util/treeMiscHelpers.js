@@ -239,6 +239,7 @@ export const categoriseSeqChanges = (seqChangesToRoot) => {
  */
 export const getBranchMutations = (branchNode, observedMutations) => {
   const mutations = branchNode.branch_attrs && branchNode.branch_attrs.mutations;
+  if (typeof mutations !== "object") return {};
   const seqChangesToRoot = branchNode.parent===branchNode ? {} : getSeqChanges(branchNode, mutations);
   const categorisedMutations = categoriseMutations(mutations, observedMutations, seqChangesToRoot);
   return categorisedMutations;
