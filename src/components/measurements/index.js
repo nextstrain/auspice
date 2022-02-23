@@ -143,7 +143,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
-  const yScale = useMemo(() => createYScale(measurements), [measurements]);
+  const yScale = useMemo(() => createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupedMeasurements});
   // Memoize handleHover function to avoid extra useEffect calls

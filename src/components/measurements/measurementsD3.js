@@ -8,7 +8,9 @@ import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals
 import { getBrighterColor } from "../../util/colorHelpers";
 
 /* C O N S T A N T S */
-const layout = {
+export const layout = {
+  yMin: 0,
+  yMax: 100,
   leftPadding: 120,
   rightPadding: 30,
   topPadding: 20,
@@ -67,15 +69,17 @@ export const createXScale = (panelWidth, measurements) => {
 
 /**
  * Creates the D3 linear scale for the y-axis of each individual subplot with
- * the provided measurements' jitters as the domain and the hard-coded
+ * the hardcoded yMin and yMax with circle diameter as the domain and the hard-coded
  * subplot height as the range.
- * @param {Array<Object>} measurements
  * @returns {function}
  */
-export const createYScale = (measurements) => {
+export const createYScale = () => {
+  // Account for circle diameter so the plotted circles do not get cut off
+  const domainMin = layout.yMin - (2 * layout.circleRadius);
+  const domainMax = layout.yMax + (2 * layout.circleRadius);
   return (
     scaleLinear()
-      .domain(extent(measurements, (m) => m[measurementJitterSymbol]))
+      .domain([domainMin, domainMax])
       .range([layout.subplotHeight, 0])
       .nice()
   );
