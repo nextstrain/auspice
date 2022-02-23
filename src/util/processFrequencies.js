@@ -128,8 +128,7 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
       }
       data.push({
         idx: n.arrayIdx,
-        values: rawJSON[n.name].frequencies,
-        weight: rawJSON[n.name].weight
+        values: rawJSON[n.name].frequencies
       });
     });
 
