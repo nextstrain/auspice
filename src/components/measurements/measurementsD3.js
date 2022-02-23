@@ -233,7 +233,7 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
       .attr("transform", `translate(${layout.leftPadding}, 0)`)
       .call(
         axisLeft(yScale)
-          .ticks(1)
+          .tickValues([yScale((layout.yMax - layout.yMin) / 2)])
           .tickFormat(() => groupingValue))
       .call((g) => g.attr("font-family", null));
 
