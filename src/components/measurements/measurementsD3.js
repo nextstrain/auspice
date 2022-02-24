@@ -47,8 +47,7 @@ const classes = {
 
 export const svgContainerDOMId = "measurementsSVGContainer";
 const getMeasurementDOMId = (measurement) => `meaurement_${measurement[measurementIdSymbol]}`;
-const domIdRegex = new RegExp("[^\\w\\-_]+", "gi");
-const getSubplotDOMId = (groupingValue) => `measurement_subplot_${groupingValue.replace(domIdRegex, "_")}`;
+const getSubplotDOMId = (groupingValueIndex) => `measurement_subplot_${groupingValueIndex}`;
 
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
@@ -163,7 +162,7 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
 };
 
 export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
-  const {xScale, yScale, x_axis_label, threshold, groupedMeasurements} = svgData;
+  const {xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
   if (groupedMeasurements && groupedMeasurements.length === 0) return;
@@ -211,7 +210,7 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
     // Make each subplot it's own SVG to re-use the same subplot yScale
     const subplot = svg.append("svg")
       .attr("class", classes.subplot)
-      .attr("id", getSubplotDOMId(groupingValue))
+      .attr("id", getSubplotDOMId(groupingOrderedValues.indexOf(groupingValue)))
       .attr("width", "100%")
       .attr("height", layout.subplotHeight)
       .attr("y", prevSubplotBottom);
@@ -292,7 +291,7 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
 };
 
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover) => {
-  const { xScale, groupedMeasurements } = svgData;
+  const { xScale, groupingOrderedValues, groupedMeasurements } = svgData;
   const svg = select(ref);
   // Re move all current color by means
   svg.selectAll(`.${classes.colorMean}`).remove();
@@ -309,7 +308,7 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover)
       }
     });
     // Plot mean/SD for each color-by attribute within subplot
-    const subplot = svg.select(`#${getSubplotDOMId(groupingValue)}`);
+    const subplot = svg.select(`#${getSubplotDOMId(groupingOrderedValues.indexOf(groupingValue))}`);
     const numberOfColorByAttributes = Object.keys(colorByGroups).length;
     // Calc space between means to evenly spread them within subplot
     // 2 x subplotPadding for padding of top and bottom of each subplot

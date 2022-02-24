@@ -144,13 +144,14 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Filter and group measurements
   const {activeFilters, filteredMeasurements} = filterMeasurements(measurements, treeStrainVisibility, filters);
-  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy], groupings.get(groupBy).values);
+  const groupingOrderedValues = groupings.get(groupBy).values;
+  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy], groupingOrderedValues);
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
   const yScale = useMemo(() => createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
-  const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupedMeasurements});
+  const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements});
   // Memoize handleHover function to avoid extra useEffect calls
   const handleHover = useMemo(() => (data, dataType, mouseX, mouseY) => {
     let newHoverData = null;
