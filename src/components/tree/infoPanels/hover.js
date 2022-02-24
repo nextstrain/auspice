@@ -9,7 +9,7 @@ import { isValueValid } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
 
-const InfoLine = ({name, value, padBelow=false}) => {
+export const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
     if (!value) return null;
     if (Array.isArray(value)) {

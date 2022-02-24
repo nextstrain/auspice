@@ -1,12 +1,13 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
+import { InfoLine } from "../tree/infoPanels/hover";
 
 const HoverPanel = ({hoverData}) => {
   if (hoverData === null) return null;
   const { mouseX, mouseY, containerId, data } = hoverData;
   const panelStyle = {
     position: "absolute",
-    width: 200,
+    minWidth: 200,
     padding: "5px",
     borderRadius: 10,
     zIndex: 1000,
@@ -26,6 +27,9 @@ const HoverPanel = ({hoverData}) => {
   // Find the relative position of the hovered element to the hover panel's container div
   const container = document.getElementById(containerId);
   const containerPosition = container.getBoundingClientRect();
+  // Make the max width of the hover panel half the container width to fit the
+  // minimum available space based on expectations of positioning below
+  panelStyle.maxWidth = containerPosition.width * 0.5;
   const relativePosition = {
     top: mouseY - containerPosition.top + container.scrollTop,
     left: mouseX - containerPosition.left
@@ -52,7 +56,7 @@ const HoverPanel = ({hoverData}) => {
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         {[...data.entries()].map(([field, value]) => {
           return (
-            <p key={field}>{field} : {value}</p>
+            <InfoLine key={field} name={`${field}:`} value={value} />
           );
         })}
       </div>
