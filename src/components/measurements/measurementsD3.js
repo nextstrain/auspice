@@ -97,7 +97,8 @@ export const createYScale = () => {
  */
 export const groupMeasurements = (measurements, groupBy, groupByFilters) => {
   const groupedMeasurements = groups(measurements, (d) => d[groupBy]);
-  if (groupByFilters) {
+
+  if (groupByFilters && groupByFilters.length) {
     const sortGroupOrder = [...groupByFilters.keys()];
     return orderBy(
       groupedMeasurements,

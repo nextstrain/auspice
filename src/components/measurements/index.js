@@ -93,10 +93,12 @@ const treeStrainPropertySelector = (state) => {
  *
  * Visibility is indicated by the numeric visibility value in the provided
  * treeStrainVisibility object for strain.
+ *
+ * Returns the active filters object and the filtered measurements
  * @param {Array<Object>} measurements
  * @param {Object<string,number>} treeStrainVisibility
  * @param {Object<string,Map>} filters
- * @returns
+ * @returns {Object<Object, Array>}
  */
 const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
   // Find active filters to filter measurements
@@ -109,15 +111,18 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
     });
   });
 
-  return measurements.filter((measurement) => {
-    // First check the strain is visible in the tree
-    if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
-    // Then check that the measurement contains values for all active filters
-    for (const [field, values] of Object.entries(activeFilters)) {
-      if (values.length > 0 && !values.includes(measurement[field])) return false;
-    }
-    return true;
-  });
+  return {
+    activeFilters,
+    filteredMeasurements: measurements.filter((measurement) => {
+      // First check the strain is visible in the tree
+      if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
+      // Then check that the measurement contains values for all active filters
+      for (const [field, values] of Object.entries(activeFilters)) {
+        if (values.length > 0 && !values.includes(measurement[field])) return false;
+      }
+      return true;
+    })
+  };
 };
 
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
@@ -138,8 +143,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const [hoverData, setHoverData] = useState(null);
 
   // Filter and group measurements
-  const filteredMeasurements = filterMeasurements(measurements, treeStrainVisibility, filters);
-  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, filters[groupBy]);
+  const {activeFilters, filteredMeasurements} = filterMeasurements(measurements, treeStrainVisibility, filters);
+  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy]);
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
