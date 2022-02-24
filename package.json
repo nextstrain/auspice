@@ -61,7 +61,7 @@
     "create-react-class": "^15.7.0",
     "css-loader": "^2.1.1",
     "css.escape": "^1.5.1",
-    "d3-array": "^1.2.0",
+    "d3-array": "^2.2.0",
     "d3-axis": "^1.0.6",
     "d3-brush": "^1.0.4",
     "d3-color": "^1.0.3",
