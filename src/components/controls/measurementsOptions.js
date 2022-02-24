@@ -41,7 +41,7 @@ const MeasurementsOptions = () => {
   // Create grouping options for the Select library
   let groupingOptions = [];
   if (collection.groupings) {
-    groupingOptions = collection.groupings.map((grouping) => {
+    groupingOptions = [...collection.groupings.keys()].map((grouping) => {
       return {
         value: grouping,
         label: collection.fields.get(grouping).title

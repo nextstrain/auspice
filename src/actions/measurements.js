@@ -52,7 +52,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   // Checks the current group by is available as a field in collection
   if (!collection.fields.has(newControls.measurementsGroupBy)) {
     // If current group by is not available as a field, then default to the first grouping option.
-    newControls.measurementsGroupBy = collection.groupings[0];
+    [newControls.measurementsGroupBy] = collection.groupings.keys();
   }
 
   // Verify that current filters are valid for the new collection
@@ -131,6 +131,13 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
         .map((filterField) => [filterField, {values: new Set()}])
     );
 
+    // Create a temp object for groupings to keep track of values and their
+    // counts so that we can create a stable default order for grouping field values
+    const groupingsValues = collection.groupings.reduce((tempObject, {key}) => {
+      tempObject[key] = {};
+      return tempObject;
+    }, {});
+
     collection.measurements.forEach((measurement, index) => {
       Object.entries(measurement).forEach(([field, fieldValue]) => {
         // Add remaining field titles
@@ -145,6 +152,12 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
           filterObject.values.add(fieldValue);
           collection.filters.set(field, filterObject);
         }
+
+        // Save grouping field values and counts
+        if (field in groupingsValues) {
+          const previousValue = groupingsValues[field][fieldValue];
+          groupingsValues[field][fieldValue] = previousValue ? previousValue + 1 : 1;
+        }
       });
 
       // Add jitter and stable id for each measurement to help visualization
@@ -153,6 +166,25 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
       measurement[measurementJitterSymbol] = Math.random() * (yMax - yMin + 1) + yMin;
       measurement[measurementIdSymbol] = index;
     });
+
+    // Create groupings Map for easier access of sorted values and to keep groupings ordering
+    // Must be done after looping through measurements to build `groupingsValues` object
+    collection.groupings = new Map(
+      collection.groupings.map(({key, order}) => {
+        const valuesByCount = Object.entries(groupingsValues[key])
+          // Use the grouping values' counts to sort the values, highest count first
+          .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
+          // Filter out values that already exist in provided order from JSON
+          .filter(([fieldValue]) => order ? !order.includes(fieldValue) : true)
+          // Create array of field values
+          .map(([fieldValue]) => fieldValue);
+        return [
+          key,
+          // Prioritize the provided values order then list values by count
+          {values: (order || []).concat(valuesByCount)}
+        ];
+      })
+    );
   });
 
   // Get the collection to display to set up default controls

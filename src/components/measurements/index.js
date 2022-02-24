@@ -134,7 +134,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
-  const { title, x_axis_label, threshold, fields, measurements } = collection;
+  const { title, x_axis_label, threshold, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
   const d3Ref = useRef(null);
@@ -144,7 +144,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Filter and group measurements
   const {activeFilters, filteredMeasurements} = filterMeasurements(measurements, treeStrainVisibility, filters);
-  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy]);
+  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy], groupings.get(groupBy).values);
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
