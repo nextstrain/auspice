@@ -44,7 +44,7 @@ export const renderTree = (that, main, phylotree, props) => {
     treeState.vaccines,
     calcBranchStrokeCols(treeState, props.colorByConfidence, props.colorBy),
     treeState.nodeColors,
-    treeState.nodeColors.map((col) => getBrighterColor(col)),
+    treeState.nodeColors.map(getBrighterColor),
     treeState.tipRadii, /* might be null */
     [props.dateMinNumeric, props.dateMaxNumeric],
     props.scatterVariables
