@@ -95,7 +95,7 @@ class FilterData extends React.Component {
         values.forEach((value) => {
           options.push({
             _type: "measurements", // custom field to differentiate measurements filters
-            label: `${title} → ${value}`,
+            label: `(M) ${title} → ${value}`,
             value: [filterField, value]
           });
         });
@@ -225,6 +225,9 @@ export const FilterInfo = (
     <br/>
     Scroll to the bottom of the main page (under the data visualisation)
     to see an expanded display of filters and available values.
+    <br/>
+    Filter options prefixed with &quot;(M)&quot; are filters specific to the Measurements panel.
+    They will have no effect on the phylogeny tree or other panels.
   </>
 );
 
