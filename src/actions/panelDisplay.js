@@ -1,4 +1,9 @@
+import { intersection } from "lodash";
 import { TOGGLE_PANEL_DISPLAY } from "./types";
+
+const gridPanels = ["tree", "measurements", "map"];
+export const numberOfGridPanels = (panels) => intersection(panels, gridPanels).length;
+export const hasMultipleGridPanels = (panels) => numberOfGridPanels(panels) > 1;
 
 export const togglePanelDisplay = (panelName) => (dispatch, getState) => {
   const { controls } = getState();
@@ -12,9 +17,7 @@ export const togglePanelDisplay = (panelName) => (dispatch, getState) => {
     panelsToDisplay = controls.panelsToDisplay.slice();
     panelsToDisplay.splice(idx, 1);
   }
-  let panelLayout = controls.panelLayout;
-  if (panelsToDisplay.indexOf("tree") === -1 || panelsToDisplay.indexOf("map") === -1) {
-    panelLayout = "full";
-  }
-  dispatch({type: TOGGLE_PANEL_DISPLAY, panelsToDisplay, panelLayout});
+  const canTogglePanelLayout = hasMultipleGridPanels(panelsToDisplay);
+  const panelLayout = canTogglePanelLayout ? controls.panelLayout : "full";
+  dispatch({type: TOGGLE_PANEL_DISPLAY, panelsToDisplay, panelLayout, canTogglePanelLayout});
 };

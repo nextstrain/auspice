@@ -11,6 +11,7 @@ import { defaultGeoResolution,
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
+import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -88,7 +89,12 @@ export const getDefaultControlsState = () => {
     mapLegendOpen: undefined,
     showOnlyPanels: false,
     showTransmissionLines: true,
-    normalizeFrequencies: true
+    normalizeFrequencies: true,
+    measurementsGroupBy: undefined,
+    measurementsDisplay: "mean",
+    measurementsShowOverallMean: true,
+    measurementsShowThreshold: true,
+    measurementsFilters: {}
   };
 };
 
@@ -206,9 +212,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,
         panelLayout: action.panelLayout,
-        canTogglePanelLayout:
-          action.panelsToDisplay.indexOf("tree") !== -1 &&
-          action.panelsToDisplay.indexOf("map") !== -1
+        canTogglePanelLayout: action.canTogglePanelLayout
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
@@ -255,7 +259,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         showTreeToo: undefined,
         showTangle: false,
-        canTogglePanelLayout: state.panelsAvailable.indexOf("map") !== -1,
+        canTogglePanelLayout: hasMultipleGridPanels(state.panelsAvailable),
         panelsToDisplay: state.panelsAvailable.slice()
       });
     case types.TOGGLE_TANGLE:
@@ -277,7 +281,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         newState = {
           ...newState,
           geoResolution: action.newGeoResolution.key,
-          canTogglePanelLayout: true,
+          canTogglePanelLayout: hasMultipleGridPanels([...state.panelsToDisplay, "map"]),
           panelsAvailable: [...state.panelsAvailable, "map"],
           panelsToDisplay: [...state.panelsToDisplay, "map"]
         };
@@ -297,6 +301,19 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return state;
     }
+    case types.LOAD_MEASUREMENTS: /* fallthrough */
+    case types.CHANGE_MEASUREMENTS_COLLECTION:
+      return {...state, ...action.controls};
+    case types.CHANGE_MEASUREMENTS_GROUP_BY:
+      return {...state, measurementsGroupBy: action.data};
+    case types.TOGGLE_MEASUREMENTS_THRESHOLD:
+      return {...state, measurementsShowThreshold: action.data};
+    case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN:
+      return {...state, measurementsShowOverallMean: action.data};
+    case types.CHANGE_MEASUREMENTS_DISPLAY:
+      return {...state, measurementsDisplay: action.data};
+    case types.APPLY_MEASUREMENTS_FILTER:
+      return {...state, measurementsFilters: action.data};
     default:
       return state;
   }

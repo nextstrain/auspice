@@ -1,7 +1,6 @@
 import { select } from "d3-selection";
 import 'd3-transition';
-import { rgb } from "d3-color";
-import { calcBranchStrokeCols } from "../../../util/colorHelpers";
+import { calcBranchStrokeCols, getBrighterColor } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
 
@@ -45,7 +44,7 @@ export const renderTree = (that, main, phylotree, props) => {
     treeState.vaccines,
     calcBranchStrokeCols(treeState, props.colorByConfidence, props.colorBy),
     treeState.nodeColors,
-    treeState.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
+    treeState.nodeColors.map(getBrighterColor),
     treeState.tipRadii, /* might be null */
     [props.dateMinNumeric, props.dateMaxNumeric],
     props.scatterVariables

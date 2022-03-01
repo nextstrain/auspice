@@ -2,37 +2,38 @@ import { computeResponsive } from "../../util/computeResponsive";
 import { controlsWidth, controlsPadding } from "../../util/globals";
 
 
-export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth, availableHeight) => {
-  /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
+export const calcPanelDims = (panels, narrativeIsDisplayed, availableWidth, availableHeight) => {
+  /* Calculate reponsive geometries. chart: entropy, frequencies. full/grid: map, tree, measurements */
   const chartWidthFraction = 1;
-  let bigWidthFraction = grid ? 0.5 : 1;
+  const fullWidthFraction = 1;
+  const gridWidthFraction = 0.5;
+
   let chartHeightFraction = 0.36;
-  let bigHeightFraction = grid ? 0.64 : 0.88;
+  let fullHeightFraction = 0.88;
+  let gridHeightFraction = 0.64;
+
   if (narrativeIsDisplayed) {
     /* heights */
     const numThinPanels = true + panels.includes("entropy") + panels.includes("frequencies") - 1;
     if (numThinPanels === 0) {
-      bigHeightFraction = 1;
+      fullHeightFraction = 1;
+      gridHeightFraction = 1;
     } else if (numThinPanels === 1) {
-      bigHeightFraction = 0.7;
+      fullHeightFraction = 0.7;
+      gridHeightFraction = 0.7;
       chartHeightFraction = 0.3;
     } else {
-      bigHeightFraction = 0.5;
+      fullHeightFraction = 0.5;
+      gridHeightFraction = 0.5;
       chartHeightFraction = 0.25;
-    }
-    /* widths */
-    if (panels.includes("map") && panels.includes("tree") && !grid) {
-      bigWidthFraction = 0.5;
-    }
-    if (grid && (!panels.includes("map") || !panels.includes("tree"))) {
-      bigWidthFraction = 1;
     }
   }
 
-  const big = computeResponsive({horizontal: bigWidthFraction, vertical: bigHeightFraction, availableWidth, availableHeight});
+  const full = computeResponsive({horizontal: fullWidthFraction, vertical: fullHeightFraction, availableWidth, availableHeight});
+  const grid = computeResponsive({horizontal: gridWidthFraction, vertical: gridHeightFraction, availableWidth, availableHeight});
   const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
 
-  return {big, chart};
+  return {full, grid, chart};
 
 };
 

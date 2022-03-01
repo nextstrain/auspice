@@ -120,3 +120,5 @@ export const getEmphasizedColor = (color) => {
   hslColor.l /= 1.2; // less luminance
   return rgb(hslColor).toString();
 };
+
+export const getBrighterColor = (color) => rgb(color).brighter([0.65]).toString();
