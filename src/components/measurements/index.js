@@ -145,7 +145,13 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Filter and group measurements
   const {activeFilters, filteredMeasurements} = filterMeasurements(measurements, treeStrainVisibility, filters);
   const groupingOrderedValues = groupings.get(groupBy).values;
-  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, activeFilters[groupBy], groupingOrderedValues);
+  // Default ordering of rows is the groupings value order from redux state
+  let groupByValueOrder = groupingOrderedValues;
+  // If there are active filters for the current group-by field, ordering is the user's filter order
+  if (activeFilters[groupBy] && activeFilters[groupBy].length) {
+    groupByValueOrder = activeFilters[groupBy];
+  }
+  const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, groupByValueOrder);
 
   // Memoize D3 scale functions to allow deep comparison to work below for svgData
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
