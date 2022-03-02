@@ -2,8 +2,22 @@
 title: Changelog
 ---
 
-## version 2.33.0 - 2022/02/15
+#### Major changes
+* Measurements panel intended for displaying titer or DMS data where a tip in the tree has multiple values associated with it.
+This function requires a dataset with a `_measurements.json` sidecar file
+See [PR 1452](https://github.com/nextstrain/auspice/pull/1452) for more.
 
+#### Minor changes
+* Improved YAML parsing for narratives
+See [PR 1472](https://github.com/nextstrain/auspice/pull/1472) for more.
+* Remove unused properties from tip-frequencies panel.
+See [PR 1471](https://github.com/nextstrain/auspice/pull/1471) for more.
+* Fixed a bug where shift+clicking on branches for trees without mutations defined caused a crash.
+See [PR 1475](https://github.com/nextstrain/auspice/pull/1475) for more.
+
+
+
+## version 2.33.0 - 2022/02/15
 
 * (Experimental) Explode phylogeny into subtrees and allow multiple trees to be provided in the dataset.
 See [PR 1442](https://github.com/nextstrain/auspice/pull/1442) for more.
