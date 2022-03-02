@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.34.0 - 2022/03/02
+
+
 #### Major changes
 * Measurements panel intended for displaying titer or DMS data where a tip in the tree has multiple values associated with it.
 This function requires a dataset with a `_measurements.json` sidecar file
