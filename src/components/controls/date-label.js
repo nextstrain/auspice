@@ -11,6 +11,8 @@ const TextSpan = styled.span`
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
+`;
+const TextSpanClickable = styled(TextSpan)`
   cursor: pointer;
 `;
 const IconSpan = styled(TextSpan)`
@@ -37,7 +39,6 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
     processNewValue(e.target.value);
   }, [processNewValue]);
 
-  let content;
   if (editing) {
     const dateInput = (
       <input
@@ -50,11 +51,30 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
       />
     );
     const saveIcon = <IconSpan onClick={() => setEditing(false)}><FiSave /></IconSpan>;
-    content = right ? <>{dateInput}{saveIcon}</> : <>{saveIcon}{dateInput}</>;
+    return right ? <>{dateInput}{saveIcon}</> : <>{saveIcon}{dateInput}</>;
+  }
+  const dateText = <TextSpanClickable onClick={() => setEditing(true)}>{value}</TextSpanClickable>;
+  const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
+  return right ? <>{dateText}{calenderIcon}</> : <>{calenderIcon}{dateText}</>;
+};
+
+const DateLabel = ({ value, minDate, maxDate, onChange, right }) => {
+  let content;
+  // eslint-disable-next-line no-self-compare
+  const isNumeric = +value === +value; // https://stackoverflow.com/q/175739#comment32052139_175787
+  if (isNumeric) {
+    // numeric dates are not editable by HTML date picker
+    content = <TextSpan>{value}</TextSpan>;
   } else {
-    const dateLabel = <TextSpan onClick={() => setEditing(true)}>{value}</TextSpan>;
-    const calenderIcon = <IconSpan onClick={() => setEditing(true)}><MdDateRange /></IconSpan>;
-    content = right ? <>{dateLabel}{calenderIcon}</> : <>{calenderIcon}{dateLabel}</>;
+    content = (
+      <DatePicker
+        value={value}
+        minDate={minDate}
+        maxDate={maxDate}
+        onChange={onChange}
+        right={right}
+      />
+    );
   }
   return (
     <FloatDiv right={right}>
@@ -63,4 +83,4 @@ const DatePicker = ({ value, minDate, maxDate, onChange, right }) => {
   );
 };
 
-export default DatePicker;
+export default DateLabel;
