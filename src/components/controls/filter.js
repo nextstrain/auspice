@@ -8,6 +8,7 @@ import { applyFilter } from "../../actions/tree";
 import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
 import { SidebarSubtitle } from "./styles";
+import VirtualizedMenuList from "./virtualizedMenuList";
 
 const DEBOUNCE_TIME = 200;
 
@@ -159,7 +160,7 @@ class FilterData extends React.Component {
           isClearable={false}
           isSearchable
           isMulti={false}
-          components={{ DropdownIndicator: null }}
+          components={{ DropdownIndicator: null, MenuList: VirtualizedMenuList }}
           onChange={this.selectionMade}
         />
         {inUseFilters.length ? (
