@@ -2,8 +2,9 @@
 title: Changelog
 ---
 
-## version 2.34.0 - 2022/03/02
+* (Minor change) expose functions for use in auspice.us. See [PR 1478](https://github.com/nextstrain/auspice/pull/1478) for more.
 
+## version 2.34.0 - 2022/03/02
 
 #### Major changes
 * Measurements panel intended for displaying titer or DMS data where a tip in the tree has multiple values associated with it.
