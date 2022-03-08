@@ -226,8 +226,8 @@ function fetchAndParseNarrative(url) {
     });
 }
 
-
-function addEndOfNarrativeBlock(narrativeBlocks) {
+/* this function is exported as auspice.us uses it */
+export function addEndOfNarrativeBlock(narrativeBlocks) {
   const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
   const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
     __html: undefined,
@@ -257,8 +257,9 @@ function parseNarrativeDatasets(blocks, query) {
  * The Dataset object holds information about a single dataset (e.g. "zika") and
  * corresponding sidecar files. It contains prototypes to help with fetching and loading
  * of these data.
+ * This function is exported as auspice.us uses it.
  */
-function Dataset(name) {
+export function Dataset(name) {
   this.name = name;
   this.pathname = undefined; // the dataset name to show. May be different from the name.
   this.apiCalls = {};
@@ -311,10 +312,12 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
         dispatch(warningNotification({message: "Failed to fetch frequencies"}));
       });
   }
-  this.rootSequence.then((data) => {
-    dispatch({type: types.SET_ROOT_SEQUENCE, data});
-    dispatch(updateColorByWithRootSequenceData());
-  });
+  if (this.rootSequence) {
+    this.rootSequence.then((data) => {
+      dispatch({type: types.SET_ROOT_SEQUENCE, data});
+      dispatch(updateColorByWithRootSequenceData());
+    });
+  }
   if (this.measurements) {
     this.measurements
       .then((data) => dispatch(loadMeasurements(data)))
