@@ -98,7 +98,7 @@ if (type === "json") {
 
 ---
 
-## Suppling custom handlers to the Auspice server
+## Supplying custom handlers to the Auspice server
 
 The provided Auspice servers -- i.e. `auspice view` and `auspice develop` both have a `--handlers <JS>` option which allows you to define your own handlers.
 The provided JavaScript file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
