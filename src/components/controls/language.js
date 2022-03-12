@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select";
 import { withTranslation } from "react-i18next";
 import i18n from "i18next";
 
@@ -8,6 +7,7 @@ import { controlsWidth } from "../../util/globals";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle } from "./styles";
 import { CHANGE_LANGUAGE } from "../../actions/types";
+import CustomSelect from "./customSelect";
 
 @connect((state) => {
   return {
@@ -70,7 +70,7 @@ class Language extends React.Component {
           {t("sidebar:Language")}
         </SidebarSubtitle>
         <div style={{paddingBottom: 100, width: controlsWidth, fontSize: 14}}>
-          <Select
+          <CustomSelect
             name="selectLanguage"
             id="selectLanguage"
             value={selectOptions.filter(({value}) => value === this.props.language)}

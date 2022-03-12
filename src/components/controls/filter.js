@@ -7,6 +7,7 @@ import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
 import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
+import { customSelectStyles } from "./customSelect";
 import { SidebarSubtitle } from "./styles";
 import VirtualizedMenuList from "./virtualizedMenuList";
 
@@ -162,6 +163,7 @@ class FilterData extends React.Component {
           isMulti={false}
           components={{ DropdownIndicator: null, MenuList: VirtualizedMenuList }}
           onChange={this.selectionMade}
+          styles={customSelectStyles}
         />
         {inUseFilters.length ? (
           <>

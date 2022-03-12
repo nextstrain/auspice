@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select";
 import { withTranslation } from 'react-i18next';
 
 import { explodeTree } from "../../actions/tree";
 import { SidebarSubtitle } from "./styles";
 import { controlsWidth } from "../../util/globals";
+import CustomSelect from "./customSelect";
 
 /**
  * The available traits to split a tree on are taken as the non-continuous colorings.
@@ -41,7 +41,7 @@ class ChooseExplodeAttr extends React.Component {
           {"[experimental] " + t("sidebar:Explode tree by")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
-          <Select
+          <CustomSelect
             value={selectOptions.filter(({value}) => value === this.props.selected)}
             options={selectOptions}
             isClearable={false}

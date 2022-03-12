@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select";
 import { withTranslation } from 'react-i18next';
 
 import { CHANGE_BRANCH_LABEL } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
 import { controlsWidth } from "../../util/globals";
+import CustomSelect from "./customSelect";
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
@@ -27,7 +27,7 @@ class ChooseBranchLabelling extends React.Component {
           {t("sidebar:Branch Labels")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
-          <Select
+          <CustomSelect
             value={selectOptions.filter(({value}) => value === this.props.selected)}
             options={selectOptions}
             isClearable={false}

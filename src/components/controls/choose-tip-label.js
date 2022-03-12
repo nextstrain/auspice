@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import Select from "react-select";
 import { withTranslation } from 'react-i18next';
 import { CHANGE_TIP_LABEL_KEY } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
 import { controlsWidth, strainSymbol } from "../../util/globals";
+import CustomSelect from "./customSelect";
 
 @connect((state) => ({
   selected: state.controls.tipLabelKey,
@@ -23,7 +23,7 @@ class ChooseTipLabel extends React.Component {
           {t("sidebar:Tip Labels")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
-          <Select
+          <CustomSelect
             value={this.props.options.filter(({value}) => value === this.props.selected)}
             // Select can't handle Symbols, so we have to convert to string for them
             getOptionValue={(option) => option.value.toString()}

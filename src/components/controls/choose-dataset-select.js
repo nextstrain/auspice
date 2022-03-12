@@ -1,10 +1,9 @@
 import React from "react";
-import Select from "react-select";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
 import { controlsWidth } from "../../util/globals";
-
+import CustomSelect from "./customSelect";
 
 class ChooseDatasetSelect extends React.Component {
   changeDataset(newPath) {
@@ -22,7 +21,7 @@ class ChooseDatasetSelect extends React.Component {
     const selectOptions = this.props.options || [];
     return (
       <div style={{width: controlsWidth, fontSize: 14}}>
-        <Select
+        <CustomSelect
           value={selectOptions.filter(({value}) => value === this.props.selected)}
           options={selectOptions}
           isClearable={false}

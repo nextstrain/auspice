@@ -1,7 +1,6 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { isEqual } from "lodash";
-import Select from "react-select";
 import { changeMeasurementsCollection } from "../../actions/measurements";
 import {
   CHANGE_MEASUREMENTS_DISPLAY,
@@ -12,6 +11,7 @@ import {
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
+import CustomSelect from "./customSelect";
 
 /**
  * React Redux selector function that takes the key and title for the
@@ -55,7 +55,7 @@ const MeasurementsOptions = () => {
         {"Collections"}
       </SidebarSubtitle>
       <div style={{ marginBottom: 10, width: controlsWidth, fontSize: 14}}>
-        <Select
+        <CustomSelect
           name="measurementsCollections"
           id="measurementsCollections"
           value={collectionOptions.filter(({value}) => value === collection.key)}
@@ -72,7 +72,7 @@ const MeasurementsOptions = () => {
         {"Group By"}
       </SidebarSubtitle>
       <div style={{ marginBottom: 10, width: controlsWidth, fontSize: 14}}>
-        <Select
+        <CustomSelect
           name="measurementsGroupings"
           id="measurementsGroupings"
           value={groupingOptions.filter(({value}) => value === groupBy)}

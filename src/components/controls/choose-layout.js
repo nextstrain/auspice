@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
-import Select from "react-select";
 import * as icons from "../framework/svg-icons";
 import { controlsWidth } from "../../util/globals";
 import { collectAvailableScatterVariables} from "../../util/scatterplotHelpers";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import { changeLayout } from "../../actions/layout";
 import Toggle from "./toggle";
+import CustomSelect from "./customSelect";
 
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
@@ -48,7 +48,7 @@ class ChooseLayout extends React.Component {
         <ScatterVariableContainer>
           <ScatterAxisName>x</ScatterAxisName>
           <ScatterSelectContainer>
-            <Select
+            <CustomSelect
               {...miscSelectProps}
               value={options.filter(({value}) => value === selectedX.value)}
               onChange={(value) => this.props.dispatch(changeLayout({x: value.value, xLabel: value.label}))}
@@ -59,7 +59,7 @@ class ChooseLayout extends React.Component {
         <ScatterVariableContainer>
           <ScatterAxisName>y</ScatterAxisName>
           <ScatterSelectContainer>
-            <Select
+            <CustomSelect
               {...miscSelectProps}
               value={options.filter(({value}) => value === selectedY.value)}
               onChange={(value) => this.props.dispatch(changeLayout({y: value.value, yLabel: value.label}))}
