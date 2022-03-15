@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Select from "react-select/lib/Select";
 import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, nucleotide_gene } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
+import CustomSelect from "./customSelect";
 
 /* the reason why we have colorBy as state (here) and in redux
    is for the case where we select genotype, then wait for the
@@ -147,15 +147,15 @@ class ColorBy extends React.Component {
   gtGeneSelect() {
     const gtGeneOptions = this.getGtGeneOptions();
     return (
-      <Select
+      <CustomSelect
         name="selectGenotype"
         id="selectGenotype"
         placeholder="gene…"
-        value={this.state.geneSelected}
+        value={gtGeneOptions.filter(({value}) => value === this.state.geneSelected)}
         options={gtGeneOptions}
-        clearable={false}
-        searchable
-        multi={false}
+        isClearable={false}
+        isSearchable
+        isMulti={false}
         onChange={(opt) => {
           this.setState({ geneSelected: opt.value });
         }}
@@ -208,13 +208,13 @@ class ColorBy extends React.Component {
 
     return (
       <div style={styles.base} id="selectColorBy">
-        <Select
+        <CustomSelect
           name="selectColorBy"
-          value={this.state.colorBySelected}
+          value={colorOptions.filter(({value}) => value === this.state.colorBySelected)}
           options={colorOptions}
-          clearable={false}
-          searchable
-          multi={false}
+          isClearable={false}
+          isSearchable
+          isMulti={false}
           onChange={(opt) => {
             this.replaceState({ colorBySelected: opt.value });
           }}

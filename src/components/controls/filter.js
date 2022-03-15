@@ -1,15 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
-import "react-select/dist/react-select.css";
-import "react-virtualized-select/styles.css";
-import Select from "react-virtualized-select";
+import AsyncSelect from "react-select/async";
 import { debounce } from 'lodash';
 import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
 import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } from "../../actions/measurements";
 import { FilterBadge } from "../info/filterBadge";
+import { customSelectStyles } from "./customSelect";
 import { SidebarSubtitle } from "./styles";
+import VirtualizedMenuList from "./virtualizedMenuList";
 
 const DEBOUNCE_TIME = 200;
 
@@ -141,7 +141,7 @@ class FilterData extends React.Component {
     // options only need to be calculated a single time per render, and by adding a debounce
     // to `loadOptions` we don't slow things down by comparing queries to a large number of options
     const options = this.makeOptions();
-    const loadOptions = debounce((input, callback) => callback(null, {options}), DEBOUNCE_TIME);
+    const loadOptions = debounce((input, callback) => callback(options), DEBOUNCE_TIME);
     const filterOption = (option, filter) => filter.toLowerCase().split(" ").every((word) => option.label.toLowerCase().includes(word));
     const styles = this.getStyles();
     const inUseFilters = this.summariseFilters();
@@ -151,20 +151,19 @@ class FilterData extends React.Component {
     const divKey = String(Object.keys(this.props.activeFilters).length);
     return (
       <div style={styles.base} key={divKey}>
-        <Select
-          async
+        <AsyncSelect
           name="filterQueryBox"
           placeholder="Type filter query here..."
-          value={undefined}
-          arrowRenderer={null}
+          value={null}
+          defaultOptions
           loadOptions={loadOptions}
           filterOption={filterOption}
-          ignoreAccents={false}
-          clearable={false}
-          searchable
-          multi={false}
-          valueKey="label"
+          isClearable={false}
+          isSearchable
+          isMulti={false}
+          components={{ DropdownIndicator: null, MenuList: VirtualizedMenuList }}
           onChange={this.selectionMade}
+          styles={customSelectStyles}
         />
         {inUseFilters.length ? (
           <>
