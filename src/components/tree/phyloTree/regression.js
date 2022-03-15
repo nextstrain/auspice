@@ -8,7 +8,7 @@ import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
  * nodes[0].
  * It does not consider which tips are inView / visible.
  */
-export function calculateRegressionThroughRoot(nodes) {
+function calculateRegressionThroughRoot(nodes) {
   const terminalNodes = nodes.filter((d) => !d.n.hasChildren);
   const nTips = terminalNodes.length;
   const offset = nodes[0].x;
@@ -29,7 +29,7 @@ export function calculateRegressionThroughRoot(nodes) {
  * set. These values must be numeric.
  * This function does not consider which tips are inView / visible.
  */
-export function calculateRegressionWithFreeIntercept(nodes) {
+function calculateRegressionWithFreeIntercept(nodes) {
   const terminalNodesWithXY = nodes.filter((d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined);
   const nTips = terminalNodesWithXY.length;
   const meanX = sum(terminalNodesWithXY.map((d) => d.x))/nTips;
@@ -42,6 +42,14 @@ export function calculateRegressionWithFreeIntercept(nodes) {
   return {slope, intercept, r2};
 }
 
+/** sets this.regression  */
+export function calculateRegression() {
+  if (this.layout==="clock") {
+    this.regression = calculateRegressionThroughRoot(this.nodes);
+  } else {
+    this.regression = calculateRegressionWithFreeIntercept(this.nodes);
+  }
+}
 
 export function makeRegressionText(regression, layout, yScale) {
   if (layout==="clock") {
