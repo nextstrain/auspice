@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.35.0 - 2022/03/16
+
+
 * Upgrade how we render dropdown menus, which greatly improves the display of long options (e.g. submitting labs).
 See [PR 1482](https://github.com/nextstrain/auspice/pull/1482) for more.
 
