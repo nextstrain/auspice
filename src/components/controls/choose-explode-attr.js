@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
+import { FaWrench } from "react-icons/fa";
 
 import { explodeTree } from "../../actions/tree";
 import { SidebarSubtitle } from "./styles";
@@ -27,7 +28,7 @@ class ChooseExplodeAttr extends React.Component {
       .filter(([key]) => key !== "gt")
       .map(([key, value]) => ({value: key, label: value.title || key}));
     if (this.props.selected) {
-      options.unshift({value: undefined, label: "Reconstruct"});
+      options.unshift({value: undefined, label: "None"});
     }
     return options;
   }
@@ -38,7 +39,8 @@ class ChooseExplodeAttr extends React.Component {
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>
-          {"[experimental] " + t("sidebar:Explode tree by")}
+          <FaWrench style={{ marginRight: "5px" }}/>
+          {t("sidebar:Explode Tree By")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <CustomSelect
