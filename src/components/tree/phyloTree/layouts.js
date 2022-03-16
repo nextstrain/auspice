@@ -3,7 +3,6 @@
 import { min, max } from "d3-array";
 import scaleLinear from "d3-scale/src/linear";
 import {point as scalePoint} from "d3-scale/src/band";
-import { calculateRegressionThroughRoot, calculateRegressionWithFreeIntercept } from "./regression";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 
@@ -126,11 +125,7 @@ export const scatterplotLayout = function scatterplotLayout() {
   }
 
   if (this.scatterVariables.showRegression) {
-    if (this.layout==="clock") {
-      this.regression = calculateRegressionThroughRoot(this.nodes);
-    } else {
-      this.regression = calculateRegressionWithFreeIntercept(this.nodes);
-    }
+    this.calculateRegression(); // sets this.regression
   }
 
 };

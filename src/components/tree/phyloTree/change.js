@@ -333,6 +333,11 @@ export const change = function change({
   if (changeColorBy) {
     this.updateColorBy();
   }
+  // recalculate existing regression if needed
+  if (changeVisibility && this.regression) {
+    elemsToUpdate.add(".regression");
+    this.calculateRegression(); // Note: must come after `updateNodesWithNewData()`
+  }
   /* some things need to update d.inView and/or d.update. This should be centralised */
   /* TODO: list all functions which modify these */
   if (zoomIntoClade) { /* must happen below updateNodesWithNewData */

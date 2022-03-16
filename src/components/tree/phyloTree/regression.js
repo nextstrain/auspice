@@ -1,16 +1,19 @@
 import { sum } from "d3-array";
 import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 
 /**
  * this function calculates a regression between
- * the x and y values of terminal nodes, passing through
- * nodes[0].
- * It does not consider which tips are inView / visible.
+ * the x and y values of terminal nodes which are also visible.
+ * The regression is forced to pass through nodes[0].
  */
-export function calculateRegressionThroughRoot(nodes) {
-  const terminalNodes = nodes.filter((d) => !d.n.hasChildren);
+function calculateRegressionThroughRoot(nodes) {
+  const terminalNodes = nodes.filter((d) => !d.n.hasChildren && d.visibility === NODE_VISIBLE);
   const nTips = terminalNodes.length;
+  if (nTips===0) {
+    return {slope: undefined, intercept: undefined, r2: undefined};
+  }
   const offset = nodes[0].x;
   const XY = sum(
     terminalNodes.map((d) => (d.y) * (d.x - offset))
@@ -25,13 +28,17 @@ export function calculateRegressionThroughRoot(nodes) {
 }
 
 /**
- * Calculate regression through terminal nodes which have both x & y values
+ * Calculate regression through visible terminal nodes which have both x & y values
  * set. These values must be numeric.
- * This function does not consider which tips are inView / visible.
  */
-export function calculateRegressionWithFreeIntercept(nodes) {
-  const terminalNodesWithXY = nodes.filter((d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined);
+function calculateRegressionWithFreeIntercept(nodes) {
+  const terminalNodesWithXY = nodes.filter(
+    (d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined && d.visibility === NODE_VISIBLE
+  );
   const nTips = terminalNodesWithXY.length;
+  if (nTips===0) {
+    return {slope: undefined, intercept: undefined, r2: undefined};
+  }
   const meanX = sum(terminalNodesWithXY.map((d) => d.x))/nTips;
   const meanY = sum(terminalNodesWithXY.map((d) => d.y))/nTips;
   const slope = sum(terminalNodesWithXY.map((d) => (d.x-meanX)*(d.y-meanY))) /
@@ -42,6 +49,14 @@ export function calculateRegressionWithFreeIntercept(nodes) {
   return {slope, intercept, r2};
 }
 
+/** sets this.regression  */
+export function calculateRegression() {
+  if (this.layout==="clock") {
+    this.regression = calculateRegressionThroughRoot(this.nodes);
+  } else {
+    this.regression = calculateRegressionWithFreeIntercept(this.nodes);
+  }
+}
 
 export function makeRegressionText(regression, layout, yScale) {
   if (layout==="clock") {

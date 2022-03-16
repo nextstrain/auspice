@@ -241,6 +241,11 @@ export const drawBranches = function drawBranches() {
  * @return {null}
  */
 export const drawRegression = function drawRegression() {
+  /* check we have computed a sensible regression before attempting to draw */
+  if (this.regression.slope===undefined) {
+    return;
+  }
+
   const leftY = this.yScale(this.regression.intercept + this.xScale.domain()[0] * this.regression.slope);
   const rightY = this.yScale(this.regression.intercept + this.xScale.domain()[1] * this.regression.slope);
 

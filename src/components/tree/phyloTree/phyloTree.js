@@ -7,6 +7,7 @@ import * as layouts from "./layouts";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
+import * as regression from "./regression";
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
 const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
@@ -68,6 +69,7 @@ PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
 PhyloTree.prototype.setScales = layouts.setScales;
 PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
+PhyloTree.prototype.calculateRegression = regression.calculateRegression;
 
 /* C O N F I D E N C E    I N T E R V A L S */
 PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
