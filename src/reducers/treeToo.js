@@ -1,4 +1,5 @@
 import * as types from "../actions/types";
+import { addNodeAttrs } from "../util/treeMiscHelpers";
 import { getDefaultTreeState } from "./tree";
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
@@ -61,6 +62,10 @@ const treeToo = (state = getDefaultTreeState(), action) => {
           nodeColorsVersion: action.version
         });
       }
+      return state;
+    case types.ADD_EXTRA_METADATA:
+      // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      addNodeAttrs(state.nodes, action.newNodeAttrs);
       return state;
     default:
       return state;

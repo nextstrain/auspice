@@ -203,11 +203,14 @@ function processLatLongs(newNodeAttrs, latLongKeys, rows, fileName) {
 }
 
 function checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, ignoredFields, fileName) {
-  const {controls, tree} = getState();
+  const {controls, tree, treeToo} = getState();
   const [droppedColorings, droppedNodes] = [new Set(), new Set()];
 
-  /* restrict the newNodeAttrs to nodes which are actually in the tree! */
+  /* restrict the newNodeAttrs to nodes which are actually in the tree(s) */
   const nodeNamesInTree = new Set(tree.nodes.map((n) => n.name)); // can be internal nodes
+  if (Array.isArray(treeToo.nodes)) {
+    treeToo.nodes.forEach((node) => nodeNamesInTree.add(node.name));
+  }
   for (const name of Object.keys(newNodeAttrs)) {
     if (!nodeNamesInTree.has(name)) {
       droppedNodes.add(name);

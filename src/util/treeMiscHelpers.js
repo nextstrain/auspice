@@ -284,3 +284,21 @@ export const sortByGeneOrder = (genomeAnnotations) => {
     return 0;
   };
 };
+
+/**
+ * Add extra per-node attrs into the `nodes` data structure. Key clashes will result in the
+ * new data overwriting the existing data
+ * @param {Array} nodes d
+ * @param {Object} newAttrs
+ * @returns undefined - modifies the `nodes` param in-place
+ */
+export const addNodeAttrs = (nodes, newAttrs) => {
+  nodes.forEach((node) => {
+    if (newAttrs[node.name]) {
+      if (!node.node_attrs) node.node_attrs = {};
+      for (const [attrName, attrData] of Object.entries(newAttrs[node.name])) {
+        node.node_attrs[attrName] = attrData;
+      }
+    }
+  });
+};
