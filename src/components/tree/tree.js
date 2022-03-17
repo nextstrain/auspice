@@ -41,6 +41,12 @@ class Tree extends React.Component {
         root: [0, 0]
       }));
     };
+    /* pressing the escape key should dismiss an info modal (if one exists) */
+    this.handlekeydownEvent = (event) => {
+      if (event.key==="Escape" && this.state.selectedNode?.node) {
+        this.clearSelectedNode(this.state.selectedNode);
+      }
+    };
   }
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
@@ -52,6 +58,7 @@ class Tree extends React.Component {
     renderTree(this, false, newState.treeToo, props);
   }
   componentDidMount() {
+    document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
       const newState = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT", this.props.tree.idxOfInViewRootNode);
@@ -94,6 +101,10 @@ class Tree extends React.Component {
       this.tangleRef.drawLines();
     }
     if (Object.keys(newState).length) this.setState(newState);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
   getStyles = () => {
