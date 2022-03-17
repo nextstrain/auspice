@@ -4,13 +4,14 @@ import { getDefaultTreeState } from "./tree";
 that the tree is loaded as they are set on the same action */
 
 const treeToo = (state = getDefaultTreeState(), action) => {
+
+  /* There are only a few actions we should always listen for, as they can change
+  the presence / absence of the second tree */
   switch (action.type) {
     case types.DATA_INVALID:
       return Object.assign({}, state, {
         loaded: false
       });
-    case types.REMOVE_TREE_TOO:
-      return getDefaultTreeState();
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       if (action.treeToo) {
@@ -19,6 +20,19 @@ const treeToo = (state = getDefaultTreeState(), action) => {
       return getDefaultTreeState();
     case types.TREE_TOO_DATA:
       return action.treeToo;
+    default:
+      // no default case
+  }
+
+  /* All other actions can only modify an existing tree, so if one doesn't exist then
+  return early */
+  if (!state.loaded) {
+    return state;
+  }
+
+  switch (action.type) {
+    case types.REMOVE_TREE_TOO:
+      return getDefaultTreeState();
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
