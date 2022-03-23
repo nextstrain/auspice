@@ -167,6 +167,14 @@ export function guessAreMutationsPerSite(scale) {
 }
 
 /**
+ * Is the node a subtree root node? (implies that we have either exploded trees or
+ * the dataset has multiple subtrees to display)
+ * @param {ReduxTreeNode} n
+ * @returns {bool}
+ */
+const isSubtreeRoot = (n) => (n.parent.name === "__ROOT" && n.parentInfo.original);
+
+/**
  * Gets the parent node to be used for stem / branch calculation.
  * Most of the time this is the same as `d.n.parent` however it is not in the
  * case of the root nodes for subtrees (e.g. exploded trees).
@@ -174,9 +182,7 @@ export function guessAreMutationsPerSite(scale) {
  * @returns {Node}
  */
 export const stemParent = (n) => {
-  return (n.parent.name === "__ROOT" && n.parentInfo.original) ?
-    n.parentInfo.original :
-    n.parent;
+  return isSubtreeRoot(n) ? n.parentInfo.original : n.parent;
 };
 
 
@@ -193,6 +199,6 @@ export const nodeOrdering = (nodes) => {
     .reduce((acc, val) => ((val ?? 0) > acc ? val : acc), 0);
   return (d) => ([
     maxVal - d.displayOrder,
-    maxVal - stemParent(d.n).shell.displayOrder
+    isSubtreeRoot(d.n) ? undefined : (maxVal - d.n.parent.shell.displayOrder)
   ]);
 };
