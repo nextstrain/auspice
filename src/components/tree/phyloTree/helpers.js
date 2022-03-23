@@ -165,3 +165,34 @@ export function guessAreMutationsPerSite(scale) {
   const maxDivergence = max(scale.domain());
   return maxDivergence <= 5;
 }
+
+/**
+ * Gets the parent node to be used for stem / branch calculation.
+ * Most of the time this is the same as `d.n.parent` however it is not in the
+ * case of the root nodes for subtrees (e.g. exploded trees).
+ * @param {Node} n
+ * @returns {Node}
+ */
+export const stemParent = (n) => {
+  return (n.parent.name === "__ROOT" && n.parentInfo.original) ?
+    n.parentInfo.original :
+    n.parent;
+};
+
+
+/**
+ * Returns a function which itself gets the order of the node and that of its parent.
+ * This is not strictly the same as the `displayOrder` the scatterplot axis
+ * renders increasing values going upwards (i.e. from the bottom to top of screen)
+ * whereas the rectangular tree renders zero at the top and goes downwards
+ * @param {Array<PhyloNode>} nodes
+ * @returns {function} which takes a single argument of type <PhyloNode>
+ */
+export const nodeOrdering = (nodes) => {
+  const maxVal = nodes.map((d) => d.displayOrder)
+    .reduce((acc, val) => ((val ?? 0) > acc ? val : acc), 0);
+  return (d) => ([
+    maxVal - d.displayOrder,
+    maxVal - stemParent(d.n).shell.displayOrder
+  ]);
+};

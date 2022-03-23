@@ -5,6 +5,7 @@ import scaleLinear from "d3-scale/src/linear";
 import {point as scalePoint} from "d3-scale/src/band";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
+import { stemParent, nodeOrdering } from "./helpers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -48,20 +49,6 @@ export const setLayout = function setLayout(layout, scatterVariables) {
   timerEnd("setLayout");
 };
 
-
-/**
- * Gets the parent node to be used for stem / branch calculation.
- * Most of the time this is the same as `d.n.parent` however it is not in the
- * case of the root nodes for subtrees (e.g. exploded trees).
- * @param {Node} n
- * @returns {Node}
- */
-const stemParent = (n) => {
-  return (n.parent.name === "__ROOT" && n.parentInfo.original) ?
-    n.parentInfo.original :
-    n.parent;
-};
-
 /**
  * assignes x,y coordinates for a rectancular layout
  * @return {null}
@@ -92,7 +79,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     return;
   }
 
-  const getDisplayOrderPair = (d) => ([d.displayOrder, stemParent(d.n).shell.displayOrder]);
+  const getDisplayOrderPair = (this.scatterVariables.x==="displayOrder" || this.scatterVariables.y==="displayOrder") ?
+    nodeOrdering(this.nodes) :
+    undefined;
 
   this.nodes.forEach((d) => {
     // set x and parent X values
