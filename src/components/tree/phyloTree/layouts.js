@@ -5,6 +5,7 @@ import scaleLinear from "d3-scale/src/linear";
 import {point as scalePoint} from "d3-scale/src/band";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
+import { stemParent, nodeOrdering } from "./helpers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -48,20 +49,6 @@ export const setLayout = function setLayout(layout, scatterVariables) {
   timerEnd("setLayout");
 };
 
-
-/**
- * Gets the parent node to be used for stem / branch calculation.
- * Most of the time this is the same as `d.n.parent` however it is not in the
- * case of the root nodes for subtrees (e.g. exploded trees).
- * @param {Node} n
- * @returns {Node}
- */
-const stemParent = (n) => {
-  return (n.parent.name === "__ROOT" && n.parentInfo.original) ?
-    n.parentInfo.original :
-    n.parent;
-};
-
 /**
  * assignes x,y coordinates for a rectancular layout
  * @return {null}
@@ -92,6 +79,10 @@ export const scatterplotLayout = function scatterplotLayout() {
     return;
   }
 
+  const getDisplayOrderPair = (this.scatterVariables.x==="displayOrder" || this.scatterVariables.y==="displayOrder") ?
+    nodeOrdering(this.nodes) :
+    undefined;
+
   this.nodes.forEach((d) => {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
@@ -100,6 +91,8 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else if (this.scatterVariables.x==="gt") {
       d.x = d.n.currentGt;
       d.px = stemParent(d.n).currentGt;
+    } else if (this.scatterVariables.x==="displayOrder") {
+      [d.x, d.px] = getDisplayOrderPair(d);
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
@@ -111,6 +104,8 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else if (this.scatterVariables.y==="gt") {
       d.y = d.n.currentGt;
       d.py = stemParent(d.n).currentGt;
+    } else if (this.scatterVariables.y==="displayOrder") {
+      [d.y, d.py] = getDisplayOrderPair(d);
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
