@@ -92,6 +92,8 @@ export const scatterplotLayout = function scatterplotLayout() {
     return;
   }
 
+  const getDisplayOrderPair = (d) => ([d.displayOrder, stemParent(d.n).shell.displayOrder]);
+
   this.nodes.forEach((d) => {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
@@ -100,6 +102,8 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else if (this.scatterVariables.x==="gt") {
       d.x = d.n.currentGt;
       d.px = stemParent(d.n).currentGt;
+    } else if (this.scatterVariables.x==="displayOrder") {
+      [d.x, d.px] = getDisplayOrderPair(d);
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
@@ -111,6 +115,8 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else if (this.scatterVariables.y==="gt") {
       d.y = d.n.currentGt;
       d.py = stemParent(d.n).currentGt;
+    } else if (this.scatterVariables.y==="displayOrder") {
+      [d.y, d.py] = getDisplayOrderPair(d);
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);

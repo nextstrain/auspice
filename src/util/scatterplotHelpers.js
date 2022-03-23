@@ -18,6 +18,7 @@ export function collectAvailableScatterVariables(colorings, colorBy) {
   } else {
     options = options.filter((o) => o.value!=="gt");
   }
+  options.unshift({value: "displayOrder", label: "Node ordering in tree"});
   options.unshift({value: "div", label: "Divergence"});
 
   return options;
@@ -96,7 +97,8 @@ export function getFirstMatchingScatterVariable(options, tryTheseFirst, notThisV
  */
 export function addScatterAxisInfo(scatterVariables, axis, controls, tree, metadata) {
   const axisVar = scatterVariables[axis];
-  if (["div", "num_date"].includes(axisVar) || metadata.colorings[axisVar].type==="continuous") {
+  const knownContinuousKeys = ["div", "num_date", "displayOrder"];
+  if (knownContinuousKeys.includes(axisVar) || metadata.colorings[axisVar].type==="continuous") {
     scatterVariables[`${axis}Continuous`] = true;
     scatterVariables[`${axis}Domain`] = undefined;
     return scatterVariables;
