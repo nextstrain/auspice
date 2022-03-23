@@ -786,6 +786,7 @@ export const createStateFromQueryOrJSONs = ({
     metadata = {...oldState.metadata};
     frequencies = {...oldState.frequencies};
     controls = restoreQueryableStateToDefaults(controls);
+    controls = modifyStateViaMetadata(controls, metadata);
   }
 
   /* For the creation of state, we want to parse out URL query parameters
