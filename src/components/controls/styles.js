@@ -66,6 +66,18 @@ export const SidebarSubtitle = styled.div`
   color: ${(props) => props.theme.color};
 `;
 
+export const SidebarSubtitleFlex = styled(SidebarSubtitle)`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const SidebarIconContainer = styled.span`
+  padding-right: 3px;
+  font-size: 16px;
+  cursor: help;
+  color: #888;
+`;
+
 /* React Select is a lot of work to style
  * I can't yet get it working with styled components
  * We import the theme here, rather than accessing it via the <ThemeProvider>

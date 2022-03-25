@@ -47,3 +47,11 @@ export const MeasurementsOptionsInfo = (
     Change collection of measurements and various display options for the collection.
   </>
 );
+
+export const ExplodeTreeInfo = (
+  <>This functionality is experimental and should be treated with caution!
+    <br/>Exploding a tree by trait X means that for each branch where the trait changes value, we will
+    prune off the branch and create a separate (sub)tree.
+    It works best when the trait doesn&apos;t change value too frequently.
+  </>
+);
