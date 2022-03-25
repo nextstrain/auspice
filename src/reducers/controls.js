@@ -22,6 +22,7 @@ export const getDefaultControlsState = () => {
     layout: defaultLayout,
     geoResolution: defaultGeoResolution,
     filters: {},
+    filtersInFooter: [],
     colorBy: defaultColorBy,
     selectedBranchLabel: "none",
     showTransmissionLines: true
@@ -67,7 +68,8 @@ export const getDefaultControlsState = () => {
     canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
-    filters: {},
+    filters: defaults.filters,
+    filtersInFooter: defaults.filtersInFooter,
     showDownload: false,
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
