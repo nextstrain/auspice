@@ -36,12 +36,18 @@ const interpretRequest = (req) => {
   if (!query.prefix) throw new Error("'prefix' not defined in request");
   const datanameParts = splitPrefixIntoParts(query.prefix);
   const info = {parts: datanameParts};
-  if (query.type && query.type !== "tree") { // "tree" is deprecated
+  /* query.type is used to indicate which sidecar file should be fetched,
+  without it we fetch the "main" dataset JSON. See the `Dataset` constructor
+  in `./src/actions/loadData.js` for which sidecars auspice may try to fetch */
+  const sidecars = ['tip-frequencies', 'root-sequence', 'measurements'];
+  if (!query.type || query.type==="tree") {
+    // note that "tree" is deprecated and unnecessary, so it's ignored
+    info.dataType = "dataset";
+  } else if (sidecars.includes(query.type)) {
     info.dataType = query.type;
   } else {
-    info.dataType = "dataset";
+    throw new Error(`Unknown file type '${query.type}' requested.`);
   }
-
   return info;
 };
 
