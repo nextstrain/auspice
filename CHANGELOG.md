@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.36.0 - 2022/03/28
+
+
 ### Functional improvements
 
 * Dynamically update regression lines to reflect filtered data.
