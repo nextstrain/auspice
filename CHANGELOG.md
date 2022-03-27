@@ -2,9 +2,27 @@
 title: Changelog
 ---
 
+### Functional improvements
+
+* Dynamically update regression lines to reflect filtered data.
+See [PR 1484](https://github.com/nextstrain/auspice/pull/1484) for more.
+* Scatterplot axes can now use "node-order" which is the order nodes appear on the rectangular tree.
+See [PR 1494](https://github.com/nextstrain/auspice/pull/1494) for more.
+* Show an "experimental" icon and on-hover info text for the explode-tree functionality.
+See [PR 1486](https://github.com/nextstrain/auspice/pull/1486) for more.
+* You can now use the escape key to remove a tip/branch info modal over the tree.
+See [PR 1485](https://github.com/nextstrain/auspice/pull/1485) for more.
+
+### Bugfixes
+
+* Drag-n-drop metadata now works for the second tree.
+See [PR 1489](https://github.com/nextstrain/auspice/pull/1489) for more.
+* Available filters are now correct when switching from a narrative to exploding the data.
+See [PR 1493](https://github.com/nextstrain/auspice/pull/1493) for more.
+* The auspice server only accepts valid sidecar file types.
+See [PR 1495](https://github.com/nextstrain/auspice/pull/1495) for more.
+
 ## version 2.35.0 - 2022/03/16
-
-
 * Upgrade how we render dropdown menus, which greatly improves the display of long options (e.g. submitting labs).
 See [PR 1482](https://github.com/nextstrain/auspice/pull/1482) for more.
 
