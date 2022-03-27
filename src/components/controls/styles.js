@@ -66,31 +66,17 @@ export const SidebarSubtitle = styled.div`
   color: ${(props) => props.theme.color};
 `;
 
-/* React Select is a lot of work to style
- * I can't yet get it working with styled components
- * We import the theme here, rather than accessing it via the <ThemeProvider>
- */
-// const customReactSelectStyles = {
-//   container: (provided, state) => {
-//     console.log(provided);
-//     return {
-//       ...provided,
-//       height: "20px"
-//     };
-//   },
-//   control: (provided, state) => {
-//     return {
-//       ...provided,
-//       color: "yellow",
-//       backgroundColor: "pink",
-//       borderColor: "red",
-//       height: "20px"
-//     };
-//   }
-// };
-// export const Select = (props) => (
-//   <ReactSelect styles={customReactSelectStyles} {...props}/>
-// );
+export const SidebarSubtitleFlex = styled(SidebarSubtitle)`
+  display: flex;
+  justify-content: space-between;
+`;
+
+export const SidebarIconContainer = styled.span`
+  padding-right: 3px;
+  font-size: 16px;
+  cursor: help;
+  color: #888;
+`;
 
 export const StyledTooltip = styled(ReactTooltip)`
   max-width: 30vh;

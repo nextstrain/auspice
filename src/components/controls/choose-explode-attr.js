@@ -1,9 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
-
+import { ImLab } from "react-icons/im";
+import { FaInfoCircle } from "react-icons/fa";
 import { explodeTree } from "../../actions/tree";
-import { SidebarSubtitle } from "./styles";
+import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
 
@@ -27,19 +28,32 @@ class ChooseExplodeAttr extends React.Component {
       .filter(([key]) => key !== "gt")
       .map(([key, value]) => ({value: key, label: value.title || key}));
     if (this.props.selected) {
-      options.unshift({value: undefined, label: "Reconstruct"});
+      options.unshift({value: undefined, label: "None"});
     }
     return options;
   }
   render() {
     if (!this.props.showThisUI) return null;
-    const { t } = this.props;
+    const { t, tooltip, mobile } = this.props;
     const selectOptions = this.gatherAttrs();
     return (
       <div style={{paddingTop: 5}}>
-        <SidebarSubtitle>
-          {"[experimental] " + t("sidebar:Explode tree by")}
-        </SidebarSubtitle>
+        <SidebarSubtitleFlex data-tip data-for="explode_tree">
+          <span>
+            <ImLab style={{ marginRight: "5px" }}/>
+            {t("sidebar:Explode Tree By")}
+          </span>
+          {tooltip && !mobile && (
+            <>
+              <SidebarIconContainer data-tip data-for="select-explode">
+                <FaInfoCircle/>
+              </SidebarIconContainer>
+              <StyledTooltip place="bottom" type="dark" effect="solid" id="select-explode">
+                {tooltip}
+              </StyledTooltip>
+            </>
+          )}
+        </SidebarSubtitleFlex>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <CustomSelect
             value={selectOptions.filter(({value}) => value === this.props.selected)}

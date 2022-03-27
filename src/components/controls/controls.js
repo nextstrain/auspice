@@ -21,7 +21,8 @@ import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
+import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
+  ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
 import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
 
@@ -45,7 +46,7 @@ function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
       <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
       <ChooseLayout />
       <ChooseMetric />
-      <ChooseExplodeAttr />
+      <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
       <ChooseBranchLabelling />
       <ChooseTipLabel />
       <ChooseSecondTree />
