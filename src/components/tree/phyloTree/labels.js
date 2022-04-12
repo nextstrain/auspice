@@ -78,11 +78,7 @@ const branchLabelFontWeight = (key) => {
  */
 const createBranchLabelVisibility = (key, layout, totalTipsInView) => (d) => {
   if (d.visibility !== NODE_VISIBLE) return "hidden";
-  if (key!=="aa") return "visible";
-  const magicTipFractionToShowBranchLabel = 0.05;
-  if (layout !== "rect") {
-    return "hidden";
-  }
+  const magicTipFractionToShowBranchLabel = 0.03;
   /* if the number of _visible_ tips descending from this node are over the
   magicTipFractionToShowBranchLabel (c/w the total number of _visible_ and
   _inView_ tips then display the label */
