@@ -26,6 +26,14 @@ const FooterStyles = styled.div`
     font-weight: 300;
   }
 
+  ol {
+    font-weight: 300;
+  }
+
+  ul {
+    font-weight: 300;
+  }
+
   h1 {
     font-weight: 700;
     font-size: 2.50em;
@@ -120,6 +128,28 @@ const FooterStyles = styled.div`
     margin-right: 30px;
     margin-top: 2px;
     margin-bottom: 2px;
+  }
+
+  table {
+    font-weight: 300;
+    margin-bottom: 1rem;
+
+    th,
+    td {
+      text-align: left;
+      padding: 0.45rem;
+      vertical-align: top;
+      border-top: 1px solid #dee2e6;
+    }
+
+    thead th {
+      vertical-align: bottom;
+      border-bottom: 2px solid #dee2e6;
+    }
+
+    tbody + tbody {
+      border-top: 2px solid #dee2e6;
+    }
   }
 
 `;
