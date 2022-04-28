@@ -85,6 +85,11 @@ const createBranchLabelVisibility = (key, layout, totalTipsInView) => (d) => {
   if (d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView) {
     return "visible";
   }
+  /* if the label is on the root of a subtree then always show it
+  (unless the label is "aa" as these can be very long) */
+  if (key!=='aa' && (d.n.name===d.n.parent.name || d.n.parent.name==="__ROOT")) {
+    return "visible";
+  }
   return "hidden";
 };
 
