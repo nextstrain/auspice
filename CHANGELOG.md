@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.37.0 - 2022/04/28
+
+
 * Improved footer styling of tables.
 See [PR 1502](https://github.com/nextstrain/auspice/pull/1502) for more.
 * Branch labels are now shown/hidden depending according to the proportion of visible tips they define.
