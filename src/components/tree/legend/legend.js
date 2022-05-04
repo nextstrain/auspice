@@ -166,8 +166,8 @@ class Legend extends React.Component {
             dispatch={this.props.dispatch}
             legendRectSize={ITEM_RECT_SIZE}
             legendSpacing={LEGEND_SPACING}
-            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
+            rectFill={rgb(this.props.colorScale.scale(d)).toString()}
+            rectStroke={rgb(this.props.colorScale.scale(d)).darker([0.35]).toString()}
             transform={this.getTransformationForLegendItem(maxNumPerColumn, i)}
             key={d}
             value={d}

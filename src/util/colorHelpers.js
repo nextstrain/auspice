@@ -121,4 +121,4 @@ export const getEmphasizedColor = (color) => {
   return rgb(hslColor).toString();
 };
 
-export const getBrighterColor = (color) => rgb(color).brighter([0.65]).toString();
+export const getDarkerColor = (color) => rgb(color).darker([0.35]).toString();

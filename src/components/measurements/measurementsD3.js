@@ -5,7 +5,7 @@ import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
 import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals";
-import { getBrighterColor } from "../../util/colorHelpers";
+import { getDarkerColor } from "../../util/colorHelpers";
 
 /* C O N S T A N T S */
 export const layout = {
@@ -272,9 +272,9 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
 export const colorMeasurementsSVG = (ref, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements}`)
-    .style("stroke", (d) => treeStrainColors[d.strain].color)
+    .style("stroke", (d) => getDarkerColor(treeStrainColors[d.strain].color))
     .style("stroke-width", layout.circleStrokeWidth)
-    .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
+    .style("fill", (d) => treeStrainColors[d.strain].color);
 };
 
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover) => {
