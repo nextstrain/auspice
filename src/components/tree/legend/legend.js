@@ -4,6 +4,7 @@ import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
 import { fastTransitionDuration, months } from "../../../util/globals";
+import { getBrighterColor } from "../../../util/colorHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { TOGGLE_LEGEND } from "../../../actions/types";
@@ -166,7 +167,7 @@ class Legend extends React.Component {
             dispatch={this.props.dispatch}
             legendRectSize={ITEM_RECT_SIZE}
             legendSpacing={LEGEND_SPACING}
-            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+            rectFill={getBrighterColor(this.props.colorScale.scale(d))}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(maxNumPerColumn, i)}
             key={d}
