@@ -25,7 +25,6 @@
     "lint:fix": "eslint --fix src",
     "get-data": "env bash ./scripts/get-data.sh",
     "heroku-postbuild": "npm run build && npm run get-data",
-    "rebuild-docker-image": "env bash ./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "cd docs && make clean && make html && echo 'Docs rebuild, open docs/_build/html/index.html'",
     "test": "jest test/*.js",

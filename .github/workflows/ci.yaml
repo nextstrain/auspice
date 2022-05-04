@@ -81,7 +81,11 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: node --version
       - run: npm ci
-      - run: npm run rebuild-docker-image
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+  rebuild-docker-image:
+    needs: [publish]
+    runs-on: ubuntu-latest
+    steps:
+    - run: gh workflow run ci.yml --repo nextstrain/docker-base
