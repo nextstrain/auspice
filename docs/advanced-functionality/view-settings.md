@@ -35,6 +35,7 @@ For instance, if you set `display_defaults.color_by` to `country`, but load the 
 | `map_triplicate`    | Should the map repeat, so that you can pan further in each direction? | Boolean |
 | `layout`            | Tree layout        | "rect", "radial", "unrooted", "clock" or "scatter" |
 | `branch_label`      | Which set of branch labels are to be displayed | "aa", "lineage" |
+| `sidebar`           | Should the sidebar start open or closed? | "open" or "closed" |
 | `panels`            | List of panels which (if available) are to be displayed  | ["tree", "map"] |
 | `transmission_lines`| Should transmission lines (if available) be rendered on the map?  | Boolean |
 | `language`          | Language to display Auspice in  | "ja" |
