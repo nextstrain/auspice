@@ -2,9 +2,14 @@
 title: Changelog
 ---
 
+* Ensure legend colours are exactly the same as the tip colours.
+See [PR 1506](https://github.com/nextstrain/auspice/pull/1506) for more.
+* Always show branch labels if they are the root of a subtree.
+See [PR 1503](https://github.com/nextstrain/auspice/pull/1503) for more.
+* Docs improvements. See [PR 1507](https://github.com/nextstrain/auspice/pull/1507) for more.
+* CI improvements. See [PR 1505](https://github.com/nextstrain/auspice/pull/1505) for more.
+
 ## version 2.37.0 - 2022/04/28
-
-
 * Improved footer styling of tables.
 See [PR 1502](https://github.com/nextstrain/auspice/pull/1502) for more.
 * Branch labels are now shown/hidden depending according to the proportion of visible tips they define.
