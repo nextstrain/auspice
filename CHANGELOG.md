@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.37.1 - 2022/05/11
+
+
 * Ensure legend colours are exactly the same as the tip colours.
 See [PR 1506](https://github.com/nextstrain/auspice/pull/1506) for more.
 * Always show branch labels if they are the root of a subtree.
