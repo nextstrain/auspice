@@ -97,6 +97,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     }
   }
 
+  if (oldProps.treeZoomsTemporally !== newProps.treeZoomsTemporally) {
+    args.newZoomMode = newProps.treeZoomsTemporally;
+    args.updateLayout = true; // unsure why this' needed
+  }
+
   if (oldProps.width !== newProps.width || oldProps.height !== newProps.height) {
     args.svgHasChangedDimensions = true;
   }

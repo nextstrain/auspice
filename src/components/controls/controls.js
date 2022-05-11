@@ -25,6 +25,7 @@ import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
   ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
 import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
+import ChooseZoomMode from "./choose-zoom-mode";
 
 function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
   const { t } = useTranslation();
@@ -44,6 +45,7 @@ function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
       <FilterData measurementsOn={measurementsOn} />
 
       <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
+      <ChooseZoomMode />
       <ChooseLayout />
       <ChooseMetric />
       <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />

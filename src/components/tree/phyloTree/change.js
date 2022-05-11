@@ -179,7 +179,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   }
 
   /* background temporal time slice */
-  if (extras.timeSliceHasPotentiallyChanged) {
+  if (extras.timeSliceHasPotentiallyChanged || (extras.newZoomMode!==undefined)) {
     this.showTemporalSlice();
   }
 
@@ -258,6 +258,7 @@ export const change = function change({
   /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
+  newZoomMode = undefined,
   updateLayout = undefined, // todo - this seems identical to `newLayout`
   newBranchLabellingKey = undefined,
   newTipLabelKey = undefined,
@@ -277,6 +278,8 @@ export const change = function change({
   const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
   const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
+  const timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
+  if (newZoomMode!==undefined) this.treeZoomsTemporally = newZoomMode;
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -312,7 +315,8 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || (newZoomMode!==undefined) ||
+    svgHasChangedDimensions || changeNodeOrder || timeSliceHasPotentiallyChanged) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -368,13 +372,15 @@ export const change = function change({
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
-    newDistance ||
+    newDistance || // technically unnecessary as part of timeSliceHas...
     newLayout ||
     changeNodeOrder ||
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||
-    showConfidences
+    showConfidences ||
+    (newZoomMode!==undefined) ||
+    timeSliceHasPotentiallyChanged // TODO could be expensive to run mapToScreen every time here...
   ) {
     this.mapToScreen();
   }
@@ -388,8 +394,7 @@ export const change = function change({
   if (svgHasChangedDimensions) {
     this.setClipMask();
   }
-  const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
-  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
+  const extras = { removeConfidences, showConfidences, newBranchLabellingKey, timeSliceHasPotentiallyChanged, newZoomMode};
   extras.hideTipLabels = animationInProgress;
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);

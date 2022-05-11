@@ -355,6 +355,19 @@ export const mapToScreen = function mapToScreen() {
     nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
 
+  /* experimental -- restrict the nodesInDomain via the time-slice */
+  if (this.treeZoomsTemporally===true) {
+    // TODO -- this works for the max time (and viz is intuitive) but for the earliest date (LHS of rect tree)
+    // we should be a bit smarter.
+    // Note that branches prior to the date cutoff have no visibility (rendered as thin lines) so it's not just
+    // a case of changing the tree domain like I'm prototyping here...
+    const early_cutoff = this.dateRange[0] - 0.1*(this.dateRange[1]-this.dateRange[0]);
+    nodesInDomain = nodesInDomain.filter((d) => {
+      const num_date = getTraitFromNode(d.n, 'num_date');
+      return (num_date > early_cutoff && num_date < this.dateRange[1]);
+    });
+  }
+
   /* Compute the domains to pass to the d3 scales for the x & y axes */
   let xDomain, yDomain, spanX, spanY;
   if (this.layout!=="scatter" || this.scatterVariables.xContinuous) {
