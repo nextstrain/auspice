@@ -1,6 +1,9 @@
 name: "Make PRs for Nextstrain projects which depend on Auspice"
 on:
-  pull_request:
+  # pull_request:
+  push:
+    branches: 
+      - "not-a-valid-branch"
 jobs:
   make-pr-on-nextstrain-dot-org: # <job_id>
     runs-on: ubuntu-latest
