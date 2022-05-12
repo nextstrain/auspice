@@ -47,6 +47,7 @@ export const renderTree = (that, main, phylotree, props) => {
     treeState.nodeColors.map(getBrighterColor),
     treeState.tipRadii, /* might be null */
     [props.dateMinNumeric, props.dateMaxNumeric],
-    props.scatterVariables
+    props.scatterVariables,
+    props.treeZoomsTemporally
   );
 };

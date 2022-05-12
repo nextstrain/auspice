@@ -85,6 +85,7 @@ export const getDefaultControlsState = () => {
     showTangle: false,
     zoomMin: undefined,
     zoomMax: undefined,
+    treeZoomsTemporally: true,
     branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
     treeLegendOpen: undefined,
@@ -123,6 +124,9 @@ const Controls = (state = getDefaultControlsState(), action) => {
         explodeAttr: action.explodeAttr,
         colorScale: Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues })
       });
+    case types.TOGGLE_TEMPORAL_ZOOM_FLAG: {
+      return Object.assign({}, state, {treeZoomsTemporally: !state.treeZoomsTemporally});
+    }
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT:
