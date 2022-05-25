@@ -384,10 +384,6 @@ export const change = function change({
     elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
   }
 
-  /* Finally, actually change the SVG elements themselves */
-  if (svgHasChangedDimensions) {
-    this.setClipMask();
-  }
   const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   extras.hideTipLabels = animationInProgress;
