@@ -347,6 +347,8 @@ export const mapToScreen = function mapToScreen() {
 
   /* construct & set the range of the x & y scales */
   this.setScales();
+  /* update the clip mask accordingly */
+  this.setClipMask();
 
   let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
