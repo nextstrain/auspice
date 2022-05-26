@@ -2,9 +2,12 @@
 title: Changelog
 ---
 
+* Allow trees with duplicate node names / missing node names (but raise an error in the console).
+See [PR 1514](https://github.com/nextstrain/auspice/pull/1514) for more.
+* Fix a bug where the right hand side of the tree could disappear.
+See [PR 1513](https://github.com/nextstrain/auspice/pull/1513) for more.
+
 ## version 2.37.1 - 2022/05/11
-
-
 * Ensure legend colours are exactly the same as the tip colours.
 See [PR 1506](https://github.com/nextstrain/auspice/pull/1506) for more.
 * Always show branch labels if they are the root of a subtree.
