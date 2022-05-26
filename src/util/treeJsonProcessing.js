@@ -2,6 +2,8 @@ import { getDefaultTreeState } from "../reducers/tree";
 import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
 import { calcFullTipCounts } from "./treeCountingHelpers";
 
+const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
+
 /**
  * Adds certain properties to the nodes array - for each node in nodes it adds
  * node.fullTipCount - see calcFullTipCounts() description
@@ -12,10 +14,24 @@ import { calcFullTipCounts } from "./treeCountingHelpers";
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 const processNodes = (nodes) => {
+  const nodeNamesSeen = new Set();
   calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
     d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
     d.hasChildren = typeof d.children !== "undefined";
+
+    /* duplicate or missing names are an error with the dataset, but typically result in
+    very hard-to-interpret Auspice errors which we can improve by dectecting problems early */
+    if (!d.name) {
+      d.name = pseudoRandomName();
+      console.error(`Tree node without a name detected. This dataset is not valid. Using the name '${d.name}' and continuing...`);
+    }
+    if (nodeNamesSeen.has(d.name)) {
+      const prev = d.name;
+      d.name = `${d.name}_${pseudoRandomName()}`;
+      console.error(`Tree node detected with a duplicate name. This dataset is not valid. Changing '${prev}' to '${d.name}' and continuing...`);
+    }
+    nodeNamesSeen.add(d.name);
   });
   return nodes;
 };
@@ -40,19 +56,6 @@ const processBranchLabelsInPlace = (nodes) => {
   return ["none", ...availableBranchLabels];
 };
 
-/**
-*  For each node visit if node not a hashMap key, insert
-*  into array.  Then append node into end of the array.
-*  @params node - object to check
-*  @param hashMap - object literal used for deduping
-*  @param array - final array that nodes are inserted
-*/
-const visitNode = (node, hashMap, array) => {
-  if (!hashMap[node.name]) {
-    hashMap[node.name] = true;
-    array.push(node);
-  }
-};
 
 const makeSubtreeRootNode = (nodesArray, subtreeIndicies) => {
   const node = {
@@ -73,16 +76,15 @@ const makeSubtreeRootNode = (nodesArray, subtreeIndicies) => {
 *  Pre-order tree traversal visits each node using stack.
 *  Checks if leaf node based on node.children
 *  pushes all children into stack and continues traversal.
-*  hashMap object literal used for deduping.
 *  @param root - deserialized JSON root to begin traversal
 *  @returns array  - final array of nodes in order with no dups
 */
 const flattenTree = (root) => {
-  const stack = [], array = [], hashMap = {};
+  const stack = [], array = [];
   stack.push(root);
   while (stack.length !== 0) {
     const node = stack.pop();
-    visitNode(node, hashMap, array);
+    array.push(node);
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
         stack.push(node.children[i]);
