@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.37.2 - 2022/05/27
+
+
 * Allow trees with duplicate node names / missing node names (but raise an error in the console).
 See [PR 1514](https://github.com/nextstrain/auspice/pull/1514) for more.
 * Fix a bug where the right hand side of the tree could disappear.
