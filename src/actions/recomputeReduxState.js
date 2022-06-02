@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -24,25 +24,23 @@ import { hasMultipleGridPanels } from "./panelDisplay";
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
 
-export const getMinCalDateViaTree = (nodes, state) => {
-  /* slider should be earlier than actual day */
-  /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = getTraitFromNode(nodes[0], "num_date");
-  return (minNumDate === undefined) ?
-    numericToCalendar(state.dateMaxNumeric - defaultDateRange) :
-    numericToCalendar(minNumDate - 0.01);
-};
-
-export const getMaxCalDateViaTree = (nodes) => {
-  let maxNumDate = reallySmallNumber;
-  nodes.forEach((node) => {
+/**
+ * returns numeric [min, max] values
+ */
+const getObservedMinMaxDates = (nodes, nodes2) => {
+  let [minNumDate, maxNumDate] = [10000, reallySmallNumber]; // revisit in 8000 years
+  let counter = 0;
+  nodes.concat(nodes2 || []).forEach((node) => {
     const numDate = getTraitFromNode(node, "num_date");
-    if (numDate !== undefined && numDate > maxNumDate) {
-      maxNumDate = numDate;
-    }
+    if (numDate===undefined) return;
+    counter++;
+    if (numDate > maxNumDate) maxNumDate = numDate;
+    if (numDate < minNumDate) minNumDate = numDate;
   });
-  maxNumDate += 0.01; /* slider should be later than actual day */
-  return numericToCalendar(maxNumDate);
+  /* expand rang them slightly so that the slider will capture the true range */
+  return counter ?
+    [minNumDate-0.01, maxNumDate + 0.01] :
+    [undefined, undefined];
 };
 
 /* need a (better) way to keep the queryParams all in "sync" */
@@ -318,31 +316,16 @@ const modifyStateViaMetadata = (state, metadata) => {
 };
 
 const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
-  state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
-  state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
-  state.dateMinNumeric = calendarToNumeric(state.dateMin);
-  state.dateMaxNumeric = calendarToNumeric(state.dateMax);
-
-  if (treeToo) {
-    const min = getMinCalDateViaTree(treeToo.nodes, state);
-    const max = getMaxCalDateViaTree(treeToo.nodes);
-    const minNumeric = calendarToNumeric(min);
-    const maxNumeric = calendarToNumeric(max);
-    if (minNumeric < state.dateMinNumeric) {
-      state.dateMinNumeric = minNumeric;
-      state.dateMin = min;
-    }
-    if (maxNumeric > state.dateMaxNumeric) {
-      state.dateMaxNumeric = maxNumeric;
-      state.dateMax = max;
-    }
-  }
-
-  /* set absolutes */
-  state["absoluteDateMin"] = state["dateMin"];
-  state["absoluteDateMax"] = state["dateMax"];
-  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
-  state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
+  const [dateMinNumeric, dateMaxNumeric] = getObservedMinMaxDates(tree.nodes, treeToo?.nodes);
+  state.dateMinNumeric = dateMinNumeric;
+  state.dateMaxNumeric = dateMaxNumeric;
+  state.dateMin = numericToCalendar(dateMinNumeric);
+  state.dateMax = numericToCalendar(dateMaxNumeric);
+  /* set absolutes -- i.e. the bounds of the date slider */
+  state.absoluteDateMinNumeric = dateMinNumeric;
+  state.absoluteDateMaxNumeric = dateMaxNumeric;
+  state.absoluteDateMin = state.dateMin;
+  state.absoluteDateMax = state.dateMax;
 
   /* For the colorings (defined in the JSON) we need to check whether they
   (a) actually exist on the tree and (b) have confidence values.
@@ -356,6 +339,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     coloringsToCheck = Object.keys(colorings);
   }
   let [aaMuts, nucMuts] = [false, false];
+  let nodesWithDates = 0;
   const examineNodes = function examineNodes(nodes) {
     nodes.forEach((node) => {
       /* check colorBys */
@@ -375,6 +359,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
         if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
         if (keys.includes("nuc")) nucMuts = true;
       }
+      /* counter of num_date notes */
+      if (node?.node_attrs?.num_date?.value!==undefined) nodesWithDates++;
     });
   };
   examineNodes(tree.nodes);
@@ -394,17 +380,21 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
+  const allNodesHaveDates = nodesWithDates === (tree.nodes.length + (treeToo?.nodes?.length || 0));
+  const someNodesHaveDates = nodesWithDates>0;
+  // const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
   const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
-  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
-    numDateAtRoot ? "dateOnly" :
-      "divOnly";
+  state.branchLengthsToDisplay = (allNodesHaveDates && divAtRoot) ? "divAndDate" :
+    allNodesHaveDates ? "dateOnly" :
+      someNodesHaveDates ? "divAndSomeDate" :
+        "divOnly";
 
-  /* if branchLengthsToDisplay is "divOnly", force to display by divergence
+  /* if we don't have allNodesHaveDates then we are forced to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
    */
-  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
-    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
+  state.distanceMeasure = (!allNodesHaveDates) ? "div" :
+    state.branchLengthsToDisplay === "dateOnly" ? "num_date" :
+      state.distanceMeasure;
 
   /* if clade is available as a branch label, then set this as the "default". This
   is largely due to historical reasons. Note that it *can* and *will* be overridden

@@ -209,6 +209,18 @@ export const calcVisibility = (tree, controls, dates, inView, filtered) => {
       if (inView[idx] && (filtered ? filtered[idx] : true)) {
         const nodeDate = getTraitFromNode(node, "num_date");
         const parentNodeDate = getTraitFromNode(node.parent, "num_date");
+
+        /* if the tree is partially temporal  then we use a different approach:
+           we hide nodes if they define a date + it's outside the range, else we show them
+           (note that most trees are either temporal (num_date on all nodes) or not -- the mixed case
+           is rare! */
+        if (controls.branchLengthsToDisplay === "divAndSomeDate") {
+          if (nodeDate && (nodeDate <= dates.dateMinNumeric || nodeDate >= dates.dateMaxNumeric)) {
+            return NODE_NOT_VISIBLE;
+          }
+          return NODE_VISIBLE;
+        }
+        /* missing date information means we must show the node */
         if (!nodeDate || !parentNodeDate) {
           return NODE_VISIBLE;
         }
