@@ -107,10 +107,15 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   const name = (colorings && colorings[colorBy] && colorings[colorBy].title) ?
     colorings[colorBy].title :
     colorBy;
+  const value = getTraitFromNode(node, colorBy);
+
+  /* case where the colorScale is temporal */
+  if (colorScale.scaleType==="temporal" && typeof value === "number") {
+    return <InfoLine name={`${name}:`} value={numericToCalendar(value)}/>;
+  }
 
   /* helper function to avoid code duplication */
   const showCurrentColorByWithoutConfidence = () => {
-    const value = getTraitFromNode(node, colorBy);
     return isValueValid(value) ?
       <InfoLine name={`${name}:`} value={value}/> :
       null;

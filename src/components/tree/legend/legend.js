@@ -138,7 +138,7 @@ class Legend extends React.Component {
       return this.props.colorScale.legendLabels.get(label);
     }
     /* depending on the colorBy, we display different labels! */
-    if (this.props.colorBy === "num_date") {
+    if (this.props.colorBy === "num_date" || this.props.colorScale.scaleType==="temporal") {
       const legendValues = this.props.colorScale.visibleLegendValues;
       if (
         (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */
