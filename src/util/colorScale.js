@@ -45,9 +45,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
-      if (scaleType === "continuous") {
+      if (scaleType === "continuous" || scaleType==="temporal") {
         ({continuous, colorScale, legendBounds, legendValues} =
-          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes, scaleType==="temporal"));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
@@ -204,17 +204,22 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
-function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
+function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTemporal) {
+  /* Note that a temporal scale is treated very similar to a continuous one... for the time being.
+     In the future it'd be nice to allow YYYY-MM-DD values, but that's for another PR (and comes
+     with its own complexities - what about -XX dates?)                     james june 2022    */
   // console.log("making a continuous color scale for ", colorBy);
+  if (colorBy==="num_date") {
+    /* before numeric scales were a definable type, num_date was specified as continuous */
+    isTemporal = true; // eslint-disable-line no-param-reassign
+  }
   let minMax;
-  switch (colorBy) {
-    case "lbi":
-      minMax = [0, 0.7];
-      break;
-    case "num_date":
-      break; /* minMax not needed for num_date */
-    default:
-      minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
+  if (isTemporal) {
+    // empty - minMax not needed
+  } else if (colorBy==="lbi") {
+    minMax = [0, 0.7]; /* TODO: this is for historical reasons, and we should switch to a provided scale */
+  } else {
+    minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
   }
 
   /* user-defined anchor points across the scale */
@@ -225,17 +230,17 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   if (anchorPoints) {
     domain = anchorPoints.map((pt) => pt[0]);
     range = anchorPoints.map((pt) => pt[1]);
-  } else if (colorBy==="num_date") {
+  } else if (isTemporal) {
     /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-    let rootDate = getTraitFromNode(t1nodes[0], "num_date");
+    let rootDate = getTraitFromNode(t1nodes[0], colorBy);
     let vals = t1nodes.filter((n) => !n.hasChildren)
-      .map((n) => getTraitFromNode(n, "num_date"));
+      .map((n) => getTraitFromNode(n, colorBy));
     if (t2nodes) {
-      const treeTooRootDate = getTraitFromNode(t2nodes[0], "num_date");
+      const treeTooRootDate = getTraitFromNode(t2nodes[0], colorBy);
       if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
       vals.concat(
         t2nodes.filter((n) => !n.hasChildren)
-          .map((n) => getTraitFromNode(n, "num_date"))
+          .map((n) => getTraitFromNode(n, colorBy))
       );
     }
     vals = vals.sort();
@@ -253,17 +258,15 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   const scale = scaleLinear().domain(domain).range(range);
 
   let legendValues;
-  switch (colorBy) {
-    case "lbi":
-      legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
-      break;
-    case "num_date":
-      legendValues = domain.slice(1);
-      break;
-    default:
-      const spread = minMax[1] - minMax[0];
-      const dp = spread > 5 ? 2 : 3;
-      legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+  if (isTemporal) {
+    legendValues = domain.slice(1);
+  } else if (colorBy==="lbi") {
+    /* TODO: this is for historical reasons, and we should switch to a provided scale */
+    legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
+  } else {
+    const spread = minMax[1] - minMax[0];
+    const dp = spread > 5 ? 2 : 3;
+    legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
   }
   if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
 
