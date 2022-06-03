@@ -12,7 +12,7 @@ jobs:
       matrix:
         node: [12, 14, 16]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -25,7 +25,7 @@ jobs:
       matrix:
         node: [12, 14, 16]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -38,7 +38,7 @@ jobs:
       matrix:
         node: [12, 14, 16]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -51,7 +51,7 @@ jobs:
       matrix:
         node: [12, 14, 16]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -63,7 +63,7 @@ jobs:
       matrix:
         node: [12, 14, 16]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node }}
@@ -74,7 +74,7 @@ jobs:
     needs: [build, unit-test, smoke-test, lint]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v2
         with:
           node-version: 14
