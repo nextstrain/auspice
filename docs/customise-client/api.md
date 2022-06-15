@@ -129,8 +129,7 @@ By default, the client makes API requests ([as detailed here](requests.md)) to "
 This is using the default server address of "/charon".
 This can be changed by specifying `serverAddress` in the customisation JSON.
 
-> Note that currently you can't specify a different domain due to CORS headers.
-This may well be a simple fix -- please get in touch if you can help here!
+> Note that if you specify a `serverAddress` on a different origin (protocol + domain + port) than Auspice, the server will need to send CORS headers to permit the requests from Auspice.
 
 ---
 
