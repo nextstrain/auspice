@@ -37,7 +37,7 @@ class ChooseExplodeAttr extends React.Component {
     const { t, tooltip, mobile } = this.props;
     const selectOptions = this.gatherAttrs();
     return (
-      <div style={{paddingTop: 5}}>
+      <div style={{paddingTop: 10}}>
         <SidebarSubtitleFlex data-tip data-for="explode_tree">
           <span>
             <ImLab style={{ marginRight: "5px" }}/>

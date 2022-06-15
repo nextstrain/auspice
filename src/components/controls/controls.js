@@ -46,10 +46,10 @@ function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
       <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
       <ChooseLayout />
       <ChooseMetric />
-      <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
       <ChooseBranchLabelling />
       <ChooseTipLabel />
       <ChooseSecondTree />
+      <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
       <ToggleTangle />
 
       {measurementsOn ? (
