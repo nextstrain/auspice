@@ -197,8 +197,9 @@ const getTraitsToDisplay = (node) => {
 const Trait = ({node, trait, colorings, isTerminal}) => {
   let value = getTraitFromNode(node, trait);
   const confidence = getTraitFromNode(node, trait, {confidence: true});
+  const isTemporal = colorings[trait]?.type==="temporal";
 
-  if (typeof value === "number") {
+  if (typeof value === "number" && !isTemporal) {
     if (!Number.isInteger(value)) {
       value = Number.parseFloat(value).toPrecision(3);
     }
@@ -215,6 +216,12 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
   const name = (colorings && colorings[trait] && colorings[trait].title) ?
     colorings[trait].title :
     trait;
+
+  /* case where the colorScale is temporal */
+  if (isTemporal && typeof value === "number") {
+    return item(name, numericToCalendar(value));
+  }
+
   const url = getUrlFromNode(node, trait);
   if (url) {
     return <Link title={name} url={url} value={value}/>;
