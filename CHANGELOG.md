@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.37.3 - 2022/06/16
+
+
 * Allow temporal colour scales.
 See [PR 1523](https://github.com/nextstrain/auspice/pull/1523) for more.
 * Change ordering of sidebar tree options.
