@@ -117,6 +117,6 @@ This project strictly adheres to the [Contributor Covenant Code of Conduct](http
 
 ## License and copyright
 
-Copyright 2014-2020 Trevor Bedford and Richard Neher.
+Copyright 2014-2022 Trevor Bedford and Richard Neher.
 
 Source code to Nextstrain is made available under the terms of the [GNU Affero General Public License](LICENSE.txt) (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
