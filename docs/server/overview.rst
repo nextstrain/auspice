@@ -1,5 +1,5 @@
 ======================================
-Auspice servers
+Overview (Server)
 ======================================
 
 The Auspice client (i.e. what you see in the web browser) requires a server behind it to
@@ -76,11 +76,3 @@ Deploying to Heroku is straightforward, but there are a few points to note:
 2. You will need to either create a ``Procfile`` or a ``npm run start`` script which calls ``auspice view`` (or ``npx auspice view`` depending on how you implement auspice).
 3. Make sure the datasets to be served are either (a) included in your git repo or (b) downloaded by the heroku build pipeline. `We use option (b) <https://github.com/nextstrain/auspice/blob/master/package.json>`_ by specifying a npm script called ``heroku-postbuild``.
 
-
-.. toctree::
-   :maxdepth: 0
-   :titlesonly:
-   :caption: Pages available
-
-   api
-   authentication
