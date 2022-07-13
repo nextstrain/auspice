@@ -20,7 +20,7 @@ You can now build the documentation with:
 which invokes Sphinx to build static HTML pages in `build/html/`.
 You can view them by running:
 
-    open build/html/index.html
+    open _build/html/index.html
 
 You can clean the build directory for a fresh start with:
 
