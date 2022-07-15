@@ -98,6 +98,10 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
     3. Example: `test/integration/zika.test.js`
 
 
+#### Manual testing
+
+A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
+
 ## git-lfs
 
 We use [Git Large File Storage](https://github.com/git-lfs/git-lfs) to manage certain assets.
