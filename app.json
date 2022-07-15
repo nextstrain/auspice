@@ -1,0 +1,20 @@
+{
+  "name": "auspice",
+  "scripts": {},
+  "env": {
+    "HOST": "0.0.0.0",
+    "NPM_CONFIG_PRODUCTION": "true"
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "stack": "heroku-18"
+}
