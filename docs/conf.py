@@ -32,7 +32,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx_markdown_tables',
     'sphinxarg.ext',
-    'sphinx.ext.autodoc'
+    'sphinx.ext.autodoc',
+    'nextstrain.sphinx.theme',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
