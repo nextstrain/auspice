@@ -1,0 +1,26 @@
+{
+  "name": "auspice",
+  "scripts": {},
+  "env": {
+    "HOST": {
+      "description": "For Auspice server; see https://docs.nextstrain.org/projects/auspice/en/stable/server/index.html#deploying-via-heroku",
+      "value": "0.0.0.0"
+    },
+    "NPM_CONFIG_PRODUCTION": {
+      "description": "Runs with NODE_ENV=production; see https://devcenter.heroku.com/articles/nodejs-support#configuring-npm",
+      "value": "true"
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "stack": "heroku-22"
+}
