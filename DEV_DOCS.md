@@ -169,4 +169,15 @@ If a translation of a particular string is not yet available, then auspice will 
 
 ## Releases & versioning
 
-New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as the GitHub workflow is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
+1. Run the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as the GitHub workflow is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
+2. Follow instructions in the [nextstrain/bioconda-recipes README](https://github.com/nextstrain/bioconda-recipes#readme) to update the version on Bioconda. Make the following changes in `recipes/auspice/meta.yaml`:
+    1. Update the version number in the first line.
+    2. Change `source.sha256` to the `sha256` hash of the file at `source.url`. You can get the value using the following command:
+
+        ```sh
+        curl -s https://registry.npmjs.com/auspice/latest \
+            | jq -r ".dist.tarball" \
+            | xargs curl -s \
+            | shasum -a 256 \
+            | cut -f 1 -d " "
+        ```
