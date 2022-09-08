@@ -190,10 +190,10 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       publicPath: "/dist/"
     },
     resolve: {
-      alias: aliasesToResolve
-    },
-    node: {
-      fs: 'empty'
+      alias: aliasesToResolve,
+      fallback: {
+        fs: false
+      }
     },
     plugins,
     optimization: {
