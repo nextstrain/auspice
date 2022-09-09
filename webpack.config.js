@@ -185,7 +185,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     entry,
     output: {
       path: outputPath,
-      filename: `auspice.bundle${!devMode ? ".[contenthash]" : ""}.js`,
+      filename: `auspice.[name].bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
       publicPath: "/dist/"
     },
