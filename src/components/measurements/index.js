@@ -261,8 +261,23 @@ const Measurements = ({height, width, showLegend}) => {
 
   const [title, setTitle] = useState("Measurements");
 
+  const getCardTitleStyle = () => {
+    /**
+     * Additional styles of Card title forces it to be in one line and display
+     * ellipsis if the title is too long to prevent the long title from pushing
+     * the Card into the next line when viewing in grid mode
+     */
+    return {
+      width,
+      display: "block",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis"
+    };
+  };
+
   return (
-    <Card title={title}>
+    <Card title={title} titleStyles={getCardTitleStyle()}>
       {measurementsLoaded &&
         (measurementsError ?
           <Flex style={{ height, width}} direction="column" justifyContent="center">
