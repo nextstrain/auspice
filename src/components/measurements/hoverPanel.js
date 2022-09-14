@@ -4,7 +4,7 @@ import { InfoLine } from "../tree/infoPanels/hover";
 
 const HoverPanel = ({hoverData}) => {
   if (hoverData === null) return null;
-  const { mouseX, mouseY, containerId, data } = hoverData;
+  const { hoverTitle, mouseX, mouseY, containerId, data } = hoverData;
   const panelStyle = {
     position: "absolute",
     minWidth: 200,
@@ -54,6 +54,9 @@ const HoverPanel = ({hoverData}) => {
   return (
     <div style={panelStyle}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+        <div style={infoPanelStyles.tooltipHeading}>
+          {hoverTitle}
+        </div>
         {[...data.entries()].map(([field, value]) => {
           return (
             <InfoLine key={field} name={`${field}:`} value={value} />
