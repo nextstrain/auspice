@@ -19,7 +19,8 @@ import {
   colorMeasurementsSVG,
   changeMeasurementsDisplay,
   svgContainerDOMId,
-  toggleDisplay
+  toggleDisplay,
+  addHoverPanelToMeasurementsAndMeans
 } from "./measurementsD3";
 
 /**
@@ -201,13 +202,14 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Draw SVG from scratch
   useEffect(() => {
     clearMeasurementsSVG(d3Ref.current);
-    drawMeasurementsSVG(d3Ref.current, svgData, handleHover);
-  }, [svgData, handleHover]);
+    drawMeasurementsSVG(d3Ref.current, svgData);
+  }, [svgData]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
-    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors, handleHover);
+    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
+    addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover);
   }, [svgData, treeStrainColors, handleHover]);
 
   // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
