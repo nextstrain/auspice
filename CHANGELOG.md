@@ -2,9 +2,20 @@
 title: Changelog
 ---
 
+* Mutations now separate out "undeletions" & add information on what the categories represent.
+See [PR 1542](https://github.com/nextstrain/auspice/pull/1542) for more.
+* Bugfix where certain GISAID accessions may cause a crash when clicked.
+See [PR 1531](https://github.com/nextstrain/auspice/pull/1531) for more.
+* Duplicate / missing node names now emit a warning to the console, not an error.
+See [PR 1543](https://github.com/nextstrain/auspice/pull/1543) for more.
+
+#### Internal (Nextstrain-related) changes
+* Documentation theme added. See [PR 1535](https://github.com/nextstrain/auspice/pull/1535) for more.
+* Bioconda rebuild instructions added. See [PR 1539](https://github.com/nextstrain/auspice/pull/1539) for more.
+* Minor docs formatting fixes. See [PR 1533](https://github.com/nextstrain/auspice/pull/1533) for more.
+
+
 ## version 2.37.3 - 2022/06/16
-
-
 * Allow temporal colour scales.
 See [PR 1523](https://github.com/nextstrain/auspice/pull/1523) for more.
 * Change ordering of sidebar tree options.
