@@ -24,12 +24,12 @@ const processNodes = (nodes) => {
     very hard-to-interpret Auspice errors which we can improve by dectecting problems early */
     if (!d.name) {
       d.name = pseudoRandomName();
-      console.error(`Tree node without a name detected. This dataset is not valid. Using the name '${d.name}' and continuing...`);
+      console.warn(`Tree node without a name detected. Using the name '${d.name}' and continuing...`);
     }
     if (nodeNamesSeen.has(d.name)) {
       const prev = d.name;
       d.name = `${d.name}_${pseudoRandomName()}`;
-      console.error(`Tree node detected with a duplicate name. This dataset is not valid. Changing '${prev}' to '${d.name}' and continuing...`);
+      console.warn(`Tree node detected with a duplicate name. Changing '${prev}' to '${d.name}' and continuing...`);
     }
     nodeNamesSeen.add(d.name);
   });
