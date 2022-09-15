@@ -60,11 +60,12 @@ const AccessionAndUrl = ({node}) => {
   let gisaid_epi_isl_url = null;
   let genbank_accession_url = null;
   if (isValueValid(gisaid_epi_isl)) {
-    const gisaid_epi_isl_number = gisaid_epi_isl.split("_")[2];
-    // slice has to count from the end of the string rather than the beginning to deal with EPI ISLs of different lengths, eg
-    // https://www.epicov.org/acknowledgement/67/98/EPI_ISL_406798.json
-    // https://www.epicov.org/acknowledgement/99/98/EPI_ISL_2839998.json
-    if (gisaid_epi_isl_number.length > 4) {
+    const gisaid_accession_regex = new RegExp('EPI_ISL_[0-9]{5,}');
+    if (gisaid_accession_regex.test(gisaid_epi_isl)) {
+      const gisaid_epi_isl_number = gisaid_epi_isl.split("_")[2];
+      // slice has to count from the end of the string rather than the beginning to deal with EPI ISLs of different lengths, eg
+      // https://www.epicov.org/acknowledgement/67/98/EPI_ISL_406798.json
+      // https://www.epicov.org/acknowledgement/99/98/EPI_ISL_2839998.json
       gisaid_epi_isl_url = "https://www.epicov.org/acknowledgement/" + gisaid_epi_isl_number.slice(-4, -2) + "/" + gisaid_epi_isl_number.slice(-2) + "/" + gisaid_epi_isl + ".json";
     } else {
       gisaid_epi_isl_url = "https://gisaid.org";
