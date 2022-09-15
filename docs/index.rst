@@ -46,15 +46,61 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
 
 
 .. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Table of contents
-   :name: mastertoc
+   :maxdepth: 1
    :titlesonly:
+   :caption: Introduction
+   :hidden:
 
-   self
-   introduction/index
-   advanced-functionality/index
-   customise-client/index
-   server/index
+   introduction/install
+   introduction/how-to-run
+
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Functionality
+   :hidden:
+
+   advanced-functionality/second-trees
+   advanced-functionality/view-settings
+   advanced-functionality/drag-drop-csv-tsv
+   advanced-functionality/misc
+
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Customising Auspice
+   :hidden:
+
+   customise-client/overview
+   customise-client/api
+   customise-client/requests
+
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Auspice servers
+   :hidden:
+
+   server/overview
+   server/api
+   server/authentication
+
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Releases
+   :hidden:
+
    releases/index
+
+
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :hidden:
+
+   Stuck? Ask us on the discussion board. We're happy to help! <https://discussion.nextstrain.org/>

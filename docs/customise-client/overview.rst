@@ -1,5 +1,5 @@
 ======================================
-Customising the Auspice Client
+Overview (Client)
 ======================================
 
 
@@ -29,12 +29,3 @@ AGPL Source Code Requirement
 Auspice is distributed under `AGPL 3.0 <https://www.gnu.org/licenses/agpl-3.0.en.html>`_.
 Any modifications made to the auspice source code, including build-time customisations as described here, must be made publicly available. 
 We ask that the "Powered by Nextstrain" text and link, rendered below the data visualisations, be maintained in all customised versions of auspice, in keeping with the spirit of scientific citations.
-
-
-.. toctree::
-   :maxdepth: 0
-   :titlesonly:
-   :caption: Pages available
-
-   api
-   requests
