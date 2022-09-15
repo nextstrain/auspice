@@ -105,8 +105,9 @@ export const clearMeasurementsSVG = (ref) => {
     .selectAll("*").remove();
 };
 
-const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, color, xScale, yValue) => {
+const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colorBy, xScale, yValue) => {
   const meanAndStandardDeviation = {
+    colorByAttr: colorBy.attribute,
     mean: mean(values),
     standardDeviation: deviation(values)
   };
@@ -122,7 +123,7 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
     .attr("class", classes.mean)
     .attr("transform", (d) => `translate(${xScale(d.mean)}, ${yValue})`)
     .attr("d", symbol().type(symbolDiamond).size(layout.diamondSize))
-    .attr("fill", color);
+    .attr("fill", colorBy.color);
 
   if (meanAndStandardDeviation.standardDeviation !== undefined) {
     container.append("line")
@@ -132,7 +133,7 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
       .attr("y1", yValue)
       .attr("y2", yValue)
       .attr("stroke-width", layout.standardDeviationStroke)
-      .attr("stroke", color);
+      .attr("stroke", colorBy.color);
   }
 };
 
@@ -242,7 +243,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       measurements.map((d) => d.value),
       subplot,
       classes.overallMean,
-      layout.overallMeanColor,
+      {attribute: null, color: layout.overallMeanColor},
       xScale,
       layout.overallMeanYValue
     );
@@ -282,12 +283,12 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
     // 2 x subplotPadding for padding around the overall mean display
     const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
-    Object.values(colorByGroups).forEach(({color, values}) => {
+    Object.entries(colorByGroups).forEach(([attribute, {color, values}]) => {
       drawMeanAndStandardDeviation(
         values,
         subplot,
         classes.colorMean,
-        color,
+        {attribute, color},
         xScale,
         yValue
       );
@@ -322,7 +323,7 @@ export const toggleDisplay = (ref, elementClass, displayOn) => {
       .attr("display", displayAttr);
 };
 
-export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover) => {
+export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements},.${classes.mean},.${classes.standardDeviation}`)
     .on("mouseover.hoverPanel", (d, i, elements) => {
@@ -333,8 +334,15 @@ export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover) => {
       const className = elements[i].getAttribute("class");
       const dataType = className === classes.rawMeasurements ? "measurement" : "mean";
 
+      // For the means, the bound data includes the color-by attribute
+      // For the measurements, we need to get the color-by attribute from treeStrainColors
+      let colorByAttr = d.colorByAttr;
+      if (dataType === "measurement") {
+        colorByAttr = treeStrainColors[d.strain]?.attribute || "undefined";
+      }
+
       // sets hover data state to trigger the hover panel display
-      handleHover(d, dataType, clientX, clientY);
+      handleHover(d, dataType, clientX, clientY, colorByAttr);
     })
     .on("mouseout.hoverPanel", () => handleHover(null));
 };

@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
-import { getTipColorAttribute } from "../../util/colorHelpers";
+import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundry";
 import Flex from "../framework/flex";
@@ -129,6 +129,8 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
+  const colorings = useSelector((state) => state.metadata.colorings);
+  const colorBy = useSelector((state) => state.controls.colorBy);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
   const filters = useSelector((state) => state.controls.measurementsFilters);
   const display = useSelector((state) => state.controls.measurementsDisplay);
@@ -160,9 +162,11 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements});
   // Memoize handleHover function to avoid extra useEffect calls
-  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY) => {
+  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY, colorByAttr=null) => {
     let newHoverData = null;
     if (data !== null) {
+      // Set color-by attribute as title if provided
+      const hoverTitle = colorByAttr !== null ? `Color by ${getColorByTitle(colorings, colorBy)} : ${colorByAttr}` : null;
       // Create a Map of data to save order of fields
       const newData = new Map();
       if (dataType === "measurement") {
@@ -186,6 +190,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
         Object.entries(data).forEach(([key, value]) => newData.set(key, value));
       }
       newHoverData = {
+        hoverTitle,
         mouseX,
         mouseY,
         containerId: svgContainerDOMId,
@@ -193,7 +198,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
       };
     }
     setHoverData(newHoverData);
-  }, [fields]);
+  }, [fields, colorings, colorBy]);
 
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
@@ -209,7 +214,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   useEffect(() => {
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
     drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
-    addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover);
+    addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover, treeStrainColors);
   }, [svgData, treeStrainColors, handleHover]);
 
   // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
