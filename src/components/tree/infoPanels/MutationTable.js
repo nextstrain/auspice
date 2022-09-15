@@ -1,7 +1,8 @@
 import React from "react";
 import styled from 'styled-components';
+import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
-
+import { StyledTooltip } from "../../controls/styles";
 
 const Button = styled.button`
   border: 0px;
@@ -132,6 +133,49 @@ const displayGeneMutations = (gene, mutsPerCat) => {
   );
 };
 
+const InfoContainer = styled.span`
+  padding-left: 10px;
+  cursor: help;
+  color: #888;
+`;
+
+const branchMutationInfo = (<div>
+  A summary of mutations inferred to have occurred on this branch.
+  Mutations are grouped into one of the following (mutually exclusive) categories,
+  with the first matching category used:
+
+  <ol>
+    <li>Undeletions: a change from a &apos;-&apos; character to a base; beware that these are often bioinformatics artifacts</li>
+    <li>Gaps: A change to a &apos;-&apos; character, indicating a missing base; these can indicate deletions but sometimes areas of no coverage are filled with gaps</li>
+    <li>Ns: Typically due to lack of sequence coverage or ambiguity at this position (Nucleotides only)</li>
+    <li>Homoplasies: a mutation that has also been observed elsewhere on the tree</li>
+    <li>Unique: Mutations which are only observed on this branch</li>
+  </ol>
+
+  Reversions to Root is an additional category which highlights those mutations which return the state to that of the root.
+  Mutations in this category will also appear one of the five categories listed above.
+  <p/>
+  Gaps and Ns are grouped into intervals, as they frequently occur in succession.
+  Click below to copy all changes to clipboard to see the full list.
+</div>);
+
+const tipChangesInfo = (<div>
+  A summary of sequence changes between the root and the selected tip.
+  Changes are grouped into one of the following (mutually exclusive) categories,
+  with the first matching category used:
+
+  <ol>
+    <li>Gaps: A change to a &apos;-&apos; character, indicating a missing base; these can indicate deletions but sometimes areas of no coverage are filled with gaps</li>
+    <li>Ns: Typically due to lack of sequence coverage or ambiguity at this position (Nucleotides only)</li>
+    <li>Reversions to root: The tip state is the same as the root state, however this has changed and been reverted along the way</li>
+    <li>Changes: The tip state differs from the root state</li>
+  </ol>
+
+  Gaps and Ns are grouped into intervals, as they frequently occur in succession.
+  Click below to copy all changes to clipboard to see the full list.
+</div>);
+
+
 export const MutationTable = ({node, geneSortFn, isTip, observedMutations}) => {
   const categorisedMutations = isTip ?
     getTipChanges(node) :
@@ -148,8 +192,16 @@ export const MutationTable = ({node, geneSortFn, isTip, observedMutations}) => {
   return (
     <>
       <Heading>
-        {isTip ? `Sequence changes observed (from root):` : `Mutations observed on branch:`}
+        {isTip ? `Sequence changes observed (from root)` : `Mutations observed on branch`}
+        <InfoContainer data-tip data-for="seqChangesInfo">
+          <FaInfoCircle/>
+        </InfoContainer>
       </Heading>
+
+      <StyledTooltip place="bottom" type="light" effect="solid" id="seqChangesInfo">
+        {isTip ? tipChangesInfo : branchMutationInfo}
+      </StyledTooltip>
+
       <table>
         <tbody>
           {Object.keys(categorisedMutations).sort(geneSortFn).map(
