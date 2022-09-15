@@ -1,4 +1,4 @@
-import { getUrlFromNode, getAccessionFromNode, getBranchMutations } from "../src/util/treeMiscHelpers";
+import { getUrlFromNode, getAccessionFromNode, getBranchMutations, categoriseSeqChanges } from "../src/util/treeMiscHelpers";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
 import { parseIntervalsOfNsOrGaps } from "../src/components/tree/infoPanels/MutationTable";
 
@@ -18,7 +18,7 @@ const dummyTree = treeJsonToState({
   children: [
     {
       name: "node1",
-      branch_attrs: {mutations: {GENE: ["A100B", "C200D", "E300F"]}},
+      branch_attrs: {mutations: {GENE: ["A100B", "C200D", "E300F", "A400-"]}},
       children: [
         { // start 1st child of node1
           name: "node1.1",
@@ -34,7 +34,7 @@ const dummyTree = treeJsonToState({
         },
         { // 3rd child of node1
           name: "tipZ",
-          branch_attrs: {mutations: {GENE: ["F300G", "B100A"]}}
+          branch_attrs: {mutations: {GENE: ["F300G", "B100A", "-400A"]}}
         }
       ]
     }
@@ -47,6 +47,8 @@ describe('Parse and summarise mutations', () => {
     // is part of treeJsonToState so we are testing it indirectly
     expect(dummyTree.observedMutations)
       .toEqual({ // exactly equal all Obj keys and values
+        "GENE:A400-": 1,
+        "GENE:-400A": 1,
         "GENE:A100B": 1,
         "GENE:C200D": 1,
         "GENE:E300F": 1,
@@ -65,7 +67,8 @@ describe('Parse and summarise mutations', () => {
       GENE: {
         unique: ["A100B", "C200D", "E300F"],
         homoplasies: [],
-        gaps: [],
+        gaps: ["A400-"],
+        undeletions: [],
         reversionsToRoot: []
       }
     });
@@ -78,9 +81,45 @@ describe('Parse and summarise mutations', () => {
         unique: ["D200C"],
         homoplasies: ["F300G"],
         gaps: [],
+        undeletions: [],
         reversionsToRoot: ["D200C"]
       }
     });
+    const branch_tipZ = getBranchMutations(
+      getNodeByName(dummyTree.nodes, "tipZ"),
+      dummyTree.observedMutations
+    );
+    expect(branch_tipZ).toEqual({
+      GENE: {
+        unique: ["B100A"],
+        homoplasies: ["F300G"],
+        gaps: [],
+        undeletions: ["-400A"],
+        reversionsToRoot: ["B100A"]
+      }
+    });
+  });
+
+  test("Tip mutations are correctly categorised", () => {
+
+    expect(categoriseSeqChanges({nuc: []}))
+      .toEqual({
+        nuc: {gaps: [], ns: [], reversionsToRoot: [], changes: []}
+      });
+
+    expect(categoriseSeqChanges({nuc: {
+      100: ['A', 'N'], // typical unknown base due to low coverage
+      101: ['A', '-'], // typical gap
+      102: ['A', 'T'], // typical change
+      103: ['A', 'A'], // typical reversion to root
+      104: ['-', 'T'], // strange, but can happen via `augur ancestral` when ref (root) seq has been pruned
+      105: ['-', '-'], // stranger, but occurs when we have situations like the above
+      106: ['N', 'N']
+    }}))
+      .toEqual({
+        nuc: {gaps: ["A101-", "-105-"], ns: ["A100N", "N106N"], reversionsToRoot: ["A103A"], changes: ["A102T", "-104T"]}
+      });
+
   });
 });
 

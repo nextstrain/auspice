@@ -142,6 +142,7 @@ export const getSeqChanges = (fromNode) => {
         if ((gene === "nuc") || gene !== "nuc") {
           if (!mutations[gene]) mutations[gene] = {};
           muts.forEach((m) => {
+            /* 'from' is the base closer to the root, 'to' is the more derived base (closer to the tip) */
             const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)]; // note: `pos` is a string
             if (mutations[gene][pos]) {
               mutations[gene][pos][0] = from; // mutation already seen => update ancestral state.
@@ -165,21 +166,29 @@ export const getSeqChanges = (fromNode) => {
 
 /**
  * Categorise each mutation into one or more of the following categories:
- * (i) unique mutations (those which are only observed once)
- * (ii) homoplasies (mutation observed elsewhere on the tree)
- * (iii) gaps
- * (iv) Ns (only applicable for nucleotides)
- * (v) reversions to root (these will also be in (i) or (ii))
+ * (1) undeletions (probably bioinformatics errors, but not always)
+ * (2) gaps
+ * (3) Ns (only applicable for nucleotides)
+ * (4) homoplasies (mutation observed elsewhere on the tree)
+ * (5) unique mutations (those which are only observed once)
+ * (6) reversions to root
+ * Categories 1-5 are mutually exclusive, with the first matching category used.
+ * (e.g. an undeletion is never a homoplasy, even if it occurs multiple times).
+ * Entries in category 6 will also appear in a previous group.
  */
 export const categoriseMutations = (mutations, observedMutations, seqChangesToRoot) => {
   const categorisedMutations = {};
   for (const gene of Object.keys(mutations)) {
-    const categories = { unique: [], homoplasies: [], gaps: [], reversionsToRoot: []};
+    const categories = { unique: [], homoplasies: [], gaps: [], reversionsToRoot: [], undeletions: []};
     const isNuc = gene==="nuc";
     if (isNuc) categories.ns = [];
     mutations[gene].forEach((mut) => {
+      const oldChar = mut.slice(0, 1);
       const newChar = mut.slice(-1);
-      if (newChar==="-") {
+
+      if (oldChar==="-") { /* undeletions are most probably bioinformatics errors, so collect them into a separate category */
+        categories.undeletions.push(mut);
+      } else if (newChar==="-") {
         categories.gaps.push(mut);
       } else if (isNuc && newChar==="N") {
         categories.ns.push(mut);
@@ -190,7 +199,7 @@ export const categoriseMutations = (mutations, observedMutations, seqChangesToRo
       }
       // check to see if this mutation is a reversion to root
       const pos = mut.slice(1, -1);
-      if (newChar!=="-" && newChar!=="N" && seqChangesToRoot[gene] &&
+      if (oldChar!=="-" && newChar!=="-" && newChar!=="N" && seqChangesToRoot[gene] &&
       seqChangesToRoot[gene][pos] && seqChangesToRoot[gene][pos][0]===seqChangesToRoot[gene][pos][1]) {
         categories.reversionsToRoot.push(mut);
       }
@@ -201,11 +210,14 @@ export const categoriseMutations = (mutations, observedMutations, seqChangesToRo
 };
 
 /**
- * Categorise each seq change into one or more of the following categories:
- * (i) changes mutations (those which are only observed once)
- * (ii) reversions to root (these will _not_ be in (i) because they're not technically a change)
- * (iii) gaps
- * (iv) Ns (only applicable for nucleotides)
+ * Categorise seq changes (i.e. the accumulated changes between a tip and the (subtree) root)
+ * into the following categories (first matching category used):
+ * (1) gaps
+ * (2) Ns (nucleotides only)
+ * (3) Reversions to root
+ * (4) Base Changes
+ *
+ * TODO: This function shares a lot of logic with `categoriseMutations()` and is thus prone to drift
  */
 export const categoriseSeqChanges = (seqChangesToRoot) => {
   const categorisedSeqChanges = {};
@@ -213,13 +225,13 @@ export const categoriseSeqChanges = (seqChangesToRoot) => {
     const categories = { changes: [], gaps: [], reversionsToRoot: []};
     const isNuc = gene==="nuc";
     if (isNuc) categories.ns = [];
-    for (const [pos, fromTo] of Object.entries(seqChangesToRoot[gene])) {
-      const mut = `${fromTo[0]}${pos}${fromTo[1]}`;
-      if (fromTo[1]==="-") {
+    for (const [pos, [from, to]] of Object.entries(seqChangesToRoot[gene])) {
+      const mut = `${from}${pos}${to}`;
+      if (to==="-") {
         categories.gaps.push(mut);
-      } else if (isNuc && fromTo[1]==="N") {
+      } else if (isNuc && to==="N") {
         categories.ns.push(mut);
-      } else if (fromTo[0]===fromTo[1]) {
+      } else if (from===to) {
         categories.reversionsToRoot.push(mut);
       } else {
         categories.changes.push(mut);
