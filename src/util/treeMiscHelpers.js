@@ -165,21 +165,29 @@ export const getSeqChanges = (fromNode) => {
 
 /**
  * Categorise each mutation into one or more of the following categories:
- * (i) unique mutations (those which are only observed once)
- * (ii) homoplasies (mutation observed elsewhere on the tree)
- * (iii) gaps
- * (iv) Ns (only applicable for nucleotides)
- * (v) reversions to root (these will also be in (i) or (ii))
+ * (1) undeletions (probably bioinformatics errors, but not always)
+ * (2) gaps
+ * (3) Ns (only applicable for nucleotides)
+ * (4) homoplasies (mutation observed elsewhere on the tree)
+ * (5) unique mutations (those which are only observed once)
+ * (6) reversions to root
+ * Categories 1-5 are mutually exclusive, with the first matching category used.
+ * (e.g. an undeletion is never a homoplasy, even if it occurs multiple times).
+ * Entries in category 6 will also appear in a previous group.
  */
 export const categoriseMutations = (mutations, observedMutations, seqChangesToRoot) => {
   const categorisedMutations = {};
   for (const gene of Object.keys(mutations)) {
-    const categories = { unique: [], homoplasies: [], gaps: [], reversionsToRoot: []};
+    const categories = { unique: [], homoplasies: [], gaps: [], reversionsToRoot: [], undeletions: []};
     const isNuc = gene==="nuc";
     if (isNuc) categories.ns = [];
     mutations[gene].forEach((mut) => {
+      const oldChar = mut.slice(0, 1);
       const newChar = mut.slice(-1);
-      if (newChar==="-") {
+
+      if (oldChar==="-") { /* undeletions are most probably bioinformatics errors, so collect them into a separate category */
+        categories.undeletions.push(mut);
+      } else if (newChar==="-") {
         categories.gaps.push(mut);
       } else if (isNuc && newChar==="N") {
         categories.ns.push(mut);
@@ -190,7 +198,7 @@ export const categoriseMutations = (mutations, observedMutations, seqChangesToRo
       }
       // check to see if this mutation is a reversion to root
       const pos = mut.slice(1, -1);
-      if (newChar!=="-" && newChar!=="N" && seqChangesToRoot[gene] &&
+      if (oldChar!=="-" && newChar!=="-" && newChar!=="N" && seqChangesToRoot[gene] &&
       seqChangesToRoot[gene][pos] && seqChangesToRoot[gene][pos][0]===seqChangesToRoot[gene][pos][1]) {
         categories.reversionsToRoot.push(mut);
       }

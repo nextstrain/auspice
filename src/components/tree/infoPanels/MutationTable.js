@@ -85,6 +85,7 @@ const mutCategoryLookup = {
   changes: "Changes",
   homoplasies: "Homoplasies",
   reversionsToRoot: "Reversions to root",
+  undeletions: "Undeletions",
   gaps: "Gaps",
   ns: "Ns "
 };
@@ -121,7 +122,7 @@ const displayGeneMutations = (gene, mutsPerCat) => {
               key={name}
               name={name}
               muts={mutsPerCat[key]}
-              displayAsIntervals={key==="gaps" || key==="ns"}
+              displayAsIntervals={key==="gaps" || key==="ns" || key==='undeletions'}
               isNuc={gene==="nuc"}
             />) :
             null

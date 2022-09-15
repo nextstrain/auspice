@@ -209,6 +209,10 @@ const BranchMutations = ({node, geneSortFn, observedMutations, t}) => {
       const value = `${parseIntervalsOfNsOrGaps(categorisedMutations.nuc.gaps).length} regions, ${categorisedMutations.nuc.gaps.length}bp.`;
       elements.push(<InfoLine name='Gaps:' value={value} key="nuc_gaps"/>);
     }
+    if (categorisedMutations.nuc.undeletions.length) {
+      const value = `${parseIntervalsOfNsOrGaps(categorisedMutations.nuc.undeletions).length} regions, ${categorisedMutations.nuc.undeletions.length}bp.`;
+      elements.push(<InfoLine name='Undeletions:' value={value} key="nuc_undeletions"/>);
+    }
     if (categorisedMutations.nuc.ns.length) {
       const value = `${parseIntervalsOfNsOrGaps(categorisedMutations.nuc.ns).length} regions, ${categorisedMutations.nuc.ns.length}bp.`;
       elements.push(<InfoLine name='Ns:' value={value} key="nuc_ns"/>);
