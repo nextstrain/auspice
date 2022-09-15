@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.38.0 - 2022/09/16
+
+
 * Mutations now separate out "undeletions" & add information on what the categories represent.
 See [PR 1542](https://github.com/nextstrain/auspice/pull/1542) for more.
 * Bugfix where certain GISAID accessions may cause a crash when clicked.
