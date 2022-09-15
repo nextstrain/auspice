@@ -142,6 +142,7 @@ export const getSeqChanges = (fromNode) => {
         if ((gene === "nuc") || gene !== "nuc") {
           if (!mutations[gene]) mutations[gene] = {};
           muts.forEach((m) => {
+            /* 'from' is the base closer to the root, 'to' is the more derived base (closer to the tip) */
             const [from, pos, to] = [m.slice(0, 1), m.slice(1, -1), m.slice(-1)]; // note: `pos` is a string
             if (mutations[gene][pos]) {
               mutations[gene][pos][0] = from; // mutation already seen => update ancestral state.
@@ -209,11 +210,14 @@ export const categoriseMutations = (mutations, observedMutations, seqChangesToRo
 };
 
 /**
- * Categorise each seq change into one or more of the following categories:
- * (i) changes mutations (those which are only observed once)
- * (ii) reversions to root (these will _not_ be in (i) because they're not technically a change)
- * (iii) gaps
- * (iv) Ns (only applicable for nucleotides)
+ * Categorise seq changes (i.e. the accumulated changes between a tip and the (subtree) root)
+ * into the following categories (first matching category used):
+ * (1) gaps
+ * (2) Ns (nucleotides only)
+ * (3) Reversions to root
+ * (4) Base Changes
+ *
+ * TODO: This function shares a lot of logic with `categoriseMutations()` and is thus prone to drift
  */
 export const categoriseSeqChanges = (seqChangesToRoot) => {
   const categorisedSeqChanges = {};
@@ -221,13 +225,13 @@ export const categoriseSeqChanges = (seqChangesToRoot) => {
     const categories = { changes: [], gaps: [], reversionsToRoot: []};
     const isNuc = gene==="nuc";
     if (isNuc) categories.ns = [];
-    for (const [pos, fromTo] of Object.entries(seqChangesToRoot[gene])) {
-      const mut = `${fromTo[0]}${pos}${fromTo[1]}`;
-      if (fromTo[1]==="-") {
+    for (const [pos, [from, to]] of Object.entries(seqChangesToRoot[gene])) {
+      const mut = `${from}${pos}${to}`;
+      if (to==="-") {
         categories.gaps.push(mut);
-      } else if (isNuc && fromTo[1]==="N") {
+      } else if (isNuc && to==="N") {
         categories.ns.push(mut);
-      } else if (fromTo[0]===fromTo[1]) {
+      } else if (from===to) {
         categories.reversionsToRoot.push(mut);
       } else {
         categories.changes.push(mut);

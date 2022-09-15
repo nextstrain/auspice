@@ -1,4 +1,4 @@
-import { getUrlFromNode, getAccessionFromNode, getBranchMutations } from "../src/util/treeMiscHelpers";
+import { getUrlFromNode, getAccessionFromNode, getBranchMutations, categoriseSeqChanges } from "../src/util/treeMiscHelpers";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
 import { parseIntervalsOfNsOrGaps } from "../src/components/tree/infoPanels/MutationTable";
 
@@ -98,6 +98,28 @@ describe('Parse and summarise mutations', () => {
         reversionsToRoot: ["B100A"]
       }
     });
+  });
+
+  test("Tip mutations are correctly categorised", () => {
+
+    expect(categoriseSeqChanges({nuc: []}))
+      .toEqual({
+        nuc: {gaps: [], ns: [], reversionsToRoot: [], changes: []}
+      });
+
+    expect(categoriseSeqChanges({nuc: {
+      100: ['A', 'N'], // typical unknown base due to low coverage
+      101: ['A', '-'], // typical gap
+      102: ['A', 'T'], // typical change
+      103: ['A', 'A'], // typical reversion to root
+      104: ['-', 'T'], // strange, but can happen via `augur ancestral` when ref (root) seq has been pruned
+      105: ['-', '-'], // stranger, but occurs when we have situations like the above
+      106: ['N', 'N']
+    }}))
+      .toEqual({
+        nuc: {gaps: ["A101-", "-105-"], ns: ["A100N", "N106N"], reversionsToRoot: ["A103A"], changes: ["A102T", "-104T"]}
+      });
+
   });
 });
 
