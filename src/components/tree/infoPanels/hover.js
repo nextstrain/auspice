@@ -11,7 +11,7 @@ import { parseIntervalsOfNsOrGaps } from "./MutationTable";
 
 export const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
-    if (!value) return null;
+    if (!value && value !== 0) return null;
     if (Array.isArray(value)) {
       return value.map((v) => (
         <div key={v} style={{fontWeight: "300", marginLeft: "0em"}}>
