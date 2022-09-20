@@ -136,10 +136,12 @@ class ColorBy extends React.Component {
   }, 400);
 
   getGtGeneOptions() {
-    let options = [];
+    const options = [];
     if (this.props.geneMap) {
-      options = Object.keys(this.props.geneMap).map((prot) => ({value: prot, label: prot}));
-      options[options.length] = {value: nucleotide_gene, label: "nucleotide"};
+      // Make the nucleotide the first option since it can be annoying to find the nucleotide
+      // option when there are ~200 genes like in monkeypox.
+      options.push({value: nucleotide_gene, label: "nucleotide"});
+      Object.keys(this.props.geneMap).forEach((prot) => options.push({value: prot, label: prot}));
     }
     return options;
   }
