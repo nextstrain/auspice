@@ -26,7 +26,8 @@ export const layout = {
   subplotFillOpacity: "0.15",
   diamondSize: 25,
   standardDeviationStroke: 2,
-  overallMeanColor: "#000"
+  overallMeanColor: "#000",
+  yAxisTickSize: 6
 };
 // Display overall mean at the center of each subplot
 layout['overallMeanYValue'] = layout.subplotHeight / 2;
@@ -211,8 +212,26 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       .call(
         axisLeft(yScale)
           .tickValues([yScale((layout.yMax - layout.yMin) / 2)])
-          .tickFormat(() => groupingValue))
-      .call((g) => g.attr("font-family", null));
+          .tickSize(layout.yAxisTickSize)
+          .tickFormat(groupingValue))
+      .call((g) => {
+        g.attr("font-family", null);
+        // If necessary, scale down the text to fit in the available space for the y-Axis labels
+        // This does mean that if the text is extremely long, it can be unreadable.
+        // We can improve on this by manually splitting the text into parts that can fit on multiple lines,
+        // but there's always limits of the available space so punting that for now.
+        //    -Jover, 20 September 2022
+        g.selectAll('text')
+          .attr("transform", (_, i, element) => {
+            const textWidth = select(element[i]).node().getBoundingClientRect().width;
+            // Subtract the twice the y-axis tick size to give some padding around the text
+            const availableTextWidth = layout.leftPadding - (2 * layout.yAxisTickSize);
+            if (textWidth > availableTextWidth) {
+              return `scale(${availableTextWidth / textWidth})`;
+            }
+            return null;
+          });
+      });
 
     // Add circles for each measurement
     subplot.append("g")
