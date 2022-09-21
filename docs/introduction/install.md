@@ -24,7 +24,7 @@ You can also use the Windows Subsystem Linux for a fuller Linux environment.
 
 ## Create a Conda Environment
 ```bash
-conda create --name auspice nodejs=12
+conda create --name auspice nodejs=14
 conda activate auspice
 ```
 
