@@ -25,6 +25,7 @@ export const renderTree = (that, main, phylotree, props) => {
       grid: true,
       confidence: props.temporalConfidence.display,
       branchLabelKey: renderBranchLabels && props.selectedBranchLabel,
+      showAllBranchLabels: props.showAllBranchLabels,
       orientation: main ? [1, 1] : [-1, 1],
       tipLabels: true,
       showTipLabels: true

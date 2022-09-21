@@ -2,13 +2,15 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 
-import { CHANGE_BRANCH_LABEL } from "../../actions/types";
+import { CHANGE_BRANCH_LABEL, TOGGLE_SHOW_ALL_BRANCH_LABELS } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
+import Toggle from "./toggle";
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
+  showAll: state.controls.showAllBranchLabels,
   available: state.tree.availableBranchLabels,
   canRenderBranchLabels: state.controls.canRenderBranchLabels
 }))
@@ -36,6 +38,16 @@ class ChooseBranchLabelling extends React.Component {
             onChange={this.change}
           />
         </div>
+
+        {this.props.selected!=="none" && (
+          <Toggle
+            display
+            on={this.props.showAll}
+            callback={() => this.props.dispatch({type: TOGGLE_SHOW_ALL_BRANCH_LABELS})}
+            label={t("sidebar:Show all labels")}
+            style={{paddingBottom: "5px", paddingTop: "10px"}}
+          />
+        )}
       </div>
     );
   }

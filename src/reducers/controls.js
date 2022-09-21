@@ -65,6 +65,7 @@ export const getDefaultControlsState = () => {
     colorScale: undefined,
     explodeAttr: undefined,
     selectedBranchLabel: "none",
+    showAllBranchLabels: false,
     canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
@@ -125,6 +126,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
+    case types.TOGGLE_SHOW_ALL_BRANCH_LABELS:
+      return Object.assign({}, state, { showAllBranchLabels: !state.showAllBranchLabels });
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.layout,
