@@ -22,7 +22,7 @@ If you've followed the [auspice install instructions](https://docs.nextstrain.or
 If not, you can create the necessary conda environment via:
 
 ```bash
-conda create --name auspice nodejs=12
+conda create --name auspice nodejs=14
 ```
 
 Install Decktape via:

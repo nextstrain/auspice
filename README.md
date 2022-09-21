@@ -40,7 +40,7 @@ We recommend using a conda environment, but this is not the only way.
 Create and activate a [conda](https://docs.conda.io) environment:
 
 ```bash
-conda create --name auspice nodejs=12
+conda create --name auspice nodejs=14
 conda activate auspice
 ```
 
