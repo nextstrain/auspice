@@ -12,7 +12,7 @@
 
 ## Prerequisites
 Auspice is a JavaScript program, and requires [Node.js](https://nodejs.org/) to be installed on your system.
-We've had success running a range of different node versions between 10.8 and 13.
+Refer to `engines.node` in [package.json](https://github.com/nextstrain/auspice/blob/-/package.json) for currently supported versions.
 
 We highly recommend using [Conda](https://conda.io/docs/) to manage environments, i.e. use Conda to create an environment with Node.js installed where you can use Auspice.
 It's possible to use other methods, but this documentation presupposes that you have Conda installed.
