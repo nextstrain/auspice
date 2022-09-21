@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { max } from "d3-array";
-import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
+import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -128,31 +128,62 @@ function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
     const tolerance = (node.shell.that.dateRange[1]-node.shell.that.dateRange[0])/50;
     return (getTraitFromNode(node, "num_date") - tolerance < getTraitFromNode(otherNode, "num_date"));
   }
-  /* Compute the divergence tolerance similarly to above. This uses the approach used to compute the
-  x-axis grid within phyotree, and could be refactored into a helper function. Note that we don't store
-  the maximum divergence on the tree so we use the in-view max instead */
+
+  /* If mutations aren't defined, we fallback to calculating divergence tolerance similarly to temporal.
+  This uses the approach used to compute the x-axis grid within phyotree, and could be refactored into a
+  helper function. Note that we don't store the maximum divergence on the tree so we use the in-view max instead */
   const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth)/50;
   return (getDivFromNode(node) - tolerance < getDivFromNode(otherNode));
 }
 
+/**
+ * Walk up the tree from node until we find either a node which has a nucleotide mutation or we
+ * reach the root of the (sub)tree. Gaps, deletions and undeletions do not count as mutations here.
+ */
+function findFirstBranchWithAMutation(node) {
+  if (node.parent === node) {
+    return node;
+  }
+  const categorisedMutations = getBranchMutations(node, {}); // 2nd param of `{}` means we skip homoplasy detection
+  if (categorisedMutations?.nuc?.unique?.length>0) {
+    return node.parent;
+  }
+
+  return findFirstBranchWithAMutation(node.parent);
+}
 
 /**
  * Given a `node`, get the parent, grandparent etc node which is beyond some
  * branch length threshold (either divergence or time). This is useful for finding the node
- * beyond a polytomy, or polytomy-like structure
+ * beyond a polytomy, or polytomy-like structure. If nucleotide mutations are defined on
+ * the tree (and distanceMeasure=div) then we find the first branch with a mutation.
  * @param {object} node - tree node
- * @param {string} getParentBeyondPolytomy -- 'num_date' or 'div'
+ * @param {string} distanceMeasure -- 'num_date' or 'div'
+ * @param {object} observedMutations
  * @returns {object} the closest node up the tree (towards the root) which is beyond
  * some threshold
  */
-export const getParentBeyondPolytomy = (node, distanceMeasure) => {
+export const getParentBeyondPolytomy = (node, distanceMeasure, observedMutations) => {
   let potentialNode = node.parent;
+  if (distanceMeasure==="div" && areNucleotideMutationsPresent(observedMutations)) {
+    return findFirstBranchWithAMutation(node);
+  }
   while (isWithinBranchTolerance(node, potentialNode, distanceMeasure)) {
     if (potentialNode === potentialNode.parent) break; // root node of tree
     potentialNode = potentialNode.parent;
   }
   return potentialNode;
 };
+
+function areNucleotideMutationsPresent(observedMutations) {
+  const mutList = Object.keys(observedMutations);
+  for (let idx=mutList.length-1; idx>=0; idx--) { // start at end, as nucs come last in the key-insertion order
+    if (mutList[idx].startsWith("nuc:")) {
+      return true;
+    }
+  }
+  return false;
+}
 
 /**
  * Prior to Jan 2020, the divergence measure was always "subs per site per year"

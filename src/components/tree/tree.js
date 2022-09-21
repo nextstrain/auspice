@@ -175,12 +175,12 @@ class Tree extends React.Component {
     // Zoom out of main tree if index of root node is not 0
     if (this.props.tree.idxOfInViewRootNode !== 0) {
       const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
-      newRoot = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure).arrayIdx;
+      newRoot = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
     }
     // Also zoom out of second tree if index of root node is not 0
     if (this.props.treeToo.idxOfInViewRootNode !== 0) {
       const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
-      newRootToo = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure).arrayIdx;
+      newRootToo = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
     }
     const root = [newRoot, newRootToo];
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
