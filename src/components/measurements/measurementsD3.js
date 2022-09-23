@@ -27,7 +27,9 @@ export const layout = {
   diamondSize: 25,
   standardDeviationStroke: 2,
   overallMeanColor: "#000",
-  yAxisTickSize: 6
+  yAxisTickSize: 6,
+  yAxisColorByLineHeight: 7,
+  yAxisColorByLineStrokeWidth: 2
 };
 // Display overall mean at the center of each subplot
 layout['overallMeanYValue'] = layout.subplotHeight / 2;
@@ -35,6 +37,7 @@ layout['overallMeanYValue'] = layout.subplotHeight / 2;
 const classes = {
   xAxis: "measurementXAxis",
   yAxis: "measurementYAxis",
+  yAxisColorByLabel: "measurementYAxisColorByLabel",
   threshold: "measurementThreshold",
   subplot: "measurementSubplot",
   subplotBackground: "measurementSubplotBackground",
@@ -364,4 +367,37 @@ export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover, treeStrain
       handleHover(d, dataType, clientX, clientY, colorByAttr);
     })
     .on("mouseout.hoverPanel", () => handleHover(null));
+};
+
+export const addColorByAttrToGroupingLabel = (ref, treeStrainColors) => {
+  const svg = select(ref);
+  // Remove all previous color-by labels for the y-axis
+  svg.selectAll(`.${classes.yAxisColorByLabel}`).remove();
+  // Loop through the y-axis labels to check if they have a corresponding color-by
+  svg.selectAll(`.${classes.yAxis}`).select(".tick")
+    .each((_, i, elements) => {
+      const groupingLabel = select(elements[i]);
+      const groupingValue = groupingLabel.text();
+      const groupingValueColorBy = treeStrainColors[groupingValue];
+      if (groupingValueColorBy) {
+        // Get the current label width to add colored line and text relative to the width
+        const labelWidth = groupingLabel.node().getBoundingClientRect().width;
+        groupingLabel.append("line")
+          .attr("class", classes.yAxisColorByLabel)
+          .attr("x1", -layout.yAxisTickSize)
+          .attr("x2", -labelWidth)
+          .attr("y1", layout.yAxisColorByLineHeight)
+          .attr("y2", layout.yAxisColorByLineHeight)
+          .attr("stroke-width", layout.yAxisColorByLineStrokeWidth)
+          .attr("stroke", groupingValueColorBy.color);
+
+        groupingLabel.append("text")
+          .attr("class", classes.yAxisColorByLabel)
+          .attr("x", labelWidth * -0.5)
+          .attr("dy", layout.yAxisColorByLineHeight * 2 + layout.yAxisColorByLineStrokeWidth)
+          .attr("text-anchor", "middle")
+          .attr("fill", "currentColor")
+          .text(`(${groupingValueColorBy.attribute})`);
+      }
+    });
 };

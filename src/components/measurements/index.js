@@ -20,7 +20,8 @@ import {
   changeMeasurementsDisplay,
   svgContainerDOMId,
   toggleDisplay,
-  addHoverPanelToMeasurementsAndMeans
+  addHoverPanelToMeasurementsAndMeans,
+  addColorByAttrToGroupingLabel
 } from "./measurementsD3";
 
 /**
@@ -212,6 +213,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
+    addColorByAttrToGroupingLabel(d3Ref.current, treeStrainColors);
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
     drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
     addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover, treeStrainColors);
