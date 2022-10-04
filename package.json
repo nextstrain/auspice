@@ -113,7 +113,7 @@
     "style-loader": "^0.13.2",
     "styled-components": "^4.0.3",
     "typeface-lato": "^0.0.75",
-    "webpack": "^4.46.0",
+    "webpack": "^5.74.0",
     "webpack-bundle-analyzer": "^3.9.0",
     "webpack-dev-middleware": "^3.7.3",
     "webpack-hot-middleware": "^2.25.2",
