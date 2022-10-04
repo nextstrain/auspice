@@ -24,12 +24,12 @@ export const layout = {
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
   subplotFillOpacity: "0.15",
-  diamondSize: 25,
-  standardDeviationStroke: 2,
+  diamondSize: 50,
+  standardDeviationStroke: 3,
   overallMeanColor: "#000",
   yAxisTickSize: 6,
-  yAxisColorByLineHeight: 7,
-  yAxisColorByLineStrokeWidth: 2
+  yAxisColorByLineHeight: 9,
+  yAxisColorByLineStrokeWidth: 4
 };
 // Display overall mean at the center of each subplot
 layout['overallMeanYValue'] = layout.subplotHeight / 2;
