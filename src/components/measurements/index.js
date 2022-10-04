@@ -65,25 +65,22 @@ const treeStrainPropertySelector = (state) => {
     // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
       treeStrainVisibility[node.name] = tree.visibility[index];
-      // Only store colors for visible strains since only measurmeents
-      // for visible strains will be displayed
-      if (isVisible(tree.visibility[index])) {
-        /*
-        * If the color scale is continuous, we want to group by the legend value
-        * instead of the specific strain attribute in order to combine all values
-        * within the legend bounds into a single group.
-        */
-        let attribute = getTipColorAttribute(node, colorScale);
-        if (colorScale.continuous) {
-          const matchingLegendValue = colorScale.visibleLegendValues
-            .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
-          if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
-        }
-        treeStrainColors[node.name] = {
-          attribute,
-          color: tree.nodeColors[index]
-        };
+      /*
+      * If the color scale is continuous, we want to group by the legend value
+      * instead of the specific strain attribute in order to combine all values
+      * within the legend bounds into a single group.
+      */
+      let attribute = getTipColorAttribute(node, colorScale);
+      if (colorScale.continuous) {
+        const matchingLegendValue = colorScale.visibleLegendValues
+          .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
+        if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
       }
+      treeStrainColors[node.name] = {
+        attribute,
+        color: tree.nodeColors[index]
+      };
+
     }
     return treeStrainProperty;
   }, intitialTreeStrainProperty);
