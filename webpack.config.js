@@ -90,7 +90,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new webpack.NoEmitOnErrorsPlugin(),
     pluginHtml,
     cleanWebpackPlugin
   ] : [
