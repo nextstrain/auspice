@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.39.0 - 2022/10/06
+
+
 
 * A range of improvements to the measurements panel including reference sera coloring
 and more informative tooltips. See [PR 1557](https://github.com/nextstrain/auspice/pull/1557) for more.
