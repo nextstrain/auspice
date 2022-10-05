@@ -29,7 +29,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
-          branch: "auspice-pr-${{ github.event.pull_request.number }}"
+          branch: "nextstrain-bot/test-auspice-pr/${{ github.event.pull_request.number }}"
           commit-message: "[testing only] upgrade auspice to ${{ env.auspice_commit }}"
           author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
           committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
