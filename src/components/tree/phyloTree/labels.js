@@ -70,13 +70,15 @@ const branchLabelFontWeight = (key) => {
 
 /** createBranchLabelVisibility (the return value should be passed to d3 style call)
  * @param {str} key e.g. "aa" or "clade"
+ * @param {bool} showAll
  * @param {str} layout
  * @param {int} totalTipsInView visible tips also in view
  * @return {func} Returns a function with 1 argument: the current node (branch).
  *                This fn will return "visible" or "hidden".
  *                NOTE: the fn should only be provided nodes which have a label.
  */
-const createBranchLabelVisibility = (key, layout, totalTipsInView) => (d) => {
+const createBranchLabelVisibility = (key, showAll, layout, totalTipsInView) => (d) => {
+  if (showAll) return "visible";
   if (d.visibility !== NODE_VISIBLE) return "hidden";
   const magicTipFractionToShowBranchLabel = 0.03;
   /* if the number of _visible_ tips descending from this node are over the
@@ -99,6 +101,7 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
   }
   const visibility = createBranchLabelVisibility(
     this.params.branchLabelKey,
+    this.params.showAllBranchLabels,
     this.layout,
     this.zoomNode.n.tipCount
   );
@@ -128,7 +131,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
   this.params.branchLabelKey = key;
   const labelSize = branchLabelSize(key);
   const fontWeight = branchLabelFontWeight(key);
-  const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
+  const visibility = createBranchLabelVisibility(key, this.params.showAllBranchLabels, this.layout, this.zoomNode.n.tipCount);
 
   if (!("branchLabels" in this.groups)) {
     this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels").attr("clip-path", "url(#treeClip)");

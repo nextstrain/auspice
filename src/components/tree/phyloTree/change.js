@@ -260,6 +260,7 @@ export const change = function change({
   newLayout = undefined,
   updateLayout = undefined, // todo - this seems identical to `newLayout`
   newBranchLabellingKey = undefined,
+  showAllBranchLabels = undefined,
   newTipLabelKey = undefined,
   /* arrays of data (the same length as nodes) */
   branchStroke = undefined,
@@ -365,6 +366,11 @@ export const change = function change({
   /* show confidences - set this param which actually adds the svg paths for
      confidence intervals when mapToScreen() gets called below */
   if (showConfidences) this.params.confidence = true;
+  /* keep the state of phylotree in sync with redux (more complex than it should be) */
+  if (showAllBranchLabels!==undefined) {
+    this.params.showAllBranchLabels=showAllBranchLabels;
+    elemsToUpdate.add('.branchLabel');
+  }
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||

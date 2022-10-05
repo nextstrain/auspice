@@ -22,6 +22,7 @@ const Tree = connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel,
   canRenderBranchLabels: state.controls.canRenderBranchLabels,
+  showAllBranchLabels: state.controls.showAllBranchLabels,
   tipLabelKey: state.controls.tipLabelKey,
   narrativeMode: state.narrative.display,
   animationPlayPauseButton: state.controls.animationPlayPauseButton

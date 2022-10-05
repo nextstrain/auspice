@@ -64,6 +64,10 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   ) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
+  if (oldProps.showAllBranchLabels!==newProps.showAllBranchLabels) {
+    args.showAllBranchLabels = newProps.showAllBranchLabels;
+  }
+
   if (oldProps.tipLabelKey !== newProps.tipLabelKey) {
     args.newTipLabelKey = newProps.tipLabelKey;
   }
