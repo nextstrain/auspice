@@ -15,6 +15,14 @@ jobs:
     steps:
       # Outputs:
       # - pr-number: The PR number from the branch name (exits if no PR exists).
+      # - auspice-sha: The GitHub-managed merge ref. Used for npm install.
+      #
+      # Note that $GITHUB_SHA shouldn't be used here because it refers to the
+      # branch HEAD which is not merged with the PR target branch. If the
+      # workflow trigger event was `pull_request` then it would refer to the
+      # merge ref¹, but we use `workflow_dispatch` to reduce the number of PRs.
+      #
+      # ¹ https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
       - name: Detect PR from branch
         id: detect-pr
         run: |
@@ -23,7 +31,9 @@ jobs:
             echo "ERROR: This branch is not associated with a PR in Auspice." >&2
             exit 1
           fi
+          MERGE_SHA=$(gh pr view $GITHUB_REF_NAME --repo nextstrain/auspice --json 'potentialMergeCommit' --jq '.potentialMergeCommit.oid')
           echo "::set-output name=pr-number::$PR_NUMBER"
+          echo "::set-output name=auspice-sha::$MERGE_SHA"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,7 +52,7 @@ jobs:
         working-directory: ${{ env.DESTINATION_REPO_DIR }}
         run: |
           npm ci
-          npm install nextstrain/auspice#${GITHUB_SHA}
+          npm install nextstrain/auspice#${{ steps.detect-pr.outputs.auspice-sha }}
           git add package.json package-lock.json
 
       - name: Create Pull Request for testing on nextstrain.org repo
@@ -58,6 +68,9 @@ jobs:
           title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ steps.detect-pr.outputs.pr-number }}'
           body: |
             This PR has been created to test nextstrain.org running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ steps.detect-pr.outputs.pr-number }}.
+
+            Note that Auspice has been installed with changes from both the PR's source and target branches.
+            This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
 
             This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
           draft: true
