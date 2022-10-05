@@ -30,14 +30,14 @@ jobs:
         with:
           token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
           branch: "nextstrain-bot/test-auspice-pr/${{ github.event.pull_request.number }}"
-          commit-message: "[testing only] upgrade auspice to ${{ env.auspice_commit }}"
+          commit-message: "[testing only] Upgrade Auspice to ${{ env.auspice_commit }}"
           author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
           committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          title: '[bot] [DO NOT MERGE] Test auspice PR ${{ github.event.pull_request.number }}'
+          title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ github.event.pull_request.number }}'
           body: |
-            This PR has been created to test Auspice from [PR ${{ github.event.pull_request.number }}](https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }})
+            This PR has been created to test nextstrain.org running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }}.
 
-            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice)
+            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
           draft: true
           delete-branch: true
       - name: Check outputs
