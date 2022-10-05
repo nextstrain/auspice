@@ -2,9 +2,19 @@
 title: Changelog
 ---
 
+
+* A range of improvements to the measurements panel including reference sera coloring
+and more informative tooltips. See [PR 1557](https://github.com/nextstrain/auspice/pull/1557) for more.
+* Color-by genotype dropdown: nuc (nucleotide) is now the first item in the list.
+See [PR 1550](https://github.com/nextstrain/auspice/pull/1550) for more.
+* Fixed a bug where zooming out one level would instead jump multiple levels.
+See [PR 1552](https://github.com/nextstrain/auspice/pull/1552) for more.
+* Added a toggle to force the display of all branch labels, rather than only those meeting
+a certain threshold. See [PR 1554](https://github.com/nextstrain/auspice/pull/1554) for more.
+* Install documentation updated. See [PR 1551](https://github.com/nextstrain/auspice/pull/1551) for more.
+
+
 ## version 2.38.0 - 2022/09/16
-
-
 * Mutations now separate out "undeletions" & add information on what the categories represent.
 See [PR 1542](https://github.com/nextstrain/auspice/pull/1542) for more.
 * Bugfix where certain GISAID accessions may cause a crash when clicked.
