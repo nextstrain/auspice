@@ -4,9 +4,8 @@ import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
 import { fastTransitionDuration, months } from "../../../util/globals";
-import { getBrighterColor } from "../../../util/colorHelpers";
+import { getBrighterColor, getColorByTitle } from "../../../util/colorHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { TOGGLE_LEGEND } from "../../../actions/types";
 
 const ITEM_RECT_SIZE = 15;
@@ -61,22 +60,12 @@ class Legend extends React.Component {
     const rowPos = rowIdx * (ITEM_RECT_SIZE + LEGEND_SPACING);
     return `translate(${colPos},${rowPos})`;
   }
-  getTitleString() {
-    if (isColorByGenotype(this.props.colorBy)) {
-      const genotype = decodeColorByGenotype(this.props.colorBy);
-      return genotype.aa
-        ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
-        : `Nucleotide at position ${genotype.positions.join(", ")}`;
-    }
-    return this.props.colorings[this.props.colorBy] === undefined ?
-      "" : this.props.colorings[this.props.colorBy].title;
-  }
 
   getTitleWidth() {
     // This is a hack because we can't use getBBox in React.
     // Lots of work to get measured width of DOM element.
     // Works fine, but will need adjusting if title font is changed.
-    return 15 + 5.3 * this.getTitleString().length;
+    return 15 + 5.3 * getColorByTitle(this.props.colorings, this.props.colorBy).length;
   }
 
   toggleLegend() {
@@ -101,7 +90,7 @@ class Legend extends React.Component {
             backgroundColor: "#fff"
           }}
         >
-          {this.getTitleString()}
+          {getColorByTitle(this.props.colorings, this.props.colorBy)}
         </text>
       </g>
     );

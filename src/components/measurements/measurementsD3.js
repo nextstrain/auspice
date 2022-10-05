@@ -24,9 +24,12 @@ export const layout = {
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
   subplotFillOpacity: "0.15",
-  diamondSize: 25,
-  standardDeviationStroke: 2,
-  overallMeanColor: "#000"
+  diamondSize: 50,
+  standardDeviationStroke: 3,
+  overallMeanColor: "#000",
+  yAxisTickSize: 6,
+  yAxisColorByLineHeight: 9,
+  yAxisColorByLineStrokeWidth: 4
 };
 // Display overall mean at the center of each subplot
 layout['overallMeanYValue'] = layout.subplotHeight / 2;
@@ -34,6 +37,7 @@ layout['overallMeanYValue'] = layout.subplotHeight / 2;
 const classes = {
   xAxis: "measurementXAxis",
   yAxis: "measurementYAxis",
+  yAxisColorByLabel: "measurementYAxisColorByLabel",
   threshold: "measurementThreshold",
   subplot: "measurementSubplot",
   subplotBackground: "measurementSubplotBackground",
@@ -105,8 +109,9 @@ export const clearMeasurementsSVG = (ref) => {
     .selectAll("*").remove();
 };
 
-const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, color, xScale, yValue, handleHover) => {
+const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colorBy, xScale, yValue) => {
   const meanAndStandardDeviation = {
+    colorByAttr: colorBy.attribute,
     mean: mean(values),
     standardDeviation: deviation(values)
   };
@@ -122,13 +127,7 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
     .attr("class", classes.mean)
     .attr("transform", (d) => `translate(${xScale(d.mean)}, ${yValue})`)
     .attr("d", symbol().type(symbolDiamond).size(layout.diamondSize))
-    .attr("fill", color)
-    .on("mouseover", (d) => {
-      // Get mouse position for HoverPanel
-      const { clientX, clientY } = d3event;
-      handleHover(d, "mean", clientX, clientY);
-    })
-    .on("mouseout", () => handleHover(null));
+    .attr("fill", colorBy.color);
 
   if (meanAndStandardDeviation.standardDeviation !== undefined) {
     container.append("line")
@@ -138,17 +137,11 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
       .attr("y1", yValue)
       .attr("y2", yValue)
       .attr("stroke-width", layout.standardDeviationStroke)
-      .attr("stroke", color)
-      .on("mouseover", (d) => {
-        // Get mouse position for HoverPanel
-        const { clientX, clientY } = d3event;
-        handleHover(d, "mean", clientX, clientY);
-      })
-      .on("mouseout", () => handleHover(null));
+      .attr("stroke", colorBy.color);
   }
 };
 
-export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
+export const drawMeasurementsSVG = (ref, svgData) => {
   const {xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
@@ -222,8 +215,26 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
       .call(
         axisLeft(yScale)
           .tickValues([yScale((layout.yMax - layout.yMin) / 2)])
-          .tickFormat(() => groupingValue))
-      .call((g) => g.attr("font-family", null));
+          .tickSize(layout.yAxisTickSize)
+          .tickFormat(groupingValue))
+      .call((g) => {
+        g.attr("font-family", null);
+        // If necessary, scale down the text to fit in the available space for the y-Axis labels
+        // This does mean that if the text is extremely long, it can be unreadable.
+        // We can improve on this by manually splitting the text into parts that can fit on multiple lines,
+        // but there's always limits of the available space so punting that for now.
+        //    -Jover, 20 September 2022
+        g.selectAll('text')
+          .attr("transform", (_, i, element) => {
+            const textWidth = select(element[i]).node().getBoundingClientRect().width;
+            // Subtract the twice the y-axis tick size to give some padding around the text
+            const availableTextWidth = layout.leftPadding - (2 * layout.yAxisTickSize);
+            if (textWidth > availableTextWidth) {
+              return `scale(${availableTextWidth / textWidth})`;
+            }
+            return null;
+          });
+      });
 
     // Add circles for each measurement
     subplot.append("g")
@@ -238,22 +249,15 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
         .attr("cx", (d) => xScale(d.value))
         .attr("cy", (d) => yScale(d[measurementJitterSymbol]))
         .attr("r", layout.circleRadius)
-        .on("mouseover", (d, i, elements) => {
+        .on("mouseover.radius", (d, i, elements) => {
           select(elements[i]).transition()
             .duration("100")
             .attr("r", layout.circleHoverRadius);
-
-          // Get mouse position for HoverPanel
-          const { clientX, clientY } = d3event;
-          // sets hover data state to trigger the hover panel display
-          handleHover(d, "measurement", clientX, clientY);
         })
-        .on("mouseout", (_, i, elements) => {
+        .on("mouseout.radius", (_, i, elements) => {
           select(elements[i]).transition()
             .duration("200")
             .attr("r", layout.circleRadius);
-          // sets hover data state to null to hide the hover panel display
-          handleHover(null);
         });
 
     // Draw overall mean and standard deviation for measurement values
@@ -261,10 +265,9 @@ export const drawMeasurementsSVG = (ref, svgData, handleHover) => {
       measurements.map((d) => d.value),
       subplot,
       classes.overallMean,
-      layout.overallMeanColor,
+      {attribute: null, color: layout.overallMeanColor},
       xScale,
-      layout.overallMeanYValue,
-      handleHover
+      layout.overallMeanYValue
     );
   });
 };
@@ -277,7 +280,7 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
     .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
 };
 
-export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover) => {
+export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
   const { xScale, groupingOrderedValues, groupedMeasurements } = svgData;
   const svg = select(ref);
   // Re move all current color by means
@@ -302,15 +305,14 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, handleHover)
     // 2 x subplotPadding for padding around the overall mean display
     const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
-    Object.values(colorByGroups).forEach(({color, values}) => {
+    Object.entries(colorByGroups).forEach(([attribute, {color, values}]) => {
       drawMeanAndStandardDeviation(
         values,
         subplot,
         classes.colorMean,
-        color,
+        {attribute, color},
         xScale,
-        yValue,
-        handleHover
+        yValue
       );
       // Increate yValue for next attribute mean
       yValue += ySpacing;
@@ -341,4 +343,61 @@ export const toggleDisplay = (ref, elementClass, displayOn) => {
   select(ref)
     .selectAll(`.${classes[elementClass]}`)
       .attr("display", displayAttr);
+};
+
+export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover, treeStrainColors) => {
+  const svg = select(ref);
+  svg.selectAll(`.${classes.rawMeasurements},.${classes.mean},.${classes.standardDeviation}`)
+    .on("mouseover.hoverPanel", (d, i, elements) => {
+      // Get mouse position for HoverPanel
+      const { clientX, clientY } = d3event;
+
+      // Use class name to check data type
+      const className = elements[i].getAttribute("class");
+      const dataType = className === classes.rawMeasurements ? "measurement" : "mean";
+
+      // For the means, the bound data includes the color-by attribute
+      // For the measurements, we need to get the color-by attribute from treeStrainColors
+      let colorByAttr = d.colorByAttr;
+      if (dataType === "measurement") {
+        colorByAttr = treeStrainColors[d.strain]?.attribute || "undefined";
+      }
+
+      // sets hover data state to trigger the hover panel display
+      handleHover(d, dataType, clientX, clientY, colorByAttr);
+    })
+    .on("mouseout.hoverPanel", () => handleHover(null));
+};
+
+export const addColorByAttrToGroupingLabel = (ref, treeStrainColors) => {
+  const svg = select(ref);
+  // Remove all previous color-by labels for the y-axis
+  svg.selectAll(`.${classes.yAxisColorByLabel}`).remove();
+  // Loop through the y-axis labels to check if they have a corresponding color-by
+  svg.selectAll(`.${classes.yAxis}`).select(".tick")
+    .each((_, i, elements) => {
+      const groupingLabel = select(elements[i]);
+      const groupingValue = groupingLabel.text();
+      const groupingValueColorBy = treeStrainColors[groupingValue];
+      if (groupingValueColorBy) {
+        // Get the current label width to add colored line and text relative to the width
+        const labelWidth = groupingLabel.node().getBoundingClientRect().width;
+        groupingLabel.append("line")
+          .attr("class", classes.yAxisColorByLabel)
+          .attr("x1", -layout.yAxisTickSize)
+          .attr("x2", -labelWidth)
+          .attr("y1", layout.yAxisColorByLineHeight)
+          .attr("y2", layout.yAxisColorByLineHeight)
+          .attr("stroke-width", layout.yAxisColorByLineStrokeWidth)
+          .attr("stroke", groupingValueColorBy.color);
+
+        groupingLabel.append("text")
+          .attr("class", classes.yAxisColorByLabel)
+          .attr("x", labelWidth * -0.5)
+          .attr("dy", layout.yAxisColorByLineHeight * 2 + layout.yAxisColorByLineStrokeWidth)
+          .attr("text-anchor", "middle")
+          .attr("fill", "currentColor")
+          .text(`(${groupingValueColorBy.attribute})`);
+      }
+    });
 };

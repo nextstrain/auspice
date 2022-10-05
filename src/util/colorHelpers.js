@@ -122,3 +122,20 @@ export const getEmphasizedColor = (color) => {
 };
 
 export const getBrighterColor = (color) => rgb(color).brighter([0.65]).toString();
+
+/**
+ * Return the display title for the selected colorBy
+ * @param {obj} colorings an object of available colorings
+ * @param {string} colorBy the select colorBy
+ * @returns {string} the display title for the colorBY
+ */
+export const getColorByTitle = (colorings, colorBy) => {
+  if (isColorByGenotype(colorBy)) {
+    const genotype = decodeColorByGenotype(colorBy);
+    return genotype.aa
+      ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
+      : `Nucleotide at position ${genotype.positions.join(", ")}`;
+  }
+  return colorings[colorBy] === undefined ?
+    "" : colorings[colorBy].title;
+};

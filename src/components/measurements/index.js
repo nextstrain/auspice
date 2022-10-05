@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
-import { getTipColorAttribute } from "../../util/colorHelpers";
+import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundry";
 import Flex from "../framework/flex";
@@ -19,7 +19,9 @@ import {
   colorMeasurementsSVG,
   changeMeasurementsDisplay,
   svgContainerDOMId,
-  toggleDisplay
+  toggleDisplay,
+  addHoverPanelToMeasurementsAndMeans,
+  addColorByAttrToGroupingLabel
 } from "./measurementsD3";
 
 /**
@@ -63,25 +65,22 @@ const treeStrainPropertySelector = (state) => {
     // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
       treeStrainVisibility[node.name] = tree.visibility[index];
-      // Only store colors for visible strains since only measurmeents
-      // for visible strains will be displayed
-      if (isVisible(tree.visibility[index])) {
-        /*
-        * If the color scale is continuous, we want to group by the legend value
-        * instead of the specific strain attribute in order to combine all values
-        * within the legend bounds into a single group.
-        */
-        let attribute = getTipColorAttribute(node, colorScale);
-        if (colorScale.continuous) {
-          const matchingLegendValue = colorScale.visibleLegendValues
-            .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
-          if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
-        }
-        treeStrainColors[node.name] = {
-          attribute,
-          color: tree.nodeColors[index]
-        };
+      /*
+      * If the color scale is continuous, we want to group by the legend value
+      * instead of the specific strain attribute in order to combine all values
+      * within the legend bounds into a single group.
+      */
+      let attribute = getTipColorAttribute(node, colorScale);
+      if (colorScale.continuous) {
+        const matchingLegendValue = colorScale.visibleLegendValues
+          .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
+        if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
       }
+      treeStrainColors[node.name] = {
+        attribute,
+        color: tree.nodeColors[index]
+      };
+
     }
     return treeStrainProperty;
   }, intitialTreeStrainProperty);
@@ -128,6 +127,8 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
+  const colorings = useSelector((state) => state.metadata.colorings);
+  const colorBy = useSelector((state) => state.controls.colorBy);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
   const filters = useSelector((state) => state.controls.measurementsFilters);
   const display = useSelector((state) => state.controls.measurementsDisplay);
@@ -159,9 +160,11 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements});
   // Memoize handleHover function to avoid extra useEffect calls
-  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY) => {
+  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY, colorByAttr=null) => {
     let newHoverData = null;
     if (data !== null) {
+      // Set color-by attribute as title if provided
+      const hoverTitle = colorByAttr !== null ? `Color by ${getColorByTitle(colorings, colorBy)} : ${colorByAttr}` : null;
       // Create a Map of data to save order of fields
       const newData = new Map();
       if (dataType === "measurement") {
@@ -185,6 +188,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
         Object.entries(data).forEach(([key, value]) => newData.set(key, value));
       }
       newHoverData = {
+        hoverTitle,
         mouseX,
         mouseY,
         containerId: svgContainerDOMId,
@@ -192,7 +196,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
       };
     }
     setHoverData(newHoverData);
-  }, [fields]);
+  }, [fields, colorings, colorBy]);
 
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
@@ -201,13 +205,15 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Draw SVG from scratch
   useEffect(() => {
     clearMeasurementsSVG(d3Ref.current);
-    drawMeasurementsSVG(d3Ref.current, svgData, handleHover);
-  }, [svgData, handleHover]);
+    drawMeasurementsSVG(d3Ref.current, svgData);
+  }, [svgData]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
+    addColorByAttrToGroupingLabel(d3Ref.current, treeStrainColors);
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
-    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors, handleHover);
+    drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors);
+    addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover, treeStrainColors);
   }, [svgData, treeStrainColors, handleHover]);
 
   // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
@@ -261,8 +267,23 @@ const Measurements = ({height, width, showLegend}) => {
 
   const [title, setTitle] = useState("Measurements");
 
+  const getCardTitleStyle = () => {
+    /**
+     * Additional styles of Card title forces it to be in one line and display
+     * ellipsis if the title is too long to prevent the long title from pushing
+     * the Card into the next line when viewing in grid mode
+     */
+    return {
+      width,
+      display: "block",
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis"
+    };
+  };
+
   return (
-    <Card title={title}>
+    <Card title={title} titleStyles={getCardTitleStyle()}>
       {measurementsLoaded &&
         (measurementsError ?
           <Flex style={{ height, width}} direction="column" justifyContent="center">
