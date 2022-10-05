@@ -1,45 +1,68 @@
 name: "Make PRs for Nextstrain projects which depend on Auspice"
 on:
-  pull_request:
+  workflow_dispatch:
 jobs:
   make-pr-on-nextstrain-dot-org: # <job_id>
+    # I don't see this being used for tags, so ensure it's only run on branches
+    # to make subsequent logic and wording easier.
+    if: github.ref_type == 'branch'
+
     runs-on: ubuntu-latest
+
+    env:
+      DESTINATION_REPO_DIR: nextstrain.org
+
     steps:
+      # Outputs:
+      # - pr-number: The PR number from the branch name (exits if no PR exists).
+      - name: Detect PR from branch
+        id: detect-pr
+        run: |
+          PR_NUMBER=$(gh pr view $GITHUB_REF_NAME --repo nextstrain/auspice --json 'number' --jq '.number') || true
+          if [[ -z $PR_NUMBER ]]; then
+            echo "ERROR: This branch is not associated with a PR in Auspice." >&2
+            exit 1
+          fi
+          echo "::set-output name=pr-number::$PR_NUMBER"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
+
       - name: Checkout nextstrain.org repo
         uses: actions/checkout@v2
         with:
           repository: nextstrain/nextstrain.org
+          path: ${{ env.DESTINATION_REPO_DIR }}
+
       - name: Install Auspice from PRs HEAD commit
-        if: ${{ github.event_name == 'pull_request' }}
-        # Note: $GITHUB_SHA is _not_ the same commit as the HEAD commit on the PR branch
-        # see https://github.community/t/github-sha-not-the-same-as-the-triggering-commit/18286/2
         shell: bash
+        working-directory: ${{ env.DESTINATION_REPO_DIR }}
         run: |
-          AUSPICE_COMMIT=$(cat $GITHUB_EVENT_PATH | jq -r .pull_request.head.sha)
-          echo "auspice_commit=$AUSPICE_COMMIT" >> $GITHUB_ENV
           npm ci
-          npm install nextstrain/auspice#${AUSPICE_COMMIT}
+          npm install nextstrain/auspice#${GITHUB_SHA}
           git add package.json package-lock.json
+
       - name: Create Pull Request for testing on nextstrain.org repo
-        if: ${{ github.event_name == 'pull_request' }}
         id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
+          path: ${{ env.DESTINATION_REPO_DIR }}
           token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
-          branch: "nextstrain-bot/test-auspice-pr/${{ github.event.pull_request.number }}"
-          commit-message: "[testing only] Upgrade Auspice to ${{ env.auspice_commit }}"
+          branch: "nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
+          commit-message: "[testing only] Upgrade Auspice to ${{ github.sha }}"
           author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
           committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ github.event.pull_request.number }}'
+          title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ steps.detect-pr.outputs.pr-number }}'
           body: |
-            This PR has been created to test nextstrain.org running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ github.event.pull_request.number }}.
+            This PR has been created to test nextstrain.org running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ steps.detect-pr.outputs.pr-number }}.
 
             This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
           draft: true
           delete-branch: true
+
       - name: Check outputs
         run: |
           echo "Nextstrain.org PR: ${{ steps.cpr.outputs.pull-request-number }}"
