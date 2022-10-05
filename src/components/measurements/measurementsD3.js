@@ -11,7 +11,7 @@ import { getBrighterColor } from "../../util/colorHelpers";
 export const layout = {
   yMin: 0,
   yMax: 100,
-  leftPadding: 120,
+  leftPadding: 180,
   rightPadding: 30,
   topPadding: 20,
   bottomPadding: 50,
