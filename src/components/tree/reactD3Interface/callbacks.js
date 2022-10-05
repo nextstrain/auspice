@@ -103,8 +103,9 @@ export const onBranchClick = function onBranchClick(d) {
   }
   /* Clicking on a branch means we want to zoom into the clade defined by that branch
   _except_ when it's the "in-view" root branch, in which case we want to zoom out */
+  const observedMutations = d.that.params.orientation[0] === 1 ? this.props.tree.observedMutations : this.props.treeToo.observedMutations;
   const arrayIdxToZoomTo = (getIdxOfInViewRootNode(d.n) === d.n.arrayIdx) ?
-    getParentBeyondPolytomy(d.n, this.props.distanceMeasure).arrayIdx :
+    getParentBeyondPolytomy(d.n, this.props.distanceMeasure, observedMutations).arrayIdx :
     d.n.arrayIdx;
   if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
   else root[1] = arrayIdxToZoomTo;
