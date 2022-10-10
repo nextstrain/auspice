@@ -1,82 +1,25 @@
 name: "Make PRs for Nextstrain projects which depend on Auspice"
 on:
   workflow_dispatch:
+    inputs:
+      nextstrain-org:
+        description: 'Make PR on nextstrain.org'
+        required: true
+        type: boolean
+      auspice-us:
+        description: 'Make PR on auspice.us'
+        required: true
+        type: boolean
 jobs:
-  make-pr-on-nextstrain-dot-org: # <job_id>
-    # I don't see this being used for tags, so ensure it's only run on branches
-    # to make subsequent logic and wording easier.
-    if: github.ref_type == 'branch'
-
-    runs-on: ubuntu-latest
-
-    env:
-      DESTINATION_REPO_DIR: nextstrain.org
-
-    steps:
-      # Outputs:
-      # - pr-number: The PR number from the branch name (exits if no PR exists).
-      # - auspice-sha: The GitHub-managed merge ref. Used for npm install.
-      #
-      # Note that $GITHUB_SHA shouldn't be used here because it refers to the
-      # branch HEAD which is not merged with the PR target branch. If the
-      # workflow trigger event was `pull_request` then it would refer to the
-      # merge ref¹, but we use `workflow_dispatch` to reduce the number of PRs.
-      #
-      # ¹ https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
-      - name: Detect PR from branch
-        id: detect-pr
-        run: |
-          PR_NUMBER=$(gh pr view $GITHUB_REF_NAME --repo nextstrain/auspice --json 'number' --jq '.number') || true
-          if [[ -z $PR_NUMBER ]]; then
-            echo "ERROR: This branch is not associated with a PR in Auspice." >&2
-            exit 1
-          fi
-          MERGE_SHA=$(gh pr view $GITHUB_REF_NAME --repo nextstrain/auspice --json 'potentialMergeCommit' --jq '.potentialMergeCommit.oid')
-          echo "::set-output name=pr-number::$PR_NUMBER"
-          echo "::set-output name=auspice-sha::$MERGE_SHA"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-
-      - name: Checkout nextstrain.org repo
-        uses: actions/checkout@v2
-        with:
-          repository: nextstrain/nextstrain.org
-          path: ${{ env.DESTINATION_REPO_DIR }}
-
-      - name: Install Auspice from PRs HEAD commit
-        shell: bash
-        working-directory: ${{ env.DESTINATION_REPO_DIR }}
-        run: |
-          npm ci
-          npm install nextstrain/auspice#${{ steps.detect-pr.outputs.auspice-sha }}
-          git add package.json package-lock.json
-
-      - name: Create Pull Request for testing on nextstrain.org repo
-        id: cpr
-        uses: peter-evans/create-pull-request@v3
-        with:
-          path: ${{ env.DESTINATION_REPO_DIR }}
-          token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
-          branch: "nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
-          commit-message: "[testing only] Upgrade Auspice to ${{ github.sha }}"
-          author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ steps.detect-pr.outputs.pr-number }}'
-          body: |
-            This PR has been created to test nextstrain.org running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ steps.detect-pr.outputs.pr-number }}.
-
-            Note that Auspice has been installed with changes from both the PR's source and target branches.
-            This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
-
-            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
-          draft: true
-          delete-branch: true
-
-      - name: Check outputs
-        run: |
-          echo "Nextstrain.org PR: ${{ steps.cpr.outputs.pull-request-number }}"
-          echo "Pull Request URL: ${{ steps.cpr.outputs.pull-request-url }}"
+  nextstrain-org:
+    if: inputs.nextstrain-org
+    uses: ./.github/workflows/make_pr_for_downstream_repo.yaml
+    secrets: inherit
+    with:
+      repository: nextstrain/nextstrain.org
+  auspice-us:
+    if: inputs.auspice-us
+    uses: ./.github/workflows/make_pr_for_downstream_repo.yaml
+    secrets: inherit
+    with:
+      repository: nextstrain/auspice.us
