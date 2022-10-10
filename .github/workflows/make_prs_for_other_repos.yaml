@@ -1,13 +1,24 @@
 name: "Make PRs for Nextstrain projects which depend on Auspice"
 on:
   workflow_dispatch:
+    inputs:
+      nextstrain-org:
+        description: 'Make PR on nextstrain.org'
+        required: true
+        type: boolean
+      auspice-us:
+        description: 'Make PR on auspice.us'
+        required: true
+        type: boolean
 jobs:
-  make-pr-on-nextstrain-dot-org:
+  nextstrain-org:
+    if: inputs.nextstrain-org
     uses: ./.github/workflows/make_pr_for_downstream_repo.yaml
     secrets: inherit
     with:
       repository: nextstrain/nextstrain.org
-  make-pr-on-auspice-us:
+  auspice-us:
+    if: inputs.auspice-us
     uses: ./.github/workflows/make_pr_for_downstream_repo.yaml
     secrets: inherit
     with:
