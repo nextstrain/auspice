@@ -24,5 +24,8 @@ Please add a note if you need help with adding tests.
 -->
 
 - [ ] Checks pass
+- [ ] (to be done by a Nextstrain team member) [Create preview PRs on downstream repositories][1].
+
+[1]: https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md#test-on-downstream-repositories
 
 <!-- 🙌 Thank you for contributing to Nextstrain! ✨ -->
