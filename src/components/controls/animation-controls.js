@@ -51,7 +51,7 @@ class AnimationControls extends React.Component {
   }
 
   render() {
-    if (this.props.branchLengthsToDisplay === "divOnly") {
+    if (["divAndSomeDate", "divOnly"].includes(this.props.branchLengthsToDisplay)) {
       return null;
     }
     return (

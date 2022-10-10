@@ -44,7 +44,7 @@ class AnimationOptions extends React.Component {
 
   render() {
     const { t } = this.props;
-    if (this.props.branchLengthsToDisplay === "divOnly") return null;
+    if (["divAndSomeDate", "divOnly"].includes(this.props.branchLengthsToDisplay)) return null;
 
     return (
       <div id="mapAnimationControls">
