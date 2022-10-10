@@ -2,7 +2,7 @@ name: "Make PRs for Nextstrain projects which depend on Auspice"
 on:
   workflow_dispatch:
 jobs:
-  make-pr-on-nextstrain-dot-org: # <job_id>
+  make-pr-on-nextstrain-dot-org:
     # I don't see this being used for tags, so ensure it's only run on branches
     # to make subsequent logic and wording easier.
     if: github.ref_type == 'branch'
