@@ -280,7 +280,7 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
     .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
 };
 
-export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
+export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues) => {
   const { xScale, groupingOrderedValues, groupedMeasurements } = svgData;
   const svg = select(ref);
   // Re move all current color by means
@@ -305,24 +305,28 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors) => {
     // 2 x subplotPadding for padding around the overall mean display
     const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
-    Object.entries(colorByGroups).forEach(([attribute, {color, values}]) => {
-      drawMeanAndStandardDeviation(
-        values,
-        subplot,
-        classes.colorMean,
-        {attribute, color},
-        xScale,
-        yValue
-      );
-      // Increate yValue for next attribute mean
-      yValue += ySpacing;
-      // If the next yValue is near the overall mean display,
-      // shift to below the overall mean display + subplotPadding
-      if (yValue > (layout.overallMeanYValue - layout.subplotPadding) &&
-          yValue < (layout.overallMeanYValue + layout.subplotPadding)) {
-        yValue = layout.overallMeanYValue + layout.subplotPadding;
-      }
-    });
+    // Order the color groups by the legend value order so that we have a stable order for the means
+    legendValues
+      .filter((attribute) => String(attribute) in colorByGroups)
+      .forEach((attribute) => {
+        const {color, values} = colorByGroups[attribute];
+        drawMeanAndStandardDeviation(
+          values,
+          subplot,
+          classes.colorMean,
+          {attribute, color},
+          xScale,
+          yValue
+        );
+        // Increase yValue for next attribute mean
+        yValue += ySpacing;
+        // If the next yValue is near the overall mean display,
+        // shift to below the overall mean display + subplotPadding
+        if (yValue > (layout.overallMeanYValue - layout.subplotPadding) &&
+            yValue < (layout.overallMeanYValue + layout.subplotPadding)) {
+          yValue = layout.overallMeanYValue + layout.subplotPadding;
+        }
+      });
   });
 };
 
