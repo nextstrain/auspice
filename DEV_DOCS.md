@@ -102,6 +102,15 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
 
+#### Test on downstream repositories
+
+Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it:
+
+1. Go to [the workflow page](https://github.com/nextstrain/auspice/actions/workflows/make_prs_for_other_repos.yaml).
+2. Select **Run workflow**.
+3. Pick the PR branch, select the downstream repositories you wish to test, and **Run workflow**.
+4. Wait for the workflow to finish running. The Auspice PR should show new reference links from the generated PRs.
+
 ## git-lfs
 
 We use [Git Large File Storage](https://github.com/git-lfs/git-lfs) to manage certain assets.
