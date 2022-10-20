@@ -175,10 +175,10 @@ const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
     const x = [];
     for (let j = 0; j < nPivots; j++) {
       if (i === 0) {
-        x.push([0, matrix[categories[i]][j]]);
+        x.push([0, matrix.get(categories[i])[j]]);
       } else {
         const prevY1 = series[i - 1][j][1];
-        x.push([prevY1, matrix[categories[i]][j] + prevY1]);
+        x.push([prevY1, matrix.get(categories[i])[j] + prevY1]);
       }
     }
     series.push(x);
@@ -252,7 +252,7 @@ const calcMaxYValue = (series) => {
 };
 
 export const processMatrix = ({matrix, pivots, colorScale}) => {
-  const categories = getOrderedCategories(Object.keys(matrix), colorScale);
+  const categories = getOrderedCategories(Array.from(matrix.keys()), colorScale);
   const series = turnMatrixIntoSeries(categories, pivots.length, matrix);
   const maxY = calcMaxYValue(series);
   return {categories, series, maxY};
