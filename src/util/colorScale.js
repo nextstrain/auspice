@@ -276,7 +276,11 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   } else {
     const spread = minMax[1] - minMax[0];
     const dp = spread > 5 ? 2 : 3;
-    legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+    /* if legend values are identical (for the specified number of decimal places) then we
+    should filter them out */
+    legendValues = genericDomain
+      .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
+      .filter((el, idx, values) => values.indexOf(el)===idx);
   }
   if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
 
