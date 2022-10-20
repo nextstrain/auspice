@@ -356,6 +356,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     coloringsToCheck = Object.keys(colorings);
   }
   let [aaMuts, nucMuts] = [false, false];
+  let num_date_confidence = false; /* flag. Is confidence defined anywhere on the tree? */
   const examineNodes = function examineNodes(nodes) {
     nodes.forEach((node) => {
       /* check colorBys */
@@ -374,6 +375,10 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
         const keys = Object.keys(node.branch_attrs.mutations);
         if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
         if (keys.includes("nuc")) nucMuts = true;
+      }
+      /* check num_date confidence */
+      if (!num_date_confidence && getTraitFromNode(node, "num_date", {confidence: true})) {
+        num_date_confidence = true;
       }
     });
   };
@@ -414,9 +419,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.selectedBranchLabel = "clade";
   }
 
-  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
-    {exists: true, display: true, on: false} :
-    {exists: false, display: false, on: false};
+  state.temporalConfidence = {exists: num_date_confidence, display: num_date_confidence, on: false};
+
   return state;
 };
 
