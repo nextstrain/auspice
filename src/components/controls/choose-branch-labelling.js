@@ -43,7 +43,7 @@ class ChooseBranchLabelling extends React.Component {
           <Toggle
             display
             on={this.props.showAll}
-            callback={() => this.props.dispatch({type: TOGGLE_SHOW_ALL_BRANCH_LABELS})}
+            callback={() => this.props.dispatch({type: TOGGLE_SHOW_ALL_BRANCH_LABELS, value: !this.props.showAll})}
             label={t("sidebar:Show all labels")}
             style={{paddingBottom: "5px", paddingTop: "10px"}}
           />

@@ -127,7 +127,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.TOGGLE_SHOW_ALL_BRANCH_LABELS:
-      return Object.assign({}, state, { showAllBranchLabels: !state.showAllBranchLabels });
+      return Object.assign({}, state, { showAllBranchLabels: action.value });
     case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.layout,

@@ -45,6 +45,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         undefined :
         action.value;
       break;
+    case types.TOGGLE_SHOW_ALL_BRANCH_LABELS:
+      /* This is not yet settable in display_defaults, and thus we want a URL query
+      that will still make sense when the default for the given branch labelling is "show all" */
+      query.showBranchLabels = action.value ? 'all' : undefined;
+      break;
     case types.CHANGE_ZOOM:
       /* entropy panel genome zoom coordinates */
       query.gmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];

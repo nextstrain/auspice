@@ -11,16 +11,24 @@ abstract: "A narrative to explore simultaneous changes to tree state. The aim is
 ---
 
 
-# [P1: Change color-by to num_date](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date)
+# [P1: Change coloring to sampling date](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date&branchLabel=aa)
+
 Check that both the branches and tips update.
 
-# [P2: Zoom into clade A1](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date&label=clade:A1)
+The clade labels should now show selected amino acids (with the selecting being done by auspice).
 
-# [P3: Zoom into clade A1b _and_ change color](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&label=clade:A1b)
-Check that the coloring of the branches and tips update as we zoom in.
+# [P2: Zoom into clade 3C.2a1b.2a.2](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&c=num_date&label=clade:3C.2a1b.2a.2&branchLabel=aa&showBranchLabels=all)
 
-# [P4: Lots of simultaneous changes](http://localhost:4000/flu/seasonal/h3n2/ha/3y?c=lbi&d=tree&dmin=2017-01-01&f_region=North%20America&label=clade:3c2.A&m=div)
-* Zoomed out to near the root (clade 3c2.A)
+We simultaneously zoom into clade 3C.2a1b.2a.2 (top right section of tree) and show _all_ AA mutations as branch labels.
+If you go to the previous slide the aa mutation labels should revert to only showing a subset.
+
+# [P3: Zoom out to clade 3C.2a1b.2 _and_ change color](http://localhost:4000/flu/seasonal/h3n2/ha/3y?d=tree&label=clade:3C.2a1b.2)
+Check that the coloring of the branches and tips update as we zoom out (slightly).
+
+The coloring should be back to the default (clade), and so should the branch labels (clade also).
+
+# [P4: Lots of simultaneous changes](http://localhost:4000/flu/seasonal/h3n2/ha/3y?c=lbi&d=tree&dmin=2017-01-01&f_region=North%20America&label=clade:3C.2a&m=div)
+* Zoomed out to near the root (clade 3C.2a)
 * Changed the horizontal scale to divergence
 * Changed the color-by to LBI (and legend should be open)
 * Filtered to North American Samples (i.e. the majority of tips are not visible).

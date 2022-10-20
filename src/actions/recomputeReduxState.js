@@ -127,6 +127,9 @@ const modifyStateViaURLQuery = (state, query) => {
     state.selectedBranchLabel = query.branchLabel;
     // do not modify the default (only the JSON can do this)
   }
+  if (query.showBranchLabels === "all") {
+    state.showAllBranchLabels = true;
+  }
   if (query.sidebar) {
     if (query.sidebar === "open") {
       state.defaults.sidebarOpen = true;
@@ -191,6 +194,8 @@ const restoreQueryableStateToDefaults = (state) => {
   state.panelsToDisplay = state.panelsAvailable.slice();
   state.tipLabelKey = strainSymbol;
   state.scatterVariables = {};
+
+  state.showAllBranchLabels = false;
   // console.log("state now", state);
   return state;
 };
