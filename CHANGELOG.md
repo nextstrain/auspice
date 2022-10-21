@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.40.0 - 2022/10/21
+
+
 * Keep the measurements panel's color-by means in a stable order while filtering. See [PR #1566](https://github.com/nextstrain/auspice/pull/1566) for more.
 * Allow setting the "show all branch labels" toggle via the URL query `?showBranchLabels=all`. See [PR #1575](https://github.com/nextstrain/auspice/pull/1575) for more.
 * Fix a bug where ordinal scales wouldn't be colored correctly in the frequency pane. See [Issue #843](https://github.com/nextstrain/auspice/issues/843) and [PR #1578](https://github.com/nextstrain/auspice/pull/1578) for more.
