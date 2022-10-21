@@ -64,10 +64,13 @@ export const computeMatrixFromRawData = (
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
   const isGenotype = isColorByGenotype(colorBy);
-  const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
+  /* Matrix shape: first level (keys of Map) are values of the current colorBy. Type is preserved (hence the use of a Map())
+                   second level (elements of array) are the pivots & their frequency value.
+                   matrix.get('22L')[3] is the (3+1)th pivot for the color-by value 21L */
+  const matrix = new Map();
   const pivotsLen = pivots.length;
   categories.forEach((x) => {
-    matrix[x] = new Array(pivotsLen).fill(0);
+    matrix.set(x, new Array(pivotsLen).fill(0));
   });
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
@@ -79,7 +82,7 @@ export const computeMatrixFromRawData = (
         unassigned_label;
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
-        matrix[category][i] += d.values[i];
+        matrix.get(category)[i] += d.values[i];
         debugPivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
         //   console.log("Pivot", frequencies.pivots[i], "strain", tree.nodes[d.idx].strain, "(clade #", tree.nodes[d.idx].strain, ") carried frequency of", d.values[i]);
@@ -90,21 +93,20 @@ export const computeMatrixFromRawData = (
 
   if (normalizeFrequencies) {
     const minVal = 1e-7;
-    Object.keys(matrix).forEach((cat) => {
+    for (const [cat] of matrix) {
       debugPivotTotals.forEach((norm, i) => {
         if (norm > minVal) {
-          matrix[cat][i] /= norm;
+          matrix.get(cat)[i] /= norm;
         } else {
-          matrix[cat][i] = 0.0;
+          matrix.get(cat)[i] = 0.0;
         }
       });
-    });
+    }
   }
 
-  if (matrix[unassigned_label].reduce((a, b) => a + b, 0) === 0) {
-    delete matrix[unassigned_label];
+  if (matrix.get(unassigned_label).reduce((a, b) => a + b, 0) === 0) {
+    matrix.delete(unassigned_label);
   }
-
   return matrix;
 };
 
