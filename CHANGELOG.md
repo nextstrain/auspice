@@ -2,10 +2,13 @@
 title: Changelog
 ---
 
+* Keep the measurements panel's color-by means in a stable order while filtering. See [PR #1566](https://github.com/nextstrain/auspice/pull/1566) for more.
+* Allow setting the "show all branch labels" toggle via the URL query `?showBranchLabels=all`. See [PR #1575](https://github.com/nextstrain/auspice/pull/1575) for more.
+* Fix a bug where ordinal scales wouldn't be colored correctly in the frequency pane. See [Issue #843](https://github.com/nextstrain/auspice/issues/843) and [PR #1578](https://github.com/nextstrain/auspice/pull/1578) for more.
+* The legend can no longer have duplicate entries (both for user provided color scales and for continuous scales), which also prevents the display bug where legend items may be overlapping when switching to a different coloring. See issues [#1521](https://github.com/nextstrain/auspice/issues/1521) and [#1547](https://github.com/nextstrain/auspice/issues/1547), and [PR 1576](https://github.com/nextstrain/auspice/pull/1576).
+* Re-enable temporal confidence bars for trees which include this data. See [PR #1577](https://github.com/nextstrain/auspice/pull/1577) for more.
+
 ## version 2.39.0 - 2022/10/06
-
-
-
 * A range of improvements to the measurements panel including reference sera coloring
 and more informative tooltips. See [PR 1557](https://github.com/nextstrain/auspice/pull/1557) for more.
 * Color-by genotype dropdown: nuc (nucleotide) is now the first item in the list.
