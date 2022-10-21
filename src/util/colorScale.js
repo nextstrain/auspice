@@ -124,8 +124,18 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   if (!Array.isArray(providedScale)) {
     throw new Error(`${colorBy} has defined a scale which wasn't an array`);
   }
-  const colorMap = new Map(providedScale);
-  let domain = providedScale.map((x) => x[0]);
+  /* The providedScale may have duplicate names (not ideal, but it happens). In this case we should
+  filter out duplicates (taking the first of the duplicates is fine) & print a console warning */
+  const colorMap = new Map();
+  for (const [name, colorHex] of providedScale) {
+    if (colorMap.has(name)) {
+      console.warn(`User provided color scale contained a duplicate entry for ${colorBy}→${name} which is ignored.`);
+    } else {
+      colorMap.set(name, colorHex);
+    }
+  }
+  let domain = Array.from(colorMap).map((x) => x[0]);
+
   /* create shades of grey for values in the tree which weren't defined in the provided scale */
   const extraVals = getExtraVals(t1nodes, t2nodes, colorBy, domain);
   if (extraVals.length) { // we must add these to the domain + provide a color value
@@ -266,7 +276,11 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   } else {
     const spread = minMax[1] - minMax[0];
     const dp = spread > 5 ? 2 : 3;
-    legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+    /* if legend values are identical (for the specified number of decimal places) then we
+    should filter them out */
+    legendValues = genericDomain
+      .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
+      .filter((el, idx, values) => values.indexOf(el)===idx);
   }
   if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
 

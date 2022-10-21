@@ -159,7 +159,7 @@ class Legend extends React.Component {
             rectFill={getBrighterColor(this.props.colorScale.scale(d))}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(maxNumPerColumn, i)}
-            key={d}
+            key={this.props.colorScale.colorBy+d+i /* eslint-disable-line react/no-array-index-key */}
             value={d}
             label={this.styleLabelText(d)}
             index={i}
