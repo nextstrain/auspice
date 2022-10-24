@@ -154,6 +154,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     .style("font-family", this.params.branchLabelFont)
     .style("font-weight", fontWeight)
     .style("font-size", labelSize)
+    .style("pointer-events", "none")
     .text((d) => d.n.branch_attrs.labels[key]);
 };
 
