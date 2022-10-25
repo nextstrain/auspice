@@ -111,7 +111,7 @@ The provided JavaScript file must export three functions, each of which handles 
 
 For information about the `req` and `res` arguments see the express documentation for the [request object](https://expressjs.com/en/api.html#req) and [response object](https://expressjs.com/en/api.html#res), respectively.
 
-You can see [nextstrain.org](https://nextstrain.org)'s implementation of these handlers [here](https://github.com/nextstrain/nextstrain.org/blob/master/server.js).
+You can see [nextstrain.org](https://nextstrain.org)'s implementation of these handlers [here](https://github.com/nextstrain/nextstrain.org/tree/HEAD/src/app.js).
 
 Here's a pseudocode example of an implementation for the `getAvailable` handler which may help understanding:
 
