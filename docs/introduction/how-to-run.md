@@ -40,7 +40,7 @@ There are two common arguments used:
 |datasetDir    | PATH   |    Directory where datasets (JSONs) are sourced. This is  ignored if you define custom handlers. |
 |narrativeDir    | PATH   |  Directory where narratives (Markdown files) are  sourced. This is ignored if you define custom handlers. |
 
-For more complicated setups, where you define your own server handlers, see [suppling custom handlers to the Auspice server](../server/api.md#suppling-custom-handlers-to-the-auspice-server).
+For more complicated setups, where you define your own server handlers, see [supplying custom handlers to the Auspice server](../server/api.md#supplying-custom-handlers-to-the-auspice-server).
 
 ## `auspice build`
 
