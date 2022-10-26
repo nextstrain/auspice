@@ -11,6 +11,9 @@ import { errorNotification } from "./notifications";
  */
 export const chooseDisplayComponentFromURL = (url) => {
   const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+  // todo - use URL() not the above code, but `url` is not actually the URL so...
+
+  if (isNarrativeEditor(parts)) return "debugNarrative";
   if (
     !parts.length ||
     (parts.length === 1 && parts[0] === "") ||
@@ -131,3 +134,13 @@ export const goTo404 = (errorMessage) => ({
   errorMessage,
   pushState: true
 });
+
+/** The narratives editor is currently only a debugger (and named as such internally)
+ * however over time editing capability will be built out. The current proposal is for
+ * pathnames such as:
+ * /edit/narratives (the drag & drop interface, implemented here)
+ * /edit/{pathname} (future, not-yet-implemented functionality)
+ */
+function isNarrativeEditor(parts) {
+  return (parts.length===2 && parts[0]==="edit" && parts[1]==="narratives");
+}

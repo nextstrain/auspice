@@ -10,6 +10,7 @@ import Notifications from "./components/notifications/notifications";
 const Main = lazy(() => import("./components/main"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
+const DebugNarrative = lazy(() => import("./components/narrativeEditor/narrativeEditor"));
 
 /** Hot Reload is happening but components are not getting rerendered.
  * This triggers a window resize which in turn triggers a general
@@ -40,6 +41,12 @@ class MainComponentSwitch extends React.Component {
         return (
           <Suspense fallback={<Spinner/>}>
             <Status/>
+          </Suspense>
+        );
+      case "debugNarrative":
+        return (
+          <Suspense fallback={<Spinner/>}>
+            <DebugNarrative/>
           </Suspense>
         );
       case "datasetLoader":

@@ -11,6 +11,7 @@ const jsonCache = (state = {
          action.jsons and add new keys, values from action.jsons to state.jsons */
       return {jsons: Object.assign(state.jsons, action.jsons)};
     case types.CLEAN_START:
+      if (action.preserveCache) return state;
       return {jsons: {}};
     default:
       return state;

@@ -36,6 +36,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   switch (action.type) {
     case types.CLEAN_START: // fallthrough
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      /* don't use queries when debugging a narrative as those URLs aren't intended to be restorable (yet) */
+      if (state.general.displayComponent==="debugNarrative") break;
       query = action.query;
       if (query.n === 0) delete query.n;
       if (query.tt) delete query.tt;
@@ -189,6 +191,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.TOGGLE_NARRATIVE: {
+      /* don't use queries when debugging a narrative as those URLs aren't intended to be restorable (yet) */
+      if (state.general.displayComponent==="debugNarrative") break;
       if (action.narrativeOn === true) {
         query = {n: state.narrative.blockIdx};
       } else if (action.narrativeOn === false) {
@@ -217,6 +221,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     case types.TOGGLE_NARRATIVE: {
+      /* when toggling between the narrative view & the underlying dataset view the intention is to
+      have the pathname represent the narrative and the dataset, respectively. However when we are
+      editing a narrative we _do not_ want to change the pathname */
+      if (state.general.displayComponent==="debugNarrative") break;
       if (action.narrativeOn === true) {
         pathname = state.narrative.pathname;
       } else if (action.narrativeOn === false) {
