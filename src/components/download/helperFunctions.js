@@ -36,7 +36,12 @@ const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=()
     return leaf;
   }
 
-  const rootNode = tree.nodes[tree.idxOfInViewRootNode];
+  /**
+   * Try the filtered root first as this may be different from the in view root node
+   * We still need to fallback on the idxOfInViewRootNode because the idxOfFilteredRoot
+   * is undefined when there are no filters applied.
+   */
+  const rootNode = tree.nodes[tree.idxOfFilteredRoot || tree.idxOfInViewRootNode];
   const rootXVal = getXVal(rootNode);
   return recurse(rootNode, rootXVal) + ";";
 };
