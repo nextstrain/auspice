@@ -41,6 +41,9 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
         Downloaded data represents the currently displayed view.
         By zooming the tree, changing the branch-length metric, applying filters etc, the downloaded data will change accordingly.
         <p/>
+        NOTE: We do not support downloads of multiple subtrees, which are usually created with the date range filter or genotype filters.
+        Downloading multiple subtrees will result in an empty Newick tree!
+        <p/>
         {partialData ? `Currently ${selectedTipsCount}/${totalTipCount} tips are displayed and will be downloaded.` : `Currently the entire dataset (${totalTipCount} tips) will be downloaded.`}
       </div>
       <Button
