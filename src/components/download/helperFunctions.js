@@ -6,6 +6,7 @@ import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
+import { EmptyNewickTreeCreated } from "../../util/exceptions";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -36,9 +37,18 @@ const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=()
     return leaf;
   }
 
-  const rootNode = tree.nodes[tree.idxOfInViewRootNode];
+  /**
+   * Try the filtered root first as this may be different from the in view root node
+   * We still need to fallback on the idxOfInViewRootNode because the idxOfFilteredRoot
+   * is undefined when there are no filters applied.
+   */
+  const rootNode = tree.nodes[tree.idxOfFilteredRoot || tree.idxOfInViewRootNode];
   const rootXVal = getXVal(rootNode);
-  return recurse(rootNode, rootXVal) + ";";
+  const newickTree = recurse(rootNode, rootXVal);
+  if (!newickTree) {
+    throw new EmptyNewickTreeCreated();
+  }
+  return newickTree + ";";
 };
 
 const MIME = {
@@ -329,7 +339,11 @@ export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colo
     dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
   } catch (err) {
     console.error(err);
-    dispatch(warningNotification({message: "Error saving tree!"}));
+    const warningObject = {message: "Error saving tree!"};
+    if (err instanceof EmptyNewickTreeCreated) {
+      warningObject.details = "An empty tree was created. If you have selected genomes, note that we do not support downloads of multiple subtrees.";
+    }
+    dispatch(warningNotification(warningObject));
   }
 };
 
