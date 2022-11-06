@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.40.1 - 2022/11/07
+
+
 * Fixed a bug where downloaded Newick trees may be empty - often this happens when there is no newick representation for the tree being displayed and in these cases a warning notification is shown. See [PR #1591](https://github.com/nextstrain/auspice/pull/1591) for more.
 * Fixed a bug where branch labels prevented clicking on the underlying branches. See [PR #1584](https://github.com/nextstrain/auspice/pull/1584) for more.
 
