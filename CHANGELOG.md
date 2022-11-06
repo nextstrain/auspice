@@ -2,9 +2,10 @@
 title: Changelog
 ---
 
+* Fixed a bug where downloaded Newick trees may be empty - often this happens when there is no newick representation for the tree being displayed and in these cases a warning notification is shown. See [PR #1591](https://github.com/nextstrain/auspice/pull/1591) for more.
+* Fixed a bug where branch labels prevented clicking on the underlying branches. See [PR #1584](https://github.com/nextstrain/auspice/pull/1584) for more.
+
 ## version 2.40.0 - 2022/10/21
-
-
 * Keep the measurements panel's color-by means in a stable order while filtering. See [PR #1566](https://github.com/nextstrain/auspice/pull/1566) for more.
 * Allow setting the "show all branch labels" toggle via the URL query `?showBranchLabels=all`. See [PR #1575](https://github.com/nextstrain/auspice/pull/1575) for more.
 * Fix a bug where ordinal scales wouldn't be colored correctly in the frequency pane. See [Issue #843](https://github.com/nextstrain/auspice/issues/843) and [PR #1578](https://github.com/nextstrain/auspice/pull/1578) for more.
