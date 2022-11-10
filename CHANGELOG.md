@@ -2,9 +2,12 @@
 title: Changelog
 ---
 
+* A narratives debugger has been added at `/edit/narratives`.
+See [PR #1590](https://github.com/nextstrain/auspice/pull/1590) or the new [Narratives Tutorial](https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html) for more details.
+Note: this functionality will prevent auspice from viewing a _dataset_ JSON named `edit_narratives.json`.
+
+
 ## version 2.40.1 - 2022/11/07
-
-
 * Fixed a bug where downloaded Newick trees may be empty - often this happens when there is no newick representation for the tree being displayed and in these cases a warning notification is shown. See [PR #1591](https://github.com/nextstrain/auspice/pull/1591) for more.
 * Fixed a bug where branch labels prevented clicking on the underlying branches. See [PR #1584](https://github.com/nextstrain/auspice/pull/1584) for more.
 
