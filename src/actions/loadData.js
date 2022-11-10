@@ -240,7 +240,7 @@ export function addEndOfNarrativeBlock(narrativeBlocks) {
  * This function returns `Dataset` objects for each of the different datasets in a narrative.
  * Note: "initial": starting page, potentially different to frontmatter
  */
-function parseNarrativeDatasets(blocks, query) {
+export function parseNarrativeDatasets(blocks, query) {
   let [datasets, initialNames, frontmatterNames] = [{}, [], []];
   const initialBlockIdx = getNarrativePageFromQuery(query, blocks);
   blocks.forEach((block, idx) => {

@@ -21,6 +21,7 @@ const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
   if (Object.keys(frontMatter).length === 1) {
     const notMarkdownError = new Error();
     notMarkdownError.fileContents = fileContents;
+    notMarkdownError.message = "YAML frontmatter missing or incomplete from narrative file";
     throw notMarkdownError;
   }
 

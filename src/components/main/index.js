@@ -63,6 +63,13 @@ class Main extends React.Component {
     };
     analyticsNewPage();
     this.toggleSidebar = this.toggleSidebar.bind(this);
+    this.eventListenerForFilesDropped = (e) => {
+      e.preventDefault();
+      return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
+    };
+    this.eventListenerForFilesDragged = (e) => {
+      e.preventDefault();
+    };
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
@@ -73,11 +80,12 @@ class Main extends React.Component {
     }
   }
   componentDidMount() {
-    document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
-    document.addEventListener("drop", (e) => {
-      e.preventDefault();
-      return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
-    }, false);
+    document.addEventListener("dragover", this.eventListenerForFilesDragged, false);
+    document.addEventListener("drop", this.eventListenerForFilesDropped, false);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("dragover", this.eventListenerForFilesDragged);
+    document.removeEventListener("drop", this.eventListenerForFilesDropped);
   }
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
