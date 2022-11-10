@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.41.0 - 2022/11/10
+
+
 * A narratives debugger has been added at `/edit/narratives`.
 See [PR #1590](https://github.com/nextstrain/auspice/pull/1590) or the new [Narratives Tutorial](https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html) for more details.
 Note: this functionality will prevent auspice from viewing a _dataset_ JSON named `edit_narratives.json`.
