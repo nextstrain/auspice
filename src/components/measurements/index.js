@@ -127,7 +127,7 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
-  const legendValues = useSelector((state) => state.controls.colorScale.legendValues);
+  const legendValues = useSelector((state) => state.controls.colorScale.legendValues, isEqual);
   const colorings = useSelector((state) => state.metadata.colorings);
   const colorBy = useSelector((state) => state.controls.colorBy);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
@@ -220,7 +220,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Display raw/mean measurements when SVG is re-drawn, colors have changed, or display has changed
   useEffect(() => {
     changeMeasurementsDisplay(d3Ref.current, display);
-  }, [svgData, treeStrainColors, display]);
+  }, [svgData, treeStrainColors, legendValues, handleHover, display]);
 
   useEffect(() => {
     toggleDisplay(d3Ref.current, "overallMean", showOverallMean);
