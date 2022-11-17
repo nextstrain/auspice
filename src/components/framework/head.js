@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from "react-redux";
 import { Helmet } from "react-helmet";
-
+import { PLAUSIBLE_DATA_DOMAIN, PLAUSIBLE_SRC } from "../../util/plausible";
 import { hasExtension, getExtension } from "../../util/extensions";
 
 const Head = ({metadata}) => {
@@ -25,6 +25,10 @@ const Head = ({metadata}) => {
       {metadata && metadata.title ?
         <meta name="description" content={metadata.title} /> :
         null}
+
+      {(PLAUSIBLE_DATA_DOMAIN && PLAUSIBLE_SRC) &&
+        <script async defer data-domain={PLAUSIBLE_DATA_DOMAIN} src={PLAUSIBLE_SRC} />}
+
     </Helmet>
   );
 };

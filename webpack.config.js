@@ -61,6 +61,9 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     directoriesToTransform.push(dir);
     // console.log("directoriesToTransform", directoriesToTransform);
     extensionData = JSON.parse(fs.readFileSync(extensionPath, {encoding: 'utf8'}));
+    if (extensionData.googleAnalyticsKey) {
+      console.log(`DEPRECATION WARNING: your extensions define a Google Analytics key (${extensionData.googleAnalyticsKey}) but GA will be removed from a future release.`);
+    }
     // console.log("extensionData", extensionData);
   }
 
