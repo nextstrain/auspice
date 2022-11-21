@@ -76,79 +76,68 @@ function parseUrl(urlString, fallbackDataset=false) {
   return {dataset, query};
 }
 
-function parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
-  return markdown
-    .replace(/\r\n/g, "\n") // handle files with CRLF endings (windows)
-    .split("\n")
-    /* reduce the array of lines into an array of slides */
-    .reduce((slides, currentLine) => {
-      const { lineIndicatesNewSlide, title, urlString} = checkIfLineIndicatesNewSlide(currentLine);
-      if (!slides.length && !lineIndicatesNewSlide) return slides; // content pre 1st slide title is ignored
-      if (lineIndicatesNewSlide) {
-        return [...slides, {lines: [`# ${title}`], urlString}];
-      }
-      slides[slides.length-1].lines.push(currentLine);
-      return slides;
-    }, [])
-    /* for each slide, parse out the mainDisplayMarkdownBlock, if it exists */
-    .map((slide) => addMainMarkdownBlock(slide))
-    /* transform each slide into the object that the client expects */
-    .map((slide) => {
-      const transformed = {
-        ...parseUrl(slide.urlString, fallbackDataset),
-        __html: markdownParser(slide.lines.join("\n"))
-      };
-      if (slide.mainMarkdownLines) {
-        // this doesn't get transformed to HTML until a later stage.
-        transformed.mainDisplayMarkdown = slide.mainMarkdownLines.join("\n");
-      }
-      return transformed;
-    });
-}
+function* parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
+  const html = markdownParser(markdown);
+  const doc = (new DOMParser()).parseFromString(html, "text/html");
 
-function checkIfLineIndicatesNewSlide(line) {
-  if (!line) return {};
-  const fields = line.match(/^\s*#\s*\[(.+?)\]\((.+?)\)\s*$/);
-  if (!fields || fields.length!==3) return {};
-  return {
-    lineIndicatesNewSlide: true,
-    title: fields[1],
-    urlString: fields[2]
-  };
-}
+  /* Each <h1> with only a link (in Markdown "# [text](href)") defines a new
+   * slide.  Note this skips over and ignores anything before the first slide.
+   *
+   * I'd use "h1:has(> a:only-child)" if it was broadly supported, as this
+   * would select the <h1> instead of the inner <a> and make it possible to use
+   * node.matches(…) instead of node.querySelector().
+   *   -trs, 21 Nov 2022
+   */
+  const titleLinkSelector = "h1 > a:only-child";
+  const isTitle = (node) =>
+    node.nodeType === Node.ELEMENT_NODE &&
+    node.querySelector(titleLinkSelector) != null;
 
-/**
- * Narratives can define a "auspiceMainDisplayMarkdown" fenced code block
- * where the content of the code block is markdown to be displayed in the
- * main part of auspice, replacing the panels.
- * We should explore nicer ways of doing this, whilst maintaining backwards
- * compat
- */
-function addMainMarkdownBlock(slide) {
-  const sidebarLines = [];
-  const mainMarkdownLines = [];
-  let inMainMarkdownSection = false;
-  slide.lines.forEach((line) => {
-    if (!inMainMarkdownSection && line.match(/^```auspiceMainDisplayMarkdown\s*$/)) {
-      inMainMarkdownSection = true;
-      return;
+  for (const titleLink of doc.querySelectorAll(titleLinkSelector)) {
+    const slide = doc.createElement("slide");
+    const {dataset, query} = parseUrl(titleLink.href, fallbackDataset);
+
+    /* Turn <h1><a>some title</a></h1> into <h1>some title</h1>; we've
+     * extracted the link itself above with parseUrl().
+     */
+    const h1 = titleLink.parentElement;
+    titleLink.replaceWith(titleLink.textContent);
+
+    /* Start collecting the slide's content into a <slide> container.
+     *
+     * First, turn <h1>some title</h1> into <slide><h1>some title</h1></slide>.
+     */
+    h1.replaceWith(slide);
+    slide.appendChild(h1);
+
+    /* Then, walk forward moving nodes into this <slide> until we hit the next
+     * slide's title (or the end of the document).
+     */
+    let sibling;
+    while (sibling = slide.nextSibling) { // eslint-disable-line no-cond-assign
+      if (isTitle(sibling)) break;
+      slide.appendChild(sibling);
     }
-    if (inMainMarkdownSection && line.match(/^```\s*/)) {
-      inMainMarkdownSection = false;
-      return;
+
+    /* Finally, extract the text of any auspiceMainDisplayMarkdown code blocks
+     * and remove them from the slide itself (for handling later).
+     */
+    let mainDisplayMarkdown = "";
+
+    for (const code of slide.querySelectorAll("pre > code.language-auspiceMainDisplayMarkdown")) {
+      mainDisplayMarkdown += code.textContent + "\n";
+      code.parentElement.remove();
     }
-    if (inMainMarkdownSection) {
-      mainMarkdownLines.push(line);
-    } else {
-      sidebarLines.push(line);
-    }
-  });
-  if (mainMarkdownLines.length) {
-    return {...slide, lines: sidebarLines, mainMarkdownLines};
+
+    // We're done with this slide, emit it!
+    yield {
+      dataset,
+      query,
+      mainDisplayMarkdown,
+      __html: slide.innerHTML
+    };
   }
-  return slide;
 }
-
 
 function parseNarrativeAuthors(frontMatter) {
   let authorMd = "";
