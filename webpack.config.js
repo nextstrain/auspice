@@ -192,6 +192,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     resolve: {
       alias: aliasesToResolve,
       fallback: {
+        buffer: require.resolve("buffer/"),
         fs: false
       }
     },

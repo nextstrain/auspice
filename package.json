@@ -52,6 +52,7 @@
     "babel-plugin-strip-function-call": "^1.0.2",
     "babel-plugin-styled-components": "^1.10.0",
     "binomial": "^0.2.0",
+    "buffer": "^6.0.3",
     "chalk": "^2.4.1",
     "clean-webpack-plugin": "^4.0.0",
     "compression": "^1.7.3",
