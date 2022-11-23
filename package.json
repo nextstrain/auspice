@@ -80,6 +80,7 @@
     "express-static-gzip": "^0.2.2",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^4.3.0",
+    "html2canvas": "^1.4.1",
     "i18next": "^19.3.2",
     "leaflet": "1.7.1",
     "leaflet-gesture-handling": "1.2.1",
