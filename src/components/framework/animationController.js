@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import html2canvas from "html2canvas";
 import { animationWindowWidth, animationTick } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
@@ -69,6 +70,8 @@ class AnimationController extends React.Component {
     /* update the URL - no reducer uses this action type */
     this.props.dispatch({type: MIDDLEWARE_ONLY_ANIMATION_STARTED});
 
+    let imgCount = 0;
+
     /* tickFn is a closure, therefore defined within maybeAnimateMap */
     const tickFn = () => {
       // console.log("TICK")
@@ -111,12 +114,27 @@ class AnimationController extends React.Component {
           /* also trash the start/end bounds, as the animation has finished of its own accord */
           window.NEXTSTRAIN.animationStartPoint = undefined;
           window.NEXTSTRAIN.animationEndPoint = undefined;
+          return;
         }
       }
+
+      /* experimental support for saving PNGs */
+      // todo - reset the count!
+      const screenshotTarget = document.body;
+      html2canvas(screenshotTarget).then((canvas) => {
+        const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");  // here is the most important part because if you dont replace you will get a DOM 18 exception.
+        const link = document.createElement("a");
+        link.setAttribute('download', `nextstrain_animation_frame_${imgCount++}.png`);
+        link.setAttribute('href', image);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.NEXTSTRAIN.animationTickReference = setTimeout(tickFn, animationTick);
+      })
     };
 
     /* start the animation */
-    window.NEXTSTRAIN.animationTickReference = setInterval(tickFn, animationTick);
+    window.NEXTSTRAIN.animationTickReference = setTimeout(tickFn, animationTick);
     // console.log("SETINTERVAL START. Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
   }
 }
