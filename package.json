@@ -79,7 +79,6 @@
     "express": "^4.16.3",
     "express-naked-redirect": "^0.1.9",
     "express-static-gzip": "^0.2.2",
-    "file-loader": "^1.1.11",
     "html-webpack-plugin": "^4.5.2",
     "i18next": "^19.3.2",
     "leaflet": "1.7.1",

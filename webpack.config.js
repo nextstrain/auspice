@@ -252,7 +252,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
-          use: "file-loader"
+          type: "asset/resource"
         },
         {
           // esprima is a (large) dependency of js-yaml which is unnecessary in a browser
