@@ -1,14 +1,3 @@
-/**
- * This file, although residing in `src` is also used by the server.
- * This is to maintain a common source of code for narrative markdown
- * parsing both server-side and client-side, thus preserving backwards
- * capability with auspice from when it was only done on the server.
- * Because we do not transpile the server code (a conscious decision)
- * this means we should not use any import statements here, and
- * export functions via the `module.exports` syntax (applies
- * to "imported" code also).
- */
-
 /* eslint no-param-reassign: off */
 
 const { safeLoadFront } = require('yaml-front-matter');
