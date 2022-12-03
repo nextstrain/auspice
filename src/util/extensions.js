@@ -1,12 +1,12 @@
 
 const registry = (() => {
-  if (!process.env.EXTENSION_DATA) {
+  if (!webpackConfig.EXTENSION_DATA) {
     // console.log("no EXTENSION_DATA found");
     return {};
   }
 
-  const extensions = typeof process.env.EXTENSION_DATA === "string" ?
-    JSON.parse(process.env.EXTENSION_DATA) : process.env.EXTENSION_DATA;
+  const extensions = typeof webpackConfig.EXTENSION_DATA === "string" ?
+    JSON.parse(webpackConfig.EXTENSION_DATA) : webpackConfig.EXTENSION_DATA;
 
   Object.keys(extensions).forEach((key) => {
     if (key.endsWith("Component")) {

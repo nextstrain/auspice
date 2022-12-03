@@ -65,10 +65,10 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   }
 
   /* plugins */
-  /* inject strings into the client-accessible process.env */
-  const pluginProcessEnvData = new webpack.DefinePlugin({
-    "process.env.NODE_ENV": devMode ? JSON.stringify("development") : JSON.stringify("production"),
-    "process.env.EXTENSION_DATA": JSON.stringify(extensionData)
+  /* inject client-accessible variables */
+  const pluginClientVariables = new webpack.DefinePlugin({
+    "webpackConfig.NODE_ENV": devMode ? JSON.stringify("development") : JSON.stringify("production"),
+    "webpackConfig.EXTENSION_DATA": JSON.stringify(extensionData)
   });
   /* gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin */
   const pluginCompress = new CompressionPlugin({
@@ -87,13 +87,13 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const plugins = devMode ? [
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    pluginProcessEnvData,
+    pluginClientVariables,
     new webpack.NoEmitOnErrorsPlugin(),
     pluginHtml,
     cleanWebpackPlugin
   ] : [
     new LodashModuleReplacementPlugin(),
-    pluginProcessEnvData,
+    pluginClientVariables,
     pluginCompress,
     pluginHtml,
     cleanWebpackPlugin
