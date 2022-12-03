@@ -90,6 +90,7 @@ If you wish to view the [nextstrain-maintained narratives](https://nextstrain.or
 ### Run auspice
 
 ```bash
+auspice build --verbose
 auspice view --datasetDir data
 ```
 

@@ -20,7 +20,6 @@
     "start": "npm run view",
     "server": "npm run view",
     "build": "node auspice.js build --verbose",
-    "prepare": "npm run build",
     "lint": "eslint src",
     "lint:fix": "eslint --fix src",
     "get-data": "env bash ./scripts/get-data.sh",
