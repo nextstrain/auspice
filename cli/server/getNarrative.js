@@ -3,17 +3,6 @@ const path = require("path");
 const fs = require("fs");
 const utils = require("../utils");
 const marked = require('marked');
-const { parseMarkdownNarrativeFile } = require("../../src/util/parseNarrative");
-
-/**
- * A thin wrapper around the client-side `parseMarkdownNarrativeFile` function.
- * The main difference is that we pass in a different markdown parser
- * than the client uses.
- */
-const parseNarrative = (fileContents) => {
-  utils.verbose("Deprecation warning: Server-side parsing of narrative files is no longer needed!");
-  return parseMarkdownNarrativeFile(fileContents, marked);
-};
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {
@@ -25,9 +14,7 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
       .replace(/\//g, "_")            // change slashes to underscores
       .concat(".md");                 // add .md suffix
 
-    // the type-query string dictates whether to parse into JSON on the server or not
-    // we default to JSON which was behavior before this argument existed
-    const type = query.type ? query.type.toLowerCase() : "json";
+    const type = query.type ? query.type.toLowerCase() : null;
 
     const pathName = path.join(narrativesPath, filename);
     utils.log("trying to access & parse local narrative file: " + pathName);
@@ -37,9 +24,6 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
         // we could stream the response (as we sometimes do for getDataset) but narrative files are small
         // so the expected time savings / server overhead is small.
         res.send(fileContents);
-      } else if (type === "json") {
-        const blocks = parseNarrative(fileContents);
-        res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
       } else {
         throw new Error(`Unknown format requested: ${type}`);
       }
@@ -54,5 +38,4 @@ const setUpGetNarrativeHandler = ({narrativesPath}) => {
 
 module.exports = {
   setUpGetNarrativeHandler,
-  parseNarrative
 };

@@ -73,7 +73,7 @@ Any other non-200 reponse behaves similarly but also displays a large "error" me
 * `type` (optional) - the format of the data returned (see below for more information).
 Current valid values are "json" and "md".
 If no type is specified the server will use "json" as a default (for backwards compatibility reasons).
-Requests to this API from the Auspice client are made with `type=md.
+Requests to this API from the Auspice client are made with `type=md`.
 
 **Response (on success):**
 
@@ -94,7 +94,7 @@ if (type === "json") {
 }
 ```
 
-> While the Auspice client (from v2.18 onwards) always requests the `type=md`, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatable with servers which may be using an earlier API.
+> While the Auspice client (from v2.18 onwards) always requests the `type=md`, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatible with servers which may be using an earlier API.
 
 ---
 
