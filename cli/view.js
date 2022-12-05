@@ -79,11 +79,14 @@ const getAuspiceBuild = () => {
   const cwd = path.resolve(process.cwd());
   const sourceDir = path.resolve(__dirname, "..");
   if (
-    cwd !== sourceDir &&
-    fs.existsSync(path.join(cwd, "index.html")) &&
-    fs.existsSync(path.join(cwd, "dist")) &&
-    fs.readdirSync(path.join(cwd, "dist")).filter((fn) => fn.match(/^auspice.bundle.[a-z0-9]+.js$/)).length === 1
+    !fs.existsSync(path.join(cwd, "dist")) ||
+    !fs.existsSync(path.join(cwd, "dist/index.html")) ||
+    !fs.readdirSync(path.join(cwd, "dist")).filter((fn) => fn.match(/^auspice.bundle.[a-z0-9]+.js$/)).length === 1
   ) {
+    console.log(chalk.redBright(`ERROR: Auspice build files not found under ${cwd}. Did you run \`auspice build\` in this directory?`));
+    process.exit(1);
+  }
+  if (cwd !== sourceDir) {
     return {
       message: "Serving the auspice build which exists in this directory.",
       baseDir: cwd,
