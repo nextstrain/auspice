@@ -131,7 +131,24 @@ The main Nextstrain documentation is available at [docs.nextstrain.org](https://
 
 The Auspice technical reference guide is available at [docs.nextstrain.org/projects/auspice](https://docs.nextstrain.org/projects/auspice/en/stable/index.html). That documentation is built from the files in this repo in the `./docs` folder.
 
-To build the Auspice documentation locally, run `npm run build-docs` and open `docs/_build/html/index.html`.
+To preview the Auspice documentation locally,
+
+1. Create and activate a Conda environment from `docs/environment.yml`. Example using Mamba:
+
+    ```bash
+    mamba env create --file docs/environment.yml
+    conda activate auspice-docs
+    ```
+
+2. Build the docs from a clean slate.
+
+    ```bash
+    make -C docs clean html
+    ```
+
+3. Open `docs/_build/html/index.html` in a browser.
+
+Changes to documentation source files (`.md` and `.rst` files under `docs/`) require re-running `make -C docs clean html` for changes to reflect in the local preview files.
 
 ## Contributing to Internationalization and Localization (i18n/l18n)
 
