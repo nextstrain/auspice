@@ -10,7 +10,7 @@ export const initialiseGoogleAnalyticsIfRequired = async () => {
   }
   importReactGa = import("react-ga");
   ReactGA = (await importReactGa).default;
-  if (process.env.NODE_ENV !== "production") {
+  if (webpackConfig.NODE_ENV !== "production") {
     // eslint-disable-next-line
     console.log("Not setting up Google Analytics as we are not in production mode");
     return;

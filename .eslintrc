@@ -8,6 +8,7 @@ globals:
   context: true
   jestPuppeteer: true
   BASE_URL: true
+  webpackConfig: true
 rules:
   camelcase: off # require camel case names
   prefer-template: off
