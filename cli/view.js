@@ -77,24 +77,35 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
 const getAuspiceBuild = () => {
   const cwd = path.resolve(process.cwd());
   const sourceDir = path.resolve(__dirname, "..");
-  if (
-    cwd !== sourceDir &&
-    fs.existsSync(path.join(cwd, "index.html")) &&
-    fs.existsSync(path.join(cwd, "dist")) &&
-    fs.readdirSync(path.join(cwd, "dist")).filter((fn) => fn.match(/^auspice\.main\.bundle\.[a-z0-9]+\.js$/)).length === 1
-  ) {
-    return {
-      message: "Serving the auspice build which exists in this directory.",
-      baseDir: cwd,
-      distDir: path.join(cwd, "dist")
-    };
+
+  // Default to current working directory.
+  let baseDir = cwd;
+  if (!hasAuspiceBuild(cwd)) {
+    if (cwd === sourceDir) {
+      utils.error(`Auspice build files not found under ${cwd}. Did you run \`auspice build\` in this directory?`);
+      process.exit(1);
+    }
+    if (!hasAuspiceBuild(sourceDir)) {
+      utils.error(`Auspice build files not found under ${cwd} or ${sourceDir}. Did you run \`auspice build\` in either directory?`);
+      process.exit(1);
+    }
+    utils.log(`Auspice build files not found under ${cwd}. Using build files under ${sourceDir}.`)
+    baseDir = sourceDir;
   }
   return {
-    message: `Serving auspice version ${version}`,
-    baseDir: sourceDir,
-    distDir: path.join(sourceDir, "dist")
+    message: `Serving the Auspice build in ${baseDir} (version ${version}).`,
+    baseDir,
+    distDir: path.join(baseDir, "dist")
   };
 };
+
+function hasAuspiceBuild(directory) {
+  return (
+    fs.existsSync(path.join(directory, "dist")) &&
+    fs.existsSync(path.join(directory, "dist/index.html")) &&
+    fs.readdirSync(path.join(directory, "dist")).filter((fn) => fn.match(/^auspice\.main\.bundle\.[a-z0-9]+\.js$/)).length === 1
+  )
+}
 
 const run = (args) => {
   /* Basic server set up */
