@@ -143,12 +143,12 @@ To preview the Auspice documentation locally,
 2. Build the docs from a clean slate.
 
     ```bash
-    make -C docs clean html
+    make -C docs clean livehtml
     ```
 
-3. Open `docs/_build/html/index.html` in a browser.
+3. Open the preview link (http://127.0.0.1:8000) in a browser.
 
-Changes to documentation source files (`.md` and `.rst` files under `docs/`) require re-running `make -C docs clean html` for changes to reflect in the local preview files.
+Changes to documentation source files (`.md` and `.rst` files under `docs/`) should automatically be reflected upon page refresh.
 
 ## Contributing to Internationalization and Localization (i18n/l18n)
 
