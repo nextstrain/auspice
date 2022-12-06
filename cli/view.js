@@ -25,7 +25,6 @@ const addParser = (parser) => {
   subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
   subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
   /* there are some options which we deliberately do not document via `--help`. */
-  subparser.addArgument('--customBuild', {action: "storeTrue", help: SUPPRESS}); /* see printed warning in the code below */
   subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS}); /* related to the "static-site-generation" or "github-pages" */
 };
 
@@ -104,10 +103,6 @@ const run = (args) => {
   app.set('host', process.env.HOST || "localhost");
   app.use(compression());
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
-
-  if (args.customBuild) {
-    utils.warn("--customBuild is no longer used and will be removed in a future version. We now serve a custom auspice build if one exists in the directory `auspice view` is run from");
-  }
 
   const auspiceBuild = getAuspiceBuild();
   utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
