@@ -8,5 +8,6 @@ dependencies:
   - pip
   - pip:
     - nextstrain-sphinx-theme>=2022.5
+    - sphinx-autobuild
     - sphinx-markdown-tables
     - sphinx-argparse
