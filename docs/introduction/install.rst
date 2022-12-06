@@ -17,7 +17,7 @@ We recommend using `Conda <https://docs.conda.io/>`__ to create an environment w
 
 .. code:: bash
 
-   conda create -c conda-forge --name auspice nodejs=14
+   conda create -c conda-forge --name auspice nodejs=16
    conda activate auspice
 
 Install Auspice as a user
