@@ -110,8 +110,8 @@ const run = (args) => {
   }
 
   const auspiceBuild = getAuspiceBuild();
-  utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
-  utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
+  utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
+  utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
