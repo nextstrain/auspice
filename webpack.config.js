@@ -13,9 +13,6 @@ const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
   utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
-  /* which directories should be parsed by babel and other loaders? */
-  const directoriesToTransform = [path.join(__dirname, 'src')];
-
   // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
   // Format is either "libName" or "libName:libPath"
   const coreDeps = [
@@ -58,8 +55,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     // console.log("BUILDING WITH EXTENSIONS");
     const dir = path.resolve(__dirname, path.dirname(extensionPath));
     aliasesToResolve["@extensions"] = dir;
-    directoriesToTransform.push(dir);
-    // console.log("directoriesToTransform", directoriesToTransform);
     extensionData = JSON.parse(fs.readFileSync(extensionPath, {encoding: 'utf8'}));
     // console.log("extensionData", extensionData);
   }
