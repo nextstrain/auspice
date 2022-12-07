@@ -27,7 +27,7 @@ module.exports = function babelConfig(api) {
     "lodash"
   ];
   if (api.env("development")) {
-    plugins.push("react-hot-loader/babel");
+    plugins.push(["react-hot-loader/babel", { safetyNet: false }]);
   }
   if (process.env.BABEL_INCLUDE_TIMING_FUNCTIONS === "false") {
     plugins.push(["strip-function-call", {strip: ["timerStart", "timerEnd"]}]);

@@ -1,23 +1,23 @@
 {
   "files": [
     {
-      "path": "./dist/auspice.bundle.*.js",
-      "maxSize": "2 kB"
+      "path": "./dist/auspice.main.bundle.*.js",
+      "maxSize": "3 kB"
     },
     {
-      "path": "./dist/auspice.chunk.+([0-9]).bundle.*.js",
+      "path": "./dist/auspice.?(chunk.)+([0-9]).bundle.*.js",
       "maxSize": "100 kB"
     },
     {
-      "path": "./dist/auspice.chunk.core-vendors.bundle.*.js",
+      "path": "./dist/auspice.?(chunk.)core-vendors.bundle.*.js",
       "maxSize": "220 kB"
     },
     {
-      "path": "./dist/auspice.chunk.other-vendors.bundle.*.js",
+      "path": "./dist/auspice.?(chunk.)other-vendors.bundle.*.js",
       "maxSize": "150 kB"
     },
     {
-      "path": "./dist/auspice.chunk.locales.bundle.*.js",
+      "path": "./dist/auspice.?(chunk.)locales.bundle.*.js",
       "maxSize": "100 kB"
     }
   ]

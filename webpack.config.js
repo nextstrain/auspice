@@ -90,7 +90,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new webpack.NoEmitOnErrorsPlugin(),
     pluginHtml,
     cleanWebpackPlugin
   ] : [
@@ -186,15 +185,16 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     entry,
     output: {
       path: outputPath,
-      filename: `auspice.bundle${!devMode ? ".[contenthash]" : ""}.js`,
+      filename: `auspice.[name].bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
       publicPath: "/dist/"
     },
     resolve: {
-      alias: aliasesToResolve
-    },
-    node: {
-      fs: 'empty'
+      alias: aliasesToResolve,
+      fallback: {
+        buffer: require.resolve("buffer/"),
+        fs: false
+      }
     },
     plugins,
     optimization: {
@@ -252,7 +252,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
-          use: "file-loader"
+          type: "asset/resource"
         },
         {
           // esprima is a (large) dependency of js-yaml which is unnecessary in a browser
