@@ -8,7 +8,7 @@
   "homepage": "https://www.npmjs.com/package/auspice",
   "engines": {
     "node": "^12 || ^14 || ^16",
-    "npm": ">=6.9"
+    "npm": "^7 || ^8"
   },
   "bin": {
     "auspice": "./auspice.js"
@@ -59,7 +59,7 @@
     "compression-webpack-plugin": "^3.1.0",
     "core-js": "^3.6.5",
     "create-react-class": "^15.7.0",
-    "css-loader": "^2.1.1",
+    "css-loader": "^3.4.0",
     "css.escape": "^1.5.1",
     "d3-array": "^2.2.0",
     "d3-axis": "^1.0.6",
@@ -95,7 +95,6 @@
     "prop-types": "^15.6.0",
     "query-string": "^4.2.3",
     "react": "^16.8.6",
-    "react-addons-css-transition-group": "^15.6.0",
     "react-collapsible": "^2.8.4",
     "react-dom": "^16.8.6",
     "react-ga": "^2.2.0",
@@ -106,6 +105,7 @@
     "react-redux": "^7.2.6",
     "react-select": "^5.2.2",
     "react-tooltip": "^4.2.10",
+    "react-transition-group": "^1.2.1",
     "react-virtualized": "^9.22.3",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
@@ -126,12 +126,12 @@
     "bundlesize": "^0.18.1",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
-    "eslint": "^5.14.1",
-    "eslint-config-airbnb": "^15.1.0",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb": "^18.2.0",
     "eslint-plugin-import": "^2.13.0",
-    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-jsx-a11y": "^6.3.0",
     "eslint-plugin-react": "^7.2.1",
-    "eslint-plugin-react-hooks": "^1.6.0",
+    "eslint-plugin-react-hooks": "^4.0.1",
     "jest": "^25.1.0",
     "jest-circus": "^25.3.0",
     "jest-image-snapshot": "^3.0.1",
