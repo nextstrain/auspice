@@ -30,33 +30,7 @@ For more detailed technical information how Auspice works and reference guides d
 
 ### Installation
 
-Install auspice for use as a global command.
-This requires nodejs.
-We recommend using a conda environment, but this is not the only way.
-(See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
-
-#### Install with conda (Recommended)
-
-Create and activate a [conda](https://docs.conda.io) environment:
-
-```bash
-conda create --name auspice nodejs=14
-conda activate auspice
-```
-
-Now that the conda environment is activated, install auspice:
-
-```bash
-npm install --global auspice
-```
-
-#### Install from source
-
-```bash
-git clone https://github.com/nextstrain/auspice.git
-cd auspice
-npm install --global .
-```
+See [the relevant page on Auspice docs](https://docs.nextstrain.org/projects/auspice/en/stable/introduction/install.html).
 
 ### Obtain datasets to display
 
