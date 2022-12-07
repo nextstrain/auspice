@@ -64,7 +64,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           path: ${{ env.DESTINATION_REPO_DIR }}
-          token: ${{ secrets.NEXTSTRAIN_BOT_PAT }}
+          token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
           branch: "nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
           commit-message: "[testing only] Upgrade Auspice to ${{ github.sha }}"
           author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
