@@ -15,7 +15,7 @@ const parser = new argparse.ArgumentParser({
   Auspice is an interactive visualisation tool for phylogenomic data.
   It can be used to display local datasets (see "auspice view -h" for details),
   or to build a customised version of the software (see "auspice build -h" for details).
-  This is the software which powers the visualisations on nextstrain.org and auspice.us, amoung others.
+  This is the software which powers the visualisations on nextstrain.org and auspice.us, among others.
   `
 });
 

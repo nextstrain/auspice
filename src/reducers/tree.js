@@ -40,8 +40,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
       return Object.assign({}, state, {
         loaded: false
       });
-    case types.CHANGE_EXPLODE_ATTR: /* fall-through */
-    case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
+    case types.CHANGE_EXPLODE_ATTR: /* fallthrough */
+    case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const newStates = {
         visibility: action.visibility,

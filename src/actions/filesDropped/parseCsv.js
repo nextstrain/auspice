@@ -3,7 +3,7 @@ let Papa; /* lazyily imported once a file is dropped on */
 /**
  * A promise-ified version of Papa.parse()
  * A note on encoding here: It will be common that people drop CSVs from microsoft excel
- * in here annd, you guessed it, this causes all sorts of problems.
+ * in here and, you guessed it, this causes all sorts of problems.
  * https://github.com/mholt/PapaParse/issues/169 suggests adding encoding: "ISO-8859-1"
  * to the config, which may work
  * @param {string} csvString a string of delimited text

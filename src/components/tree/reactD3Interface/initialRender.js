@@ -39,7 +39,7 @@ export const renderTree = (that, main, phylotree, props) => {
       onTipLeave: callbacks.onTipLeave.bind(that),
       tipLabel: makeTipLabelFunc(props.tipLabelKey)
     },
-    treeState.branchThickness, /* guarenteed to be in redux by now */
+    treeState.branchThickness, /* guaranteed to be in redux by now */
     treeState.visibility,
     props.temporalConfidence.on, /* drawConfidence? */
     treeState.vaccines,

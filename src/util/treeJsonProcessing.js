@@ -10,7 +10,7 @@ const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
  * node.hasChildren {bool}
  * node.arrayIdx  {integer} - the index of the node in the nodes array
  * @param  {array} nodes redux tree nodes
- * @return {array} input array (kinda unneccessary)
+ * @return {array} input array (kinda unnecessary)
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 const processNodes = (nodes) => {
@@ -21,7 +21,7 @@ const processNodes = (nodes) => {
     d.hasChildren = typeof d.children !== "undefined";
 
     /* duplicate or missing names are an error with the dataset, but typically result in
-    very hard-to-interpret Auspice errors which we can improve by dectecting problems early */
+    very hard-to-interpret Auspice errors which we can improve by detecting problems early */
     if (!d.name) {
       d.name = pseudoRandomName();
       console.warn(`Tree node without a name detected. Using the name '${d.name}' and continuing...`);

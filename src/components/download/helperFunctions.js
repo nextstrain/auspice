@@ -131,7 +131,7 @@ export const areAuthorsPresent = (tree) => {
 
 /**
  * Create & write a TSV file where each row is an author,
- * with the relevent information (num isolates, journal etcetera)
+ * with the relevant information (num isolates, journal etcetera)
  */
 export const authorTSV = (dispatch, filePrefix, tree) => {
   const lineArray = [];
@@ -170,7 +170,7 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
 
 /**
  * Create & write a TSV file where each row is a strain in the tree,
- * with the relevent information (accession, traits, etcetera).
+ * with the relevant information (accession, traits, etcetera).
  * Only visible nodes (tips) will be included in the file.
  */
 export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibilities) => {
@@ -205,7 +205,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibiliti
     }
 
     /* collect values (as writable strings) of the same "traits" as can be viewed by the modal displayed
-    when clicking on tips. Note that "num_date", "author" and "vaccine" are considered seperately below */
+    when clicking on tips. Note that "num_date", "author" and "vaccine" are considered separately below */
     const nodeAttrsToIgnore = ["author", "div", "num_date", "vaccine", "accession"];
     const traits = Object.keys(node.node_attrs).filter((k) => !nodeAttrsToIgnore.includes(k));
     for (const trait of traits) {
@@ -455,7 +455,7 @@ const injectAsSVGStrings = (output, key, data) => {
   output.push("</svg>");
 };
 
-/* define actual writer as a closure, because it may need to be triggered asyncronously */
+/* define actual writer as a closure, because it may need to be triggered asynchronously */
 const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */

@@ -28,7 +28,7 @@ const scrollToTop = () => {
 
 const explanationParagraph=`
   <p class="explanation">
-  Narratives are interleaved sections of text and associated nextstrain visualisations of the genomic data.
+  Narratives are interleaved sections of text and associated Nextstrain visualisations of the genomic data.
   Click the coloured arrows at the top & bottom of each page to move through this narrative.
   Within each page, you can scroll through the text to see visualisations of the genomic data.
   </p>
@@ -79,7 +79,7 @@ class MobileNarrativeDisplay extends React.Component {
       ));
       scrollToTop();
     };
-    // TODO: bind down & up arrows (is this ok since we also have scollable content?)
+    // TODO: bind down & up arrows (is this ok since we also have scrollable content?)
   }
 
   pageNarrativeContent() {

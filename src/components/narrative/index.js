@@ -63,7 +63,7 @@ class Narrative extends React.Component {
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
     /* bind arrow keys to move around in narrative */
-    /* Note that "normal" page scrolling is not avaialble in narrative mode
+    /* Note that "normal" page scrolling is not available in narrative mode
     and that scrolling the sidebar is associated with changing the narrative slide */
     Mousetrap.bind(['left', 'up'], this.goToPreviousSlide);
     Mousetrap.bind(['right', 'down'], this.goToNextSlide);

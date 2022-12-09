@@ -187,7 +187,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
   // Create a subplot for each grouping
   let prevSubplotBottom = layout.topPadding;
   groupedMeasurements.forEach(([groupingValue, measurements], index) => {
-    // Make each subplot it's own SVG to re-use the same subplot yScale
+    // Make each subplot its own SVG to re-use the same subplot yScale
     const subplot = svg.append("svg")
       .attr("class", classes.subplot)
       .attr("id", getSubplotDOMId(groupingOrderedValues.indexOf(groupingValue)))
@@ -222,7 +222,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         // If necessary, scale down the text to fit in the available space for the y-Axis labels
         // This does mean that if the text is extremely long, it can be unreadable.
         // We can improve on this by manually splitting the text into parts that can fit on multiple lines,
-        // but there's always limits of the available space so punting that for now.
+        // but there're always limits of the available space so punting that for now.
         //    -Jover, 20 September 2022
         g.selectAll('text')
           .attr("transform", (_, i, element) => {
@@ -283,7 +283,7 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues) => {
   const { xScale, groupingOrderedValues, groupedMeasurements } = svgData;
   const svg = select(ref);
-  // Re move all current color by means
+  // Remove all current color by means
   svg.selectAll(`.${classes.colorMean}`).remove();
   // Calc and draw color by means for each group
   groupedMeasurements.forEach(([groupingValue, measurements]) => {

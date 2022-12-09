@@ -3,7 +3,7 @@ import { controlsWidth, controlsPadding } from "../../util/globals";
 
 
 export const calcPanelDims = (panels, narrativeIsDisplayed, availableWidth, availableHeight) => {
-  /* Calculate reponsive geometries. chart: entropy, frequencies. full/grid: map, tree, measurements */
+  /* Calculate responsive geometries. chart: entropy, frequencies. full/grid: map, tree, measurements */
   const chartWidthFraction = 1;
   const fullWidthFraction = 1;
   const gridWidthFraction = 0.5;

@@ -244,7 +244,7 @@ class Map extends React.Component {
         this.props.showTransmissionLines,
       );
 
-      // don't redraw on every rerender - need to seperately handle virus change redraw
+      // don't redraw on every rerender - need to separately handle virus change redraw
       this.setState({
         boundsSet: true,
         d3elems,
@@ -296,7 +296,7 @@ class Map extends React.Component {
 
       if (!this.state.demeData || !this.state.transmissionData) {
         /* this seems to happen when the data takes a particularly long time to create.
-        and the map is ready before the data (??). It's imperitive that this method runs
+        and the map is ready before the data (??). It's imperative that this method runs
         so if the data's not ready yet we try to rerun it after a short time.
         This could be improved */
         window.setTimeout(() => this.respondToLeafletEvent(leafletEvent), 50);
@@ -358,7 +358,7 @@ class Map extends React.Component {
   /**
    * updates demes & transmissions when redux (tree) visibility or colorScale (i.e. colorBy) has changed
    * returns early if the map or tree isn't ready
-   * uses deme & transmission indicies for smart (quick) updating
+   * uses deme & transmission indices for smart (quick) updating
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
     if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) { return; }

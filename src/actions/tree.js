@@ -142,7 +142,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
 /**
  * date changes need to update tip visibility & branch thicknesses
  * this can be done in a single action
- * NB calling this without specifing newMin OR newMax is a no-op
+ * NB calling this without specifying newMin OR newMax is a no-op
  * @param  {string|false} newMin optional
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
@@ -333,7 +333,7 @@ const _traverseAndCreateSubtrees = (root, node, attr) => {
   // store original children so we traverse the entire tree
   const originalChildren = node.hasChildren ? [...node.children] : [];
 
-  if (node.arrayIdx === 0) { // __ROOT will hold all (expoded) subtrees
+  if (node.arrayIdx === 0) { // __ROOT will hold all (exploded) subtrees
     node.unexplodedChildren = originalChildren;
   } else if (node.hasChildren) {
     const parentTrait = getTraitFromNode(node, attr);

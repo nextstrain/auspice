@@ -146,7 +146,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       const coords = leafletLatLongToLayerPoint(lat, long, map);
 
       /* add entries to
-       * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
+       * (1) `demeIndices` -- a dict of "deme value" to the indices of `demeData` & `arcData` where they appear
        * (2) `demeData` -- an array of objects, each with {name, count etc.}
        *      if pie charts, then `demeData.arcs` exists, if colour-blended circles, `demeData.color` exists
        */

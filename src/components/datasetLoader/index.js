@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { loadJSONs } from "../../actions/loadData";
 import { PAGE_CHANGE } from "../../actions/types";
 
-/* The DatsetLoader component simply triggers the (async) loadJSONs action
+/* The DatasetLoader component simply triggers the (async) loadJSONs action
  * and then redirects to the "main" page (via a PAGE_CHANGE action).
  * Note that if the loadJSONs action "fails" it will subsequently redirect to a 404 page
  */

@@ -209,11 +209,11 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 };
 
 /**
-* traverse the tree and compile the entropy data for the visibile branches
+* traverse the tree and compile the entropy data for the visible branches
 * @param {Array} nodes - list of nodes
 * @param {Array} visibility - 1-1 correspondence with nodes.
 * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
-* @param {obj} geneMap used to NT fill colours. This should be imroved.
+* @param {obj} geneMap used to NT fill colours. This should be improved.
 * @param {bool} showCounts show counts or entropy values?
 * @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
 * TODO: this algorithm can be much improved, and the data structures returned improved also

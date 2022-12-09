@@ -111,7 +111,7 @@ class Entropy extends React.Component {
     if (newMutType !== this.props.mutType) {
       /* 1. switch the redux colorBy back to the default */
       this.props.dispatch(changeColorBy(this.props.defaultColorBy));
-      /* 2. update the mut type in redux & re-calulate entropy */
+      /* 2. update the mut type in redux & re-calculate entropy */
       this.props.dispatch(changeMutType(newMutType));
     }
   }
