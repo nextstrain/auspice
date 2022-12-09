@@ -392,7 +392,7 @@ export const change = function change({
 
   const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
-  extras.hideTipLabels = animationInProgress;
+  extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
   } else {
