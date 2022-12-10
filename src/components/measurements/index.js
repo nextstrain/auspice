@@ -4,7 +4,7 @@ import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
-import ErrorBoundary from "../../util/errorBoundry";
+import ErrorBoundary from "../../util/errorBoundary";
 import Flex from "../framework/flex";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";

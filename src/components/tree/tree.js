@@ -14,7 +14,7 @@ import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
-import ErrorBoundary from "../../util/errorBoundry";
+import ErrorBoundary from "../../util/errorBoundary";
 import { untangleTreeToo } from "./tangle/untangling";
 import { sortByGeneOrder } from "../../util/treeMiscHelpers";
 
