@@ -2,7 +2,7 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
-import { genotypeSymbol, strainSymbol } from "../util/globals";
+import { genotypeSymbol, noneSymbol, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters } from "../util/getGenotype";
 
 /**
@@ -149,7 +149,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_TIP_LABEL_KEY: {
-      query.tl = action.key===strainSymbol ? undefined : action.key;
+      query.tl = action.key === strainSymbol ?  undefined :
+                 action.key === noneSymbol   ?         "" :
+                                               action.key ;
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {

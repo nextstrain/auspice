@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { CHANGE_TIP_LABEL_KEY } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
-import { controlsWidth, strainSymbol } from "../../util/globals";
+import { controlsWidth, noneSymbol, strainSymbol } from "../../util/globals";
 import CustomSelect from "./customSelect";
 
 @connect((state) => ({
@@ -54,10 +54,10 @@ export function collectAvailableTipLabelOptions(colorings) {
      * can't clash with potential coloring values, but then it's not as
      * straightforward to specify this option via the URL query
      */
-    {value: 'none', label: "none"},
+    {value: noneSymbol, label: "none"},
     {value: strainSymbol, label: "Sample Name"},
     ...Object.entries(colorings)
-      .filter((keyValue) => keyValue[0] !== 'gt' && keyValue[0] !== 'none')
+      .filter((keyValue) => keyValue[0] !== 'gt')
       .map(([key, value]) => {
         return {value: key, label: value.title};
       })

@@ -201,6 +201,7 @@ export const isValueValid = (value) => {
   // booleans, valid strings & numbers are valid.
   return true;
 };
+export const noneSymbol = Symbol('none');
 export const strainSymbol = Symbol('strain');
 export const genotypeSymbol = Symbol('genotype');
 export const measurementIdSymbol = Symbol('measurementId');

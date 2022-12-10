@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, noneSymbol, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -86,7 +86,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
     state["panelLayout"] = query.p;
   }
-  if (query.tl) {
+  if (query.tl === "") {
+    state["tipLabelKey"] = noneSymbol;
+  } else if (query.tl) {
     state["tipLabelKey"] = query.tl;
   }
   if (query.dmin) {

@@ -2,7 +2,7 @@ import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren, setDisplayOrder } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { NODE_VISIBLE } from "../../../util/globals";
+import { NODE_VISIBLE, noneSymbol } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 import { makeTipLabelFunc } from "./labels";
@@ -392,7 +392,7 @@ export const change = function change({
 
   const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
-  extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
+  extras.hideTipLabels = animationInProgress || newTipLabelKey === noneSymbol;
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
   } else {
