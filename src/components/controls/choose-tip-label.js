@@ -49,9 +49,15 @@ export default WithTranslation;
  */
 export function collectAvailableTipLabelOptions(colorings) {
   return [
+    /**
+     * We should consider using a Symbol for the 'none' value so that it
+     * can't clash with potential coloring values, but then it's not as
+     * straightforward to specify this option via the URL query
+     */
+    {value: 'none', label: "none"},
     {value: strainSymbol, label: "Sample Name"},
     ...Object.entries(colorings)
-      .filter((keyValue) => keyValue[0] !== 'gt')
+      .filter((keyValue) => keyValue[0] !== 'gt' && keyValue[0] !== 'none')
       .map(([key, value]) => {
         return {value: key, label: value.title};
       })
