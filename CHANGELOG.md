@@ -2,9 +2,19 @@
 title: Changelog
 ---
 
+
+* You can now turn off tip labels by selecting "none" in the dropdown. See [PR #1618](https://github.com/nextstrain/auspice/pull/1618)
+* A bug in the measurements panel was fixed where the mean/SD may disappear. See [PR #1593](https://github.com/nextstrain/auspice/pull/1593)
+
+_There have been a number of internal changes with this release, most of which should not result in any different behavior while using Auspice._
+
+* Upgraded webpack 4 → 5. See [PR #1520](https://github.com/nextstrain/auspice/pull/1520) for more.
+* Upgraded lockfile to the npm 7/8 format. See [PR #1602](https://github.com/nextstrain/auspice/pull/1602) for more.
+* Webpack cleanups via [PR #1605](https://github.com/nextstrain/auspice/pull/1605)
+* Documentation autobuilding via [PR #1609](https://github.com/nextstrain/auspice/pull/1609)
+* Spelling fixes ([PR #1619](https://github.com/nextstrain/auspice/pull/1619), [PR #1620](https://github.com/nextstrain/auspice/pull/1620))
+
 ## version 2.41.0 - 2022/11/10
-
-
 * A narratives debugger has been added at `/edit/narratives`.
 See [PR #1590](https://github.com/nextstrain/auspice/pull/1590) or the new [Narratives Tutorial](https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html) for more details.
 Note: this functionality will prevent auspice from viewing a _dataset_ JSON named `edit_narratives.json`.
