@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import DefaultSplashContent from "./splash";
 import { hasExtension, getExtension } from "../../util/extensions";
-import ErrorBoundary from "../../util/errorBoundry";
+import ErrorBoundary from "../../util/errorBoundary";
 import { fetchJSON } from "../../util/serverInteraction";
 import { getServerAddress, controlsHiddenWidth } from "../../util/globals";
 import { changePage } from "../../actions/navigation";

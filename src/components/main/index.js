@@ -20,7 +20,7 @@ import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
 import { Sidebar } from "./sidebar";
 import { calcPanelDims, calcStyles } from "./utils";
 import { PanelsContainer, sidebarTheme } from "./styles";
-import ErrorBoundary from "../../util/errorBoundry";
+import ErrorBoundary from "../../util/errorBoundary";
 import Spinner, { PanelSpinner } from "../framework/spinner";
 import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
 import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";

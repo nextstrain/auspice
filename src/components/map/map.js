@@ -22,7 +22,7 @@ import {
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
-import ErrorBoundary from "../../util/errorBoundry";
+import ErrorBoundary from "../../util/errorBoundary";
 import { getMapTilesSettings } from "../../util/globals";
 import Legend from "../tree/legend/legend";
 import "../../css/mapbox.css";
