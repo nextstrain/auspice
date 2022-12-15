@@ -48,7 +48,7 @@ export const setDisplayOrderRecursively = (node, yCounter) => {
     node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
-  /* if here, then all children have displayOrders, but we dont. */
+  /* if here, then all children have displayOrders, but we don't. */
   node.displayOrder = children.reduce((acc, d) => acc + d.shell.displayOrder, 0) / children.length;
   node.displayOrderRange = [children[0].shell.displayOrder, children[children.length - 1].shell.displayOrder];
   return yCounter;

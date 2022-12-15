@@ -8,8 +8,8 @@ const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 /**
  * The following code borrows heavily from the Footer
  * but is here in order to allow modifications with no side
- * effects to the Footer. This work was done in an expidited fashion
- * for nCoV but this should be revisted and improved when we have
+ * effects to the Footer. This work was done in an expedited fashion
+ * for nCoV but this should be revisited and improved when we have
  * time.                                          james. Jan 24 2020
  */
 

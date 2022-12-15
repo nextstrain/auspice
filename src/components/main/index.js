@@ -48,7 +48,7 @@ const Measurements = lazy(() => import("../measurements"));
 class Main extends React.Component {
   constructor(props) {
     super(props);
-    /* window listner employed to toggle switch to mobile display.
+    /* window listener employed to toggle switch to mobile display.
     NOTE: this used to toggle sidebar open boolean when that was stored
     as state here, but his has since ben moved to redux state. The mobile
     display should likewise be lifted to redux state */

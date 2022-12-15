@@ -67,7 +67,7 @@ class Tree extends React.Component {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
       newState.geneSortFn = sortByGeneOrder(this.props.metadata.genomeAnnotations);
-      this.setState(newState); /* this will trigger an unneccessary CDU :( */
+      this.setState(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
   componentDidUpdate(prevProps) {
@@ -96,7 +96,7 @@ class Tree extends React.Component {
       /* note, we don't incorporate unusedNewState into the state? why not? */
     }
 
-    /* we may need to (imperitively) tell the tangle to redraw */
+    /* we may need to (imperatively) tell the tangle to redraw */
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }

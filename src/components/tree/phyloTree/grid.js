@@ -141,7 +141,7 @@ const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
   }
   /* how many of those "units" should ideally fit into each major grid separation? */
   majorStep.n = Math.floor(timeBetweenMajorGrids/levels[majorStep.unit].t) || 1;
-  /* if the numer of units (per major grid) is above the allowed max, use a bigger unit */
+  /* if the number of units (per major grid) is above the allowed max, use a bigger unit */
   if (levels[majorStep.unit].max && majorStep.n > levels[majorStep.unit].max) {
     majorStep.unit = levelsKeys[levelsKeys.indexOf(majorStep.unit)-1];
     majorStep.n = Math.floor(timeBetweenMajorGrids/levels[majorStep.unit].t) || 1;

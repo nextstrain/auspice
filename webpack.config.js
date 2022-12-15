@@ -119,7 +119,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
    * of the big vendor bundle, so we must be sure they're stable both internally
    * and with respect to the implementation.
    * The hashes of the bundles are hardcoded in bundlesize so it will trigger
-   * a check error if it is unadvertently changed.
+   * a check error if it is inadvertently changed.
    */
   const coreVendors = [
     "@babel/runtime",
@@ -143,7 +143,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
    * For example d3-.* is here even if it's a core library, because if we
    * include some new d3 feature, the whole bundle will change.
    * The hashes of the bundles are hardcoded in bundlesize so it will trigger
-   * a check error if it is unadvertently changed.
+   * a check error if it is inadvertently changed.
    */
   const bigVendors = [
     "d3-.*", // d3 is imported selectively, new usages may change the bundle

@@ -96,7 +96,7 @@ export const MarkdownInput = ({fileName, setNarrative, setError}) => {
 
 /** promisify FileReader's readAsText() so we can use it within
  * async functions via `await readJson(file)`.
- * Originally addapted from https://stackoverflow.com/a/51026615
+ * Originally adapted from https://stackoverflow.com/a/51026615
  * Taken from https://github.com/nextstrain/auspice.us/blob/427c138dcfce1f0e6fff8049dacc4e416304ff7a/auspice_client_customisation/handleDroppedFiles.js#L24-L44
  */
 function readFile(file, isJSON=true) {

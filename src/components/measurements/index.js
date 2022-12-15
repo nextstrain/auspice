@@ -48,7 +48,7 @@ const isVisible = (visibility) => visibility === NODE_VISIBLE;
  * are relevant for the Measurement's panel. Uses the colorScale redux state to
  * find the current color attribute per strain.
  *
- * tree.visiblity and tree.nodeColors need to be an arrays that have the same
+ * tree.visibility and tree.nodeColors need to be arrays that have the same
  * order as tree.nodes
  * @param {Object} state
  * @returns {Object<string,Object>}

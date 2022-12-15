@@ -1,7 +1,7 @@
 import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
 
-/* The metdata reducer holds data that is
+/* The metadata reducer holds data that is
  * (a) mostly derived from the dataset JSON
  * (b) rarely changes
  */

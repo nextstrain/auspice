@@ -303,7 +303,7 @@ function getMinMaxFromTree(nodes, nodesToo, attr) {
 }
 
 /* this creates a (ramped) list of colours
-   this is necessary as ordinal scales can't interpololate colours.
+   this is necessary as ordinal scales can't interpolate colours.
    range: [a,b], the colours to go between */
 function createListOfColors(n, range) {
   const scale = scaleLinear().domain([0, n])

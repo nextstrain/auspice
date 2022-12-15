@@ -38,7 +38,7 @@ EntropyChart.prototype.render = function render(props) {
   this._drawMainNavElements();
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
-  /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precidence */
+  /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precedence */
   this.zoomCoordinates = isColorByGenotype(props.colorBy) ?
     this._getZoomCoordinates(decodeColorByGenotype(props.colorBy, props.geneLength), props.geneMap) :
     this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
@@ -466,7 +466,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     return d3Event && d3Event.sourceEvent && d3Event.sourceEvent.type === 'zoom';
   }
 
-  /* zooms in by modifing the domain of xMain scale */
+  /* zooms in by modifying the domain of xMain scale */
   this._zoom = function _zoom(start, end) {
     const s = [start, end];
     this.scales.xMain.domain(s);

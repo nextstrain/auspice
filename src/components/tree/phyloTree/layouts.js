@@ -50,7 +50,7 @@ export const setLayout = function setLayout(layout, scatterVariables) {
 };
 
 /**
- * assignes x,y coordinates for a rectancular layout
+ * assignes x,y coordinates for a rectangular layout
  * @return {null}
  */
 export const rectangularLayout = function rectangularLayout() {

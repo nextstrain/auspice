@@ -156,8 +156,8 @@ const FooterStyles = styled.div`
 
 export const getAcknowledgments = (metadata, dispatch) => {
   /**
-   * If the metadata contains a description key, then it will take precendence the hard-coded
-   * acknowledgements. Expects the text in the description to be in Mardown format.
+   * If the metadata contains a description key, then it will take precedence the hard-coded
+   * acknowledgements. Expects the text in the description to be in Markdown format.
    * Jover. December 2019.
   */
   if (metadata.description) {

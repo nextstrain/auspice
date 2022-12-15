@@ -1,6 +1,6 @@
 
 /** applyToNodesPostOrder
- * recursivly apply the callback to each node postorder (root to tip, go left as far as you can, then backtrack...)
+ * recursively apply the callback to each node postorder (root to tip, go left as far as you can, then backtrack...)
  */
 // const applyToNodesPostOrder = (node, callback) => {
 //   if (node.children) {

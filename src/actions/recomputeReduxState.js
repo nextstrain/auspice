@@ -253,7 +253,7 @@ const modifyStateViaMetadata = (state, metadata) => {
               console.error("Skipping 'display_default' for sidebar as it's not 'open' or 'closed'");
             }
           } else {
-            /* most of the time if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
+            /* most of the time if key=geoResolution, set both state.geoResolution and state.defaults.geoResolution */
             state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
             state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
           }
@@ -491,7 +491,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   if (metadata.geoResolutions) {
     const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
-      /* fallbacks: JSON defined default, then hardocded default, then any available */
+      /* fallbacks: JSON defined default, then hardcoded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
         state.geoResolution = metadata.displayDefaults.geoResolution;
       } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
@@ -616,7 +616,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
     newIdxRoot = applyInViewNodesToTree(0, oldState);
   }
 
-  /* calculate new branch thickesses & visibility, as this depends on the root note */
+  /* calculate new branch thicknesses & visibility, as this depends on the root note */
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
@@ -922,7 +922,7 @@ export const createTreeTooState = ({
   secondTreeUrl, /* treeToo URL */
   dispatch
 }) => {
-  /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
+  /* TODO: reconcile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
   const tree = Object.assign({}, oldState.tree);
