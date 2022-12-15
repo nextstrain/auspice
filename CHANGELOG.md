@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.42.0 - 2022/12/15
+
+
 
 * You can now turn off tip labels by selecting "none" in the dropdown. See [PR #1618](https://github.com/nextstrain/auspice/pull/1618)
 * A bug in the measurements panel was fixed where the mean/SD may disappear. See [PR #1593](https://github.com/nextstrain/auspice/pull/1593)
