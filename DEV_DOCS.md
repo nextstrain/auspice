@@ -196,6 +196,7 @@ If a translation of a particular string is not yet available, then auspice will 
 ## Releases & versioning
 
 1. Run the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as the GitHub workflow is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
+    - Ensure the [docker-base CI action triggered by nextstrain-bot](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml?query=branch%3Amaster+actor%3Anextstrain-bot) runs successfully.
 2. Update the version on Bioconda:
     1. [Click to edit the Bioconda recipe](https://github.com/bioconda/bioconda-recipes/edit/master/recipes/auspice/meta.yaml). Or, consider using [the Nextstrain fork](https://github.com/nextstrain/bioconda-recipes) to create PRs that other team members can contribute to.
     2. Make the following changes:
@@ -211,3 +212,4 @@ If a translation of a particular string is not yet available, then auspice will 
             ```
 
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
+3. When the new version of Auspice is available on bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `master` branch.
