@@ -14,7 +14,7 @@ export const layout = {
   leftPadding: 180,
   rightPadding: 30,
   topPadding: 20,
-  bottomPadding: 50,
+  xAxisHeight: 50,
   subplotHeight: 100,
   subplotPadding: 10,
   circleRadius: 3,
@@ -103,9 +103,12 @@ export const groupMeasurements = (measurements, groupBy, groupByValueOrder) => {
     "asc");
 };
 
-export const clearMeasurementsSVG = (ref) => {
+export const clearMeasurementsSVG = (ref, xAxisRef) => {
   select(ref)
     .attr("height", null)
+    .selectAll("*").remove();
+
+  select(xAxisRef)
     .selectAll("*").remove();
 };
 
@@ -141,19 +144,55 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
   }
 };
 
-export const drawMeasurementsSVG = (ref, svgData) => {
-  const {xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
+const drawStickyXAxis = (ref, containerHeight, svgHeight, xScale, x_axis_label) => {
+  const svg = select(ref);
+
+  /**
+   * Add top sticky-constraint to make sure the x-axis is always visible
+   * Uses the minimum constraint to keep x-axis directly at the bottom of the
+   * measurements SVG even when the SVG is smaller than the container
+   */
+  const stickyTopConstraint = Math.min((containerHeight - layout.xAxisHeight), svgHeight);
+  svg.style("top", `${stickyTopConstraint}px`);
+
+  // Add white background rect so the axis doesn't overlap with underlying measurements
+  svg.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", "100%")
+    .attr("width", "100%")
+    .attr("fill", "white")
+    .attr("fill-opacity", 1);
+
+  // Draw sticky x-axis
+  const svgWidth = svg.node().getBoundingClientRect().width;
+  svg.append("g")
+    .attr("class", classes.xAxis)
+    .call(axisBottom(xScale))
+    .call((g) => g.attr("font-family", null))
+    .append("text")
+      .attr("x", layout.leftPadding + ((svgWidth - layout.leftPadding - layout.rightPadding)) / 2)
+      .attr("y", layout.xAxisHeight * 2 / 3)
+      .attr("text-anchor", "middle")
+      .attr("fill", "currentColor")
+      .text(x_axis_label);
+};
+
+export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
+  const {containerHeight, xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
   if (groupedMeasurements && groupedMeasurements.length === 0) return;
 
   const svg = select(ref);
-  const svgWidth = svg.node().getBoundingClientRect().width;
 
   // The number of groups is the number of subplots, which determines the final SVG height
   const totalSubplotHeight = (layout.subplotHeight * groupedMeasurements.length);
-  const svgHeight = totalSubplotHeight + layout.topPadding + layout.bottomPadding;
+  const svgHeight = totalSubplotHeight + layout.topPadding;
   svg.attr("height", svgHeight);
+
+  // x-axis is in a different SVG element to allow sticky positioning
+  drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);
 
   // Add threshold if provided
   if (threshold !== null) {
@@ -163,26 +202,12 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       .attr("x1", thresholdXValue)
       .attr("x2", thresholdXValue)
       .attr("y1", layout.topPadding)
-      .attr("y2", svgHeight - layout.bottomPadding)
+      .attr("y2", svgHeight)
       .attr("stroke-width", layout.thresholdStrokeWidth)
       .attr("stroke", layout.thresholdStroke)
       // Hide threshold by default since another function will toggle display
       .attr("display", "none");
   }
-
-  // Add x-axis to the bottom of the SVG
-  // (above the bottomPadding to leave room for the x-axis label)
-  svg.append("g")
-    .attr("class", classes.xAxis)
-    .attr("transform", `translate(0, ${svgHeight - layout.bottomPadding})`)
-    .call(axisBottom(xScale))
-    .call((g) => g.attr("font-family", null))
-    .append("text")
-      .attr("x", layout.leftPadding + ((svgWidth - layout.leftPadding - layout.rightPadding)) / 2)
-      .attr("y", layout.bottomPadding * 2 / 3)
-      .attr("text-anchor", "middle")
-      .attr("fill", "currentColor")
-      .text(x_axis_label);
 
   // Create a subplot for each grouping
   let prevSubplotBottom = layout.topPadding;

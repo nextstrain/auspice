@@ -21,7 +21,8 @@ import {
   svgContainerDOMId,
   toggleDisplay,
   addHoverPanelToMeasurementsAndMeans,
-  addColorByAttrToGroupingLabel
+  addColorByAttrToGroupingLabel,
+  layout
 } from "./measurementsD3";
 
 /**
@@ -140,6 +141,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Ref to access the D3 SVG
   const d3Ref = useRef(null);
+  const d3XAxisRef = useRef(null);
 
   // State for storing data for the HoverPanel
   const [hoverData, setHoverData] = useState(null);
@@ -159,7 +161,15 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
   const yScale = useMemo(() => createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
-  const svgData = useDeepCompareMemo({ xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements});
+  const svgData = useDeepCompareMemo({
+    containerHeight: height,
+    xScale,
+    yScale,
+    x_axis_label,
+    threshold,
+    groupingOrderedValues,
+    groupedMeasurements
+  });
   // Memoize handleHover function to avoid extra useEffect calls
   const handleHover = useMemo(() => (data, dataType, mouseX, mouseY, colorByAttr=null) => {
     let newHoverData = null;
@@ -205,8 +215,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Draw SVG from scratch
   useEffect(() => {
-    clearMeasurementsSVG(d3Ref.current);
-    drawMeasurementsSVG(d3Ref.current, svgData);
+    clearMeasurementsSVG(d3Ref.current, d3XAxisRef.current);
+    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData);
   }, [svgData]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
@@ -239,6 +249,32 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     };
   };
 
+  /**
+   * Sticky x-axis with a set height to make sure the x-axis is always
+   * at the bottom of the measurements panel
+   */
+  const getStickyXAxisSVGStyle = () => {
+    return {
+      width: "100%",
+      height: layout.xAxisHeight,
+      position: "sticky",
+      zIndex: 99
+    };
+  };
+
+  /**
+   * Position relative with bottom shifted up by the x-axis height to
+   * allow x-axis to fit in the bottom of the panel when scrolling all the way
+   * to the bottom of the measurements SVG
+   */
+  const getMainSVGStyle = () => {
+    return {
+      width: "100%",
+      position: "relative",
+      bottom: `${getStickyXAxisSVGStyle().height}px`
+    };
+  };
+
   return (
     <>
       {showLegend &&
@@ -252,10 +288,16 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
             hoverData={hoverData}
           />
         }
+        {/* x-axis SVG must be above main measurements SVG for sticky positioning to work properly */}
+        <svg
+          id="d3MeasurementsXAxisSVG"
+          ref={d3XAxisRef}
+          style={getStickyXAxisSVGStyle()}
+        />
         <svg
           id="d3MeasurementsSVG"
-          width="100%"
           ref={d3Ref}
+          style={getMainSVGStyle()}
         />
       </div>
     </>
