@@ -112,9 +112,12 @@ const MeasurementsOptions = () => {
       />
       <Toggle
         // Only display threshold toggle if the collection has a valid threshold
-        display={typeof collection.threshold === "number"}
+        display={
+          Array.isArray(collection.thresholds) &&
+          collection.thresholds.some((threshold) => typeof threshold === "number")
+        }
         on={showThreshold}
-        label="Show measurement threshold"
+        label="Show measurement threshold(s)"
         callback={() => dispatch({type: TOGGLE_MEASUREMENTS_THRESHOLD, data: !showThreshold})}
       />
     </div>

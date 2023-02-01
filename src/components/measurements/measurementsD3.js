@@ -179,7 +179,7 @@ const drawStickyXAxis = (ref, containerHeight, svgHeight, xScale, x_axis_label) 
 };
 
 export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
-  const {containerHeight, xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
+  const {containerHeight, xScale, yScale, x_axis_label, thresholds, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
   if (groupedMeasurements && groupedMeasurements.length === 0) return;
@@ -194,19 +194,21 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
   // x-axis is in a different SVG element to allow sticky positioning
   drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);
 
-  // Add threshold if provided
-  if (threshold !== null) {
-    const thresholdXValue = xScale(threshold);
-    svg.append("line")
-      .attr("class", classes.threshold)
-      .attr("x1", thresholdXValue)
-      .attr("x2", thresholdXValue)
-      .attr("y1", layout.topPadding)
-      .attr("y2", svgHeight)
-      .attr("stroke-width", layout.thresholdStrokeWidth)
-      .attr("stroke", layout.thresholdStroke)
-      // Hide threshold by default since another function will toggle display
-      .attr("display", "none");
+  // Add threshold(s) if provided
+  if (thresholds !== null) {
+    for (const threshold of thresholds) {
+      const thresholdXValue = xScale(threshold);
+      svg.append("line")
+        .attr("class", classes.threshold)
+        .attr("x1", thresholdXValue)
+        .attr("x2", thresholdXValue)
+        .attr("y1", layout.topPadding)
+        .attr("y2", svgHeight)
+        .attr("stroke-width", layout.thresholdStrokeWidth)
+        .attr("stroke", layout.thresholdStroke)
+        // Hide threshold by default since another function will toggle display
+        .attr("display", "none");
+    }
   }
 
   // Create a subplot for each grouping

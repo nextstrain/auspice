@@ -137,7 +137,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
-  const { title, x_axis_label, threshold, fields, measurements, groupings } = collection;
+  const { title, x_axis_label, thresholds, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
   const d3Ref = useRef(null);
@@ -166,7 +166,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     xScale,
     yScale,
     x_axis_label,
-    threshold,
+    thresholds,
     groupingOrderedValues,
     groupedMeasurements
   });
