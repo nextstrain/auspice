@@ -141,6 +141,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const { title, x_axis_label, thresholds, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
+  const svgContainerRef = useRef(null);
   const d3Ref = useRef(null);
   const d3XAxisRef = useRef(null);
 
@@ -216,6 +217,9 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 
   // Draw SVG from scratch
   useEffect(() => {
+    // Reset the container to the top to prevent sticky x-axis from keeping
+    // the scroll position on whitespace.
+    svgContainerRef.current.scrollTop = 0;
     clearMeasurementsSVG(d3Ref.current, d3XAxisRef.current);
     drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData);
   }, [svgData]);
@@ -284,7 +288,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
           <Legend right width={width}/>
         </ErrorBoundary>
       }
-      <div id={svgContainerDOMId} style={getSVGContainerStyle()}>
+      <div id={svgContainerDOMId} ref={svgContainerRef} style={getSVGContainerStyle()}>
         {hoverData &&
           <HoverPanel
             hoverData={hoverData}
