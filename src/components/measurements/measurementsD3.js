@@ -20,6 +20,8 @@ export const layout = {
   circleRadius: 3,
   circleHoverRadius: 5,
   circleStrokeWidth: 1,
+  circleFillOpacity: 0.5,
+  circleStrokeOpacity: 0.75,
   thresholdStrokeWidth: 2,
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
@@ -276,6 +278,8 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
         .attr("id", (d) => getMeasurementDOMId(d))
         .attr("cx", (d) => xScale(d.value))
         .attr("r", layout.circleRadius)
+        .attr("fill-opacity", layout.circleFillOpacity)
+        .attr("stroke-opacity", layout.circleStrokeOpacity)
         .on("mouseover.radius", (d, i, elements) => {
           select(elements[i]).transition()
             .duration("100")
