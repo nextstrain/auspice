@@ -22,7 +22,8 @@ import {
   toggleDisplay,
   addHoverPanelToMeasurementsAndMeans,
   addColorByAttrToGroupingLabel,
-  layout
+  layout,
+  jitterRawMeansByColorBy
 } from "./measurementsD3";
 
 /**
@@ -223,6 +224,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   useEffect(() => {
     addColorByAttrToGroupingLabel(d3Ref.current, treeStrainColors);
     colorMeasurementsSVG(d3Ref.current, treeStrainColors);
+    jitterRawMeansByColorBy(d3Ref.current, svgData, treeStrainColors, legendValues);
     drawMeansForColorBy(d3Ref.current, svgData, treeStrainColors, legendValues);
     addHoverPanelToMeasurementsAndMeans(d3Ref.current, handleHover, treeStrainColors);
   }, [svgData, treeStrainColors, legendValues, handleHover]);

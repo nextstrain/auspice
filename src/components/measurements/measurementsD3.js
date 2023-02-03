@@ -4,7 +4,7 @@ import { scaleLinear } from "d3-scale";
 import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
-import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals";
+import { measurementIdSymbol } from "../../util/globals";
 import { getBrighterColor } from "../../util/colorHelpers";
 
 /* C O N S T A N T S */
@@ -264,6 +264,7 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
       });
 
     // Add circles for each measurement
+    // Note, "cy" is added later when jittering within color-by groups
     subplot.append("g")
       .attr("class", classes.rawMeasurementsGroup)
       .attr("display", "none")
@@ -274,7 +275,6 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
         .attr("class", classes.rawMeasurements)
         .attr("id", (d) => getMeasurementDOMId(d))
         .attr("cx", (d) => xScale(d.value))
-        .attr("cy", (d) => yScale(d[measurementJitterSymbol]))
         .attr("r", layout.circleRadius)
         .on("mouseover.radius", (d, i, elements) => {
           select(elements[i]).transition()
@@ -305,6 +305,45 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
     .style("stroke", (d) => treeStrainColors[d.strain].color)
     .style("stroke-width", layout.circleStrokeWidth)
     .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
+};
+
+export const jitterRawMeansByColorBy = (ref, svgData, treeStrainColors, legendValues) => {
+  const { groupedMeasurements } = svgData;
+  const svg = select(ref);
+
+  groupedMeasurements.forEach(([_, measurements]) => {
+    // For each color-by attribute, create an array of measurement DOM ids
+    const colorByGroups = {};
+    measurements.forEach((measurement) => {
+      const { attribute } = treeStrainColors[measurement.strain];
+      colorByGroups[attribute] = colorByGroups[attribute] || [];
+      colorByGroups[attribute].push(getMeasurementDOMId(measurement));
+    });
+    // Calculate total available subplot height
+    // Accounts for top/bottom padding and padding between color-by groups
+    const numberOfColorByAttributes = Object.keys(colorByGroups).length;
+    const totalColorByPadding = (numberOfColorByAttributes - 1) * 2 * layout.circleRadius;
+    const availableSubplotHeight = layout.subplotHeight - (2*layout.subplotPadding) - totalColorByPadding;
+
+    let currentYMin = layout.subplotPadding;
+    Object.keys(colorByGroups)
+      // Sort by legendValues for stable ordering of color-by groups
+      .sort((a, b) => legendValues.indexOf(a) - legendValues.indexOf(b))
+      .forEach((attribute) => {
+        // Calculate max Y value for each color-by attribute
+        // This is determined by the proportion of measurements in each attribute group
+        const domIds = colorByGroups[attribute];
+        const proportionOfMeasurements = domIds.length / measurements.length;
+        const currentYMax = currentYMin + (proportionOfMeasurements * availableSubplotHeight);
+        // Jitter "cy" value for each raw measurement
+        domIds.forEach((domId) => {
+          const jitter = Math.random() * (currentYMax - currentYMin) + currentYMin;
+          svg.select(`#${domId}`).attr("cy", jitter);
+        });
+        // Set next min Y value for next color-by attribute group
+        currentYMin = currentYMax + (2 * layout.circleRadius);
+      });
+  });
 };
 
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues) => {
