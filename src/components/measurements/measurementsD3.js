@@ -4,7 +4,7 @@ import { scaleLinear } from "d3-scale";
 import { select, event as d3event } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
-import { measurementIdSymbol, measurementJitterSymbol } from "../../util/globals";
+import { measurementIdSymbol } from "../../util/globals";
 import { getBrighterColor } from "../../util/colorHelpers";
 
 /* C O N S T A N T S */
@@ -14,12 +14,14 @@ export const layout = {
   leftPadding: 180,
   rightPadding: 30,
   topPadding: 20,
-  bottomPadding: 50,
+  xAxisHeight: 50,
   subplotHeight: 100,
   subplotPadding: 10,
   circleRadius: 3,
   circleHoverRadius: 5,
   circleStrokeWidth: 1,
+  circleFillOpacity: 0.5,
+  circleStrokeOpacity: 0.75,
   thresholdStrokeWidth: 2,
   thresholdStroke: "#DDD",
   subplotFill: "#adb1b3",
@@ -103,9 +105,12 @@ export const groupMeasurements = (measurements, groupBy, groupByValueOrder) => {
     "asc");
 };
 
-export const clearMeasurementsSVG = (ref) => {
+export const clearMeasurementsSVG = (ref, xAxisRef) => {
   select(ref)
     .attr("height", null)
+    .selectAll("*").remove();
+
+  select(xAxisRef)
     .selectAll("*").remove();
 };
 
@@ -141,48 +146,72 @@ const drawMeanAndStandardDeviation = (values, d3ParentNode, containerClass, colo
   }
 };
 
-export const drawMeasurementsSVG = (ref, svgData) => {
-  const {xScale, yScale, x_axis_label, threshold, groupingOrderedValues, groupedMeasurements} = svgData;
+const drawStickyXAxis = (ref, containerHeight, svgHeight, xScale, x_axis_label) => {
+  const svg = select(ref);
+
+  /**
+   * Add top sticky-constraint to make sure the x-axis is always visible
+   * Uses the minimum constraint to keep x-axis directly at the bottom of the
+   * measurements SVG even when the SVG is smaller than the container
+   */
+  const stickyTopConstraint = Math.min((containerHeight - layout.xAxisHeight), svgHeight);
+  svg.style("top", `${stickyTopConstraint}px`);
+
+  // Add white background rect so the axis doesn't overlap with underlying measurements
+  svg.append("rect")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("height", "100%")
+    .attr("width", "100%")
+    .attr("fill", "white")
+    .attr("fill-opacity", 1);
+
+  // Draw sticky x-axis
+  const svgWidth = svg.node().getBoundingClientRect().width;
+  svg.append("g")
+    .attr("class", classes.xAxis)
+    .call(axisBottom(xScale))
+    .call((g) => g.attr("font-family", null))
+    .append("text")
+      .attr("x", layout.leftPadding + ((svgWidth - layout.leftPadding - layout.rightPadding)) / 2)
+      .attr("y", layout.xAxisHeight * 2 / 3)
+      .attr("text-anchor", "middle")
+      .attr("fill", "currentColor")
+      .text(x_axis_label);
+};
+
+export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
+  const {containerHeight, xScale, yScale, x_axis_label, thresholds, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
   if (groupedMeasurements && groupedMeasurements.length === 0) return;
 
   const svg = select(ref);
-  const svgWidth = svg.node().getBoundingClientRect().width;
 
   // The number of groups is the number of subplots, which determines the final SVG height
   const totalSubplotHeight = (layout.subplotHeight * groupedMeasurements.length);
-  const svgHeight = totalSubplotHeight + layout.topPadding + layout.bottomPadding;
+  const svgHeight = totalSubplotHeight + layout.topPadding;
   svg.attr("height", svgHeight);
 
-  // Add threshold if provided
-  if (threshold !== null) {
-    const thresholdXValue = xScale(threshold);
-    svg.append("line")
-      .attr("class", classes.threshold)
-      .attr("x1", thresholdXValue)
-      .attr("x2", thresholdXValue)
-      .attr("y1", layout.topPadding)
-      .attr("y2", svgHeight - layout.bottomPadding)
-      .attr("stroke-width", layout.thresholdStrokeWidth)
-      .attr("stroke", layout.thresholdStroke)
-      // Hide threshold by default since another function will toggle display
-      .attr("display", "none");
-  }
+  // x-axis is in a different SVG element to allow sticky positioning
+  drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);
 
-  // Add x-axis to the bottom of the SVG
-  // (above the bottomPadding to leave room for the x-axis label)
-  svg.append("g")
-    .attr("class", classes.xAxis)
-    .attr("transform", `translate(0, ${svgHeight - layout.bottomPadding})`)
-    .call(axisBottom(xScale))
-    .call((g) => g.attr("font-family", null))
-    .append("text")
-      .attr("x", layout.leftPadding + ((svgWidth - layout.leftPadding - layout.rightPadding)) / 2)
-      .attr("y", layout.bottomPadding * 2 / 3)
-      .attr("text-anchor", "middle")
-      .attr("fill", "currentColor")
-      .text(x_axis_label);
+  // Add threshold(s) if provided
+  if (thresholds !== null) {
+    for (const threshold of thresholds) {
+      const thresholdXValue = xScale(threshold);
+      svg.append("line")
+        .attr("class", classes.threshold)
+        .attr("x1", thresholdXValue)
+        .attr("x2", thresholdXValue)
+        .attr("y1", layout.topPadding)
+        .attr("y2", svgHeight)
+        .attr("stroke-width", layout.thresholdStrokeWidth)
+        .attr("stroke", layout.thresholdStroke)
+        // Hide threshold by default since another function will toggle display
+        .attr("display", "none");
+    }
+  }
 
   // Create a subplot for each grouping
   let prevSubplotBottom = layout.topPadding;
@@ -237,6 +266,7 @@ export const drawMeasurementsSVG = (ref, svgData) => {
       });
 
     // Add circles for each measurement
+    // Note, "cy" is added later when jittering within color-by groups
     subplot.append("g")
       .attr("class", classes.rawMeasurementsGroup)
       .attr("display", "none")
@@ -247,8 +277,9 @@ export const drawMeasurementsSVG = (ref, svgData) => {
         .attr("class", classes.rawMeasurements)
         .attr("id", (d) => getMeasurementDOMId(d))
         .attr("cx", (d) => xScale(d.value))
-        .attr("cy", (d) => yScale(d[measurementJitterSymbol]))
         .attr("r", layout.circleRadius)
+        .attr("fill-opacity", layout.circleFillOpacity)
+        .attr("stroke-opacity", layout.circleStrokeOpacity)
         .on("mouseover.radius", (d, i, elements) => {
           select(elements[i]).transition()
             .duration("100")
@@ -278,6 +309,45 @@ export const colorMeasurementsSVG = (ref, treeStrainColors) => {
     .style("stroke", (d) => treeStrainColors[d.strain].color)
     .style("stroke-width", layout.circleStrokeWidth)
     .style("fill", (d) => getBrighterColor(treeStrainColors[d.strain].color));
+};
+
+export const jitterRawMeansByColorBy = (ref, svgData, treeStrainColors, legendValues) => {
+  const { groupedMeasurements } = svgData;
+  const svg = select(ref);
+
+  groupedMeasurements.forEach(([_, measurements]) => {
+    // For each color-by attribute, create an array of measurement DOM ids
+    const colorByGroups = {};
+    measurements.forEach((measurement) => {
+      const { attribute } = treeStrainColors[measurement.strain];
+      colorByGroups[attribute] = colorByGroups[attribute] || [];
+      colorByGroups[attribute].push(getMeasurementDOMId(measurement));
+    });
+    // Calculate total available subplot height
+    // Accounts for top/bottom padding and padding between color-by groups
+    const numberOfColorByAttributes = Object.keys(colorByGroups).length;
+    const totalColorByPadding = (numberOfColorByAttributes - 1) * 2 * layout.circleRadius;
+    const availableSubplotHeight = layout.subplotHeight - (2*layout.subplotPadding) - totalColorByPadding;
+
+    let currentYMin = layout.subplotPadding;
+    Object.keys(colorByGroups)
+      // Sort by legendValues for stable ordering of color-by groups
+      .sort((a, b) => legendValues.indexOf(a) - legendValues.indexOf(b))
+      .forEach((attribute) => {
+        // Calculate max Y value for each color-by attribute
+        // This is determined by the proportion of measurements in each attribute group
+        const domIds = colorByGroups[attribute];
+        const proportionOfMeasurements = domIds.length / measurements.length;
+        const currentYMax = currentYMin + (proportionOfMeasurements * availableSubplotHeight);
+        // Jitter "cy" value for each raw measurement
+        domIds.forEach((domId) => {
+          const jitter = Math.random() * (currentYMax - currentYMin) + currentYMin;
+          svg.select(`#${domId}`).attr("cy", jitter);
+        });
+        // Set next min Y value for next color-by attribute group
+        currentYMin = currentYMax + (2 * layout.circleRadius);
+      });
+  });
 };
 
 export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues) => {

@@ -1,6 +1,5 @@
 import { pick } from "lodash";
-import { measurementIdSymbol, measurementJitterSymbol } from "../util/globals";
-import { layout as measurementsLayout } from "../components/measurements/measurementsD3";
+import { measurementIdSymbol } from "../util/globals";
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
@@ -109,6 +108,16 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
   }
 
   collections.forEach((collection) => {
+    /**
+     * Keep backwards compatibility with single value threshold.
+     * Make sure thresholds are an array of values so that we don't have to
+     * check the data type in the D3 drawing process
+     * `collection.thresholds` takes precedence over the deprecated `collection.threshold`
+     */
+    if (typeof collection.threshold === "number") {
+      collection.thresholds = collection.thresholds || [collection.threshold];
+      delete collection.threshold;
+    }
     /*
      * Create fields Map for easier access of titles and to keep ordering
      * First add fields from JSON to keep user's ordering
@@ -160,10 +169,7 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
         }
       });
 
-      // Add jitter and stable id for each measurement to help visualization
-      const { yMin, yMax } = measurementsLayout;
-      // Generates a random number between the y min and max, inclusively
-      measurement[measurementJitterSymbol] = Math.random() * (yMax - yMin + 1) + yMin;
+      // Add stable id for each measurement to help visualization
       measurement[measurementIdSymbol] = index;
     });
 

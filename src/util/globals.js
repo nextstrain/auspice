@@ -204,7 +204,6 @@ export const isValueValid = (value) => {
 export const strainSymbol = Symbol('strain');
 export const genotypeSymbol = Symbol('genotype');
 export const measurementIdSymbol = Symbol('measurementId');
-export const measurementJitterSymbol = Symbol('measurementJitter');
 
 /**
  * Address to fetch tiles from (including access key).
