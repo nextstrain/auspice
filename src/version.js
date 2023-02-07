@@ -1,4 +1,4 @@
-const version = "2.42.0";
+const version = "2.43.0";
 
 module.exports = {
   version
