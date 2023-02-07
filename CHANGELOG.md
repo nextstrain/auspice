@@ -3,12 +3,9 @@ title: Changelog
 ---
 
 ## version 2.43.0 - 2023/02/07
-
+* Improvements to the measurements panel including multiple thresholds, jitter of raw measurements within color-by groups, and a sticky x-axis. See [PR 1631](https://github.com/nextstrain/auspice/pull/1631).
 
 ## version 2.42.0 - 2022/12/15
-
-
-
 * You can now turn off tip labels by selecting "none" in the dropdown. See [PR #1618](https://github.com/nextstrain/auspice/pull/1618)
 * A bug in the measurements panel was fixed where the mean/SD may disappear. See [PR #1593](https://github.com/nextstrain/auspice/pull/1593)
 
@@ -158,7 +155,7 @@ See [PR 1456](https://github.com/nextstrain/auspice/pull/1456) for more.
 There have also been internal changes related to how we run CI. These should not affect using Auspice as a library / CLI.
 
 ## version 2.32.1 - 2021/11/11
-* Fix URL parsing to allow the string "narratives" to be in a dataset without it being interpreted as a narrative itself. 
+* Fix URL parsing to allow the string "narratives" to be in a dataset without it being interpreted as a narrative itself.
 See [PR 1428](https://github.com/nextstrain/auspice/pull/1428) for more.
 
 ## version 2.32.0 - 2021/10/20
@@ -180,19 +177,19 @@ See [PR 1392](https://github.com/nextstrain/auspice/pull/1392) for more.
 ## version 2.30.0 - 2021/09/07
 
 * Narratives can now load sidecar files and second trees.
-This allows allowing frequency panel display, colouring by root-sequence, and tanglegrams. 
+This allows allowing frequency panel display, colouring by root-sequence, and tanglegrams.
 See [PR 1305](https://github.com/nextstrain/auspice/pull/1305) for more.
 * Excel (`.xlsx`) files can be used as additional metadata for drag-and-drop.
 See [PR 1386](https://github.com/nextstrain/auspice/pull/1386) for more.
 * Trees are now clipped to improve axes visibility.
 See [PR 1383](https://github.com/nextstrain/auspice/pull/1383) for more.
-* Improved accession URL creation. 
+* Improved accession URL creation.
 See [PR 1382](https://github.com/nextstrain/auspice/pull/1382) for more.
 * minor documentation improvements.
 
 ## version 2.29.1 - 2021/07/16
 
-* Update TravisCI script to improve how we publish Auspice to npm. 
+* Update TravisCI script to improve how we publish Auspice to npm.
 See [PR 1380](https://github.com/nextstrain/auspice/pull/1380) for more.
 
 ## version 2.29.0 - 2021/07/15
