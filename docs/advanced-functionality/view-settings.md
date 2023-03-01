@@ -72,7 +72,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `d`        | List of panels to display, `,` separated | `d=tree,map` |
 | `p`        | Panel layout (buggy!) | `p=full`, `p=grid` |
 | `gmin`     | Entropy panel zoom (minimum) bound | `gmin=1000` |
-| `gmin`     | Entropy panel zoom (maximum) bound | `gmax=2000` |
+| `gmax`     | Entropy panel zoom (maximum) bound | `gmax=2000` |
 | `animate`  | Animation settings | |
 | `n`        | Narrative page number | `n=1` goes to the first page |
 | `s`        | Selected strain | `s=1_0199_PF` |
