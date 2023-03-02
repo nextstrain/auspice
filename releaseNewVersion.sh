@@ -113,4 +113,4 @@ echo -e "\nThe 'CI' GitHub Action will automatically publish this version to npm
 echo -e "\nNow attempting to make a GitHub release (https://github.com/nextstrain/auspice/releases). If this step fails please do this manually."
 
 # Step 10: create a release based off the tag with content from the changlog
-node scripts/extract-release-notes.js | gh release create v${newVersion} -t "Auspice ${newVersion}" --notes-file -
+node scripts/extract-release-notes.js | gh release create v${newVersion} --repo nextstrain/auspice -t "Auspice ${newVersion}" --notes-file -
