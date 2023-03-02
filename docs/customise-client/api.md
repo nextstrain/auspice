@@ -26,7 +26,8 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 * `splashComponent` a (relative) path to a JS file exporting a React component to be rendered as the splash page. See below.
 * `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
 * `finePrint` String of Markdown to add to the "fine print" at the bottom of pages.
-* `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
+* `plausibleDataDomain` plausible.io analytics (see below)
+* `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. This is deprecated and will be removed from an upcoming release.
 * `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
 * `mapTiles` Specify the address (and other information) for the tiles used to render the map.
 
@@ -152,3 +153,14 @@ If you are distributing your own version of auspice (i.e. not running it locally
 Please see [this discussion post](https://discussion.nextstrain.org/t/build-with-newest-nextstrain-ncov-has-api-requests-to-mapbox-403-forbidden/396/11?u=james) for a hands-on guide to setting custom map tile info.
 For some examples of other tile sets you may use, see the [OpenStreetMap wiki](https://wiki.openstreetmap.org/wiki/Tile_servers), and please remember to adhere to the licenses and terms of use for each tile server.
 The API address contains parameters as specified by the [Leaflet API](https://docs.mapbox.com/api/overview/).
+
+---
+
+### Tracking Analytics
+
+Auspice has in-built support for [Plausible Analytics](https://plausible.io/docs).
+To enable this you will need to provide the `plausibleDataDomain` in your extensions.
+The analytics are not included when running Auspice in development mode.
+
+Auspice has support for Google Analytics but this is deprecated and will be removed in a future release.
+Google Analytics run when the `googleAnalyticsKey` extension is set and only run in production mode.
