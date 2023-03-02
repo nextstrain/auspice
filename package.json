@@ -8,7 +8,7 @@
   "homepage": "https://www.npmjs.com/package/auspice",
   "engines": {
     "node": "^14 || ^16 || ^18",
-    "npm": "^7 || ^8"
+    "npm": "^7 || ^8 || ^9"
   },
   "bin": {
     "auspice": "./auspice.js"
