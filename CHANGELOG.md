@@ -2,6 +2,8 @@
 title: Changelog
 ---
 
+* Added support for [Plausible Analytics](https://plausible.io) and deprecated support for Google Analytics. See the [documentation on configuring analytics](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html#tracking-analytics). ([#1597](https://github.com/nextstrain/auspice/pull/1597))
+
 ## version 2.43.0 - 2023/02/07
 * Improvements to the measurements panel including multiple thresholds, jitter of raw measurements within color-by groups, and a sticky x-axis. See [PR 1631](https://github.com/nextstrain/auspice/pull/1631).
 
