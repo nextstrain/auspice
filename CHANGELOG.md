@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.44.0 - 2023/03/02
+
+
 * Added support for [Plausible Analytics](https://plausible.io) and deprecated support for Google Analytics. See the [documentation on configuring analytics](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html#tracking-analytics). ([#1597](https://github.com/nextstrain/auspice/pull/1597))
 
 ## version 2.43.0 - 2023/02/07
