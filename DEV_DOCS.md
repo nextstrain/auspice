@@ -212,4 +212,4 @@ If a translation of a particular string is not yet available, then auspice will 
             ```
 
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
-3. When the new version of Auspice is available on bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `master` branch.
+3. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
