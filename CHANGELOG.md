@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.45.0 - 2023/03/08
+
+
 * Remove support for Node.js version 12. ([#1560](https://github.com/nextstrain/auspice/pull/1560))
 * Add support for Node.js version 18 and NPM version 9. ([#1560](https://github.com/nextstrain/auspice/pull/1560))
 
