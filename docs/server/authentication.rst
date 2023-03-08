@@ -13,7 +13,13 @@ Using the Server to Verify Cookies
 
    auth-cartoon
 
-The server can examine cookies sent with each API request (or, the request for ``index.html``) to verify the status of a user. This allows the server to examine the cookie and: \* Deliver different available datasets depending on the cookie \* Accept or reject specific dataset requests depending on the cookie \* Redirect requests to a custom authentication page (referred to as ``login.html``) \* If this is from a request for ``index.html`` (i.e. you want to secure the entire site), then the redirect is simple \* For redirects from an API request, you may have to respond with a 302 or 303 redirect header.
+The server can examine cookies sent with each API request (or, the request for ``index.html``) to verify the status of a user. This allows the server to examine the cookie and:
+
+* Deliver different available datasets depending on the cookie
+* Accept or reject specific dataset requests depending on the cookie
+* Redirect requests to a custom authentication page (referred to as ``login.html``)
+   * If this is from a request for ``index.html`` (i.e. you want to secure the entire site), then the redirect is simple
+   * For redirects from an API request, you may have to respond with a 302 or 303 redirect header.
 
 It is this custom authentication page which can process a login and set a cookie appropriately. As Auspice is served from the same domain, the cookie should remain with all requests.
 

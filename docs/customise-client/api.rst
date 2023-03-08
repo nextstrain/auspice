@@ -1,6 +1,8 @@
 Client Customisation API
 ========================
 
+.. warning::
+
    The functionality detailed in this page needs more attention, both in terms of testing and code development. We expect there to be some bugs and possible API changes. If you rely on this functionality, we recommend you pin your installation of Auspice to a specific version. Please `get in touch with us <mailto:hello@nextstrain.org>`__ if you are using these customisations so that we can work with you!
 
 This page details the available options and format of the customisations available at (client) build time. They are contained in a JSON file supplied to Auspice via
@@ -9,7 +11,11 @@ This page details the available options and format of the customisations availab
 
    auspice build --extend <JSON>
 
-*Note that the hot-reloading development functionality does not work for code which is included via this client customisation mechanism.* *Thus, while you can run ``auspice develop --extend <JSON>`` it will not update as you may expect!*
+.. note::
+
+   The hot-reloading development functionality does not work for code which is included via this client customisation mechanism. Thus, while you can run ``auspice develop --extend <JSON>`` it will not update as you may expect!
+
+.. _client-api-available-customisations:
 
 Available Customisations
 ------------------------
@@ -26,9 +32,9 @@ The following are definable as top-level keys of the JSON file. A useful referen
 -  ``serverAddress`` Specify the address / prefix which the auspice client uses for API requests.
 -  ``mapTiles`` Specify the address (and other information) for the tiles used to render the map.
 
-..
+.. note::
 
-   Please remember to make any modifications, including customisations described here, publicly available. See `the previous page <./index.rst>`__ for more details.
+   Please remember to make any modifications, including customisations described here, publicly available. See :doc:`the previous page <overview>` for more details.
 
 --------------
 
@@ -138,9 +144,11 @@ Where the javascript file contains a default export of a React component.
 Specifying the API server address
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-By default, the client makes API requests (`as detailed here <requests.md>`__) to "/charon/getAvailable", "/charon/getDataset" etc. This is using the default server address of "/charon". This can be changed by specifying ``serverAddress`` in the customisation JSON.
+By default, the client makes API requests (:doc:`as detailed here <requests>`) to "/charon/getAvailable", "/charon/getDataset" etc. This is using the default server address of "/charon". This can be changed by specifying ``serverAddress`` in the customisation JSON.
 
-   Note that if you specify a ``serverAddress`` on a different origin (protocol + domain + port) than Auspice, the server will need to send CORS headers to permit the requests from Auspice.
+.. note::
+
+   If you specify a ``serverAddress`` on a different origin (protocol + domain + port) than Auspice, the server will need to send CORS headers to permit the requests from Auspice.
 
 --------------
 

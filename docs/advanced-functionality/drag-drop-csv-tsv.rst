@@ -87,7 +87,11 @@ The following fields are ignored completely. (Some of these may be allowed in th
    month
    day
 
-Fields which end with certain strings are treated as follows: - ``__autocolour``: this suffix is dropped, but the column is otherwise parsed as normal - ``__colour``: see above section on adding colours - ``__shape``: this column is currently ignored
+Fields which end with certain strings are treated as follows:
+
+- ``__autocolour``: this suffix is dropped, but the column is otherwise parsed as normal
+- ``__colour``: see above section on adding colours
+- ``__shape``: this column is currently ignored
 
 The following columns are interpreted as geographic locations (see section above) and therefore are not added as a colouring:
 

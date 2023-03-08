@@ -4,7 +4,13 @@ Server API
 Auspice client requests
 -----------------------
 
-The Auspice server handles requests to 3 API endpoints made by the Auspice client: \* ``/charon/getAvailable`` (returns a list of available datasets and narratives) \* ``/charon/getDataset`` (returns the requested dataset) \* ``/charon/getNarrative`` (returns the requested narrative)
+The Auspice server handles requests to 3 API endpoints made by the Auspice client:
+
+* ``/charon/getAvailable`` (returns a list of available datasets and narratives)
+* ``/charon/getDataset`` (returns the requested dataset)
+* ``/charon/getNarrative`` (returns the requested narrative)
+
+.. _server-api-charon-getavailable:
 
 ``/charon/getAvailable``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -49,13 +55,15 @@ Failure to return a valid JSON will result in a warning notification shown in Au
 
 The JSON response depends on the file-type being requested.
 
-If the type is not specified, i.e. we're requesting the "main" dataset JSON then `see this JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__. Note that the Auspice client *cannot* process v1 (meta / tree) JSONs -- `see below <server/api.md#importing-code-from-auspice>`__ for how to convert these.
+If the type is not specified, i.e. we're requesting the "main" dataset JSON then `see this JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__. Note that the Auspice client *cannot* process v1 (meta / tree) JSONs -- :ref:`see below <server-api-importing-code-from-auspice>` for how to convert these.
 
 Alternative file type reponses are to be documented.
 
 **Alternative responses:**
 
 A ``204`` reponse will cause Auspice to show its splash page listing the available datasets & narratives. Any other non-200 reponse behaves similarly but also displays a large "error" message indicating that the dataset was not valid.
+
+.. _server-api-charon-getnarrative:
 
 ``/charon/getNarrative``
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -81,11 +89,13 @@ If a JSON is requested then the narrative file is parsed into JSON format by the
      res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
    }
 
-..
+.. note::
 
    While the Auspice client (from v2.18 onwards) always requests the ``type=md``, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatible with servers which may be using an earlier API.
 
 --------------
+
+.. _server-api-supplying-custom-handlers:
 
 Supplying custom handlers to the Auspice server
 -----------------------------------------------
@@ -121,6 +131,8 @@ Here's a pseudocode example of an implementation for the ``getAvailable`` handle
 
 --------------
 
+.. _server-api-importing-code-from-auspice:
+
 Importing code from Auspice
 ---------------------------
 
@@ -133,6 +145,8 @@ Currently
    const auspice = require("auspice");
 
 returns an object with two properties:
+
+.. _server-api-convertfromv1:
 
 ``convertFromV1``
 ~~~~~~~~~~~~~~~~~
@@ -152,7 +166,9 @@ An object representing the v2 JSON `defined by this schema <https://github.com/n
 ``parseNarrativeFile``
 ~~~~~~~~~~~~~~~~~~~~~~
 
-   This function is deprecated as of vXXX. You can now send the untransformed contents of the narrative file (markdown) for client-side parsing. See `above <#charon-getnarrative>`__ for more details.
+.. warning::
+
+   This function is deprecated as of vXXX. You can now send the untransformed contents of the narrative file (markdown) for client-side parsing. See :ref:`above <server-api-charon-getnarrative>` for more details.
 
 **Signature:**
 
@@ -164,4 +180,8 @@ where ``fileContents`` is a string representation of the narrative Markdown file
 
 **Returns:**
 
-An array of objects, each entry representing a different narrative "block" or "page". Each object has properties \* ``__html`` -- the HTML to render in the sidebar to form the narrative \* ``dataset`` -- the dataset associated with this block \* ``query`` -- the query associated with this block
+An array of objects, each entry representing a different narrative "block" or "page". Each object has properties
+
+* ``__html`` -- the HTML to render in the sidebar to form the narrative
+* ``dataset`` -- the dataset associated with this block
+* ``query`` -- the query associated with this block

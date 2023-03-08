@@ -24,7 +24,7 @@ And then run ``auspice`` via:
 
    auspice view --datasetDir datasets
 
-This will allow you to run Auspice locally (i.e. from your computer) and view the dataset which is behind `nextstrain.org/zika <https://nextstrain.org/zika>`__. `See below <#obtaining-a-set-of-input-files>`__ for how to download all of the data available on `nextstrain.org <https://nextstrain.org>`__.
+This will allow you to run Auspice locally (i.e. from your computer) and view the dataset which is behind `nextstrain.org/zika <https://nextstrain.org/zika>`__. :ref:`See below <introduction-obtaining-a-set-of-input-files>` for how to download all of the data available on `nextstrain.org <https://nextstrain.org>`__.
 
 To analyse your own data, please see the tutorials on the `nextstrain docs <https://nextstrain.org/docs/>`__.
 
@@ -41,12 +41,16 @@ This is the main command we'll run Auspice with, as it makes Auspice available i
 | narrativeDir        | PATH                     | Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers. |
 +---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
 
-For more complicated setups, where you define your own server handlers, see `supplying custom handlers to the Auspice server <../server/api.md#supplying-custom-handlers-to-the-auspice-server>`__.
+For more complicated setups, where you define your own server handlers, see :ref:`supplying custom handlers to the Auspice server <server-api-supplying-custom-handlers>`.
 
 ``auspice build``
 -----------------
 
-Build the client source code bundle. This is needed in three cases: 1. You have installed Auspice from source, or updated the source code. 1. You are editing the source code and need to rebuild the client 1. You wish to build a customised version of the Auspice client. See `Customising Auspice <../customise-client/index>`__ for more info.
+Build the client source code bundle. This is needed in three cases:
+
+1. You have installed Auspice from source, or updated the source code.
+2. You are editing the source code and need to rebuild the client
+3. You wish to build a customised version of the Auspice client. See :doc:`Customising Auspice <../customise-client/overview>` for more info.
 
 ``auspice develop``
 -------------------
@@ -58,7 +62,7 @@ This is only useful if you are editing the client source code!
 ``auspice convert``
 -------------------
 
-This is a utility command to convert between dataset formats. Currently, it only converts "Auspice v1" JSONs into "Auspice v2" JSONs, using the same code that is `programatically importable <../server/api.md#convertfromv1>`__.
+This is a utility command to convert between dataset formats. Currently, it only converts "Auspice v1" JSONs into "Auspice v2" JSONs, using the same code that is :ref:`programatically importable <server-api-convertfromv1>`.
 
 Right now, ``auspice view`` will automatically convert "v1" JSONs into "v2" JSONs, so there's no need to do this yourself.
 
@@ -67,34 +71,56 @@ Input File Formats
 
 Auspice is agnostic about the data it visualises -- they don't have to be viral genomes, or real-time, or generated in Augur. (They do, however have to be in a specific file format.)
 
-Auspice takes two different file types: \* Datasets (the tree, map, etc.), which are defined as one or more JSON files. \* Narratives, which are specified as a Markdown file.
+Auspice takes two different file types:
 
-See the `Server API <../server/api.md>`__ for more details about the file formats an Auspice server (e.g. ``auspice view``) sends to the client.
+* Datasets (the tree, map, etc.), which are defined as one or more JSON files.
+* Narratives, which are specified as a Markdown file.
+
+See the :doc:`Server API <../server/api>` for more details about the file formats an Auspice server (e.g. ``auspice view``) sends to the client.
 
 Dataset JSONs
 ~~~~~~~~~~~~~
 
 Currently we mainly use `Augur <https://github.com/nextstrain/augur>`__ to create these datasets. See `the Nextstrain documentation <https://nextstrain.org/docs/bioinformatics/introduction-to-augur>`__ for more details on this process.
 
-Datasets JSONs include: \* Auspice v2 JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__. It includes the following information: \* ``tree``: The tree structure encoded as a deeply nested JSON object. \* Traits (such as country, divergence, collection date, attributions, etc.) are stored on each node. \* The presence of a ``children`` property indicates that it's an internal node and contains the child objects. \* ``metadata``: Additional data to control and inform the visualization. \* Frequency JSON (optional) - `example here <http://data.nextstrain.org/flu_seasonal_h3n2_ha_2y_tip-frequencies.json>`__ \* Generates the frequencies panel, e.g. on `nextstrain.org/flu <https://nextstrain.org/flu>`__.
+Datasets JSONs include:
+
+* Auspice v2 JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__. It includes the following information:
+   * ``tree``: The tree structure encoded as a deeply nested JSON object.
+      * Traits (such as country, divergence, collection date, attributions, etc.) are stored on each node.
+      * The presence of a ``children`` property indicates that it's an internal node and contains the child objects.
+   * ``metadata``: Additional data to control and inform the visualization.
+* Frequency JSON (optional) - `example here <http://data.nextstrain.org/flu_seasonal_h3n2_ha_2y_tip-frequencies.json>`__
+   * Generates the frequencies panel, e.g. on `nextstrain.org/flu <https://nextstrain.org/flu>`__.
+
+.. note::
 
    We are working on ways to make datasets in Newick / Nexus formats available. You can see an early prototype of this at `auspice-us.herokuapp.com <https://auspice-us.herokuapp.com/>`__ where you can drop on Newick (and CSV) files. Using BEAST trees is possible, but you have to use Augur to convert them first.
 
-..
+.. note::
 
-   If you happen to maintain builds that rely on Auspice v1, don’t worry - Auspice v2 is backward compatible and accepts the v1 format as well. The v1 schema is also available below. See `the v2 release notes <../releases/v2.md>`__ for details and motivation for the v2 format.
+   If you happen to maintain builds that rely on Auspice v1, don't worry - Auspice v2 is backward compatible and accepts the v1 format as well. The v1 schema is also available below. See :doc:`the v2 release notes <../releases/v2>` for details and motivation for the v2 format.
 
 Auspice v1 JSONs (for backwards compatibility use only)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Auspice works with the v1 format for backwards compatibility. *The zika dataset we download above is in this format.*
 
-This format includes: \* Tree JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-tree.json>`__ \* The same tree information as in the v2 JSON above in a separate file whose name *must* end with ``_tree.json``. \* Metadata JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-meta.json>`__ \* The same metadata information as in the v2 JSON above in a separate file whose name *must* end with ``_meta.json`` and have the same prefix as the tree JSON above. \* Frequency JSON (optional) - `example here <http://data.nextstrain.org/flu_seasonal_h3n2_ha_2y_tip-frequencies.json>`__ \* Generates the frequencies panel, e.g. on `nextstrain.org/flu <https://nextstrain.org/flu>`__.
+This format includes:
+
+* Tree JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-tree.json>`__
+   * The same tree information as in the v2 JSON above in a separate file whose name *must* end with ``_tree.json``.
+* Metadata JSON (required) - `schema here <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-meta.json>`__
+   * The same metadata information as in the v2 JSON above in a separate file whose name *must* end with ``_meta.json`` and have the same prefix as the tree JSON above.
+* Frequency JSON (optional) - `example here <http://data.nextstrain.org/flu_seasonal_h3n2_ha_2y_tip-frequencies.json>`__
+   * Generates the frequencies panel, e.g. on `nextstrain.org/flu <https://nextstrain.org/flu>`__.
 
 Narratives
 ~~~~~~~~~~
 
 For narratives, please see `Writing a Narrative <https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html>`__ for a description of the file format.
+
+.. _introduction-obtaining-a-set-of-input-files:
 
 Obtaining a Set of Input Files
 ------------------------------

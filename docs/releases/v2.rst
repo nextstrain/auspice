@@ -118,7 +118,7 @@ Auspice has had the ability to display two trees side-by-side for a while now (a
 
 We now use a more verbose syntax to define the display of multiple trees, specifying the entire pathname for both datasets. The above example is now "flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y". Any available datasets can be compared using this URL syntax, even if the result is rather nonsensical. The old syntax will continue to work and will automatically correct to the new syntax (and show you a warning).
 
-P.S. The list of available second trees, which is displayed in the sidebar, is now handed to Auspice by the `getAvailable API request <server/api.md#charon-getavailable>`__.
+P.S. The list of available second trees, which is displayed in the sidebar, is now handed to Auspice by the :ref:`getAvailable API request <server-api-charon-getavailable>`.
 
 Display better dates on the tree axis
 -------------------------------------
@@ -142,7 +142,7 @@ If your analysis produces results in ``-`` (gaps), ``X`` (unknown residue) or ``
 Removal of Twitter & Google Analytics
 -------------------------------------
 
-These were a holdover from the early days when `nextstrain.org <https://nextstrain.org>`__ and Auspice were the same thing. We've now removed all calls to Twitter, and made Google Analytics opt in. See `requests made from the client <../customise-client/requests.md>`__ for details on exactly what requests are made and how to opt-in to Google Analytics if you desire.
+These were a holdover from the early days when `nextstrain.org <https://nextstrain.org>`__ and Auspice were the same thing. We've now removed all calls to Twitter, and made Google Analytics opt in. See :doc:`requests made from the client <../customise-client/requests>` for details on exactly what requests are made and how to opt-in to Google Analytics if you desire.
 
 Improvements in the entropy panel
 ---------------------------------
@@ -162,24 +162,24 @@ This allows custom servers (`nextstrain.org <https://nextstrain.org>`__, for ins
 Importing (server) code from Auspice
 ------------------------------------
 
-Auspice now makes a few helper commands available for those who are writing custom Auspice servers. See `these docs <server/api.md#importing-code-from-auspice>`__ for more info.
+Auspice now makes a few helper commands available for those who are writing custom Auspice servers. See :ref:`these docs <server-api-importing-code-from-auspice>` for more info.
 
 New Auspice subcommand: ``auspice convert``
 -------------------------------------------
 
-This is a utility command to convert between dataset formats. Currently, it only converts "Auspice v1" JSONs into "Auspice v2" JSONs, using the same code that is `programatically importable <server/api.md#convertfromv1>`__.
+This is a utility command to convert between dataset formats. Currently, it only converts "Auspice v1" JSONs into "Auspice v2" JSONs, using the same code that is :ref:`programatically importable <server-api-convertfromv1>`.
 
 Right now, ``auspice view`` will automatically convert "v1" JSONs into "v2" JSONs, so there's no need to do this yourself.
 
 Ability to show a "build" source URL in the sidebar
 ---------------------------------------------------
 
-Auspice used to contain some hard-coded logic which was used by nextstrain to display a link to the GitHub repo behind community URLs. We have now generalised this, and the `getAvailable API request <server/api.md#charon-getavailable>`__ can define a ``buildUrl`` property for each dataset which auspice will display in the sidebar.
+Auspice used to contain some hard-coded logic which was used by nextstrain to display a link to the GitHub repo behind community URLs. We have now generalised this, and the :ref:`getAvailable API request <server-api-charon-getavailable>` can define a ``buildUrl`` property for each dataset which auspice will display in the sidebar.
 
 ``auspice view`` uses a custom Auspice client if present
 --------------------------------------------------------
 
-It's possible to use ``auspice build`` to `build a custom auspice client <../customise-client/introduction.md>`__. If this has been done, then running ``auspice view`` will serve it -- before you had to run ``auspice view --customBuild``. This streamlines generating custom auspice bundles and serving them locally.
+It's possible to use ``auspice build`` to :doc:`build a custom auspice client <../customise-client/overview>`. If this has been done, then running ``auspice view`` will serve it -- before you had to run ``auspice view --customBuild``. This streamlines generating custom auspice bundles and serving them locally.
 
 .. |auspice-v2-gif| image:: ../assets/v2-pie-charts.gif
 .. |pie-charts| image:: ../assets/v2-pie-charts.png

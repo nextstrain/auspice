@@ -13,6 +13,10 @@ You can compare any two datasets which you have available -- for instance if you
 Showing potential datasets in the sidebar
 -----------------------------------------
 
-Depending on the way you've labelled your datasets, potential second trees are available in a sidebar dropdown. These are defined by the `getAvailable API request <server/api.md#charon-getavailable>`__. Currently, the logic in ``auspice view`` is to match all datasets which: - contain the same first "part" of the URL -- interpreted here to represent the same pathogen. - have the same number of "parts" in the URL (parts are delimited by a ``_`` in the filename or a ``/`` in the URL). - differ from the currently selected dataset by only 1 part.
+Depending on the way you've labelled your datasets, potential second trees are available in a sidebar dropdown. These are defined by the :ref:`getAvailable API request <server-api-charon-getavailable>`. Currently, the logic in ``auspice view`` is to match all datasets which:
+
+- contain the same first "part" of the URL -- interpreted here to represent the same pathogen.
+- have the same number of "parts" in the URL (parts are delimited by a ``_`` in the filename or a ``/`` in the URL).
+- differ from the currently selected dataset by only 1 part.
 
 .. |two-trees| image:: ../assets/tangle.png

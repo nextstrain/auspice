@@ -26,7 +26,7 @@ When a dataset, narrative, or listing of available datasets is to be displayed i
 -  ``/charon/getDataset`` -- return the requested dataset
 -  ``/charon/getNarrative`` -- return the requested narrative
 
-See `the server API documentation <../server/api.md>`__ for more details about the requests, or the `client customisation API <api.md>`__ for the ability to change "/charon" to a different value.
+See :doc:`the server API documentation <../server/api>` for more details about the requests, or the :doc:`client customisation API <api>` for the ability to change "/charon" to a different value.
 
 Image Requests
 ~~~~~~~~~~~~~~
@@ -51,4 +51,4 @@ If a map is displayed by Auspice the individual tiles are requested from api.map
 Google Analytics (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Auspice has the potential to include Google Analytics in a limited fashion. See `the client customisation API documentation <customise-client/api.md#available-customisations>`__ for how to set this. Note that these requests are only made if you specify a Google Analytics key during build-time customisation of the client.
+Auspice has the potential to include Google Analytics in a limited fashion. See :ref:`the client customisation API documentation <client-api-available-customisations>` for how to set this. Note that these requests are only made if you specify a Google Analytics key during build-time customisation of the client.

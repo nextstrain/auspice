@@ -1,7 +1,11 @@
 View Settings
 =============
 
-View settings refer to things such as how we display the tree (radial? root-to-tip?), what panels we display (map? tree? both?), what colouring we are using etcetera. There are three ways these can be controlled: 1. The defaults are configured by the dataset creators (and stored as "display defaults" in the dataset JSON). This allows 2. Interacting with the visualisation (e.g. changing the color-by) modifies the view, and the URL is changed accordingly. For instance, change `nextstrain.org/zika <https://nextstrain.org/zika>`__ to have a color-by of author, and you'll see the URL silently update to `?c=author <https://nextstrain.org/zika?c=author>`__. If you reload the page or share this URL, then the color-by is set via this URL. 3. Narratives, in which the narrative author chooses different "views" for each page, are created by associating each page with a URL (see (2)) which defines a specific view into the data.
+View settings refer to things such as how we display the tree (radial? root-to-tip?), what panels we display (map? tree? both?), what colouring we are using etcetera. There are three ways these can be controlled:
+
+1. The defaults are configured by the dataset creators (and stored as "display defaults" in the dataset JSON). This allows
+2. Interacting with the visualisation (e.g. changing the color-by) modifies the view, and the URL is changed accordingly. For instance, change `nextstrain.org/zika <https://nextstrain.org/zika>`__ to have a color-by of author, and you'll see the URL silently update to `?c=author <https://nextstrain.org/zika?c=author>`__. If you reload the page or share this URL, then the color-by is set via this URL.
+3. Narratives, in which the narrative author chooses different "views" for each page, are created by associating each page with a URL (see (2)) which defines a specific view into the data.
 
 Auspice (hardcoded) defaults
 ----------------------------
