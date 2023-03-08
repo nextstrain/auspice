@@ -75,9 +75,9 @@ perl -pi -e "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\
 perl -pi -e "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
 unset packagesVersion srcVersion parts bumps yn
 
-# step 3: add h2 title to CHANGELOG.md with newVersion & date, while preserving YAML frontmatter for docs
+# step 3: add h2 title to CHANGELOG.md with newVersion & date, while preserving the h1 title
 today=$(date +'%Y/%m/%d')
-echo -e "---\ntitle: Changelog\n---\n\n## version ${newVersion} - ${today}\n\n$(tail -n +4 CHANGELOG.md)" > CHANGELOG.md
+echo -e "# Changelog\n\n## version ${newVersion} - ${today}\n\n$(tail -n +2 CHANGELOG.md)" > CHANGELOG.md
 unset today
 
 # step 4: commit to current branch (master) & push to github (origin)
