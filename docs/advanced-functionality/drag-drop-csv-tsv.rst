@@ -12,13 +12,8 @@ Example:
 
 A TSV file as follows can be dragged onto `nextstrain.org/zika <https://nextstrain.org/zika>`__ to add a "secret" color-by:
 
-.. code:: text
-
-   strain	secret
-   USVI/19/2016	A
-   USVI/28/2016	B
-   USVI/41/2016	C
-   USVI/42/2016	C
+.. literalinclude:: ../assets/extra-data.tsv
+   :language: text
 
 .. figure:: ../assets/extra-data.png
    :alt: Auspice with extra data shown via TSV
@@ -27,13 +22,8 @@ A TSV file as follows can be dragged onto `nextstrain.org/zika <https://nextstra
 
 A more complex metadata file may look like the following, which makes use of additional features available. This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.
 
-.. code:: text
-
-   strain	secret	secret__colour	latitude	longitude
-   USVI/19/2016	A	#f4e409	0	-120
-   USVI/28/2016	B	#f49015	0	-115
-   USVI/41/2016	C	#710000	0	-100
-   USVI/42/2016	C	#710000	0	-120
+.. literalinclude:: ../assets/extra-data-2.tsv
+   :language: text
 
 .. figure:: ../assets/extra-data-2.png
    :alt: Auspice with extra data shown via TSV
