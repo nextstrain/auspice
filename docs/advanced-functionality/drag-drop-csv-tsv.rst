@@ -10,20 +10,26 @@ The general format is compatible with other popular tools such as `MicroReact <h
 Example:
 --------
 
-A TSV file as follows can be dragged onto `nextstrain.org/zika <https://nextstrain.org/zika>`__ to add a "secret" color-by:
+A :download:`small TSV file <../assets/extra-data.tsv>` with the following data:
 
-.. literalinclude:: ../assets/extra-data.tsv
-   :language: text
+.. csv-table::
+   :file: ../assets/extra-data.tsv
+   :delim: tab
+
+can be dragged onto `nextstrain.org/zika <https://nextstrain.org/zika>`_ to add a "secret" color-by:
 
 .. figure:: ../assets/extra-data.png
    :alt: Auspice with extra data shown via TSV
 
    Auspice with extra data shown via TSV
 
-A more complex metadata file may look like the following, which makes use of additional features available. This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.
+A :download:`more complex TSV file <../assets/extra-data-2.tsv>` can add more data to make use of additional features available:
 
-.. literalinclude:: ../assets/extra-data-2.tsv
-   :language: text
+.. csv-table::
+   :file: ../assets/extra-data-2.tsv
+   :delim: tab
+
+This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.  When dragged onto `nextstrain.org/zika`_, it looks like:
 
 .. figure:: ../assets/extra-data-2.png
    :alt: Auspice with extra data shown via TSV
