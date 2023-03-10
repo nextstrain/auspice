@@ -45,7 +45,7 @@ Customising the Default Auspice Server
 ======================================
 
 You can customise the default Auspice server by supplying your own handlers for each of the three GET requests.
-See `the API documentation <../server/api.html#suppling-custom-handlers-to-the-auspice-server>`_ for how to define these and provide them to `auspice view`.
+See `the API documentation <../server/api.html#supplying-custom-handlers-to-the-auspice-server>`_ for how to define these and provide them to `auspice view`.
 
 
 AGPL Source Code Requirement

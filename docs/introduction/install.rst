@@ -27,7 +27,7 @@ Install Auspice as a user
 
    npm install --global auspice
 
-If you look at the `release notes <https://docs.nextstrain.org/projects/auspice/en/stable/releases/changelog.html>`__ you can see the changes that have been made to Auspice (see your version of Auspice via ``auspice --version``). To upgrade, you can run
+If you look at the :doc:`release notes <../releases/changelog>` you can see the changes that have been made to Auspice (see your version of Auspice via ``auspice --version``). To upgrade, you can run
 
 .. code:: bash
 

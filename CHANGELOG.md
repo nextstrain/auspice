@@ -1,6 +1,4 @@
----
-title: Changelog
----
+# Changelog
 
 ## version 2.45.0 - 2023/03/08
 
