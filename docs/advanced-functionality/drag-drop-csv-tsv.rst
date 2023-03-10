@@ -20,10 +20,10 @@ A TSV file as follows can be dragged onto `nextstrain.org/zika <https://nextstra
    USVI/41/2016    C
    USVI/42/2016    C
 
-.. figure:: ../assets/csv-extra-data.png
-   :alt: auspice with extra data shown via csv
+.. figure:: ../assets/extra-data.png
+   :alt: Auspice with extra data shown via TSV
 
-   auspice with extra data shown via csv
+   Auspice with extra data shown via TSV
 
 A more complex metadata file may look like the following, which makes use of additional features available. This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.
 
@@ -35,10 +35,10 @@ A more complex metadata file may look like the following, which makes use of add
    USVI/41/2016    C   #710000 0   -100
    USVI/42/2016    C   #710000 0   -120
 
-.. figure:: ../assets/csv-extra-data-2.png
-   :alt: auspice with extra data shown via csv
+.. figure:: ../assets/extra-data-2.png
+   :alt: Auspice with extra data shown via TSV
 
-   auspice with extra data shown via csv
+   Auspice with extra data shown via TSV
 
 Adding extra colorings and filters
 ----------------------------------
