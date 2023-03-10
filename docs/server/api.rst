@@ -33,11 +33,11 @@ The Auspice server handles requests to 3 API endpoints made by the Auspice clien
          "secondTreeOptions": "[optional] A list of requests which should \
              appear as potential second-trees in the sidebar dropdown"
        },
-       ...
+       // ...
      ],
      "narratives": [
        {"request": "URL of a narrative. Will become the prefix in a getNarrative request"},
-       ...
+       // ...
      ]
    }
 

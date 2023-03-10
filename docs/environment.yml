@@ -11,3 +11,4 @@ dependencies:
     - sphinx-autobuild
     - sphinx-markdown-tables
     - sphinx-argparse
+    - pygments>=2.12.0  # For JSON with comments
