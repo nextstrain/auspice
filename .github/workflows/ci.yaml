@@ -6,6 +6,7 @@ on:
   pull_request:
   workflow_dispatch:
 name: ci
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,6 +21,7 @@ jobs:
       - run: node --version
       - run: npm ci
       - run: npm run build
+
   unit-test:
     runs-on: ubuntu-latest
     strategy:
@@ -33,6 +35,7 @@ jobs:
       - run: node --version
       - run: npm ci
       - run: npm test
+
   smoke-test:
     runs-on: ubuntu-latest
     strategy:
@@ -46,6 +49,7 @@ jobs:
       - run: npm ci
       - run: npm run get-data
       - run: npm run smoke-test:ci
+
   lint:
     runs-on: ubuntu-latest
     strategy:
@@ -58,6 +62,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci
       - run: npm run lint
+
   bundlesize:
     runs-on: ubuntu-latest
     steps:
@@ -67,6 +72,7 @@ jobs:
           node-version: 18
       - run: npm ci
       - run: npx --yes bundlesize
+
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
     needs: [build, unit-test, smoke-test, lint]
@@ -82,6 +88,7 @@ jobs:
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   rebuild-docker-image:
     needs: [publish]
     runs-on: ubuntu-latest
@@ -89,6 +96,7 @@ jobs:
     - run: gh workflow run ci.yml --repo nextstrain/docker-base
       env:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_WORKFLOW_DISPATCH }}
+
   build-docs:
     uses: nextstrain/.github/.github/workflows/docs-ci.yaml@master
     with:
