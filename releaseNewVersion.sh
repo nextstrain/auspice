@@ -70,8 +70,8 @@ select yn in "major-new-release" "feature-release" "minor-fix"; do
     esac
 done
 echo -e "\n"
-# now replace the version in packages.json and version.js (inplace!)
-perl -pi -e "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/" package.json
+# now replace the version in NPM files and version.js (inplace!)
+npm version "${newVersion}" --no-git-tag-version
 perl -pi -e "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
 unset packagesVersion srcVersion parts bumps yn
 
