@@ -73,9 +73,29 @@ jobs:
       - run: npm ci
       - run: npx --yes bundlesize
 
+  # Ensure package-lock.json is synced with package.json.
+  check-lockfile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          # Node.js version doesn't matter; npm version is more important when
+          # it comes to lockfiles.
+          node-version: 18
+      - run: npm install -g npm@8
+      - run: npm install --ignore-scripts
+      - run: |
+          if git diff --exit-code package-lock.json; then
+              echo "package-lock.json is up to date." >&2
+          else
+              echo "package-lock.json needs updating. Please run 'npm install --ignore-scripts' locally and commit the changes." >&2
+              exit 1
+          fi
+
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
-    needs: [build, unit-test, smoke-test, lint]
+    needs: [build, unit-test, smoke-test, lint, check-lockfile]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
