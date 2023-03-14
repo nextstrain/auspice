@@ -10,35 +10,31 @@ The general format is compatible with other popular tools such as `MicroReact <h
 Example:
 --------
 
-A TSV file as follows can be dragged onto `nextstrain.org/zika <https://nextstrain.org/zika>`__ to add a "secret" color-by:
+A :download:`small TSV file <../assets/extra-data.tsv>` with the following data:
 
-.. code:: text
+.. csv-table::
+   :file: ../assets/extra-data.tsv
+   :delim: tab
 
-   strain  secret
-   USVI/19/2016    A
-   USVI/28/2016    B
-   USVI/41/2016    C
-   USVI/42/2016    C
+can be dragged onto `nextstrain.org/zika <https://nextstrain.org/zika>`_ to add a "secret" color-by:
 
-.. figure:: ../assets/csv-extra-data.png
-   :alt: auspice with extra data shown via csv
+.. figure:: ../assets/extra-data.png
+   :alt: Auspice with extra data shown via TSV
 
-   auspice with extra data shown via csv
+   Auspice with extra data shown via TSV
 
-A more complex metadata file may look like the following, which makes use of additional features available. This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.
+A :download:`more complex TSV file <../assets/extra-data-2.tsv>` can add more data to make use of additional features available:
 
-.. code:: text
+.. csv-table::
+   :file: ../assets/extra-data-2.tsv
+   :delim: tab
 
-   strain  secret  secret__colour  latitude    longitude
-   USVI/19/2016    A   #f4e409 0   -120
-   USVI/28/2016    B   #f49015 0   -115
-   USVI/41/2016    C   #710000 0   -100
-   USVI/42/2016    C   #710000 0   -120
+This defines colours for the metadata (e.g. ``A`` is yellow, ``B`` is orange) as well as associating strains with (made up) geographic coordinates.  When dragged onto `nextstrain.org/zika`_, it looks like:
 
-.. figure:: ../assets/csv-extra-data-2.png
-   :alt: auspice with extra data shown via csv
+.. figure:: ../assets/extra-data-2.png
+   :alt: Auspice with extra data shown via TSV
 
-   auspice with extra data shown via csv
+   Auspice with extra data shown via TSV
 
 Adding extra colorings and filters
 ----------------------------------
