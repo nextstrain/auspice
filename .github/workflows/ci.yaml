@@ -60,16 +60,13 @@ jobs:
       - run: npm run lint
   bundlesize:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [14, 16, 18]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 18
       - run: npm ci
-      - run: npx bundlesize
+        run: npx --yes bundlesize
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
     needs: [build, unit-test, smoke-test, lint]
