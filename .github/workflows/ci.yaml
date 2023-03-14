@@ -69,7 +69,11 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
-      - run: npx bundlesize
+      # Node.js 14 comes with NPM 6 which auto-installs packages by default.
+      - if: ${{ matrix.node == 14 }}
+        run: npx bundlesize
+      - if: ${{ matrix.node != 14 }}
+        run: npx --yes bundlesize
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
     needs: [build, unit-test, smoke-test, lint]

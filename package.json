@@ -122,7 +122,6 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.3",
-    "bundlesize": "^0.18.1",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "eslint": "^7.5.0",
