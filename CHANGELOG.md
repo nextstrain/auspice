@@ -2,6 +2,7 @@
 
 ## version 2.45.1 - 2023/03/14
 
+* Small improvements to Auspice documentation. ([#1588](https://github.com/nextstrain/auspice/pull/1588))
 
 ## version 2.45.0 - 2023/03/08
 
