@@ -63,7 +63,7 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
           name="Acknowledgments (TSV)"
           description={`Per-sample acknowledgments (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.acknowledgmentsTSV(dispatch, filePrefix, tree.nodes, metadata.colorings, tree.visibility)}
+          onClick={() => helpers.acknowledgmentsTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
         />
       )}
       {!gisaidProvenance && (
@@ -71,7 +71,7 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
           name="Metadata (TSV)"
           description={`Per-sample metadata (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.strainTSV(dispatch, filePrefix, tree.nodes, metadata.colorings, tree.visibility)}
+          onClick={() => helpers.strainTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
         />
       )}
       {helpers.areAuthorsPresent(tree) && (

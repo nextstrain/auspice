@@ -173,7 +173,7 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
  * with the relevant information (accession, traits, etcetera).
  * Only visible nodes (tips) will be included in the file.
  */
-export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibilities) => {
+export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
@@ -275,7 +275,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibiliti
  * - author
  * Only visible nodes (tips) will be included in the file.
  */
-export const acknowledgmentsTSV = (dispatch, filePrefix, nodes, colorings, nodeVisibilities) => {
+export const acknowledgmentsTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
