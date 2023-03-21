@@ -1,5 +1,11 @@
 # Changelog
 
+* Fixed a bug for continuous color scales where tips with values of zero wouldn't appear on legend-hover or in the frequencies panel.
+See [PR #1643](https://github.com/nextstrain/auspice/pull/1643) for more.
+* Fixed a bug where downloaded TSVs may have unescaped quotes which resulted in incorrect parsing.
+See [PR #1649](https://github.com/nextstrain/auspice/pull/1649) for more.
+* Minor documentation updates. See [PR #1638](https://github.com/nextstrain/auspice/pull/1638) for more.
+
 ## version 2.45.1 - 2023/03/14
 
 * Small improvements to Auspice documentation. ([#1588](https://github.com/nextstrain/auspice/pull/1588))
