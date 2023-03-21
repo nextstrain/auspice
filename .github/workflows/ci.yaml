@@ -33,6 +33,9 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node --version
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
+      # also skips life cycle scripts for dependencies. If the job fails here,
+      # try removing this flag.
       - run: npm ci --ignore-scripts
       - run: npm test
 
@@ -60,6 +63,9 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node }}
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
+      # also skips life cycle scripts for dependencies. If the job fails here,
+      # try removing this flag.
       - run: npm ci --ignore-scripts
       - run: npm run lint
 
