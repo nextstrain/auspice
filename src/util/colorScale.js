@@ -110,7 +110,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       colorBy,
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues: ["unknown"],
-      legendBounds: createLegendBounds(["unknown"]),
+      legendBounds: {unknown: [-Infinity, Infinity]},
       genotype: null,
       scaleType: null,
       domain: [],
