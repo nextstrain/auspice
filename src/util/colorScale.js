@@ -393,15 +393,19 @@ function booleanColorScale(val) {
   return "#CBB742";
 }
 
+/**
+ * @param {Array<Number>} legendValues
+ * @returns {Record<Number, [Number, Number]>}
+ */
 function createLegendBounds(legendValues) {
   const valBetween = (x0, x1) => x0 + 0.5*(x1-x0);
   const len = legendValues.length;
   const legendBounds = {};
-  legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
+  legendBounds[legendValues[0]] = [-Infinity, valBetween(legendValues[0], legendValues[1])];
   for (let i = 1; i < len - 1; i++) {
     legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
   }
-  legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+  legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), Infinity];
   return legendBounds;
 }
 
