@@ -1,6 +1,6 @@
 import { tipRadius, tipRadiusOnLegendMatch } from "./globals";
 import { getTipColorAttribute } from "./colorHelpers";
-import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
 * equates a single tip and a legend element
@@ -12,7 +12,7 @@ import { getTraitFromNode } from "../util/treeMiscHelpers";
 * @param {object} colorScale - used to get the value of the attribute being used for colouring
 * @returns bool
 */
-export const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
+export const determineLegendMatch = (selectedLegendItem: (string|number), node:any, colorScale:any) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
   if (colorScale.continuous) {
     if (selectedLegendItem === colorScale.legendValues[0] && nodeAttr===colorScale.legendBounds[selectedLegendItem][0]) {
@@ -31,7 +31,7 @@ export const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
  * @param {string} geoValueToMatch - Value to match (e.g. "New Zealand", "New York")
  * @returns bool
  */
-const determineLocationMatch = (node, geoResolution, geoValueToMatch) => {
+const determineLocationMatch = (node:any, geoResolution:string, geoValueToMatch:string) => {
   return geoValueToMatch === getTraitFromNode(node, geoResolution);
 };
 
@@ -44,13 +44,16 @@ const determineLocationMatch = (node, geoResolution, geoValueToMatch) => {
 * @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false, colorScale, tree}) => {
+export const calcTipRadii = (
+  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false, colorScale, tree}:
+  {tipSelectedIdx:(number|false), selectedLegendItem:(number|string|false), geoFilter:([string, string]|[]), searchNodes:any, colorScale:any, tree:any}
+) => {
   if (selectedLegendItem !== false && tree && tree.nodes) {
-    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d:any) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (geoFilter.length===2 && tree && tree.nodes) {
-    return tree.nodes.map((d) => determineLocationMatch(d, ...geoFilter) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d:any) => determineLocationMatch(d, geoFilter[0], geoFilter[1]) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (searchNodes) {
-    return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d:any) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
