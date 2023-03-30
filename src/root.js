@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { connect } from "react-redux";
+// XXX FIXME react-18
 import { hot } from 'react-hot-loader/root';
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";

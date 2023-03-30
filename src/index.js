@@ -4,6 +4,7 @@ import "core-js";
 import "regenerator-runtime";
 import "css.escape";
 /* L I B R A R I E S */
+// XXX FIXME react-18
 import "react-hot-loader";
 import React from "react";
 import ReactDOM from "react-dom";

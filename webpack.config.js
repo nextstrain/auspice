@@ -17,8 +17,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   // Format is either "libName" or "libName:libPath"
   const coreDeps = [
     "react",
-    "react-hot-loader",
-    "react-dom:@hot-loader/react-dom",
+    // XXX FIXME react-18: react-hot-loader won't support react 18; must switch to
+    // react-refresh slash builtin support hooks? unclear without more digging.
+    // see <https://github.com/facebook/react/issues/16604>
+    //"react-hot-loader",
+    //"react-dom:@hot-loader/react-dom",
     "regenerator-runtime",
     "core-js",
     "styled-components"
@@ -131,7 +134,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "regenerator-runtime",
     "whatwg-fetch",
     "style-loader",
-    "@hot-loader/react-dom",
+    // XXX FIXME react-18
+    //"@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
     "leaflet",
     "redux",

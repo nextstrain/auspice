@@ -28,6 +28,7 @@ module.exports = function babelConfig(api) {
     "lodash"
   ];
   if (api.env("development")) {
+    // XXX FIXME react-18
     plugins.push(["react-hot-loader/babel", { safetyNet: false }]);
   }
   if (process.env.BABEL_INCLUDE_TIMING_FUNCTIONS === "false") {

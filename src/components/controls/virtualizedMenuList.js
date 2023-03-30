@@ -1,4 +1,7 @@
 import React, { useLayoutEffect, useRef } from "react";
+// XXX FIXME react-18: react-virtualized has peer dep on react ^16 and won't
+// get updates; need to switch to react-window
+// <https://github.com/bvaughn/react-window#how-is-react-window-different-from-react-virtualized>
 import { List } from "react-virtualized/dist/es/List";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized/dist/es/CellMeasurer";
 import { isEqual } from "lodash";
@@ -15,6 +18,7 @@ const VirtualizedMenuList = ({ children, maxHeight, focusedOption }) => {
   const listRef = useRef(null);
   const options = useRef(null);
   const cache = useRef(
+    // XXX FIXME react-18
     new CellMeasurerCache({
       fixedWidth: true,
       defaultHeight: DEFAULT_ROW_HEIGHT
@@ -58,6 +62,7 @@ const VirtualizedMenuList = ({ children, maxHeight, focusedOption }) => {
    * component via the cache
    */
   const rowRenderer = ({ index, key, parent, style }) => (
+    // XXX FIXME react-18
     <CellMeasurer
       cache={cache.current}
       columnIndex={0}
@@ -85,6 +90,7 @@ const VirtualizedMenuList = ({ children, maxHeight, focusedOption }) => {
   };
 
   return (
+    // XXX FIXME react-18
     <List
       ref={listRef}
       height={calcListHeight()}
