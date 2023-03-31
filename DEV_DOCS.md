@@ -30,7 +30,10 @@ You can install using your system `npm` or [within a Conda environment](https://
 git clone https://github.com/nextstrain/auspice.git
 cd auspice
 
-# install dependencies and make `auspice` available globally
+# install dependencies and build auspice
+npm ci
+
+# make `auspice` available globally
 npm install --global .
 ```
 
