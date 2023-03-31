@@ -19,9 +19,24 @@ This project strictly adheres to the [Contributor Covenant Code of Conduct](http
 
 Please see the [project boards](https://github.com/orgs/nextstrain/projects) for currently available issues.
 
-## Contributing code
+## Developer Installation
 
-Code contributions are welcomed! [Please see the main auspice docs](https://docs.nextstrain.org/projects/auspice/en/latest/introduction/install.html) for details on how to install and run auspice from source.
+This is useful for debugging, modifying the source code, or using an unpublished feature branch.
+
+You can install using your system `npm` or [within a Conda environment](https://docs.nextstrain.org/projects/auspice/en/stable/introduction/install.html#install-dependencies) to keep things isolated.
+
+```sh
+# grab the GitHub auspice repo
+git clone https://github.com/nextstrain/auspice.git
+cd auspice
+
+# install dependencies and make `auspice` available globally
+npm install --global .
+```
+
+Updating Auspice should only require pulling the new version from GitHub - it shouldn't require any `npm` commands. You will, however, have to re-build Auspice whenever the client-related code has changed, via `auspice build`.
+
+## Contributing code
 
 Please comment on an open issue if you are working on it.
 For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
