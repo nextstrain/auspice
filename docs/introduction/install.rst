@@ -36,18 +36,7 @@ If you look at the :doc:`release notes <../releases/changelog>` you can see the 
 Install Auspice as a developer
 ==============================
 
-This is useful for debugging, modifying the source code, or using an unpublished feature branch.
-
-.. code:: bash
-
-   # grab the GitHub auspice repo
-   git clone https://github.com/nextstrain/auspice.git
-   cd auspice
-
-   # install dependencies and make `auspice` available globally
-   npm install --global .
-
-Updating Auspice should only require pulling the new version from GitHub - it shouldn't require any ``npm`` commands. You will, however, have to re-build Auspice whenever the client-related code has changed, via ``auspice build``.
+See `DEV_DOCS.md <https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md#developer-installation>__`.
 
 Testing if it worked
 ====================
