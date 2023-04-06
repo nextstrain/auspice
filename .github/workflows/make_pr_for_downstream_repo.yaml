@@ -5,6 +5,10 @@ on:
       repository:
         required: true
         type: string
+      directory:
+        required: false
+        type: string
+        default: .
 jobs:
   make-pr-on-downstream-repo:
     # I don't see this being used for tags, so ensure it's only run on branches
@@ -53,7 +57,7 @@ jobs:
 
       - name: Install Auspice from PRs HEAD commit
         shell: bash
-        working-directory: ${{ env.DESTINATION_REPO_DIR }}
+        working-directory: ${{ env.DESTINATION_REPO_DIR }}/${{ inputs.directory }}
         run: |
           npm ci
           npm install nextstrain/auspice#${{ steps.detect-pr.outputs.auspice-sha }}
