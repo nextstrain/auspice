@@ -18,8 +18,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     // "moduleResolution": "node",                       /* Specify how TypeScript looks up a file from a given module specifier. */
     // "baseUrl": "./",                                  /* Specify the base directory to resolve non-relative module names. */
     // "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
-    // "typeRoots": [],                                  /* Specify multiple folders that act like `./node_modules/@types`. */
-    // "types": [],                                      /* Specify type package names to be included without being referenced in a source file. */
+    "types": [],                                         /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
     // "resolveJsonModule": true,                        /* Enable importing .json files */
     // "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */
@@ -59,7 +58,6 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
 
     /* Completeness */
     // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
-    "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
   "include": [
     "src/**/*"
