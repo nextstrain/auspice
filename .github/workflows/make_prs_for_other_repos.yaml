@@ -17,6 +17,7 @@ jobs:
     secrets: inherit
     with:
       repository: nextstrain/nextstrain.org
+      directory: auspice-client
   auspice-us:
     if: inputs.auspice-us
     uses: ./.github/workflows/make_pr_for_downstream_repo.yaml
