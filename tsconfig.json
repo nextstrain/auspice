@@ -46,9 +46,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     // "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */
 
     /* JavaScript Support */
-    // "allowJs": true,                                  /* Allow JavaScript files to be a part of your program. Use the `checkJS` option to get errors from these files. */
-    // "checkJs": true,                                  /* Enable error reporting in type-checked JavaScript files. */
-    // "maxNodeModuleJsDepth": 1,                        /* Specify the maximum folder depth used for checking JavaScript files from `node_modules`. Only applicable with `allowJs`. */
+    "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */
 
     /* Emit */
     "declaration": true,                                 /* Generate .d.ts files from TypeScript and JavaScript files in your project. */
