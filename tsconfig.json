@@ -15,7 +15,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     "jsx": "react",                                      /* Specify what JSX code is generated. */
 
     /* Modules */
-    // "moduleResolution": "node",                       /* Specify how TypeScript looks up a file from a given module specifier. */
+    "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
     "types": [],                                         /* Specify type package names to be included without being referenced in a source file. */
 
     /* JavaScript Support */
