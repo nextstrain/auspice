@@ -45,7 +45,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     // "noUncheckedIndexedAccess": true,                 /* Include 'undefined' in index signature results */
     // "noImplicitOverride": true,                       /* Ensure overriding members in derived classes are marked with an override modifier. */
     // "noPropertyAccessFromIndexSignature": true,       /* Enforces using indexed accessors for keys declared using an indexed type */
-    // "allowUnusedLabels": true,                        /* Disable error reporting for unused labels. */
+    "allowUnusedLabels": false,                          /* Enable error reporting for unused labels. */
     "allowUnreachableCode": false,                       /* Enable error reporting for unreachable code. */
 
     /* Completeness */
