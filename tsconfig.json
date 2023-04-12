@@ -20,7 +20,6 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     // "paths": {},                                      /* Specify a set of entries that re-map imports to additional lookup locations. */
     "types": [],                                         /* Specify type package names to be included without being referenced in a source file. */
     // "allowUmdGlobalAccess": true,                     /* Allow accessing UMD globals from modules. */
-    // "noResolve": true,                                /* Disallow `import`s, `require`s or `<reference>`s from expanding the number of files TypeScript should add to a project. */
 
     /* JavaScript Support */
     "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */
