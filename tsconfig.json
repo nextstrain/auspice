@@ -1,7 +1,16 @@
+/*
+Much of Auspice was written in JavaScript. There is an effort to convert
+existing JavaScript files to TypeScript in an iterative, file-by-file approach.
+
+TypeScript is used in this project for type-checking only, not for its compiled
+output files - Babel is used for that. Config options should reflect this usage
+pattern.
+
+Visit https://aka.ms/tsconfig.json for a detailed list of options.
+*/
+
 {
   "compilerOptions": {
-    /* Visit https://aka.ms/tsconfig.json to read more about this file */
-
     /* Projects */
     // "incremental": true,                              /* Enable incremental compilation */
     // "composite": true,                                /* Enable constraints that allow a TypeScript project to be used with project references. */
