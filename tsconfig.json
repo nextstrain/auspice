@@ -25,7 +25,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     "noEmit": true,                                      /* Do not emit compiler output files like JavaScript source code, source-maps or declarations. */
 
     /* Interop Constraints */
-    // "isolatedModules": true,                          /* Ensure that each file can be safely transpiled without relying on other imports. */
+    "isolatedModules": true,                             /* Ensure that each file can be safely transpiled without relying on other imports. */
     "allowSyntheticDefaultImports": true,                /* Allow 'import x from y' when a module doesn't have a default export. */
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
 
