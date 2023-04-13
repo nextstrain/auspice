@@ -155,6 +155,7 @@ Our CI (GitHub action) will type-check the project.
 The various moving parts involved are:
 
 * `typescript` (`tsc` command) is used by `npm run type-check` as well as other plugins/libraries
+* `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser` allow ESLint to parse TypeScript syntax
 
 ## Contributing to Documentation
 

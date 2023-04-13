@@ -1,14 +1,16 @@
 ---
 extends:
   - eslint:recommended
+  - plugin:@typescript-eslint/eslint-recommended
   - plugin:react/recommended
   - plugin:react-hooks/recommended
 
 plugins:
+  - "@typescript-eslint"
   - react
   - react-hooks
 
-parser: "@babel/eslint-parser"
+parser: "@typescript-eslint/parser"
 
 globals:
   page: true
@@ -19,8 +21,10 @@ globals:
 
 rules:
   # Code quality rules
-  no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
-  no-use-before-define: ["error", { "functions": false }]
+  no-unused-vars: off
+  "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
+  no-use-before-define: off
+  "@typescript-eslint/no-use-before-define": ["error", { "functions": false }]
   prefer-const: ["error", {"destructuring": "all"}]
   react/no-array-index-key: error
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
