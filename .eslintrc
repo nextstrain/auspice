@@ -103,4 +103,3 @@ env:
   es6: true
   browser: true
   jest: true
-# https://gist.github.com/odedw/cf14a55aa154adbc3bf7#file-eslintrc-yaml-L4
