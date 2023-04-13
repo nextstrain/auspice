@@ -69,6 +69,19 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm run lint
 
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
+      # also skips life cycle scripts for dependencies. If the job fails here,
+      # try removing this flag.
+      - run: npm ci --ignore-scripts
+      - run: npm run type-check
+
   bundlesize:
     runs-on: ubuntu-latest
     steps:

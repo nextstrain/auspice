@@ -142,6 +142,19 @@ git lfs status
 git lfs ls-files # list LFS tracked tiles
 ```
 
+## Typescript
+
+Auspice is in the process of moving to typescript, and currently supports both `.js(x)` and `.ts(x)` files.
+[This guide](https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html) is helpful to understand the bigger picture of migrating a JS project to TS. 
+Typescript is supposed to help us, so there's no problem using `any` types as we move code from JS to TS, however new code would ideally be typed.
+
+You can check the types via `npm type-check` or run `npm type-check:watch`; alternatively your editor should be able to show this.
+
+Our CI (GitHub action) will type-check the project.
+
+The various moving parts involved are:
+
+* `typescript` (`tsc` command) is used by `npm run type-check` as well as other plugins/libraries
 
 ## Contributing to Documentation
 

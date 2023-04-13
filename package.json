@@ -23,6 +23,8 @@
     "prepare": "npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
     "get-data": "env bash ./scripts/get-data.sh",
     "heroku-postbuild": "npm run build && npm run get-data",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
@@ -133,6 +135,7 @@
     "node-fetch": "^2.6.1",
     "puppeteer": "^2.1.1",
     "quoted-printable": "^1.0.1",
-    "start-server-and-test": "^1.14.0"
+    "start-server-and-test": "^1.14.0",
+    "typescript": "^5.0.2"
   }
 }
