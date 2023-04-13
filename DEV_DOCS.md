@@ -156,6 +156,7 @@ The various moving parts involved are:
 
 * `typescript` (`tsc` command) is used by `npm run type-check` as well as other plugins/libraries
 * `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser` allow ESLint to parse TypeScript syntax
+* `@babel/preset-typescript` is used by babel-loader (via webpack) to parse `.ts(x)` files
 
 ## Contributing to Documentation
 

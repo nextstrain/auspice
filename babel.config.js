@@ -17,7 +17,8 @@ module.exports = function babelConfig(api) {
         bugfixes: true
       }
     ],
-    "@babel/preset-react"
+    "@babel/preset-react",
+    "@babel/preset-typescript"
   ];
   const plugins = [
     ["@babel/plugin-proposal-decorators", { legacy: true }],
