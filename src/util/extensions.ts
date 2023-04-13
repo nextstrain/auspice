@@ -1,3 +1,8 @@
+// TODO: Add typing for individual extensions.
+// See docs/customise-client/api.rst.
+type Extensions = {
+  [key: string]: any
+}
 
 const registry = (() => {
   if (!process.env.EXTENSION_DATA) {
@@ -5,10 +10,10 @@ const registry = (() => {
     return {};
   }
 
-  const extensions = typeof process.env.EXTENSION_DATA === "string" ?
+  const extensions: Extensions = typeof process.env.EXTENSION_DATA === "string" ?
     JSON.parse(process.env.EXTENSION_DATA) : process.env.EXTENSION_DATA;
 
-  Object.keys(extensions).forEach((key) => {
+  Object.keys(extensions).forEach((key: string) => {
     if (key.endsWith("Component")) {
       // console.log("loading component", key);
       /* "@extensions" is a webpack alias */
@@ -21,7 +26,7 @@ const registry = (() => {
 })();
 
 
-export const getExtension = (what) => {
+export const getExtension = (what: string) => {
   if (registry[what]) {
     return registry[what];
   }
@@ -29,6 +34,6 @@ export const getExtension = (what) => {
   return false;
 };
 
-export const hasExtension = (what) => {
+export const hasExtension = (what: string) => {
   return Object.keys(registry).includes(what);
 };

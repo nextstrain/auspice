@@ -16,7 +16,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
 
     /* Modules */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
-    "types": [],                                         /* Specify type package names to be included without being referenced in a source file. */
+    "types": ["node"],                                   /* Specify type package names to be included without being referenced in a source file. */
 
     /* JavaScript Support */
     "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */
@@ -38,7 +38,6 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     "noFallthroughCasesInSwitch": true,                  /* Enable error reporting for fallthrough cases in switch statements. */
     "noUncheckedIndexedAccess": true,                    /* Include 'undefined' in index signature results */
     "noImplicitOverride": true,                          /* Ensure overriding members in derived classes are marked with an override modifier. */
-    "noPropertyAccessFromIndexSignature": true,          /* Enforces using indexed accessors for keys declared using an indexed type */
     "allowUnusedLabels": false,                          /* Enable error reporting for unused labels. */
     "allowUnreachableCode": false,                       /* Enable error reporting for unreachable code. */
 
