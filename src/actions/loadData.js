@@ -4,7 +4,7 @@ import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
-import { loadMeasurements } from "./measurements";
+import { parseMeasurementsJSON, loadMeasurements } from "./measurements";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
@@ -298,8 +298,9 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
   }
   if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
     this.measurements = fetchJSON(this.apiCalls.measurements)
+      .then((json) => parseMeasurementsJSON(json))
       .catch((err) => {
-        console.error("Failed to fetch measurements collections", err.message);
+        console.error("Failed to fetch and parse measurements collections", err.message);
       });
   }
 };

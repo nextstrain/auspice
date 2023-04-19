@@ -95,13 +95,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   return newControls;
 };
 
-export const loadMeasurements = (json) => (dispatch, getState) => {
-  // TODO: Load controls from state to get potential url query parameters
-  const { tree, controls } = getState();
-  if (!tree.loaded) {
-    throw new Error("tree not loaded");
-  }
-
+export const parseMeasurementsJSON = (json) => {
   const collections = json["collections"];
   if (!collections || collections.length === 0) {
     throw new Error("Measurements JSON does not have collections");
@@ -193,9 +187,19 @@ export const loadMeasurements = (json) => (dispatch, getState) => {
     );
   });
 
+  return {collections, defaultCollection: json["default_collection"]};
+};
+
+export const loadMeasurements = ({collections, defaultCollection}) => (dispatch, getState) => {
+  // TODO: Load controls from state to get potential url query parameters
+  const { tree, controls } = getState();
+  if (!tree.loaded) {
+    throw new Error("tree not loaded");
+  }
+
   // Get the collection to display to set up default controls
   // TODO: consider url query parameter?
-  const collectionToDisplay = getCollectionToDisplay(collections, json["default_collection"]);
+  const collectionToDisplay = getCollectionToDisplay(collections, defaultCollection);
 
   dispatch({
     type: LOAD_MEASUREMENTS,
