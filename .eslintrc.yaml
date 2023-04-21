@@ -19,7 +19,6 @@ globals:
 
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
-  no-case-declarations: off
   no-compare-neg-zero: off
   no-cond-assign: off
   no-prototype-builtins: off

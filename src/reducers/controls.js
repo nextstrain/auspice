@@ -143,7 +143,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
           on: false
         })
       });
-    case types.CHANGE_DISTANCE_MEASURE:
+    case types.CHANGE_DISTANCE_MEASURE: {
       const updatesToState = {
         distanceMeasure: action.data,
         branchLengthsToDisplay: state.branchLengthsToDisplay
@@ -161,7 +161,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
         });
       }
       return Object.assign({}, state, updatesToState);
-    case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
+    }
+      case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates = { quickdraw: action.quickdraw };
       if (action.dateMin) {
         newDates.dateMin = action.dateMin;
@@ -276,7 +277,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
-    case types.ADD_EXTRA_METADATA:
+    case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {
         state.filters[colorBy] = [];
         state.coloringsPresentOnTree.add(colorBy);
@@ -292,9 +293,11 @@ const Controls = (state = getDefaultControlsState(), action) => {
         };
       }
       return newState;
-    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+    }
+    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       const colorScale = Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues });
       return Object.assign({}, state, { colorScale: colorScale });
+    }
     case types.TOGGLE_TRANSMISSION_LINES:
       return Object.assign({}, state, { showTransmissionLines: action.data });
 

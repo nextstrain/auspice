@@ -269,7 +269,7 @@ export const applyFilter = (mode, trait, values) => {
         }
         break;
       case "remove": // fallthrough
-      case "inactivate":
+      case "inactivate": {
         if (currentlyFilteredTraits.indexOf(trait) === -1) {
           console.error(`trying to ${mode} values from an un-initialised filter!`);
           return;
@@ -289,6 +289,7 @@ export const applyFilter = (mode, trait, values) => {
           }
         }
         break;
+      }
       default:
         console.error(`applyFilter called with invalid mode: ${mode}`);
         return; // don't dispatch

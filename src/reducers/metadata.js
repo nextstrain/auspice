@@ -20,7 +20,7 @@ const Metadata = (state = {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
     case types.CLEAN_START:
       return action.metadata;
-    case types.ADD_EXTRA_METADATA:
+    case types.ADD_EXTRA_METADATA: {
       const colorings = Object.assign({}, state.colorings, action.newColorings);
       let geoResolutions = state.geoResolutions;
       if (action.newGeoResolution) {
@@ -28,7 +28,8 @@ const Metadata = (state = {
         else geoResolutions = [...geoResolutions, action.newGeoResolution];
       }
       return Object.assign({}, state, {colorings, geoResolutions});
-    case types.SET_AVAILABLE:
+    }
+    case types.SET_AVAILABLE: {
       if (state.buildUrl) {
         return state; // do not use data from getAvailable to overwrite a buildUrl set from a dataset JSON
       }
@@ -37,6 +38,7 @@ const Metadata = (state = {
         return Object.assign({}, state, {buildUrl});
       }
       return state;
+    }
     case types.SET_ROOT_SEQUENCE:
       return {...state, rootSequence: action.data};
     default:

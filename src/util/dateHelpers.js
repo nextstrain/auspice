@@ -87,11 +87,12 @@ export const getPreviousDate = (unit, date) => {
   switch (unit) {
     case "DAY":
       return dateClone;
-    case "WEEK":
+    case "WEEK": {
       const dayIdx = date.getDay(); // 0 is sunday
       if (dayIdx===1) return dateClone;
       dateClone.setDate(date.getDate() + (8-dayIdx)%7 - 7);
       return dateClone;
+    }
     case "MONTH":
       if (date.getDate()===1) return dateClone; // i.e. 1st of the month
       return new Date(date.getFullYear(), date.getMonth(), 1, 12);

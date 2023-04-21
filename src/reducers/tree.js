@@ -42,7 +42,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
       });
     case types.CHANGE_EXPLODE_ATTR: /* fallthrough */
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
-    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       const newStates = {
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,
@@ -56,6 +56,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
         selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);
+    }
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
         tipRadii: action.data,
