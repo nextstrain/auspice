@@ -58,7 +58,7 @@ const calculateNumericGridSeparation = (range, minorTicks) => {
   /* make an informed guess of the step size to start with.
   E.g. 0.07 => step of 0.01, 70 => step size of 10 */
   const logRange = Math.floor(Math.log10(range));
-  let majorStep = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
+  let majorStep = Math.pow(10, logRange);
   if (range/majorStep < 2) { // if step > 0.5*range then make more fine-grained steps
     majorStep /= 5;
   } else if (range/majorStep <5) { // if step > 0.2*range then make more fine grained steps

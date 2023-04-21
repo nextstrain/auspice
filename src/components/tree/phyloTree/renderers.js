@@ -150,7 +150,7 @@ export const getBranchVisibility = (d) => {
  * @param {obj} d node
  * @param {string} b branch type -- either "T" (tee) or "S" (stem)
  */
-export const strokeForBranch = (d, b) => { // eslint-disable-line
+export const strokeForBranch = (d, b) => {
   /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
   cause the branches to not appear, we're falling back to the previous solution which
   doesn't use gradients. The commented code remains & hopefully a solution can be

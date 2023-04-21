@@ -39,7 +39,7 @@ class Title extends React.Component {
     const title = "nextstrain";
     return title.split("").map((letter, i) => (
       <span
-        key={i} // eslint-disable-line react/no-array-index-key
+        key={i}
         style={{color: titleColors[i] }}
       >
         {letter}

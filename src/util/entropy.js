@@ -59,7 +59,7 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   if (isAA) {
     const prots = Object.keys(sparse);
     for (let i = 0; i < prots.length; i++) {
-      for (const k in sparse[prots[i]]) { // eslint-disable-line
+      for (const k in sparse[prots[i]]) {
         const numK = parseInt(k, 10);
         if (sparse[prots[i]][numK] > m) {m = sparse[prots[i]][numK];}
         counts[j] = {

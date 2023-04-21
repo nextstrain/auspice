@@ -28,7 +28,7 @@ const narrative = (state = {
       }
       return state;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      if (action.query.hasOwnProperty("n")) { // eslint-disable-line
+      if (action.query.hasOwnProperty("n")) {
         return Object.assign({}, state, {blockIdx: action.query.n});
       }
       return state;

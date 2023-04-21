@@ -218,7 +218,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
 /* draw the genes (annotations) */
 EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   const geneHeight = 20;
-  const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
+  const readingFrameOffset = (frame) => 5;
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   const strokeCol = posInSequence < 1e6 ? "white" : "black";
   const startG = (d) => d.start > this.scales.xNav.domain()[0] ? this.scales.xNav(d.start) : this.offsets.x1;
@@ -286,7 +286,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.prot, d.codon));
     }
   } else {
-    if (posInView > 1000) { // eslint-disable-line no-lonely-if
+    if (posInView > 1000) {
       barWidth = 2;
     } else if (posInView > 250) {
       barWidth = 3;

@@ -58,7 +58,7 @@ class ColorBy extends React.Component {
   // Applies the given state to the immutable blank state and replaces the
   // current state with the result.
   replaceState(state) {
-    this.setState((oldState, props) => this.newState(state)); // eslint-disable-line no-unused-vars
+    this.setState((oldState, props) => this.newState(state));
   }
 
   newState(state) {

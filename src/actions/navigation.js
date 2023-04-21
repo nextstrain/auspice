@@ -90,8 +90,8 @@ export const changePage = ({
   const oldState = getState();
 
   /* set some defaults */
-  if (!path) path = window.location.pathname;  // eslint-disable-line
-  if (!query) query = queryString.parse(window.location.search);  // eslint-disable-line
+  if (!path) path = window.location.pathname; 
+  if (!query) query = queryString.parse(window.location.search); 
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
 

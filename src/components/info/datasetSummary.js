@@ -9,12 +9,12 @@ const plurals = {
 
 export const pluralise = (word, n) => {
   if (n === 1) {
-    if (word === "authors") word = "author"; // eslint-disable-line
+    if (word === "authors") word = "author";
   } else {
-    if (word in plurals) word = plurals[word]; // eslint-disable-line
-    if (word.slice(-1).toLowerCase() !== "s") word+="s"; // eslint-disable-line
+    if (word in plurals) word = plurals[word];
+    if (word.slice(-1).toLowerCase() !== "s") word+="s";
   }
-  word = word.replace(/_/g, " "); // eslint-disable-line
+  word = word.replace(/_/g, " ");
   return word;
 };
 

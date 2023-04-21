@@ -287,7 +287,7 @@ function performGenotypeFilterMatch(filtered, filters, nodes) {
   // todo: the entropy view is sometimes broken after filtering by genotype, but this shouldn't be the case (we can filter by other traits which are homoplasic and it works)
 
   if (!filtered) { // happens if there are no other filters in play
-    filtered = Array.from({length: nodes.length}, () => true); // eslint-disable-line no-param-reassign
+    filtered = Array.from({length: nodes.length}, () => true);
   }
   const filterConstellationLong = createFilterConstellation(genotypeFilters);
   const nGt = filterConstellationLong.length; // Note: may not be the same as genotypeFilters.length

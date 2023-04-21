@@ -445,7 +445,7 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
   }
 
   /* add top&left padding */
-  for (let key in panels) { // eslint-disable-line
+  for (let key in panels) {
     if (panels[key]) {
       panels[key].x += padding;
       panels[key].y += padding;
@@ -535,7 +535,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   /* logic for extracting the overall width etc */
   const overallDimensions = createBoundingDimensionsAndPositionPanels(panels, panelLayout, textStrings.length);
   output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${overallDimensions.height}">`);
-  for (let key in panels) { // eslint-disable-line
+  for (let key in panels) {
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }

@@ -9,7 +9,7 @@ export const isColorByGenotype = (colorBy) => colorBy === "gt" || colorBy.starts
  */
 export const encodeColorByGenotype = ({ gene, positions }) => {
   if (!gene) {
-    gene = nucleotide_gene; // eslint-disable-line no-param-reassign
+    gene = nucleotide_gene;
   }
 
   if (!positions || !positions.length) {
@@ -42,7 +42,7 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
       return null;
     }
 
-    const positions = decodePositions(encodedPositions, geneLength); // eslint-disable-line no-use-before-define
+    const positions = decodePositions(encodedPositions, geneLength);
 
     if (!positions.length) {
       console.error("decodeColorByGenotype failed: no valid positions", colorBy, encodedPositions, geneLength);

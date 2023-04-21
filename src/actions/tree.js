@@ -74,7 +74,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
-      cladeSelected = tree.selectedClade; // eslint-disable-line no-param-reassign
+      cladeSelected = tree.selectedClade;
     }
 
     if (!tree.nodes) {return;}
@@ -309,7 +309,7 @@ export const toggleTemporalConfidence = () => ({
  */
 const _resetExpodedTree = (nodes) => {
   nodes.forEach((n) => {
-    if (n.hasOwnProperty('unexplodedChildren')) { // eslint-disable-line
+    if (n.hasOwnProperty('unexplodedChildren')) {
       n.children = n.unexplodedChildren;
       n.hasChildren = true;
       delete n.unexplodedChildren;

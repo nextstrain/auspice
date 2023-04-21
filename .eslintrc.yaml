@@ -1,6 +1,11 @@
 ---
-extends: "airbnb"
-plugins: ["react-hooks"]
+extends:
+  - eslint:recommended
+  - plugin:react/recommended
+  - plugin:react-hooks/recommended
+plugins:
+  - react
+  - react-hooks
 parser: "@babel/eslint-parser"
 globals:
   page: true
@@ -9,91 +14,15 @@ globals:
   jestPuppeteer: true
   BASE_URL: true
 rules:
-  camelcase: off # require camel case names
-  prefer-template: off
-  object-shorthand: off
-  quotes: off # ', ", ` no one cares
-  max-len: off # be sensible
-  no-mixed-operators: off # allow 1 + 1 * 3
-  no-confusing-arrow: off # allow (a) => a ? 1 : 2;
-  no-useless-constructor: off
-  no-nested-ternary: off
-  object-curly-spacing: off # allow { a: 1 } and {a: 1}
-  block-spacing: off # same as above for function blocks on a single line
-  dot-notation: off # allows someObject["a"] as well as someObject.a
-  comma-dangle: ["error", "never"]
-  padded-blocks: off
-  no-plusplus: off # we are old enought to use i++
-  arrow-body-style: off
-  arrow-parens: ["error", "always"] # use brackets always, (a) => body // () => body // (a, b) => body
-  no-case-declarations: off # we don't surround case blocks with { } in our switch statements as we use fallthroughs deliberately
-  one-var: off
-  one-var-declaration-per-line: off
-  no-console: [1, { "allow": ["warn", "error"] }]
-  space-infix-ops: off
-  no-param-reassign: [1, { "props": false }]
-  no-underscore-dangle: off
-  no-unused-expressions: ['error', {"allowTernary": true }]
-  no-restricted-syntax: ['error', 'ForInStatement', 'WithStatement'] # allow ForOfStatement & LabeledStatement
-  class-methods-use-this: off
-  react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
-  react/forbid-prop-types: off
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
-  react/jsx-first-prop-new-line: off
-  react/no-did-mount-set-state: off
-  react/no-did-update-set-state: off
-  react/prop-types: off # possibly reinstate
-  react/sort-comp: off # possibly reinstate
-  jsx-a11y/no-static-element-interactions: off
-  jsx-a11y/anchor-has-content: off
-  jsx-a11y/heading-has-content: off
-  import/prefer-default-export: off
-  no-multi-spaces: ["error", { ignoreEOLComments: true }]
-  no-labels: off
-  no-unused-labels: off
-  no-continue: off
-  no-unneeded-ternary: ["error", { "defaultAssignment": true }]
-  quote-props: ["error", "as-needed"]
-  prefer-const: ["error", {"destructuring": "all"}]
-  indent: ["error", 2, {"MemberExpression": "off", "SwitchCase": 1}]
-  react-hooks/rules-of-hooks: "error"
-  react-hooks/exhaustive-deps: "warn"
-  object-curly-newline: off
-  operator-linebreak: ["error", "after", { "overrides": { "?": "ignore", ":": "ignore" } }]
-  react/destructuring-assignment: off
-  prefer-destructuring: off
-  implicit-arrow-linebreak: off
-  jsx-quotes: off
-  no-use-before-define: ["error", { "functions": false }]
-  no-return-await: off
-  # <<< These were enabled by extension and plugin upgrades in https://github.com/nextstrain/auspice/pull/1602. Disabling for now.
-  function-paren-newline: off
-  import/no-cycle: off
-  import/no-useless-path-segments: off
-  import/order: off
-  jsx-a11y/anchor-is-valid: off
-  jsx-a11y/click-events-have-key-events: off
-  lines-between-class-members: off
-  max-classes-per-file: off
+  no-case-declarations: off
   no-compare-neg-zero: off
-  no-else-return: off
-  no-multiple-empty-lines: off
-  no-restricted-globals: off
+  no-cond-assign: off
+  no-prototype-builtins: off
   no-unused-vars: off
-  prefer-object-spread: off
-  react/button-has-type: off
-  react/default-props-match-prop-types: off
-  react/jsx-closing-tag-location: off
-  react/jsx-curly-brace-presence: off
-  react/jsx-curly-newline: off
-  react/jsx-one-expression-per-line: off
-  react/jsx-props-no-spreading: off
-  react/jsx-wrap-multilines: off
-  react/no-access-state-in-setstate: off
   react/no-deprecated: off
-  react/no-unused-state: off
-  react/static-property-placement: off
-  # >>>
+  react/no-direct-mutation-state: off
+  react/prop-types: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module
@@ -102,4 +31,5 @@ parserOptions:
 env:
   es6: true
   browser: true
+  node: true
   jest: true

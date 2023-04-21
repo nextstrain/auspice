@@ -15,7 +15,7 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   // let tmp = 0;
   nodes.forEach((d, i) => {
     d.update = false;
-    for (let key in newNodeProps) { // eslint-disable-line
+    for (let key in newNodeProps) {
       const val = newNodeProps[key][i];
       if (val !== d[key]) {
         d[key] = val;

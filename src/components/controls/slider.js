@@ -110,7 +110,7 @@ function undoEnsureArray(x) {
 // TB: I tried to convert this to a proper "class Slider extends React.Component"
 // but ran into difficulties with this bindings in functions like _getMousePosition
 // So, leaving as createReactClass for the time being.
-const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
+const Slider = createReactClass({
 
   propTypes: {
 

@@ -237,11 +237,11 @@ const modifyStateViaMetadata = (state, metadata) => {
   state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"]; // eslint-disable-line
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
-        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) {
           if (keysToCheckFor[i] === "sidebar") {
             if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
               state.defaults.sidebarOpen = true;
@@ -627,7 +627,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
+  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true);
 
   return newState;
 };
@@ -808,7 +808,7 @@ export const createStateFromQueryOrJSONs = ({
     narrative = narrativeBlocks;
     narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
     /* replace the query with the information which can guide the view */
-    query = queryString.parse(narrative[narrativeSlideIdx].query); // eslint-disable-line no-param-reassign
+    query = queryString.parse(narrative[narrativeSlideIdx].query);
   }
 
   controls = modifyStateViaURLQuery(controls, query);
@@ -910,7 +910,7 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   /* if narratives then switch the query back to ?n=<SLIDE> for display */
-  if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
+  if (narrativeBlocks) query = {n: narrativeSlideIdx};
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };

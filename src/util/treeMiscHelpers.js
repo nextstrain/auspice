@@ -96,8 +96,8 @@ function validateUrl(url) {
   if (url===undefined) return undefined; // urls are optional, so return early to avoid the console warning
   try {
     if (typeof url !== "string") throw new Error();
-    if (url.startsWith("http_")) url = url.replace("http_", "http:"); // eslint-disable-line no-param-reassign
-    if (url.startsWith("https_")) url = url.replace("https_", "https:"); // eslint-disable-line no-param-reassign
+    if (url.startsWith("http_")) url = url.replace("http_", "http:");
+    if (url.startsWith("https_")) url = url.replace("https_", "https:");
     const urlObj = new URL(url);
     return urlObj.href;
   } catch (err) {

@@ -46,7 +46,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
           alt="logo"
           width="102"
           src={
-            require("../../images/logo-light.svg") // eslint-disable-line global-require
+            require("../../images/logo-light.svg")
           }
         />
       </Flex>

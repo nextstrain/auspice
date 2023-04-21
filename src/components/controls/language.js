@@ -20,7 +20,7 @@ class Language extends React.Component {
     for (const ns of ["language", "sidebar", "translation"]) {
       if (!i18n.hasResourceBundle(lang, ns)) {
         try {
-          const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`); // eslint-disable-line
+          const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`);
           i18n.addResourceBundle(lang, ns, res.default);
         } catch (err) {
           console.error(`Language ${lang} not found!`);

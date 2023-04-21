@@ -221,7 +221,7 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   // console.log("making a continuous color scale for ", colorBy);
   if (colorBy==="num_date") {
     /* before numeric scales were a definable type, num_date was specified as continuous */
-    isTemporal = true; // eslint-disable-line no-param-reassign
+    isTemporal = true;
   }
   let minMax;
   if (isTemporal) {

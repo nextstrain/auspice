@@ -114,7 +114,7 @@ function* parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
      * slide's title (or the end of the document).
      */
     let sibling;
-    while (sibling = slide.nextSibling) { // eslint-disable-line no-cond-assign
+    while (sibling = slide.nextSibling) {
       if (isTitle(sibling)) break;
       slide.appendChild(sibling);
     }
