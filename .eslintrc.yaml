@@ -3,16 +3,20 @@ extends:
   - eslint:recommended
   - plugin:react/recommended
   - plugin:react-hooks/recommended
+
 plugins:
   - react
   - react-hooks
+
 parser: "@babel/eslint-parser"
+
 globals:
   page: true
   browser: true
   context: true
   jestPuppeteer: true
   BASE_URL: true
+
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   no-case-declarations: off
@@ -23,11 +27,13 @@ rules:
   react/no-deprecated: off
   react/no-direct-mutation-state: off
   react/prop-types: off
+
 parserOptions:
   ecmaVersion: 6
   sourceType: module
   ecmaFeatures:
     modules: true
+
 env:
   es6: true
   browser: true
