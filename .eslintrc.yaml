@@ -20,7 +20,6 @@ globals:
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
-  react/no-direct-mutation-state: off
   react/prop-types: off
 
 parserOptions:

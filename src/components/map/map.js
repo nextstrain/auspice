@@ -581,7 +581,7 @@ class Map extends React.Component {
   fitMapBoundsToData(demeData, demeIndices) {
     const SWNE = this.getGeoRange(demeData, demeIndices);
     // window.L available because leaflet() was called in UNSAFE_componentWillMount
-    this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
+    this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);  // eslint-disable-line react/no-direct-mutation-state
     const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
