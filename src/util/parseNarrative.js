@@ -114,7 +114,7 @@ function* parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
      * slide's title (or the end of the document).
      */
     let sibling;
-    while (sibling = slide.nextSibling) {
+    while ((sibling = slide.nextSibling)) {
       if (isTitle(sibling)) break;
       slide.appendChild(sibling);
     }
