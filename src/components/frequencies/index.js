@@ -78,7 +78,7 @@ class Frequencies extends React.Component {
     }
     this.setState(newState);
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.version === nextProps.version) {
       // no-op
     } else if (!this.props.loaded && nextProps.loaded) {

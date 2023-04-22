@@ -84,7 +84,7 @@ class Map extends React.Component {
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
@@ -120,7 +120,7 @@ class Map extends React.Component {
     }
     this.maybeInvalidateMapSize(this.props);
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
@@ -580,7 +580,7 @@ class Map extends React.Component {
   }
   fitMapBoundsToData(demeData, demeIndices) {
     const SWNE = this.getGeoRange(demeData, demeIndices);
-    // window.L available because leaflet() was called in componentWillMount
+    // window.L available because leaflet() was called in UNSAFE_componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout

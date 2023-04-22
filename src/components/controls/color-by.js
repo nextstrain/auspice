@@ -69,7 +69,7 @@ class ColorBy extends React.Component {
   }
 
   // State from the outside world enters via props.
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
       if (isColorByGenotype(nextProps.colorBy)) {
         const genotype = decodeColorByGenotype(nextProps.colorBy);

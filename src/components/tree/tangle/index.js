@@ -56,7 +56,7 @@ class Tangle extends React.Component {
   //     .transition().duration(500)
   //     .attr("d", makeTipPath);
   // }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!this.state.drawn && nextProps.rightNodes[0].shell) {
       this.drawLines(nextProps);
       this.setState({drawn: true});
