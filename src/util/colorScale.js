@@ -203,7 +203,8 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
       const spread = minMax[1] - minMax[0];
       const dp = spread > 5 ? 2 : 3;
       legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
-      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
+      // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
+      if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
       legendBounds = createLegendBounds(legendValues);
     }
   } else {
@@ -282,7 +283,8 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
       .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
       .filter((el, idx, values) => values.indexOf(el)===idx);
   }
-  if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
+  // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
+  if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
   return {
     continuous: true,
