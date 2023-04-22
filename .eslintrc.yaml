@@ -20,6 +20,8 @@ globals:
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
+
+  # Remove this override once all props have been typed using PropTypes or TypeScript.
   react/prop-types: off
 
 parserOptions:
