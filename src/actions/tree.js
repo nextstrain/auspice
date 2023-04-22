@@ -310,7 +310,7 @@ export const toggleTemporalConfidence = () => ({
  */
 const _resetExpodedTree = (nodes) => {
   nodes.forEach((n) => {
-    if (n.hasOwnProperty('unexplodedChildren')) {
+    if (Object.prototype.hasOwnProperty.call(n, 'unexplodedChildren')) {
       n.children = n.unexplodedChildren;
       n.hasChildren = true;
       delete n.unexplodedChildren;

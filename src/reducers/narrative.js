@@ -28,7 +28,7 @@ const narrative = (state = {
       }
       return state;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      if (action.query.hasOwnProperty("n")) {
+      if (Object.prototype.hasOwnProperty.call(action.query, "n")) {
         return Object.assign({}, state, {blockIdx: action.query.n});
       }
       return state;

@@ -19,7 +19,6 @@ globals:
 
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
-  no-prototype-builtins: off
   no-unused-vars: off
   react/no-deprecated: off
   react/no-direct-mutation-state: off
