@@ -45,7 +45,7 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
   if (handlersArg) {
     const handlersPath = path.resolve(handlersArg);
     utils.verbose(`Loading handlers from ${handlersPath}`);
-    const inject = require(handlersPath); // eslint-disable-line
+    const inject = require(handlersPath);
     handlers.getAvailable = inject.getAvailable;
     handlers.getDataset = inject.getDataset;
     handlers.getNarrative = inject.getNarrative;

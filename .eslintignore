@@ -1,2 +1,7 @@
+cli/*
 dist/*
+docs/*
 node_modules/*
+scripts/*
+test/*
+webpack.config.js

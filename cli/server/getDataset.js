@@ -2,7 +2,7 @@ const getAvailable = require("./getAvailable");
 const helpers = require("./getDatasetHelpers");
 
 const setUpGetDatasetHandler = ({datasetsPath}) => {
-  return async (req, res) => { // eslint-disable-line consistent-return
+  return async (req, res) => {
     try {
       const availableDatasets = await getAvailable.getAvailableDatasets(datasetsPath);
       const info = helpers.interpretRequest(req, datasetsPath);
