@@ -579,10 +579,6 @@ class Map extends React.Component {
     }
   }
   fitMapBoundsToData(demeData, demeIndices) {
-    const SWNE = this.getGeoRange(demeData, demeIndices);
-    // window.L available because leaflet() was called in UNSAFE_componentWillMount
-    this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);  // eslint-disable-line react/no-direct-mutation-state
-    const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
       window.clearTimeout(this.bounds_timeout);
@@ -590,6 +586,9 @@ class Map extends React.Component {
     // delay to change map bounds
     this.bounds_timeout = window.setTimeout(
       (map) => {
+        const SWNE = this.getGeoRange(demeData, demeIndices);
+        const maxZoom = this.getMaxZoomForFittingMapToData();
+        // window.L available because leaflet() was called in UNSAFE_componentWillMount
         map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
       },
       this.props.narrativeMode ? 100 : 750,
