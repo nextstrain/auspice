@@ -1,6 +1,11 @@
-import { CHANGE_MEASUREMENTS_COLLECTION, LOAD_MEASUREMENTS, UPDATE_MEASUREMENTS_ERROR } from "../actions/types";
+import {
+  CHANGE_MEASUREMENTS_COLLECTION,
+  LOAD_MEASUREMENTS,
+  UPDATE_MEASUREMENTS_ERROR,
+  URL_QUERY_CHANGE_WITH_COMPUTED_STATE
+} from "../actions/types";
 
-const getDefaultMeasurementsState = () => ({
+export const getDefaultMeasurementsState = () => ({
   error: undefined,
   loaded: false,
   collections: [],
@@ -9,6 +14,8 @@ const getDefaultMeasurementsState = () => ({
 
 const measurements = (state = getDefaultMeasurementsState(), action) => {
   switch (action.type) {
+    case URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      return { ...action.measurements };
     case LOAD_MEASUREMENTS:
       return {
         ...state,

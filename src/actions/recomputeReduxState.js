@@ -7,6 +7,7 @@ import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../ut
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { getDefaultFrequenciesState } from "../reducers/frequencies";
+import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -757,7 +758,7 @@ export const createStateFromQueryOrJSONs = ({
   query,
   dispatch
 }) => {
-  let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
+  let tree, treeToo, entropy, controls, metadata, narrative, frequencies, measurements;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */
@@ -766,6 +767,8 @@ export const createStateFromQueryOrJSONs = ({
     entropy = entropyCreateState(metadata.genomeAnnotations);
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
+    /* ensure default measurements state */
+    measurements = getDefaultMeasurementsState();
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
@@ -794,6 +797,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
     frequencies = {...oldState.frequencies};
+    measurements = {...oldState.measurements};
     controls = restoreQueryableStateToDefaults(controls);
     controls = modifyStateViaMetadata(controls, metadata);
   }
@@ -912,7 +916,7 @@ export const createStateFromQueryOrJSONs = ({
   /* if narratives then switch the query back to ?n=<SLIDE> for display */
   if (narrativeBlocks) query = {n: narrativeSlideIdx}; // eslint-disable-line no-param-reassign
 
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, measurements, query};
 };
 
 export const createTreeTooState = ({
