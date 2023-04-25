@@ -2,7 +2,7 @@ import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
 import { changeURLMiddleware } from "../middleware/changeURL";
 import rootReducer from "../reducers";
-import { loggingMiddleware } from "../middleware/logActions";
+import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-line no-unused-vars
 import { keepScatterplotStateInSync } from "../middleware/scatterplot";
 
 const configureStore = (initialState) => {

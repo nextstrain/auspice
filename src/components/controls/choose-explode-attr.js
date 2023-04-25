@@ -24,7 +24,7 @@ class ChooseExplodeAttr extends React.Component {
   }
   gatherAttrs() {
     const options = Object.entries(this.props.available)
-      .filter(([key, value]) => value.type !== "continuous")
+      .filter(([_key, value]) => value.type !== "continuous")
       .filter(([key]) => key !== "gt")
       .map(([key, value]) => ({value: key, label: value.title || key}));
     if (this.props.selected) {

@@ -135,7 +135,7 @@ class Legend extends React.Component {
       ) {
         return parseInt(label, 10);
       }
-      const [yyyy, mm, dd] = numericToCalendar(label).split('-');
+      const [yyyy, mm, _dd] = numericToCalendar(label).split('-');
       return `${months[mm]} ${yyyy}`;
     }
     return label;

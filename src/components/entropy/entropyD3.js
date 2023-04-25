@@ -218,7 +218,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
 /* draw the genes (annotations) */
 EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   const geneHeight = 20;
-  const readingFrameOffset = (frame) => 5;
+  const readingFrameOffset = (_frame) => 5;
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   const strokeCol = posInSequence < 1e6 ? "white" : "black";
   const startG = (d) => d.start > this.scales.xNav.domain()[0] ? this.scales.xNav(d.start) : this.offsets.x1;

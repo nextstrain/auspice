@@ -2,7 +2,7 @@ const queryString = require("query-string");
 const path = require("path");
 const fs = require("fs");
 const utils = require("../utils");
-const marked = require('marked');
+const marked = require('marked'); // eslint-disable-line no-unused-vars
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {

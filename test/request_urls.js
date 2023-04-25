@@ -9,7 +9,7 @@ chai.use(require('chai-http'));
 
 const expect = chai.expect;
 
-const isValidJSONCallback = (url) => {
+const isValidJSONCallback = (url) => { // eslint-disable-line no-unused-vars
   return (done) => {
     chai.request(url)
       .get('')

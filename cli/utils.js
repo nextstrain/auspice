@@ -2,7 +2,7 @@
 const fs = require('fs');
 const chalk = require('chalk');
 const path = require("path");
-const fetch = require('node-fetch');
+const fetch = require('node-fetch'); // eslint-disable-line no-unused-vars
 
 const verbose = (msg) => {
   if (global.AUSPICE_VERBOSE) {
