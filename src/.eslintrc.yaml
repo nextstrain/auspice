@@ -2,3 +2,6 @@
 
 rules:
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
+
+  # Code quality rules
+  # no-console: [1, { "allow": ["warn", "error"] }]
