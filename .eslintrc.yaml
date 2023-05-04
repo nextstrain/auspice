@@ -22,6 +22,7 @@ rules:
   no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
   no-use-before-define: ["error", { "functions": false }]
   prefer-const: ["error", {"destructuring": "all"}]
+  react/no-array-index-key: error
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
 
   # Code style rules
