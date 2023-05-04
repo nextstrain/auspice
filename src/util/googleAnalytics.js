@@ -11,7 +11,7 @@ export const initialiseGoogleAnalyticsIfRequired = async () => {
   importReactGa = import("react-ga");
   ReactGA = (await importReactGa).default;
   if (process.env.NODE_ENV !== "production") {
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.log("Not setting up Google Analytics as we are not in production mode");
     return;
   }
@@ -40,6 +40,7 @@ export const triggerOutboundEvent = async (address) => {
   else return;
   ReactGA.outboundLink(
     {label: address},
+    // eslint-disable-next-line no-console
     () => console.log("outbound event triggered", address)
   );
 };
