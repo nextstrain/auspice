@@ -42,7 +42,7 @@ i18n
     fallbackLng: "en",
     /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
     (and this can be kept even after deployment if needed) */
-    debug: process.env.NODE_ENV === 'production' ? false : false,
+    debug: process.env.NODE_ENV === 'production' ? false : false,  // eslint-disable-line no-unneeded-ternary
     interpolation: {
       escapeValue: false
     },
