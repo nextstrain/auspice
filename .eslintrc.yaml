@@ -1,0 +1,48 @@
+---
+extends:
+  - eslint:recommended
+  - plugin:react/recommended
+  - plugin:react-hooks/recommended
+
+plugins:
+  - react
+  - react-hooks
+
+parser: "@babel/eslint-parser"
+
+globals:
+  page: true
+  browser: true
+  context: true
+  jestPuppeteer: true
+  BASE_URL: true
+
+rules:
+  # Code quality rules
+  no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
+  no-use-before-define: ["error", { "functions": false }]
+  prefer-const: ["error", {"destructuring": "all"}]
+  react/no-array-index-key: error
+  react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
+
+  # Code style rules
+  arrow-parens: ["error", "always"]
+  no-unneeded-ternary: ["error", { "defaultAssignment": true }]
+  operator-linebreak: ["error", "after", { "overrides": { "?": "ignore", ":": "ignore" } }]
+  quote-props: ["error", "as-needed"]
+
+parserOptions:
+  ecmaVersion: 6
+  sourceType: module
+  ecmaFeatures:
+    modules: true
+
+env:
+  es6: true
+  browser: true
+  node: true
+  jest: true
+
+settings:
+  react:
+    version: detect

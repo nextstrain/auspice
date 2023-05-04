@@ -30,7 +30,7 @@ class Tangle extends React.Component {
     );
   }
   drawLines(props) {
-    if (!props) props = this.props; // eslint-disable-line
+    if (!props) props = this.props;
     const thickness = props.lookup.length > 750 ? 0.25 : props.lookup.length > 100 ? 0.5 : 1;
     select(this.d3ref).selectAll("*").remove();
     const makeTipPath = makeTipPathGenerator(props);
@@ -56,7 +56,7 @@ class Tangle extends React.Component {
   //     .transition().duration(500)
   //     .attr("d", makeTipPath);
   // }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (!this.state.drawn && nextProps.rightNodes[0].shell) {
       this.drawLines(nextProps);
       this.setState({drawn: true});

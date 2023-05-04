@@ -26,7 +26,7 @@ export const styles = {
 };
 
 export const stopProp = (e) => {
-  if (!e) {e = window.event;} // eslint-disable-line no-param-reassign
+  if (!e) {e = window.event;}
   e.cancelBubble = true;
   if (e.stopPropagation) {e.stopPropagation();}
 };

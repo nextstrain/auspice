@@ -74,7 +74,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
-      cladeSelected = tree.selectedClade; // eslint-disable-line no-param-reassign
+      cladeSelected = tree.selectedClade;
     }
 
     if (!tree.nodes) {return;}
@@ -269,7 +269,7 @@ export const applyFilter = (mode, trait, values) => {
         }
         break;
       case "remove": // fallthrough
-      case "inactivate":
+      case "inactivate": {
         if (currentlyFilteredTraits.indexOf(trait) === -1) {
           console.error(`trying to ${mode} values from an un-initialised filter!`);
           return;
@@ -289,6 +289,7 @@ export const applyFilter = (mode, trait, values) => {
           }
         }
         break;
+      }
       default:
         console.error(`applyFilter called with invalid mode: ${mode}`);
         return; // don't dispatch
@@ -309,7 +310,7 @@ export const toggleTemporalConfidence = () => ({
  */
 const _resetExpodedTree = (nodes) => {
   nodes.forEach((n) => {
-    if (n.hasOwnProperty('unexplodedChildren')) { // eslint-disable-line
+    if (Object.prototype.hasOwnProperty.call(n, 'unexplodedChildren')) {
       n.children = n.unexplodedChildren;
       n.hasChildren = true;
       delete n.unexplodedChildren;

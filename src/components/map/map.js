@@ -84,7 +84,7 @@ class Map extends React.Component {
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
-  componentWillMount() {
+  UNSAFE_componentWillMount() {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
@@ -120,7 +120,7 @@ class Map extends React.Component {
     }
     this.maybeInvalidateMapSize(this.props);
   }
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
@@ -579,10 +579,6 @@ class Map extends React.Component {
     }
   }
   fitMapBoundsToData(demeData, demeIndices) {
-    const SWNE = this.getGeoRange(demeData, demeIndices);
-    // window.L available because leaflet() was called in componentWillMount
-    this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
-    const maxZoom = this.getMaxZoomForFittingMapToData();
     // first, clear any existing timeout
     if (this.bounds_timeout) {
       window.clearTimeout(this.bounds_timeout);
@@ -590,6 +586,9 @@ class Map extends React.Component {
     // delay to change map bounds
     this.bounds_timeout = window.setTimeout(
       (map) => {
+        const SWNE = this.getGeoRange(demeData, demeIndices);
+        const maxZoom = this.getMaxZoomForFittingMapToData();
+        // window.L available because leaflet() was called in UNSAFE_componentWillMount
         map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
       },
       this.props.narrativeMode ? 100 : 750,

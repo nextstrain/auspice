@@ -12,7 +12,7 @@ export default function MarkdownDisplay({ mdstring, ...props }) {
   return (
     <div
       {...props}
-      dangerouslySetInnerHTML={{ __html: cleanDescription }} // eslint-disable-line react/no-danger
+      dangerouslySetInnerHTML={{ __html: cleanDescription }}
     />
   );
 }

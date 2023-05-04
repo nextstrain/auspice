@@ -1,7 +1,5 @@
-/* eslint-disable import/first */
-
 /* P O L Y F I L L S */
-import "whatwg-fetch"; // eslint-disable-line
+import "whatwg-fetch";
 import "core-js";
 import "regenerator-runtime";
 import "css.escape";
@@ -26,7 +24,7 @@ import "./css/notifications.css";
 import "./css/select.css";
 
 /* FONTS */
-import 'typeface-lato'; // eslint-disable-line import/extensions
+import 'typeface-lato';
 
 const store = configureStore();
 
@@ -39,12 +37,12 @@ initialiseGoogleAnalyticsIfRequired();
 i18n
   .use(initReactI18next)
   .init({
-    resources: {}, // eslint-disable-line
+    resources: {},
     lng: "en",
     fallbackLng: "en",
     /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
     (and this can be kept even after deployment if needed) */
-    debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
+    debug: process.env.NODE_ENV === 'production' ? false : false,  // eslint-disable-line no-unneeded-ternary
     interpolation: {
       escapeValue: false
     },

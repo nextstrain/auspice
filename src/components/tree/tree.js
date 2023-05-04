@@ -91,9 +91,9 @@ class Tree extends React.Component {
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
-      let unusedNewState; // eslint-disable-line
-      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
-      /* note, we don't incorporate unusedNewState into the state? why not? */
+      let _unusedNewState;
+      [_unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      /* note, we don't incorporate _unusedNewState into the state? why not? */
     }
 
     /* we may need to (imperatively) tell the tangle to redraw */

@@ -99,7 +99,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   ];
 
   if (analyzeBundle) {
-    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin; // eslint-disable-line
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
     plugins.push(new BundleAnalyzerPlugin());
   }
 

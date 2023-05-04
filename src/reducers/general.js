@@ -29,7 +29,7 @@ const general = (state = {
   language: query.lang ? query.lang : defaults.language
 }, action) => {
   switch (action.type) {
-    case types.PAGE_CHANGE:
+    case types.PAGE_CHANGE: {
       const stateUpdate = {
         displayComponent: action.displayComponent,
         errorMessage: action.errorMessage
@@ -38,6 +38,7 @@ const general = (state = {
         stateUpdate.pathname = action.path;
       }
       return Object.assign({}, state, stateUpdate);
+    }
     case types.UPDATE_PATHNAME:
       return Object.assign({}, state, {
         pathname: action.pathname
@@ -46,12 +47,13 @@ const general = (state = {
       return Object.assign({}, state, {
         language: action.data
       });
-    case types.CLEAN_START:
+    case types.CLEAN_START: {
       const defaultLanguage = action.metadata.displayDefaults["language"] || defaults.language;
       return Object.assign({}, state, {
         defaults: Object.assign({}, state.defaults, {language: defaultLanguage}),
         language: query.lang ? query.lang : defaultLanguage
       });
+    }
     default:
       return state;
   }

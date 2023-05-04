@@ -24,7 +24,7 @@ function main() {
       releaseNotes.push(content[i]);
     }
   }
-  console.log(releaseNotes.join("\n")); // eslint-disable-line no-console
+  console.log(releaseNotes.join("\n"));
 }
 
 main();

@@ -174,7 +174,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
       }
       break;
-    case types.MIDDLEWARE_ONLY_ANIMATION_STARTED:
+    case types.MIDDLEWARE_ONLY_ANIMATION_STARTED: {
       /* animation started - format: start bound, end bound, loop 0|1, cumulative 0|1, speed in ms */
       const a = numericToCalendar(window.NEXTSTRAIN.animationStartPoint);
       const b = numericToCalendar(window.NEXTSTRAIN.animationEndPoint);
@@ -183,6 +183,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       const e = state.controls.mapAnimationDurationInMilliseconds;
       query.animate = `${a},${b},${c},${d},${e}`;
       break;
+    }
     case types.PAGE_CHANGE:
       if (action.query) {
         query = action.query;

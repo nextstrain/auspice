@@ -58,7 +58,7 @@ class ColorBy extends React.Component {
   // Applies the given state to the immutable blank state and replaces the
   // current state with the result.
   replaceState(state) {
-    this.setState((oldState, props) => this.newState(state)); // eslint-disable-line no-unused-vars
+    this.setState((_oldState, _props) => this.newState(state));
   }
 
   newState(state) {
@@ -69,7 +69,7 @@ class ColorBy extends React.Component {
   }
 
   // State from the outside world enters via props.
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
       if (isColorByGenotype(nextProps.colorBy)) {
         const genotype = decodeColorByGenotype(nextProps.colorBy);

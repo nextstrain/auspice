@@ -9,19 +9,6 @@ chai.use(require('chai-http'));
 
 const expect = chai.expect;
 
-const isValidJSONCallback = (url) => {
-  return (done) => {
-    chai.request(url)
-      .get('')
-      .end((err, res) => {
-        expect(err).to.be.null;
-        expect(res).to.have.status(200);
-        expect(res).to.be.json;
-        done();
-      });
-  };
-};
-
 const isValidURLCallback = (url) => {
   return (done) => {
     chai.request(url)

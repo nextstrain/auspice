@@ -2,7 +2,6 @@ const queryString = require("query-string");
 const path = require("path");
 const fs = require("fs");
 const utils = require("../utils");
-const marked = require('marked');
 
 const setUpGetNarrativeHandler = ({narrativesPath}) => {
   return async (req, res) => {

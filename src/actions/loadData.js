@@ -20,10 +20,10 @@ export function getDatasetNamesFromUrl(url) {
     const parts = url.replace(/^\//, '')
       .replace(/\/$/, '')
       .split(":");
-    url = parts[0]; // eslint-disable-line no-param-reassign
+    url = parts[0];
     secondTreeUrl = parts[1];
   }
-  if (url.startsWith('/')) url = url.slice(1); // eslint-disable-line no-param-reassign
+  if (url.startsWith('/')) url = url.slice(1);
   if (secondTreeUrl && secondTreeUrl.startsWith('/')) {
     secondTreeUrl = secondTreeUrl.slice(1);
   }
