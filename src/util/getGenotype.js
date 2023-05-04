@@ -60,12 +60,12 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
   return null;
 };
 
-export const decodePositions = (positions, geneLength = 'Infinity') => {
+export function decodePositions(positions, geneLength = 'Infinity') {
   return positions
     .split(",")
     .map((x) => parseInt(x, 10))
     .filter((x) => x > 0 && x <= Math.floor(geneLength));
-};
+}
 
 /**
  * Encode genotype filters for storage in URL query state.
