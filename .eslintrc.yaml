@@ -18,8 +18,6 @@ globals:
   BASE_URL: true
 
 rules:
-  react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
-
   # Code quality rules
   no-unused-vars: ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
