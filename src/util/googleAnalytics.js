@@ -34,13 +34,3 @@ export const analyticsControlsEvent = async (action) => {
     action
   });
 };
-
-export const triggerOutboundEvent = async (address) => {
-  if (importReactGa) await importReactGa;
-  else return;
-  ReactGA.outboundLink(
-    {label: address},
-    // eslint-disable-next-line no-console
-    () => console.log("outbound event triggered", address)
-  );
-};
