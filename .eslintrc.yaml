@@ -25,6 +25,7 @@ rules:
   "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
   no-use-before-define: off
   "@typescript-eslint/no-use-before-define": ["error", { "functions": false }]
+  "@typescript-eslint/no-var-requires": off # Remove this override once all files use ES6 style imports.
   prefer-const: ["error", {"destructuring": "all"}]
   react/no-array-index-key: error
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
@@ -36,7 +37,6 @@ rules:
   quote-props: ["error", "as-needed"]
 
   # Temporary: newly added by @typescript-eslint/recommended
-  "@typescript-eslint/no-var-requires": off
   "@typescript-eslint/no-empty-function": off
 
 parserOptions:
