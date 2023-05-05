@@ -21,6 +21,7 @@ globals:
 
 rules:
   # Code quality rules
+  "@typescript-eslint/no-empty-function": ["error", { "allow": ["arrowFunctions"] }]
   no-unused-vars: off
   "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
   no-use-before-define: off
@@ -35,9 +36,6 @@ rules:
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
   operator-linebreak: ["error", "after", { "overrides": { "?": "ignore", ":": "ignore" } }]
   quote-props: ["error", "as-needed"]
-
-  # Temporary: newly added by @typescript-eslint/recommended
-  "@typescript-eslint/no-empty-function": off
 
 parserOptions:
   ecmaVersion: 6
