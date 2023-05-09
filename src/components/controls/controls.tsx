@@ -26,7 +26,14 @@ import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
 import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
 
-function Controls({mapOn, frequenciesOn, measurementsOn, mobileDisplay}) {
+type Props = {
+  mapOn: boolean
+  frequenciesOn: boolean
+  measurementsOn: boolean
+  mobileDisplay: boolean
+}
+
+function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
   const { t } = useTranslation();
 
   return (

@@ -1,0 +1,50 @@
+/*
+Much of Auspice was written in JavaScript. There is an effort to convert
+existing JavaScript files to TypeScript in an iterative, file-by-file approach.
+
+TypeScript is used in this project for type-checking only, not for its compiled
+output files - Babel is used for that. Config options should reflect this usage
+pattern.
+
+Visit https://aka.ms/tsconfig.json for a detailed list of options.
+*/
+
+{
+  "compilerOptions": {
+    /* Language and Environment */
+    "jsx": "react",                                      /* Specify what JSX code is generated. */
+
+    /* Modules */
+    "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
+    "types": ["node"],                                   /* Specify type package names to be included without being referenced in a source file. */
+
+    /* JavaScript Support */
+    "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */
+
+    /* Emit */
+    "noEmit": true,                                      /* Do not emit compiler output files like JavaScript source code, source-maps or declarations. */
+
+    /* Interop Constraints */
+    "isolatedModules": true,                             /* Ensure that each file can be safely transpiled without relying on other imports. */
+    "allowSyntheticDefaultImports": true,                /* Allow 'import x from y' when a module doesn't have a default export. */
+    "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
+
+    /* Type Checking */
+    "strict": true,                                      /* Enable all strict type-checking options. */
+    "noUnusedLocals": true,                              /* Enable error reporting when a local variables aren't read. */
+    "noUnusedParameters": true,                          /* Raise an error when a function parameter isn't read */
+    "exactOptionalPropertyTypes": true,                  /* Interpret optional property types as written, rather than adding 'undefined'. */
+    "noImplicitReturns": true,                           /* Enable error reporting for codepaths that do not explicitly return in a function. */
+    "noFallthroughCasesInSwitch": true,                  /* Enable error reporting for fallthrough cases in switch statements. */
+    "noUncheckedIndexedAccess": true,                    /* Include 'undefined' in index signature results */
+    "noImplicitOverride": true,                          /* Ensure overriding members in derived classes are marked with an override modifier. */
+    "allowUnusedLabels": false,                          /* Enable error reporting for unused labels. */
+    "allowUnreachableCode": false,                       /* Enable error reporting for unreachable code. */
+
+    /* Completeness */
+    "skipDefaultLibCheck": true,                         /* Skip type checking .d.ts files that are included with TypeScript. */
+  },
+  "include": [
+    "src/**/*"
+  ]
+}

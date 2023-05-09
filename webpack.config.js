@@ -189,6 +189,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     },
     resolve: {
       alias: aliasesToResolve,
+      extensions: ['.ts', '.tsx', '...'],
       fallback: {
         buffer: require.resolve("buffer/"),
         fs: false
@@ -235,7 +236,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(ts|js)x?$/,
           loader: 'babel-loader',
           exclude: [
             /node_modules\/(core-js|regenerator-runtime)/

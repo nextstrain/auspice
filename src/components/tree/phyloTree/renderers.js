@@ -297,6 +297,7 @@ export const clearSVG = function clearSVG() {
 cause the branches to not appear, we're falling back to the previous solution which
 doesn't use gradients. Calls to `updateColorBy` are therefore unnecessary.
                                                                 James, April 4 2020. */
+// eslint-disable-next-line @typescript-eslint/no-empty-function
 export const updateColorBy = function updateColorBy() {};
 // export const updateColorBy = function updateColorBy() {
 //   // console.log("updating colorBy")

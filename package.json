@@ -23,6 +23,8 @@
     "prepare": "npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint --fix .",
+    "type-check": "tsc",
+    "type-check:watch": "npm run type-check -- --watch",
     "get-data": "env bash ./scripts/get-data.sh",
     "heroku-postbuild": "npm run build && npm run get-data",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
@@ -44,6 +46,7 @@
     "@babel/plugin-transform-runtime": "^7.8.3",
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.21.0",
     "@hot-loader/react-dom": "^16.13.0",
     "argparse": "^1.0.10",
     "babel-loader": "^8.0.4",
@@ -98,7 +101,7 @@
     "react-ga": "^2.2.0",
     "react-helmet": "^5.2.1",
     "react-hot-loader": "^4.8.4",
-    "react-i18next": "^11.3.3",
+    "react-i18next": "^11.15.6",
     "react-icons": "^3.9.0",
     "react-redux": "^7.2.6",
     "react-select": "^5.2.2",
@@ -120,7 +123,10 @@
     "yaml-front-matter": "^4.0.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.16.3",
+    "@types/leaflet": "^1.9.3",
+    "@types/node": "^18.15.11",
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "eslint": "^8.39.0",
@@ -133,6 +139,7 @@
     "node-fetch": "^2.6.1",
     "puppeteer": "^2.1.1",
     "quoted-printable": "^1.0.1",
-    "start-server-and-test": "^1.14.0"
+    "start-server-and-test": "^1.14.0",
+    "typescript": "^5.0.2"
   }
 }
