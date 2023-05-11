@@ -19,6 +19,7 @@ const getAnnotations = (jsonData) => {
         prot: prot,
         start: jsonData[prot].start - 1, // see above
         end: jsonData[prot].end,
+        // XXX FIXME: strand?
         strand: jsonData[prot].strand,
         fill: genotypeColors[aaCount % 10]
       });

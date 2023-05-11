@@ -45,8 +45,10 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) =>
     styles.container.bottom = height - pos.y;
   }
 
+  // XXX FIXME: strand
   const isNegStrand = hovered.d.prot ? geneMap[hovered.d.prot].strand === "-" : null;
 
+  // XXX FIXME: strand
   const nucPos = hovered.d.prot ?
     mutType === "aa" ?
       isNegStrand ? geneMap[hovered.d.prot].end - hovered.d.codon * 3 + 3 :
@@ -72,6 +74,7 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) =>
         </div>
         <p/>
         <div>
+          // XXX FIXME: strand
           {isNegStrand === null ? `` : isNegStrand ? t("Negative strand") : t("Positive strand")}
         </div>
         <p/>

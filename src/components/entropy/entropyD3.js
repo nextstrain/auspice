@@ -104,6 +104,7 @@ EntropyChart.prototype.update = function update({
 
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
+  // XXX FIXME: strand
   if (this.geneMap[gene].strand === "-") {
     return this.geneMap[gene].end - aaPos * 3 + 1;
   }
@@ -177,9 +178,12 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   const strokeCol = posInSequence < 1e6 ? "white" : "black"; /* black for large because otherwise disappear against background */
   /* check if we've got 2 reading frames (genes on both the "+" & "-" strands) and if so then modify
   the offset accordingly. If not, plot them all in the middle to save space */
+  // XXX FIXME: strand
+  // XXX FIXME: does this assume there are always strand==="+" annotations? I think so.
   const genesOnBothStrands = !!annotations.filter((a) => a.strand === "-").length;
   const readingFrameOffset = (strand) => {
     if (genesOnBothStrands) {
+      // XXX FIXME: strand
       return strand === "-" ? 20 : 0;
     }
     return 10;
