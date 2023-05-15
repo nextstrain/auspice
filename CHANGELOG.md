@@ -1,5 +1,13 @@
 # Changelog
 
+* Fixed a bug where narratives with multiple datasets that had measurements panels would error when switching datasets. ([#1603](https://github.com/nextstrain/auspice/issues/1603))
+
+_There have been a number of internal changes with this release, most of which should not result in any different behavior while using Auspice._
+
+* Add basic TypeScript support ([#1450](https://github.com/nextstrain/auspice/pull/1450))
+* Minor dev docs updates ([#1660](https://github.com/nextstrain/auspice/pull/1660))
+* Overhaul of ESLint rules ([#1665](https://github.com/nextstrain/auspice/pull/1665))
+
 ## version 2.45.2 - 2023/03/22
 
 
