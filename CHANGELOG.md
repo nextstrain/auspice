@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.46.0 - 2023/05/15
+
+
 * Fixed a bug where narratives with multiple datasets that had measurements panels would error when switching datasets. ([#1603](https://github.com/nextstrain/auspice/issues/1603))
 
 _There have been a number of internal changes with this release, most of which should not result in any different behavior while using Auspice._
