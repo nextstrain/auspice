@@ -39,7 +39,7 @@ export function continuousAttrValueToNumber(attr) {
   switch (typeof attr.value) {
     case "number":
       break;
-    case "string":
+    case "string": {
       const value = attr.value.trim();
       if (value === "" || isNaN(value) || value ==="Infinity" || value ==="-Infinity") {
         // Note: Number("")=0
@@ -49,6 +49,7 @@ export function continuousAttrValueToNumber(attr) {
         attr.value = Number(value);
       }
       break;
+    }
     default:
       // any other types (Boolean, Null ('object')) are not valid for a continuous scale
       attr.value = undefined;
