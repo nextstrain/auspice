@@ -11,6 +11,7 @@ import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
+import { castIncorrectTypes } from "../util/castJsonTypes";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
@@ -771,11 +772,13 @@ export const createStateFromQueryOrJSONs = ({
     measurements = getDefaultMeasurementsState();
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
+    castIncorrectTypes(metadata, tree);
     tree.debug = "LEFT";
     tree.name = mainTreeName;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (secondTreeDataset) {
       treeToo = treeJsonToState(secondTreeDataset.tree);
+      castIncorrectTypes(metadata, treeToo);
       treeToo.debug = "RIGHT";
       treeToo.name = secondTreeName;
       /* TODO: calc & display num tips in 2nd tree */
