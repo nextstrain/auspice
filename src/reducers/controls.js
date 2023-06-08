@@ -24,6 +24,7 @@ export const getDefaultControlsState = () => {
     filtersInFooter: [],
     colorBy: defaultColorBy,
     selectedBranchLabel: "none",
+    tipLabelKey: strainSymbol,
     showTransmissionLines: true
   };
   // a default sidebarOpen status is only set via JSON, URL query
@@ -78,7 +79,7 @@ export const getDefaultControlsState = () => {
     panelsAvailable: [],
     panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
-    tipLabelKey: strainSymbol,
+    tipLabelKey: defaults.tipLabelKey,
     showTreeToo: undefined,
     showTangle: false,
     zoomMin: undefined,

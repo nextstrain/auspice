@@ -5,6 +5,8 @@ import { shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
 
+export const strainSymbolUrlString = "__strain__";
+
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
  * intercepting actions and updating the URL accordingly. Thus, in theory, this
@@ -167,7 +169,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_TIP_LABEL_KEY: {
-      query.tl = action.key===strainSymbol ? undefined : action.key;
+      query.tl = action.key===state.controls.defaults.tipLabelKey ? undefined :
+        action.key===strainSymbol ? strainSymbolUrlString :
+        action.key;
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {

@@ -22,6 +22,7 @@ import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decode
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
+import { strainSymbolUrlString } from "../middleware/changeURL";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -89,7 +90,7 @@ const modifyStateViaURLQuery = (state, query) => {
     state["panelLayout"] = query.p;
   }
   if (query.tl) {
-    state["tipLabelKey"] = query.tl;
+    state["tipLabelKey"] = query.tl===strainSymbolUrlString ? strainSymbol : query.tl;
   }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
@@ -238,8 +239,8 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   state.filters[strainSymbol] = [];
   state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", "tipLabelKey", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',      'string',  "boolean"              , "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
@@ -552,10 +553,21 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     state.defaults.selectedBranchLabel = "none";
   }
 
-  /* check tip label is valid. We use the function which generates the options for the dropdown here */
-  if (!collectAvailableTipLabelOptions(metadata.colorings).map((o) => o.value).includes(state.tipLabelKey)) {
-    console.error("Can't set selected tip label to ", state.tipLabelKey);
-    state.tipLabelKey = strainSymbol;
+  /* check tip label is valid. We use the function which generates the options for the dropdown here.
+   * state.defaults.tipLabelKey is set by the JSON's display_defaults (default: strainSymbol)
+   * state.tipLabelKey is first set the JSON and then overridden via the URL query (default: state.defaults.tipLabelKey)
+   */
+  const validTipLabels = collectAvailableTipLabelOptions(metadata.colorings).map((o) => o.value);
+  if (!validTipLabels.includes(state.defaults.tipLabelKey)) {
+    console.error("Invalid JSON-defined tip label:", state.defaults.tipLabelKey);
+    state.defaults.tipLabelKey = strainSymbol;
+  }
+  if (!validTipLabels.includes(state.tipLabelKey)) {
+    if (query.tl) {
+      console.error("Invalid URL-defined tip label:", state.tipLabelKey);
+      delete query.tl;
+    }
+    state.tipLabelKey = state.defaults.tipLabelKey;
   }
 
   /* temporalConfidence */
@@ -745,6 +757,7 @@ const createMetadataStateFromJSON = (json) => {
       geo_resolution: "geoResolution",
       distance_measure: "distanceMeasure",
       branch_label: "selectedBranchLabel",
+      tip_label: "tipLabelKey",
       map_triplicate: "mapTriplicate",
       layout: "layout",
       language: "language",

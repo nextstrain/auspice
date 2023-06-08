@@ -1,8 +1,10 @@
 # Changelog
 
+
+* Allow the tip label key to be defined in the JSON via `display_defaults.tip_label`, in addition to being settable via a URL query.
+See [the docs](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/view-settings.html) or [PR #1668](https://github.com/nextstrain/auspice/pull/1668) for more.
+
 ## version 2.48.0 - 2023/08/31
-
-
 
 * Root sequence data may be inlined in the main dataset JSON
 ([Auspice PR #1688](https://github.com/nextstrain/auspice/pull/1688) and [Augur PR #1295](https://github.com/nextstrain/augur/pull/1295)).
@@ -32,8 +34,6 @@ detailed in [augur PR #1281](https://github.com/nextstrain/augur/pull/1281).
 * Dependencies updated. See [PR #1669](https://github.com/nextstrain/auspice/pull/1669) for more.
 
 ## version 2.46.0 - 2023/05/15
-
-
 * Fixed a bug where narratives with multiple datasets that had measurements panels would error when switching datasets. ([#1603](https://github.com/nextstrain/auspice/issues/1603))
 
 _There have been a number of internal changes with this release, most of which should not result in any different behavior while using Auspice._
