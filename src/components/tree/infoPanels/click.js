@@ -1,10 +1,11 @@
 import React from "react";
-import { isValueValid } from "../../../util/globals";
+import { isValueValid, strainSymbol } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
   getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
 import { MutationTable } from "./MutationTable";
+import { displayName } from "./hover";
 
 export const styles = {
   container: {
@@ -237,7 +238,7 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
+const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, observedMutations, geneSortFn, tipLabelKey, t}) => {
   if (selectedNode.event!=="click") {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
@@ -245,19 +246,14 @@ const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, observedM
   const isTip = selectedNode.type === "tip";
   const isTerminal = node.fullTipCount===1;
 
-  const title = isTip ?
-    node.name :
-    isTerminal ?
-      `Branch leading to ${node.name}` :
-      "Internal branch";
-
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
-        <StrainName>{title}</StrainName>
+        <StrainName>{displayName(node, tipLabelKey, !isTip)}</StrainName>
         <table>
           <tbody>
-            {!isTip && item(t("Number of terminal tips"), node.fullTipCount)}
+            {(isTip && tipLabelKey!==strainSymbol) && item(t("Node name"), node.name)}
+            {(!isTip && node.fullTipCount>1) && item(t("Number of terminal tips"), node.fullTipCount)}
             {isTip && <VaccineInfo node={node} t={t}/>}
             <SampleDate isTerminal={isTerminal} node={node} t={t}/>
             {!isTip && item("Node name", node.name)}

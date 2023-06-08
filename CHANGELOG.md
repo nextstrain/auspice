@@ -1,5 +1,8 @@
 # Changelog
 
+* The specified tip label is used for the on-hover info boxes & on-click modals.
+See [PR #1668](https://github.com/nextstrain/auspice/pull/1668) for more.
+
 ## version 2.50.0 - 2023/10/30
 
 

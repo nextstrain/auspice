@@ -204,6 +204,7 @@ class Tree extends React.Component {
           geneSortFn={this.state.geneSortFn}
           observedMutations={this.props.tree.observedMutations}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
+          tipLabelKey={this.props.tipLabelKey}
           t={t}
         />
         <NodeClickedPanel
@@ -212,6 +213,7 @@ class Tree extends React.Component {
           observedMutations={this.props.tree.observedMutations}
           colorings={this.props.colorings}
           geneSortFn={this.state.geneSortFn}
+          tipLabelKey={this.props.tipLabelKey}
           t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
