@@ -3,7 +3,8 @@
 * Any `node_attr` in the tree can be used as a tip label, as well as the special-cases of strain-name and "none".
   Previously we only allowed valid colorings.
   ([#1668](https://github.com/nextstrain/auspice/pull/1668))
-
+* The specified tip label is surfaced more prominently within the the on-hover info boxes & on-click modals.
+  ([#1668](https://github.com/nextstrain/auspice/pull/1668))
 
 ## version 2.56.1 - 2024/08/22
 

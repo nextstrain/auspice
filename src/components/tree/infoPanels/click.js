@@ -1,11 +1,12 @@
 import React from "react";
-import { isValueValid } from "../../../util/globals";
+import { isValueValid, strainSymbol } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
   getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
 import { MutationTable } from "./MutationTable";
 import { lhsTreeId} from "../tree";
+import { nodeDisplayName } from "./helpers";
 
 export const styles = {
   container: {
@@ -241,9 +242,10 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * @param  {Object}   props.colorings
  * @param  {Object}   props.observedMutations
  * @param  {function} props.geneSortFn
+ * @param  {string|symbol} props.tipLabelKey
  * @param  {function} props.t
  */
-const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
+const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelectedNode, colorings, observedMutations, geneSortFn, tipLabelKey, t}) => {
   if (!selectedNode) return null;
   const node = (selectedNode.treeId===lhsTreeId ? nodesLhsTree : nodesRhsTree)?.[selectedNode.idx];
   if (!node) {
@@ -252,25 +254,23 @@ const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelect
   }
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
+
+  /* We have `isTerminal` and `isTip` to differentiate between clicking on a branch leading to a tip
+   * vs clicking on the tip (circle) itself */
   const isTerminal = !node.hasChildren;
   const isTip = !selectedNode.isBranch;
-
-  const title = isTip ?
-    node.name :
-    isTerminal ?
-      `Branch leading to ${node.name}` :
-      "Internal branch";
+  const shouldShowNodeName = tipLabelKey!==strainSymbol;
 
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
-        <StrainName>{title}</StrainName>
+        <StrainName>{nodeDisplayName(t, node, tipLabelKey, !isTip)}</StrainName>
         <table>
           <tbody>
-            {!isTip && item(t("Number of terminal tips"), node.fullTipCount)}
+            {!isTerminal && item(t("Number of terminal tips"), node.fullTipCount)}
+            {shouldShowNodeName && item(t("Node name"), node.name)}
             {isTip && <VaccineInfo node={node} t={t}/>}
             <SampleDate isTerminal={isTerminal} node={node} t={t}/>
-            {!isTip && item("Node name", node.name)}
             {isTip && <PublicationInfo node={node} t={t}/>}
             {getTraitsToDisplay(node).map((trait) => (
               <Trait node={node} trait={trait} colorings={colorings} key={trait} isTerminal={isTerminal}/>
