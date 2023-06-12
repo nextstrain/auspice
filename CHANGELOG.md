@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.46.1 - 2023/06/12
+
+
 * Fix a number of bugs related to continuous traits:
     * Negative (string) values are now correctly interpreted. See [issue #1626](https://github.com/nextstrain/auspice/issues/1626) and [PR #1655](https://github.com/nextstrain/auspice/pull/1655) for more.
     * Fix legend matching bounds (used when hovering over legend items). See [PR #1657](https://github.com/nextstrain/auspice/pull/1657) for more.
