@@ -1,6 +1,6 @@
-import { select, mouse } from "d3-selection";
+import { select, pointer } from "d3-selection";
 import 'd3-transition';
-import scaleLinear from "d3-scale/src/linear";
+import {scaleLinear} from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { min, max } from "d3-array";
 import { rgb } from "d3-color";
@@ -272,8 +272,8 @@ export const drawStream = (
     .y1((d) => scales.y(d[1]));
 
   /* define handleMouseMove inside drawStream so it can access the provided arguments */
-  function handleMouseMove(d, i) {
-    const [mousex] = mouse(this); // [x, y] x starts from left, y starts from top
+  function handleMouseMove(e, d, i) {
+    const [mousex] = pointer(e); // [x, y] x starts from left, y starts from top
     /* what's the closest pivot? */
     const date = scales.x.invert(mousex);
     const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);

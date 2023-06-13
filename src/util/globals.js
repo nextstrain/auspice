@@ -1,5 +1,4 @@
-import { sqrt as scaleSqrt } from "d3-scale/src/pow";
-import scaleLinear from "d3-scale/src/linear";
+import {scaleLinear, scaleSqrt} from "d3-scale";
 import { hasExtension, getExtension } from "../util/extensions";
 
 export const colorOptions = {

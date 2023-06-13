@@ -5,7 +5,7 @@ import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/rendere
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
-export const onTipHover = function onTipHover(d) {
+export const onTipHover = function onTipHover(e, d) {
   if (d.visibility !== NODE_VISIBLE) return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
@@ -21,7 +21,7 @@ export const onTipHover = function onTipHover(d) {
   });
 };
 
-export const onTipClick = function onTipClick(d) {
+export const onTipClick = function onTipClick(e, d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
   this.setState({
@@ -35,7 +35,7 @@ export const onTipClick = function onTipClick(d) {
 };
 
 
-export const onBranchHover = function onBranchHover(d) {
+export const onBranchHover = function onBranchHover(e, d) {
   if (d.visibility !== NODE_VISIBLE) return;
 
   branchStrokeForHover(d);
@@ -63,7 +63,7 @@ export const onBranchHover = function onBranchHover(d) {
   });
 };
 
-export const onBranchClick = function onBranchClick(d) {
+export const onBranchClick = function onBranchClick(e, d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
 
@@ -113,7 +113,7 @@ export const onBranchClick = function onBranchClick(d) {
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
-export const onBranchLeave = function onBranchLeave(d) {
+export const onBranchLeave = function onBranchLeave(e, d) {
   if (this.state.selectedNode.event!=="hover") return;
 
   /* Reset the stroke back to what it was before */
@@ -128,7 +128,7 @@ export const onBranchLeave = function onBranchLeave(d) {
   this.setState({selectedNode: {}});
 };
 
-export const onTipLeave = function onTipLeave(d) {
+export const onTipLeave = function onTipLeave(e, d) {
   if (this.state.selectedNode.event!=="hover") return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :

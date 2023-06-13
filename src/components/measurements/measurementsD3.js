@@ -1,7 +1,7 @@
 import { extent, groups, mean, deviation } from "d3-array";
 import { axisBottom, axisLeft } from "d3-axis";
 import { scaleLinear } from "d3-scale";
-import { select, event as d3event } from "d3-selection";
+import { select } from "d3-selection";
 import { symbol, symbolDiamond } from "d3-shape";
 import { orderBy } from "lodash";
 import { measurementIdSymbol } from "../../util/globals";
@@ -422,9 +422,11 @@ export const toggleDisplay = (ref, elementClass, displayOn) => {
 export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover, treeStrainColors) => {
   const svg = select(ref);
   svg.selectAll(`.${classes.rawMeasurements},.${classes.mean},.${classes.standardDeviation}`)
-    .on("mouseover.hoverPanel", (d, i, elements) => {
+    .on("mouseover.hoverPanel", (e, d, i, elements) => {
+      // TODO XXX i & elements are undefined
+      console.log("mouseover.hoverPanel", e, d, i, elements)
       // Get mouse position for HoverPanel
-      const { clientX, clientY } = d3event;
+      const { clientX, clientY } = e;
 
       // Use class name to check data type
       const className = elements[i].getAttribute("class");

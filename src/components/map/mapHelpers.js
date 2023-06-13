@@ -198,7 +198,7 @@ export const drawDemesAndTransmissions = (
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       )
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
+      .on("mouseover", (e, d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
       .on("mouseout", () => { dispatch(updateTipRadii()); });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection

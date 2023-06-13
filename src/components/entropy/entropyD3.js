@@ -1,7 +1,7 @@
 /* eslint no-underscore-dangle: off */
-import { select, event as d3event } from "d3-selection";
+import { select } from "d3-selection";
 import 'd3-transition';
-import scaleLinear from "d3-scale/src/linear";
+import {scaleLinear} from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { format } from "d3-format";
 import { zoom } from "d3-zoom";
@@ -319,8 +319,8 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     .attr("width", barWidth)
     .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
     .style("fill", fillfn)
-    .on("mouseover", (d) => {
-      this.callbacks.onHover(d, d3event.pageX, d3event.pageY);
+    .on("mouseover", (event, d) => {
+      this.callbacks.onHover(d, event.pageX, event.pageY);
     })
     .on("mouseout", (d) => {
       this.callbacks.onLeave(d);
@@ -421,14 +421,15 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 
 /* the brush is the shaded area in the nav window */
 EntropyChart.prototype._addBrush = function _addBrush() {
-  this.brushed = function brushed() {
+  this.brushed = function brushed(event) {
+    console.log('brushed. Event:', event)
     /* this block called when the brush is manipulated */
-    const s = d3event.selection || this.scales.xNav.range();
+    const s = event.selection || this.scales.xNav.range();
     // console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
     this.zoomCoordinates = start_end.map(Math.round);
-    if (!d3event.selection) { /* This keeps brush working if user clicks (zoom out entirely) rather than click-drag! */
+    if (!event.selection) { /* This keeps brush working if user clicks (zoom out entirely) rather than click-drag! */
       this.navGraph.select(".brush")
         .call(this.brush.move, () => {
           this.zoomCoordinates = this.scales.xNav.range().map(Math.round);
@@ -439,31 +440,35 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     }
   };
 
-  this.brushFinished = function brushFinished() {
-    this.brushed();
+  this.brushFinished = function brushFinished(event) {
+    console.log("brushFinished Event:", event)
+    this.brushed(event);
     /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
-    if (d3event.sourceEvent instanceof MouseEvent) {
+
+    if (event.sourceEvent instanceof MouseEvent) {
       if (
-        !d3event.selection ||
-        d3event.sourceEvent.target.id === "d3entropyParent" ||
-        d3event.sourceEvent.target.id === ""
+        // TODO XXX - sometimes we get
+        //  Uncaught TypeError: event.sourceEvent.target.id is undefined
+        !event.selection ||
+        event.sourceEvent.target.id === "d3entropyParent" ||
+        event.sourceEvent.target.id === ""
       ) {
         this.props.dispatch(changeZoom(this.zoomCoordinates));
       } else if (
-        d3event.sourceEvent.target.id.match(/^prot/) ||
-        d3event.sourceEvent.target.id.match(/^nt/)
+        event.sourceEvent.target.id.match(/^prot/) ||
+        event.sourceEvent.target.id.match(/^nt/)
       ) {
         /* If selected gene or clicked on entropy, hide zoom coords */
         this.props.dispatch(changeZoom([undefined, undefined]));
       }
-    } else if (_isZoomEvent(d3event)) {
+    } else if (_isZoomEvent(event)) {
       this.props.dispatch(changeZoom(this.zoomCoordinates));
     }
   };
 
   /* ZoomEvent is emitted by d3-zoom when shift/option + mouseWheel on the entropy panel. */
-  function _isZoomEvent(d3Event) {
-    return d3Event && d3Event.sourceEvent && d3Event.sourceEvent.type === 'zoom';
+  function _isZoomEvent(event) {
+    return event && event.sourceEvent && event.sourceEvent.type === 'zoom';
   }
 
   /* zooms in by modifying the domain of xMain scale */
@@ -484,11 +489,11 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
-    .on("brush", () => { // https://github.com/d3/d3-brush#brush_on
-      this.brushed();
+    .on("brush", (event) => { // https://github.com/d3/d3-brush#brush_on
+      this.brushed(event);
     })
-    .on("end", () => {
-      this.brushFinished();
+    .on("end", (event) => {
+      this.brushFinished(event);
     });
   this.gBrush = this.navGraph.append("g")
     .attr("class", "brush")
@@ -527,7 +532,7 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
     // .scaleExtent([1, 8]) /* seems to limit mouse scroll zooming */
     .translateExtent(zoomExtents)
     .extent(zoomExtents)
-    .on("zoom", () => this.zoomed());
+    .on("zoom", (event) => this.zoomed(event));
 
   /* the overlay should be dependent on whether you have certain keys pressed */
   const zoomKeys = ["option", "shift"];
@@ -539,7 +544,7 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
       .attr("width", this.offsets.width)
       .attr("height", this.offsets.y2Nav + 30 - this.offsets.y1Main)
       .call(this.zoom)
-      .on("wheel", () => { d3event.preventDefault(); });
+      .on("wheel", (event) => { event.preventDefault(); });
   }, "keydown");
   Mousetrap.bind(zoomKeys, () => {
     this.svg.selectAll(".overlay").remove();
@@ -549,8 +554,9 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
 };
 
 EntropyChart.prototype._createZoomFn = function _createZoomFn() {
-  return function zoomed() {
-    const t = d3event.transform;
+  return function zoomed(event) {
+    console.log("zoomed. Event:", event)
+    const t = event.transform;
     const zoomCoordLen = this.zoomCoordinates[1] - this.zoomCoordinates[0];
     const amountZoomChange = (zoomCoordLen - (zoomCoordLen/t.k))/2;
     const tempZoomCoordinates = [Math.max(this.zoomCoordinates[0]+amountZoomChange, this.scales.xNav(0)),
