@@ -13,7 +13,6 @@ beforeEach(async () => {
   await jestPuppeteer.resetBrowser();
   const userAgent = await browser.userAgent();
   await page.setUserAgent(`${userAgent}bot`);
-  await page._client.send('Animation.setPlaybackRate', { playbackRate: 12 });
   await page.setViewport({
     width: 1536,
     height: 864
