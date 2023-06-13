@@ -57,7 +57,7 @@ We use the following libraries for all kinds of testing, so it'd help to read th
 3. [`Jest-Puppeteer`](https://github.com/smooth-code/jest-puppeteer)
 4. [`Jest-Image-Snapshot`](https://github.com/americanexpress/jest-image-snapshot)
 
-When you submit a pull request to the auspice repository, a variety of integration and unit tests will need to pass before it can be merged.
+When you submit a pull request to the auspice repository, certain tests will need to pass before it can be merged.
 
 You will likely want to run these tests locally before submitting:
 
@@ -73,17 +73,8 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 #### For integration tests
 
-> For integration tests to work, you'll need to have `git-lfs` installed (see below) as it stores the images that the snapshot tests will use.
-
-1. Fetch the datasets with `npm run get-data`.
-2. Ensure you are **not** currently running the site locally, then run `npm run integration-test:ci`.
-
-
-#### How to update test snapshots
-
-1. Unit tests: `npm run test -- -u`
-2. Integration tests `npm run integration-test -- -u`
-
+Auspice used to have integration testing using jest + puppeteer, however this was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
+Ideally this functionality will be brought back, and that PR would be a good place to start.
 
 #### For smoke tests
 
@@ -97,23 +88,10 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
     E.g., `describe.only()`, `it.only()`, or `test.only()`
 
-2. Run a single test file, append the following to your test command `-- relative_or_absolute_path/to/file`:
+2. You can run a single test file like so:
 
-    E.g., `npm run integration-test -- test/integration/zika.test.js`
+    E.g., `npx jest test/dates.test.js`
 
-3. Run integration tests in headful mode, prepend `HEADLESS=false` to your command:
-
-    E.g., `HEADLESS=false npm run integration-test`
-
-4. For integration tests, please try to use [`expect-puppeteer`](https://github.com/smooth-code/jest-puppeteer/blob/master/packages/expect-puppeteer/README.md#api) as much as possible, and only resort to `puppeteer`'s native API when we can't do it with `expect-puppeteer`. The reason is because `expect-puppeteer` has better DX, as explained [here](https://github.com/smooth-code/jest-puppeteer/blob/master/packages/expect-puppeteer/README.md#why-do-i-need-it)
-
-5. How to add a new integration image test:
-
-    1. Wrap your image test with helper function `toMatchImageSnapshot()` from `test/integration/helpers.js`, and it will take a screenshot every `100ms` until it matches the expected snapshot or timeout (default: `10s`)
-
-    2. Temporarily add `page.waitFor(__ENOUGH__MS__)` before taking the new snapshot to give the browser enough time to render a complete image
-
-    3. Example: `test/integration/zika.test.js`
 
 
 #### Manual testing
@@ -131,16 +109,9 @@ Additionally, a GitHub Actions workflow has been set up to generate PRs in downs
 
 ## git-lfs
 
-We use [Git Large File Storage](https://github.com/git-lfs/git-lfs) to manage certain assets.
-Currently these are limited to images within the `./test` directory (which we use for snapshot integration testing) but this may change in the future.
-If you are not using these images, you don't need to have `git-lfs` installed; however **will not be able to run integration tests without it**.
-See [here](https://git-lfs.github.com/) for installation instructions.
+[Git Large File Storage](https://github.com/git-lfs/git-lfs) was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
+You may uninstall it via `git lfs uninstall` if needed.
 
-Helpful commands:
-```bash
-git lfs status
-git lfs ls-files # list LFS tracked tiles
-```
 
 ## Typescript
 
