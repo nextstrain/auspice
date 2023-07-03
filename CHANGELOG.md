@@ -1,5 +1,8 @@
 # Changelog
 
+* Remove support for Node.js version 14. ([#1674](https://github.com/nextstrain/auspice/pull/1674))
+* Add support for Node.js version 20. ([#1673](https://github.com/nextstrain/auspice/pull/1673))
+
 ## version 2.46.1 - 2023/06/12
 
 
