@@ -12,9 +12,9 @@ import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
 
-/* EntropChart uses D3 for visualisation. There are 2 methods exposed to
+/* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
- * EntropyChart.render & EntropyChartupdate
+ * EntropyChart.render & EntropyChart.update
  */
 const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, callbacks) {
   this.svg = select(ref);

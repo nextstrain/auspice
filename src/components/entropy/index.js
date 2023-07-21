@@ -70,7 +70,6 @@ const constructEncodedGenotype = (mutType, d) => {
     zoomMin: state.controls.zoomMin,
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
-    shouldReRender: false,
     panelLayout: state.controls.panelLayout,
     narrativeMode: state.narrative.display
   };
