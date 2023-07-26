@@ -1,9 +1,9 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) => {
+const InfoPanel = ({d3event, width, height, children}) => {
   /* this is a function - we can bail early */
-  if (!hovered) {
+  if (!d3event) {
     return null;
   }
 
@@ -26,12 +26,9 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) =>
     }
   };
 
-  /* don't use d3entropy or main chart SVG as these change on zoom.
-  The Y axis is safe as it is invariant */
-  const bounds = document.getElementById("entropyYAxis").getBoundingClientRect();
   const pos = {
-    x: hovered.x - bounds.left + 15,
-    y: hovered.y - bounds.top
+    x: d3event.layerX,
+    y: d3event.layerY
   };
 
   if (pos.x < width * 0.7) {
@@ -45,45 +42,11 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) =>
     styles.container.bottom = height - pos.y;
   }
 
-  const isNegStrand = hovered.d.prot ? geneMap[hovered.d.prot].strand === "-" : null;
-
-  const nucPos = hovered.d.prot ?
-    mutType === "aa" ?
-      isNegStrand ? geneMap[hovered.d.prot].end - hovered.d.codon * 3 + 3 :
-        geneMap[hovered.d.prot].start + hovered.d.codon * 3
-      : isNegStrand ? geneMap[hovered.d.prot].end - hovered.d.x :
-        hovered.d.x - geneMap[hovered.d.prot].start-1
-    : null;
-
-  const codonFromNuc = hovered.d.prot && mutType !== "aa" ? Math.floor((nucPos)/3) + 1 : null;
   return (
     <div style={styles.container}>
-      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
-        <div>
-          {
-            mutType === "aa" ? t("Codon {{codon}} in protein {{protein}}", {codon: hovered.d.codon, protein: hovered.d.prot}) :
-              hovered.d.prot ? `${t("Nucleotide {{nuc}}", {nuc: hovered.d.x})} (${t("Codon {{codon}} in protein {{protein}}", {codon: codonFromNuc, protein: hovered.d.prot})})` :
-                t("Nucleotide {{nuc}}", {nuc: hovered.d.x})
-          }
-        </div>
-        <p/>
-        <div>
-          {mutType === "aa" ? t("Nuc positions {{a}} to {{b}}", {a: nucPos-2, b: nucPos}) : ``}
-        </div>
-        <p/>
-        <div>
-          {isNegStrand === null ? `` : isNegStrand ? t("Negative strand") : t("Positive strand")}
-        </div>
-        <p/>
-        <div>
-          {showCounts ? `${t("Num mutations")}: ${hovered.d.y}` : `${t("entropy")}: ${hovered.d.y}`}
-        </div>
-        <div style={infoPanelStyles.comment}>
-          {t("Click to color tree & map")}
-        </div>
-      </div>
+      {children}
     </div>
-  );
+  )
 };
 
 export default InfoPanel;

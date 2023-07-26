@@ -89,11 +89,9 @@ class Entropy extends React.Component {
     defaultColorBy: PropTypes.string.isRequired,
     mutType: PropTypes.string.isRequired
   }
-
   /* CALLBACKS */
-  onHover(d, x, y) {
-    // console.log("hovering @", x, y, this.state.chartGeom);
-    this.setState({hovered: {d, type: ".tip", x, y}});
+  onHover(hovered) {
+    this.setState({hovered})
   }
   onLeave() {
     this.setState({hovered: false});
@@ -204,6 +202,7 @@ class Entropy extends React.Component {
         updateParams.zoomMin = nextProps.zoomMin;
       }
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
+        updateParams.showCounts = nextProps.showCounts;
         updateParams.aa = nextProps.mutType === "aa";
         updateParams.newBars = nextProps.bars;
         updateParams.maxYVal = nextProps.maxYVal;
@@ -268,15 +267,9 @@ class Entropy extends React.Component {
     const styles = getStyles(this.props.width);
     return (
       <Card title={t("Diversity")}>
-        <InfoPanel
-          hovered={this.state.hovered}
-          width={this.props.width}
-          height={this.props.height}
-          mutType={this.props.mutType}
-          showCounts={this.props.showCounts}
-          geneMap={this.props.geneMap}
-          t={t}
-        />
+        <InfoPanel d3event={this.state.hovered.d3event} width={this.props.width} height={this.props.height}>
+          {this.state.hovered ? this.state.hovered.tooltip(this.props.t) : null}
+        </InfoPanel>
         <svg
           id="d3entropyParent"
           style={{pointerEvents: "auto"}}

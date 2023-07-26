@@ -1,4 +1,5 @@
 /* eslint no-underscore-dangle: off */
+import React from 'react';
 import { select, event as d3event } from "d3-selection";
 import 'd3-transition';
 import scaleLinear from "d3-scale/src/linear";
@@ -7,7 +8,7 @@ import { format } from "d3-format";
 import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
-import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
+import { lightGrey, medGrey, darkGrey, infoPanelStyles } from "../../globalStyles";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
@@ -29,6 +30,7 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
 EntropyChart.prototype.render = function render(props) {
   this.props = props;
   this.aa = props.mutType === "aa";
+  this.showCounts = props.showCounts;
   this.bars = props.bars;
   this.selectedNodes = isColorByGenotype(props.colorBy) ?
     this._getSelectedNodes(decodeColorByGenotype(props.colorBy, props.geneLength)) :
@@ -57,6 +59,7 @@ EntropyChart.prototype.update = function update({
   aa = undefined, /* undefined is a no-op for each optional argument */
   selected = undefined,
   newBars = undefined,
+  showCounts = undefined,
   maxYVal = undefined,
   clearSelected = false,
   gene = undefined,
@@ -68,7 +71,10 @@ EntropyChart.prototype.update = function update({
   const aaChange = aa !== undefined && aa !== this.aa;
   if (newBars || aaChange) {
     if (aaChange) {this.aa = aa;}
-    if (newBars) {this.bars = newBars;}
+    if (newBars) {
+      this.bars = newBars;
+      this.showCounts = showCounts;
+    }
     this._updateYScaleAndAxis(maxYVal);
     this._drawBars();
   }
@@ -319,7 +325,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     .attr("height", (d) => this.offsets.heightMainBars - this.scales.y(d.y))
     .style("fill", fillfn)
     .on("mouseover", (d) => {
-      this.callbacks.onHover(d, d3event.pageX, d3event.pageY);
+      this.callbacks.onHover({d3event, tooltip: this._mainTooltip(d)})
     })
     .on("mouseout", (d) => {
       this.callbacks.onLeave(d);
@@ -630,5 +636,48 @@ EntropyChart.prototype._createGroups = function _createGroups() {
     .attr("height", this.offsets.heightMainBars);
 };
 
+
+EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
+  /* NOTE - d is still from geneMap (not genomeMap) */
+  const _render = function _render(t) { 
+    const isNegStrand = d.prot ? this.geneMap[d.prot].strand === "-" : null;
+
+    const nucPos = d.prot ?
+      this.aa ?
+        isNegStrand ? this.geneMap[d.prot].end - d.codon * 3 + 3 :
+          this.geneMap[d.prot].start + d.codon * 3
+        : isNegStrand ? this.geneMap[d.prot].end - d.x :
+          d.x - this.geneMap[d.prot].start-1
+      : null;
+
+      return (
+      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+        <div>
+          {
+            this.aa ? t("Codon {{codon}} in protein {{protein}}", {codon: d.codon, protein: d.prot}) :
+              d.prot ? `${t("Nucleotide {{nuc}}", {nuc: d.x})} (${t("Codon {{codon}} in protein {{protein}}", {codon: Math.floor((nucPos)/3) + 1, protein: d.prot})})` :
+                t("Nucleotide {{nuc}}", {nuc: d.x})
+          }
+        </div>
+        <p/>
+        <div>
+          {this.aa ? t("Nuc positions {{a}} to {{b}}", {a: nucPos-2, b: nucPos}) : ``}
+        </div>
+        <p/>
+        <div>
+          {isNegStrand === null ? `` : isNegStrand ? t("Negative strand") : t("Positive strand")}
+        </div>
+        <p/>
+        <div>
+          {this.showCounts ? `${t("Num mutations")}: ${d.y}` : `${t("entropy")}: ${d.y}`}
+        </div>
+        <div style={infoPanelStyles.comment}>
+          {t("Click to color tree & map")}
+        </div>
+      </div>
+    );
+  }
+  return _render.bind(this)
+}
 
 export default EntropyChart;
