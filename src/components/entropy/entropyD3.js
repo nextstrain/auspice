@@ -17,10 +17,11 @@ import { nucleotide_gene } from "../../util/globals";
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChart.update
  */
-const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, callbacks) {
+const EntropyChart = function EntropyChart(ref, annotations, geneMap, genomeMap, maxNt, callbacks) {
   this.svg = select(ref);
   this.annotations = annotations;
   this.geneMap = geneMap;
+  this.genomeMap = genomeMap;
   this.maxNt = maxNt;
   this.callbacks = callbacks;
   this.okToDrawBars = false; /* useful as the brush setUp causes _drawBars x 2 */
@@ -48,7 +49,7 @@ EntropyChart.prototype.render = function render(props) {
   this.zoomCoordinates[1] = props.zoomMax ? props.zoomMax : this.zoomCoordinates[1];
   this._drawAxes();
   this._addBrush();
-  this._drawGenes(this.annotations);
+  this._drawNavCds();
   this._drawZoomGenes(this.annotations);
   this.okToDrawBars = true;
   this._drawBars();
@@ -221,35 +222,61 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
 };
 
 /* draw the genes (annotations) */
-EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
-  const geneHeight = 20;
-  const readingFrameOffset = (_frame) => 5;
-  const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
-  const strokeCol = posInSequence < 1e6 ? "white" : "black";
-  const startG = (d) => d.start > this.scales.xNav.domain()[0] ? this.scales.xNav(d.start) : this.offsets.x1;
-  const endG = (d) => d.end < this.scales.xNav.domain()[1] ? this.scales.xNav(d.end) : this.offsets.x2;
-  const selection = this._groups.navCds.selectAll(".gene")
-    .data(annotations)
+EntropyChart.prototype._drawNavCds = function _drawNavCds() {
+
+  const cdsSegments = []
+  this.genomeMap[0] // Auspice only (currently) considers the first genome
+    .genes.forEach((gene) => {
+      gene.cds.forEach((cds) => {
+        cds.segments.forEach((cdsSegment, idx) => {
+          const s = {...cdsSegment};
+          s.color = cds.color;
+          s.name = cds.name;
+          s.geneName = gene.name;
+          s.yOffset = cdsSegment.frame * this.offsets.navCdsHeight/2
+          s.segmentNumber = `${idx+1}/${cds.segments.length}`;
+          if (cds.strand === '-') {
+            s.yOffset += (this.offsets.brushHeight + this.offsets.navCdsHeight*2)
+            // TODO XXX - need to properly account for ticks + axis text
+            s.yOffset += 15
+          }
+          cdsSegments.push(s);
+          s.rangePx = [this.scales.xNav(s.rangeGenome[0]), this.scales.xNav(s.rangeGenome[1])]
+        })
+      })
+    })
+
+  this._groups.navCds.selectAll(".cdsNav")
+    .data(cdsSegments)
     .enter()
-    .append("g");
-  selection.append("rect")
-    .attr("class", "gene")
-    .attr("x", (d) => this.scales.xNav(d.start))
-    .attr("y", (d) => readingFrameOffset(d.strand))
-    .attr("width", (d) => this.scales.xNav(d.end) - this.scales.xNav(d.start))
-    .attr("height", geneHeight)
-    .style("fill", (d) => d.fill)
-    .style("stroke", () => strokeCol);
-  selection.append("text")
-    .attr("x", (d) =>
-      this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2
-    )
-    .attr("y", (d) => readingFrameOffset(d.strand) + 5)
-    .attr("dy", ".7em")
-    .attr("text-anchor", "middle")
-    .style("fill", () => "white")
-    /* this makes 2K gene in zika not show up!! */
-    .text((d) => (endG(d)-startG(d)) > 10 ? d.prot : ""); /* only print labels if gene large enough to see */
+    .append("rect")
+      .attr("class", "gene")
+      .attr("x", (d) => d.rangePx[0])
+      .attr("y", (d) => d.yOffset)
+      .attr("width", (d) => d.rangePx[1] - d.rangePx[0])
+      .attr("height", this.offsets.navCdsHeight)
+      .style("fill", (d) => d.color)
+      .style('opacity', 0.5)
+      .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
+        this.callbacks.onHover({d3event, tooltip: this._navCdsTooltip(d)})
+      })
+      .on("mouseout", (d) => {
+        this.callbacks.onLeave(d);
+      })
+
+  this._groups.navCds.selectAll(".cdsNavText")
+    .data(cdsSegments)
+    .enter()
+    .append("text")
+      .attr("x", (d) => d.rangePx[0] + 0.5*(d.rangePx[1]-d.rangePx[0]))
+      .attr("y", (d) => d.yOffset)
+      .attr("dy", ".7em")
+      .attr("pointer-events", "none")
+      .attr("text-anchor", "middle")       // horizontal axis
+      .attr("dominant-baseline", "auto") // vertical axis
+      .style("fill", "white")
+      .text((d) => d.name);
+
 };
 
 /* clearSelectedBar works on SVG id tags, not on this.selected */
@@ -402,9 +429,10 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   const marginLeft = 15;
   const marginRight = 17;
   const spaceBelowBarchart = 130;
-  const spaceBelowTopOfNavAnnotations = 65;
-  const spaceBelowTopOfNavAxis = 35;
-  const brushHeight = 55;
+  const navCdsHeight = 10; /* for an individual CDS (rectangle) */
+  const spaceBelowTopOfNavAxis = 35; // TODO - depends on whether -ve strand CDSs exist
+  const spaceAboveTopOfNavAxis = 2 * navCdsHeight + 5; // 5px space between frame2 CDS + axis line
+  const brushHeight = 10;
   const spaceBetweenMainCdsNavCds = 0;
   const heightMainCds = 42;
 
@@ -416,10 +444,12 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
     y1MainXAxis: height - spaceBelowBarchart,
   
     brushHeight,
-    y1NavBrush: height - spaceBelowTopOfNavAnnotations,
-    y1NavAnnotations: height - spaceBelowTopOfNavAnnotations,
+    y1NavBrush: height - spaceBelowTopOfNavAxis - brushHeight/2, // brush centered on axis
+
+    navCdsHeight, 
+    y1NavAnnotations: height - spaceBelowTopOfNavAxis - spaceAboveTopOfNavAxis,
     y1NavXAxis: height - spaceBelowTopOfNavAxis,
-    y1MainCds: height - spaceBelowTopOfNavAnnotations - spaceBetweenMainCdsNavCds - heightMainCds,
+    y1MainCds: height - spaceBelowTopOfNavAxis - spaceAboveTopOfNavAxis - spaceBetweenMainCdsNavCds - heightMainCds,
   };
   this.offsets.heightMainBars = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.width = this.offsets.x2 - this.offsets.x1;
@@ -489,7 +519,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
 
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
-    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.brushHeight - 1]])
+    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.brushHeight]])
     .on("brush", () => { // https://github.com/d3/d3-brush#brush_on
       this.brushed();
     })
@@ -604,9 +634,6 @@ EntropyChart.prototype._createGroups = function _createGroups() {
   this._groups.navCds = this.svg.append("g")
     .attr("id", "navCds")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1NavAnnotations + ")");
-  this._groups.navBrush = this.svg.append("g")
-    .attr("id", "navBrush")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1NavBrush + ")");
   this._groups.mainCds = this.svg.append("g")
     .attr("id", "mainCds")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1MainCds + ")");
@@ -623,6 +650,10 @@ EntropyChart.prototype._createGroups = function _createGroups() {
   this._groups.navXAxis = this.svg.append("g")
     .attr("id", "navXAxis")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1NavXAxis + ")")
+
+  this._groups.navBrush = this.svg.append("g")
+    .attr("id", "navBrush")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1NavBrush + ")");
 
   this._groups.mainClip = this.svg.append("g")
     .attr("id", "mainClip")
@@ -679,5 +710,28 @@ EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
   }
   return _render.bind(this)
 }
+
+
+EntropyChart.prototype._navCdsTooltip = function _navCdsTooltip(d) {
+  const _render = function _render(_t) {
+    return (
+      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+        <table>
+          <tbody>
+            <tr><td>CDS</td><td>{d.name}</td></tr>
+            <tr><td>Parent Gene</td><td>{d.geneName}</td></tr>
+            <tr><td>Range (genome)</td><td>{d.rangeGenome.join(" - ")}</td></tr>
+            <tr><td>Range (local)</td><td>{d.rangeLocal.join(" - ")}</td></tr>
+            <tr><td>CDS Segment</td><td>{d.segmentNumber}</td></tr>
+            <tr><td>Frame</td><td>{d.frame}</td></tr>
+            <tr><td>Phase</td><td>{d.phase}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+  return _render.bind(this)
+}
+
 
 export default EntropyChart;
