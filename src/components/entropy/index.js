@@ -62,6 +62,7 @@ const constructEncodedGenotype = (mutType, d) => {
     bars: state.entropy.bars,
     annotations: state.entropy.annotations,
     geneMap: state.entropy.geneMap,
+    genomeMap: state.entropy.genomeMap,
     geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
@@ -161,6 +162,7 @@ class Entropy extends React.Component {
       this.d3entropy,
       props.annotations,
       props.geneMap,
+      props.genomeMap,
       props.geneLength[nucleotide_gene],
       { /* callbacks */
         onHover: this.onHover.bind(this),
