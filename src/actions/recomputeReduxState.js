@@ -13,12 +13,12 @@ import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { castIncorrectTypes } from "../util/castJsonTypes";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
+import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
-import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
@@ -392,15 +392,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   examineNodes(tree.nodes);
   if (treeToo) examineNodes(treeToo.nodes);
 
-
-  /* ensure specified mutType is indeed available */
-  if (!aaMuts && !nucMuts) {
-    state.mutType = null;
-  } else if (state.mutType === "aa" && !aaMuts) {
-    state.mutType = "nuc";
-  } else if (state.mutType === "nuc" && !nucMuts) {
-    state.mutType = "aa";
-  }
   if (aaMuts || nucMuts) {
     state.coloringsPresentOnTree.add("gt");
   }
@@ -528,14 +519,6 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     state.temporalConfidence.display = false;
     state.temporalConfidence.on = false;
     delete query.ci; // rm ci from the query if it doesn't apply
-  }
-
-  /* if colorBy is a genotype then we need to set mutType */
-  if (state.colorBy) {
-    const maybeMutType = determineColorByGenotypeMutType(state.colorBy);
-    if (maybeMutType) {
-      state.mutType = maybeMutType;
-    }
   }
 
   /* ensure selected filters (via the URL query) are valid. If not, modify state + URL. */
@@ -882,12 +865,26 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate entropy in view */
   if (entropy.loaded) {
-    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+    /* The selected CDS + positions are only known if a genotype color-by has been set (display defaults | url) */
+    entropy.selectedCds = nucleotide_gene;
+    entropy.selectedPositions = [];
+    if (isColorByGenotype(controls.colorBy)) {
+      const gt = decodeColorByGenotype(controls.colorBy);
+      const cds = getCdsFromGenotype(gt?.gene, entropy.genomeMap);
+      if (cds) {
+        entropy.selectedCds = cds;
+        entropy.selectedPositions = gt?.positions || []
+      }
+    }
+    // TODO -- I'll update calcEntropyInView to consider the selected CDS in a subsequent commit
+    const mutType = entropy.selectedCds===nucleotide_gene ? 'nuc' : 'aa';
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.geneMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
     entropy.zoomMax = controls["zoomMax"];
     entropy.zoomMin = controls["zoomMin"];
     entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
+    console.log("createStateFromQueryOrJSONs::entropyState", entropy.selectedCds, entropy.selectedPositions)
   }
 
   /* update frequencies if they exist (not done for new JSONs) */

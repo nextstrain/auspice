@@ -4,7 +4,7 @@ import { infoNotification, warningNotification } from "../../actions/notificatio
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
@@ -598,7 +598,7 @@ export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleSt
   }
 };
 
-export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
+export const entropyTSV = (dispatch, filePrefix, entropy) => {
   const headerEntropyBarMap = {
     base: "x",
     gene: "prot",
@@ -607,7 +607,7 @@ export const entropyTSV = (dispatch, filePrefix, entropy, mutType) => {
     entropy: "y"
   };
   // Change headers based on nuc/aa and events/entropy states
-  const headerFields = mutType === "nuc" ? ["base"] : ["gene", "position"];
+  const headerFields = entropy.selectedCds === nucleotide_gene ? ["base"] : ["gene", "position"];
   headerFields.push(entropy.showCounts ? "events" : "entropy");
 
   // Create array of data objects to write to TSV

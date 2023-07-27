@@ -1,7 +1,15 @@
 // import _filter from "lodash/filter";
 import * as types from "../actions/types";
 
-const Entropy = (state = {loaded: false, showCounts: false}, action) => {
+export const defaultEntropyState = () => {
+  const startingState = {
+    loaded: false,
+    showCounts: false,
+  }
+  return {...startingState};
+}
+
+const Entropy = (state = defaultEntropyState(), action) => {
   switch (action.type) {
     case types.CHANGE_ZOOM:
       return Object.assign({}, state, {
@@ -23,6 +31,9 @@ const Entropy = (state = {loaded: false, showCounts: false}, action) => {
       return Object.assign({}, state, {
         showCounts: action.showCounts
       });
+    case types.CHANGE_ENTROPY_CDS_SELECTION:
+      console.log("reducer::entropy::change_cds_selection", action)
+      return {...state, ...action};
     default:
       return state;
   }

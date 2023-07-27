@@ -1,7 +1,7 @@
 import React from "react";
 import { withTheme } from 'styled-components';
 import * as icons from "../framework/svg-icons";
-import { NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
@@ -16,7 +16,7 @@ const iconWidth = 25;
  * A React Component displaying buttons which trigger data-downloads. Intended for display within the
  * larger Download modal component
  */
-export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, mutType, distanceMeasure, panelsToDisplay, panelLayout, filters, visibility, visibleStateCounts, relevantPublications}) => {
+export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, distanceMeasure, panelsToDisplay, panelLayout, filters, visibility, visibleStateCounts, relevantPublications}) => {
   const totalTipCount = metadata.mainTreeNumTips;
   const selectedTipsCount = getNumSelectedTips(tree.nodes, tree.visibility);
   const partialData = selectedTipsCount !== totalTipCount;
@@ -34,6 +34,7 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
       }
     }
   }
+  const entropyBar = entropy?.selectedCds===nucleotide_gene ? "nucleotide" : "codon";
 
   return (
     <>
@@ -85,9 +86,9 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
       {entropy.loaded && (
         <Button
           name="Genetic diversity data (TSV)"
-          description={`The data behind the diversity panel showing ${entropy.showCounts?`a count of changes across the tree`:`normalised shannon entropy`} per ${mutType==="nuc"?"nucleotide":"codon"}.`}
+          description={`The data behind the diversity panel showing ${entropy.showCounts?`a count of changes across the tree`:`normalised shannon entropy`} per ${entropyBar}.`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.entropyTSV(dispatch, filePrefix, entropy, mutType)}
+          onClick={() => helpers.entropyTSV(dispatch, filePrefix, entropy)}
         />
       )}
       <Button

@@ -67,7 +67,7 @@ export const setGenotype = (nodes, prot, positions, rootSequence) => {
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
 
-export const orderOfGenotypeAppearance = (nodes, mutType) => {
+export const orderOfGenotypeAppearance = (nodes, aaGenotype) => {
   const seen = {};
   nodes.forEach((n) => {
     let numDate = getTraitFromNode(n, "num_date");
@@ -80,7 +80,7 @@ export const orderOfGenotypeAppearance = (nodes, mutType) => {
   ordered.sort((a, b) => seen[a] < seen[b] ? -1 : 1);
   let orderedBases;
   // remove 'non-bases' (X - N)
-  if (mutType === "nuc") {
+  if (!aaGenotype) {
     orderedBases = ordered.filter((x) => x !== "X" && x !== "-" && x !== "N");
   } else {
     orderedBases = ordered.filter((x) => x !== "X" && x !== "-");
@@ -89,7 +89,7 @@ export const orderOfGenotypeAppearance = (nodes, mutType) => {
   if (ordered.indexOf("-") !== -1) {
     orderedBases.push("-");
   }
-  if (ordered.indexOf("N") !== -1 && mutType === "nuc") {
+  if (ordered.indexOf("N") !== -1 && !aaGenotype) {
     orderedBases.push("N");
   }
   if (ordered.indexOf("X") !== -1) {

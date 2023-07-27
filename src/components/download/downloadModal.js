@@ -48,7 +48,6 @@ export const publications = {
   distanceMeasure: state.controls.distanceMeasure,
   metadata: state.metadata,
   entropy: state.entropy,
-  mutType: state.controls.mutType,
   tree: state.tree,
   nodes: state.tree.nodes,
   visibleStateCounts: state.tree.visibleStateCounts,

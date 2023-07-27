@@ -9,7 +9,6 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey, infoPanelStyles } from "../../globalStyles";
-import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
 
@@ -30,23 +29,36 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, genomeMap,
 /* "PUBLIC" PROTOTYPES */
 EntropyChart.prototype.render = function render(props) {
   this.props = props;
-  this.aa = props.mutType === "aa";
+  this.selectedCds = props.selectedCds;
+  this.selectedPositions = props.selectedPositions;
+  /* temporarily keep this.aa, as so much code relies on it here */
+  this.aa = this.selectedCds !== 'nuc';
   this.showCounts = props.showCounts;
   this.bars = props.bars;
-  this.selectedNodes = isColorByGenotype(props.colorBy) ?
-    this._getSelectedNodes(decodeColorByGenotype(props.colorBy, props.geneLength)) :
-    [];
+  this._setSelectedNodes();
   this.svg.selectAll("*").remove(); /* tear things down */
   this._calcOffsets(props.width, props.height);
   this._createGroups();
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
   /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precedence */
-  this.zoomCoordinates = isColorByGenotype(props.colorBy) ?
-    this._getZoomCoordinates(decodeColorByGenotype(props.colorBy, props.geneLength), props.geneMap) :
-    this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
+
+  /** TEMPORARY -- the zooming will be updated in a future commit. Here I simply convert the
+   * new state (selectedCds, selectedPositions) into the previous structure so the code works
+   * as intended without needing to refactor the zoom logic. The intention here is to 
+   * "set zoom to specified gene or to whole genome" (although it also sets the zoom for nucleotide
+   * positions)
+   */
+  if (this.selectedPositions.length) {
+    const aa = this.selectedCds!==nucleotide_gene;
+    const genotype = {aa, positions: [...this.selectedPositions], gene: aa ? this.selectedCds.name : nucleotide_gene}
+    this.zoomCoordinates = this._getZoomCoordinates(genotype, props.geneMap)
+  } else {
+    this.zoomCoordinates = this.scales.xNav.domain();
+  }
   this.zoomCoordinates[0] = props.zoomMin ? props.zoomMin : this.zoomCoordinates[0];
   this.zoomCoordinates[1] = props.zoomMax ? props.zoomMax : this.zoomCoordinates[1];
+  console.log("entropyD3::render::zoomCoords", this.zoomCoordinates.join(", "))
   this._drawAxes();
   this._addBrush();
   this._drawNavCds();
@@ -57,18 +69,22 @@ EntropyChart.prototype.render = function render(props) {
 };
 
 EntropyChart.prototype.update = function update({
-  aa = undefined, /* undefined is a no-op for each optional argument */
-  selected = undefined,
+  selectedCds = undefined, /* undefined is a no-op for each optional argument */
+  selectedPositions = undefined,
   newBars = undefined,
   showCounts = undefined,
   maxYVal = undefined,
-  clearSelected = false,
   gene = undefined,
   start = undefined,
   end = undefined,
   zoomMax = undefined,
   zoomMin = undefined
 }) {
+  let aa = undefined; // see comment above
+  if (selectedCds!==undefined) {
+    this.selectedCds = selectedCds;
+    aa = this.selectedCds !== 'nuc';
+  }
   const aaChange = aa !== undefined && aa !== this.aa;
   if (newBars || aaChange) {
     if (aaChange) {this.aa = aa;}
@@ -77,14 +93,14 @@ EntropyChart.prototype.update = function update({
       this.showCounts = showCounts;
     }
     this._updateYScaleAndAxis(maxYVal);
-    this._drawBars();
+    this._drawBars(); // NOTE: this may (incorrectly) attempt to highlight previous bars
   }
-  if (selected !== undefined) {
+
+  if (selectedPositions !== undefined) {
+    this.selectedPositions = selectedPositions;
     this._clearSelectedBars();
-    this.selectedNodes = this._getSelectedNodes(selected);
+    this._setSelectedNodes();
     this._highlightSelectedBars();
-  } else if (clearSelected) {
-    this._clearSelectedBars();
   }
   if (gene !== undefined && start !== undefined && end !== undefined) {
     /* move the brush */
@@ -144,35 +160,30 @@ EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed
     Math.min(startEnd[1]+multiplier, this.scales.xNav.domain()[1])];
 };
 
-EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
-  if (this.aa !== parsed.aa) {
+EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
+  if (this.aa !== (this.selectedCds!==nucleotide_gene)) {
     console.error("entropy out of sync");
     return undefined;
   }
-  const selectedNodes = [];
+  this.selectedNodes = [];
+  if (!this.selectedPositions.length) return;
   if (this.aa) { /*     P  R  O  T  E  I  N  S    */
-    const genePosPairs = [];
-    for (const pos of parsed.positions) {
-      genePosPairs.push([parsed.gene, pos]);
-    }
     for (const node of this.bars) {
-      for (const pair of genePosPairs) {
-        if (node.prot === pair[0] && node.codon === pair[1]) {
-          selectedNodes.push(node);
+      for (const position of this.selectedPositions) {
+        if (node.prot === this.selectedCds.name && node.codon === position) {
+          this.selectedNodes.push(node);
         }
       }
     }
   } else { /*     N U C L E O T I D E S     */
     for (const node of this.bars) {
-      if (parsed.positions.indexOf(node.x) !== -1) {
-        selectedNodes.push(node);
+      if (this.selectedPositions.indexOf(node.x) !== -1) {
+        this.selectedNodes.push(node);
       }
     }
   }
-  /* we fall through to here if the selected genotype (from URL or typed in)
-  is not in the entropy data as it has no variation */
-  // console.log("get selected nodes returning", selectedNodes)
-  return selectedNodes;
+  /* NOTE - if the selected genotype (from URL or typed in)
+  is not in the entropy data as it has no variation - then selectedNodes may be empty */
 };
 
 

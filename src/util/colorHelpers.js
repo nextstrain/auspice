@@ -24,17 +24,6 @@ export const getAverageColorFromNodes = (nodes, nodeColors) => {
   return avg.toString();
 };
 
-export const determineColorByGenotypeMutType = (colorBy) => {
-  if (isColorByGenotype(colorBy)) {
-    const genotype = decodeColorByGenotype(colorBy);
-    return genotype.aa
-      ? "aa"
-      : "nuc";
-  }
-  return false;
-};
-
-
 /**
 * what colorBy trait names are present in the tree but _not_ in the provided scale?
 * @param {Array} nodes - list of nodes

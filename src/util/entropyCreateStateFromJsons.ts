@@ -1,4 +1,5 @@
 import { genotypeColors, nucleotide_gene } from "./globals";
+import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
 // enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
@@ -223,12 +224,7 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
       genomeMap: genomeMap(genomeAnnotations)
     };
   }
-  return {
-    showCounts: false,
-    loaded: false,
-    annotations: [],
-    geneMap: {}
-  };
+  return defaultEntropyState();
 };
 
 
