@@ -22,7 +22,7 @@ const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=()
   const getXVal = temporal ? (n) => getTraitFromNode(n, "num_date") : getDivFromNode;
 
   function recurse(node, parentX) {
-    if (!node.inView || tree.visibility[node.arrayIdx]!==NODE_VISIBLE) {
+    if (!node.shell.inView || tree.visibility[node.arrayIdx]!==NODE_VISIBLE) {
       return "";
     }
     if (node.hasChildren) {
@@ -176,7 +176,7 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   const UNKNOWN = "unknown";
   const info = {};
   tree.nodes
-    .filter((n, i) => tree.visibility[i] === NODE_VISIBLE && n.inView)
+    .filter((n, i) => tree.visibility[i] === NODE_VISIBLE && n.shell.inView)
     .filter((n) => !n.hasChildren).forEach((n) => {
       const author = getFullAuthorInfoFromNode(n);
       if (!author) return;
@@ -221,7 +221,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
   for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
 
-    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView) {
+    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.shell.inView) {
       continue;
     }
 
@@ -313,7 +313,7 @@ export const acknowledgmentsTSV = (dispatch, filePrefix, nodes, nodeVisibilities
   for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
 
-    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView) {
+    if (nodeVisibilities[i] !== NODE_VISIBLE || !node.shell.inView) {
       continue;
     }
 
