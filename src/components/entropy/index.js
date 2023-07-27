@@ -9,11 +9,10 @@ import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
-import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
 import { timerStart, timerEnd } from "../../util/perf";
-import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
-import { nucleotide_gene } from "../../util/globals";
+import { encodeColorByGenotype, getCdsFromGenotype } from "../../util/getGenotype";
+import { nucleotide_gene, equalArrays } from "../../util/globals";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -33,32 +32,25 @@ const getStyles = (width) => {
       position: "relative",
       top: -1
     },
-    aaNtSwitch: {
+    goBackToNucleotide: {
       position: "absolute",
-      right: 5,
+      right: 144,
       top: 0,
       zIndex: 100
     },
     entropyCountSwitch: {
       position: "absolute",
-      right: 74,
+      right: 5,
       top: 0,
       zIndex: 100
     }
   };
 };
 
-const constructEncodedGenotype = (mutType, d) => {
-  return encodeColorByGenotype(
-    mutType === "aa"
-      ? { gene: d.prot, positions: [d.codon] }
-      : { positions: [d.x] }
-  );
-};
-
 @connect((state) => {
   return {
-    mutType: state.controls.mutType,
+    selectedCds: state.entropy.selectedCds,
+    selectedPositions: state.entropy.selectedPositions,
     bars: state.entropy.bars,
     annotations: state.entropy.annotations,
     geneMap: state.entropy.geneMap,
@@ -88,7 +80,8 @@ class Entropy extends React.Component {
     loaded: PropTypes.bool.isRequired,
     colorBy: PropTypes.string.isRequired,
     defaultColorBy: PropTypes.string.isRequired,
-    mutType: PropTypes.string.isRequired
+    selectedCds: PropTypes.any.isRequired,
+    selectedPositions: PropTypes.array.isRequired,
   }
   /* CALLBACKS */
   onHover(hovered) {
@@ -99,38 +92,29 @@ class Entropy extends React.Component {
   }
   onClick(d) {
     if (this.props.narrativeMode) return;
-    const colorBy = constructEncodedGenotype(this.props.mutType, d);
-    analyticsControlsEvent("color-by-genotype");
+    // This will be improved in a subsequent commit
+    const geneName = d.codon===undefined ? nucleotide_gene : d.prot;
+    const cds = getCdsFromGenotype(geneName, this.props.genomeMap);
+    const colorBy = cds===nucleotide_gene ?
+      encodeColorByGenotype({ positions: [d.x] }) :
+      encodeColorByGenotype({ gene: cds.name, positions: [d.codon] });
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
 
-  changeMutTypeCallback(newMutType) {
-    if (newMutType !== this.props.mutType) {
-      /* 1. switch the redux colorBy back to the default */
-      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
-      /* 2. update the mut type in redux & re-calculate entropy */
-      this.props.dispatch(changeMutType(newMutType));
-    }
-  }
-
-  aaNtSwitch(styles) {
+  goBackToNucleotide(styles) {
     if (this.props.narrativeMode) return null;
+    if (this.props.selectedCds===nucleotide_gene) return null;
     return (
-      <div style={{...tabGroup, ...styles.aaNtSwitch}}>
+      <div style={{...tabGroup, ...styles.goBackToNucleotide}}>
         <button
           key={1}
-          style={this.props.mutType === "aa" ? tabGroupMemberSelected : tabGroupMember}
-          onClick={() => this.changeMutTypeCallback("aa")}
+          style={tabGroupMember}
+          onClick={() => {
+            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+          }}
         >
-          <span style={styles.switchTitle}> {"AA"} </span>
-        </button>
-        <button
-          key={2}
-          style={this.props.mutType !== "aa" ? tabGroupMemberSelected : tabGroupMember}
-          onClick={() => this.changeMutTypeCallback("nuc")}
-        >
-          <span style={styles.switchTitle}> {"NT"} </span>
+          <span style={styles.switchTitle}> {"⏎ nuc"} </span>
         </button>
       </div>
     );
@@ -203,51 +187,53 @@ class Entropy extends React.Component {
         updateParams.zoomMax = nextProps.zoomMax;
         updateParams.zoomMin = nextProps.zoomMin;
       }
-      if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
+      if (this.props.bars !== nextProps.bars || this.props.selectedCds !== nextProps.selectedCds) { // TODO -- can remove 2nd conditional once bars update every cds change
         updateParams.showCounts = nextProps.showCounts;
-        updateParams.aa = nextProps.mutType === "aa";
+        updateParams.selectedCds = nextProps.selectedCds;
         updateParams.newBars = nextProps.bars;
         updateParams.maxYVal = nextProps.maxYVal;
       }
-      if (this.props.colorBy !== nextProps.colorBy && (isColorByGenotype(this.props.colorBy) || isColorByGenotype(nextProps.colorBy))) {
-        if (isColorByGenotype(nextProps.colorBy)) {
-          const colorByGenotype = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
-          if (colorByGenotype.aa) {  /* if it is a gene, zoom to it */
-            updateParams.gene = colorByGenotype.gene;
-            updateParams.start = nextProps.geneMap[updateParams.gene].start;
-            updateParams.end = nextProps.geneMap[updateParams.gene].end;
-          } else { /* if a nuc, want to do different things if 1 or multiple */
-            const positions = colorByGenotype.positions;
-            const zoomCoord = this.state.chart.zoomCoordinates;
-            const maxNt = this.state.chart.maxNt;
-            /* find out what new coords would be - if different enough, change zoom */
-            let startUpdate, endUpdate;
-            if (positions.length > 1) {
-              const start = Math.min.apply(null, positions);
-              const end = Math.max.apply(null, positions);
-              startUpdate = start - (end-start)*0.05;
-              endUpdate = end + (end-start)*0.05;
-            } else {
-              const pos = positions[0];
-              const eitherSide = maxNt*0.05;
-              const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
-                (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
-              startUpdate = newStartEnd[0];
-              endUpdate = newStartEnd[1];
-            }
-            /* if the zoom would be different enough, change it */
-            if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
-              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
-              !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
-              updateParams.gene = colorByGenotype.gene;
-              updateParams.start = startUpdate;
-              updateParams.end = endUpdate;
-            }
-          }
-          updateParams.selected = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
+      const cdsChanged = this.props.selectedCds !== nextProps.selectedCds;
+      const positionsChanged = cdsChanged || !equalArrays(this.props.selectedPositions, nextProps.selectedPositions);
+      if (cdsChanged || positionsChanged) {
+        if (nextProps.selectedCds !== nucleotide_gene) {
+          /* zoom to the gene - note this uses the geneMap not genomeMap - TODO XXX */
+          updateParams.gene = nextProps.selectedCds.name;
+          updateParams.start = nextProps.geneMap[updateParams.gene].start;
+          updateParams.end = nextProps.geneMap[updateParams.gene].end;
         } else {
-          updateParams.clearSelected = true;
+          const positions = nextProps.selectedPositions;
+          const zoomCoord = this.state.chart.zoomCoordinates;
+          const maxNt = this.state.chart.maxNt;
+          /* find out what new coords would be - if different enough, change zoom */
+          let startUpdate, endUpdate;
+          if (positions.length > 1) {
+            const start = Math.min.apply(null, positions);
+            const end = Math.max.apply(null, positions);
+            startUpdate = start - (end-start)*0.05;
+            endUpdate = end + (end-start)*0.05;
+          } else if (positions.length===1) {
+            const pos = positions[0];
+            const eitherSide = maxNt*0.05;
+            const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
+              (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
+            startUpdate = newStartEnd[0];
+            endUpdate = newStartEnd[1];
+          } else {
+            /* Nucleotide view, no positions selected */
+            [startUpdate, endUpdate] = this.state.chart.zoomCoordinates;
+          }
+          /* if the zoom would be different enough, change it */
+          if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
+            !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
+            !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
+            updateParams.gene = nucleotide_gene;
+            updateParams.start = startUpdate;
+            updateParams.end = endUpdate;
+          }
         }
+        if (cdsChanged) updateParams.selectedCds = nextProps.selectedCds;
+        if (positionsChanged) updateParams.selectedPositions = nextProps.selectedPositions;
       }
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
@@ -280,7 +266,7 @@ class Entropy extends React.Component {
         >
           <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
-        {this.aaNtSwitch(styles)}
+        {this.goBackToNucleotide(styles)}
         {this.entropyCountSwitch(styles)}
       </Card>
     );

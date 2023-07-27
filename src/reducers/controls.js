@@ -4,7 +4,6 @@ import { defaultGeoResolution,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
-  defaultMutType,
   controlsHiddenWidth,
   strainSymbol,
   twoColumnBreakpoint } from "../util/globals";
@@ -47,7 +46,6 @@ export const getDefaultControlsState = () => {
     search: null,
     strain: null,
     geneLength: {},
-    mutType: defaultMutType,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     scatterVariables: {},
@@ -243,10 +241,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
         filters
       });
     }
-    case types.TOGGLE_MUT_TYPE:
-      return Object.assign({}, state, {
-        mutType: action.data
-      });
     case types.TOGGLE_TEMPORAL_CONF:
       return Object.assign({}, state, {
         temporalConfidence: Object.assign({}, state.temporalConfidence, {

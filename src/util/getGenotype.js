@@ -109,3 +109,16 @@ export const makeGenotypeLabel = (colorBy) => {
   if (!genotype) return false;
   return `Genotype ${genotype.gene}: ${genotype.positions.join(", ")}`;
 };
+
+export const getCdsFromGenotype = (name, genomeMap) => {
+  if (!Array.isArray(genomeMap) || !genomeMap.length || !name) return null;
+  if (name==='nuc') return nucleotide_gene;
+  for (const gene of genomeMap[0].genes) {
+    for (const cds of gene.cds) {
+      if (cds.name===name) {
+        return cds;
+      }
+    }
+  }
+  return null;
+}
