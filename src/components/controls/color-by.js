@@ -6,7 +6,7 @@ import { sidebarField } from "../../globalStyles";
 import { controlsWidth, nucleotide_gene } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions, getCdsLength } from "../../util/getGenotype";
 import CustomSelect from "./customSelect";
 
 /* the reason why we have colorBy as state (here) and in redux
@@ -16,7 +16,6 @@ import CustomSelect from "./customSelect";
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
-    geneLength: state.controls.geneLength,
     colorings: state.metadata.colorings,
     genomeMap: state.entropy.genomeMap,
   };
@@ -50,7 +49,6 @@ class ColorBy extends React.Component {
   }
   static propTypes = {
     colorBy: PropTypes.string.isRequired,
-    geneLength: PropTypes.object.isRequired,
     colorings: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired,
     genomeMap: PropTypes.array,
@@ -102,7 +100,7 @@ class ColorBy extends React.Component {
       if (geneSelected && positionSelected) {
         const genotype = encodeColorByGenotype({
           gene: geneSelected,
-          positions: decodePositions(positionSelected, this.props.geneLength[geneSelected])
+          positions: decodePositions(positionSelected, getCdsLength(this.props.genomeMap, geneSelected))
         });
 
         if (genotype && genotype!==this.props.colorBy) {
@@ -178,10 +176,8 @@ class ColorBy extends React.Component {
   gtPositionInput() {
     const { geneSelected } = this.state;
 
-    const geneLength = Math.floor(this.props.geneLength[geneSelected]);
-
     const placeholder = geneSelected
-      ? `${geneSelected} position (1–${geneLength})…`
+      ? `${geneSelected} position (1–${getCdsLength(this.props.genomeMap, geneSelected)})…`
       : `position…`;
 
     return (

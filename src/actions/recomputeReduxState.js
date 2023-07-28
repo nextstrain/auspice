@@ -330,17 +330,6 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
-  /* genome annotations in metadata */
-  if (metadata.genomeAnnotations) {
-    for (const gene of Object.keys(metadata.genomeAnnotations)) {
-      state.geneLength[gene] = metadata.genomeAnnotations[gene].end - metadata.genomeAnnotations[gene].start;
-      if (gene !== nucleotide_gene) {
-        state.geneLength[gene] /= 3;
-      }
-    }
-  } else {
-    console.warn("JSONs did not include `genome_annotations`");
-  }
 
   return state;
 };
@@ -486,7 +475,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     if (!genomeMap) {
       fallBackToDefaultColorBy();
     } else {
-      const decoded = decodeColorByGenotype(state.colorBy, state.geneLength)
+      const decoded = decodeColorByGenotype(state.colorBy, genomeMap)
       if (!decoded) { // note that a console.error printed by decodeColorByGenotype in this case
         fallBackToDefaultColorBy();
       } else {

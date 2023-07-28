@@ -36,8 +36,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     let colorScale, legendValues, legendBounds, legendLabels, domain;
 
     let genotype;
-    if (isColorByGenotype(colorBy) && controls.geneLength) {
-      genotype = decodeColorByGenotype(colorBy, controls.geneLength);
+    if (isColorByGenotype(colorBy)) {
+      genotype = decodeColorByGenotype(colorBy);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
     }
     const scaleType = genotype ? "categorical" : colorings[colorBy].type;

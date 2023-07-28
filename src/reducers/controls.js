@@ -45,7 +45,6 @@ export const getDefaultControlsState = () => {
     region: null,
     search: null,
     strain: null,
-    geneLength: {},
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     scatterVariables: {},
