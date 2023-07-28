@@ -53,7 +53,6 @@ const getStyles = (width) => {
     selectedPositions: state.entropy.selectedPositions,
     bars: state.entropy.bars,
     genomeMap: state.entropy.genomeMap,
-    geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
@@ -148,7 +147,6 @@ class Entropy extends React.Component {
     const chart = new EntropyChart(
       this.d3entropy,
       props.genomeMap,
-      props.geneLength[nucleotide_gene],
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
@@ -205,7 +203,7 @@ class Entropy extends React.Component {
         } else {
           const positions = nextProps.selectedPositions;
           const zoomCoord = this.state.chart.zoomCoordinates;
-          const maxNt = this.state.chart.maxNt;
+          const maxNt = this.props.genomeMap[0].range[1];
           /* find out what new coords would be - if different enough, change zoom */
           let startUpdate, endUpdate;
           if (positions.length > 1) {

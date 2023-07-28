@@ -17,10 +17,9 @@ import { getCdsByName, getNucCoordinatesFromAaPos} from "../../util/entropy";
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChart.update
  */
-const EntropyChart = function EntropyChart(ref, genomeMap, maxNt, callbacks) {
+const EntropyChart = function EntropyChart(ref, genomeMap, callbacks) {
   this.svg = select(ref);
   this.genomeMap = genomeMap;
-  this.maxNt = maxNt;
   this.callbacks = callbacks;
   this.okToDrawBars = false; /* useful as the brush setUp causes _drawBars x 2 */
 };
@@ -39,7 +38,7 @@ EntropyChart.prototype.render = function render(props) {
   this._calcOffsets(props.width, props.height);
   this._createGroups();
   this._addZoomLayers();
-  this._setScales(this.maxNt + 1, props.maxYVal);
+  this._setScales(this.genomeMap[0].range[1], props.maxYVal);
   /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precedence */
 
   /** TEMPORARY -- the zooming will be updated in a future commit. Here I simply convert the

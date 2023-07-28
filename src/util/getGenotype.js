@@ -25,34 +25,35 @@ export const encodeColorByGenotype = ({ gene, positions }) => {
  *   gt-nuc_142,144   → { gene: "nuc", aa: false, positions: [142,144] }
  *   gt-HA1_144,142   → { gene: "HA1", aa: true,  positions: [144,142] }
  */
-export const decodeColorByGenotype = (colorBy, geneLengths) => {
-  // If we're passed a map of gene name → length, then validate the decoded
+export const decodeColorByGenotype = (colorBy, genomeMap) => {
+  // If we're passed a genomeMap, then validate the decoded
   // gene name and positions.  Otherwise, just decode without validation.
-  const validate = typeof geneLengths === "object" && Object.keys(geneLengths).length;
+  const validate = !!genomeMap;
 
   // Split the encoded string into tokens of gene and positions.
   const match = colorBy.match(/^gt-(.+)_([0-9,]+)$/);
 
   if (match) {
-    const [, gene, encodedPositions] = match;
-    const geneLength = validate ? geneLengths[gene] : 'Infinity';
+    const [, cdsName, encodedPositions] = match;
+
+    const geneLength = validate ? getCdsLength(genomeMap, cdsName) : 'Infinity';
 
     if (validate && !geneLength) {
-      console.error("decodeColorByGenotype failed: no gene length", colorBy, gene, geneLengths);
+      console.error(`decodeColorByGenotype failed for color-by ${colorBy} (cds name: ${cdsName}) ` + 
+      "as it wasn't found in the genome map;");
       return null;
     }
 
     const positions = decodePositions(encodedPositions, geneLength);
-
     if (!positions.length) {
       console.error("decodeColorByGenotype failed: no valid positions", colorBy, encodedPositions, geneLength);
       return null;
     }
 
     return {
-      gene,
+      gene: cdsName,
       positions,
-      aa: gene !== nucleotide_gene
+      aa: cdsName!==nucleotide_gene,
     };
   }
 
@@ -121,4 +122,24 @@ export const getCdsFromGenotype = (name, genomeMap) => {
     }
   }
   return null;
+}
+ 
+/**
+ * Returns the length of the genome (in nucleotides, if cdsName='nuc')
+ * or the length of the CDS (in codons, including the stop codon)
+ * @param {GenomeAnnotation} genomeMap 
+ * @param {string} cdsName (may include "nuc")
+ * @returns {number}
+ */
+export function getCdsLength(genomeMap, cdsName) {
+  if (cdsName===nucleotide_gene) {
+    return genomeMap[0].range[1];
+  }
+  for (const gene of genomeMap[0].genes) {
+    for (const cds of gene.cds) {
+      // length is checked to be a multiple of 3 when genomeMap is created
+      if (cds.name===cdsName) return cds.length/3;
+    }
+  }
+  return 0; // should never happen, as the cdsName originates from the genomeMap
 }
