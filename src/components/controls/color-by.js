@@ -104,7 +104,7 @@ class ColorBy extends React.Component {
           positions: decodePositions(positionSelected, this.props.geneLength[geneSelected])
         });
 
-        if (genotype) {
+        if (genotype && genotype!==this.props.colorBy) {
           this.dispatchColorByGenotype(genotype);
         }
       }
