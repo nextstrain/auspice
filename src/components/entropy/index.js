@@ -11,7 +11,7 @@ import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
 import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
 import { timerStart, timerEnd } from "../../util/perf";
-import { encodeColorByGenotype, getCdsFromGenotype } from "../../util/getGenotype";
+import { encodeColorByGenotype } from "../../util/getGenotype";
 import { nucleotide_gene, equalArrays } from "../../util/globals";
 import "../../css/entropy.css";
 
@@ -94,12 +94,9 @@ class Entropy extends React.Component {
   }
   onClick(d) {
     if (this.props.narrativeMode) return;
-    // This will be improved in a subsequent commit
-    const geneName = d.codon===undefined ? nucleotide_gene : d.prot;
-    const cds = getCdsFromGenotype(geneName, this.props.genomeMap);
-    const colorBy = cds===nucleotide_gene ?
+    const colorBy = d.codon===undefined ?
       encodeColorByGenotype({ positions: [d.x] }) :
-      encodeColorByGenotype({ gene: cds.name, positions: [d.codon] });
+      encodeColorByGenotype({ gene: this.props.selectedCds.name, positions: [d.codon] });
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
@@ -201,6 +198,7 @@ class Entropy extends React.Component {
           [updateParams.start, updateParams.end] = this.state.chart._getZoomCoordinates({aa: true, gene: nextProps.selectedCds.name});
           updateParams.gene = nextProps.selectedCds.name;
         } else {
+
           const positions = nextProps.selectedPositions;
           const zoomCoord = this.state.chart.zoomCoordinates;
           const maxNt = this.props.genomeMap[0].range[1];
