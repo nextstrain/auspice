@@ -99,7 +99,7 @@ class Entropy extends React.Component {
     const cds = getCdsFromGenotype(geneName, this.props.genomeMap);
     const colorBy = cds===nucleotide_gene ?
       encodeColorByGenotype({ positions: [d.x] }) :
-      encodeColorByGenotype({ gene: cds.name, positions: [d.codon] });
+      encodeColorByGenotype({ gene: this.props.selectedCds.name, positions: [d.codon] });
     console.log("<entropy>::barchart-onClick-handler", d, cds, colorBy)
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
@@ -203,6 +203,7 @@ class Entropy extends React.Component {
           [updateParams.start, updateParams.end] = this.state.chart._getZoomCoordinates({aa: true, gene: nextProps.selectedCds.name});
           updateParams.gene = nextProps.selectedCds.name;
         } else {
+
           const positions = nextProps.selectedPositions;
           const zoomCoord = this.state.chart.zoomCoordinates;
           const maxNt = this.props.genomeMap[0].range[1];

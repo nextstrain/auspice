@@ -129,8 +129,12 @@ EntropyChart.prototype.update = function update({
  * But for now this is at least as good as the previous implementation (but not perfect)
  */
 // const firstNucOfCds = (d) => {
-EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
-  const cds = getCdsByName(this.genomeMap, gene);
+EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(aaPos) {
+  const cds = getCdsByName(this.genomeMap, this.selectedCds.name);
+  if (!cds) {
+    console.log(`ERROR _aaToNtCoord no CDS for ${this.selectedCds.name}`);
+    return NaN;
+  }
   if (cds.strand==='-') {
     console.log("Negative strand mapping not yet implemented");
     return NaN;
@@ -140,7 +144,7 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
     const x = (aaPos-1)*3+1 - segment.rangeLocal[0];
     return segment.rangeGenome[0] + x;
   }
-  console.error(`Error mapping codon position ${aaPos} for CDS ${gene}`);
+  console.error(`Error mapping codon position ${aaPos} for CDS ${this.selectedCds.name}`);
   return NaN;
 }
 
@@ -181,16 +185,12 @@ EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed
 };
 
 EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
-  if (this.aa !== (this.selectedCds!==nucleotide_gene)) {
-    console.error("entropy out of sync");
-    return undefined;
-  }
   this.selectedNodes = [];
   if (!this.selectedPositions.length) return;
   if (this.aa) { /*     P  R  O  T  E  I  N  S    */
     for (const node of this.bars) {
       for (const position of this.selectedPositions) {
-        if (node.prot === this.selectedCds.name && node.codon === position) {
+        if (node.codon === position) {
           this.selectedNodes.push(node);
         }
       }
@@ -338,7 +338,7 @@ EntropyChart.prototype._cdsSegments = function _cdsSegments() {
 /* clearSelectedBar works on SVG id tags, not on this.selected */
 EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
   for (const d of this.selectedNodes) {
-    const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
+    const id = this.aa ? `#cds-${this.selectedCds.name}-${d.codon}` : `#nt${d.x}`;
     /* To revisit: a previous version used a zebra-fill based on when nuc positions changed from within
     a gene to outside a gene, or to another gene. This information is no longer available as it
     was problematic, but it will hopefully resurface shortly. Given the problems of overlapping
@@ -352,8 +352,7 @@ EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
     // TODO -- following needs updating once we reinstate CDS intersection
-    if (this.aa && !d.prot) return; /* if we've switched from NT to AA by selecting a gene, don't try to highlight NT position! */
-    const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
+    const id = this.aa ? `#cds-${this.selectedCds.name}-${d.codon}` : `#nt${d.x}`;
     select(id).style("fill", "red");
   }
 };
@@ -371,7 +370,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     if (posInView > 600) {
       barWidth = 2;
     } else {
-      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.prot, d.codon));
+      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.codon));
     }
   } else {
     if (posInView > 1000) {
@@ -382,19 +381,19 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       barWidth = (d) => this.scales.xMain(d.x + 0.3) - this.scales.xMain(d.x - 0.3);
     }
   }
-    
-  const idfn = this.aa ? (d) => "prot" + d.prot + d.codon : (d) => "nt" + d.x;
+
+  const barSvgId = this.aa ? (d) => `cds-${this.selectedCds.name}-${d.codon}` : (d) => "nt" + d.x;
 
   const xscale = this.aa ?
-    (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon) - 0.3) : // shift 0.3 in order to
-    (d) => this.scales.xMain(d.x - 0.3);                                 // line up bars & ticks
+    (d) => this.scales.xMain(this._aaToNtCoord(d.codon) - 0.3) : // shift 0.3 in order to
+    (d) => this.scales.xMain(d.x - 0.3);                         // line up bars & ticks
 
   this._groups.mainBars
     .selectAll(".bar")
     .data(this.bars)
     .enter().append("rect")
     .attr("class", "bar")
-    .attr("id", idfn)
+    .attr("id", barSvgId)
     .attr("x", xscale)
     .attr("y", (d) => this.scales.y(d.y))
     .attr("width", barWidth)
@@ -744,9 +743,9 @@ EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
     let codonNucleotides = [];
     let strand = '';
     if (this.aa) {
-      const cds = getCdsByName(this.genomeMap, d.prot);
+      const cds = getCdsByName(this.genomeMap, this.selectedCds.name);
       if (!cds) {
-        console.error(`CDS ${d.prot} not found in genomeMap (i.e. JSON annotations)`);
+        console.error(`CDS ${this.selectedCds.name} not found in genomeMap (i.e. JSON annotations)`);
         return null;
       }
       if (cds.strand==='-') {
@@ -789,7 +788,7 @@ EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
         <div>
           {
             this.aa ?
-              t("Codon {{codon}} in protein {{protein}}", {codon: d.codon, protein: d.prot}) :
+              t("Codon {{codon}} in protein {{protein}}", {codon: d.codon, protein: this.selectedCds.name}) :
               t("Nucleotide {{nuc}}", {nuc: d.x})
           }
         </div>

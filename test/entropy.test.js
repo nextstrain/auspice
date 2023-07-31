@@ -1,6 +1,6 @@
-import { calcEntropyInView } from "../src/util/entropy";
+import { calcEntropyInView, getCdsByName } from "../src/util/entropy";
 import { treeJsonToState } from "../src/util/treeJsonProcessing";
-import {NODE_VISIBLE, NODE_NOT_VISIBLE} from "../src/util/globals";
+import {NODE_VISIBLE, NODE_NOT_VISIBLE, nucleotide_gene} from "../src/util/globals";
 
 function tree1() {
   const nodes = treeJsonToState({
@@ -79,32 +79,36 @@ test("Basic mutation counts", () => {
   const {nodes, visibility, genomeMap} = tree1();
 
   /* Very simple counting of nucleotide changes across all nodes */
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, true);
+  let [counts, max] = calcEntropyInView(nodes, visibility, nucleotide_gene, true);
   expect(max).toBe(4);
   expect(counts).toStrictEqual([{x:5,y:4}, {x:10,y:1}, {x:15,y:1}]);
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, true);
-  const result = [{codon:1,y:1,prot:'CDS1'}, {codon:4,y:3,prot:'CDS2'}, ]
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS1'), true);
+  let result = [{codon:1,y:1}]
+  expect(max).toBe(getMax(result));
+  expect(noFill(counts)).toStrictEqual(result);
+
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS2'), true);
+  result = [{codon:4,y:3}]
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(result)
-
 });
 
 test("Visibility mask + counts", () => {
-  const {nodes, visibility, genomeMap} = tree1();
+  const {nodes, visibility} = tree1();
 
   nodes.forEach((n, i) => {
     if (n.name==='tipZ') visibility[i]=NODE_NOT_VISIBLE;
   });
-  const [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, true);
+  const [counts, max] = calcEntropyInView(nodes, visibility, nucleotide_gene, true);
   expect(max).toBe(3);
   expect(counts).toStrictEqual([{x:5,y:3}, {x:10,y:1}, {x:15,y:1}]);
 })
 
-test("Basic entropy counts", () => {
+test("Basic entropy calculations", () => {
   const {nodes, visibility, genomeMap} = tree1();
 
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, false);
+  let [counts, max] = calcEntropyInView(nodes, visibility, nucleotide_gene, false);
   let result = [
     {x:5,  y:entropy(1,2)},     // T,G,G
     {x:10, y:entropy(1,2)},     // T,A,A
@@ -112,11 +116,13 @@ test("Basic entropy counts", () => {
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, false);
-  result = [
-    {codon:1, y:entropy(1,2),  prot:'CDS1'},    // A,A,B
-    {codon:4, y:entropy(1,1,1),prot:'CDS2'}     // M,P,S
-  ]
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS1'), false);
+  result = [{codon:1, y:entropy(1,2)}];       // A,A,B
+  expect(max).toBe(getMax(result));
+  expect(noFill(counts)).toStrictEqual(stringifyY(result));
+
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS2'), false);
+  result = [{codon:4, y:entropy(1,1,1)}];     // M,P,S
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 });
@@ -128,7 +134,7 @@ test("Visibility mask + entropy", () => {
   nodes.forEach((n, i) => {
     if (n.name==='tipX' || n.name==='tipY') visibility[i]=NODE_NOT_VISIBLE;
   });
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, false);
+  let [counts, max] = calcEntropyInView(nodes, visibility, nucleotide_gene, false);
   let result = [
     {x:5,y:entropy(1)},     // G
     // NOTE - position 10 is not reported as no visible nodes have it
@@ -136,11 +142,14 @@ test("Visibility mask + entropy", () => {
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, false);
-  result = [
-    {codon:1,y:entropy(1),prot:'CDS1'},  // B
-    {codon:4,y:entropy(1),prot:'CDS2'}   // S
-  ]
+
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS1'), false);
+  result = [{codon:1,y:entropy(1)}]  // B
+  expect(max).toBe(getMax(result));
+  expect(noFill(counts)).toStrictEqual(stringifyY(result));
+
+  [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS2'), false);
+  result = [{codon:4,y:entropy(1)}];  // B
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 });
