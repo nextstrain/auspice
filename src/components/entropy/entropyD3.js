@@ -8,18 +8,18 @@ import { format } from "d3-format";
 import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
-import { lightGrey, medGrey, darkGrey, infoPanelStyles } from "../../globalStyles";
+import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
+import { getCdsByName } from "../../util/entropy";
 
 /* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChart.update
  */
-const EntropyChart = function EntropyChart(ref, annotations, geneMap, genomeMap, maxNt, callbacks) {
+const EntropyChart = function EntropyChart(ref, annotations, genomeMap, maxNt, callbacks) {
   this.svg = select(ref);
   this.annotations = annotations;
-  this.geneMap = geneMap;
   this.genomeMap = genomeMap;
   this.maxNt = maxNt;
   this.callbacks = callbacks;
@@ -52,7 +52,7 @@ EntropyChart.prototype.render = function render(props) {
   if (this.selectedPositions.length) {
     const aa = this.selectedCds!==nucleotide_gene;
     const genotype = {aa, positions: [...this.selectedPositions], gene: aa ? this.selectedCds.name : nucleotide_gene}
-    this.zoomCoordinates = this._getZoomCoordinates(genotype, props.geneMap)
+    this.zoomCoordinates = this._getZoomCoordinates(genotype)
   } else {
     this.zoomCoordinates = this.scales.xNav.domain();
   }
@@ -125,14 +125,30 @@ EntropyChart.prototype.update = function update({
 /* "PRIVATE" PROTOTYPES */
 
 /* convert amino acid X in gene Y to a nucleotide number */
-EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
-  if (this.geneMap[gene].strand === "-") {
-    return this.geneMap[gene].end - aaPos * 3 + 1;
-  }
-  return this.geneMap[gene].start + aaPos * 3 - 2; // Plot from 1st codon position, not last.
-};
 
-EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
+
+
+/**
+ * This will change when we move the main axes to represent rangeLocal of the CDS (segments)
+ * But for now this is at least as good as the previous implementation (but not perfect)
+ */
+// const firstNucOfCds = (d) => {
+EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
+  const cds = getCdsByName(this.genomeMap, gene);
+  if (cds.strand==='-') {
+    console.log("Negative strand mapping not yet implemented");
+    return NaN;
+  }
+  for (const segment of cds.segments) {
+    if (segment.rangeLocal[1] < (aaPos-1)*3) continue;
+    const x = (aaPos-1)*3+1 - segment.rangeLocal[0];
+    return segment.rangeGenome[0] + x;
+  }
+  console.error(`Error mapping codon position ${aaPos} for CDS ${gene}`);
+  return NaN;
+}
+
+EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed) {
   let startEnd = [0, this.scales.xNav.domain()[1]];
   let multiplier = 0; /* scale genes to nice sizes - don't scale nucs */
   if (!parsed.aa) {
@@ -150,10 +166,18 @@ EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed
       startEnd = [start - (end-start)*0.05, end + (end-start)*0.05];
     }
   } else {
-    /* if a gene, scale to nice size */
-    const gene = parsed.gene;
-    startEnd = [geneMap[gene].start, geneMap[gene].end];
-    multiplier = (startEnd[1]-startEnd[0])*1;
+    /* if a gene (CDS), scale to nice size */
+    const segments = getCdsByName(this.genomeMap, parsed.gene)?.segments;
+    if (!segments) {
+      console.error(`Internal error. CDS name ${parsed.gene} not found in genomeMap`);
+      return this.scales.xNav.domain();
+    }
+    startEnd = segments.reduce((z, d) => {
+      if (d.rangeGenome[0]<z[0]) z[0]=d.rangeGenome[0];
+      if (d.rangeGenome[1]>z[1]) z[1]=d.rangeGenome[1];
+      return z;
+    }, [Infinity,0]);
+    multiplier = 0; // it's not really a multiplier!!!
   }
   /* ensure doesn't run off graph */
   return [Math.max(startEnd[0]-multiplier, 0),
@@ -319,22 +343,22 @@ EntropyChart.prototype._cdsSegments = function _cdsSegments() {
 EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
   for (const d of this.selectedNodes) {
     const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
-    const fillFn = this.aa ?
-      (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey :
-      (node) => !node.prot ? lightGrey : this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey;
-    select(id).style("fill", fillFn);
+    /* To revisit: a previous version used a zebra-fill based on when nuc positions changed from within
+    a gene to outside a gene, or to another gene. This information is no longer available as it
+    was problematic, but it will hopefully resurface shortly. Given the problems of overlapping
+    genes, perhaps a zebra-fill based soley on whether a position is inside a (any) CDS segment or not
+    would be best... */
+    select(id).style("fill", darkGrey);
   }
   this.selectedNodes = [];
 };
 
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
+    // TODO -- following needs updating once we reinstate CDS intersection
     if (this.aa && !d.prot) return; /* if we've switched from NT to AA by selecting a gene, don't try to highlight NT position! */
     const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
-    const fillVal = this.aa ?
-      this.geneMap[d.prot].fill :
-      d.prot ? this.geneMap[d.prot].fill : "red";
-    select(id).style("fill", fillVal);
+    select(id).style("fill", "red");
   }
 };
 
@@ -368,14 +392,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   const xscale = this.aa ?
     (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon) - 0.3) : // shift 0.3 in order to
     (d) => this.scales.xMain(d.x - 0.3);                                 // line up bars & ticks
-  const fillfn = this.aa ?
-    (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey :
-    (d) => {
-      if (d.prot) {
-        return (this.geneMap[d.prot].idx % 2) ? medGrey : darkGrey;
-      }
-      return lightGrey;
-    };
+
   this._groups.mainBars
     .selectAll(".bar")
     .data(this.bars)
@@ -386,7 +403,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     .attr("y", (d) => this.scales.y(d.y))
     .attr("width", barWidth)
     .attr("height", (d) => this.offsets.heightMainBars - this.scales.y(d.y))
-    .style("fill", fillfn)
+    .style("fill", darkGrey)
     .on("mouseover", (d) => {
       this.callbacks.onHover({d3event, tooltip: this._mainTooltip(d)})
     })
@@ -719,34 +736,72 @@ EntropyChart.prototype._createGroups = function _createGroups() {
 
 
 EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
-  /* NOTE - d is still from geneMap (not genomeMap) */
-  const _render = function _render(t) { 
-    const isNegStrand = d.prot ? this.geneMap[d.prot].strand === "-" : null;
+  const _render = function _render(t) {
 
-    const nucPos = d.prot ?
-      this.aa ?
-        isNegStrand ? this.geneMap[d.prot].end - d.codon * 3 + 3 :
-          this.geneMap[d.prot].start + d.codon * 3
-        : isNegStrand ? this.geneMap[d.prot].end - d.x :
-          d.x - this.geneMap[d.prot].start-1
-      : null;
-
-      return (
+    /**
+     * This code needs a bunch of testing, so this is a TODO XXX
+     * I'm not convinced we've ever actually supported negative strand nuc (i.e. genome)
+     * (some of the code is written as if we do, some of it is not)
+     */
+    let codonNucleotides = [];
+    let strand = '';
+    if (this.aa) {
+      const cds = getCdsByName(this.genomeMap, d.prot);
+      if (!cds) {
+        console.error(`CDS ${d.prot} not found in genomeMap (i.e. JSON annotations)`);
+        return null;
+      }
+      if (cds.strand==='-') {
+        strand = t("Negative strand")
+        codonNucleotides = ["Negative strand not yet implemented"];
+      } else {
+        /* default is + strand */
+        strand = cds.strand==="+" ? t("Positive strand") : t("Positive strand (assumed)");
+        for (const segment of cds.segments) {
+          if (segment.rangeLocal[1] < (d.codon-1)*3) continue;
+          if (codonNucleotides.length===0) {
+            /* RangeLocal represents the nucleotide coords of the amino acids in this segment, relative to the CDS
+            so find the offset required for that to get to the 1st base of this codon, then map that to the rangeGenome */
+            const x = (d.codon-1)*3+1 - segment.rangeLocal[0];
+            let pos = segment.rangeGenome[0] + x;
+            codonNucleotides.push(pos++); // Nuc 1 of the codon
+            if (pos>segment.rangeGenome[1]) continue;
+            codonNucleotides.push(pos++); // nuc 2 of the codon
+            if (pos>segment.rangeGenome[1]) continue;
+            codonNucleotides.push(pos++); // nuc 3 of the codon
+            break;
+          } else {
+            /* remaining nucleotides from the beginning of the segment */
+            if (segment.phase!==(3-codonNucleotides.length)) {
+              console.error(`Internal Error -- phase mismatch for CDS ${cds.name} when mapping codon ${d.codon}`);
+              codonNucleotides.push("Error!")
+              break;
+            }
+            codonNucleotides.push(segment.rangeGenome[0])
+            if (codonNucleotides.length===1) {
+              codonNucleotides.push(segment.rangeGenome[0]+1)
+            }
+            break;
+          }
+        }
+      }
+    }
+    return (
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
           {
-            this.aa ? t("Codon {{codon}} in protein {{protein}}", {codon: d.codon, protein: d.prot}) :
-              d.prot ? `${t("Nucleotide {{nuc}}", {nuc: d.x})} (${t("Codon {{codon}} in protein {{protein}}", {codon: Math.floor((nucPos)/3) + 1, protein: d.prot})})` :
-                t("Nucleotide {{nuc}}", {nuc: d.x})
+            this.aa ?
+              t("Codon {{codon}} in protein {{protein}}", {codon: d.codon, protein: d.prot}) :
+              t("Nucleotide {{nuc}}", {nuc: d.x})
           }
         </div>
         <p/>
         <div>
-          {this.aa ? t("Nuc positions {{a}} to {{b}}", {a: nucPos-2, b: nucPos}) : ``}
+          {this.aa ? t("Nuc positions {{positions}}", {positions: codonNucleotides.join(", ")}) : ``}
         </div>
         <p/>
         <div>
-          {isNegStrand === null ? `` : isNegStrand ? t("Negative strand") : t("Positive strand")}
+          {strand ? strand : "Strand: unknown (todo)"}
         </div>
         <p/>
         <div>

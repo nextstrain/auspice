@@ -18,7 +18,7 @@ import CustomSelect from "./customSelect";
     colorBy: state.controls.colorBy,
     geneLength: state.controls.geneLength,
     colorings: state.metadata.colorings,
-    geneMap: state.entropy.geneMap
+    genomeMap: state.entropy.genomeMap,
   };
 })
 class ColorBy extends React.Component {
@@ -52,7 +52,8 @@ class ColorBy extends React.Component {
     colorBy: PropTypes.string.isRequired,
     geneLength: PropTypes.object.isRequired,
     colorings: PropTypes.object.isRequired,
-    dispatch: PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired,
+    genomeMap: PropTypes.array.isRequired,
   }
 
   // Applies the given state to the immutable blank state and replaces the
@@ -136,13 +137,22 @@ class ColorBy extends React.Component {
   }, 400);
 
   getGtGeneOptions() {
-    const options = [];
-    if (this.props.geneMap) {
-      // Make the nucleotide the first option since it can be annoying to find the nucleotide
-      // option when there are ~200 genes like in monkeypox.
-      options.push({value: nucleotide_gene, label: "nucleotide"});
-      Object.keys(this.props.geneMap).forEach((prot) => options.push({value: prot, label: prot}));
-    }
+    if (!this.props.genomeMap?.length) return [];
+    const options = [
+      // Nuc is first option, especially helpful when there are many many genes/CDSs
+      {value: nucleotide_gene, label: "nucleotide"}
+    ]
+    this.props.genomeMap[0].genes.forEach((gene) => {
+      /**
+       * A lot of the code in this file refers to "gene(s)", however the actual dropdown
+       * options represent CDSs, as these are what we have translations / mutations for.
+       * The `genomeMap` differentiates between the two, and we may one day have a more
+       * complex dropdown UI which exposes the associated gene for a CDS.
+       */
+      gene.cds.forEach((cds) => {
+        options.push({value: cds.name, label: cds.name})
+      })
+    })
     return options;
   }
 

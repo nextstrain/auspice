@@ -878,7 +878,7 @@ export const createStateFromQueryOrJSONs = ({
     }
     // TODO -- I'll update calcEntropyInView to consider the selected CDS in a subsequent commit
     const mutType = entropy.selectedCds===nucleotide_gene ? 'nuc' : 'aa';
-    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.geneMap, entropy.showCounts);
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.genomeMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
     entropy.zoomMax = controls["zoomMax"];

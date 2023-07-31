@@ -10,28 +10,28 @@ function tree1() {
         name: "tipX",
         branch_attrs: {mutations: {
           nuc: ["A5T", "A10T"],
-          GENE2: ["L4M"] 
+          CDS2: ["L4M"] 
         }}
       },
       {
         name: "tipY",
         branch_attrs: {mutations: {
           nuc: ["A5G"],
-          GENE2: ["L4P"]
+          CDS2: ["L4P"]
         }}
       },
       {
         name: "internalNodeZ",
         branch_attrs: {mutations: {
           nuc: ["A5C", "A15T"],
-          GENE1: ["A1B"]
+          CDS1: ["A1B"]
         }},
         children: [
           {
             name: "tipZ",
             branch_attrs: {mutations: {
               nuc: ["A5G"],  // NOTE this is nonsensical - A→C followed by A→G
-              GENE2: ["L4S"] // Codon 4 should be stop, but auspice doesn't check
+              CDS2: ["L4S"] // Codon 4 should be stop, but auspice doesn't check
             }}
           }
         ]
@@ -41,57 +41,81 @@ function tree1() {
 
   const visibility = nodes.map(() => NODE_VISIBLE)
 
-  const geneMap = {
-    // P.S. start/end are GFF-like 1-based, close ended feature annotations in JSON
-    // but start is converted to 0-based (by `getAnnotations()`) prior to geneMap creation
-    GENE1: {prot: 'GENE1', start: 5, end: 14, strand: '+', fill: "NA", idx: 1}, // length=3 codons
-    GENE2: {prot: 'GENE2', start: 4, end: 16, strand: '-', fill: "NA", idx: 0}, // length=4 codons
-  }
+  const genomeMap = [
+    {
+      name: 'source',
+      range: [1,18],
+      genes: [
+        {
+          name: "GENE1", color: "NA",
+          cds: [
+            {
+              name: "CDS1", length: 9, strand: "+",
+              segments: [
+                {rangeGenome: [6,14], rangeLocal: [1, 9], phase: 0, frame: 2},
+              ]
+            }
+          ]
+        },
+        {
+          name: "GENE2", color: "NA",
+          cds: [
+            {
+              name: "CDS2", length: 12, strand: "-",
+              segments: [
+                {rangeGenome: [5,16], rangeLocal: [1, 12], phase: 0, frame: 1},
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
 
-  return {nodes, visibility, geneMap};
+  return {nodes, visibility, genomeMap};
 }
 
 test("Basic mutation counts", () => {
-  const {nodes, visibility, geneMap} = tree1();
+  const {nodes, visibility, genomeMap} = tree1();
 
   /* Very simple counting of nucleotide changes across all nodes */
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", {}, true);
+  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, true);
   expect(max).toBe(4);
-  expect(counts).toStrictEqual([{x:5,y:4,prot:false},{x:10,y:1,prot:false},{x:15,y:1,prot:false}]);
+  expect(counts).toStrictEqual([{x:5,y:4}, {x:10,y:1}, {x:15,y:1}]);
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", geneMap, true);
-  const result = [{codon:1,y:1,prot:'GENE1'}, {codon:4,y:3,prot:'GENE2'}, ]
+  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, true);
+  const result = [{codon:1,y:1,prot:'CDS1'}, {codon:4,y:3,prot:'CDS2'}, ]
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(result)
 
 });
 
 test("Visibility mask + counts", () => {
-  const {nodes, visibility} = tree1();
+  const {nodes, visibility, genomeMap} = tree1();
 
   nodes.forEach((n, i) => {
     if (n.name==='tipZ') visibility[i]=NODE_NOT_VISIBLE;
   });
-  const [counts, max] = calcEntropyInView(nodes, visibility, "nuc",  {}, true);
+  const [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, true);
   expect(max).toBe(3);
-  expect(counts).toStrictEqual([{x:5,y:3,prot:false},{x:10,y:1,prot:false},{x:15,y:1,prot:false}]);
+  expect(counts).toStrictEqual([{x:5,y:3}, {x:10,y:1}, {x:15,y:1}]);
 })
 
 test("Basic entropy counts", () => {
-  const {nodes, visibility, geneMap} = tree1();
+  const {nodes, visibility, genomeMap} = tree1();
 
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", {}, false);
+  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, false);
   let result = [
-    {x:5,y:entropy(1,2),prot:false},    // T,G,G
-    {x:10,y:entropy(1,2),prot:false},   // T,A,A
-    {x:15,y:entropy(1,2),prot:false}]   // A,A,T
+    {x:5,  y:entropy(1,2)},     // T,G,G
+    {x:10, y:entropy(1,2)},     // T,A,A
+    {x:15, y:entropy(1,2)}]     // A,A,T
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", geneMap, false);
+  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, false);
   result = [
-    {codon:1,y:entropy(1,2),prot:'GENE1'},    // A,A,B
-    {codon:4,y:entropy(1,1,1),prot:'GENE2'}   // M,P,S
+    {codon:1, y:entropy(1,2),  prot:'CDS1'},    // A,A,B
+    {codon:4, y:entropy(1,1,1),prot:'CDS2'}     // M,P,S
   ]
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
@@ -99,23 +123,23 @@ test("Basic entropy counts", () => {
 
 
 test("Visibility mask + entropy", () => {
-  const {nodes, visibility, geneMap} = tree1();
+  const {nodes, visibility, genomeMap} = tree1();
 
   nodes.forEach((n, i) => {
     if (n.name==='tipX' || n.name==='tipY') visibility[i]=NODE_NOT_VISIBLE;
   });
-  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", {}, false);
+  let [counts, max] = calcEntropyInView(nodes, visibility, "nuc", genomeMap, false);
   let result = [
-    {x:5,y:entropy(1),prot:false},    // G
+    {x:5,y:entropy(1)},     // G
     // NOTE - position 10 is not reported as no visible nodes have it
-    {x:15,y:entropy(1),prot:false}];   // T
+    {x:15,y:entropy(1)}];   // T
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
-  [counts, max] = calcEntropyInView(nodes, visibility, "aa", geneMap, false);
+  [counts, max] = calcEntropyInView(nodes, visibility, "aa", genomeMap, false);
   result = [
-    {codon:1,y:entropy(1),prot:'GENE1'},  // B
-    {codon:4,y:entropy(1),prot:'GENE2'}   // S
+    {codon:1,y:entropy(1),prot:'CDS1'},  // B
+    {codon:4,y:entropy(1),prot:'CDS2'}   // S
   ]
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));

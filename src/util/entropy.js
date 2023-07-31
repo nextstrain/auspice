@@ -1,14 +1,5 @@
 import { genotypeColors, NODE_VISIBLE, nucleotide_gene } from "./globals";
 
-const intersectGenes = function intersectGenes(geneMap, pos) {
-  for (const gene of Object.keys(geneMap)) {
-    if (pos >= geneMap[gene].start && pos <= geneMap[gene].end) {
-      return gene;
-    }
-  }
-  return false;
-};
-
 /**
  * Get mutations on node. Returns false if mutations not set.
  * @param {object} n node
@@ -20,11 +11,11 @@ const getNodeMutations = (n) => {
   return false;
 };
 
-const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
-
+const calcMutationCounts = (nodes, visibility, genomeMap, isAA) => {
+  const cds = getCds(genomeMap)
   const sparse = isAA ? {} : [];
   if (isAA) {
-    Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
+    cds.forEach((d) => {sparse[d.name] = {};});
   }
   nodes.forEach((n) => {
     if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
@@ -78,15 +69,13 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
       counts[j] = {x: i, y: sparse[i]}; /* TODO reset y scale in D3 or compute entropy */
       j++;
     }
-    for (const nt of counts) {
-      nt.prot = intersectGenes(geneMap, nt.x);
-    }
   }
   return [counts, m];
 };
 
-const calcEntropy = (nodes, visibility, geneMap, isAA) => {
-  const arrayOfProts = isAA ? Object.keys(geneMap) : [nucleotide_gene];
+const calcEntropy = (nodes, visibility, genomeMap, isAA) => {
+  const cds = getCds(genomeMap)
+  const arrayOfProts = isAA ? cds.map((d) => d.name) : [nucleotide_gene];
   const initialState = {};
   const anc_state = {};
   const counts = {}; // same struct as state, but with counts not chars
@@ -197,7 +186,6 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       } : {
         x: parseInt(k, 10),
         y: s.toFixed(3),
-        prot: intersectGenes(geneMap, k)
       };
       i++;
     }
@@ -211,13 +199,29 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 * @param {Array} nodes - list of nodes
 * @param {Array} visibility - 1-1 correspondence with nodes.
 * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
-* @param {obj} geneMap used to NT fill colours. This should be improved.
+* @param {array} genomeMap
 * @param {bool} showCounts show counts or entropy values?
 * @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
 * TODO: this algorithm can be much improved, and the data structures returned improved also
 */
-export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
+export const calcEntropyInView = (nodes, visibility, mutType, genomeMap, showCounts) => {
   return showCounts ?
-    calcMutationCounts(nodes, visibility, geneMap, mutType === "aa") :
-    calcEntropy(nodes, visibility, geneMap, mutType === "aa");
+    calcMutationCounts(nodes, visibility, genomeMap, mutType === "aa") :
+    calcEntropy(nodes, visibility, genomeMap, mutType === "aa");
 };
+
+/**
+ * Returns an array of all CDSs in the (first chromosome of the) genome
+ */
+export function getCds(genomeMap) {
+  let cds = [];
+  genomeMap[0].genes.forEach((gene) => {
+    cds = cds.concat(gene.cds);
+  })
+  return cds;
+}
+
+/** returns undefined if not found */
+export function getCdsByName(genomeMap, name) {
+  return getCds(genomeMap).filter((cds)=>cds.name===name)[0];
+}
