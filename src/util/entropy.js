@@ -63,7 +63,6 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
         const numK = parseInt(k, 10);
         if (sparse[prots[i]][numK] > m) {m = sparse[prots[i]][numK];}
         counts[j] = {
-          x: geneMap[prots[i]].start + 3 * numK - 1, // check
           y: sparse[prots[i]][numK],
           codon: numK, // check
           fill: genotypeColors[i % 10],
@@ -191,7 +190,6 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       }
       if (s > m) {m = s;}
       entropy[i] = isAA ? {
-        x: geneMap[prot].start + 3 * k - 1, // check
         y: s.toFixed(3),
         codon: parseInt(k, 10), // check
         fill: genotypeColors[i % 10],
