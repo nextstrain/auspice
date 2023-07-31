@@ -82,19 +82,6 @@ const getAnnotations = (jsonData: JsonAnnotations) => {
   return [annotations, nuc];
 };
 
-const processAnnotations = (annotations: any) => {
-  const m:Record<string,any> = {}; /* m === geneMap */
-  annotations.forEach((d) => {
-    m[d.prot] = d;
-  });
-  const sorted = Object.keys(m).sort((a, b) =>
-    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
-  );
-  for (const gene of Object.keys(m)) {
-    m[gene].idx = sorted.indexOf(gene);
-  }
-  return m;
-};
 
 /**
  * This is in flux -- Richard's working on an updated representation for the JSON
@@ -219,7 +206,6 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
       loaded: true,
       annotations,
       lengthSequence,
-      geneMap: processAnnotations(annotations),
       genomeMap: genomeMap(genomeAnnotations)
     };
   }

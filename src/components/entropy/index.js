@@ -53,7 +53,6 @@ const getStyles = (width) => {
     selectedPositions: state.entropy.selectedPositions,
     bars: state.entropy.bars,
     annotations: state.entropy.annotations,
-    geneMap: state.entropy.geneMap,
     genomeMap: state.entropy.genomeMap,
     geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
@@ -145,7 +144,6 @@ class Entropy extends React.Component {
     const chart = new EntropyChart(
       this.d3entropy,
       props.annotations,
-      props.geneMap,
       props.genomeMap,
       props.geneLength[nucleotide_gene],
       { /* callbacks */
@@ -197,10 +195,10 @@ class Entropy extends React.Component {
       const positionsChanged = cdsChanged || !equalArrays(this.props.selectedPositions, nextProps.selectedPositions);
       if (cdsChanged || positionsChanged) {
         if (nextProps.selectedCds !== nucleotide_gene) {
-          /* zoom to the gene - note this uses the geneMap not genomeMap - TODO XXX */
+          /* zoom to the gene - note that this functionality is ~duplicated within entropyD3.js,
+          so we call that. The zooming will be revisited in a future commit */
+          [updateParams.start, updateParams.end] = this.state.chart._getZoomCoordinates({aa: true, gene: nextProps.selectedCds.name});
           updateParams.gene = nextProps.selectedCds.name;
-          updateParams.start = nextProps.geneMap[updateParams.gene].start;
-          updateParams.end = nextProps.geneMap[updateParams.gene].end;
         } else {
           const positions = nextProps.selectedPositions;
           const zoomCoord = this.state.chart.zoomCoordinates;

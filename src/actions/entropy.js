@@ -10,11 +10,11 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
   const { entropy, controls, tree } = getState();
   if (!tree.nodes ||
     !tree.visibility ||
-    !entropy.geneMap ||
+    !entropy.genomeMap ||
     controls.animationPlayPauseButton !== "Play"
   ) {return;}
   const mutType = entropy.selectedCds === 'nuc' ? 'nuc' : 'aa'; // Temporary TODO
-  const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.geneMap, entropy.showCounts);
+  const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.genomeMap, entropy.showCounts);
   dispatch({type: types.ENTROPY_DATA, data, maxYVal});
 }, 500, { leading: true, trailing: true });
 
@@ -90,7 +90,7 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
   if (entropy.selectedCds !== action.selectedCds) {
     const mutType = action.selectedCds === nucleotide_gene ? 'nuc' : 'aa'; // Temporary TODO
     const state = getState();
-    const [data, maxYVal] = calcEntropyInView(state.tree.nodes, state.tree.visibility, mutType, entropy.geneMap, entropy.showCounts);
+    const [data, maxYVal] = calcEntropyInView(state.tree.nodes, state.tree.visibility, mutType, entropy.genomeMap, entropy.showCounts);
     action.bars = data;
     action.maxYVal = maxYVal;
   } else if (equalArrays(action.selectedPositions, entropy.selectedPositions)) {
