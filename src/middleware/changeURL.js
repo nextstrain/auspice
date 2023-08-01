@@ -52,11 +52,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       that will still make sense when the default for the given branch labelling is "show all" */
       query.showBranchLabels = action.value ? 'all' : undefined;
       break;
-    case types.CHANGE_ZOOM:
-      /* entropy panel genome zoom coordinates */
-      query.gmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];
-      query.gmax = action.zoomc[1] >= state.controls.absoluteZoomMax ? undefined : action.zoomc[1];
+    case types.CHANGE_ZOOM: {
+      /* entropy panel genome zoom coordinates -- because this is only dispatched from within <Entropy>,
+      we can be sure that the entropyMap exists */
+      const bounds = state.entropy.genomeMap[0].range;
+      query.gmin = action.zoomc[0] <= bounds[0] ? undefined : action.zoomc[0];
+      query.gmax = action.zoomc[1] >= bounds[1] ? undefined : action.zoomc[1];
       break;
+    }
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
