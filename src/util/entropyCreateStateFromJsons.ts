@@ -197,15 +197,21 @@ const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
 
 
 export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
-  if (genomeAnnotations && genomeAnnotations.nuc) {
+  if (genomeAnnotations) {
     const ant = getAnnotations(genomeAnnotations);
     const annotations = ant[0];
-    return {
-      showCounts: false,
-      loaded: true,
-      annotations,
-      genomeMap: genomeMap(genomeAnnotations)
-    };
+    try {
+      return {
+        showCounts: false,
+        loaded: true,
+        annotations,
+        genomeMap: genomeMap(genomeAnnotations)
+      };
+    } catch (e) {
+      if (e instanceof Error) console.error(e.message);
+      console.error("Genotype colorings and the entropy panel will not be available.")
+      // fallthrough
+    }
   }
   return defaultEntropyState();
 };

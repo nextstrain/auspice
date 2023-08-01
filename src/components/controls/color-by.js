@@ -53,7 +53,7 @@ class ColorBy extends React.Component {
     geneLength: PropTypes.object.isRequired,
     colorings: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired,
-    genomeMap: PropTypes.array.isRequired,
+    genomeMap: PropTypes.array,
   }
 
   // Applies the given state to the immutable blank state and replaces the
