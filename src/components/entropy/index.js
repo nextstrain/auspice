@@ -52,7 +52,6 @@ const getStyles = (width) => {
     selectedCds: state.entropy.selectedCds,
     selectedPositions: state.entropy.selectedPositions,
     bars: state.entropy.bars,
-    annotations: state.entropy.annotations,
     genomeMap: state.entropy.genomeMap,
     geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
@@ -150,7 +149,6 @@ class Entropy extends React.Component {
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
-      props.annotations,
       props.genomeMap,
       props.geneLength[nucleotide_gene],
       { /* callbacks */

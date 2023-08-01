@@ -17,9 +17,8 @@ import { getCdsByName } from "../../util/entropy";
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChart.update
  */
-const EntropyChart = function EntropyChart(ref, annotations, genomeMap, maxNt, callbacks) {
+const EntropyChart = function EntropyChart(ref, genomeMap, maxNt, callbacks) {
   this.svg = select(ref);
-  this.annotations = annotations;
   this.genomeMap = genomeMap;
   this.maxNt = maxNt;
   this.callbacks = callbacks;
