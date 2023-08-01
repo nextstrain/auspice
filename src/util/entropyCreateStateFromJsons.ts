@@ -199,13 +199,10 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
   if (genomeAnnotations && genomeAnnotations.nuc) {
     const ant = getAnnotations(genomeAnnotations);
     const annotations = ant[0];
-    const nucAnnotation: any = ant[1];
-    const lengthSequence = nucAnnotation[0].end;
     return {
       showCounts: false,
       loaded: true,
       annotations,
-      lengthSequence,
       genomeMap: genomeMap(genomeAnnotations)
     };
   }

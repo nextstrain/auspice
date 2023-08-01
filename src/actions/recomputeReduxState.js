@@ -284,6 +284,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
 
   /* if we lack genome annotations, remove entropy from panels to display */
+  /* P.S. This is equivalent to checking if entropy.loaded === true, but we don't have access to entropy state */
   if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
@@ -422,7 +423,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarrative) => {
+const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, viewingNarrative) => {
   /* want to check that the (currently set) colorBy (state.colorBy) is valid,
    * and fall-back to an available colorBy if not
    */
@@ -462,13 +463,26 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     fallBackToDefaultColorBy();
   }
 
-  /* zoom */
-  if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
-  if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
-  if (state.zoomMin > state.zoomMax) {
-    const tempMin = state.zoomMin;
-    state.zoomMin = state.zoomMax;
-    state.zoomMax = tempMin;
+  /* Validate requested entropy zoom bounds (via URL) */
+  const genomeBounds = genomeMap?.[0]?.range;
+  if (!genomeBounds) {
+    /* Annotations block missing / invalid, so it makes no sense to have entropy zoom bounds */
+    [state.zoomMin, state.zoomMax] = [undefined, undefined];
+    delete query.gmin;
+    delete query.gmax;
+  } else {
+    if (state.zoomMin <= genomeBounds[0] || state.zoomMin >= genomeBounds[1]) {
+      state.zoomMin = undefined;
+      delete query.gmin;
+    }
+    if (state.zoomMax <= genomeBounds[0] || state.zoomMax >= genomeBounds[1]) {
+      state.zoomMax = undefined;
+      delete query.gmax;
+    }
+    if (state.zoomMin && state.zoomMax && state.zoomMin>state.zoomMax) {
+      [state.zoomMin, state.zoomMax] = [state.zoomMax, state.zoomMin];
+      [query.gmin, query.gmax] = [state.zoomMin, state.zoomMax];
+    }
   }
 
   /* colorBy confidence */
@@ -772,8 +786,6 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata);
-    controls["absoluteZoomMin"] = 0;
-    controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
     can affect props comparisons. Due to the size of some of the state, we only do this selectively */
@@ -809,7 +821,7 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
-  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
+  controls = checkAndCorrectErrorsInState(controls, metadata, entropy.genomeMap, query, tree, viewingNarrative); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
@@ -881,9 +893,6 @@ export const createStateFromQueryOrJSONs = ({
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, mutType, entropy.genomeMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
-    entropy.zoomMax = controls["zoomMax"];
-    entropy.zoomMin = controls["zoomMin"];
-    entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
   }
 
   /* update frequencies if they exist (not done for new JSONs) */

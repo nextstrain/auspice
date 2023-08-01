@@ -59,6 +59,11 @@ const getStyles = (width) => {
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
+    /**
+     * Note that zoomMin & zoomMax only represent the state when changed by a URL
+     * i.e. on dataset load or narrative page change. As such, they fall out-of-sync
+     * as soon as any user-zooming is performed.
+     */
     zoomMin: state.controls.zoomMin,
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
