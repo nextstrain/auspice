@@ -224,8 +224,10 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
       /* The benefit of recalculating the range like this as opposed to a clip mask is
       that the text can be easily centered on the visible pixels */
       s.rangePx = [
-        this.scales.xMain(Math.max(s.rangeGenome[0], inViewNucA)),
-        this.scales.xMain(Math.min(s.rangeGenome[1], inViewNucB))
+        /* the range is modified by 0.5 so that the start/end of the CDS lines up between
+        two d3 ticks when zoomed in such that each tick represents one nucleotide */
+        this.scales.xMain(Math.max(s.rangeGenome[0]-0.5, inViewNucA)),
+        this.scales.xMain(Math.min(s.rangeGenome[1]+0.5, inViewNucB))
       ];
       if (s.strand === '+') {
         s.yOffset = s.frame * this.offsets.mainCdsHeight/2;
@@ -361,32 +363,20 @@ EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars(
 EntropyChart.prototype._drawBars = function _drawBars() {
   if (!this.okToDrawBars) {return;}
   this._groups.mainBars.selectAll("*").remove();
-  let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
-  if (this.aa) {
-    posInView /= 3;
-  }
-  let barWidth;
-  if (this.aa) {
-    if (posInView > 600) {
-      barWidth = 2;
-    } else {
-      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.codon));
-    }
-  } else {
-    if (posInView > 1000) {
-      barWidth = 2;
-    } else if (posInView > 250) {
-      barWidth = 3;
-    } else {
-      barWidth = (d) => this.scales.xMain(d.x + 0.3) - this.scales.xMain(d.x - 0.3);
-    }
-  }
+  
+  /* Calculate bar width */
+  const validXPos = this.scales.xMain.domain()[0]; // any value inside the scale's domain will do
+  let barWidth = this.scales.xMain(validXPos+1) - this.scales.xMain(validXPos); // pixels between 2 nucleotides
+  if (this.aa) barWidth *= 3;           // pixels between 2 amino acids
+  barWidth *= 0.9;                      // allow padding between bars
+  if (barWidth < 1.5) barWidth = 1.5;   // minimum bar width of 1.5px
 
   const barSvgId = this.aa ? (d) => `cds-${this.selectedCds.name}-${d.codon}` : (d) => "nt" + d.x;
 
+  const barWidthHalf = barWidth/2; // we'll shift the bars x-values left by half-a-bar so the center & tick line up
   const xscale = this.aa ?
-    (d) => this.scales.xMain(this._aaToNtCoord(d.codon) - 0.3) : // shift 0.3 in order to
-    (d) => this.scales.xMain(d.x - 0.3);                         // line up bars & ticks
+    (d) => this.scales.xMain(this._aaToNtCoord(d.codon) + 1) - barWidthHalf :
+    (d) => this.scales.xMain(d.x) - barWidthHalf;
 
   this._groups.mainBars
     .selectAll(".bar")
