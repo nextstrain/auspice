@@ -13,6 +13,7 @@ import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/e
 import { timerStart, timerEnd } from "../../util/perf";
 import { encodeColorByGenotype, getCdsFromGenotype } from "../../util/getGenotype";
 import { nucleotide_gene, equalArrays } from "../../util/globals";
+import { getCdsByName } from "../../util/entropy";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -104,6 +105,15 @@ class Entropy extends React.Component {
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
+  onCdsClick(d) {
+    /**
+     * This callback is only available if we are viewing the genome in the main axis.
+     * The color-by is decoupled from the selected CDS / selected position; this callback
+     * modifies the entropy selected CDS/positions, but leaves the color-by untouched.
+     */
+    this.props.dispatch(changeEntropyCdsSelection(getCdsByName(this.props.genomeMap, d.name)));
+    this.setState({hovered: false});
+  }
 
   goBackToNucleotide(styles) {
     if (this.props.narrativeMode) return null;
@@ -152,7 +162,8 @@ class Entropy extends React.Component {
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
-        onClick: this.onClick.bind(this)
+        onClick: this.onClick.bind(this),
+        onCdsClick: this.onCdsClick.bind(this)
       }
     );
     chart.render(props);

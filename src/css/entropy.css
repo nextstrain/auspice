@@ -33,3 +33,10 @@ the overlay added on key-presses is is not a child of .brush */
   cursor: -moz-grab;
   cursor: -webkit-grab;
 }
+
+#d3entropy .cdsText {
+  pointer-events: none;
+}
+#d3entropy .cds {
+  cursor: pointer;
+}
