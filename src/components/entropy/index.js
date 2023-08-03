@@ -194,54 +194,17 @@ class Entropy extends React.Component {
         updateParams.zoomMax = nextProps.zoomMax;
         updateParams.zoomMin = nextProps.zoomMin;
       }
-      if (this.props.bars !== nextProps.bars || this.props.selectedCds !== nextProps.selectedCds) { // TODO -- can remove 2nd conditional once bars update every cds change
-        updateParams.showCounts = nextProps.showCounts;
-        updateParams.selectedCds = nextProps.selectedCds;
-        updateParams.newBars = nextProps.bars;
-        updateParams.maxYVal = nextProps.maxYVal;
+      if (this.props.bars !== nextProps.bars) {
+        updateParams.newBars = [nextProps.bars, nextProps.maxYVal];
       }
-      const cdsChanged = this.props.selectedCds !== nextProps.selectedCds;
-      const positionsChanged = cdsChanged || !equalArrays(this.props.selectedPositions, nextProps.selectedPositions);
-      if (cdsChanged || positionsChanged) {
-        if (nextProps.selectedCds !== nucleotide_gene) {
-          /* zoom to the gene - note that this functionality is ~duplicated within entropyD3.js,
-          so we call that. The zooming will be revisited in a future commit */
-          [updateParams.start, updateParams.end] = this.state.chart._getZoomCoordinates({aa: true, gene: nextProps.selectedCds.name});
-          updateParams.gene = nextProps.selectedCds.name;
-        } else {
-
-          const positions = nextProps.selectedPositions;
-          const zoomCoord = this.state.chart.zoomCoordinates;
-          const maxNt = this.props.genomeMap[0].range[1];
-          /* find out what new coords would be - if different enough, change zoom */
-          let startUpdate, endUpdate;
-          if (positions.length > 1) {
-            const start = Math.min.apply(null, positions);
-            const end = Math.max.apply(null, positions);
-            startUpdate = start - (end-start)*0.05;
-            endUpdate = end + (end-start)*0.05;
-          } else if (positions.length===1) {
-            const pos = positions[0];
-            const eitherSide = maxNt*0.05;
-            const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
-              (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
-            startUpdate = newStartEnd[0];
-            endUpdate = newStartEnd[1];
-          } else {
-            /* Nucleotide view, no positions selected */
-            [startUpdate, endUpdate] = this.state.chart.zoomCoordinates;
-          }
-          /* if the zoom would be different enough, change it */
-          if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
-            !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
-            !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
-            updateParams.gene = nucleotide_gene;
-            updateParams.start = startUpdate;
-            updateParams.end = endUpdate;
-          }
-        }
-        if (cdsChanged) updateParams.selectedCds = nextProps.selectedCds;
-        if (positionsChanged) updateParams.selectedPositions = nextProps.selectedPositions;
+      if (this.props.selectedCds !== nextProps.selectedCds) {
+        updateParams.selectedCds = nextProps.selectedCds;
+      }
+      if (this.props.showCounts !== nextProps.showCounts) {
+        updateParams.showCounts = nextProps.showCounts;
+      }
+      if (!equalArrays(this.props.selectedPositions, nextProps.selectedPositions)) {
+        updateParams.selectedPositions = nextProps.selectedPositions
       }
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
