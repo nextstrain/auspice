@@ -11,7 +11,7 @@ import Mousetrap from "mousetrap";
 import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
-import { getCdsByName } from "../../util/entropy";
+import { getCdsByName, isCdsWrapping } from "../../util/entropy";
 
 /* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -28,6 +28,7 @@ const EntropyChart = function EntropyChart(ref, genomeMap, callbacks) {
 EntropyChart.prototype.render = function render(props) {
   this.props = props;
   this.selectedCds = props.selectedCds;
+  this.selectedCdsIsWrapping = isCdsWrapping(this.selectedCds);
   this.selectedPositions = props.selectedPositions;
   /* temporarily keep this.aa, as so much code relies on it here */
   this.aa = this.selectedCds !== 'nuc';
@@ -38,26 +39,10 @@ EntropyChart.prototype.render = function render(props) {
   this._calcOffsets(props.width, props.height);
   this._createGroups();
   this._setScales(props.maxYVal);
-  /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precedence */
-
-  /** TEMPORARY -- the zooming will be updated in a future commit. Here I simply convert the
-   * new state (selectedCds, selectedPositions) into the previous structure so the code works
-   * as intended without needing to refactor the zoom logic. The intention here is to 
-   * "set zoom to specified gene or to whole genome" (although it also sets the zoom for nucleotide
-   * positions)
-   */
-  if (this.selectedPositions.length) {
-    const aa = this.selectedCds!==nucleotide_gene;
-    const genotype = {aa, positions: [...this.selectedPositions], gene: aa ? this.selectedCds.name : nucleotide_gene}
-    this.zoomCoordinates = this._getZoomCoordinates(genotype)
-  } else {
-    this.zoomCoordinates = this.scales.xNav.domain();
-  }
-  this.zoomCoordinates[0] = props.zoomMin ? props.zoomMin : this.zoomCoordinates[0];
-  this.zoomCoordinates[1] = props.zoomMax ? props.zoomMax : this.zoomCoordinates[1];
-  console.log("entropyD3::render::zoomCoords", this.zoomCoordinates.join(", "))
+  this._setZoomCoordinates(props.zoomMin, props.zoomMax)
+  console.log(`\trender() Zoom coordinates are now`, this.zoomCoordinates)
   this._drawAxes();
-  // this._setUpZoomBrush(); // TEMPORARY XXX
+  this._setUpZoomBrush();
   this._drawNavCds();
   this._drawMainCds();
   this.okToDrawBars = true;
@@ -69,42 +54,48 @@ EntropyChart.prototype.update = function update({
   selectedPositions = undefined,
   newBars = undefined,
   showCounts = undefined,
-  maxYVal = undefined,
-  gene = undefined,
-  start = undefined,
-  end = undefined,
   zoomMax = undefined,
   zoomMin = undefined
 }) {
-  let aa = undefined; // see comment above
-  if (selectedCds!==undefined) {
+  if (selectedCds) {
     this.selectedCds = selectedCds;
-    aa = this.selectedCds !== 'nuc';
-  }
-  const aaChange = aa !== undefined && aa !== this.aa;
-  if (newBars || aaChange) {
-    if (aaChange) {this.aa = aa;}
-    if (newBars) {
-      this.bars = newBars;
-      this.showCounts = showCounts;
-      this._drawNavCds(); // updates styles of selected CDS segments
-    }
-    this._updateOffsets();
-    this._updateMainScaleAndAxis(maxYVal);
-    /* NOTE: this some cases this may attempt to highlight out-of-date bars, but
-    they don't exist in the DOM so there's no visual effect. In general, the
-    functions called in this update cycle could be streamlined to avoid double
-    calls and unnecessary work such as this */
-    this._drawBars();
-    this._drawMainCds();
+    this.selectedCdsIsWrapping = isCdsWrapping(this.selectedCds);
+    this._setUpZoomBrushWrapping(!this.selectedCdsIsWrapping); // destroy if not wrapping, create if wrapping
+    this.aa = this.selectedCds !== 'nuc';
   }
 
-  if (selectedPositions !== undefined) {
-    this.selectedPositions = selectedPositions;
-    this._clearSelectedBars();
-    this._setSelectedNodes();
-    this._highlightSelectedBars();
+  if (newBars || selectedPositions!==undefined) {
+    if (showCounts!==undefined) this.showCounts = showCounts;
+    if (newBars) {
+      this.bars = newBars[0];
+      this._updateOffsets();
+      this._updateMainScaleAndAxis(newBars[1]);
+      this._drawNavCds(); // only for CDS opacity changes
+    }
+    if (selectedPositions !== undefined) {
+      this.selectedPositions = selectedPositions;
+    }
+    if (selectedCds || selectedPositions !== undefined) {
+      this._setZoomCoordinates(zoomMin, zoomMax, !!selectedCds);
+      console.log(`\tupdate() Zoom coordinates are now`, this.zoomCoordinates)
+    }
+    /* always move the brush. If the zoom-coordinates are unchanged, then the
+    brush won't actually move, but it will still trigger `_brushChanged` and
+    therefore re-render bars + main CDS. Any previously highlighted bars will
+    remain highlighted if the selectedCds hasn't changed, otherwise nothing will
+    be highlighted */
+    this._groups.navBrush.call(this.brush.move, () => this.zoomCoordinates.map(this.scales.xNav));
+
+    if (selectedPositions !== undefined) {
+      this._clearSelectedBars();
+      this._setSelectedNodes();
+      this._highlightSelectedBars();
+    }
   }
+}
+
+  
+
   // TEMPORARY XXX - following commented section controls zooming
   // if (gene !== undefined && start !== undefined && end !== undefined) {
   //   /* move the brush */
@@ -124,45 +115,169 @@ EntropyChart.prototype.update = function update({
   //       return [this.scales.xNav(zMin), this.scales.xNav(zMax)];
   //     });
   // }
-};
+// };
 
 /* "PRIVATE" PROTOTYPES */
 
-EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed) {
-  let startEnd = [0, this.scales.xNav.domain()[1]];
-  let multiplier = 0; /* scale genes to nice sizes - don't scale nucs */
-  if (!parsed.aa) {
-    const maxNt = this.scales.xNav.domain()[1];
-    /* if one nuc position, pad on either side with some space */
-    if (parsed.positions.length === 1) {
-      const pos = parsed.positions[0];
-      const eitherSide = maxNt*0.05;
-      startEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
-        (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
+/**
+ * Given the selectedCds + selectedPositions we want to choose the appropriate zoom
+ * coordinates. This is decided in conjunction with any existing zoom coordinates - we
+ * don't always want to change the zoom.
+ * Called from:
+ *  - initial render
+ *  - update
+ */
+EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overrideMin, overrideMax, cdsChanged) {
+
+  console.log(`_setZoomCoordinates. current zoom is: ${this.zoomCoordinates || 'not yet set'}`);
+  if (overrideMin || overrideMax) {
+    console.log(`\tRedux-specified zoom bounds: ${overrideMin}, ${overrideMax}`)
+  }
+
+  if (cdsChanged && this.zoomCoordinates) {
+    console.log("\tDestroying previous zoom state, because we've changed CDS");
+    this.zoomCoordinates = undefined;
+  }
+
+  if (this.selectedCds===nucleotide_gene) {
+    const domain = this.scales.xNav.domain();
+    if (this.selectedPositions?.length) {
+      const posMin = Math.min(...this.selectedPositions);
+      const posMax = Math.max(...this.selectedPositions);
+      /* If we already have coordinates which are not the default, and the new
+      positions are within the coordinates, then don't change zoom at all */
+      if (
+        this.zoomCoordinates &&
+        (this.zoomCoordinates[0]!==domain[0] || this.zoomCoordinates[1]!==domain[1]) &&
+        posMin>this.zoomCoordinates[0] && posMax<this.zoomCoordinates[1]
+      ) {
+        return;
+      }
+      let desiredSurroundingSpace = Math.floor(domain[1] * 0.05);  // 5%
+      if (desiredSurroundingSpace>1000) desiredSurroundingSpace=1000; // up to a max of 1kb
+      this.zoomCoordinates = [posMin - desiredSurroundingSpace, posMax + desiredSurroundingSpace];
+      // console.log(`\tAround ${posMin}-${posMax} with 5% either side (${desiredSurroundingSpace}nt)`)
     } else {
-      /* if two nuc pos, find largest and smallest and pad slightly */
-      const start = Math.min.apply(null, parsed.positions);
-      const end = Math.max.apply(null, parsed.positions);
-      startEnd = [start - (end-start)*0.05, end + (end-start)*0.05];
+      // console.log("\tZoom : entire genome")
+      this.zoomCoordinates = this.scales.xNav.domain();
+    }
+    if (overrideMin||overrideMax) {
+      if (overrideMin) this.zoomCoordinates[0] = overrideMin;
+      if (overrideMax) this.zoomCoordinates[1] = overrideMax;
+      // it's guaranteed that overrideMin<overrideMax, however we may no longer have zoom coords [0] < [1]
+      if (this.zoomCoordinates[0]>=this.zoomCoordinates[1]) {
+        if (overrideMin) this.zoomCoordinates = [overrideMin, domain[1]];
+        if (overrideMax) this.zoomCoordinates = [domain[0], overrideMax];
+      }
+    }
+    // clamp the zoom to the domain
+    if (this.zoomCoordinates[0] < domain[0]) this.zoomCoordinates[0]=domain[0];
+    if (this.zoomCoordinates[1] > domain[1]) this.zoomCoordinates[1]=domain[1];
+  } else {
+    const segments = this.selectedCds.segments;
+    if (!this.selectedCdsIsWrapping) {
+      /**
+       * The approach for (non-wrapping) selected CDSs is much easier -- we show the entire gene unless
+       * there's overrides
+       */
+      this.zoomCoordinates = [
+        segments[0].rangeGenome[0],
+        segments[segments.length-1].rangeGenome[1]
+      ]
+      if (overrideMin && overrideMin>this.zoomCoordinates[0] && overrideMin<this.zoomCoordinates[1]) {
+        this.zoomCoordinates[0] = overrideMin;
+      }
+      if (overrideMax && overrideMax>this.zoomCoordinates[0] && overrideMax<this.zoomCoordinates[1]) {
+        this.zoomCoordinates[1] = overrideMax;
+      }
+    } else {
+      /* We want to show the entire CDS, it's just a bit more work for wrapping CDSs */
+      this.zoomCoordinates = [
+        segments[segments.length-1].rangeGenome[1],
+        segments[0].rangeGenome[0]
+      ]
+      // offsets? Probably the same as above?
+
+    }
+  }
+};
+
+
+/**
+ * Given this.zoomCoordinates (nucleotides in genome space), we want to return
+ * the appropriate zoom coordinates in rangeLocal space (nucleotides) for the
+ * selected CDS. If either of the zoom handles (i.e. zoomCoordinates) are beyond
+ * the selected CDS, then we reset the zoomCoordinates to a sensible state &
+ * return false.
+ */
+EntropyChart.prototype._rangeLocalZoomCoordinates = function _rangeLocalZoomCoordinates() {
+  const segments = this.selectedCds.segments
+  let localA, localB;
+
+  if (!this.selectedCdsIsWrapping) {
+    // If the current genome zoom is outside the CDS, then clamp the zoom &
+    // return false, otherwise set the local zoom coordinates via the
+    // genome zoom
+    const [genomeA, genomeB] = [Math.min(...this.zoomCoordinates), Math.max(...this.zoomCoordinates)];
+    if (genomeA < segments[0].rangeGenome[0]) {
+      this.zoomCoordinates[0] = segments[0].rangeGenome[0];
+      return false;
+    } else {
+      for (const s of segments) {
+        if (s.rangeGenome[0]<=genomeA && s.rangeGenome[1]>=genomeA) {
+          const advance = genomeA - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
+          localA = s.rangeLocal[0] + advance;
+          break;
+        }
+      }
+    }
+    if (genomeB > segments[segments.length-1].rangeGenome[1]) {
+      this.zoomCoordinates[1] = segments[segments.length-1].rangeGenome[1];
+      return false;
+    } else {
+      for (const s of segments) {
+        if (s.rangeGenome[0]<=genomeB && s.rangeGenome[1]>=genomeB) {
+          const advance = genomeB - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
+          localB = s.rangeLocal[0] + advance;
+          break;
+        }
+      }
     }
   } else {
-    /* if a gene (CDS), scale to nice size */
-    const segments = getCdsByName(this.genomeMap, parsed.gene)?.segments;
-    if (!segments) {
-      console.error(`Internal error. CDS name ${parsed.gene} not found in genomeMap`);
-      return this.scales.xNav.domain();
+    // selected gene is wrapping. We apply the same approach, it's just somewhat
+    // round the other way. Remember genomeStart > genomeEnd, and that the zoom
+    // _must_ wrap the origin (i.e. there is currently no way to change from a
+    // warpped zoom to a non-wrapped zoom, even though it may be useful)
+    const [genomeEnd, genomeStart] = [Math.min(...this.zoomCoordinates), Math.max(...this.zoomCoordinates)];
+    if (genomeStart < segments[0].rangeGenome[0]) {
+      this.zoomCoordinates[1] = segments[0].rangeGenome[0];
+      return false;
+    } else {
+      for (const s of segments) {
+        if (s.rangeGenome[0]<=genomeStart && s.rangeGenome[1]>=genomeStart) {
+          const advance = genomeStart - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
+          localA = s.rangeLocal[0] + advance;
+          break;
+        }
+      }
     }
-    startEnd = segments.reduce((z, d) => {
-      if (d.rangeGenome[0]<z[0]) z[0]=d.rangeGenome[0];
-      if (d.rangeGenome[1]>z[1]) z[1]=d.rangeGenome[1];
-      return z;
-    }, [Infinity,0]);
-    multiplier = 0; // it's not really a multiplier!!!
+    if (genomeEnd > segments[segments.length-1].rangeGenome[1]) {
+      this.zoomCoordinates[0] = segments[segments.length-1].rangeGenome[1];
+      return false;
+    } else {
+      for (const s of segments) {
+        if (s.rangeGenome[0]<=genomeEnd && s.rangeGenome[1]>=genomeEnd) {
+          const advance = s.rangeGenome[1] - genomeEnd; // number nt remove from the end
+          localB = s.rangeLocal[1] - advance;
+          break;
+        }
+      }
+    }
   }
-  /* ensure doesn't run off graph */
-  return [Math.max(startEnd[0]-multiplier, 0),
-    Math.min(startEnd[1]+multiplier, this.scales.xNav.domain()[1])];
-};
+
+  return [localA, localB]
+}
+
 
 EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
   this.selectedNodes = [];
@@ -644,7 +759,7 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
-      return this.zoomCoordinates.map(this.scales.xNav); /* coords may have been specified by URL */
+      return this.zoomCoordinates.map(this.scales.xNav);
     });
 
   /* https://bl.ocks.org/mbostock/4349545 */
@@ -656,41 +771,59 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
     .attr("cursor", "ew-resize")
     .attr("d", "M0,0 0,0 -5,11 5,11 0,0 Z")
     /* see the extent x,y params in brushX() (above) */
-    .attr("transform", (d) =>
-      d.type === "e" ?
-        "translate(" + (this.scales.xNav(this.zoomCoordinates[1]) - 1) + "," + (this.offsets.brushHeight) + ")" :
-        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.brushHeight) + ")"
-        /* this makes handles move if initial draw is zoomed! */
-    );
+    .attr("transform", (d) => {
+      return d.type === "e" ? // end (2nd) handle
+        `translate(${this.scales.xNav(this.zoomCoordinates[1])},${this.offsets.brushHeight})` :
+        `translate(${this.scales.xNav(this.zoomCoordinates[0])},${this.offsets.brushHeight})`
+    })
 
-    this._setUpMousewheelZooming()
+    if (this.selectedCdsIsWrapping) this._setUpZoomBrushWrapping();
+
+    // this._setUpMousewheelZooming() // TODO XXX
 };
 
+
 /**
- * Dispatches Redux actions to update the zoom coordinates in the URL (and redux state)
+ * Adds rectangles to mimic the zoom brush, but they are inverted. This function
+ * should be run whenever we have a wrapped CDS. If not, then it's safe to call
+ * it with destroy = true. While this adds the rectangles, they must be kept in
+ * sync with the brush position (done via this._brushChanged)
+ */
+EntropyChart.prototype._setUpZoomBrushWrapping = function _setUpZoomBrushWrapping(destroy=false) {
+  if (destroy) {
+    this._navBrushWrappingSelection?.remove();
+    this._navBrushWrappingSelection = undefined;
+    // ensure the actual brush selection has its default opacity
+    this._groups.navBrush.select(".selection").attr("fill-opacity", 0.3);
+    return;
+  }
+  this._navBrushWrappingSelection = this._groups.navBrushWrapping
+    .selectAll(".selection-wrapping")
+    .data(this.zoomCoordinates)
+    .enter()
+    .append("rect")
+      .attr("class", "selection-wrapping")
+      .attr("x", (d, i) => i===0 ? 0 : this.scales.xNav(d))
+      .attr("y", 0)
+      .attr("width", (d, i) => i===0 ? this.scales.xNav(d) : this.offsets.width - this.scales.xNav(d))
+      .attr("height", this.offsets.brushHeight)
+      .attr("fill", "#777")       // chosen to match d3's brushX default
+      .attr("fill-opacity", 0.3); // chosen to match d3's brushX default
+
+  // hide the actual brush selection (as we want to view the inverted selection)
+  this._groups.navBrush.select(".selection").attr("fill-opacity", 0);
+}
+
+
+/**
+ * Dispatches Redux actions to update the zoom coordinates in the URL (and redux
+ * state). Currently this is very simple, however there are improvements we can
+ * make such as:
+ *   - if the zoomCoordinates are at the edges of a selected CDS, then we
+ *     actually want to clear the URL queries
  */
 EntropyChart.prototype._dispatchZoomCoordinates = function _dispatchZoomCoordinates() {
-  /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
-  if (d3event.sourceEvent instanceof MouseEvent) {
-    if (
-      !d3event.selection ||
-      d3event.sourceEvent.target.id === "d3entropyParent" ||
-      d3event.sourceEvent.target.id === ""
-    ) {
-      this.props.dispatch(changeZoom(this.zoomCoordinates));
-    } else if (
-      d3event.sourceEvent.target.id.match(/^prot/) ||
-      d3event.sourceEvent.target.id.match(/^nt/)
-    ) {
-      /* If selected gene or clicked on entropy, hide zoom coords */
-      this.props.dispatch(changeZoom([undefined, undefined]));
-    }
-  } else if (d3event &&
-    d3event.sourceEvent &&
-    d3event.sourceEvent.type === 'zoom'
-  ) {
-    this.props.dispatch(changeZoom(this.zoomCoordinates));
-  }
+  this.props.dispatch(changeZoom(this.zoomCoordinates));
 };
 
 /**
@@ -704,23 +837,35 @@ EntropyChart.prototype._brushChanged = function _brushChanged() {
   const s = d3event.selection || this.scales.xNav.range();
   const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
   this.zoomCoordinates = start_end.map(Math.round);
-  if (!d3event.selection) { /* This keeps brush working if user clicks (zoom out entirely) rather than click-drag! */
-    this._groups.navBrush.select(".brush")
-      .call(this.brush.move, () => {
-        this.zoomCoordinates = this.scales.xNav.range().map(Math.round);
-        return this.scales.xNav.range();
-      });
+  
+  if (this.selectedCds===nucleotide_gene) {
+    this.scales.xMain.domain(this.zoomCoordinates);
   } else {
-    this.scales.xMain.domain(start_end);
-    this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
-    this._groups.mainXAxis.call(this.axes.xMain);
-    this._drawBars();
-    this._drawMainCds();
-    if (this.brushHandle) {
-      this.brushHandle
-        .attr("display", null)
-        .attr("transform", (d, i) => "translate(" + this.scales.xNav(start_end[i]) + "," + (this.offsets.brushHeight) + ")");
+    const domainLocal = this._rangeLocalZoomCoordinates(); // nucleotides
+    if (domainLocal) {
+      this.scales.xMain.domain(this._rangeLocalZoomCoordinates());
+    } else {
+      this._groups.navBrush
+        .call(this.brush.move, () => {
+          return this.zoomCoordinates.map(this.scales.xNav);
+        });
     }
+  }
+    
+  this.axes.xMain = this.axes.xMain.scale(this.scales.xMain)
+  this._groups.mainXAxis.call(this.axes.xMain);
+  this._drawBars();
+  this._drawMainCds();
+  if (this.brushHandle) {
+    this.brushHandle
+      .attr("display", null)
+      .attr("transform", (d, i) => `translate(${this.scales.xNav(this.zoomCoordinates[i])},${this.offsets.brushHeight})`);
+  }
+  if (this._navBrushWrappingSelection) {
+    this._navBrushWrappingSelection
+      .attr("x", (d, i) => i===0 ? 0 : this.scales.xNav(this.zoomCoordinates[1]))
+      .attr("width", (d, i) => i===0 ? this.scales.xNav(this.zoomCoordinates[0]) : 
+        this.offsets.width - this.scales.xNav(this.zoomCoordinates[1]))
   }
 };
 
@@ -823,6 +968,10 @@ EntropyChart.prototype._createGroups = function _createGroups() {
 
   this._groups.navBrush = this.svg.append("g")
     .attr("id", "navBrush")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
+
+  this._groups.navBrushWrapping = this.svg.append("g") // custom brush <rect> which wrap the origin
+    .attr("id", "navBrushWrapping")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
 
   this._groups.mainClip = this.svg.append("g")
@@ -951,6 +1100,7 @@ EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
   }
   return _render.bind(this)
 }
+
 
 
 export default EntropyChart;

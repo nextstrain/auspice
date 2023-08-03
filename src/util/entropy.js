@@ -164,6 +164,18 @@ export function getCdsByName(genomeMap, name) {
   return getCds(genomeMap).filter((cds)=>cds.name===name)[0];
 }
 
+/* Does a CDS wrap the origin? */
+export function isCdsWrapping(cds) {
+  if (cds===nucleotide_gene) return false;
+  for (let i=1; i<cds.segments.length; i++) {
+    // segments are already sorted according to rangeLocal
+    if (cds.segments[i-1].rangeGenome[0] > cds.segments[i].rangeGenome[0]) {
+      return true;
+    }
+  }
+  return false; // fallthrough
+}
+
 /** A, B are the from/to nuc/aa of an observed mutation  */
 function valid(A, B, isAA) {
   if (isAA) {
