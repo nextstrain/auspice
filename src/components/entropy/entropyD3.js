@@ -405,14 +405,28 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
     .enter()
     .append("text")
       .attr("x", (d) => d.rangePx[0] + 0.5*(d.rangePx[1]-d.rangePx[0]))
-      .attr("y", (d) => d.yOffset+1)
+      .attr("y", (d) => d.yOffset+2)
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")        // horizontal axis
       .attr("dominant-baseline", "hanging") // vertical axis
       .style("font-size", `${this.offsets.mainCdsHeight-2}px`)
       .style("fill", "white")
-      .text((d) => d.name);
+      .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 10));
 };
+
+/**
+ * A first pass at trying to be smart about how text is printed over CDSs, which
+ * may be very few pixels wide... There are more complicated methods (e.g. query
+ * the DOM), or alternatives (e.g. clipping). This doesn't address the problem of
+ * text from different CDSs being printed over top of each other
+ */
+function textIfSpaceAllows(text, width, pxPerChar) {
+  if ((width-5)/text.length > pxPerChar) {
+    return text;
+  }
+  return null;
+}
+
 
 /**
  * Renders the CDS annotations in the lower "Nav" track. These have fixed
@@ -472,14 +486,13 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
     .enter()
     .append("text")
       .attr("x", (d) => d.rangePx[0] + 0.5*(d.rangePx[1]-d.rangePx[0]))
-      .attr("y", (d) => d.yOffset)
+      .attr("y", (d) => d.yOffset+2)
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")        // horizontal axis
       .attr("dominant-baseline", "hanging") // vertical axis
       .style("font-size", `${this.offsets.navCdsHeight-2}px`)
       .style("fill", (d) => d.name===this.selectedCds?.name ? '#000' : '#fff')
-      .text((d) => d.name);
-
+      .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 30/4));
 };
 
 EntropyChart.prototype._cdsSegments = function _cdsSegments() {
