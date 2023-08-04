@@ -331,7 +331,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .style("stroke-width", 2)
         .style('opacity', 1) // Segments _can't_ overlap when viewing an individual CDS
         .on("mouseover", (d) => {
-          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
+          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip({displayName: this.selectedCds?.displayName, ...d})})
         })
         .on("mouseout", (d) => {
           this.callbacks.onLeave(d);
@@ -494,6 +494,7 @@ EntropyChart.prototype._cdsSegments = function _cdsSegments() {
           s.strand = cds.strand;
           s.geneName = gene.name;
           s.segmentNumber = `${idx+1}/${cds.segments.length}`;
+          if (cds.displayName) s.displayName=cds.displayName;
           cdsSegments.push(s);
         })
       })
@@ -1079,9 +1080,12 @@ EntropyChart.prototype._mainTooltip = function _mainTooltip(d) {
 EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
   const _render = function _render(t) {
     return (
-      <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+      <div className={"tooltip entropy"} style={infoPanelStyles.tooltip}>
         <table>
           <tbody>
+            { d.displayName && (
+              <tr><td>Name</td><td>{d.displayName}</td></tr>
+            )}
             <tr><td>CDS</td><td>{d.name}</td></tr>
             <tr><td>Parent Gene</td><td>{d.geneName}</td></tr>
             <tr><td>Range (genome)</td><td>{d.rangeGenome.join(" - ")}</td></tr>

@@ -10,7 +10,7 @@ const InfoPanel = ({d3event, width, height, children}) => {
   const styles = {
     container: {
       position: "absolute",
-      width: 200,
+      maxWidth: 400,
       padding: "10px",
       borderRadius: 10,
       zIndex: 1000,

@@ -11,6 +11,7 @@ interface JsonAnnotation {
   type?: string; // unused by auspice
   gene?: string; // for testing purposes only?
   color?: string; // for testing purposes only?
+  display_name?: string;
 }
 
 /* Specifies the range of the each segment's corresponding position in the genome,
@@ -40,6 +41,7 @@ interface CDS {
   strand: Strand;
   color: string;
   name: string;
+  displayName?: string;
 }
 interface CdsSegment {
   rangeLocal: RangeLocal;
@@ -150,6 +152,9 @@ const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
           segments,
           strand: '+',
           color: validColor(annotation.color) || defaultColor || '#000',
+        }
+        if (typeof annotation.display_name === 'string') {
+          cds.displayName = annotation.display_name;
         }
         return cds;
       })
