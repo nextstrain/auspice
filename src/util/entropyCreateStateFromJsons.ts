@@ -4,9 +4,11 @@ import { defaultEntropyState } from "../reducers/entropy";
 type JsonAnnotations = Record<string, JsonAnnotation>
 // enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
 type Strand = string;
+type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
 interface JsonAnnotation {
-  end: number;
-  start: number;
+  end?: number;
+  start?: number;
+  segments?: JsonSegmentRange[];
   strand: Strand;
   type?: string; // unused by auspice
   gene?: string; // for testing purposes only?
@@ -79,7 +81,8 @@ const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
     .filter(([name,]) => name==='nuc')
     .map(([, annotation]) => annotation)[0];
   if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
-  
+  if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
+
   const chrom: Chromosome = {
     name: 'source',
     range: [nucAnnotation.start, nucAnnotation.end],
@@ -107,60 +110,12 @@ const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
         cds: []
       }
       const defaultColor = nextColor.next().value; // default colours are per-gene (not per-CDS)
-      gene.cds = Object.entries(cdsAnnotations).map(([cdsName, annotation]) => {
-        // currently each cdsAnnotations (in the JSON) corresponds to a contiguous CDS
-        // so we can easily compute the length without needing to collect the associated
-        // segments
-        const length = annotation.end-annotation.start+1;
-        if (length%3) {
-          // TODO XXX - following for dev purposes only
-          console.log(`PROBLEM! JSON defined ${cdsName} has length ${length} which is not a multiple of 3`);
-        }
-        /* The only way we have multiple CDS _segments_ from the current JSON schema is if they wrap around */
-        const segments: CdsSegment[] = [];
-        if (annotation.end <= chrom.range[1]) {
-          segments.push({
-            rangeLocal: [1, length],
-            rangeGenome: [annotation.start, annotation.end],
-            phase: 0,
-            frame: (annotation.start-1)%3,
-          })
-        } else {
-          /* first segment ends at the 3' end of the genome */
-          const firstSegmentRangeLocal: RangeLocal = [1, chrom.range[1]-annotation.start+1];
-          segments.push({
-            rangeLocal: firstSegmentRangeLocal,
-            rangeGenome: [annotation.start, chrom.range[1]], // gene wraps around
-            phase: 0,
-            frame: (annotation.start-1)%3,
-          })
-          /* second (and final) segment starts at the 5' end */
-          const phase = (3-firstSegmentRangeLocal[1]%3)%3;
-          segments.push({
-            rangeLocal: [firstSegmentRangeLocal[1]+1, length],
-            rangeGenome: [1, annotation.end-chrom.range[1]],
-            phase,
-            frame: phase,
-          })
-        }
-        /* ensure segments are sorted according to how the make up the CDS itself,
-        irregardless of where they appear in the genome */
-        segments.sort((a, b) => (a.rangeLocal < b.rangeLocal) ? -1 : 1);
-        const cds: CDS = {
-          name: cdsName,
-          length,
-          segments,
-          strand: '+',
-          color: validColor(annotation.color) || defaultColor || '#000',
-        }
-        if (typeof annotation.display_name === 'string') {
-          cds.displayName = annotation.display_name;
-        }
-        return cds;
-      })
-      return gene;
-    });
 
+      gene.cds = Object.entries(cdsAnnotations)
+        .map(([cdsName, annotation]) => cdsFromAnnotation(cdsName, annotation, chrom, defaultColor))
+        .filter((cds) => cds.name!=='__INVALID__');
+      return gene;
+    })
     console.log("genomeMap:", JSON.stringify([chrom], undefined, 2))
     return [chrom];
 }
@@ -195,4 +150,87 @@ function* nextColorGenerator() {
     yield genotypeColors[i++] as string;
     if (i===genotypeColors.length) i=0;
   }
+}
+
+/**
+ * Returns a CDS object parsed from the provided JsonAnnotation block
+ */
+function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, chrom: Chromosome, defaultColor: (string|void)): CDS {
+  const invalidCds: CDS = {
+    name: '__INVALID__',
+    length: 0,
+    segments: [],
+    strand: '+',
+    color: '#000',
+  }
+  let length = 0;
+  const segments: CdsSegment[] = [];
+  if (annotation.start && annotation.end) {
+    /* The simplest case is where a JSON annotation block defines a
+    contiguous CDS, however it may be a wrapping CDS (i.e. cds end > genome
+    end */
+    length = annotation.end-annotation.start+1;    
+    if (annotation.end <= chrom.range[1]) {
+      segments.push({
+        rangeLocal: [1, length],
+        rangeGenome: [annotation.start, annotation.end],
+        phase: 0,
+        frame: (annotation.start-1)%3,
+      })
+    } else {
+      /* first segment ends at the 3' end of the genome */
+      const firstSegmentRangeLocal: RangeLocal = [1, chrom.range[1]-annotation.start+1];
+      segments.push({
+        rangeLocal: firstSegmentRangeLocal,
+        rangeGenome: [annotation.start, chrom.range[1]], // gene wraps around
+        phase: 0,
+        frame: (annotation.start-1)%3,
+      })
+      /* second (and final) segment starts at the 5' end */
+      const phase = (3-firstSegmentRangeLocal[1]%3)%3;
+      segments.push({
+        rangeLocal: [firstSegmentRangeLocal[1]+1, length],
+        rangeGenome: [1, annotation.end-chrom.range[1]],
+        phase,
+        frame: phase,
+      })
+    }
+  } else if (annotation.segments && Array.isArray(annotation.segments)) {
+    let previousRangeLocalEnd = 0;
+    for (const segment of annotation.segments) {
+      /* The segments, as defined in the JSON, must be ordered appropriately */
+      const segmentLength = segment.end - segment.start + 1; // in nucleotides
+      length += segmentLength;
+      segments.push({
+        rangeLocal: [previousRangeLocalEnd+1, previousRangeLocalEnd+segmentLength],
+        rangeGenome: [segment.start, segment.end],
+        phase: length%3===0 ? 0 : (length%3===1 ? 2 : 1),
+        frame: (segment.start-1)%3,
+      })
+      previousRangeLocalEnd += segmentLength;
+    }
+  } else {
+    console.error(`[Genome annotation] ${cdsName} requires either start+end or segments to be defined`);
+    return invalidCds;
+  }
+
+  if (length%3) {
+    console.error(`[Genome annotation] ${cdsName} has length ${length} which is not a multiple of 3`);
+    return invalidCds; // skip parsing of this CDS's annotation block
+  }
+
+  /* ensure segments are sorted according to how the make up the CDS itself,
+  irregardless of where they appear in the genome */
+  segments.sort((a, b) => (a.rangeLocal < b.rangeLocal) ? -1 : 1);
+  const cds: CDS = {
+    name: cdsName,
+    length,
+    segments,
+    strand: '+',
+    color: validColor(annotation.color) || defaultColor || '#000',
+  }
+  if (typeof annotation.display_name === 'string') {
+    cds.displayName = annotation.display_name;
+  }
+  return cds
 }
