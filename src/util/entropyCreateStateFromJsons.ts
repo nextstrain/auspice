@@ -1,10 +1,18 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
+import jsonCache from "../reducers/jsonCache";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
 // enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
 type Strand = string;
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
+type JsonCdsFeature = {
+  start?: number;
+  end?: number;
+  color?: string;
+  display_name?: string;
+  segments?: JsonSegmentRange[];
+}
 interface JsonAnnotation {
   end?: number;
   start?: number;
@@ -14,6 +22,7 @@ interface JsonAnnotation {
   gene?: string; // for testing purposes only?
   color?: string; // for testing purposes only?
   display_name?: string;
+  features?: Record<string, JsonCdsFeature>;
 }
 
 /* Specifies the range of the each segment's corresponding position in the genome,
@@ -27,6 +36,13 @@ start at 1, and the end value (of the last segment) corresponds to the number of
 range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS */
 type RangeLocal = [number, number];
 
+type CdsFeature = {
+  color: string;
+  name: string;
+  displayName?: string;
+  segments: RangeLocal[];
+}
+
 type GenomeAnnotation = Chromosome[];
 interface Chromosome {
   name: string;
@@ -39,11 +55,12 @@ interface Gene {
 }
 interface CDS {
   length: number; /* length of the CDS in nucleotides. Will be a multiple of 3 */
-  segments: CdsSegment[];
+  segments: CdsSegment[]; // NOTE: [CdsSegment, ...CdsSegment[]] would be better
   strand: Strand;
   color: string;
   name: string;
   displayName?: string;
+  features?: CdsFeature[];
 }
 interface CdsSegment {
   rangeLocal: RangeLocal;
@@ -232,5 +249,71 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, chrom: C
   if (typeof annotation.display_name === 'string') {
     cds.displayName = annotation.display_name;
   }
+  extractFeatures(cds, annotation.features);
   return cds
+}
+
+function extractFeatures(cds:CDS, jsonFeatures: (Record<string,JsonCdsFeature> | undefined)): void {
+  if (typeof jsonFeatures !== 'object' || Array.isArray(jsonFeatures)) return;
+
+  function _processSegment(featureName:string, start:number, end:number): (false|RangeLocal) {
+    // check multiple of 3
+    if ((end - start + 1)%3 !== 0) {
+      console.warn(`[CDS feature] ${featureName} has a length which is not a multiple of 3. Skipping.`);
+      return false;
+    }
+    if (cds.segments.length<1) {
+      console.error(`[Internal error] CDS ${cds.name} has zero segments.`, cds);
+      /* Should guard against this upstream by using better types */
+      return false;
+    }
+    if (cds.segments.length>1) {
+      console.warn(`[CDS feature] ${featureName} is on a segmented CDS, which is not yet allowed.`);
+      // This should be possible, it just makes the accounting harder. We have written the projection logic within
+      // the entropy d3 code, BTW
+      return false;
+    }
+    const rangeLocal: RangeLocal = [
+      /* TODO - cds.segments should be typed to have a minimum of 1 element */
+      // @ts-expect-error: see comment above
+      start-cds.segments[0].rangeGenome[0]+1,
+      // @ts-expect-error: see comment above
+      end-cds.segments[0].rangeGenome[0]+1, 
+    ];
+    if (rangeLocal[0]%3 !== 1) {
+      console.warn(`[CDS feature] ${featureName} is not aligned with the codon positions of the CDS`);
+      return false;
+    }
+    return rangeLocal;
+  }
+
+  for (const [name, jsonFeature] of Object.entries(jsonFeatures)) {
+    const segments = [];
+    if (jsonFeature.end && jsonFeature.start) {
+      const s = _processSegment(name, jsonFeature.start, jsonFeature.end);
+      if (s) segments.push(s);
+    } else {
+      for (const segment of (jsonFeature.segments || [])) {
+        const s = _processSegment(name, segment.start, segment.end);
+        if (s) {
+          segments.push(s);
+        } else {
+          continue; // don't save a feature if _any_ of the segments are invalid
+        }
+      }
+    }
+    if (segments.length) {
+      const feature: CdsFeature = {
+        name,
+        segments,
+        color: validColor(jsonFeature.color) || "#000"
+      }
+      if (jsonFeature.display_name) feature.displayName = jsonFeature.display_name;
+      if (cds.features) {
+        cds.features.push(feature)
+      } else {
+        cds.features = [feature];
+      }
+    }
+  }
 }

@@ -30,6 +30,9 @@ rules:
   prefer-const: ["error", {"destructuring": "all"}]
   react/no-array-index-key: error
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.
+ 
+  # Allow typescript line-disabling _if_ we use a comment to explain why
+  "@typescript-eslint/ban-ts-comment": ["error", {'ts-expect-error': 'allow-with-description'}]
 
   # Code style rules
   arrow-parens: ["error", "always"]

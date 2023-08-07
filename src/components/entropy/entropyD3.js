@@ -314,6 +314,11 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
   const [inViewNucA, inViewNucB] = this.scales.xMain.domain();
 
   if (this.selectedCds!==nucleotide_gene) {
+
+    // Make some group for feature elements to ensure they're _behind_ the "main" CDS annotations
+    const featureGroupUnderlay = this._groups.mainCds.append("g").attr("id", "featuresOnClick")
+    const featureGroup = this._groups.mainCds.append("g").attr("id", "features")
+
     this._groups.mainCds.selectAll(".cds")
       .data(this.selectedCds.segments)
       .enter()
@@ -355,6 +360,76 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .style("font-size", `${this.offsets.mainCdsHeight-2}px`)
         .text(() => this.selectedCds.name);
 
+    if (this.selectedCds.features) {
+      this.selectedCds.features.forEach((feature) => {
+        featureGroup.selectAll(".cdsFeature")
+          .data(feature.segments)
+          .enter()
+          .append("rect")
+            .attr("class", "feature")
+            .attr("x", (d) => this.scales.xMain(Math.max(d[0]-0.5, inViewNucA)))
+            .attr("y", this.offsets.mainCdsHeight)
+            .attr("width", (d) => {
+              return this.scales.xMain(Math.min(d[1]+0.5, inViewNucB)) -
+              this.scales.xMain(Math.max(d[0]-0.5, inViewNucA))
+            })
+            .attr("height", this.offsets.mainCdsHeight)
+            .style("fill", feature.color)
+            .style("stroke", "#fff")
+            .style("stroke-width", 2)
+            .style('opacity', 0.7) // Features may overlap!
+            .on("mouseover", (d) => {
+              // Maybe add a vertical overlay ? Or perhaps clicking could toggle such an overlay?
+              this.callbacks.onHover({d3event, tooltip: this._cdsFeatureTooltip({cds: this.selectedCds, feature, segment: d})})
+            })
+            .on("mouseout", (d) => {
+              this.callbacks.onLeave(d);
+            })
+            .on("click", (d) => {
+              if (this._selectedCdsFeatureOverlay) {
+                this._selectedCdsFeatureOverlay = false;
+                featureGroupUnderlay.selectAll("*").remove();
+                return;
+              }
+              this._selectedCdsFeatureOverlay = true;
+              featureGroupUnderlay.selectAll(".cdsFeatureUnderlay")
+                .data(feature.segments)
+                .enter()
+                  .append("rect")
+                  .attr("class", "featureUnderlay")
+                  .attr("x", (d) => this.scales.xMain(Math.max(d[0]-0.5, inViewNucA)))
+                  .attr("width", (d) => {
+                    return this.scales.xMain(Math.min(d[1]+0.5, inViewNucB)) -
+                    this.scales.xMain(Math.max(d[0]-0.5, inViewNucA))
+                  })
+                  .attr("y", this.offsets.mainY1 - this.offsets.mainCdsY1 ) // negative value
+                  .attr("height", (this.offsets.mainY1 - this.offsets.mainCdsY1)*-1 + this.offsets.mainCdsHeight)
+                  .style("fill", feature.color)
+                  .style("stroke", "#fff")
+                  .style("stroke-width", 2)
+                  .style('opacity', 0.5)
+
+            })
+            .style("cursor", "pointer");
+        featureGroup.selectAll(".cdsFeatureText")
+          .data(feature.segments)
+          .enter()
+          .append("text")
+            .attr("x", (d) => {
+              const l =  this.scales.xMain(Math.max(d[0], inViewNucA));
+              const r = this.scales.xMain(Math.min(d[1], inViewNucB));
+              return l + (r-l)/2;
+            })
+            .attr("y", () => this.offsets.mainCdsHeight+2)
+            .attr("pointer-events", "none")
+            .attr("text-anchor", "middle")        // horizontal axis
+            .attr("dominant-baseline", "hanging") // vertical axis
+            .style("font-size", `${this.offsets.mainCdsHeight-2}px`)
+            .style("fill", "white")
+            .text((d) => textIfSpaceAllows(feature.name, this.scales.xMain(d[1]) - this.scales.xMain(d[0]), 10));
+
+      });
+    }
     return;
   }
 
@@ -1111,6 +1186,29 @@ EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
 
         <div style={infoPanelStyles.comment}>
           {t("Click to view this CDS in isolation")}
+        </div>
+      </div>
+    )
+  }
+  return _render.bind(this)
+}
+
+EntropyChart.prototype._cdsFeatureTooltip = function _cdsFeatureTooltip({cds, feature, segment}) {
+  const _render = function _render(t) {
+    return (
+      <div className={"tooltip entropy"} style={infoPanelStyles.tooltip}>
+        <table>
+          <tbody>
+            { feature.displayName && (
+              <tr><td>Full name</td><td>{feature.displayName}</td></tr>
+            )}
+            <tr><td>Name</td><td>{feature.name}</td></tr>
+            <tr><td>Parent CDS</td><td>{cds.name}</td></tr>
+          </tbody>
+        </table>
+
+        <div style={infoPanelStyles.comment}>
+          {t("Click to toggle on/off background shading for this region ")}
         </div>
       </div>
     )

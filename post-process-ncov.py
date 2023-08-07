@@ -52,14 +52,14 @@ NEW_ANNOTATION = {
     "display_name": "structural protein; spike protein; surface glycoprotein",
     "start": 21563,
     "strand": "+",
-  },
-  "S1RBD": {
-    "gene": "Spike",
-    "start": 22517,
-    "end": 23182,
-    "color": "#feb24c",
-    "display_name": "S1 RBD. Note this should be a feature within S, not a CDS of its own. Since there are no mutations in the JSON, no bars can be calculated.",
-    "strand": "+"
+    "features": {
+      "RBD": {
+        "start": 22517,
+        "end": 23182,
+        "color": "#feb24c",
+        "display_name": "S1 RBD. Coordinates from NCBI genome viewer."
+      }
+    }
   },
   "E": {
     "end": 26472,
