@@ -26,12 +26,18 @@ type RangeGenome = [number, number];
 start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
 range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS */
 type RangeLocal = [number, number];
+type ChromosomeMetadata = {
+  strandsObserved: Set<Strand>,
+  posStrandStackHeight: number,
+  negStrandStackHeight: number,
+}
 
 type GenomeAnnotation = Chromosome[];
 interface Chromosome {
   name: string;
   range: RangeGenome;
   genes: Gene[];
+  metadata: ChromosomeMetadata
 }
 interface Gene {
   name: string;
@@ -43,7 +49,9 @@ interface CDS {
   strand: Strand;
   color: string;
   name: string;
+  isWrapping: boolean;
   displayName?: string;
+  stackPosition?: number;
 }
 interface CdsSegment {
   rangeLocal: RangeLocal;
@@ -81,12 +89,10 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
     .map(([, annotation]) => annotation)[0];
   if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
   if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
+  if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positve strand." +
+    "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
+  const rangeGenome: RangeGenome =  [nucAnnotation.start, nucAnnotation.end];
 
-  const chrom: Chromosome = {
-    name: 'source',
-    range: [nucAnnotation.start, nucAnnotation.end],
-    genes: [],
-  }
 
   /* Group by genes -- most JSONs will not include this information, so it'll essentially be
   one CDS per gene, but that's just fine! */
@@ -102,7 +108,9 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
 
   const nextColor = nextColorGenerator();
 
-  chrom.genes = Object.entries(annotationsPerGene)
+  const strandsObserved: Set<Strand> = new Set();
+
+  const genes = Object.entries(annotationsPerGene)
     .map(([geneName, cdsAnnotations]) => {
       const gene: Gene = {
         name: geneName,
@@ -111,13 +119,26 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
       const defaultColor = nextColor.next().value; // default colours are per-gene (not per-CDS)
 
       gene.cds = Object.entries(cdsAnnotations)
-        .map(([cdsName, annotation]) => cdsFromAnnotation(cdsName, annotation, chrom, defaultColor))
+        .map(([cdsName, annotation]) => cdsFromAnnotation(cdsName, annotation, rangeGenome, defaultColor))
         .filter((cds) => cds.name!=='__INVALID__');
+      gene.cds.forEach((cds) => strandsObserved.add(cds.strand));
       return gene;
     })
-    return [chrom];
-}
 
+  const metadata: ChromosomeMetadata = {
+    strandsObserved,
+    posStrandStackHeight: calculateStackPosition(genes, '+'),
+    negStrandStackHeight: calculateStackPosition(genes, '-'),
+  }
+
+  const chromosome: Chromosome = {
+    name: 'source',
+    range: rangeGenome,
+    genes,
+    metadata
+  }
+  return [chromosome];
+}
 
 export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
   if (genomeAnnotations) {
@@ -153,35 +174,50 @@ function* nextColorGenerator() {
 /**
  * Returns a CDS object parsed from the provided JsonAnnotation block
  */
-function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, chrom: Chromosome, defaultColor: (string|void)): CDS {
+function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGenome: RangeGenome, defaultColor: (string|void)): CDS {
   const invalidCds: CDS = {
     name: '__INVALID__',
     length: 0,
     segments: [],
     strand: '+',
+    isWrapping: false,
     color: '#000',
   }
-  const genomeLength = chrom.range[1];
-  let length = 0; // rangeLocal length
+  let strand;
+  if (annotation.strand==='+') {
+    strand = '+';
+  } else if (annotation.strand==='-') {
+    strand = '-';
+  } else {
+    // Ideally we would ignore this CDS, but I have a feeling many CDSs don't have strand annotated.
+    console.warn(`[Genome annotation]  ${cdsName} has strand ${annotation.strand || '(missing)'}.` +
+      " We will treat this CDS as a positive strand CDS.");
+    strand = '+';
+  }
+  const positive = strand === '+';
+  
+  let length = 0;  // rangeLocal length
   const segments: CdsSegment[] = [];
   if (annotation.start && annotation.end) {
     /* The simplest case is where a JSON annotation block defines a
     contiguous CDS, however it may be a wrapping CDS (i.e. cds end > genome
     end */
-    if (annotation.end <= chrom.range[1]) {
+    if (annotation.end <= rangeGenome[1]) {
       length = annotation.end-annotation.start+1;    
       segments.push({
         rangeLocal: [1, length],
         rangeGenome: [annotation.start, annotation.end],
         phase: 0,
-        frame: (annotation.start-1)%3,
+        frame: _frame(annotation.start, annotation.end, 0, rangeGenome[1], positive),
       })
     } else {
       /* We turn this into the equivalent JsonSegments to minimise code duplication */
       annotation.segments = [
-        {start: annotation.start, end: genomeLength},
-        {start: 1, end: annotation.end-genomeLength}
+        {start: annotation.start, end: rangeGenome[1]},
+        {start: 1, end: annotation.end-rangeGenome[1]}
       ]
+      /* -ve strand segments are 3' -> 5', so segment[0] is at the start of the genome */
+      if (!positive) annotation.segments.reverse();
     }
   }
 
@@ -197,14 +233,12 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, chrom: C
       const segmentLength = segment.end - segment.start + 1; // in nucleotides
       /* phase is the number of nucs we need to add to the so-far-observed length to make it mod 3 */
       const phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
-      /* frame is calculated once we are back in phase */
-      const frame = (segment.start+phase-1)%3;
 
       segments.push({
         rangeLocal: [previousRangeLocalEnd+1, previousRangeLocalEnd+segmentLength],
         rangeGenome: [segment.start, segment.end],
         phase,
-        frame,
+        frame: _frame(segment.start, segment.end, phase, rangeGenome[1], positive)
       })
       length += segmentLength;
       previousRangeLocalEnd += segmentLength;
@@ -224,11 +258,154 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, chrom: C
     name: cdsName,
     length,
     segments,
-    strand: '+',
+    strand,
+    isWrapping: _isCdsWrapping(strand, segments),
     color: validColor(annotation.color) || defaultColor || '#000',
   }
   if (typeof annotation.display_name === 'string') {
     cds.displayName = annotation.display_name;
   }
   return cds
+}
+
+/**
+ * Calculates the (open reading) frame the provided segment is in.
+ * For +ve strand this is calculated 5'->3', for -ve strand it's 3'->5'.
+ * The frame is calculated once the CDS is back in phase.
+ * start: 1 based, rangeGenome[0] of the segment
+ * end: 1 based, rangeGenome[1] of the segment
+ * start < end always
+ * genomeLength: 1 based
+ * positiveStrand: boolean
+ * Returns a number in the set {0, 1, 2}
+ */
+function _frame(start:number, end:number, phase: number, genomeLength:number, positiveStrand:boolean) {
+  return positiveStrand ?
+    (start+phase-1)%3 :
+    Math.abs((end-phase-genomeLength)%3);
+}
+
+/**
+ * Given a list of genes (each with CDSs), we want to calculate and assign each
+ * CDS a "stack position" such that each CDS can be plotted with no overlaps.
+ * All segments of a given CDS will have the same stack position. (Stack here
+ * refers to this being a stacking problem.) The stack position starts at 1.
+ * Returns the maximum position observed.
+ */
+function calculateStackPosition(genes: Gene[], strand: (Strand|null) = null):number {
+  /* List of CDSs, sorted by their earliest occurrence in the genome (for any segment) */
+  let cdss = genes.reduce((acc: CDS[], gene) => [...acc, ...gene.cds], []);
+  if (strand) {
+    cdss = cdss.filter((cds) => cds.strand===strand);
+  }
+  cdss.sort((a, b) =>
+    Math.min(...a.segments.map((s) => s.rangeGenome[0])) < Math.min(...b.segments.map((s) => s.rangeGenome[0])) ?
+      -1 : 1
+  );
+  let stack: CDS[] = []; // current CDSs in stack
+  for (const newCds of cdss) {
+    /* remove any CDS from the stack which has ended (completely) before this one starts */
+    const newMinStart = Math.min(...newCds.segments.map((s) => s.rangeGenome[0]));
+    stack = stack.filter((cds) =>
+     !(Math.max(...cds.segments.map((s) => s.rangeGenome[1])) < newMinStart)
+    );
+    // console.log("\nstacK:", stack.map((cds) => cds.name).join(", "));
+    // console.log("\tconsideing", newCds.name)
+    /* If there are any empty slots in the current stack, take the lowest! */
+    const existingY = stack.map((cds) => cds.stackPosition || 0).sort();
+    const empty = _emptySlots(existingY);
+    if (empty) {
+      // console.log("\t\ttaking empty slot", empty)
+      newCds.stackPosition = empty;
+      stack.push(newCds);
+      continue;
+    }
+    /* If any CDS in the stack has a single space (i.e. between 2 segments) into which the entire
+    new CDS (i.e. all segments of newCds) can fit into, then we can re-use that position */
+    const reuseablePosition = _fitCdssTogether(stack, newCds);
+    if (reuseablePosition) {
+      // console.log("\t\treusing position", reuseablePosition)
+      newCds.stackPosition = reuseablePosition;
+      stack.push(newCds);
+      continue;
+    }
+    /* fallthrough: use a higher position! */
+    newCds.stackPosition = (existingY[existingY.length-1] || 0) + 1;
+    // console.log("\t\tAdding to the top!", newCds.stackPosition)
+    stack.push(newCds);
+  }
+
+  return Math.max(...cdss.map((cds) => cds.stackPosition || 0));
+}
+
+/**
+ * Given an array of sorted integers, if there are any spaces (starting with 1)
+ * then return the value which can fill that space. Returns 0 if no spaces.
+ */
+function _emptySlots(values: number[]):number {
+  if ((values[0] || 0) > 1) return 1;
+  for (let i=1; i<values.length; i++) {
+    /* intermediate variables because of https://github.com/microsoft/TypeScript/issues/46253 */
+    const [a, b] = [values[i-1], values[i]];
+    if (a && b && b-a>1) return a+1;
+  }
+  return 0;
+}
+
+/**
+ * If the newCds completely (i.e. all of its segments) fits inside a single
+ * between-segment space of an existing segment, then return the stackPosition
+ * of that existing CDS. Otherwise return 0;
+ */
+function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
+  const a = Math.min(...newCds.segments.map((s) => s.rangeGenome[0]));
+  const b = Math.max(...newCds.segments.map((s) => s.rangeGenome[1]));
+  for (const cds of existing) {
+    if (cds.segments.length===1) continue;
+    const segments = [...cds.segments]
+    segments.sort((a, b) => a.rangeGenome[0]<b.rangeGenome[1] ? -1 : 1)
+    for (let i = 0; i<segments.length-1; i++) {
+      const end = segments[i]?.rangeGenome[1] || 0;
+      const nextStart = segments[i+1]?.rangeGenome[0] || 0;
+      const stackPosition = cds.stackPosition || 0;
+      if (end<a && nextStart>b) {
+        /* yes - we can fit into the same position as this cds, but check if
+        another CDS in the stack is occupying this space first! */
+        let spaceTaken = false;
+        existing.forEach((el) => {
+          if (el.stackPosition!==stackPosition) return; // only consider same row
+          if (spaceTaken) return; // saves time
+          el.segments.forEach((s) => {
+            if (s.rangeGenome[1]>=a && s.rangeGenome[0]<=b) {
+              spaceTaken = true
+            }
+          })
+        })
+        if (!spaceTaken) {
+          return stackPosition;
+        }
+      }
+    }
+  }
+  return 0;
+}
+
+
+/* Does a CDS wrap the origin? */
+function _isCdsWrapping(strand: Strand, segments: CdsSegment[]): boolean {
+  const positive = strand==='+';
+  // segments ordered to guarantee rangeLocal will always be greater (than the previous segment)
+  let prevSegment;
+  for (const segment of segments) {
+    if (prevSegment) {
+      if (positive && prevSegment.rangeGenome[0] > segment.rangeGenome[0]) {
+        return true;
+      }
+      if (!positive && prevSegment.rangeGenome[0] < segment.rangeGenome[0]) {
+        return true;
+      }
+    }
+    prevSegment = segment;
+  }
+  return false; // fallthrough
 }

@@ -11,7 +11,7 @@ import Mousetrap from "mousetrap";
 import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
-import { getCdsByName, getNucCoordinatesFromAaPos, isCdsWrapping} from "../../util/entropy";
+import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome} from "../../util/entropy";
 
 /* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -28,7 +28,6 @@ const EntropyChart = function EntropyChart(ref, genomeMap, callbacks) {
 EntropyChart.prototype.render = function render(props) {
   this.props = props;
   this.selectedCds = props.selectedCds;
-  this.selectedCdsIsWrapping = isCdsWrapping(this.selectedCds);
   this.selectedPositions = props.selectedPositions;
   /* temporarily keep this.aa, as so much code relies on it here */
   this.aa = this.selectedCds !== 'nuc';
@@ -58,8 +57,7 @@ EntropyChart.prototype.update = function update({
 }) {
   if (selectedCds) {
     this.selectedCds = selectedCds;
-    this.selectedCdsIsWrapping = isCdsWrapping(this.selectedCds);
-    this._setUpZoomBrushWrapping(!this.selectedCdsIsWrapping); // destroy if not wrapping, create if wrapping
+    this._setUpZoomBrushWrapping()
     this.aa = this.selectedCds !== 'nuc';
   }
 
@@ -142,15 +140,9 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
     if (this.zoomCoordinates[1] > domain[1]) this.zoomCoordinates[1]=domain[1];
   } else {
     const segments = this.selectedCds.segments;
-    if (!this.selectedCdsIsWrapping) {
-      /**
-       * The approach for (non-wrapping) selected CDSs is much easier -- we show the entire gene unless
-       * there's overrides
-       */
-      this.zoomCoordinates = [
-        segments[0].rangeGenome[0],
-        segments[segments.length-1].rangeGenome[1]
-      ]
+    if (!this.selectedCds.isWrapping) {
+      const cdsGenomeCoords = segments.map((s) => s.rangeGenome).flat();
+      this.zoomCoordinates = [Math.min(...cdsGenomeCoords), Math.max(...cdsGenomeCoords)];
       if (overrideMin && overrideMin>this.zoomCoordinates[0] && overrideMin<this.zoomCoordinates[1]) {
         this.zoomCoordinates[0] = overrideMin;
       }
@@ -158,92 +150,28 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
         this.zoomCoordinates[1] = overrideMax;
       }
     } else {
-      /* We want to show the entire CDS, it's just a bit more work for wrapping CDSs */
-      this.zoomCoordinates = [
-        segments[segments.length-1].rangeGenome[1],
-        segments[0].rangeGenome[0]
-      ]
-      // offsets? Probably the same as above?
-
+      if (this.selectedCds.strand==='+') {
+        this.zoomCoordinates = [
+          segments[segments.length-1].rangeGenome[1],
+          segments[0].rangeGenome[0]
+        ]
+      } else {
+        this.zoomCoordinates = [
+          segments[0].rangeGenome[1],
+          segments[segments.length-1].rangeGenome[0]
+        ]
+      }
+      /* gmin (overrideMin), gmax (overrideMax) are backwards with wrapping genes,
+      although if you think of them as gmin<gmax always then it is consistent */
+      if (overrideMin && overrideMin<this.zoomCoordinates[0]) {
+        this.zoomCoordinates[0] = overrideMin;
+      }
+      if (overrideMax && overrideMax>this.zoomCoordinates[0]) {
+        this.zoomCoordinates[1] = overrideMax;
+      }
     }
   }
 };
-
-
-/**
- * Given this.zoomCoordinates (nucleotides in genome space), we want to return
- * the appropriate zoom coordinates in rangeLocal space (nucleotides) for the
- * selected CDS. If either of the zoom handles (i.e. zoomCoordinates) are beyond
- * the selected CDS, then we reset the zoomCoordinates to a sensible state &
- * return false.
- */
-EntropyChart.prototype._rangeLocalZoomCoordinates = function _rangeLocalZoomCoordinates() {
-  const segments = this.selectedCds.segments
-  let localA, localB;
-
-  if (!this.selectedCdsIsWrapping) {
-    // If the current genome zoom is outside the CDS, then clamp the zoom &
-    // return false, otherwise set the local zoom coordinates via the
-    // genome zoom
-    const [genomeA, genomeB] = [Math.min(...this.zoomCoordinates), Math.max(...this.zoomCoordinates)];
-    if (genomeA < segments[0].rangeGenome[0]) {
-      this.zoomCoordinates[0] = segments[0].rangeGenome[0];
-      return false;
-    } else {
-      for (const s of segments) {
-        if (s.rangeGenome[0]<=genomeA && s.rangeGenome[1]>=genomeA) {
-          const advance = genomeA - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
-          localA = s.rangeLocal[0] + advance;
-          break;
-        }
-      }
-    }
-    if (genomeB > segments[segments.length-1].rangeGenome[1]) {
-      this.zoomCoordinates[1] = segments[segments.length-1].rangeGenome[1];
-      return false;
-    } else {
-      for (const s of segments) {
-        if (s.rangeGenome[0]<=genomeB && s.rangeGenome[1]>=genomeB) {
-          const advance = genomeB - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
-          localB = s.rangeLocal[0] + advance;
-          break;
-        }
-      }
-    }
-  } else {
-    // selected gene is wrapping. We apply the same approach, it's just somewhat
-    // round the other way. Remember genomeStart > genomeEnd, and that the zoom
-    // _must_ wrap the origin (i.e. there is currently no way to change from a
-    // warpped zoom to a non-wrapped zoom, even though it may be useful)
-    const [genomeEnd, genomeStart] = [Math.min(...this.zoomCoordinates), Math.max(...this.zoomCoordinates)];
-    if (genomeStart < segments[0].rangeGenome[0]) {
-      this.zoomCoordinates[1] = segments[0].rangeGenome[0];
-      return false;
-    } else {
-      for (const s of segments) {
-        if (s.rangeGenome[0]<=genomeStart && s.rangeGenome[1]>=genomeStart) {
-          const advance = genomeStart - s.rangeGenome[0]; // number nt to shift rangeLocal forward by
-          localA = s.rangeLocal[0] + advance;
-          break;
-        }
-      }
-    }
-    if (genomeEnd > segments[segments.length-1].rangeGenome[1]) {
-      this.zoomCoordinates[0] = segments[segments.length-1].rangeGenome[1];
-      return false;
-    } else {
-      for (const s of segments) {
-        if (s.rangeGenome[0]<=genomeEnd && s.rangeGenome[1]>=genomeEnd) {
-          const advance = s.rangeGenome[1] - genomeEnd; // number nt remove from the end
-          localB = s.rangeLocal[1] - advance;
-          break;
-        }
-      }
-    }
-  }
-
-  return [localA, localB]
-}
 
 
 EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
@@ -280,6 +208,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
   const [inViewNucA, inViewNucB] = this.scales.xMain.domain();
 
   if (this.selectedCds!==nucleotide_gene) {
+
     this._groups.mainCds.selectAll(".cds")
       .data(this.selectedCds.segments)
       .enter()
@@ -291,13 +220,15 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
           return this.scales.xMain(Math.min(d.rangeLocal[1]+0.5, inViewNucB)) -
           this.scales.xMain(Math.max(d.rangeLocal[0]-0.5, inViewNucA))
         })
-        .attr("height", this.offsets.mainCdsHeight)
+        .attr("height", this.offsets.mainCdsRectHeight)
         .style("fill", this.selectedCds.color)
         .style("stroke", "#fff")
         .style("stroke-width", 2)
         .style('opacity', 1) // Segments _can't_ overlap when viewing an individual CDS
         .on("mouseover", (d) => {
-          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip({displayName: this.selectedCds?.displayName, ...d})})
+          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(
+            {displayName: this.selectedCds?.displayName, cds: this.selectedCds, ...d}
+          )})
         })
         .on("mouseout", (d) => {
           this.callbacks.onLeave(d);
@@ -318,7 +249,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .attr("text-anchor", "middle")        // horizontal axis
         .attr("dominant-baseline", "hanging") // vertical axis
         .style("fill", "white")
-        .style("font-size", `${this.offsets.mainCdsHeight-2}px`)
+        .style("font-size", `${this.offsets.mainCdsRectHeight-2}px`)
         .text(() => this.selectedCds.name);
 
     return;
@@ -337,11 +268,11 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         this.scales.xMain(Math.max(s.rangeGenome[0]-0.5, inViewNucA)),
         this.scales.xMain(Math.min(s.rangeGenome[1]+0.5, inViewNucB))
       ];
-      if (s.strand === '+') {
-        s.yOffset = s.frame * this.offsets.mainCdsHeight/2;
-      } else {
-        // TODO XXX
-      }
+      /* Calculate the vertical coordinates in pixel space (relative to the <g> transform) */
+      const jitter = (s.cds.stackPosition-1)*this.offsets.mainCdsJitter;
+      s.yPx = s.cds.strand==='+' ? // always top-left (irregardless of strand)
+        (this.offsets.mainCdsPositiveDelta - jitter - this.offsets.mainCdsRectHeight) :
+        (this.offsets.mainCdsNegativeDelta + jitter);
       return s;
     })
     .filter((s) => !!s)
@@ -349,20 +280,15 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
   this._groups.mainCds.selectAll(".cds")
     .data(cdsSegments)
     .enter()
-    .append("rect")
+    .append("path")
       .attr("class", "gene")
-      .attr("x", (d) => d.rangePx[0])
-      .attr("y", (d) => d.yOffset)
-      .attr("width", (d) => d.rangePx[1] - d.rangePx[0])
-      .attr("height", this.offsets.mainCdsHeight)
+      .attr("d", (d) => _cdsPath(d, this.offsets))
       .style("fill", (d) => d.color)
       .style('opacity', 0.7)
       .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
         this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
       })
-      .on("mouseout", (d) => {
-        this.callbacks.onLeave(d);
-      })
+      .on("mouseout", this.callbacks.onLeave)
       .on("click", this.callbacks.onCdsClick)
       .style("cursor", "pointer");
 
@@ -371,11 +297,11 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
     .enter()
     .append("text")
       .attr("x", (d) => d.rangePx[0] + 0.5*(d.rangePx[1]-d.rangePx[0]))
-      .attr("y", (d) => d.yOffset+2)
+      .attr("y", (d) => d.yPx+1)
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")        // horizontal axis
       .attr("dominant-baseline", "hanging") // vertical axis
-      .style("font-size", `${this.offsets.mainCdsHeight-2}px`)
+      .style("font-size", `${this.offsets.mainCdsRectHeight-2}px`)
       .style("fill", "white")
       .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 10));
 };
@@ -393,6 +319,25 @@ function textIfSpaceAllows(text, width, pxPerChar) {
   return null;
 }
 
+
+function _cdsPath(d, offsets) {
+  const h = offsets.mainCdsRectHeight;
+  let w = Math.floor(d.rangePx[1] - d.rangePx[0]); // width of CDS (pixels)
+  let x = Math.round(d.rangePx[0])
+  if (w<20) {
+    /* no directional arrow - space is too limited */
+    return `M ${x},${d.yPx} h ${w} v ${h} h -${w} Z`
+  }
+  const w2 = Math.floor(Math.min(w/4, 10)); // width of arrow head
+  w-=w2;
+  const h2 = h/2;
+  if (d.cds.strand==='+') {
+    return `M ${x},${d.yPx} h ${w} l ${w2},${h2} l -${w2},${h2} h -${w} Z`;
+  }
+  // start at top-right and go around the arrow anticlockwise
+  x = Math.round(d.rangePx[1])
+  return `M ${x},${d.yPx} h -${w} l -${w2},${h2} l ${w2},${h2} h ${w} Z`;
+}
 
 /**
  * Renders the CDS annotations in the lower "Nav" track. These have fixed
@@ -415,10 +360,11 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
   cdsSegments.forEach((s) => {
     s.rangePx = [this.scales.xNav(s.rangeGenome[0]), this.scales.xNav(s.rangeGenome[1])];
     if (s.strand === '+') {
-      s.yOffset = s.frame * this.offsets.navCdsHeight/2
-    } else {
-      s.yOffset = (this.offsets.navCdsY2 - this.offsets.navCdsY1) - this.offsets.navCdsHeight -
-        (1/((s.frame+1)%3))*this.offsets.navCdsHeight/2;
+      s.yPx = this.offsets.navCdsPositiveStrandSpace - // start at the _bottom_ of the +ve strand CDS space
+        (s.cds.stackPosition) * this.offsets.navCdsRectHeight
+    } else if (s.strand === '-') {
+      s.yPx = this.offsets.navCdsNegativeY1Delta + // starting point is below axis labels
+        (s.cds.stackPosition-1) * this.offsets.navCdsRectHeight;
     }
   })
 
@@ -428,12 +374,15 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
     .append("rect")
       .attr("class", "gene")
       .attr("x", (d) => d.rangePx[0])
-      .attr("y", (d) => d.yOffset)
+      .attr("y", (d) => d.yPx)
       .attr("width", (d) => d.rangePx[1] - d.rangePx[0])
-      .attr("height", this.offsets.navCdsHeight)
+      .attr("height", this.offsets.navCdsRectHeight)
       .style("fill", (d) => d.color)
-      .style('fill-opacity', (d) => d.name===this.selectedCds?.name ? 1 : 0.7)
-      .style('stroke', (d) => d.name===this.selectedCds?.name ? '#000' : '#fff')
+      .style('fill-opacity', (d) => {
+        if (this.selectedCds===nucleotide_gene) return 1;
+        return d.name===this.selectedCds.name ? 1 : 0.3
+      })
+      .style('stroke', '#fff')
       .style('stroke-width', 1)
       .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
         this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
@@ -449,12 +398,12 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
     .enter()
     .append("text")
       .attr("x", (d) => d.rangePx[0] + 0.5*(d.rangePx[1]-d.rangePx[0]))
-      .attr("y", (d) => d.yOffset+2)
+      .attr("y", (d) => d.yPx+2)
       .attr("pointer-events", "none")
       .attr("text-anchor", "middle")        // horizontal axis
       .attr("dominant-baseline", "hanging") // vertical axis
-      .style("font-size", `${this.offsets.navCdsHeight-2}px`)
-      .style("fill", (d) => d.name===this.selectedCds?.name ? '#000' : '#fff')
+      .style("font-size", `${this.offsets.navCdsRectHeight-2}px`)
+      .style("fill", '#fff')
       .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 30/4));
 };
 
@@ -464,7 +413,8 @@ EntropyChart.prototype._cdsSegments = function _cdsSegments() {
     .genes.forEach((gene) => {
       gene.cds.forEach((cds) => {
         cds.segments.forEach((cdsSegment, idx) => {
-          const s = {...cdsSegment};
+          const s = {...cdsSegment}; // shallow copy so we don't modify the redux data
+          s.cds = cds; // this is a pointer to the redux data - don't modify it!
           s.color = cds.color;
           s.name = cds.name;
           s.strand = cds.strand;
@@ -616,7 +566,9 @@ EntropyChart.prototype._updateMainScaleAndAxis = function _updateMainScaleAndAxi
     this._groups.mainBars.attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainY1 + ")");
     this._groups.mainCds.attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainCdsY1 + ")");
     this._groups.mainXAxis.attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainAxisY1 + ")");
-    this._groups.mainClip.select("#cliprect").attr("width", this.offsets.widthNarrow)      
+    this._groups.mainClip.select("#cliprect")
+      .attr("width", this.offsets.widthNarrow)
+      .attr("height", this.offsets.heightMainBars);
 
     /* update the scales & rerender x-axis */
     this.scales.xMain.domain([0, mainAxisLength])
@@ -625,7 +577,9 @@ EntropyChart.prototype._updateMainScaleAndAxis = function _updateMainScaleAndAxi
     this._groups.mainXAxis.call(this.axes.xMain);
   }
 
-  this.scales.y.domain([0, yMax])
+  this.scales.y
+    .domain([0, yMax])
+    .range([this.offsets.heightMainBars, 0]);
   this._groups.mainYAxis.call(this.axes.y)
   /* requires redraw of bars */
 };
@@ -647,37 +601,84 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   const marginRight = 15;
   const marginBottom = 0;
 
-  const spaceBetweenBarsAndHighestCds = 5;
+  /* Spacing which we'll use in the calculations below */
+  const navCdsRectHeight = 13;
+  const tinySpace = 2;  // space above axis line before a CDS appears
+  const navAxisSpaceBelow = 20; // bigger than space above axis to accommodate ticks
+  const brushSpaceAboveBelowCdsRects = 2;
+  const metadata = this.genomeMap[0].metadata;
+  const navCdsPositiveStrandSpace = metadata.strandsObserved.has('+') ?
+    metadata.posStrandStackHeight*navCdsRectHeight : 0;
+  const navCdsNegativeStrandSpace = metadata.strandsObserved.has('-') ?
+    metadata.negStrandStackHeight*navCdsRectHeight : 0;
+  const mainCdsRectHeight = 16;
+  const mainCdsJitter = mainCdsRectHeight/2;
+  const mainCdsPositiveStrandSpace = metadata.strandsObserved.has('+') ?
+    mainCdsRectHeight + (metadata.posStrandStackHeight-1)*mainCdsJitter : 0;
+  const mainCdsNegativeStrandSpace = metadata.strandsObserved.has('-') ?
+    mainCdsRectHeight + (metadata.negStrandStackHeight-1)*mainCdsJitter : 0;
+
   const tickSpace = 20; // ad-hoc TODO XXX
-  const negStrand = false; // TODO XXX - probably in initial render / constructor?
 
   /* The general approach is to calculate spacings from the bottom up, with the barchart
-  occupying the remaining space */
+  occupying the remaining space. The space needed below the bottom of the barchart is
+  a function of the genomeMap, so we could calculate this ahead-of-time and make the entropy
+  panel height a function of this. (I think this is a good idea, we should do it!)  */
   this.offsets = {};
+  this.offsets.tinySpace = tinySpace;
+  this.offsets.brushHandleHeight = 12;
+  this.offsets.navCdsRectHeight = navCdsRectHeight;
+  this.offsets.navAxisY1 = height - marginBottom - this.offsets.brushHandleHeight -
+    tickSpace - navCdsNegativeStrandSpace;
+  this.offsets.navCdsY1 = this.offsets.navAxisY1 - 
+    tinySpace - // space above axis line before any CDS appears
+    navCdsPositiveStrandSpace;
+  this.offsets.navCdsPositiveStrandSpace = navCdsPositiveStrandSpace;
+  /* navCdsNegativeY1Delta is the height change between navCdsY1 and the top of the highest -ve strand CDS rect */
+  this.offsets.navCdsNegativeY1Delta = this.offsets.navAxisY1 + navAxisSpaceBelow - this.offsets.navCdsY1;
 
-  /* nav (navigation) is the fixed axis, with a brush overlay (to zoom) + CDS annotations */
-  this.offsets.navCdsHeight = 13;
-  this.offsets.brushHeight = 10;
-  const negStrandNavCdsSpace = negStrand ? this.offsets.navCdsHeight * 2 : 0;
-  this.offsets.navAxisY1 = height - marginBottom - tickSpace - negStrandNavCdsSpace;
-  this.offsets.brushY1 = this.offsets.navAxisY1 - this.offsets.brushHeight/2;
-  this.offsets.navCdsY1 = this.offsets.brushY1 - 2*this.offsets.navCdsHeight;
-  this.offsets.navCdsY2 = height - marginBottom;
+  /* brush should start just above highest CDS and extend to just below lowest CDS, or extend just below
+  the tick labels if there are no -ve strand CDSs */
+  this.offsets.brushY1 = this.offsets.navCdsY1 - brushSpaceAboveBelowCdsRects;
+  this.offsets.brushHeight = this.offsets.navCdsNegativeY1Delta + // space between top of CDS space & top of -ve strand CDS
+    navCdsNegativeStrandSpace + 2*brushSpaceAboveBelowCdsRects;
 
-  /* main is the barchart, axis (axes), CDS annotations. While it updates as we zoom,
-  the updating doesn't change the offsets */
-  this.offsets.mainCdsHeight = 15; // TODO XXX
-  this.offsets.mainAxisY1 = this.offsets.navCdsY1 -
-    0 - // spacing between nav + main -- adjust in conjunction with tickSpace
-    (negStrand ? this.offsets.mainCdsHeight * 2 : 0) -
+  /* The main axis sits ~directly above the top of the brush, with the CDSs
+  above that. It is used by the barchart, upper axis, upper CDS annotations. It
+  updates as we zoom, but zooming doesn't change the offsets. When (if) a CDS is
+  selected then the axis doesn't change position, but the space above it (and
+  thus mainCdsY1, heightMainBars) changes */
+  this.offsets.mainAxisY1 = this.offsets.brushY1 - 
+    tinySpace -
     tickSpace;
-  this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
-    this.offsets.mainCdsHeight * 2 -
-    0;
+  if (this.aa) {  
+    this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
+      tinySpace - // space above axis line before any CDS appears
+      mainCdsRectHeight; // space only for a single rect
+  } else {
+    this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
+      tinySpace - // space above axis line before any CDS appears
+      mainCdsNegativeStrandSpace -
+      tinySpace - // space between -ve, +ve strand CDSs
+      mainCdsPositiveStrandSpace;
+  }
+  this.offsets.mainCdsNegativeStrandSpace = mainCdsNegativeStrandSpace;
+  this.offsets.mainCdsPositiveStrandSpace = mainCdsPositiveStrandSpace;
+
+  /* deltas used to know where to start drawing CDSs relative to the transformed coords, were zero = mainCdsY1 */
+  this.offsets.mainCdsPositiveDelta = mainCdsPositiveStrandSpace;
+  this.offsets.mainCdsNegativeDelta = mainCdsPositiveStrandSpace + tinySpace;
+  this.offsets.mainCdsJitter = mainCdsJitter;
+  this.offsets.mainCdsRectHeight = mainCdsRectHeight;
+
+  /* mainY1 is the top of the bar chart, and so the bars are the space that's left over */
   this.offsets.mainY1 = marginTop;
-  this.offsets.heightMainBars = this.offsets.mainCdsY1 - this.offsets.mainY1 - spaceBetweenBarsAndHighestCds;
-  
-  /* The Nav, Brush, and y-axis all use x1,x2, width */
+  this.offsets.heightMainBars = this.offsets.mainCdsY1 - 
+    this.offsets.mainY1 - 
+    tinySpace; // space between topmost CDS + bars starting 
+
+  /* We now consider the horizontal offsets.
+  The Nav, Brush, and y-axis all use x1,x2, width, which never changes */
   this.offsets.x1 = marginLeft;
   this.offsets.width = width - this.offsets.x1 - marginRight;
 
@@ -703,12 +704,22 @@ EntropyChart.prototype._updateOffsets = function _updateOffsets() {
   if (this.aa) {
     this.offsets.x1Narrow = this.offsets.x1 + this.offsets.xMainInternalPad
     this.offsets.widthNarrow = this.offsets.width - 2*this.offsets.xMainInternalPad;
+    this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
+      this.offsets.tinySpace - // space above axis line before any CDS appears
+      this.offsets.mainCdsRectHeight; // space only for a single rect
   } else {
     this.offsets.x1Narrow = this.offsets.x1;
     this.offsets.widthNarrow = this.offsets.width;
+    this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
+      this.offsets.tinySpace - // space above axis line before any CDS appears
+      this.offsets.mainCdsNegativeStrandSpace -
+      this.offsets.tinySpace - // space between -ve, +ve strand CDSs
+      this.offsets.mainCdsPositiveStrandSpace;
   }
+  this.offsets.heightMainBars = this.offsets.mainCdsY1 - 
+    this.offsets.mainY1 - 
+    this.offsets.tinySpace; // space between topmost CDS + bars starting 
 }
-
 
 /**
  * Creates & renders the brush (the grey shaded area which we can drag to move the zoom window)
@@ -738,13 +749,14 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
     });
 
   /* https://bl.ocks.org/mbostock/4349545 */
+  const v = this.offsets.brushHandleHeight;
   this.brushHandle = this._groups.navBrush.selectAll(".handle--custom")
     .data([{type: "w"}, {type: "e"}])
     .enter().append("path")
     .attr("class", "handle--custom")
     .attr("fill", darkGrey)
     .attr("cursor", "ew-resize")
-    .attr("d", "M0,0 0,0 -5,11 5,11 0,0 Z")
+    .attr("d", `M0,0 -6,${v} 6,${v} Z`)
     /* see the extent x,y params in brushX() (above) */
     .attr("transform", (d) => {
       return d.type === "e" ? // end (2nd) handle
@@ -752,26 +764,32 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
         `translate(${this.scales.xNav(this.zoomCoordinates[0])},${this.offsets.brushHeight})`
     })
 
-    if (this.selectedCdsIsWrapping) this._setUpZoomBrushWrapping();
+    this._setUpZoomBrushWrapping();
 
     // this._setUpMousewheelZooming() // TODO XXX
 };
 
 
 /**
- * Adds rectangles to mimic the zoom brush, but they are inverted. This function
- * should be run whenever we have a wrapped CDS. If not, then it's safe to call
- * it with destroy = true. While this adds the rectangles, they must be kept in
- * sync with the brush position (done via this._brushChanged)
+ * If we have selected a wrapping CDS this function inverts the brush by
+ * (i) hiding the original brush
+ * (ii) adding rectangles either side of the original brush which extend to the genome bounds
+ * This is safe to call in any situation - whether the selected CDS is wrapping or not.
+ * 
+ * The rectangles set up here must be moved by another method (e.g. this._brushChanged).
  */
-EntropyChart.prototype._setUpZoomBrushWrapping = function _setUpZoomBrushWrapping(destroy=false) {
-  if (destroy) {
-    this._navBrushWrappingSelection?.remove();
-    this._navBrushWrappingSelection = undefined;
-    // ensure the actual brush selection has its default opacity
-    this._groups.navBrush.select(".selection").attr("fill-opacity", 0.3);
+EntropyChart.prototype._setUpZoomBrushWrapping = function _setUpZoomBrushWrapping() {
+  /* Remove any previous wrapping brush overlay */
+  this._navBrushWrappingSelection?.remove();
+  this._navBrushWrappingSelection = undefined;
+  // ensure the actual brush selection has its default opacity
+  this._groups.navBrush.select(".selection").attr("fill-opacity", 0.3);
+
+  /* Add a brush overlay only if needed */
+  if (this.selectedCds === nucleotide_gene || this.selectedCds.isWrapping===false) {
     return;
   }
+
   this._navBrushWrappingSelection = this._groups.navBrushWrapping
     .selectAll(".selection-wrapping")
     .data(this.zoomCoordinates)
@@ -816,10 +834,12 @@ EntropyChart.prototype._brushChanged = function _brushChanged() {
   if (this.selectedCds===nucleotide_gene) {
     this.scales.xMain.domain(this.zoomCoordinates);
   } else {
-    const domainLocal = this._rangeLocalZoomCoordinates(); // nucleotides
-    if (domainLocal) {
-      this.scales.xMain.domain(this._rangeLocalZoomCoordinates());
+    const [cdsRangeLocal, valid] = getCdsRangeLocalFromRangeGenome(this.selectedCds, this.zoomCoordinates);
+    if (valid) {
+      this.scales.xMain.domain(cdsRangeLocal);
     } else {
+      /* Return the zoom to the full extent of the selected CDS */
+      this._setZoomCoordinates();
       this._groups.navBrush
         .call(this.brush.move, () => {
           return this.zoomCoordinates.map(this.scales.xNav);
@@ -922,6 +942,15 @@ EntropyChart.prototype._createGroups = function _createGroups() {
     .attr("id", "mainBars")
     .attr("clip-path", "url(#clip)")
     .attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainY1 + ")");
+
+  this._groups.navBrush = this.svg.append("g")
+    .attr("id", "navBrush")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
+
+  this._groups.navBrushWrapping = this.svg.append("g") // custom brush <rect> which wrap the origin
+    .attr("id", "navBrushWrapping")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
+
   this._groups.navCds = this.svg.append("g")
     .attr("id", "navCds")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.navCdsY1 + ")");
@@ -941,13 +970,6 @@ EntropyChart.prototype._createGroups = function _createGroups() {
     .attr("id", "navXAxis")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.navAxisY1 + ")")
 
-  this._groups.navBrush = this.svg.append("g")
-    .attr("id", "navBrush")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
-
-  this._groups.navBrushWrapping = this.svg.append("g") // custom brush <rect> which wrap the origin
-    .attr("id", "navBrushWrapping")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.brushY1 + ")");
 
   this._groups.mainClip = this.svg.append("g")
     .attr("id", "mainClip")
@@ -1045,7 +1067,8 @@ EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
             <tr><td>Range (genome)</td><td>{d.rangeGenome.join(" - ")}</td></tr>
             <tr><td>Range (local)</td><td>{d.rangeLocal.join(" - ")}</td></tr>
             <tr><td>CDS Segment</td><td>{d.segmentNumber}</td></tr>
-            <tr><td>Frame</td><td>{d.frame}</td></tr>
+            <tr><td>Strand</td><td>{d.cds.strand==='+' ? 'Positive' : 'Negative'}</td></tr>
+            <tr><td>Frame</td><td>{`${d.frame} (${d.cds.strand==='+'?'F':'R'}${d.frame})`}</td></tr>
             <tr><td>Phase</td><td>{d.phase}</td></tr>
           </tbody>
         </table>

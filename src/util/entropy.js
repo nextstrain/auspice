@@ -164,56 +164,153 @@ export function getCdsByName(genomeMap, name) {
   return getCds(genomeMap).filter((cds)=>cds.name===name)[0];
 }
 
+/**
+ * Given a CDS (and all the inherent complexity possible there), and two points
+ * on the genome (rangeGenome), return rangeLocal coordinates for the part of
+ * the CDS that's "in view". The returned coordinates are expanded outwards to
+ * include the entire codon (in the 2/3rd of cases where they fall inside a
+ * codon).
+ * If _either_ of the rangeGenome positions are _beyond_ the CDS then we return
+ * the entire rangeLocal of the cds + set the flag `valid` to false.
+ * 
+ * For wrapping genes, the UI forces the rangeGenome (i.e. the zoomCoordinates)
+ * to be on either side of the origin, and we maintain thus assumption here.
+ * 
+ * Returns [rangeLocalInView:rangeLocal, valid:bool]
+ */
+export function getCdsRangeLocalFromRangeGenome(cds, rangeGenome) {
+  const positive = cds.strand==='+';
+  const [zoomStart, zoomEnd] = cds.isWrapping ?
+    [rangeGenome[1], rangeGenome[0]] : // .toReversed() not available for Auspice?!?
+    rangeGenome;
+  const segments = cds.segments;
+  // segA is the segment closest to genome position 1. segB is closest to the end.
+  const [segA, segB] = positive ?
+    [segments[0], segments[segments.length-1]] :
+    [segments[segments.length-1], segments[0]]
+
+  let [cdsLocalStart, cdsLocalEnd] = [1, cds.length];
+
+  if (zoomStart < segA.rangeGenome[0] || zoomEnd > segB.rangeGenome[1]) {
+    return [[cdsLocalStart, cdsLocalEnd], false];
+  }
+  /**
+   * The general approach is to visit the segments in the order they appear,
+   * i.e. in the context of the strand it's always 5' -> 3' but for -ve strand
+   * CDSs this appears 3' -> 5' in the context of the +ve strand. Once we find
+   * an intersection we can work out the appropriate local coordinate. 
+   * Remember that zoomStart/End are reversed if the CDS is wrapping!
+   */
+  let prevSeg;
+  for (const seg of segments) {
+    /* If the zoom start (5') is inside the segment, then we know one of the local bounds */  
+    if (seg.rangeGenome[0]<=zoomStart && seg.rangeGenome[1]>=zoomStart) {
+      if (positive) {
+        const delta = zoomStart - seg.rangeGenome[0];
+        cdsLocalStart = seg.rangeLocal[0] + delta;
+      } else {
+        const delta = zoomStart - seg.rangeGenome[0];
+        cdsLocalEnd = seg.rangeLocal[1] - delta;
+      }
+    }       
+    /* If the zoom end (3') is inside the segment, then we know one of the local bounds */      
+    if (seg.rangeGenome[0]<=zoomEnd && seg.rangeGenome[1]>=zoomEnd) {
+      if (positive) {
+        const delta = zoomEnd - seg.rangeGenome[0];
+        cdsLocalEnd = seg.rangeLocal[0] + delta;
+        // if (segments.length>1) {
+        //   console.log(`Zoom end (${zoomEnd}) in segment`, seg.rangeGenome, seg.rangeLocal, cdsLocalEnd)
+        // }
+      } else {
+        const delta = seg.rangeGenome[1] - zoomEnd;
+        cdsLocalStart = seg.rangeLocal[0] + delta;
+      }
+    }
+    /* Check to see if the zoom fell in the space between segments */
+    if (prevSeg) {
+      if (positive) {
+        if (prevSeg.rangeGenome[1] < zoomStart && seg.rangeGenome[0] > zoomStart) {
+          cdsLocalStart = seg.rangeLocal[0];
+        }
+        if (prevSeg.rangeGenome[1] < zoomEnd && seg.rangeGenome[0] > zoomEnd) {
+          cdsLocalEnd = prevSeg.rangeLocal[1];
+        }
+      } else {
+        if (prevSeg.rangeGenome[0] > zoomStart && seg.rangeGenome[1] < zoomStart) {
+          cdsLocalEnd = prevSeg.rangeLocal[1];
+        }
+        if (prevSeg.rangeGenome[0] > zoomEnd && seg.rangeGenome[1] < zoomEnd) {
+          cdsLocalStart = seg.rangeLocal[0];
+        }
+      }
+    }
+    prevSeg = seg;
+  }
+  /* Expand the local CDS coordinates so that they are not within a codon. Note
+  that this does result is some weirdness; for example a segment finishes at
+  (genome) position 10 but pos 10 is inside a codon (in that segment), and we've
+  zoomed to pos 10, then we'll expand the local coordinates into the next
+  segment to complete the codon even though the next segment may be well beyond
+  the zoom bounds */
+  cdsLocalStart -= (cdsLocalStart-1)%3;
+  const endOverhang = cdsLocalEnd%3;
+  if (endOverhang) {
+    cdsLocalEnd += endOverhang===1 ? 2 : 1;
+  }
+
+  return [[cdsLocalStart, cdsLocalEnd], true];
+}
+
 export function getNucCoordinatesFromAaPos(cds, aaPos) {
   let frame;
   const nucCoordinates = [];
-  if (cds.strand==='-') {
-    frame = 'TODO'
-    nucCoordinates.push("Negative strand not yet implemented");
-  } else { // Any strand which is _not_ '-' is interpreted as +ve strand
-    const ntCodonStart = (aaPos-1)*3 + 1; /* codon triplet starts here (inclusive, 1-based) */
-    for (let i=0; i<cds.segments.length; i++) {
-      let segment = cds.segments[i];
-      if (segment.rangeLocal[1] < ntCodonStart) continue;
-      frame = `frame ${segment.frame}`;
+  const ntCodonStart = (aaPos-1)*3 + 1; /* codon triplet starts here (inclusive, 1-based) */
+  const positive = cds.strand==='+';
+  for (let i=0; i<cds.segments.length; i++) {
+    let segment = cds.segments[i];
+    if (segment.rangeLocal[1] < ntCodonStart) continue;
+    frame = `frame ${segment.frame}`;
+    if (positive) {
       let ntPosGenome = segment.rangeGenome[0] + (ntCodonStart - segment.rangeLocal[0]);
       while (ntPosGenome <= segment.rangeGenome[1] && nucCoordinates.length<3) {
         nucCoordinates.push(ntPosGenome++);
       }
-      if (nucCoordinates.length!==3) {
-        /* Codon bridges 2 segments */
-        segment = cds.segments[i+1];
-        /* rewrite "frame x" to "frames x → y" */
-        frame = frame.replace('frame', 'frames') + ` → ${segment.frame}`;
-        /* sanity check the phase */
-        if (segment.phase!==(3-nucCoordinates.length)) {
-          console.error(`Internal Error -- phase mismatch for CDS ${cds.name} when mapping codon ${aaPos}`);
-          nucCoordinates.push("Internal Error!")
-          break;
-        }
-        /* grab the necessary nucleotides -- at most there'll be two needed */
+    } else {
+      let ntPosGenome = segment.rangeGenome[1] - (ntCodonStart - segment.rangeLocal[0]);
+      while (ntPosGenome >= segment.rangeGenome[0] && nucCoordinates.length<3) {
+        nucCoordinates.push(ntPosGenome--);
+      }
+    }
+    /** If we were lucky and the entire codon fell into a single segment, then
+     * we're done. If not, we proceed to the next segment and grab the one or
+     * two nucleotides to make up the codon */
+    if (nucCoordinates.length!==3) {
+      /* Codon bridges 2 segments */
+      segment = cds.segments[i+1];
+      /* rewrite "frame x" to "frames x → y" */
+      frame = frame.replace('frame', 'frames') + ` → ${segment.frame}`;
+      /* sanity check the phase */
+      if (segment.phase!==(3-nucCoordinates.length)) {
+        console.error(`Internal Error -- phase mismatch for CDS ${cds.name} when mapping codon ${aaPos}`);
+        nucCoordinates.push("Internal Error!")
+        break;
+      }
+      /* grab the necessary nucleotides -- at most there'll be two needed */
+      if (positive) {
         nucCoordinates.push(segment.rangeGenome[0]);
         if (nucCoordinates.length<3) {
           nucCoordinates.push(segment.rangeGenome[0]+1);
         }
+      } else {
+        nucCoordinates.push(segment.rangeGenome[1]);
+        if (nucCoordinates.length<3) {
+          nucCoordinates.push(segment.rangeGenome[1]-1);
+        }
       }
-      break;
     }
+    break;
   }
   return {frame, nucCoordinates};
-}
-
-
-/* Does a CDS wrap the origin? */
-export function isCdsWrapping(cds) {
-  if (cds===nucleotide_gene) return false;
-  for (let i=1; i<cds.segments.length; i++) {
-    // segments are already sorted according to rangeLocal
-    if (cds.segments[i-1].rangeGenome[0] > cds.segments[i].rangeGenome[0]) {
-      return true;
-    }
-  }
-  return false; // fallthrough
 }
 
 /** A, B are the from/to nuc/aa of an observed mutation  */
