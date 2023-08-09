@@ -1,0 +1,50 @@
+{
+  "version": "v2",
+  "meta": {
+    "title": "Test dataset for complex genome annotations",
+    "updated": "2023-07-09",
+    "display_defaults": {"panels": ["entropy"], "distance_measure": "div"},
+    "panels": ["tree", "entropy"],
+    "genome_annotations": {
+      "nuc": {"start": 1, "end": 100},
+      "pos-single": {"start": 23, "end": 28, "strand": "+",
+        "display_name": "Frame1 (F1); Mutations at aa1=nuc23-25, aa2=nuc26-28; "},
+      "pos-multi": {"segments": [{"start": 31, "end": 36}, {"start": 36, "end": 43}, {"start": 63, "end": 69}], "strand": "+",
+        "display_name": "Seg1/3: 31..36 F0 p0; Seg2/3: 36..43, F2, p0; Seg 3/3: 63..69 F2 p1; Mutations aa2 → nuc34-36, aa3 → nuc36-68, aa5: 42,43,63 aa7 → 67-69"},
+      "pos-wrapping": {"start": 93, "end": 110, "strand": "+",
+        "display_name": "Breaks down to 2 segments: 93-100 (F2), 1-10 (phase 1, F1). Mutations: aa3: 99,100,1"},
+      "neg-single": {"start": 72, "end": 80, "strand": "-",
+        "display_name": "Frame2 (R2); Mutations at aa1=78-80, aa3=nuc72-74;"},
+      "neg-multi": {"segments": [{"start": 53, "end": 60}, {"start": 46, "end": 53}, {"start": 12, "end": 19}], "strand": "-",
+        "display_name": "Segment order important. Seg1/3: 53..60 R1 p0; Seg2/3: 46..53, F0, p1; Seg 3/3: 12..19 R2 p2; Mutations: aa1 → nuc60,59,58, aa3 → nuc54,53,53 (slippage), aa6 → nuc46,19,18"},
+      "neg-wrapping": {"start": 91, "end": 108, "strand": "-",
+        "display_name": "Breaks down to 2 segments: 1..8 R2 p0 and 91..100 R1 p1 (order important). Mutations: aa1 → nuc8,7,6, aa3 → nuc2,1,100, aa6 → nuc93,92,91"}
+    }
+  },
+  "tree": {
+    "name": "root",
+    "node_attrs": {"div": 0},
+    "children": [
+      {
+        "name": "A",
+        "node_attrs": {"div": 1},
+        "branch_attrs": {"mutations": {
+          "nuc": ["A20T"],
+          "pos-single": ["A1B", "G2H"],
+          "pos-multi": ["A2B", "G3H", "L7S"],
+          "pos-wrapping": ["L3S"]
+        }}
+      },
+      {
+        "name": "B",
+        "node_attrs": {"div": 1},
+        "branch_attrs": {"mutations": {
+          "nuc": ["A20G"],
+          "neg-single": ["A1B", "G3H"],
+          "neg-multi": ["A1B", "G3H", "L6S"],
+          "neg-wrapping": ["A1B", "G3H", "L6S"]
+        }}
+      }
+    ]
+  }
+}

@@ -73,7 +73,7 @@ interface CdsSegment {
  * TODO XXX - throwing an Error here prevents a dataset from loading
  * TODO XXX - standardise a new (or extended) format in the JSON.
  */
-const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
+export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
