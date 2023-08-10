@@ -320,3 +320,28 @@ function valid(A, B, isAA) {
   }
   return A !== "N" && A !== "-" && B !== "N" && B !== "-";
 }
+
+/**
+ * Given a nucleotide in Genome space (e.g. from `rangeGenome`) find all CDSs
+ * which have a segment covering that nucleotide and return the local coordinate
+ * of that position (in both nuc + aa coordinates)
+ * Returns {cds: CDS; nucLocal: number; aaLocal: number}[]
+ */
+export function nucleotideToAaPosition(genomeMap, nucPos) {
+  const matches = [];
+  getCds(genomeMap).forEach((cds) => {
+    for (const segment of cds.segments) {
+      if (segment.rangeGenome[0] <= nucPos && segment.rangeGenome[1] >= nucPos) {
+        const delta = cds.strand==='+' ?
+          nucPos - segment.rangeGenome[0] :
+          segment.rangeGenome[1] - nucPos;
+        const nucLocal = segment.rangeLocal[0]+delta;
+        const aaLocal = Math.ceil(nucLocal/3);
+        matches.push({cds, nucLocal, aaLocal})
+        /* Don't return here - we want to check future segments as segments can
+        be overlapping */
+      }
+    }
+  })
+  return matches;
+}

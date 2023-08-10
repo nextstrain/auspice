@@ -11,7 +11,8 @@ import Mousetrap from "mousetrap";
 import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
 import { nucleotide_gene } from "../../util/globals";
-import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome} from "../../util/entropy";
+import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
+  nucleotideToAaPosition} from "../../util/entropy";
 
 /* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -444,7 +445,6 @@ EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
 
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
-    // TODO -- following needs updating once we reinstate CDS intersection
     const id = this.aa ? `#cds-${this.selectedCds.name}-${d.codon}` : `#nt${d.x}`;
     select(id).style("fill", "red");
   }
@@ -1028,17 +1028,43 @@ EntropyChart.prototype._mainTooltipAa = function _mainTooltipAa(d) {
 
 EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
   const _render = function _render(t) {
+    const nuc = d.x;
+    const aa = nucleotideToAaPosition(this.genomeMap, nuc);
+    let overlaps; // JSX to convey overlapping CDS info
+    if (aa) {
+      overlaps = (<div>
+        {`Overlaps with ${aa.length} CDS segment${aa.length>1?'s':''}:`}
+        <p/>
+        <table>
+          <tbody style={{fontWeight: 300}}>
+            <tr key="header">
+              <td style={{minWidth: '60px', paddingRight: '5px'}}>CDS</td>
+              <td style={{paddingRight: '5px'}}>Nt Pos (in CDS)</td>
+              <td style={{paddingRight: '5px'}}>AA Pos</td>
+            </tr>
+            {aa.map((match) => (
+              <tr key={match.cds.name + match.nucLocal}>
+                <td>{match.cds.name}</td>
+                <td>{match.nucLocal}</td>
+                <td>{match.aaLocal}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>)
+    } else {
+      overlaps = (<div>
+        {t("No overlapping CDSs")}
+      </div>)
+    }
+
     return (
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
-          {t("Nucleotide {{nuc}}", {nuc: d.x})}
+          {t("Nucleotide {{nuc}}", {nuc})}
         </div>
-        <div>
-          {t("Overlapping CDSs") + ":"}
-        </div>
-        <div>
-          {"Table here! TODO"}
-        </div>
+        <p/>
+        {overlaps}
         <p/>
         <div>
           {this.showCounts ? `${t("Num mutations")}: ${d.y}` : `${t("entropy")}: ${d.y}`}

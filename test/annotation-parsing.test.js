@@ -1,8 +1,10 @@
 import { genomeMap } from "../src/util/entropyCreateStateFromJsons";
 import dataset from './data/test_complex-genome-annotation.json';
-import { getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome} from "../src/util/entropy";
+import { getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
+  nucleotideToAaPosition} from "../src/util/entropy";
 
-const chromosome = genomeMap(dataset.meta.genome_annotations)[0];
+const genome = genomeMap(dataset.meta.genome_annotations)
+const chromosome = genome[0];
 
 test("Chromosome coordinates", () => {
   expect(chromosome.range[0]).toBe(1);
@@ -234,6 +236,37 @@ describe('Genome zoom bounds mapped to cds local coordinates', () => {
     })
   }
 })
+
+
+/**
+ * Note that order of CDSs (if multiple matches) is the order they
+ * appear in the JSON
+ */
+const nucleotideToAaPositionData = [
+  [23, [{cds: getCds('pos-single'),   nucLocal: 1,  aaLocal: 1}]],
+  [75, [{cds: getCds('neg-single'),   nucLocal: 6,  aaLocal: 2}]],
+  [9,  [{cds: getCds('pos-wrapping'), nucLocal: 17, aaLocal: 6}]],
+  [92, [{cds: getCds('neg-wrapping'), nucLocal: 17, aaLocal: 6}]],
+  [4,  [{cds: getCds('pos-wrapping'), nucLocal: 12, aaLocal: 4}, 
+        {cds: getCds('neg-wrapping'), nucLocal: 5,  aaLocal: 2}]],
+  [93, [{cds: getCds('pos-wrapping'), nucLocal: 1,  aaLocal: 1}, 
+        {cds: getCds('neg-wrapping'), nucLocal: 16, aaLocal: 6}]],
+  [48, [{cds: getCds('neg-multi'),    nucLocal: 14, aaLocal: 5}]],
+  [63, [{cds: getCds('pos-multi'),    nucLocal: 15, aaLocal: 5}]],
+  // Pos 36 appears in 2 segments of the pos-multi CDS, in different codons
+  [36, [{cds: getCds('pos-multi'),    nucLocal: 6, aaLocal: 2},
+        {cds: getCds('pos-multi'),    nucLocal: 7, aaLocal: 3}]],
+  // Pos 53 appears in 2 segments of the neg-multi CDS, both in the same codon
+  [53, [{cds: getCds('neg-multi'),    nucLocal: 8,  aaLocal: 3},
+        {cds: getCds('neg-multi'),    nucLocal: 9, aaLocal: 3}]],
+]
+
+
+test("Single nucleotide positions are correctly mapped to amino acid positions", () => {
+  for (const [nucPos, expectedResult] of nucleotideToAaPositionData) {
+    expect(nucleotideToAaPosition(genome, nucPos)).toStrictEqual(expectedResult);
+  }
+});
 
 
 /** Assumes that the gene name wasn't specified in the JSON and thus
