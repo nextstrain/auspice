@@ -19,7 +19,7 @@ test("+ve strand CDS with a single segment", () => {
     length, strand: '+',
     isWrapping: false,
     segments: [
-      {rangeGenome: [23, 28], rangeLocal: [1, length], phase: 0, frame: 1}
+      {rangeGenome: [23, 28], rangeLocal: [1, length], phase: 0, frame: 1, segmentNumber: 1}
     ]
   }))
 });
@@ -31,7 +31,7 @@ test("-ve strand CDS with a single segment", () => {
     length, strand: '-',
     isWrapping: false,
     segments: [
-      {rangeGenome: [72, 80], rangeLocal: [1, length], phase: 0, frame: 2}
+      {rangeGenome: [72, 80], rangeLocal: [1, length], phase: 0, frame: 2, segmentNumber: 1}
     ]
   }))
 });
@@ -43,8 +43,8 @@ test("+ve strand CDS which wraps the origin", () => {
     length, strand: '+',
     isWrapping: true,
     segments: [
-      {rangeGenome: [93, 100], rangeLocal: [1, 8],      phase: 0, frame: 2},
-      {rangeGenome: [1, 10],   rangeLocal: [9, length], phase: 1, frame: 1},
+      {rangeGenome: [93, 100], rangeLocal: [1, 8],      phase: 0, frame: 2, segmentNumber: 1},
+      {rangeGenome: [1, 10],   rangeLocal: [9, length], phase: 1, frame: 1, segmentNumber: 2},
     ]
   }))
 });
@@ -58,8 +58,8 @@ test("-ve strand CDS which wraps the origin", () => {
     segments: [
       // segment order is based on the direction of the CDS, so for -ve strand it's 3' to 5'
       // but within each segment the rangeGenome is still 5' to 3'
-      {rangeGenome: [1, 8],    rangeLocal: [1, 8], phase: 0, frame: 2},
-      {rangeGenome: [91, 100], rangeLocal: [9, length], phase: 1, frame: 1},
+      {rangeGenome: [1, 8],    rangeLocal: [1, 8],      phase: 0, frame: 2, segmentNumber: 1},
+      {rangeGenome: [91, 100], rangeLocal: [9, length], phase: 1, frame: 1, segmentNumber: 2},
     ]
   }))
 });
@@ -72,9 +72,9 @@ test("+ve strand CDS with multiple (non-wrapping) segments", () => {
     isWrapping: false,
     segments: [
       // -1 frameshift (e.g. ribosome slip) between 1st & 2nd segments
-      {rangeGenome: [31, 36], rangeLocal: [1, 6],       phase: 0, frame: 0}, // 2 amino acids
-      {rangeGenome: [36, 43], rangeLocal: [7, 14],      phase: 0, frame: 2}, // 2 2/3 amino acids
-      {rangeGenome: [63, 69], rangeLocal: [15, length], phase: 1, frame: 0}  // 1/3 + 2 amino acids
+      {rangeGenome: [31, 36], rangeLocal: [1, 6],       phase: 0, frame: 0, segmentNumber: 1}, // 2 amino acids
+      {rangeGenome: [36, 43], rangeLocal: [7, 14],      phase: 0, frame: 2, segmentNumber: 2}, // 2 2/3 amino acids
+      {rangeGenome: [63, 69], rangeLocal: [15, length], phase: 1, frame: 0, segmentNumber: 3}  // 1/3 + 2 amino acids
     ]
   }))
 });
@@ -91,9 +91,9 @@ test("-ve strand CDS with multiple (non-wrapping) segments", () => {
       // but within each segment the rangeGenome is still 5' to 3'
       // This example has a -1 frameshift between 1st & 2nd segments (so nuc 53 is in both)
       // and then a 27nt jump to the 3rd segment.
-      {rangeGenome: [53, 60], rangeLocal: [1, 8],       phase: 0, frame: 1}, // 2 2/3 amino acids
-      {rangeGenome: [46, 53], rangeLocal: [9, 16],      phase: 1, frame: 0}, // 1/3 + 2 + 1/3  amino acids
-      {rangeGenome: [12, 19], rangeLocal: [17, length], phase: 2, frame: 2}  // 2/3 + 2 amino acids
+      {rangeGenome: [53, 60], rangeLocal: [1, 8],       phase: 0, frame: 1, segmentNumber: 1}, // 2 2/3 amino acids
+      {rangeGenome: [46, 53], rangeLocal: [9, 16],      phase: 1, frame: 0, segmentNumber: 2}, // 1/3 + 2 + 1/3  amino acids
+      {rangeGenome: [12, 19], rangeLocal: [17, length], phase: 2, frame: 2, segmentNumber: 3}  // 2/3 + 2 amino acids
     ]
   }))
 });

@@ -31,3 +31,12 @@ the overlay added on key-presses is is not a child of .brush */
 #d3entropy .cds {
   cursor: pointer;
 }
+
+table.entropy-table {
+  font-weight: 300;
+}
+
+table.entropy-table td {
+  padding-bottom: 3px;
+  padding-right: 5px;
+}

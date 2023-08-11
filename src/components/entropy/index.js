@@ -107,7 +107,7 @@ class Entropy extends React.Component {
      * The color-by is decoupled from the selected CDS / selected position; this callback
      * modifies the entropy selected CDS/positions, but leaves the color-by untouched.
      */
-    this.props.dispatch(changeEntropyCdsSelection(getCdsByName(this.props.genomeMap, d.name)));
+    this.props.dispatch(changeEntropyCdsSelection(getCdsByName(this.props.genomeMap, d.cds.name)));
     this.setState({hovered: false});
   }
 

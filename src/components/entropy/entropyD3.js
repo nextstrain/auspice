@@ -205,13 +205,11 @@ EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
  */
 EntropyChart.prototype._drawMainCds = function _drawMainCds() {
   this._groups.mainCds.selectAll("*").remove();
-
   const [inViewNucA, inViewNucB] = this.scales.xMain.domain();
 
   if (this.selectedCds!==nucleotide_gene) {
-
     this._groups.mainCds.selectAll(".cds")
-      .data(this.selectedCds.segments)
+      .data(this._cdsSegments({selected: true}))
       .enter()
       .append("rect")
         .attr("class", "gene")
@@ -227,9 +225,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .style("stroke-width", 2)
         .style('opacity', 1) // Segments _can't_ overlap when viewing an individual CDS
         .on("mouseover", (d) => {
-          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(
-            {displayName: this.selectedCds?.displayName, cds: this.selectedCds, ...d}
-          )})
+          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
         })
         .on("mouseout", (d) => {
           this.callbacks.onLeave(d);
@@ -256,27 +252,21 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
     return;
   }
 
-  const cdsSegments = this._cdsSegments()
+  const cdsSegments = this._cdsSegments({range: [inViewNucA, inViewNucB]})
     .map((s) => {
-      if (s.rangeGenome[1] < inViewNucA || s.rangeGenome[0] > inViewNucB) {
-        return false; // CDS is beyond the current zoom domain
-      }
-      /* The benefit of recalculating the range like this as opposed to a clip mask is
-      that the text can be easily centered on the visible pixels */
-      s.rangePx = [
-        /* the range is modified by 0.5 so that the start/end of the CDS lines up between
-        two d3 ticks when zoomed in such that each tick represents one nucleotide */
+      const rangePx = [
+        /* the nuc position is modified by 0.5 so that the start/end of the CDS lines up
+        between two d3 ticks when zoomed in such that each tick represents one nucleotide */
         this.scales.xMain(Math.max(s.rangeGenome[0]-0.5, inViewNucA)),
         this.scales.xMain(Math.min(s.rangeGenome[1]+0.5, inViewNucB))
       ];
       /* Calculate the vertical coordinates in pixel space (relative to the <g> transform) */
       const jitter = (s.cds.stackPosition-1)*this.offsets.mainCdsJitter;
-      s.yPx = s.cds.strand==='+' ? // always top-left (irregardless of strand)
+      const yPx = s.cds.strand==='+' ? // always top-left (irregardless of strand)
         (this.offsets.mainCdsPositiveDelta - jitter - this.offsets.mainCdsRectHeight) :
         (this.offsets.mainCdsNegativeDelta + jitter);
-      return s;
-    })
-    .filter((s) => !!s)
+      return {rangePx, yPx, ...s};
+    });
 
   this._groups.mainCds.selectAll(".cds")
     .data(cdsSegments)
@@ -284,7 +274,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
     .append("path")
       .attr("class", "gene")
       .attr("d", (d) => _cdsPath(d, this.offsets))
-      .style("fill", (d) => d.color)
+      .style("fill", (d) => d.cds.color)
       .style('opacity', 0.7)
       .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
         this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
@@ -304,7 +294,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
       .attr("dominant-baseline", "hanging") // vertical axis
       .style("font-size", `${this.offsets.mainCdsRectHeight-2}px`)
       .style("fill", "white")
-      .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 10));
+      .text((d) => textIfSpaceAllows(d.cds.name, d.rangePx[1] - d.rangePx[0], 10));
 };
 
 /**
@@ -357,17 +347,16 @@ function _cdsPath(d, offsets) {
 EntropyChart.prototype._drawNavCds = function _drawNavCds() {
   this._groups.navCds.selectAll("*").remove();
 
-  const cdsSegments = this._cdsSegments()
-  cdsSegments.forEach((s) => {
-    s.rangePx = [this.scales.xNav(s.rangeGenome[0]), this.scales.xNav(s.rangeGenome[1])];
-    if (s.strand === '+') {
-      s.yPx = this.offsets.navCdsPositiveStrandSpace - // start at the _bottom_ of the +ve strand CDS space
-        (s.cds.stackPosition) * this.offsets.navCdsRectHeight
-    } else if (s.strand === '-') {
-      s.yPx = this.offsets.navCdsNegativeY1Delta + // starting point is below axis labels
-        (s.cds.stackPosition-1) * this.offsets.navCdsRectHeight;
-    }
-  })
+  const cdsSegments = this._cdsSegments({})
+    .map((s) => ({
+      rangePx: s.rangeGenome.map(this.scales.xNav),
+      yPx: s.cds.strand==='+' ?
+        this.offsets.navCdsPositiveStrandSpace - // start at the _bottom_ of the +ve strand CDS space & move up
+          (s.cds.stackPosition) * this.offsets.navCdsRectHeight :
+        this.offsets.navCdsNegativeY1Delta + // start below axis labels & move downwards
+          (s.cds.stackPosition-1) * this.offsets.navCdsRectHeight,
+      ...s
+    }))
 
   this._groups.navCds.selectAll(".cdsNav")
     .data(cdsSegments)
@@ -378,10 +367,10 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
       .attr("y", (d) => d.yPx)
       .attr("width", (d) => d.rangePx[1] - d.rangePx[0])
       .attr("height", this.offsets.navCdsRectHeight)
-      .style("fill", (d) => d.color)
+      .style("fill", (d) => d.cds.color)
       .style('fill-opacity', (d) => {
         if (this.selectedCds===nucleotide_gene) return 1;
-        return d.name===this.selectedCds.name ? 1 : 0.3
+        return d.cds.name===this.selectedCds.name ? 1 : 0.3
       })
       .style('stroke', '#fff')
       .style('stroke-width', 1)
@@ -405,23 +394,36 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
       .attr("dominant-baseline", "hanging") // vertical axis
       .style("font-size", `${this.offsets.navCdsRectHeight-2}px`)
       .style("fill", '#fff')
-      .text((d) => textIfSpaceAllows(d.name, d.rangePx[1] - d.rangePx[0], 30/4));
+      .text((d) => textIfSpaceAllows(d.cds.name, d.rangePx[1] - d.rangePx[0], 30/4));
 };
 
-EntropyChart.prototype._cdsSegments = function _cdsSegments() {
+/**
+ * Returns a list of objects which are similar to shallow copies of the matching `CdsSegment`s
+ * but with some additions. This allows us to add properties from d3 without worrying about
+ * modifying the underlying redux state and the sync-issues that would result.
+ * Returned structure (in TypeScript) would be
+ * interface Segment extends CdsSegment {
+ *   cds: CDS;   // a pointer to a react object - do not modify
+ *   gene: Gene; // a pointer to a react object - do not modify
+ * }
+ * Arguments (all optional):
+ * selected: string - only return segments from the currently selected CDS
+ * range: (RangeGenome|undefined) - return only segments which are visible in that range
+ * @returns 
+ */
+EntropyChart.prototype._cdsSegments = function _cdsSegments({range=undefined, selected=false}) {
   const cdsSegments = []
   this.genomeMap[0] // Auspice only (currently) considers the first genome
     .genes.forEach((gene) => {
       gene.cds.forEach((cds) => {
-        cds.segments.forEach((cdsSegment, idx) => {
+        if (selected && cds.name!==this.selectedCds.name) return;
+        cds.segments.forEach((cdsSegment) => {
+          if (range && (cdsSegment.rangeGenome[1] < range[0] || cdsSegment.rangeGenome[0] > range[1])) {
+            return; // CDS is beyond the requested range
+          }
           const s = {...cdsSegment}; // shallow copy so we don't modify the redux data
-          s.cds = cds; // this is a pointer to the redux data - don't modify it!
-          s.color = cds.color;
-          s.name = cds.name;
-          s.strand = cds.strand;
-          s.geneName = gene.name;
-          s.segmentNumber = `${idx+1}/${cds.segments.length}`;
-          if (cds.displayName) s.displayName=cds.displayName;
+          s.cds = cds;   // this is a pointer to the redux data - don't modify it!
+          s.gene = gene; // this is a pointer to the redux data - don't modify it!
           cdsSegments.push(s);
         })
       })
@@ -1015,7 +1017,7 @@ EntropyChart.prototype._mainTooltipAa = function _mainTooltipAa(d) {
         </div>
         <p/>
         <div>
-          {this.showCounts ? `${t("Num mutations")}: ${d.y}` : `${t("entropy")}: ${d.y}`}
+          {this.showCounts ? `${t("Num changes observed")}: ${d.y}` : `${t("Normalised Shannon entropy")}: ${d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
         {t("Click to color tree & map by this genotype")}
@@ -1035,12 +1037,12 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
       overlaps = (<div>
         {`Overlaps with ${aa.length} CDS segment${aa.length>1?'s':''}:`}
         <p/>
-        <table>
-          <tbody style={{fontWeight: 300}}>
+        <table className="entropy-table">
+          <tbody >
             <tr key="header">
-              <td style={{minWidth: '60px', paddingRight: '5px'}}>CDS</td>
-              <td style={{paddingRight: '5px'}}>Nt Pos (in CDS)</td>
-              <td style={{paddingRight: '5px'}}>AA Pos</td>
+              <td style={{minWidth: '60px'}}>CDS</td>
+              <td>Nt Pos (in CDS)</td>
+              <td>AA Pos</td>
             </tr>
             {aa.map((match) => (
               <tr key={match.cds.name + match.nucLocal}>
@@ -1067,7 +1069,7 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
         {overlaps}
         <p/>
         <div>
-          {this.showCounts ? `${t("Num mutations")}: ${d.y}` : `${t("entropy")}: ${d.y}`}
+          {this.showCounts ? `${t("Num changes observed")}: ${d.y}` : `${t("Normalised Shannon entropy")}: ${d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
           {t("Click to color tree & map by this genotype")}
@@ -1081,33 +1083,56 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
 
 EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
   const _render = function _render(t) {
+    const segmented = d.cds.segments.length > 1;
     return (
       <div className={"tooltip entropy"} style={infoPanelStyles.tooltip}>
-        <table>
+        <table className="entropy-table">
           <tbody>
-            { d.displayName && (
-              <tr><td>Name</td><td>{d.displayName}</td></tr>
+            { d.cds.displayName && (
+              <tr><td>Name</td><td>{d.cds.displayName}</td></tr>
             )}
-            <tr><td style={{minWidth: '80px'}}>CDS</td><td>{d.name}</td></tr>
-            <tr><td>Parent Gene</td><td>{d.geneName}</td></tr>
-            <tr><td>Range (genome)</td><td>{d.rangeGenome.join(" - ")}</td></tr>
-            <tr><td>Range (local)</td><td>{d.rangeLocal.join(" - ")}</td></tr>
-            <tr><td>CDS Segment</td><td>{d.segmentNumber}</td></tr>
+            <tr><td>CDS name</td><td>{d.cds.name}</td></tr>
+            { d.cds.description && (
+              <tr><td>Description</td><td>{d.cds.description}</td></tr>
+            )}
+            {d.cds.name!==d.gene.name && (
+              <tr><td>Gene name</td><td>{d.gene.name}</td></tr>
+            )}
+            <tr><td>CDS length</td><td>{`${d.cds.length/3} amino acids`}</td></tr>
+
+            {segmented ? (
+              <>
+                <tr><td>CDS segment</td><td>{`${d.segmentNumber}/${d.cds.segments.length}`}</td></tr>
+                <tr><td>Segment length</td><td>{_cdsSegmentLength(d.rangeLocal)}</td></tr>
+                <tr><td>Segment coords</td><td>{d.rangeGenome.join(" - ") + " (genome coordinates)"}</td></tr>
+              </>
+            ) : (
+              <tr><td>CDS coords</td><td>{d.rangeGenome.join(" - ") + " (genome coordinates)"}</td></tr>
+            )}
             <tr><td>Strand</td><td>{d.cds.strand==='+' ? 'Positive' : 'Negative'}</td></tr>
             <tr><td>Frame</td><td>{`${d.frame} (${d.cds.strand==='+'?'F':'R'}${d.frame})`}</td></tr>
-            <tr><td>Phase</td><td>{d.phase}</td></tr>
+            <tr><td style={{minWidth: '100px'}}>Phase</td><td>{d.phase}</td></tr>
           </tbody>
         </table>
-
-        <div style={infoPanelStyles.comment}>
-          {t("Click to view this CDS in isolation")}
-        </div>
+        
+        {this.selectedCds?.name !== d.cds.name &&
+          (<div style={infoPanelStyles.comment}>
+            {t("Click to view this CDS in isolation")}
+          </div>)}
       </div>
     )
   }
   return _render.bind(this)
 }
 
-
+function _cdsSegmentLength(segmentRangeNuc) {
+  const numNucs = segmentRangeNuc[1]-segmentRangeNuc[0] + 1;
+  const hanging = numNucs%3;
+  let ret = String(Math.floor(numNucs/3));
+  if (hanging) {
+    ret += hanging===1 ? " ⅓" : " ⅔";
+  }
+  return ret + " amino acids"
+}
 
 export default EntropyChart;

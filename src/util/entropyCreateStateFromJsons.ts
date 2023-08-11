@@ -6,14 +6,16 @@ type JsonAnnotations = Record<string, JsonAnnotation>
 type Strand = string;
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
 interface JsonAnnotation {
+  /* Other properties are commonly set in the JSON structure, but the following are
+  the only ones read by Auspice */
   end?: number;
   start?: number;
   segments?: JsonSegmentRange[];
   strand: Strand;
-  type?: string; // unused by auspice
-  gene?: string; // for testing purposes only?
-  color?: string; // for testing purposes only?
+  gene?: string;
+  color?: string;
   display_name?: string;
+  description?: string;
 }
 
 /* Specifies the range of the each segment's corresponding position in the genome,
@@ -51,11 +53,13 @@ interface CDS {
   name: string;
   isWrapping: boolean;
   displayName?: string;
+  description?: string;
   stackPosition?: number;
 }
 interface CdsSegment {
   rangeLocal: RangeLocal;
   rangeGenome: RangeGenome;
+  segmentNumber: number; /* 1-based */
   phase: number; /* 0, 1 or 2. Indicates where the next codon begins relative to the 5' end of this segment */
   frame: number; /* 0, 1 or 2. The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
 }
@@ -78,9 +82,6 @@ interface CdsSegment {
  *
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
- * 
- * TODO XXX - negative strand CDSs
- * TODO XXX - throwing an Error here prevents a dataset from loading
  */
 export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
 
@@ -89,7 +90,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
     .map(([, annotation]) => annotation)[0];
   if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
   if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
-  if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positve strand." +
+  if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positive strand." +
     "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
   const rangeGenome: RangeGenome =  [nucAnnotation.start, nucAnnotation.end];
 
@@ -205,6 +206,7 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
     if (annotation.end <= rangeGenome[1]) {
       length = annotation.end-annotation.start+1;    
       segments.push({
+        segmentNumber: 1,
         rangeLocal: [1, length],
         rangeGenome: [annotation.start, annotation.end],
         phase: 0,
@@ -227,6 +229,7 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
       return invalidCds;
     }
     let previousRangeLocalEnd = 0;
+    let segmentNumber = 1;
     for (const segment of annotation.segments) {
       /* The segments, as defined in the JSON, must be ordered according to the order the appear in the CDS.
       For -ve strand that's 3' to 5'. The rangeGenome within each segment is always 5' to 3'. */
@@ -234,14 +237,17 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
       /* phase is the number of nucs we need to add to the so-far-observed length to make it mod 3 */
       const phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
 
-      segments.push({
+      const s: CdsSegment = {
+        segmentNumber: segmentNumber++,
         rangeLocal: [previousRangeLocalEnd+1, previousRangeLocalEnd+segmentLength],
         rangeGenome: [segment.start, segment.end],
         phase,
         frame: _frame(segment.start, segment.end, phase, rangeGenome[1], positive)
-      })
+      };
+      segments.push(s);
       length += segmentLength;
       previousRangeLocalEnd += segmentLength;
+
     }
   }
   if (!segments.length) {
@@ -264,6 +270,9 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
   }
   if (typeof annotation.display_name === 'string') {
     cds.displayName = annotation.display_name;
+  }
+  if (typeof annotation.description === 'string') {
+    cds.description = annotation.description;
   }
   return cds
 }
