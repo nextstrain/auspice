@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { withTranslation } from "react-i18next";
 import 'd3-transition';
+import { FaInfoCircle } from "react-icons/fa";
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
@@ -14,7 +15,9 @@ import { timerStart, timerEnd } from "../../util/perf";
 import { encodeColorByGenotype } from "../../util/getGenotype";
 import { nucleotide_gene, equalArrays } from "../../util/globals";
 import { getCdsByName } from "../../util/entropy";
+import { StyledTooltip } from "../controls/styles";
 import "../../css/entropy.css";
+
 
 const getStyles = (width) => {
   return {
@@ -33,17 +36,25 @@ const getStyles = (width) => {
       position: "relative",
       top: -1
     },
-    goBackToNucleotide: {
+    resetLayout: {
       position: "absolute",
-      right: 144,
+      right: 190,
       top: 0,
       zIndex: 100
     },
     entropyCountSwitch: {
       position: "absolute",
-      right: 5,
+      right: 50,
       top: 0,
       zIndex: 100
+    },
+    helpIcon: {
+      position: "absolute",
+      right: 25,
+      top: 3,
+      fontSize: '16px', // controls icon size
+      cursor: 'help',
+      color: '#888'
     }
   };
 };
@@ -111,19 +122,33 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
 
-  goBackToNucleotide(styles) {
-    if (this.props.narrativeMode) return null;
-    if (this.props.selectedCds===nucleotide_gene) return null;
+  resetLayout(styles) {
+    if (this.props.narrativeMode || !this.state.chart) return null;
+    const viewingGenome = this.props.selectedCds===nucleotide_gene;
+    /**
+     * The intention for this button is to be inactive when viewing the genome &
+     * fully zoomed out, however zoom actions do not trigger redux state changes
+     * which would be necessary for this (see comment in @connect decorator
+     * above). Once we fix that it is simple to conditionally inactivate this
+     * button.
+     */
     return (
-      <div style={{...tabGroup, ...styles.goBackToNucleotide}}>
+      <div style={{...tabGroup, ...styles.resetLayout}}>
         <button
           key={1}
           style={tabGroupMember}
           onClick={() => {
-            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+            if (viewingGenome) {
+              this.state.chart.update({
+                zoomMin: this.state.chart.zoomBounds[0],
+                zoomMax: this.state.chart.zoomBounds[1],
+              })
+            } else {
+              this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+            }
           }}
         >
-          <span style={styles.switchTitle}> {"⏎ nuc"} </span>
+          <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
         </button>
       </div>
     );
@@ -221,11 +246,18 @@ class Entropy extends React.Component {
     }
   }
 
+  title() {
+    if (this.props.width<500) return "Diversity";
+    if (this.props.selectedCds===nucleotide_gene) {
+      return "Nucleotide diversity of genome"
+    }
+    return `Amino acid diversity of CDS ${this.props.selectedCds.name}`
+  }
+
   render() {
-    const { t } = this.props;
     const styles = getStyles(this.props.width);
     return (
-      <Card title={t("Diversity")}>
+      <Card title={this.title()}>
         <InfoPanel d3event={this.state.hovered.d3event} width={this.props.width} height={this.props.height}>
           {this.state.hovered ? this.state.hovered.tooltip(this.props.t) : null}
         </InfoPanel>
@@ -237,8 +269,25 @@ class Entropy extends React.Component {
         >
           <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
-        {this.goBackToNucleotide(styles)}
+        {this.resetLayout(styles)}
         {this.entropyCountSwitch(styles)}
+        <span style={styles.helpIcon} data-tip data-for="entropyHelp">
+          <FaInfoCircle/>
+        </span>
+        <StyledTooltip place="left" type="dark" effect="solid" id="entropyHelp" style={{maxWidth: '50vh'}}>
+          <div>
+            This panel displays the observed diversity across the current genome or a selected CDS
+            {` (currently you are viewing ${this.props.selectedCds===nucleotide_gene?'the genome':`CDS ${this.props.selectedCds.name}`}). `}
+            <p/>
+            The lower axis shows the genome with +ve strand CDSs above and -ve strand CDSs below and
+            the grey overlay allows zooming in to a region.
+            The upper axis shows either the zoomed in region of the genome or a selected CDS;
+            in the latter case the coordinates represent amino acids.
+            <p/>
+            Clicking on a CDS will select it and show it on the upper axis.
+            {` Clicking "Reset Layout" will always return you to viewing the entire genome.`}
+          </div>
+        </StyledTooltip>
       </Card>
     );
   }

@@ -10,7 +10,7 @@ import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
-import { nucleotide_gene, equalArrays } from "../../util/globals";
+import { nucleotide_gene } from "../../util/globals";
 import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
   nucleotideToAaPosition} from "../../util/entropy";
 
@@ -90,6 +90,9 @@ EntropyChart.prototype.update = function update({
       this._setSelectedNodes();
       this._highlightSelectedBars();
     }
+  } else if (zoomMin!==undefined || zoomMax!==undefined) {
+    this._setZoomCoordinates(zoomMin, zoomMax, false);
+    this._groups.navBrush.call(this.brush.move, () => this.zoomCoordinates.map(this.scales.xNav));
   }
 }
 
@@ -563,6 +566,20 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
   if (visPos > 1e6) {   /* axes number differently if large genome */
     this.axes.xNav.tickFormat(format(".1e"));
   }
+
+  /* A hint that the numbering is AA when a CDS is selected */
+  this._groups.mainXAxis.append("text")
+    .attr("class", "axisLabel")
+    .attr("y", 7)
+    .attr("x", -2)
+    .attr("pointer-events", "none")
+    .attr("text-anchor", "end")           // horizontal axis
+    .attr("dominant-baseline", "hanging") // vertical axis
+    .style("fill", darkGrey)
+    .style("font-size", '12px')
+    .text('AA pos')
+    .style("visibility", this.aa ? "visible": "hidden")
+
   this._groups.mainYAxis.call(this.axes.y);
   this._groups.mainXAxis.call(this.axes.xMain);
   this._groups.navXAxis.call(this.axes.xNav);
@@ -588,6 +605,9 @@ EntropyChart.prototype._updateMainScaleAndAxis = function _updateMainScaleAndAxi
     this.scales.xMainUpperLimit = mainAxisLength;
     this._groups.mainXAxis.call(this.axes.xMain);
   }
+
+  this._groups.mainXAxis.select(".axisLabel")
+    .style("visibility", this.aa ? "visible": "hidden")
 
   this.scales.y
     .domain([0, yMax])
