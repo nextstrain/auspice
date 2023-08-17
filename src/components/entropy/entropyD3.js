@@ -10,7 +10,7 @@ import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { darkGrey, infoPanelStyles } from "../../globalStyles";
 import { changeZoom } from "../../actions/entropy";
-import { nucleotide_gene } from "../../util/globals";
+import { nucleotide_gene, equalArrays } from "../../util/globals";
 import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
   nucleotideToAaPosition} from "../../util/entropy";
 
@@ -39,6 +39,7 @@ EntropyChart.prototype.render = function render(props) {
   this._calcOffsets(props.width, props.height);
   this._createGroups();
   this._setScales(props.maxYVal);
+  this._setZoomBounds();
   this._setZoomCoordinates(props.zoomMin, props.zoomMax)
   this._drawAxes();
   this._setUpZoomBrush();
@@ -60,6 +61,7 @@ EntropyChart.prototype.update = function update({
     this.selectedCds = selectedCds;
     this._setUpZoomBrushWrapping()
     this.aa = this.selectedCds !== 'nuc';
+    this._setZoomBounds();
   }
 
   if (newBars || selectedPositions!==undefined) {
@@ -93,6 +95,15 @@ EntropyChart.prototype.update = function update({
 
 /* "PRIVATE" PROTOTYPES */
 
+EntropyChart.prototype._setZoomBounds = function _setZoomBounds() {
+  if (this.aa) {
+    const cdsGenomeCoords = this.selectedCds.segments.map((s) => s.rangeGenome).flat();
+    this.zoomBounds = [Math.min(...cdsGenomeCoords), Math.max(...cdsGenomeCoords)];
+  } else {
+    this.zoomBounds = [0, this.genomeMap[0].range[1]];
+  }
+}
+
 /**
  * Given the selectedCds + selectedPositions we want to choose the appropriate zoom
  * coordinates. This is decided in conjunction with any existing zoom coordinates - we
@@ -125,7 +136,7 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
       if (desiredSurroundingSpace>1000) desiredSurroundingSpace=1000; // up to a max of 1kb
       this.zoomCoordinates = [posMin - desiredSurroundingSpace, posMax + desiredSurroundingSpace];
     } else {
-      this.zoomCoordinates = this.scales.xNav.domain();
+      this.zoomCoordinates = domain;
     }
     if (overrideMin||overrideMax) {
       if (overrideMin) this.zoomCoordinates[0] = overrideMin;
@@ -142,8 +153,7 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
   } else {
     const segments = this.selectedCds.segments;
     if (!this.selectedCds.isWrapping) {
-      const cdsGenomeCoords = segments.map((s) => s.rangeGenome).flat();
-      this.zoomCoordinates = [Math.min(...cdsGenomeCoords), Math.max(...cdsGenomeCoords)];
+      this.zoomCoordinates = [...this.zoomBounds];
       if (overrideMin && overrideMin>this.zoomCoordinates[0] && overrideMin<this.zoomCoordinates[1]) {
         this.zoomCoordinates[0] = overrideMin;
       }
@@ -628,7 +638,7 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   panel height a function of this. (I think this is a good idea, we should do it!)  */
   this.offsets = {};
   this.offsets.tinySpace = tinySpace;
-  this.offsets.brushHandleHeight = 12;
+  this.offsets.brushHandleHeight = 14;
   this.offsets.navCdsRectHeight = navCdsRectHeight;
   this.offsets.navAxisY1 = height - marginBottom - this.offsets.brushHandleHeight -
     tickSpace - navCdsNegativeStrandSpace;
@@ -738,7 +748,7 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
       this._brushChanged();
     })
     .on("end", () => {
-      this._brushChanged();
+      this._brushChanged(true);
       this._dispatchZoomCoordinates();
     });
 
@@ -751,14 +761,20 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
     });
 
   /* https://bl.ocks.org/mbostock/4349545 */
-  const v = this.offsets.brushHandleHeight;
+  const strokeWidth = 2;
+  /* Whether the stroke width is counted as part of the path dimensions is
+  browser dependent, so if we assume it's not counted then we ensure no clipping
+  at the cost of a little whitespace */
+  const height = this.offsets.brushHandleHeight-strokeWidth*2;
   this.brushHandle = this._groups.navBrush.selectAll(".handle--custom")
     .data([{type: "w"}, {type: "e"}])
     .enter().append("path")
     .attr("class", "handle--custom")
-    .attr("fill", darkGrey)
-    .attr("cursor", "ew-resize")
-    .attr("d", `M0,0 -6,${v} 6,${v} Z`)
+    .attr("stroke", darkGrey)
+    .attr("stroke-width", 2)
+    .attr("cursor", (_, i) => this.zoomCoordinates[i]===this.zoomBounds[i] ? 
+      (i===0 ? "e-resize" : "w-resize") : "ew-resize")
+    .attr("d", `M0,0 -5,${height} 5,${height} Z`)
     /* see the extent x,y params in brushX() (above) */
     .attr("transform", (d) => {
       return d.type === "e" ? // end (2nd) handle
@@ -825,9 +841,10 @@ EntropyChart.prototype._dispatchZoomCoordinates = function _dispatchZoomCoordina
  * Called when the brush position has changed, and orchestrates the updating of other
  * elements we want to keep in sync with the brush.
  * Note that the this.brush.move() (a method of d3's brushX) only handles movement of itself
- * (i.e. the grey rectangle)
+ * (i.e. the grey rectangle).
+ * The property `final: boolean` indicates if the brush is being moved or has finished moving
  */
-EntropyChart.prototype._brushChanged = function _brushChanged() {
+EntropyChart.prototype._brushChanged = function _brushChanged(final=false) {
   /* this block called when the brush is manipulated */
   const s = d3event.selection || this.scales.xNav.range();
   const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
@@ -857,6 +874,11 @@ EntropyChart.prototype._brushChanged = function _brushChanged() {
     this.brushHandle
       .attr("display", null)
       .attr("transform", (d, i) => `translate(${this.scales.xNav(this.zoomCoordinates[i])},${this.offsets.brushHeight})`);
+    if (final) {
+      this._groups.navBrush.selectAll(".handle--custom")
+        .attr("cursor", (_, i) => this.zoomCoordinates[i]===this.zoomBounds[i] ? 
+          (i===0 ? "e-resize" : "w-resize") : "ew-resize");
+    }
   }
   if (this._navBrushWrappingSelection) {
     this._navBrushWrappingSelection
