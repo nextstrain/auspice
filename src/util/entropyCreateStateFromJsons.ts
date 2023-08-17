@@ -184,18 +184,17 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
     isWrapping: false,
     color: '#000',
   }
-  let strand;
-  if (annotation.strand==='+') {
-    strand = '+';
-  } else if (annotation.strand==='-') {
-    strand = '-';
-  } else {
-    // Ideally we would ignore this CDS, but I have a feeling many CDSs don't have strand annotated.
-    console.warn(`[Genome annotation]  ${cdsName} has strand ${annotation.strand || '(missing)'}.` +
-      " We will treat this CDS as a positive strand CDS.");
-    strand = '+';
+  const strand = annotation.strand;
+  if (!(strand==='+' || strand==='-')) {
+    /** GFF allows for strands '?' (features whose strandedness is relevant, but unknown) and '.' (features that are not stranded),
+     * which are represented by augur as '?' and null, respectively. (null comes from `None` in python.)
+     * In both cases it's not a good idea to make an assumption of strandedness, or to assume it's even a CDS. */
+    console.error(`[Genome annotation]  ${cdsName} has strand ` + 
+      (Object.prototype.hasOwnProperty.call(annotation, "strand") ? String(annotation.strand) : '(missing)') +
+      ". This CDS will be ignored.");
+    return invalidCds;
   }
-  const positive = strand === '+';
+  const positive = strand==='+';
   
   let length = 0;  // rangeLocal length
   const segments: CdsSegment[] = [];
