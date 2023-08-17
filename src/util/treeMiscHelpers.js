@@ -273,27 +273,22 @@ export const getTipChanges = (tipNode) => {
  * Returns a function which will sort a list, where each element in the list
  * is a gene name. Sorted by start position of the gene, with "nuc" first.
  */
-export const sortByGeneOrder = (genomeAnnotations) => {
-  if (!(genomeAnnotations instanceof Object)) {
-    return (a, b) => {
-      if (a==="nuc") return -1;
-      if (b==="nuc") return 1;
-      return 0;
-    };
-  }
-  const geneOrder = Object.entries(genomeAnnotations)
-    .sort((a, b) => {
-      if (b[0]==="nuc") return 1; // show nucleotide "gene" first
-      if (a[1].start < b[1].start) return -1;
-      if (a[1].start > b[1].start) return 1;
-      return 0;
-    })
-    .map(([name]) => name);
-
+export const sortByGeneOrder = (genomeMap) => {
+  if (!genomeMap) return () => 0;
+  /* Sort CDSs based on the genome position of the start codon */
+  const cdsPos = genomeMap[0].genes.map((gene) =>
+    gene.cds.map((cds) => [cds.name, cds.segments[0].rangeGenome[cds.strand==='+' ? 0 : 1]])
+  ).flat();
+  cdsPos.sort((a, b) => a[1]>b[1] ? 1 : -1)
+  const order = {};
+  cdsPos.forEach(([name,], idx) => {order[name] = idx+1;});
+  order.nuc=0; // Nuc is always first
+  /* Returned function takes two CDS names so it can be used as the sort function
+  for an array of CDS names */
   return (a, b) => {
-    if (geneOrder.indexOf(a) < geneOrder.indexOf(b)) return -1;
-    if (geneOrder.indexOf(a) > geneOrder.indexOf(b)) return 1;
-    return 0;
+    if (order[a]===undefined) return 1;
+    if (order[b]===undefined) return -1;
+    return order[a] - order[b];
   };
 };
 

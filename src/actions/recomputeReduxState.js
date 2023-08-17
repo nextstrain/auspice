@@ -724,9 +724,6 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.build_url) {
     metadata.buildUrl = json.meta.build_url;
   }
-  if (json.meta.genome_annotations) {
-    metadata.genomeAnnotations = json.meta.genome_annotations;
-  }
   if (json.meta.data_provenance) {
     metadata.dataProvenance = json.meta.data_provenance;
   }
@@ -794,7 +791,7 @@ export const createStateFromQueryOrJSONs = ({
     /* create metadata state */
     metadata = createMetadataStateFromJSON(json);
     /* entropy state */
-    entropy = entropyCreateState(metadata.genomeAnnotations);
+    entropy = entropyCreateState(json.meta.genome_annotations);
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
     /* ensure default measurements state */
