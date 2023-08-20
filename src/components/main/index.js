@@ -134,7 +134,7 @@ class Main extends React.Component {
     const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
       calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.state.mobileDisplay);
     const overlayHandler = () => {this.props.dispatch({type: TOGGLE_SIDEBAR, value: false});};
-    const {full, grid, chart} =
+    const {full, grid, chartEntropy, chartFrequencies} =
       calcPanelDims(this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     /* We use tree name(s) as a react key so that components remount when datasets change */
     const keyName = `${this.props.treeName}${this.props.secondTreeName ? `:${this.props.secondTreeName}` : ''}`;
@@ -205,13 +205,13 @@ class Main extends React.Component {
           }
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
-              <Entropy width={chart.width} height={chart.height} key={keyName+"_entropy"}/>
+              <Entropy width={chartEntropy.width} height={chartEntropy.height} key={keyName+"_entropy"}/>
             </Suspense>) :
             null
           }
           {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
             (<Suspense fallback={null}>
-              <Frequencies width={chart.width} height={chart.height} key={keyName+"_frequencies"}/>
+              <Frequencies width={chartFrequencies.width} height={chartFrequencies.height} key={keyName+"_frequencies"}/>
             </Suspense>) :
             null
           }

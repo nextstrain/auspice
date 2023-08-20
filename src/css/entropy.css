@@ -5,13 +5,11 @@
   --medGrey: #888;
 }
 
+/* Normally elements with .overlay are children of the .brush, however
+the overlay added on key-presses is is not a child of .brush */
 #d3entropy .overlay {
   fill: none;
   pointer-events: all;
-}
-
-#d3entropy .brush {
-  stroke: none;
 }
 
 #d3entropy .niceText {
@@ -25,4 +23,20 @@
   cursor: grab;
   cursor: -moz-grab;
   cursor: -webkit-grab;
+}
+
+#d3entropy .cdsText {
+  pointer-events: none;
+}
+#d3entropy .cds {
+  cursor: pointer;
+}
+
+table.entropy-table {
+  font-weight: 300;
+}
+
+table.entropy-table td {
+  padding-bottom: 3px;
+  padding-right: 5px;
 }

@@ -31,9 +31,11 @@ export const calcPanelDims = (panels, narrativeIsDisplayed, availableWidth, avai
 
   const full = computeResponsive({horizontal: fullWidthFraction, vertical: fullHeightFraction, availableWidth, availableHeight});
   const grid = computeResponsive({horizontal: gridWidthFraction, vertical: gridHeightFraction, availableWidth, availableHeight});
-  const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
+  /* Frequencies are usable with a (SVG) height of ~200px, but the Entropy panel needs more */
+  const chartFrequencies = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 200});
+  const chartEntropy = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 300});
 
-  return {full, grid, chart};
+  return {full, grid, chartFrequencies, chartEntropy};
 
 };
 

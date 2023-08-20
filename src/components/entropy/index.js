@@ -4,17 +4,20 @@ import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { withTranslation } from "react-i18next";
 import 'd3-transition';
+import { FaInfoCircle } from "react-icons/fa";
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
-import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
 import { timerStart, timerEnd } from "../../util/perf";
-import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
-import { nucleotide_gene } from "../../util/globals";
+import { encodeColorByGenotype } from "../../util/getGenotype";
+import { nucleotide_gene, equalArrays } from "../../util/globals";
+import { getCdsByName } from "../../util/entropy";
+import { StyledTooltip } from "../controls/styles";
 import "../../css/entropy.css";
+
 
 const getStyles = (width) => {
   return {
@@ -33,44 +36,47 @@ const getStyles = (width) => {
       position: "relative",
       top: -1
     },
-    aaNtSwitch: {
+    resetLayout: {
       position: "absolute",
-      right: 5,
+      right: 190,
       top: 0,
       zIndex: 100
     },
     entropyCountSwitch: {
       position: "absolute",
-      right: 74,
+      right: 50,
       top: 0,
       zIndex: 100
+    },
+    helpIcon: {
+      position: "absolute",
+      right: 25,
+      top: 3,
+      fontSize: '16px', // controls icon size
+      cursor: 'help',
+      color: '#888'
     }
   };
 };
 
-const constructEncodedGenotype = (mutType, d) => {
-  return encodeColorByGenotype(
-    mutType === "aa"
-      ? { gene: d.prot, positions: [d.codon] }
-      : { positions: [d.x] }
-  );
-};
-
 @connect((state) => {
   return {
-    mutType: state.controls.mutType,
+    selectedCds: state.entropy.selectedCds,
+    selectedPositions: state.entropy.selectedPositions,
     bars: state.entropy.bars,
-    annotations: state.entropy.annotations,
-    geneMap: state.entropy.geneMap,
-    geneLength: state.controls.geneLength,
+    genomeMap: state.entropy.genomeMap,
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
+    /**
+     * Note that zoomMin & zoomMax only represent the state when changed by a URL
+     * i.e. on dataset load or narrative page change. As such, they fall out-of-sync
+     * as soon as any user-zooming is performed.
+     */
     zoomMin: state.controls.zoomMin,
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
-    shouldReRender: false,
     panelLayout: state.controls.panelLayout,
     narrativeMode: state.narrative.display
   };
@@ -88,51 +94,61 @@ class Entropy extends React.Component {
     loaded: PropTypes.bool.isRequired,
     colorBy: PropTypes.string.isRequired,
     defaultColorBy: PropTypes.string.isRequired,
-    mutType: PropTypes.string.isRequired
+    selectedCds: PropTypes.any.isRequired,
+    selectedPositions: PropTypes.array.isRequired,
   }
-
   /* CALLBACKS */
-  onHover(d, x, y) {
-    // console.log("hovering @", x, y, this.state.chartGeom);
-    this.setState({hovered: {d, type: ".tip", x, y}});
+  onHover(hovered) {
+    this.setState({hovered})
   }
   onLeave() {
     this.setState({hovered: false});
   }
   onClick(d) {
     if (this.props.narrativeMode) return;
-    const colorBy = constructEncodedGenotype(this.props.mutType, d);
-    analyticsControlsEvent("color-by-genotype");
+    const colorBy = d.codon===undefined ?
+      encodeColorByGenotype({ positions: [d.x] }) :
+      encodeColorByGenotype({ gene: this.props.selectedCds.name, positions: [d.codon] });
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
-
-  changeMutTypeCallback(newMutType) {
-    if (newMutType !== this.props.mutType) {
-      /* 1. switch the redux colorBy back to the default */
-      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
-      /* 2. update the mut type in redux & re-calculate entropy */
-      this.props.dispatch(changeMutType(newMutType));
-    }
+  onCdsClick(d) {
+    /**
+     * This callback is only available if we are viewing the genome in the main axis.
+     * The color-by is decoupled from the selected CDS / selected position; this callback
+     * modifies the entropy selected CDS/positions, but leaves the color-by untouched.
+     */
+    this.props.dispatch(changeEntropyCdsSelection(getCdsByName(this.props.genomeMap, d.cds.name)));
+    this.setState({hovered: false});
   }
 
-  aaNtSwitch(styles) {
-    if (this.props.narrativeMode) return null;
+  resetLayout(styles) {
+    if (this.props.narrativeMode || !this.state.chart) return null;
+    const viewingGenome = this.props.selectedCds===nucleotide_gene;
+    /**
+     * The intention for this button is to be inactive when viewing the genome &
+     * fully zoomed out, however zoom actions do not trigger redux state changes
+     * which would be necessary for this (see comment in @connect decorator
+     * above). Once we fix that it is simple to conditionally inactivate this
+     * button.
+     */
     return (
-      <div style={{...tabGroup, ...styles.aaNtSwitch}}>
+      <div style={{...tabGroup, ...styles.resetLayout}}>
         <button
           key={1}
-          style={this.props.mutType === "aa" ? tabGroupMemberSelected : tabGroupMember}
-          onClick={() => this.changeMutTypeCallback("aa")}
+          style={tabGroupMember}
+          onClick={() => {
+            if (viewingGenome) {
+              this.state.chart.update({
+                zoomMin: this.state.chart.zoomBounds[0],
+                zoomMax: this.state.chart.zoomBounds[1],
+              })
+            } else {
+              this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+            }
+          }}
         >
-          <span style={styles.switchTitle}> {"AA"} </span>
-        </button>
-        <button
-          key={2}
-          style={this.props.mutType !== "aa" ? tabGroupMemberSelected : tabGroupMember}
-          onClick={() => this.changeMutTypeCallback("nuc")}
-        >
-          <span style={styles.switchTitle}> {"NT"} </span>
+          <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
         </button>
       </div>
     );
@@ -162,13 +178,12 @@ class Entropy extends React.Component {
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
-      props.annotations,
-      props.geneMap,
-      props.geneLength[nucleotide_gene],
+      props.genomeMap,
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
-        onClick: this.onClick.bind(this)
+        onClick: this.onClick.bind(this),
+        onCdsClick: this.onCdsClick.bind(this)
       }
     );
     chart.render(props);
@@ -204,50 +219,17 @@ class Entropy extends React.Component {
         updateParams.zoomMax = nextProps.zoomMax;
         updateParams.zoomMin = nextProps.zoomMin;
       }
-      if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
-        updateParams.aa = nextProps.mutType === "aa";
-        updateParams.newBars = nextProps.bars;
-        updateParams.maxYVal = nextProps.maxYVal;
+      if (this.props.bars !== nextProps.bars) {
+        updateParams.newBars = [nextProps.bars, nextProps.maxYVal];
       }
-      if (this.props.colorBy !== nextProps.colorBy && (isColorByGenotype(this.props.colorBy) || isColorByGenotype(nextProps.colorBy))) {
-        if (isColorByGenotype(nextProps.colorBy)) {
-          const colorByGenotype = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
-          if (colorByGenotype.aa) {  /* if it is a gene, zoom to it */
-            updateParams.gene = colorByGenotype.gene;
-            updateParams.start = nextProps.geneMap[updateParams.gene].start;
-            updateParams.end = nextProps.geneMap[updateParams.gene].end;
-          } else { /* if a nuc, want to do different things if 1 or multiple */
-            const positions = colorByGenotype.positions;
-            const zoomCoord = this.state.chart.zoomCoordinates;
-            const maxNt = this.state.chart.maxNt;
-            /* find out what new coords would be - if different enough, change zoom */
-            let startUpdate, endUpdate;
-            if (positions.length > 1) {
-              const start = Math.min.apply(null, positions);
-              const end = Math.max.apply(null, positions);
-              startUpdate = start - (end-start)*0.05;
-              endUpdate = end + (end-start)*0.05;
-            } else {
-              const pos = positions[0];
-              const eitherSide = maxNt*0.05;
-              const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
-                (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
-              startUpdate = newStartEnd[0];
-              endUpdate = newStartEnd[1];
-            }
-            /* if the zoom would be different enough, change it */
-            if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
-              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
-              !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
-              updateParams.gene = colorByGenotype.gene;
-              updateParams.start = startUpdate;
-              updateParams.end = endUpdate;
-            }
-          }
-          updateParams.selected = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
-        } else {
-          updateParams.clearSelected = true;
-        }
+      if (this.props.selectedCds !== nextProps.selectedCds) {
+        updateParams.selectedCds = nextProps.selectedCds;
+      }
+      if (this.props.showCounts !== nextProps.showCounts) {
+        updateParams.showCounts = nextProps.showCounts;
+      }
+      if (!equalArrays(this.props.selectedPositions, nextProps.selectedPositions)) {
+        updateParams.selectedPositions = nextProps.selectedPositions
       }
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
@@ -264,20 +246,21 @@ class Entropy extends React.Component {
     }
   }
 
+  title() {
+    if (this.props.width<500) return "Diversity";
+    if (this.props.selectedCds===nucleotide_gene) {
+      return "Nucleotide diversity of genome"
+    }
+    return `Amino acid diversity of CDS ${this.props.selectedCds.name}`
+  }
+
   render() {
-    const { t } = this.props;
     const styles = getStyles(this.props.width);
     return (
-      <Card title={t("Diversity")}>
-        <InfoPanel
-          hovered={this.state.hovered}
-          width={this.props.width}
-          height={this.props.height}
-          mutType={this.props.mutType}
-          showCounts={this.props.showCounts}
-          geneMap={this.props.geneMap}
-          t={t}
-        />
+      <Card title={this.title()}>
+        <InfoPanel d3event={this.state.hovered.d3event} width={this.props.width} height={this.props.height}>
+          {this.state.hovered ? this.state.hovered.tooltip(this.props.t) : null}
+        </InfoPanel>
         <svg
           id="d3entropyParent"
           style={{pointerEvents: "auto"}}
@@ -286,8 +269,25 @@ class Entropy extends React.Component {
         >
           <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
-        {this.aaNtSwitch(styles)}
+        {this.resetLayout(styles)}
         {this.entropyCountSwitch(styles)}
+        <span style={styles.helpIcon} data-tip data-for="entropyHelp">
+          <FaInfoCircle/>
+        </span>
+        <StyledTooltip place="left" type="dark" effect="solid" id="entropyHelp" style={{maxWidth: '50vh'}}>
+          <div>
+            This panel displays the observed diversity across the current genome or a selected CDS
+            {` (currently you are viewing ${this.props.selectedCds===nucleotide_gene?'the genome':`CDS ${this.props.selectedCds.name}`}). `}
+            <p/>
+            The lower axis shows the genome with +ve strand CDSs above and -ve strand CDSs below and
+            the grey overlay allows zooming in to a region.
+            The upper axis shows either the zoomed in region of the genome or a selected CDS;
+            in the latter case the coordinates represent amino acids.
+            <p/>
+            Clicking on a CDS will select it and show it on the upper axis.
+            {` Clicking "Reset Layout" will always return you to viewing the entire genome.`}
+          </div>
+        </StyledTooltip>
       </Card>
     );
   }

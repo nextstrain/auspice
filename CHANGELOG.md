@@ -1,5 +1,14 @@
 # Changelog
 
+* Entropy panel now supports more complex genome architectures and has improved styling.
+The JSON schema has been extended to allow segmented CDSs, which allows us to represent CDSs such as those which
+wrap the origin (common in HepB), and those with ribosomal slippage (nCoV, EBOV). The visual representation of CDSs
+now better conveys overlapping CDSs, both in the lower "nav" axis where CDSs are stacked on top of each other and
+in the upper "main" axis where we now view the translations for each CDS individually.
+A number of small genotype-related bugs have also been fixed and the internal representation of the genome streamlined.
+For full details please see [#1684](https://github.com/nextstrain/auspice/pull/1684), and the schema changes are
+detailed in [augur PR #1281](https://github.com/nextstrain/augur/pull/1281).
+
 * Remove support for Node.js version 14. ([#1674](https://github.com/nextstrain/auspice/pull/1674))
 * Add support for Node.js version 20. ([#1673](https://github.com/nextstrain/auspice/pull/1673))
 

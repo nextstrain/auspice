@@ -36,13 +36,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     let colorScale, legendValues, legendBounds, legendLabels, domain;
 
     let genotype;
-    if (isColorByGenotype(colorBy) && controls.geneLength) {
-      genotype = decodeColorByGenotype(colorBy, controls.geneLength);
+    if (isColorByGenotype(colorBy)) {
+      genotype = decodeColorByGenotype(colorBy);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
     }
     const scaleType = genotype ? "categorical" : colorings[colorBy].type;
     if (genotype) {
-      ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, controls.mutType));
+      ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
       if (scaleType === "continuous" || scaleType==="temporal") {
@@ -152,18 +152,18 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   };
 }
 
-function createScaleForGenotype(t1nodes, mutType) {
-  const legendValues = orderOfGenotypeAppearance(t1nodes, mutType);
-  const trueValues = mutType === "nuc" ?
-    legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N" && x !== "") :
-    legendValues.filter((x) => x !== "X" && x !== "-" && x !== "");
+function createScaleForGenotype(t1nodes, aaGenotype) {
+  const legendValues = orderOfGenotypeAppearance(t1nodes, aaGenotype);
+  const trueValues = aaGenotype ?
+    legendValues.filter((x) => x !== "X" && x !== "-" && x !== "") :
+    legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N" && x !== "");
   const domain = [undefined, ...legendValues];
   const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
   // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
   if (legendValues.indexOf("-") !== -1) {
     range.push(rgb(217, 217, 217));
   }
-  if (legendValues.indexOf("N") !== -1 && mutType === "nuc") {
+  if (legendValues.indexOf("N") !== -1 && !aaGenotype) {
     range.push(rgb(153, 153, 153));
   }
   if (legendValues.indexOf("X") !== -1) {

@@ -40,7 +40,6 @@ export const reallyBigNumber = 10000000;
 export const LBItime_window = 0.5;
 export const LBItau = 0.0005;
 export const attemptUntangle = false;
-export const defaultMutType = "aa";
 export const nucleotide_gene = "nuc";
 export const plot_frequencies = false;
 export const genericDomain = [0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
@@ -248,3 +247,5 @@ const aminoAcids = {
 };
 
 export const getAminoAcidName = (x) => aminoAcids[x.toUpperCase()] || "Unknown";
+
+export const equalArrays = (a,b) => a.length===b.length && a.every((el, idx) => b[idx]===el);

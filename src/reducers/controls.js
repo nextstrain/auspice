@@ -4,7 +4,6 @@ import { defaultGeoResolution,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
-  defaultMutType,
   controlsHiddenWidth,
   strainSymbol,
   twoColumnBreakpoint } from "../util/globals";
@@ -46,8 +45,6 @@ export const getDefaultControlsState = () => {
     region: null,
     search: null,
     strain: null,
-    geneLength: {},
-    mutType: defaultMutType,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     scatterVariables: {},
@@ -243,10 +240,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
         filters
       });
     }
-    case types.TOGGLE_MUT_TYPE:
-      return Object.assign({}, state, {
-        mutType: action.data
-      });
     case types.TOGGLE_TEMPORAL_CONF:
       return Object.assign({}, state, {
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
@@ -322,6 +315,15 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return {...state, measurementsDisplay: action.data};
     case types.APPLY_MEASUREMENTS_FILTER:
       return {...state, measurementsFilters: action.data};
+    /**
+     * Currently the CHANGE_ZOOM action (entropy panel zoom changed) does not
+     * update the zoomMin/zoomMax, and as such they only represent the initially
+     * requested zoom range. The following commented out code will keep the
+     * state in sync, but corresponding changes will be  required to the entropy
+     * code.
+     */
+    // case types.CHANGE_ZOOM: // this is the entropy panel zoom
+    //   return {...state, zoomMin: action.zoomc[0], zoomMax: action.zoomc[1]};
     default:
       return state;
   }

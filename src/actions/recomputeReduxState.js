@@ -13,12 +13,12 @@ import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { castIncorrectTypes } from "../util/castJsonTypes";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
+import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
-import { isColorByGenotype, decodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters } from "../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
@@ -202,7 +202,7 @@ const restoreQueryableStateToDefaults = (state) => {
   return state;
 };
 
-const modifyStateViaMetadata = (state, metadata) => {
+const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   if (metadata.date_range) {
     /* this may be useful if, e.g., one were to want to display an outbreak
     from 2000-2005 (the default is the present day) */
@@ -272,9 +272,10 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsAvailable = metadata.panels.slice();
     state.panelsToDisplay = metadata.panels.slice();
   } else {
-    /* while `metadata.panels` is required by the schema, every single dataset can display a tree, so this is a nice fallback */
-    state.panelsAvailable = ["tree"];
-    state.panelsToDisplay = ["tree"];
+    /* while `metadata.panels` is required by the schema, we provide a fallback
+    Entropy will be removed below if it's not possible to display it. */
+    state.panelsAvailable = ["tree", "entropy"];
+    state.panelsToDisplay = ["tree", "entropy"];
   }
 
   /* if we lack geoResolutions, remove map from panels to display */
@@ -283,10 +284,31 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
 
-  /* if we lack genome annotations, remove entropy from panels to display */
-  if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
+  /**
+   * Entropy panel display is only possible if all three of the following are true:
+   * (i) the genomeMap exists
+   * (ii) mutations exist on the tree
+   * (iii) the JSON specifies "entropy" as a panel _or_ doesn't specify panels at all (see above)
+   * If (i && ii) then we can select genotype colorings. If this is not specified in the JSON
+   * then we add it here as I think it's the best UX (otherwise we either have to disable
+   * the entropy panel or disable the ability to select gt colorings from that panel)
+   */
+  if (!metadata.colorings) metadata.colorings = {};
+  if (genomeMap && state.coloringsPresentOnTree.has("gt")) {
+    if (!Object.keys(metadata.colorings).includes('gt')) {
+      metadata.colorings.gt = {
+        title: "Genotype",
+        type: "categorical"
+      }
+    }
+  } else {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
+    if (Object.keys(metadata.colorings).includes('gt')) {
+      console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " + 
+      "check that 'metadata.genome_annotations' is correct and that mutations have been assigned to 'branch_attrs' on the tree.")
+      delete metadata.colorings.gt;
+    }
   }
 
   /* After calculating the available panels, we check this against the display default (if that was set)
@@ -308,17 +330,6 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (!hasMultipleGridPanels(state.panelsToDisplay)) {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
-  }
-  /* genome annotations in metadata */
-  if (metadata.genomeAnnotations) {
-    for (const gene of Object.keys(metadata.genomeAnnotations)) {
-      state.geneLength[gene] = metadata.genomeAnnotations[gene].end - metadata.genomeAnnotations[gene].start;
-      if (gene !== nucleotide_gene) {
-        state.geneLength[gene] /= 3;
-      }
-    }
-  } else {
-    console.warn("JSONs did not include `genome_annotations`");
   }
 
   return state;
@@ -351,10 +362,18 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
 
-  /* For the colorings (defined in the JSON) we need to check whether they
-  (a) actually exist on the tree and (b) have confidence values.
-  TODO - this whole file should be reorganised to make things clearer.
-  perhaps there's a better place to put this... */
+  /**
+   * The following section makes an (expensive) traversal through the tree, checking if
+   * the provided colorings (via the JSON) are actually present on the tree. A
+   * previous comment implied that any colorings not present in the tree would be removed,
+   * but they are not! In fact, `coloringsPresentOnTreeWithConfidence` is never accessed,
+   * and `coloringsPresentOnTree` was only accessed when metadata CSV/TSV is dropped on.
+   * I'm now checking if "gt" is in `coloringsPresentOnTree` to decide whether to allow
+   * a genotype colorBy and the entropy panel, but this approach could be improved as well.
+   * We should either remove this completely, make it work as intended, or execute this
+   * only when a file is dropped. (I've gone down too many rabbit holes in this PR to
+   * do this now, unfortunately.)                                           james, 2023
+   */
   state.coloringsPresentOnTree = new Set();
   state.coloringsPresentOnTreeWithConfidence = new Set(); // subset of above
 
@@ -392,15 +411,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   examineNodes(tree.nodes);
   if (treeToo) examineNodes(treeToo.nodes);
 
-
-  /* ensure specified mutType is indeed available */
-  if (!aaMuts && !nucMuts) {
-    state.mutType = null;
-  } else if (state.mutType === "aa" && !aaMuts) {
-    state.mutType = "nuc";
-  } else if (state.mutType === "nuc" && !nucMuts) {
-    state.mutType = "aa";
-  }
   if (aaMuts || nucMuts) {
     state.coloringsPresentOnTree.add("gt");
   }
@@ -431,7 +441,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarrative) => {
+const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, viewingNarrative) => {
   /* want to check that the (currently set) colorBy (state.colorBy) is valid,
    * and fall-back to an available colorBy if not
    */
@@ -462,22 +472,49 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     delete query.c;
   };
   if (isColorByGenotype(state.colorBy)) {
-    /* Check that the genotype is valid with the current data */
-    if (!decodeColorByGenotype(state.colorBy, state.geneLength)) {
+    /* Check that the genotype is valid (and so are all positions) with the current data */
+    if (!genomeMap) {
       fallBackToDefaultColorBy();
+    } else {
+      const decoded = decodeColorByGenotype(state.colorBy, genomeMap)
+      if (!decoded) { // note that a console.error printed by decodeColorByGenotype in this case
+        fallBackToDefaultColorBy();
+      } else {
+        const encoded = encodeColorByGenotype(decoded);
+        if (state.colorBy!==encoded) {
+          /* color-by is partially valid - i.e. some positions are invalid (note that position ordering is unchanged) */
+          console.error(`Genotype color-by ${state.colorBy} contains at lease one invalid position. ` +
+          `Color-by has been changed to ${encoded}.`)
+          query.c = encoded;
+          state.colorBy = encoded
+        }
+      }
     }
   } else if (Object.keys(metadata.colorings).indexOf(state.colorBy) === -1) {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
     fallBackToDefaultColorBy();
   }
 
-  /* zoom */
-  if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
-  if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
-  if (state.zoomMin > state.zoomMax) {
-    const tempMin = state.zoomMin;
-    state.zoomMin = state.zoomMax;
-    state.zoomMax = tempMin;
+  /* Validate requested entropy zoom bounds (via URL) */
+  const genomeBounds = genomeMap?.[0]?.range;
+  if (!genomeBounds) {
+    /* Annotations block missing / invalid, so it makes no sense to have entropy zoom bounds */
+    [state.zoomMin, state.zoomMax] = [undefined, undefined];
+    delete query.gmin;
+    delete query.gmax;
+  } else {
+    if (state.zoomMin <= genomeBounds[0] || state.zoomMin >= genomeBounds[1]) {
+      state.zoomMin = undefined;
+      delete query.gmin;
+    }
+    if (state.zoomMax <= genomeBounds[0] || state.zoomMax >= genomeBounds[1]) {
+      state.zoomMax = undefined;
+      delete query.gmax;
+    }
+    if (state.zoomMin && state.zoomMax && state.zoomMin>state.zoomMax) {
+      [state.zoomMin, state.zoomMax] = [state.zoomMax, state.zoomMin];
+      [query.gmin, query.gmax] = [state.zoomMin, state.zoomMax];
+    }
   }
 
   /* colorBy confidence */
@@ -528,14 +565,6 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     state.temporalConfidence.display = false;
     state.temporalConfidence.on = false;
     delete query.ci; // rm ci from the query if it doesn't apply
-  }
-
-  /* if colorBy is a genotype then we need to set mutType */
-  if (state.colorBy) {
-    const maybeMutType = determineColorByGenotypeMutType(state.colorBy);
-    if (maybeMutType) {
-      state.mutType = maybeMutType;
-    }
   }
 
   /* ensure selected filters (via the URL query) are valid. If not, modify state + URL. */
@@ -695,9 +724,6 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.build_url) {
     metadata.buildUrl = json.meta.build_url;
   }
-  if (json.meta.genome_annotations) {
-    metadata.genomeAnnotations = json.meta.genome_annotations;
-  }
   if (json.meta.data_provenance) {
     metadata.dataProvenance = json.meta.data_provenance;
   }
@@ -765,7 +791,7 @@ export const createStateFromQueryOrJSONs = ({
     /* create metadata state */
     metadata = createMetadataStateFromJSON(json);
     /* entropy state */
-    entropy = entropyCreateState(metadata.genomeAnnotations);
+    entropy = entropyCreateState(json.meta.genome_annotations);
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
     /* ensure default measurements state */
@@ -788,9 +814,7 @@ export const createStateFromQueryOrJSONs = ({
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
-    controls = modifyStateViaMetadata(controls, metadata);
-    controls["absoluteZoomMin"] = 0;
-    controls["absoluteZoomMax"] = entropy.lengthSequence;
+    controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
     can affect props comparisons. Due to the size of some of the state, we only do this selectively */
@@ -802,7 +826,7 @@ export const createStateFromQueryOrJSONs = ({
     frequencies = {...oldState.frequencies};
     measurements = {...oldState.measurements};
     controls = restoreQueryableStateToDefaults(controls);
-    controls = modifyStateViaMetadata(controls, metadata);
+    controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
   }
 
   /* For the creation of state, we want to parse out URL query parameters
@@ -826,7 +850,7 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
-  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
+  controls = checkAndCorrectErrorsInState(controls, metadata, entropy.genomeMap, query, tree, viewingNarrative); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
@@ -882,12 +906,20 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate entropy in view */
   if (entropy.loaded) {
-    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+    /* The selected CDS + positions are only known if a genotype color-by has been set (display defaults | url) */
+    entropy.selectedCds = nucleotide_gene;
+    entropy.selectedPositions = [];
+    if (isColorByGenotype(controls.colorBy)) {
+      const gt = decodeColorByGenotype(controls.colorBy);
+      const cds = getCdsFromGenotype(gt?.gene, entropy.genomeMap);
+      if (cds) {
+        entropy.selectedCds = cds;
+        entropy.selectedPositions = gt?.positions || []
+      }
+    }
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
-    entropy.zoomMax = controls["zoomMax"];
-    entropy.zoomMin = controls["zoomMin"];
-    entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
   }
 
   /* update frequencies if they exist (not done for new JSONs) */

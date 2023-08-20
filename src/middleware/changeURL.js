@@ -2,8 +2,8 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
-import { genotypeSymbol, strainSymbol } from "../util/globals";
-import { encodeGenotypeFilters } from "../util/getGenotype";
+import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
+import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -52,11 +52,29 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       that will still make sense when the default for the given branch labelling is "show all" */
       query.showBranchLabels = action.value ? 'all' : undefined;
       break;
-    case types.CHANGE_ZOOM:
-      /* entropy panel genome zoom coordinates */
-      query.gmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];
-      query.gmax = action.zoomc[1] >= state.controls.absoluteZoomMax ? undefined : action.zoomc[1];
+    case types.CHANGE_ZOOM: {
+      /* entropy panel genome zoom coordinates. On a page load these queries
+      will be combined with the selected CDS from the color-by genotype, or be
+      applied to the nuc view. As such, if the entropy panel's selected CDS is
+      _not_ the same as the colorBy (if applicable) then we don't set gmin/gmax
+      */
+      const entropyCdsName = state.entropy.selectedCds===nucleotide_gene ?
+        nucleotide_gene :
+        state.entropy.selectedCds.name;
+      const colorByCdsName = isColorByGenotype(state.controls.colorBy) &&
+        decodeColorByGenotype(state.controls.colorBy, state.entropy.genomeMap).gene;
+      const bounds = state.entropy.genomeMap[0].range; // guaranteed to exist, as the action comes from <entropy>
+      if (
+        ((!colorByCdsName || colorByCdsName===nucleotide_gene) && entropyCdsName===nucleotide_gene) ||
+        (colorByCdsName===entropyCdsName)
+      ) {
+        query.gmin = action.zoomc[0] <= bounds[0] ? undefined : action.zoomc[0];
+        query.gmax = action.zoomc[1] >= bounds[1] ? undefined : action.zoomc[1];
+      } else {
+        [query.gmin, query.gmax] = [undefined, undefined];
+      }
       break;
+    }
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;

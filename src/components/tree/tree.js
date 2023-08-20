@@ -66,7 +66,7 @@ class Tree extends React.Component {
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
-      newState.geneSortFn = sortByGeneOrder(this.props.metadata.genomeAnnotations);
+      newState.geneSortFn = sortByGeneOrder(this.props.genomeMap);
       this.setState(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
@@ -200,7 +200,7 @@ class Tree extends React.Component {
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
-          colorings={this.props.metadata.colorings}
+          colorings={this.props.colorings}
           geneSortFn={this.state.geneSortFn}
           observedMutations={this.props.tree.observedMutations}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
@@ -210,7 +210,7 @@ class Tree extends React.Component {
           clearSelectedNode={this.clearSelectedNode}
           selectedNode={this.state.selectedNode}
           observedMutations={this.props.tree.observedMutations}
-          colorings={this.props.metadata.colorings}
+          colorings={this.props.colorings}
           geneSortFn={this.state.geneSortFn}
           t={t}
         />
