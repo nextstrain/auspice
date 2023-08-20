@@ -136,7 +136,7 @@ function Button({name, description, icon, onClick}) {
 
 function getNumUniqueAuthors(nodes, nodeVisibilities) {
   const authors = new Set(nodes
-    .filter((n, i) => nodeVisibilities[i] === NODE_VISIBLE && n.inView)
+    .filter((n, i) => nodeVisibilities[i] === NODE_VISIBLE && n.shell.inView)
     .map((n) => getFullAuthorInfoFromNode(n))
     .filter((a) => a && a.value)
     .map((a) => a.value)
