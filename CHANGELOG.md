@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.47.0 - 2023/08/21
+
+
 * Entropy panel now supports more complex genome architectures and has improved styling.
 The JSON schema has been extended to allow segmented CDSs, which allows us to represent CDSs such as those which
 wrap the origin (common in HepB), and those with ribosomal slippage (nCoV, EBOV). The visual representation of CDSs
