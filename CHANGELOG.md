@@ -8,7 +8,8 @@ in the upper "main" axis where we now view the translations for each CDS individ
 A number of small genotype-related bugs have also been fixed and the internal representation of the genome streamlined.
 For full details please see [#1684](https://github.com/nextstrain/auspice/pull/1684), and the schema changes are
 detailed in [augur PR #1281](https://github.com/nextstrain/augur/pull/1281).
-
+* Fixed a bug where metadata TSV download was sometimes empty or incomplete, described in [issue #1411](https://github.com/nextstrain/auspice/issues/1411).
+([PR #1681](https://github.com/nextstrain/auspice/pull/1681))
 * Remove support for Node.js version 14. ([#1674](https://github.com/nextstrain/auspice/pull/1674))
 * Add support for Node.js version 20. ([#1673](https://github.com/nextstrain/auspice/pull/1673))
 
