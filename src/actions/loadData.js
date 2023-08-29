@@ -299,7 +299,7 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
       .catch((reason) => Promise.resolve(reason))
   }
 
-  if (!this.rootSequence) {
+  if (!mainJson.root_sequence && !this.rootSequence) {
     // Note that the browser may log a GET error if the above 404s
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
       .catch((reason) => Promise.resolve(reason))
