@@ -1,6 +1,7 @@
 import {useEffect, useReducer, useRef} from "react";
 import { useDispatch } from 'react-redux';
 import { CACHE_JSONS } from "../../actions/types";
+import { FetchError } from "../../util/exceptions";
 
 /**
  * The auspice architecture includes a cache of datasets (main + sidecars)
@@ -73,41 +74,43 @@ async function fetchDatasetAndSidecars(name, dataset, dispatchDatasetResponses) 
 
   try {
     await dataset.fetchSidecars();
-    /** fetchSidecars sets up promises for the sidecar files _after_ waiting
-     *  for the main dataset to arrive (resolve), but it doesn't wait for the
-     *  sidecar promises to resolve.
-     *
-     *  The contents of the sidecars are not validated (further than simple JSON validation
-     *  via res.JSON(). Neither are they dispatched -- this only matters if the debugger is
-     *  actually visualising the dataset when the promise resolves (as if its resolved when the
-     *  dataset viz loads then it'll access the promise), which is an edge case we don't need
-     *  to address (yet).
-     * TODO the above isn't true! The sidecar file doesn't load :(
+    /** fetchSidecars conditionally sets up promises for the sidecar files at
+     * `dataset[sidecarName]` (this is not set if the main dataset indicates
+     * that the sidecar file should not be fetched).
+     * The promises will _always_ resolve, but the resolved value may be an error.
+     * If the resolved value is not an error, the sidecar may still be invalid,
+     * but this is not currently known until it is loaded (`loadSidecars()`).
      */
 
-    /* rootSequence is always attempted, and resolves to undefined on fetch failure or the JSON on success. */
-    dispatchDatasetResponses({name, datasetType: 'rootSeq', status: 'inProgress'});
-    dataset.rootSequence.then((rootSeqData) => {
-      if (rootSeqData) {
-        dispatchDatasetResponses({name, datasetType: 'rootSeq', status: 'success'});
-      } else {
-        dispatchDatasetResponses({name, datasetType: 'rootSeq', status: 'Warning - could not fetch the root sequence sidecar file. This is not necessarily a problem!'});
-      }
-    });
-
-    /* tipFrequencies is NOT fetched unless the dataset asks to display it. If attempted,
-       it resolves to undefined on fetch failure or the JSON on success. */
-    if (dataset.tipFrequencies) {
-      dispatchDatasetResponses({name, datasetType: 'frequencies', status: 'inProgress'});
-      dataset.tipFrequencies.then((tipFreqData) => {
-        if (tipFreqData) {
-          dispatchDatasetResponses({name, datasetType: 'frequencies', status: 'success'});
+    /* ----- root sequence sidecar JSON ------- */
+    if (dataset.rootSequence) {
+      dispatchDatasetResponses({name, datasetType: 'rootSeq', status: 'inProgress'});
+      dataset.rootSequence.then((rootSeqData) => {
+        if (rootSeqData instanceof FetchError) {
+          dispatchDatasetResponses({name, datasetType: 'rootSeq', status: "Warning - root sequence JSON isn't available (this is not necessarily a problem!)"});
+        } else if (rootSeqData instanceof Error) {
+          dispatchDatasetResponses({name, datasetType: 'rootSeq', status: `Error - root sequence JSON exists but is invalid: "${rootSeqData.message}"`});
         } else {
-          dispatchDatasetResponses({name, datasetType: 'frequencies', status: 'Error - the dataset requested a tipFrequencies sidecar but the fetch failed'});
+          dispatchDatasetResponses({name, datasetType: 'rootSeq', status: 'success'});
         }
       });
     } else {
-      // TODO -- expand on status messaging here.
+      // TODO -- this indicates the root-sequence was inlined & we should improve the status message
+      // (default status message: not-attempted)
+    }
+
+    /* ----- tip frequencies sidecar JSON ------- */
+    if (dataset.tipFrequencies) {
+      dispatchDatasetResponses({name, datasetType: 'frequencies', status: 'inProgress'});
+      dataset.tipFrequencies.then((tipFreqData) => {
+        if (tipFreqData instanceof Error) {
+          dispatchDatasetResponses({name, datasetType: 'frequencies', status: `Error - the dataset requested a tipFrequencies sidecar JSON however the following error was raised: "${tipFreqData.message}"`});
+        } else {
+          dispatchDatasetResponses({name, datasetType: 'frequencies', status: 'success'});
+        }
+      });
+    } else {
+      // TODO -- expand on status messaging here (default status message: not-attempted)
     }
 
 

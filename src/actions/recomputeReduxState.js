@@ -733,6 +733,11 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.panels) {
     metadata.panels = json.meta.panels;
   }
+  if (json.root_sequence) {
+    /* A dataset may set the root sequence inline (i.e. within the main dataset JSON), which
+    we capture here. Alternatively it may be a sidecar JSON file */
+    metadata.rootSequence = json.root_sequence;
+  }
   if (json.meta.display_defaults) {
     metadata.displayDefaults = {};
     const jsonKeyToAuspiceKey = {

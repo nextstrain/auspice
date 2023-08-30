@@ -8,7 +8,7 @@ import { parseMeasurementsJSON, loadMeasurements } from "./measurements";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
-import { NoContentError } from "../util/exceptions";
+import { NoContentError, FetchError} from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
 import { explodeTree } from "./tree";
@@ -283,47 +283,78 @@ Dataset.prototype.fetchMain = function fetchMain() {
     .then((res) => res.json());
 };
 Dataset.prototype.fetchSidecars = async function fetchSidecars() {
+  /**
+   * If deemed appropriate, fetch sidecars and store the resulting promise as `this.<sidecarName>`.
+   * The returned promise will (eventually) be processed by chaining further `then` clauses via
+   * the `loadSidecars()` prototype. Because this may happen some time in the future, or even
+   * not at all, the promises created here should not reject in order to avoid the browser's default
+   * unhandled promise rejection logging. If the fetch fails we instead resolve to an Error object
+   * and and it is the responsibility of code which uses these promises to react appropriately.
+   */
   const mainJson = await this.main;
   if (!mainJson) throw new Error("Cannot fetch sidecar files since the main JSON didn't succeed.");
 
   if (mainJson.meta.panels && mainJson.meta.panels.includes("frequencies") && !this.tipFrequencies) {
     this.tipFrequencies = fetchJSON(this.apiCalls.tipFrequencies)
-      .catch((err) => {
-        console.error("Failed to fetch frequencies", err.message);
-      });
+      .catch((reason) => Promise.resolve(reason))
   }
-  if (!this.rootSequence) {
+
+  if (!mainJson.root_sequence && !this.rootSequence) {
+    // Note that the browser may log a GET error if the above 404s
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
-      .catch(() => {}); // it's not unexpected to be missing the root-sequence JSON
+      .catch((reason) => Promise.resolve(reason))
   }
+
   if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
     this.measurements = fetchJSON(this.apiCalls.measurements)
       .then((json) => parseMeasurementsJSON(json))
-      .catch((err) => {
-        console.error("Failed to fetch and parse measurements collections", err.message);
-      });
+      .catch((reason) => Promise.resolve(reason))
   }
 };
 Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
-  // Helper function to load (dispatch) the visualisation of sidecar files
+  /* Helper function to load (dispatch) the visualisation of sidecar files.
+  `this.<sidecarName>` will be undefined (if the request was never made)
+  or a promise which may resolve to the parsed JSON data,
+  or reject with a suitable error.
+  */
   if (this.tipFrequencies) {
     this.tipFrequencies
+      .then((data) => {
+        if (data instanceof Error) throw data;
+        return data
+      })
       .then((data) => dispatch(loadFrequencies(data)))
-      .catch(() => {
-        dispatch(warningNotification({message: "Failed to fetch frequencies"}));
+      .catch((reason) => {
+        console.error(reason)
+        const message = `Failed to ${reason instanceof FetchError ? 'fetch' : 'parse'} tip frequencies`;
+        dispatch(warningNotification({message}));
       });
   }
   if (this.rootSequence) {
     this.rootSequence.then((data) => {
+      if (data instanceof Error) throw data;
+      return data
+    }).then((data) => {
       dispatch({type: types.SET_ROOT_SEQUENCE, data});
       dispatch(updateColorByWithRootSequenceData());
-    });
+    }).catch((reason) => {
+      if (reason instanceof FetchError) {
+        // no console error message as root sequence sidecars are often not present
+        return
+      }
+      console.error(reason);
+      dispatch(warningNotification({message: "Failed to parse root sequence JSON"}));
+    })
   }
   if (this.measurements) {
     this.measurements
+      .then((data) => {
+        if (data instanceof Error) throw data;
+        return data
+      })
       .then((data) => dispatch(loadMeasurements(data)))
       .catch((err) => {
-        const errorMessage = "Failed to load measurements collections";
+        const errorMessage = `Failed to ${err instanceof FetchError ? 'fetch' : 'parse'} measurements collections`;
         console.error(errorMessage, err.message);
         dispatch(warningNotification({message: errorMessage}));
         // Hide measurements panel
@@ -333,6 +364,6 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
       });
   }
 };
-Dataset.prototype.fetchAvailable = async function fetchSidecars() {
+Dataset.prototype.fetchAvailable = async function fetchAvailable() {
   this.available = fetchJSON(this.apiCalls.getAvailable);
 };

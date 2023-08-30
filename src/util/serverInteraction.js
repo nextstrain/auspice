@@ -1,4 +1,4 @@
-import {NoContentError} from "./exceptions";
+import {FetchError, NoContentError} from "./exceptions";
 
 export const fetchWithErrorHandling = async (path) => {
   const res = await fetch(path);
@@ -7,7 +7,7 @@ export const fetchWithErrorHandling = async (path) => {
     if (res.status === 204) {
       throw new NoContentError();
     }
-    throw new Error(`${await res.text()} (${res.statusText})`);
+    throw new FetchError(`${path} ${await res.text()} (${res.statusText})`);
   }
   return res;
 };
