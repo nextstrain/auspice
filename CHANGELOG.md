@@ -1,7 +1,11 @@
 # Changelog
 
-## version 2.47.0 - 2023/08/21
 
+* Root sequence data may be inlined in the main dataset JSON
+([Auspice PR #1688](https://github.com/nextstrain/auspice/pull/1688) and [Augur PR #1295](https://github.com/nextstrain/augur/pull/1295)).
+* Bugfix: Fixes a crash when a dataset without the entropy panel attempted to change colorings. ([#1691](https://github.com/nextstrain/auspice/pull/1691))
+
+## version 2.47.0 - 2023/08/21
 
 * Entropy panel now supports more complex genome architectures and has improved styling.
 The JSON schema has been extended to allow segmented CDSs, which allows us to represent CDSs such as those which
