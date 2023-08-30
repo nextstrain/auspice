@@ -5,6 +5,7 @@ import { select } from "d3-selection";
 import { withTranslation } from "react-i18next";
 import 'd3-transition';
 import { FaInfoCircle } from "react-icons/fa";
+import { isEqual } from 'lodash';
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
@@ -13,7 +14,7 @@ import InfoPanel from "./infoPanel";
 import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
 import { timerStart, timerEnd } from "../../util/perf";
 import { encodeColorByGenotype } from "../../util/getGenotype";
-import { nucleotide_gene, equalArrays } from "../../util/globals";
+import { nucleotide_gene } from "../../util/globals";
 import { getCdsByName } from "../../util/entropy";
 import { StyledTooltip } from "../controls/styles";
 import "../../css/entropy.css";
@@ -228,7 +229,7 @@ class Entropy extends React.Component {
       if (this.props.showCounts !== nextProps.showCounts) {
         updateParams.showCounts = nextProps.showCounts;
       }
-      if (!equalArrays(this.props.selectedPositions, nextProps.selectedPositions)) {
+      if (!isEqual(this.props.selectedPositions, nextProps.selectedPositions)) {
         updateParams.selectedPositions = nextProps.selectedPositions
       }
       if (Object.keys(updateParams).length) {
