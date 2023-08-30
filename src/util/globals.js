@@ -247,5 +247,3 @@ const aminoAcids = {
 };
 
 export const getAminoAcidName = (x) => aminoAcids[x.toUpperCase()] || "Unknown";
-
-export const equalArrays = (a,b) => a.length===b.length && a.every((el, idx) => b[idx]===el);

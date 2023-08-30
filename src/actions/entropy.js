@@ -1,6 +1,6 @@
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import { calcEntropyInView } from "../util/entropy";
-import { nucleotide_gene, equalArrays } from "../util/globals";
+import { nucleotide_gene } from "../util/globals";
 import * as types from "./types";
 import { isColorByGenotype, decodeColorByGenotype, getCdsFromGenotype} from "../util/getGenotype";
 
@@ -91,7 +91,7 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
     const [data, maxYVal] = calcEntropyInView(state.tree.nodes, state.tree.visibility, action.selectedCds, entropy.showCounts);
     action.bars = data;
     action.maxYVal = maxYVal;
-  } else if (equalArrays(action.selectedPositions, entropy.selectedPositions)) {
+  } else if (isEqual(action.selectedPositions, entropy.selectedPositions)) {
     return;
   }
 
