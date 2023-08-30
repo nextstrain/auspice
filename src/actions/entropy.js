@@ -18,18 +18,18 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
 }, 500, { leading: true, trailing: true });
 
 /**
- * Returns a thunk which makes zero or one dispatches to update the entropy reducer 
+ * Returns a thunk which makes zero or one dispatches to update the entropy reducer
  * if the selected CDS and/or positions need updating.
- * 
+ *
  * The argument may vary:
  *   - It may be a colorBy string, which may or may not be a genotype coloring
  *   - It may be a CDS (Object)
  *   - It may be the constant `nucleotide_gene`
- * 
+ *
  * The expected state updates to (selectedCds, selectedPositions) are as follows:
  * (nuc = nucleotide_gene, x,y,z are positions, [*] means any (or no) positions selected,
  * no-op means that no dispatches are made and thus the state is unchanged):
- * 
+ *
  * -----------------------------------------------------------------------------------
  * PREVIOUS STATE  | EXAMPLE ARGUMENT      |  NEW STATE ($ = entropy bar recalc needed)
  * -----------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
  * CdsA, [*]       | CdsB                  | CdsB, [] $
  * CdsA, [*]       | nucleotide_gene       | nuc, [] $
  * -----------------------------------------------------------------------------------
- * 
+ *
  * @returns {ReduxThunk}
  */
 export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
