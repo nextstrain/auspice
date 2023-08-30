@@ -56,6 +56,9 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
   const action = {type: types.CHANGE_ENTROPY_CDS_SELECTION}
   const entropy = getState().entropy;
 
+  // no-op if the entropy data isn't present
+  if (!entropy.loaded) return;
+
   if (arg === nucleotide_gene) {
     if (entropy.selectedCds === nucleotide_gene) {
       return
