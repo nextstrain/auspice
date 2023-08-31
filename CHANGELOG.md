@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.48.0 - 2023/08/31
+
+
 
 * Root sequence data may be inlined in the main dataset JSON
 ([Auspice PR #1688](https://github.com/nextstrain/auspice/pull/1688) and [Augur PR #1295](https://github.com/nextstrain/augur/pull/1295)).
