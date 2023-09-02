@@ -1,4 +1,4 @@
-import { createDefaultParams } from "./defaultParams";
+import { createDefaultParams, Params } from "./defaultParams";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -9,38 +9,66 @@ import * as confidence from "./confidence";
 import * as labels from "./labels";
 import * as regression from "./regression";
 
+type ReduxNode = {
+  name: string
+  inView: boolean
+  shell: PhyloNode
+}
+
+type PhyloNode = {
+  that: PhyloTree
+  n: ReduxNode
+  x: number
+  y: number
+  inView: boolean
+}
+
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
-const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
-  this.grid = false;
-  this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
-  this.params = createDefaultParams();
-  this.groups = {};
-  /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
-  It also helps preserve the initial order of groups in the DOM as we are not creating new ones upon updates */
-  this.id = id; /* super useful when one is trying to debug multiple trees! */
-  /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
-   this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
-   Furthermore, these objects are linked:
-   -- this.nodes[i].n = reduxNodes[i]
-   -- reduxNodes[i].shell = this.nodes[i] */
-  this.nodes = reduxNodes.map((d) => {
-    const phyloNode = {
-      that: this,
-      n: d, /* a back link to the redux node */
-      x: 0,
-      y: 0,
-      inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
-    };
-    d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
-    return phyloNode;
-  });
-  this.zoomNode = this.nodes[idxOfInViewRootNode];
-  this.strainToNode = {};
-  this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
-  /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
-  // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
-  //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
-};
+class PhyloTree {
+
+  grid: boolean
+  attributes: string[]
+  groups: { [key: string]: any }
+  id: string
+  params: Params
+  zoomNode: PhyloNode
+  nodes: PhyloNode[]
+  strainToNode: { [key: string]: PhyloNode };
+
+  constructor(reduxNodes: ReduxNode[], id: string, idxOfInViewRootNode: number) {
+    this.grid = false;
+    this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
+    this.params = createDefaultParams();
+    this.groups = {};
+
+    /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
+    It also helps preserve the initial order of groups in the DOM as we are not creating new ones upon updates */
+    this.id = id; /* super useful when one is trying to debug multiple trees! */
+
+    /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
+     this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
+     Furthermore, these objects are linked:
+     -- this.nodes[i].n = reduxNodes[i]
+     -- reduxNodes[i].shell = this.nodes[i] */
+    this.nodes = reduxNodes.map((d) => {
+      const phyloNode: PhyloNode = {
+        that: this,
+        n: d, /* a back link to the redux node */
+        x: 0,
+        y: 0,
+        inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
+      };
+      d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
+      return phyloNode;
+    });
+    this.zoomNode = this.nodes[idxOfInViewRootNode];
+    this.strainToNode = {};
+    this.nodes.forEach((phylonode) => { this.strainToNode[phylonode.n.name] = phylonode; });
+    /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
+    // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+    //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
+  }
+}
 
 /* C H A N G E */
 PhyloTree.prototype.change = change;

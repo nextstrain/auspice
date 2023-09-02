@@ -1,5 +1,46 @@
 import { dataFont, darkGrey } from "../../../globalStyles";
 
+export type Params = {
+  regressionStroke: string
+  regressionWidth: number
+  majorGridStroke: string
+  majorGridWidth: number
+  minorGridStroke: string
+  minorGridWidth: number
+  tickLabelSize: number
+  tickLabelFill: string
+  minorTicks: number
+  orientation: number[]
+  showGrid: boolean
+  fillSelected: string
+  radiusSelected: number
+  branchStroke: string
+  branchStrokeWidth: number
+  tipStroke: string
+  tipFill: string
+  tipStrokeWidth: number
+  tipRadius: number
+  fontFamily: string
+  branchLabelKey: boolean
+  branchLabelFont: string
+  branchLabelFill: string
+  branchLabelFontWeight: number
+  branchLabelPadX: number
+  branchLabelPadY: number
+  tipLabels: boolean
+  tipLabelFont: string
+  tipLabelFill: string
+  tipLabelPadX: number
+  tipLabelPadY: number
+  mapToScreenDebounceTime: number
+  tipLabelFontSizeL1: number
+  tipLabelFontSizeL2: number
+  tipLabelFontSizeL3: number
+  tipLabelBreakL1: number
+  tipLabelBreakL2: number
+  tipLabelBreakL3: number
+}
+
 export const createDefaultParams = () => ({
   regressionStroke: darkGrey,
   regressionWidth: 6,
