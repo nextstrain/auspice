@@ -273,7 +273,8 @@ export const addGrid = function addGrid() {
           " " +
           yScale.range()[0].toString();
       } else if (layoutShadow==="radial") {
-        const xPos = xScale(gridPoint.position-xmin);
+        const relativePosition = gridPoint.position - xmin;
+        const xPos = xScale(Math.max(relativePosition, 0));
         svgPath = 'M '+xPos.toString() +
           "  " +
           yScale(0).toString() +
@@ -307,7 +308,8 @@ export const addGrid = function addGrid() {
   /* same as xTextPos HOF, but for y-values */
   const yTextPos = (yScale, layoutShadow) => (gridPoint) => {
     if (gridPoint.axis === "x") {
-      return layoutShadow === "radial" ? yScale(gridPoint.position-xmin)-5 : yScale.range()[1] + 18;
+      const relativePosition = gridPoint.position - xmin;
+      return layoutShadow === "radial" ? yScale(Math.max(relativePosition, 0))-5 : yScale.range()[1] + 18;
     }
     return yScale(gridPoint.position);
   };
