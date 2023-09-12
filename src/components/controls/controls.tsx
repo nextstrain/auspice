@@ -27,13 +27,14 @@ import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
 
 type Props = {
+  treeOn: boolean
   mapOn: boolean
   frequenciesOn: boolean
   measurementsOn: boolean
   mobileDisplay: boolean
 }
 
-function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
+function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -50,14 +51,18 @@ function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props
       <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
       <FilterData measurementsOn={measurementsOn} />
 
-      <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
-      <ChooseLayout />
-      <ChooseMetric />
-      <ChooseBranchLabelling />
-      <ChooseTipLabel />
-      <ChooseSecondTree />
-      <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
-      <ToggleTangle />
+      {treeOn &&
+        <span>
+          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
+          <ChooseLayout />
+          <ChooseMetric />
+          <ChooseBranchLabelling />
+          <ChooseTipLabel />
+          <ChooseSecondTree />
+          <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
+          <ToggleTangle />
+        </span>
+      }
 
       {measurementsOn &&
         <span style={{ marginTop: "10px" }}>

@@ -25,6 +25,7 @@ export const Sidebar = (
         ) : (
           <Controls
             mobileDisplay={mobileDisplay}
+            treeOn={panelsToDisplay.includes("tree")}
             mapOn={panelsToDisplay.includes("map")}
             frequenciesOn={panelsToDisplay.includes("frequencies")}
             measurementsOn={panelsToDisplay.includes("measurements")}
