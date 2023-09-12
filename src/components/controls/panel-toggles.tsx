@@ -16,9 +16,13 @@ export default function PanelToggles() {
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
 
   const panels = panelsAvailable.slice();
+
+  // Prevent the map from being toggled on when a second tree is visible.
+  // It is hidden by logic elsewhere.
   if (showTreeToo && panels.indexOf("map") !== -1) {
     panels.splice(panels.indexOf("map"), 1);
   }
+
   return <>
     {panels.map((n) => (
       <Toggle
