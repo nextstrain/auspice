@@ -25,7 +25,6 @@ export const Sidebar = (
       <SidebarContainer left={sidebarOpen ? 0 : -1 * width} width={width} height={height}>
         <NavBar
           sidebar
-          mobileDisplay={mobileDisplay}
           toggleHandler={navBarHandler}
           narrativeTitle={displayNarrative ? narrativeTitle : false}
           width={width}
