@@ -6,9 +6,19 @@ import Controls from "../controls/controls";
 import { SidebarContainer, sidebarTheme } from "./styles";
 import { narrativeNavBarHeight } from "../../util/globals";
 
+type Props = {
+  sidebarOpen: boolean
+  width: number
+  height: number
+  displayNarrative: boolean
+  panelsToDisplay: string[]
+  narrativeTitle: string
+  mobileDisplay: boolean
+  navBarHandler: React.MouseEvent<HTMLButtonElement>
+}
 
 export const Sidebar = (
-  {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, mobileDisplay, navBarHandler}
+  {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, mobileDisplay, navBarHandler}: Props
 ) => {
   return (
     <ThemeProvider theme={sidebarTheme}>
