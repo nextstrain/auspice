@@ -59,27 +59,27 @@ function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props
       <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
       <ToggleTangle />
 
-      {measurementsOn ? (
+      {measurementsOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo} mobile={mobileDisplay}/>
           <MeasurementsOptions />
         </span>
-      ) : null}
+      }
 
-      {mapOn ? (
+      {mapOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo} mobile={mobileDisplay}/>
           <GeoResolution />
           <TransmissionLines />
         </span>
-      ) : null}
+      }
 
-      {frequenciesOn ? (
+      {frequenciesOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo} mobile={mobileDisplay}/>
           <NormalizeFrequencies />
         </span>
-      ) : null}
+      }
 
       <span style={{ marginTop: "10px" }}>
         <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo} mobile={mobileDisplay}/>
