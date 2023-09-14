@@ -27,13 +27,14 @@ import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
 
 type Props = {
+  treeOn: boolean
   mapOn: boolean
   frequenciesOn: boolean
   measurementsOn: boolean
   mobileDisplay: boolean
 }
 
-function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
+function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
   const { t } = useTranslation();
 
   return (
@@ -50,36 +51,40 @@ function Controls({ mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props
       <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
       <FilterData measurementsOn={measurementsOn} />
 
-      <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
-      <ChooseLayout />
-      <ChooseMetric />
-      <ChooseBranchLabelling />
-      <ChooseTipLabel />
-      <ChooseSecondTree />
-      <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
-      <ToggleTangle />
+      {treeOn &&
+        <span>
+          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
+          <ChooseLayout />
+          <ChooseMetric />
+          <ChooseBranchLabelling />
+          <ChooseTipLabel />
+          <ChooseSecondTree />
+          <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
+          <ToggleTangle />
+        </span>
+      }
 
-      {measurementsOn ? (
+      {measurementsOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo} mobile={mobileDisplay}/>
           <MeasurementsOptions />
         </span>
-      ) : null}
+      }
 
-      {mapOn ? (
+      {mapOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo} mobile={mobileDisplay}/>
           <GeoResolution />
           <TransmissionLines />
         </span>
-      ) : null}
+      }
 
-      {frequenciesOn ? (
+      {frequenciesOn &&
         <span style={{ marginTop: "10px" }}>
           <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo} mobile={mobileDisplay}/>
           <NormalizeFrequencies />
         </span>
-      ) : null}
+      }
 
       <span style={{ marginTop: "10px" }}>
         <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo} mobile={mobileDisplay}/>
