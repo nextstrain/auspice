@@ -3,6 +3,14 @@
 
 * Allow the tip label key to be defined in the JSON via `display_defaults.tip_label`, in addition to being settable via a URL query.
 See [the docs](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/view-settings.html) or [PR #1668](https://github.com/nextstrain/auspice/pull/1668) for more.
+* Tree-specific options in the sidebar are now hidden when the tree panel is not displayed. ([#1698](https://github.com/nextstrain/auspice/pull/1698))
+* Fixed a bug where the radial trees would have their inner grid circles offset. ([#1693](https://github.com/nextstrain/auspice/pull/1693))
+* Fixed a bug where SVG export of the entropy panel was invalid. ([#1694](https://github.com/nextstrain/auspice/pull/1694))
+
+_Internal changes which should not result in any different behaviour while using Auspice._
+
+* Read the Docs build config updated. ([#1700](https://github.com/nextstrain/auspice/pull/1700))
+* CI improvements. ([#1702](https://github.com/nextstrain/auspice/pull/1702))
 
 ## version 2.48.0 - 2023/08/31
 
