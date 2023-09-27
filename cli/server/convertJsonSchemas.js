@@ -258,7 +258,7 @@ const setVaccineChoicesOnNodes = (v2, v1meta) => {
  */
 const setLabels = (v2) => {
   traverseTree(v2.tree, (node) => {
-    /* are their aa mutations? */
+    /* are there aa mutations? */
     if (node.branch_attrs && node.branch_attrs.mutations) {
       const mutations = node.branch_attrs.mutations;
       const aaMutsToLabel = Object.keys(mutations)

@@ -194,7 +194,6 @@ const restoreQueryableStateToDefaults = (state) => {
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
-  state.tipLabelKey = strainSymbol;
   state.scatterVariables = {};
 
   state.showAllBranchLabels = false;
@@ -238,8 +237,8 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   state.filters[strainSymbol] = [];
   state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar', "showTransmissionLines", "normalizeFrequencies", "tipLabelKey"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',  "boolean"              , "boolean"             , "string"     ];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
@@ -305,7 +304,7 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
     if (Object.keys(metadata.colorings).includes('gt')) {
-      console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " + 
+      console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " +
       "check that 'metadata.genome_annotations' is correct and that mutations have been assigned to 'branch_attrs' on the tree.")
       delete metadata.colorings.gt;
     }
@@ -745,6 +744,7 @@ const createMetadataStateFromJSON = (json) => {
       geo_resolution: "geoResolution",
       distance_measure: "distanceMeasure",
       branch_label: "selectedBranchLabel",
+      tip_label: "tipLabelKey",
       map_triplicate: "mapTriplicate",
       layout: "layout",
       language: "language",
