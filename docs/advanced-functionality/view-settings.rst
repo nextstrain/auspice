@@ -17,6 +17,7 @@ Auspice has some hardcoded defaults, largely for historical reasons. Each of the
 -  Default geographic resolution is "country", if available.
 -  Default colouring is "country", if available.
 -  Default branch labelling is "clade", if available.
+-  Default tip labelling is the sample / strain name (`node.name`)
 
 Dataset (JSON) configurable defaults
 ------------------------------------
@@ -35,6 +36,8 @@ These are exported as the (optional) property of the dataset JSON ``meta.display
 | ``map_triplicate``        | Should the map repeat, so that you can pan further in each direction? | Boolean                                            |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``layout``                | Tree layout                                                           | "rect", "radial", "unrooted", "clock" or "scatter" |
++---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
+| ``tip_label``             | What attribute (in 'node_attrs') to use as tip (node) labels          | "country"                                          |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``branch_label``          | Which set of branch labels are to be displayed                        | "aa", "lineage"                                    |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
@@ -102,6 +105,8 @@ URL queries are the part of the URL coming after the ``?`` character, and typica
 | ``n``                | Narrative page number                                     | ``n=1`` goes to the first page                    |
 +----------------------+-----------------------------------------------------------+---------------------------------------------------+
 | ``s``                | Selected strain                                           | ``s=1_0199_PF``                                   |
++----------------------+-----------------------------------------------------------+---------------------------------------------------+
+| ``tl``               | Tip label to display                                      | ``tl=country``                                    |
 +----------------------+-----------------------------------------------------------+---------------------------------------------------+
 | ``branchLabel``      | Branch labels to display                                  | ``branchLabel=aa``                                |
 +----------------------+-----------------------------------------------------------+---------------------------------------------------+
