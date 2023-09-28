@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.49.0 - 2023/09/28
+
+
 
 * Allow the tip label key to be defined in the JSON via `display_defaults.tip_label`, in addition to being settable via a URL query.
 See [the docs](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/view-settings.html) or [PR #1668](https://github.com/nextstrain/auspice/pull/1668) for more.
