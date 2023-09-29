@@ -8,7 +8,7 @@ type Props = {
 }
 
 /**
- * A header used by all controls, containing an informative title.
+ * A header used by all non-panel controls, containing an informative title.
  */
 export const ControlHeader = ({title, tooltip=undefined }: Props) => {
   return (

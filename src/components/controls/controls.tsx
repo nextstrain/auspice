@@ -17,13 +17,13 @@ import GeoResolution from "./geo-resolution";
 import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
-import PanelToggles from "./panel-toggles";
+import { PanelSection } from "./panelSection";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
-  ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
+import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelOptionsInfo,
+  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
@@ -31,12 +31,10 @@ import { RootState } from "../../store";
 function Controls() {
   const { t } = useTranslation();
 
+  const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
-
-  const treeOn = panelsToDisplay.includes("tree");
-  const mapOn = panelsToDisplay.includes("map");
-  const frequenciesOn = panelsToDisplay.includes("frequencies");
-  const measurementsOn = panelsToDisplay.includes("measurements");
+  const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
+  const canTogglePanelLayout = useSelector((state: RootState) => state.controls.canTogglePanelLayout);
 
   return (
     <ControlsContainer>
@@ -50,41 +48,66 @@ function Controls() {
       <ColorBy />
 
       <ControlHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo}/>
-      <FilterData measurementsOn={measurementsOn} />
+      <FilterData measurementsOn={panelsToDisplay.includes("measurements")} />
 
-      {treeOn &&
-        <span>
-          <ControlHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo}/>
-          <ChooseLayout />
-          <ChooseMetric />
-          <ChooseBranchLabelling />
-          <ChooseTipLabel />
-          <ChooseSecondTree />
-          <ChooseExplodeAttr tooltip={ExplodeTreeInfo} />
-          <ToggleTangle />
-        </span>
+      <span style={{ paddingTop: "10px" }} />
+
+      {panelsAvailable.includes("tree") &&
+        <PanelSection
+          panel="tree"
+          title={t("sidebar:Tree")}
+          tooltip={TreeInfo}
+          options={<>
+            <ChooseLayout />
+            <ChooseMetric />
+            <ChooseBranchLabelling />
+            <ChooseTipLabel />
+            <ChooseSecondTree />
+            <ChooseExplodeAttr tooltip={ExplodeTreeInfo} />
+            <ToggleTangle />
+          </>}
+        />
       }
 
-      {measurementsOn &&
-        <span style={{ marginTop: "10px" }}>
-          <ControlHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo}/>
-          <MeasurementsOptions />
-        </span>
+      {panelsAvailable.includes("measurements") &&
+        <PanelSection
+          panel="measurements"
+          title={t("sidebar:Measurements")}
+          tooltip={MeasurementsInfo}
+          options={<MeasurementsOptions />}
+        />
       }
 
-      {mapOn &&
-        <span style={{ marginTop: "10px" }}>
-          <ControlHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo}/>
-          <GeoResolution />
-          <TransmissionLines />
-        </span>
+      {/* Prevent the map from being toggled on when a second tree is visible.
+          It is hidden by logic elsewhere.
+      */}
+      {panelsAvailable.includes("map") && !showTreeToo &&
+        <PanelSection
+          panel="map"
+          title={t("sidebar:Map")}
+          tooltip={MapInfo}
+          options={<>
+            <GeoResolution />
+            <TransmissionLines />
+          </>}
+        />
       }
 
-      {frequenciesOn &&
-        <span style={{ marginTop: "10px" }}>
-          <ControlHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo}/>
-          <NormalizeFrequencies />
-        </span>
+      {panelsAvailable.includes("entropy") &&
+        <PanelSection
+          panel="entropy"
+          title={t("sidebar:Entropy")}
+          tooltip={EntropyInfo}
+        />
+      }
+
+      {panelsAvailable.includes("frequencies") &&
+        <PanelSection
+          panel="frequencies"
+          title={t("sidebar:Frequency")}
+          tooltip={FrequencyInfo}
+          options={<NormalizeFrequencies />}
+        />
       }
 
       <span style={{ marginTop: "10px" }}>
@@ -92,10 +115,13 @@ function Controls() {
         <AnimationOptions />
       </span>
 
-      <span style={{ paddingTop: "10px" }} />
-      <ControlHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo}/>
-      <PanelLayout />
-      <PanelToggles />
+      {canTogglePanelLayout &&
+        <>
+          <span style={{ paddingTop: "10px" }} />
+          <ControlHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} />
+          <PanelLayout />
+        </>
+      }
 
       <span style={{ paddingTop: "10px" }} />
       <ControlHeader title={t("sidebar:Language")}/>
