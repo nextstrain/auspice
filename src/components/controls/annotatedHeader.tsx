@@ -2,7 +2,13 @@ import React from "react";
 import { FaInfoCircle } from "react-icons/fa";
 import {StyledTooltip, HeaderIconContainer, HeaderContainer} from "./styles";
 
-export const AnnotatedHeader = ({title, tooltip, mobile}) => {
+type Props = {
+  title: string
+  tooltip: JSX.Element
+  mobile: boolean
+}
+
+export const AnnotatedHeader = ({title, tooltip, mobile}: Props) => {
   return (
     <HeaderContainer>
       <span>{title}</span>
