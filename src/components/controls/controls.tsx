@@ -16,15 +16,17 @@ import GeoResolution from "./geo-resolution";
 import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
-import PanelToggles from "./panel-toggles";
+import PanelToggle from "./panel-toggle";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
-  ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
+import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
+  ExplodeTreeInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
 import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store";
 
 type Props = {
   treeOn: boolean
@@ -36,6 +38,10 @@ type Props = {
 
 function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
   const { t } = useTranslation();
+
+  const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);
+  const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
+  const canTogglePanelLayout = useSelector((state: RootState) => state.controls.canTogglePanelLayout);
 
   return (
     <ControlsContainer>
@@ -51,9 +57,25 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
       <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
       <FilterData measurementsOn={measurementsOn} />
 
+      {canTogglePanelLayout &&
+        <>
+          <span style={{ paddingTop: "10px" }} />
+          {/* FIXME: update translations */}
+          <AnnotatedHeader title={t("sidebar:Layout")} tooltip={PanelLayoutInfo} mobile={mobileDisplay} />
+          <PanelLayout />
+        </>
+      }
+
+      {panelsAvailable.includes("tree") &&
+        <AnnotatedHeader
+          toggle={<PanelToggle panel="tree" on={treeOn} />}
+          title={t("sidebar:Tree")}
+          tooltip={TreeInfo}
+          mobile={mobileDisplay}
+        />
+      }
       {treeOn &&
         <span>
-          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
           <ChooseLayout />
           <ChooseMetric />
           <ChooseBranchLabelling />
@@ -64,24 +86,48 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
         </span>
       }
 
+      {panelsAvailable.includes("measurements") &&
+        <AnnotatedHeader
+          toggle={<PanelToggle panel="measurements" on={measurementsOn} />}
+          title={t("sidebar:Measurements")}
+          tooltip={MeasurementsInfo}
+          mobile={mobileDisplay}
+        />
+      }
       {measurementsOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo} mobile={mobileDisplay}/>
           <MeasurementsOptions />
         </span>
       }
 
+      {/* Prevent the map from being toggled on when a second tree is visible.
+          It is hidden by logic elsewhere.
+      */}
+      {panelsAvailable.includes("map") && !showTreeToo &&
+        <AnnotatedHeader
+          toggle={<PanelToggle panel="map" on={mapOn} />}
+          title={t("sidebar:Map")}
+          tooltip={MapInfo}
+          mobile={mobileDisplay}
+        />
+      }
       {mapOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo} mobile={mobileDisplay}/>
           <GeoResolution />
           <TransmissionLines />
         </span>
       }
 
+      {panelsAvailable.includes("frequencies") &&
+        <AnnotatedHeader
+          toggle={<PanelToggle panel="frequencies" on={frequenciesOn} />}
+          title={t("sidebar:Frequency")}
+          tooltip={FrequencyInfo}
+          mobile={mobileDisplay}
+        />
+      }
       {frequenciesOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo} mobile={mobileDisplay}/>
           <NormalizeFrequencies />
         </span>
       }
@@ -91,10 +137,6 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
         <AnimationOptions />
       </span>
 
-      <span style={{ paddingTop: "10px" }} />
-      <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} mobile={mobileDisplay}/>
-      <PanelLayout />
-      <PanelToggles />
       <Language />
     </ControlsContainer>
   );

@@ -1,7 +1,7 @@
 import React from "react";
 
 
-export const TreeOptionsInfo = (
+export const TreeInfo = (
   <>
     Change various options relating to how the tree is displayed.
     The exact options available depend on the dataset and specific analysis performed.
@@ -12,7 +12,7 @@ export const TreeOptionsInfo = (
 );
 
 
-export const MapOptionsInfo = (
+export const MapInfo = (
   <>
     Change various options relating to how the map is displayed.
     <br/>
@@ -27,11 +27,9 @@ export const AnimationOptionsInfo = (
   </>
 );
 
-export const PanelOptionsInfo = (
+export const PanelLayoutInfo = (
   <>
-    Control which panels are being displayed and whether to show the tree and the map side-by-side (<em>grid</em>) or expanded (<em>full</em>).
-    <br/>
-    Note that what options are available here are dataset specific!
+    Control whether to show the tree and the map side-by-side (<em>grid</em>) or expanded (<em>full</em>).
   </>
 );
 
@@ -42,7 +40,7 @@ export const FrequencyInfo = (
   </>
 );
 
-export const MeasurementsOptionsInfo = (
+export const MeasurementsInfo = (
   <>
     Change collection of measurements and various display options for the collection.
   </>
