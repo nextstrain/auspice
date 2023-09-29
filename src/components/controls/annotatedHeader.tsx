@@ -4,7 +4,12 @@ import { FaInfoCircle } from "react-icons/fa";
 import {StyledTooltip, HeaderIconContainer, HeaderContainer} from "./styles";
 import { RootState } from "../../store";
 
-export const AnnotatedHeader = ({title, tooltip}) => {
+type Props = {
+  title: string
+  tooltip?: JSX.Element
+}
+
+export const AnnotatedHeader = ({title, tooltip=undefined}: Props) => {
   const mobile = useSelector((state: RootState) => state.general.mobileDisplay);
 
   return (
