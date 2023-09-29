@@ -19,16 +19,12 @@ const PanelsGridIcon = withTheme(icons.PanelsGrid);
 @connect((state) => {
   return {
     panelLayout: state.controls.panelLayout,
-    canTogglePanelLayout: state.controls.canTogglePanelLayout
   };
 })
 class PanelLayouts extends React.Component {
   render() {
     const { t } = this.props;
-    // const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
-    if (!this.props.canTogglePanelLayout) {
-      return null;
-    }
+
     return (
       <div style={{marginTop: 0, marginBottom: 10}}>
         <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>

@@ -30,6 +30,25 @@ export const HeaderContainer = styled.div`
   margin-bottom: 5px;
 `;
 
+export const PanelSectionContainer = styled.div`
+  // Less padding is necessary on the top because there is already some space
+  // from HeaderContainer's top margin.
+  padding-top: 2px;
+  padding-bottom: 8px;
+
+  // Add borders to delineate panel sections from other sections.
+  // TODO: Rename unselectedBackground to alternateBackground.
+  // https://github.com/nextstrain/auspice/pull/1704#discussion_r1385917481
+  border-top: 1px solid ${(props) => props.theme.unselectedBackground};
+  border-bottom: 1px solid ${(props) => props.theme.unselectedBackground};
+
+  // Don't add a top border when there is already a bottom border from a sibling
+  // above.
+  & + & {
+    border-top: none;
+  }
+`;
+
 export const TitleAndIconContainer = styled.span`
   display: flex;
   align-items: center;

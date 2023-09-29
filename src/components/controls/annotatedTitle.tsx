@@ -27,7 +27,9 @@ export const AnnotatedTitle = ({title, tooltip=undefined}: Props) => {
       <HeaderTitle>{title}</HeaderTitle>
       {tooltip && !mobile && (
         <>
-          <HeaderIconContainer data-tip data-for={title}>
+          <HeaderIconContainer data-tip data-for={title}
+            // Don't allow any parent onClick callbacks to run.
+            onClick={(event) => event.stopPropagation()}>
             <FaInfoCircle/>
           </HeaderIconContainer>
           <StyledTooltip place="bottom" type="dark" effect="solid" id={title}>
