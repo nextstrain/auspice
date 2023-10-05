@@ -16,6 +16,7 @@ import GeoResolution from "./geo-resolution";
 import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
+import Toggle from "./toggle";
 import PanelToggle from "./panel-toggle";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
@@ -39,6 +40,8 @@ type Props = {
 function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
   const { t } = useTranslation();
 
+  const [showAnimationOptions, setShowAnimationOptions] = React.useState(false);
+
   const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const canTogglePanelLayout = useSelector((state: RootState) => state.controls.canTogglePanelLayout);
@@ -49,7 +52,28 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
 
       <AnnotatedHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo} mobile={mobileDisplay}/>
       <DateRangeInputs />
-      <AnimationControls />
+
+      {/* FIXME: update translations */}
+      {/* FIXME: combine this custom Toggle and PanelToggle? */}
+      <AnnotatedHeader
+        toggle={<Toggle
+          display={true}
+          on={showAnimationOptions}
+          callback={() => setShowAnimationOptions(!showAnimationOptions)}
+          label={""}
+          style={{ display: "inline" }}
+        />}
+        title={t("sidebar:Animate")}
+        tooltip={AnimationOptionsInfo}
+        mobile={mobileDisplay}
+      />
+      {showAnimationOptions &&
+        <>
+          {/* FIXME: combine the two components below? */}
+          <AnimationOptions />
+          <AnimationControls />
+        </>
+      }
 
       <AnnotatedHeader title={t("sidebar:Color By")} tooltip={ColorByInfo} mobile={mobileDisplay}/>
       <ColorBy />
@@ -131,11 +155,6 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
           <NormalizeFrequencies />
         </span>
       }
-
-      <span style={{ marginTop: "10px" }}>
-        <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo} mobile={mobileDisplay}/>
-        <AnimationOptions />
-      </span>
 
       <Language />
     </ControlsContainer>
