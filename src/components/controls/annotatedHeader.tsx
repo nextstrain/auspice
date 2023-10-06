@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
-import {StyledTooltip, HeaderIconContainer, HeaderContainer} from "./styles";
+import {StyledTooltip, HeaderIconContainer, HeaderContainer, HeaderTitle} from "./styles";
 import { RootState } from "../../store";
 
 type Props = {
@@ -14,7 +14,7 @@ export const AnnotatedHeader = ({title, tooltip=undefined}: Props) => {
 
   return (
     <HeaderContainer>
-      <span>{title}</span>
+      <HeaderTitle>{title}</HeaderTitle>
       {tooltip && !mobile && (
         <>
           <HeaderIconContainer data-tip data-for={title}>
