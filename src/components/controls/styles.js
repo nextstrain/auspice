@@ -24,12 +24,15 @@ export const ControlsContainer = styled.div`
 export const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  font-family: ${(props) => props.theme["font-family"]};
-  font-size: 16px;
   line-height: 28px;
   min-height: 28px; /* needed for safari, else the div height is 0 */
   margin-top: 15px;
   margin-bottom: 5px;
+`;
+
+export const HeaderTitle = styled.span`
+  font-family: ${(props) => props.theme["font-family"]};
+  font-size: 16px;
   font-weight: 500;
   color: ${(props) => props.theme.color};
 `;

@@ -1,6 +1,6 @@
 import React from "react";
 import { FaInfoCircle } from "react-icons/fa";
-import {StyledTooltip, HeaderIconContainer, HeaderContainer} from "./styles";
+import {StyledTooltip, HeaderIconContainer, HeaderContainer, HeaderTitle} from "./styles";
 
 type Props = {
   toggle?: JSX.Element
@@ -14,7 +14,7 @@ export const AnnotatedHeader = ({toggle=undefined, title, tooltip, mobile}: Prop
     <HeaderContainer>
       <span>
         {toggle && <span>{toggle}</span>}
-        <span>{title}</span>
+        <HeaderTitle>{title}</HeaderTitle>
       </span>
       {tooltip && !mobile && (
         <>
