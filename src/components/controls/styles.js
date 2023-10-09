@@ -28,6 +28,8 @@ export const HeaderContainer = styled.div`
   min-height: 28px; /* needed for safari, else the div height is 0 */
   margin-top: 15px;
   margin-bottom: 5px;
+  border-top: 1px solid #d3d3d3;
+  padding-top: 9px;
 `;
 
 export const HeaderTitle = styled.span`
