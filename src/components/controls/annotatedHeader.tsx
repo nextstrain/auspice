@@ -12,20 +12,20 @@ type Props = {
 export const AnnotatedHeader = ({toggle=undefined, title, tooltip, mobile}: Props) => {
   return (
     <HeaderContainer>
-      <span>
-        {toggle && <span>{toggle}</span>}
+      <div>
         <HeaderTitle>{title}</HeaderTitle>
-      </span>
-      {tooltip && !mobile && (
-        <>
-          <HeaderIconContainer data-tip data-for={title}>
-            <FaInfoCircle/>
-          </HeaderIconContainer>
-          <StyledTooltip place="bottom" type="dark" effect="solid" id={title}>
-            {tooltip}
-          </StyledTooltip>
-        </>
-      )}
+        {tooltip && !mobile && (
+          <>
+            <HeaderIconContainer data-tip data-for={title}>
+              <FaInfoCircle />
+            </HeaderIconContainer>
+            <StyledTooltip place="bottom" type="dark" effect="solid" id={title}>
+              {tooltip}
+            </StyledTooltip>
+          </>
+        )}
+      </div>
+      {toggle !== undefined && toggle}
     </HeaderContainer>
   );
 };

@@ -40,8 +40,7 @@ export const HeaderTitle = styled.span`
 `;
 
 export const HeaderIconContainer = styled.span`
-  padding-top: 4px;
-  padding-right: 3px;
+  padding-left: 6px;
   cursor: help;
   color: #888;
 `;

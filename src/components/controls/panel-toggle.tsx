@@ -24,7 +24,6 @@ const PanelToggle = ({ panel, on }: Props) => {
       on={on}
       callback={() => dispatch(togglePanelDisplay(panel))}
       label=""
-      style={{display: "inline"}}
     />
   );
 };
