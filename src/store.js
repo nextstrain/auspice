@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { changeURLMiddleware } from "../middleware/changeURL";
-import rootReducer from "../reducers";
-// import { loggingMiddleware } from "../middleware/logActions";
-import { keepScatterplotStateInSync } from "../middleware/scatterplot";
+import { changeURLMiddleware } from "./middleware/changeURL";
+import rootReducer from "./reducers";
+// import { loggingMiddleware } from "./middleware/logActions";
+import { keepScatterplotStateInSync } from "./middleware/scatterplot";
 
 const middleware = [
   keepScatterplotStateInSync,
@@ -25,8 +25,8 @@ const store = configureStore({
 
 if (process.env.NODE_ENV !== 'production' && module.hot) {
   // console.log("hot reducer reload");
-  module.hot.accept('../reducers', () => {
-    const nextRootReducer = require('../reducers/index'); 
+  module.hot.accept('./reducers', () => {
+    const nextRootReducer = require('./reducers/index'); 
     store.replaceReducer(nextRootReducer);
   });
 }
