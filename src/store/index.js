@@ -12,7 +12,14 @@ const middleware = [
 
 const store = configureStore({
   reducer: rootReducer,
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(middleware),
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      // TODO: Go through reducers and see why the state is not immutable nor serializable.
+      // These were not checked prior to the adoption of Redux Toolkit, and were not
+      // investigated to minimize conversion efforts.
+      immutableCheck: false,
+      serializableCheck: false
+    }).concat(middleware),
   devTools: process.env.NODE_ENV !== 'production',
 })
 
