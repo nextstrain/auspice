@@ -16,7 +16,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
 
     /* Modules */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
-    "types": ["node"],                                   /* Specify type package names to be included without being referenced in a source file. */
+    "types": ["node", "webpack-env"],                    /* Specify type package names to be included without being referenced in a source file. */
 
     /* JavaScript Support */
     "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */

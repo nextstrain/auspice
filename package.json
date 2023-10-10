@@ -124,6 +124,7 @@
   "devDependencies": {
     "@types/leaflet": "^1.9.3",
     "@types/node": "^18.15.11",
+    "@types/webpack-env": "^1.18.2",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
     "chai": "^4.1.2",
