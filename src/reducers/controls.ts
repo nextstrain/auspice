@@ -12,11 +12,22 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
+export interface ControlsState {
+  panelsAvailable: string[]
+  panelsToDisplay: string[]
+  showTreeToo: boolean
+  canTogglePanelLayout: boolean
+
+  // This allows arbitrary prop names while TypeScript adoption is incomplete.
+  // TODO: add all other props explicitly and remove this.
+  [propName: string]: any;
+}
+
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 export const getDefaultControlsState = () => {
-  const defaults = {
+  const defaults: Partial<ControlsState> = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
     geoResolution: defaultGeoResolution,
@@ -80,7 +91,7 @@ export const getDefaultControlsState = () => {
     panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
     tipLabelKey: defaults.tipLabelKey,
-    showTreeToo: undefined,
+    showTreeToo: false,
     showTangle: false,
     zoomMin: undefined,
     zoomMax: undefined,
@@ -102,7 +113,7 @@ export const getDefaultControlsState = () => {
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
 export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => exists && distMeasure === "num_date" && layout === "rect";
 
-const Controls = (state = getDefaultControlsState(), action) => {
+const Controls = (state: ControlsState = getDefaultControlsState(), action): ControlsState => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
@@ -142,7 +153,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         })
       });
     case types.CHANGE_DISTANCE_MEASURE: {
-      const updatesToState = {
+      const updatesToState: Partial<ControlsState> = {
         distanceMeasure: action.data,
         branchLengthsToDisplay: state.branchLengthsToDisplay
       };
@@ -161,7 +172,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, updatesToState);
     }
       case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      const newDates = { quickdraw: action.quickdraw };
+      const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };
       if (action.dateMin) {
         newDates.dateMin = action.dateMin;
         newDates.dateMinNumeric = action.dateMinNumeric;
@@ -257,7 +268,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.REMOVE_TREE_TOO:
       return Object.assign({}, state, {
-        showTreeToo: undefined,
+        showTreeToo: false,
         showTangle: false,
         canTogglePanelLayout: hasMultipleGridPanels(state.panelsAvailable),
         panelsToDisplay: state.panelsAvailable.slice()
