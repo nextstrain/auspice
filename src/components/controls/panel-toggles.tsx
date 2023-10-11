@@ -1,35 +1,33 @@
 import React from "react";
-import { connect } from "react-redux";
-import { withTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from 'react-i18next';
 
 import Toggle from "./toggle";
 import { togglePanelDisplay } from "../../actions/panelDisplay";
+import { RootState } from "../../store";
 
-@connect((state) => ({
-  panelsAvailable: state.controls.panelsAvailable,
-  panelsToDisplay: state.controls.panelsToDisplay,
-  showTreeToo: state.controls.showTreeToo
-}))
-class PanelToggles extends React.Component {
-  render() {
-    const { t } = this.props;
+export default function PanelToggles() {
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
 
-    const panels = this.props.panelsAvailable.slice();
-    if (this.props.showTreeToo && panels.indexOf("map") !== -1) {
-      panels.splice(panels.indexOf("map"), 1);
-    }
-    return panels.map((n) => (
+  const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);
+  const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
+  const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
+
+  const panels = panelsAvailable.slice();
+  if (showTreeToo && panels.indexOf("map") !== -1) {
+    panels.splice(panels.indexOf("map"), 1);
+  }
+  return <>
+    {panels.map((n) => (
       <Toggle
         key={n}
         display
-        on={this.props.panelsToDisplay.indexOf(n) !== -1}
-        callback={() => this.props.dispatch(togglePanelDisplay(n))}
+        on={panelsToDisplay.indexOf(n) !== -1}
+        callback={() => dispatch(togglePanelDisplay(n))}
         label={t("sidebar:Show " + n)}
-        style={{paddingBottom: "10px"}}
+        style={{ paddingBottom: "10px" }}
       />
-    ));
-  }
+    ))}
+  </>
 }
-
-const WithTranslation = withTranslation()(PanelToggles);
-export default WithTranslation;
