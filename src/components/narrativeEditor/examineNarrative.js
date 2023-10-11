@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from "../../hooks";
 import { getDatasetNamesFromUrl } from "../../actions/loadData";
 import { CLEAN_START } from "../../actions/types";
 import { createStateFromQueryOrJSONs } from "../../actions/recomputeReduxState";
@@ -159,7 +159,7 @@ const NarrativeSummary = ({summary, datasetResponses, showNarrative}) => {
 };
 
 const ExamineNarrative = ({narrative, datasetResponses, setDisplayNarrative}) => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const el = useRef(null);
   useEffect(() => {
     /* when a narrative is loaded then we want to focus on <ExamineNarrative> however

@@ -1,5 +1,6 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "../../hooks";
 import { useTranslation } from 'react-i18next';
 
 import Toggle from "./toggle";
@@ -7,7 +8,7 @@ import { togglePanelDisplay } from "../../actions/panelDisplay";
 import { RootState } from "../../store";
 
 export default function PanelToggles() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
   const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);

@@ -1,5 +1,5 @@
 import {useEffect, useReducer, useRef} from "react";
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from "../../hooks";
 import { CACHE_JSONS } from "../../actions/types";
 import { FetchError } from "../../util/exceptions";
 
@@ -14,7 +14,7 @@ import { FetchError } from "../../util/exceptions";
  */
 
 export function useDatasetFetch(datasets) {
-  const dispatchRedux = useDispatch();
+  const dispatchRedux = useAppDispatch;
   const [datasetResponses, dispatchDatasetResponses] = useReducer(
     (state, action) => {
       if (action.reset) return {};
