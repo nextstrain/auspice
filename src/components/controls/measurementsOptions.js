@@ -1,5 +1,6 @@
 import React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
 import { changeMeasurementsCollection } from "../../actions/measurements";
 import {
@@ -30,7 +31,7 @@ const collectionOptionsSelector = (collections) => {
 };
 
 const MeasurementsOptions = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const collection = useSelector((state) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state) => collectionOptionsSelector(state.measurements.collections), isEqual);
   const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
