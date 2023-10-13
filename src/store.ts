@@ -19,7 +19,12 @@ const store = configureStore({
       // These were not checked prior to the adoption of Redux Toolkit, and were not
       // investigated to minimize conversion efforts.
       immutableCheck: false,
-      serializableCheck: false
+
+      // By design, the state contains many values that are non-serializable.
+      // Instead of adding several ignoredPaths, disable this check entirely.
+      // This means time-travel debugging is not possible, but it would not be
+      // performant enough given the large size of the Redux state.
+      serializableCheck: false,
     }).concat(middleware),
   devTools: process.env.NODE_ENV !== 'production',
 })
