@@ -15,10 +15,15 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     // This adds the thunk middleware, and for development builds, other useful checks.
     getDefaultMiddleware({
-      // TODO: Go through reducers and see why the state is not immutable nor serializable.
-      // These were not checked prior to the adoption of Redux Toolkit, and were not
-      // investigated to minimize conversion efforts.
-      immutableCheck: false,
+      immutableCheck: {
+        // Immutability can't be checked in the following due to circular references.
+        ignoredPaths: [
+          'tree.nodes',
+          'tree.vaccines',
+          'treeToo.nodes',
+          'treeToo.vaccines',
+        ],
+      },
 
       // By design, the state contains many values that are non-serializable.
       // Instead of adding several ignoredPaths, disable this check entirely.
