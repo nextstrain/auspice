@@ -13,6 +13,7 @@ const middleware = [
 const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
+    // This adds the thunk middleware, and for development builds, other useful checks.
     getDefaultMiddleware({
       // TODO: Go through reducers and see why the state is not immutable nor serializable.
       // These were not checked prior to the adoption of Redux Toolkit, and were not
