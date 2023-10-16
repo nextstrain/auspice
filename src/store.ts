@@ -15,15 +15,19 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     // This adds the thunk middleware, and for development builds, other useful checks.
     getDefaultMiddleware({
-      immutableCheck: {
-        // Immutability can't be checked in the following due to circular references.
-        ignoredPaths: [
-          'tree.nodes',
-          'tree.vaccines',
-          'treeToo.nodes',
-          'treeToo.vaccines',
-        ],
-      },
+      // Immutability can't be checked in some parts of the state due to circular references.
+      // Allow the option to disable this check through an environment variable.
+      // Note that it is never enabled when NODE_ENV=production.
+      immutableCheck: process.env.SKIP_REDUX_CHECKS
+        ? false
+        : {
+          ignoredPaths: [
+            'tree.nodes',
+            'tree.vaccines',
+            'treeToo.nodes',
+            'treeToo.vaccines',
+          ],
+        },
 
       // By design, the state contains many values that are non-serializable.
       // Instead of adding several ignoredPaths, disable this check entirely.
