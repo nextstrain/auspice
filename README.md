@@ -75,6 +75,18 @@ If you are editing source code, running the following command will allow hot-rel
 auspice develop --datasetDir data
 ```
 
+#### Environment variables
+
+The client looks for some environment variables. All are optional.
+
+> [!NOTE]
+> This is an incomplete list. For other variables, search for `process.env.` in the codebase.
+
+- `SKIP_REDUX_CHECKS`: Set this to a truthy value to improve dev server responsiveness. Useful when you see a console warning like this:
+
+    > ImmutableStateInvariantMiddleware took 200ms, which is more than the warning threshold of 32ms.
+    > If your state or actions are very large, you may want to disable the middleware as it might cause too much of a slowdown in development mode.
+
 ### CLI (Command Line Interface)
 
 Run `auspice --help` or `auspice view --help` to see all the available command line options.

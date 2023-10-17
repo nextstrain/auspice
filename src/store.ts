@@ -13,12 +13,27 @@ const middleware = [
 const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
+    // This adds the thunk middleware, and for development builds, other useful checks.
     getDefaultMiddleware({
-      // TODO: Go through reducers and see why the state is not immutable nor serializable.
-      // These were not checked prior to the adoption of Redux Toolkit, and were not
-      // investigated to minimize conversion efforts.
-      immutableCheck: false,
-      serializableCheck: false
+      // Immutability can't be checked in some parts of the state due to circular references.
+      // Allow the option to disable this check through an environment variable.
+      // Note that it is never enabled when NODE_ENV=production.
+      immutableCheck: process.env.SKIP_REDUX_CHECKS
+        ? false
+        : {
+          ignoredPaths: [
+            'tree.nodes',
+            'tree.vaccines',
+            'treeToo.nodes',
+            'treeToo.vaccines',
+          ],
+        },
+
+      // By design, the state contains many values that are non-serializable.
+      // Instead of adding several ignoredPaths, disable this check entirely.
+      // This means time-travel debugging is not possible, but it would not be
+      // performant enough given the large size of the Redux state.
+      serializableCheck: false,
     }).concat(middleware),
   devTools: process.env.NODE_ENV !== 'production',
 })

@@ -67,6 +67,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const pluginProcessEnvData = new webpack.DefinePlugin({
     "process.env": {
       NODE_ENV: devMode ? JSON.stringify("development") : JSON.stringify("production"),
+      SKIP_REDUX_CHECKS: JSON.stringify(process.env.SKIP_REDUX_CHECKS),
       EXTENSION_DATA: JSON.stringify(extensionData)
     }
   });
