@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { useTranslation } from 'react-i18next';
 
 import ColorBy, {ColorByInfo} from "./color-by";
@@ -25,16 +26,17 @@ import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
   ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
 import { AnnotatedHeader } from "./annotatedHeader";
 import MeasurementsOptions from "./measurementsOptions";
+import { RootState } from "../../store";
 
-type Props = {
-  treeOn: boolean
-  mapOn: boolean
-  frequenciesOn: boolean
-  measurementsOn: boolean
-}
-
-function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn }: Props) {
+function Controls() {
   const { t } = useTranslation();
+
+  const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
+
+  const treeOn = panelsToDisplay.includes("tree");
+  const mapOn = panelsToDisplay.includes("map");
+  const frequenciesOn = panelsToDisplay.includes("frequencies");
+  const measurementsOn = panelsToDisplay.includes("measurements");
 
   return (
     <ControlsContainer>
