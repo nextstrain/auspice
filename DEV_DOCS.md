@@ -17,7 +17,7 @@ Thank you for helping us to improve Nextstrain!
 
 This project strictly adheres to the [Contributor Covenant Code of Conduct](https://github.com/nextstrain/.github/blob/master/CODE_OF_CONDUCT.md).
 
-Please see the [project boards](https://github.com/orgs/nextstrain/projects) for currently available issues.
+Please see the [GitHub issues page](https://github.com/nextstrain/auspice/issues) for currently available issues.
 
 ## Developer Installation
 
