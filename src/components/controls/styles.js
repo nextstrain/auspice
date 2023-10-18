@@ -49,7 +49,7 @@ export const PanelSectionContainer = styled.div`
 `;
 
 export const TitleAndIconContainer = styled.span`
-  display: flex;
+  display: inline-flex;
   align-items: center;
 `;
 
