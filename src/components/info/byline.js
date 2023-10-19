@@ -22,6 +22,7 @@ class Byline extends React.Component {
         {renderAvatar(t, this.props.metadata)}
         {renderBuildInfo(t, this.props.metadata)}
         {renderMaintainers(t, this.props.metadata)}
+        {renderDataUpdated(t, this.props.metadata)}
         {renderDataProvenance(t, this.props.metadata)}
       </>
     );
@@ -101,6 +102,20 @@ function renderMaintainers(t, metadata) {
   return null;
 }
 
+/**
+ * Returns a React component detailing the date the data was last updated.
+ * Renders a <span> containing "Data updated X", where X derives from `metadata.updated`
+ */
+function renderDataUpdated(t, metadata) {
+  if (metadata.updated) {
+    return (
+      <span>
+        {`${t("Data updated")} ${metadata.updated}. `}
+      </span>
+    );
+  }
+  return null;
+}
 
 /**
  * Returns a React component detailing the data provenance of the build (pipeline).
