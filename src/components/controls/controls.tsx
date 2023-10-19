@@ -24,7 +24,7 @@ import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
 import {TreeOptionsInfo, MapOptionsInfo, AnimationOptionsInfo, PanelOptionsInfo,
   ExplodeTreeInfo, FrequencyInfo, MeasurementsOptionsInfo} from "./miscInfoText";
-import { AnnotatedHeader } from "./annotatedHeader";
+import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
 
@@ -42,19 +42,19 @@ function Controls() {
     <ControlsContainer>
       <ChooseDataset />
 
-      <AnnotatedHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
+      <ControlHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
       <DateRangeInputs />
       <AnimationControls />
 
-      <AnnotatedHeader title={t("sidebar:Color By")} tooltip={ColorByInfo}/>
+      <ControlHeader title={t("sidebar:Color By")} tooltip={ColorByInfo}/>
       <ColorBy />
 
-      <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo}/>
+      <ControlHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo}/>
       <FilterData measurementsOn={measurementsOn} />
 
       {treeOn &&
         <span>
-          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo}/>
+          <ControlHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo}/>
           <ChooseLayout />
           <ChooseMetric />
           <ChooseBranchLabelling />
@@ -67,14 +67,14 @@ function Controls() {
 
       {measurementsOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo}/>
+          <ControlHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo}/>
           <MeasurementsOptions />
         </span>
       }
 
       {mapOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo}/>
+          <ControlHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo}/>
           <GeoResolution />
           <TransmissionLines />
         </span>
@@ -82,23 +82,23 @@ function Controls() {
 
       {frequenciesOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo}/>
+          <ControlHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo}/>
           <NormalizeFrequencies />
         </span>
       }
 
       <span style={{ marginTop: "10px" }}>
-        <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
+        <ControlHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
         <AnimationOptions />
       </span>
 
       <span style={{ paddingTop: "10px" }} />
-      <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo}/>
+      <ControlHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo}/>
       <PanelLayout />
       <PanelToggles />
 
       <span style={{ paddingTop: "10px" }} />
-      <AnnotatedHeader title={t("sidebar:Language")}/>
+      <ControlHeader title={t("sidebar:Language")}/>
       <Language />
     </ControlsContainer>
   );

@@ -1,19 +1,29 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
-import {StyledTooltip, HeaderIconContainer, HeaderContainer, HeaderTitle} from "./styles";
+import {TitleAndIconContainer, StyledTooltip, HeaderIconContainer, HeaderTitle} from "./styles";
 import { RootState } from "../../store";
 
+/** Title to display for the control. */
+export type Title = string;
+
+/** Informational tooltip element to display on hover. */
+export type Tooltip = JSX.Element;
+
 type Props = {
-  title: string
-  tooltip?: JSX.Element
+  title: Title
+  tooltip?: Tooltip
 }
 
-export const AnnotatedHeader = ({title, tooltip=undefined}: Props) => {
+/**
+ * A title and tooltip to be shown in a control header.
+ * The tooltip is not shown on mobile.
+ */
+export const AnnotatedTitle = ({title, tooltip=undefined}: Props) => {
   const mobile = useSelector((state: RootState) => state.general.mobileDisplay);
 
   return (
-    <HeaderContainer>
+    <TitleAndIconContainer>
       <HeaderTitle>{title}</HeaderTitle>
       {tooltip && !mobile && (
         <>
@@ -25,7 +35,6 @@ export const AnnotatedHeader = ({title, tooltip=undefined}: Props) => {
           </StyledTooltip>
         </>
       )}
-    </HeaderContainer>
+    </TitleAndIconContainer>
   );
 };
-

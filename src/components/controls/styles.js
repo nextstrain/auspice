@@ -30,6 +30,11 @@ export const HeaderContainer = styled.div`
   margin-bottom: 5px;
 `;
 
+export const TitleAndIconContainer = styled.span`
+  display: flex;
+  align-items: center;
+`;
+
 export const HeaderTitle = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
   font-size: 16px;
@@ -38,8 +43,9 @@ export const HeaderTitle = styled.span`
 `;
 
 export const HeaderIconContainer = styled.span`
-  padding-top: 4px;
-  padding-right: 3px;
+  display: inline-flex;
+  font-size: 16px;
+  padding-left: 6px;
   cursor: help;
   color: #888;
 `;
