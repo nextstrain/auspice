@@ -181,7 +181,7 @@ export const drawBranches = function drawBranches() {
   } else {
     this.groups.branchTee
       .selectAll('.branch')
-      .data(this.nodes.filter((d) => d.n.hasChildren))
+      .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
       .enter()
       .append("path")
       .attr("class", "branch T")
@@ -213,7 +213,7 @@ export const drawBranches = function drawBranches() {
   }
   this.groups.branchStem
     .selectAll('.branch')
-    .data(this.nodes)
+    .data(this.nodes.filter((d) => d.displayOrder !== undefined))
     .enter()
     .append("path")
     .attr("class", "branch S")
