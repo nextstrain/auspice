@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
-import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT, TOGGLE_SIDEBAR } from "../../actions/types";
+import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT, TOGGLE_SIDEBAR, TOGGLE_MOBILE_DISPLAY } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
 import { twoColumnBreakpoint, controlsHiddenWidth} from "../../util/globals";
 
@@ -60,6 +60,13 @@ class Monitor extends React.Component {
         } else if (oldBrowserDimensions.width < controlsHiddenWidth && newBrowserDimensions.width > controlsHiddenWidth) {
           dispatch({type: TOGGLE_SIDEBAR, value: true});
         }
+      }
+
+      /* Determine if a mobile device is being used based on window width. */
+      if (oldBrowserDimensions.width > controlsHiddenWidth && newBrowserDimensions.width < controlsHiddenWidth) {
+        dispatch({ type: TOGGLE_MOBILE_DISPLAY, value: true });
+      } else if (oldBrowserDimensions.width < controlsHiddenWidth && newBrowserDimensions.width > controlsHiddenWidth) {
+        dispatch({ type: TOGGLE_MOBILE_DISPLAY, value: false });
       }
 
       /* if we are _not_ in narrative mode, then browser resizing may change between grid & full layouts automatically */

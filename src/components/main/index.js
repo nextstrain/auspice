@@ -6,7 +6,6 @@ import SidebarToggle from "../framework/sidebar-toggle";
 import Info from "../info/info";
 import Tree from "../tree";
 import Map from "../map/map";
-import { controlsHiddenWidth } from "../../util/globals";
 import Footer from "../framework/footer";
 import FinePrint from "../framework/fine-print";
 import DownloadModal from "../download/downloadModal";
@@ -43,22 +42,14 @@ const Measurements = lazy(() => import("../measurements"));
   sidebarOpen: state.controls.sidebarOpen,
   showOnlyPanels: state.controls.showOnlyPanels,
   treeName: state.tree.name,
-  secondTreeName: state.controls.showTreeToo
+  secondTreeName: state.controls.showTreeToo,
+  mobileDisplay: state.general.mobileDisplay
 }))
 class Main extends React.Component {
   constructor(props) {
     super(props);
-    /* window listener employed to toggle switch to mobile display.
-    NOTE: this used to toggle sidebar open boolean when that was stored
-    as state here, but his has since ben moved to redux state. The mobile
-    display should likewise be lifted to redux state */
-    const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
-    mql.addListener(() => this.setState({
-      mobileDisplay: !this.state.mql.matches
-    }));
+
     this.state = {
-      mql,
-      mobileDisplay: !mql.matches,
       showSpinner: !(this.props.metadataLoaded && this.props.treeLoaded)
     };
     analyticsNewPage();
@@ -116,7 +107,7 @@ class Main extends React.Component {
 
     /* for mobile narratives we use a custom component as the nesting of view components is different */
     /* TODO - the breakpoint for `mobileDisplay` needs testing */
-    if (this.state.mobileDisplay && this.props.displayNarrative) {
+    if (this.props.mobileDisplay && this.props.displayNarrative) {
       return (
         <>
           <AnimationController/>
@@ -132,7 +123,7 @@ class Main extends React.Component {
      * (b) narrative display for non-mobile (i.e. display side-by-side)
      */
     const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
-      calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.state.mobileDisplay);
+      calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.props.mobileDisplay);
     const overlayHandler = () => {this.props.dispatch({type: TOGGLE_SIDEBAR, value: false});};
     const {full, grid, chartEntropy, chartFrequencies} =
       calcPanelDims(this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
@@ -148,7 +139,7 @@ class Main extends React.Component {
         </ErrorBoundary>
         <SidebarToggle
           sidebarOpen={this.props.sidebarOpen}
-          mobileDisplay={this.state.mobileDisplay}
+          mobileDisplay={this.props.mobileDisplay}
           handler={this.toggleSidebar}
         />
         <Sidebar
@@ -158,7 +149,7 @@ class Main extends React.Component {
           displayNarrative={this.props.displayNarrative}
           panelsToDisplay={this.props.panelsToDisplay}
           narrativeTitle={this.props.narrativeTitle}
-          mobileDisplay={this.state.mobileDisplay}
+          mobileDisplay={this.props.mobileDisplay}
           navBarHandler={this.toggleSidebar}
         />
         <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>
@@ -223,7 +214,7 @@ class Main extends React.Component {
           }
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}
-        {this.state.mobileDisplay ?
+        {this.props.mobileDisplay ?
           <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
           null
         }
