@@ -54,7 +54,8 @@ For instance, here is the customisation used by nextstrain.org:
        "sidebarBoxShadow": "rgba(0, 0, 0, 0.2)",
        "font-family": "Lato, Helvetica Neue, Helvetica, sans-serif",
        "selectedColor": "#5097BA",
-       "unselectedColor": "#333"
+       "unselectedColor": "#333",
+       "unselectedBackground": "#888"
      }
    }
 
@@ -66,6 +67,8 @@ For instance, here is the customisation used by nextstrain.org:
 | selectedColor            | color                        | Text color of selected text / button text          |
 +--------------------------+------------------------------+----------------------------------------------------+
 | unselectedColor          | color                        | Text color of unselected text / button text        |
++--------------------------+------------------------------+----------------------------------------------------+
+| unselectedBackground     | color                        | Background color of unselected toggle              |
 +--------------------------+------------------------------+----------------------------------------------------+
 | font-family              | font                         | Inner shadow of the sidebar on the right hand side |
 +--------------------------+------------------------------+----------------------------------------------------+
