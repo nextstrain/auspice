@@ -31,49 +31,48 @@ type Props = {
   mapOn: boolean
   frequenciesOn: boolean
   measurementsOn: boolean
-  mobileDisplay: boolean
 }
 
-function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay }: Props) {
+function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn }: Props) {
   const { t } = useTranslation();
 
   return (
     <ControlsContainer>
       <ChooseDataset />
 
-      <AnnotatedHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo} mobile={mobileDisplay}/>
+      <AnnotatedHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
       <DateRangeInputs />
       <AnimationControls />
 
-      <AnnotatedHeader title={t("sidebar:Color By")} tooltip={ColorByInfo} mobile={mobileDisplay}/>
+      <AnnotatedHeader title={t("sidebar:Color By")} tooltip={ColorByInfo}/>
       <ColorBy />
 
-      <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo} mobile={mobileDisplay}/>
+      <AnnotatedHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo}/>
       <FilterData measurementsOn={measurementsOn} />
 
       {treeOn &&
         <span>
-          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo} mobile={mobileDisplay}/>
+          <AnnotatedHeader title={t("sidebar:Tree Options")} tooltip={TreeOptionsInfo}/>
           <ChooseLayout />
           <ChooseMetric />
           <ChooseBranchLabelling />
           <ChooseTipLabel />
           <ChooseSecondTree />
-          <ChooseExplodeAttr tooltip={ExplodeTreeInfo} mobile={mobileDisplay} />
+          <ChooseExplodeAttr tooltip={ExplodeTreeInfo} />
           <ToggleTangle />
         </span>
       }
 
       {measurementsOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo} mobile={mobileDisplay}/>
+          <AnnotatedHeader title={t("sidebar:Measurements Options")} tooltip={MeasurementsOptionsInfo}/>
           <MeasurementsOptions />
         </span>
       }
 
       {mapOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo} mobile={mobileDisplay}/>
+          <AnnotatedHeader title={t("sidebar:Map Options")} tooltip={MapOptionsInfo}/>
           <GeoResolution />
           <TransmissionLines />
         </span>
@@ -81,18 +80,18 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn, mobileDisplay 
 
       {frequenciesOn &&
         <span style={{ marginTop: "10px" }}>
-          <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo} mobile={mobileDisplay}/>
+          <AnnotatedHeader title={t("sidebar:Frequency Options")} tooltip={FrequencyInfo}/>
           <NormalizeFrequencies />
         </span>
       }
 
       <span style={{ marginTop: "10px" }}>
-        <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo} mobile={mobileDisplay}/>
+        <AnnotatedHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
         <AnimationOptions />
       </span>
 
       <span style={{ paddingTop: "10px" }} />
-      <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} mobile={mobileDisplay}/>
+      <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo}/>
       <PanelLayout />
       <PanelToggles />
       <Language />

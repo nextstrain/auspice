@@ -24,7 +24,6 @@ export const Sidebar = (
           <Narrative height={height - narrativeNavBarHeight} width={width} />
         ) : (
           <Controls
-            mobileDisplay={mobileDisplay}
             treeOn={panelsToDisplay.includes("tree")}
             mapOn={panelsToDisplay.includes("map")}
             frequenciesOn={panelsToDisplay.includes("frequencies")}

@@ -15,7 +15,8 @@ import CustomSelect from "./customSelect";
 @connect((state) => ({
   selected: state.controls.explodeAttr,
   available: state.metadata.colorings,
-  showThisUI: !state.controls.showTreeToo
+  showThisUI: !state.controls.showTreeToo,
+  mobileDisplay: state.general.mobileDisplay
 }))
 class ChooseExplodeAttr extends React.Component {
   constructor(props) {
@@ -34,7 +35,7 @@ class ChooseExplodeAttr extends React.Component {
   }
   render() {
     if (!this.props.showThisUI) return null;
-    const { t, tooltip, mobile } = this.props;
+    const { t, tooltip } = this.props;
     const selectOptions = this.gatherAttrs();
     return (
       <div style={{paddingTop: 10}}>
@@ -43,7 +44,7 @@ class ChooseExplodeAttr extends React.Component {
             <ImLab style={{ marginRight: "5px" }}/>
             {t("sidebar:Explode Tree By")}
           </span>
-          {tooltip && !mobile && (
+          {tooltip && !this.props.mobileDisplay && (
             <>
               <SidebarIconContainer data-tip data-for="select-explode">
                 <FaInfoCircle/>
