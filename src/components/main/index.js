@@ -149,7 +149,6 @@ class Main extends React.Component {
           displayNarrative={this.props.displayNarrative}
           panelsToDisplay={this.props.panelsToDisplay}
           narrativeTitle={this.props.narrativeTitle}
-          mobileDisplay={this.props.mobileDisplay}
           navBarHandler={this.toggleSidebar}
         />
         <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>

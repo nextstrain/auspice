@@ -8,14 +8,13 @@ import { narrativeNavBarHeight } from "../../util/globals";
 
 
 export const Sidebar = (
-  {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, mobileDisplay, navBarHandler}
+  {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, navBarHandler}
 ) => {
   return (
     <ThemeProvider theme={sidebarTheme}>
       <SidebarContainer left={sidebarOpen ? 0 : -1 * width} width={width} height={height}>
         <NavBar
           sidebar
-          mobileDisplay={mobileDisplay}
           toggleHandler={navBarHandler}
           narrativeTitle={displayNarrative ? narrativeTitle : false}
           width={width}
