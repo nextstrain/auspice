@@ -94,6 +94,9 @@ function Controls({ treeOn, mapOn, frequenciesOn, measurementsOn }: Props) {
       <AnnotatedHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo}/>
       <PanelLayout />
       <PanelToggles />
+
+      <span style={{ paddingTop: "10px" }} />
+      <AnnotatedHeader title={t("sidebar:Language")}/>
       <Language />
     </ControlsContainer>
   );

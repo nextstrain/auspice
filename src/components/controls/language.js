@@ -1,11 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from "react-i18next";
 import i18n from "i18next";
 
 import { controlsWidth } from "../../util/globals";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { SidebarSubtitle } from "./styles";
 import { CHANGE_LANGUAGE } from "../../actions/types";
 import CustomSelect from "./customSelect";
 
@@ -62,29 +60,22 @@ class Language extends React.Component {
   }
 
   render() {
-    const { t } = this.props;
     const selectOptions = this.getlanguageOptions();
     return (
-      <>
-        <SidebarSubtitle spaceAbove>
-          {t("sidebar:Language")}
-        </SidebarSubtitle>
-        <div style={{paddingBottom: 100, width: controlsWidth, fontSize: 14}}>
-          <CustomSelect
-            name="selectLanguage"
-            id="selectLanguage"
-            value={selectOptions.filter(({value}) => value === this.props.language)}
-            options={selectOptions}
-            isClearable={false}
-            isSearchable={false}
-            isMulti={false}
-            onChange={(opt) => {this.changeLanguage(opt.value);}}
-          />
-        </div>
-      </>
+      <div style={{paddingBottom: 100, width: controlsWidth, fontSize: 14}}>
+        <CustomSelect
+          name="selectLanguage"
+          id="selectLanguage"
+          value={selectOptions.filter(({value}) => value === this.props.language)}
+          options={selectOptions}
+          isClearable={false}
+          isSearchable={false}
+          isMulti={false}
+          onChange={(opt) => {this.changeLanguage(opt.value);}}
+        />
+      </div>
     );
   }
 }
-const WithTranslation = withTranslation()(Language);
 
-export default WithTranslation;
+export default Language;
