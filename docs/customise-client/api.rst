@@ -62,17 +62,17 @@ For instance, here is the customisation used by nextstrain.org:
 +--------------------------+------------------------------+----------------------------------------------------+
 | Properties               | CSS string of                | Description                                        |
 +==========================+==============================+====================================================+
-| color                    | color                        | Text color                                         |
-+--------------------------+------------------------------+----------------------------------------------------+
 | selectedColor            | color                        | Text color of selected text / button text          |
 +--------------------------+------------------------------+----------------------------------------------------+
 | unselectedColor          | color                        | Text color of unselected text / button text        |
 +--------------------------+------------------------------+----------------------------------------------------+
+| color                    | color                        | Text color of all other text                       |
++--------------------------+------------------------------+----------------------------------------------------+
 | unselectedBackground     | color                        | Background color of unselected toggle              |
 +--------------------------+------------------------------+----------------------------------------------------+
-| font-family              | font                         | Inner shadow of the sidebar on the right hand side |
+| font-family              | font                         | Font used throughout the sidebar                   |
 +--------------------------+------------------------------+----------------------------------------------------+
-| background               | color                        | Background color                                   |
+| background               | color                        | Background color of the entire sidebar             |
 +--------------------------+------------------------------+----------------------------------------------------+
 
 Components
