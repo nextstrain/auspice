@@ -143,11 +143,9 @@ class Main extends React.Component {
           handler={this.toggleSidebar}
         />
         <Sidebar
-          sidebarOpen={this.props.sidebarOpen}
           width={sidebarWidth}
           height={availableHeight}
           displayNarrative={this.props.displayNarrative}
-          panelsToDisplay={this.props.panelsToDisplay}
           narrativeTitle={this.props.narrativeTitle}
           navBarHandler={this.toggleSidebar}
         />
