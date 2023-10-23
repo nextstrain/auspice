@@ -28,7 +28,7 @@ export const AnimationOptionsInfo = (
   </>
 );
 
-export const PanelOptionsInfo = (
+export const PanelLayoutInfo = (
   <>
     Control whether to show the tree and the map side-by-side (<em>grid</em>) or expanded (<em>full</em>).
   </>

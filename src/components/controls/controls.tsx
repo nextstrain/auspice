@@ -22,7 +22,7 @@ import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelOptionsInfo,
+import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
   ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
@@ -118,7 +118,7 @@ function Controls() {
       {canTogglePanelLayout &&
         <>
           <span style={{ paddingTop: "10px" }} />
-          <ControlHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} />
+          <ControlHeader title={t("sidebar:Display")} tooltip={PanelLayoutInfo} />
           <PanelLayout />
         </>
       }
