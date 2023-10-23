@@ -22,7 +22,7 @@ import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
-import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelOptionsInfo,
+import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
   ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
@@ -50,7 +50,15 @@ function Controls() {
       <ControlHeader title={t("sidebar:Filter Data")} tooltip={FilterInfo}/>
       <FilterData measurementsOn={panelsToDisplay.includes("measurements")} />
 
-      <span style={{ paddingTop: "10px" }} />
+      {canTogglePanelLayout ?
+        <>
+          <ControlHeader title={t("sidebar:Display")} tooltip={PanelLayoutInfo} />
+          <PanelLayout />
+        </>
+        :
+        <span style={{ paddingTop: "10px" }} />
+      }
+
 
       {panelsAvailable.includes("tree") &&
         <PanelSection
@@ -114,14 +122,6 @@ function Controls() {
         <ControlHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
         <AnimationOptions />
       </span>
-
-      {canTogglePanelLayout &&
-        <>
-          <span style={{ paddingTop: "10px" }} />
-          <ControlHeader title={t("sidebar:Panel Options")} tooltip={PanelOptionsInfo} />
-          <PanelLayout />
-        </>
-      }
 
       <span style={{ paddingTop: "10px" }} />
       <ControlHeader title={t("sidebar:Language")}/>
