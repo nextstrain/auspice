@@ -54,22 +54,25 @@ For instance, here is the customisation used by nextstrain.org:
        "sidebarBoxShadow": "rgba(0, 0, 0, 0.2)",
        "font-family": "Lato, Helvetica Neue, Helvetica, sans-serif",
        "selectedColor": "#5097BA",
-       "unselectedColor": "#333"
+       "unselectedColor": "#333",
+       "unselectedBackground": "#888"
      }
    }
 
 +--------------------------+------------------------------+----------------------------------------------------+
 | Properties               | CSS string of                | Description                                        |
 +==========================+==============================+====================================================+
-| color                    | color                        | Text color                                         |
-+--------------------------+------------------------------+----------------------------------------------------+
 | selectedColor            | color                        | Text color of selected text / button text          |
 +--------------------------+------------------------------+----------------------------------------------------+
 | unselectedColor          | color                        | Text color of unselected text / button text        |
 +--------------------------+------------------------------+----------------------------------------------------+
-| font-family              | font                         | Inner shadow of the sidebar on the right hand side |
+| color                    | color                        | Text color of all other text                       |
 +--------------------------+------------------------------+----------------------------------------------------+
-| background               | color                        | Background color                                   |
+| unselectedBackground     | color                        | Background color of unselected toggle              |
++--------------------------+------------------------------+----------------------------------------------------+
+| font-family              | font                         | Font used throughout the sidebar                   |
++--------------------------+------------------------------+----------------------------------------------------+
+| background               | color                        | Background color of the entire sidebar             |
 +--------------------------+------------------------------+----------------------------------------------------+
 
 Components
