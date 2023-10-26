@@ -21,6 +21,7 @@ export const getDefaultTreeState = () => {
     vaccines: false,
     version: 0,
     idxOfInViewRootNode: 0,
+    idxOfInViewRootNodeHistory: [],
     visibleStateCounts: {},
     totalStateCounts: {},
     observedMutations: {},
@@ -55,6 +56,9 @@ const Tree = (state = getDefaultTreeState(), action) => {
         visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };
+      if (action.idxOfInViewRootNodeHistory) {
+        newStates.idxOfInViewRootNodeHistory = action.idxOfInViewRootNodeHistory;
+      }
       return Object.assign({}, state, newStates);
     }
     case types.UPDATE_TIP_RADII:
