@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.50.0 - 2023/10/30
+
+
 * Fixed a bug that showed SVG-related errors in the development browser console when viewing a tree in the rectangular layout. ([#1714](https://github.com/nextstrain/auspice/pull/1714))
 * Added "Data updated" date under the dataset title, in addition to the existing mention in the footer. ([#1715](https://github.com/nextstrain/auspice/pull/1715))
 * Updated docs on customizing the sidebar style with `sidebarTheme`. ([#1718](https://github.com/nextstrain/auspice/pull/1718))
