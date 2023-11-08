@@ -24,6 +24,7 @@ export const ControlsContainer = styled.div`
 export const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
+  align-items: center;
   line-height: 28px;
   min-height: 28px; /* needed for safari, else the div height is 0 */
   margin-top: 15px;
