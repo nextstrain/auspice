@@ -25,6 +25,7 @@ export const PanelToggle = ({ on, callback }: Props) => {
       on={on}
       callback={callback}
       label=""
+      style={{ height: "21px" }} // height from ToggleBackground. FIXME: this should be hardcoded in Toggle
     />
   );
 };
