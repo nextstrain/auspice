@@ -36,7 +36,9 @@ export const PanelHeader = ({ panel, title, tooltip, panelIsVisible }: Props) =>
         display={true}
         on={panelIsVisible}
         callback={togglePanelVisibility}
-        label="" />
+        label=""
+        style={{ height: "21px" }} // height from ToggleBackground. FIXME: this should be hardcoded in Toggle
+      />
     </HeaderContainer>
   );
 };
