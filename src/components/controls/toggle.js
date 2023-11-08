@@ -2,6 +2,11 @@ import React from "react";
 import styled from 'styled-components';
 import { SidebarSubtitle } from "./styles";
 
+const ToggleContainer = styled.div`
+  // Same as ToggleBackground, necessary for panel toggles.
+  height: 21px;
+`
+
 const ToggleBackground = styled.label`
   position: relative;
   display: inline-block;
@@ -72,7 +77,7 @@ const Toggle = ({display, on, callback, label, style={}}) => {
   if (!display) return null;
 
   return (
-    <div style={style}>
+    <ToggleContainer style={style}>
       <ToggleBackground>
         <Input type="checkbox" checked={on} onChange={callback}/>
         <Slider/>
@@ -82,7 +87,7 @@ const Toggle = ({display, on, callback, label, style={}}) => {
           </ToggleSubtitle>
         )}
       </ToggleBackground>
-    </div>
+    </ToggleContainer>
   );
 };
 
