@@ -31,7 +31,7 @@ const Slider = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${(props) => props.theme.unselectedBackground};
+    background-color: ${(props) => props.theme.alternateBackground};
     -webkit-transition: .4s;
     transition: .4s;
     border-radius: 12px;
