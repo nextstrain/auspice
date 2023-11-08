@@ -42,10 +42,15 @@ const sidebarThemeDefaults = {
   sidebarBoxShadow: "rgba(255, 255, 255, 1)",
   selectedColor: "#5DA8A3",
   unselectedColor: "#BBB",
-  unselectedBackground: "#888"
+  alternateBackground: "#888"
 };
 let sidebarThemeExtensions = {};
 if (hasExtension("sidebarTheme")) {
   sidebarThemeExtensions = getExtension("sidebarTheme");
+
+  // unselectedBackground → alternateBackground
+  if (Object.prototype.hasOwnProperty.call(sidebarThemeExtensions, "unselectedBackground")) {
+    sidebarThemeExtensions["alternateBackground"] = sidebarThemeExtensions["unselectedBackground"];
+  }
 }
 export const sidebarTheme = {...sidebarThemeDefaults, ...sidebarThemeExtensions};

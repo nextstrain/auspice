@@ -38,10 +38,8 @@ export const PanelSectionContainer = styled.div`
   padding-bottom: 8px;
 
   // Add borders to delineate panel sections from other sections.
-  // TODO: Rename unselectedBackground to alternateBackground.
-  // https://github.com/nextstrain/auspice/pull/1704#discussion_r1385917481
-  border-top: 1px solid ${(props) => props.theme.unselectedBackground};
-  border-bottom: 1px solid ${(props) => props.theme.unselectedBackground};
+  border-top: 1px solid ${(props) => props.theme.alternateBackground};
+  border-bottom: 1px solid ${(props) => props.theme.alternateBackground};
 
   // Don't add a top border when there is already a bottom border from a sibling
   // above.
