@@ -2,6 +2,7 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { chooseDisplayComponentFromURL } from "../actions/navigation";
 import { hasExtension, getExtension } from "../util/extensions";
+import { controlsHiddenWidth } from "../util/globals";
 
 /* the store for cross-cutting state -- that is, state
 not limited to <App>
@@ -20,13 +21,18 @@ const getFirstPageToDisplay = () => {
   return chooseDisplayComponentFromURL(window.location.pathname);
 };
 
+function getInitialMobileState() {
+  return window.innerWidth < controlsHiddenWidth;
+}
+
 
 const general = (state = {
   defaults,
   displayComponent: getFirstPageToDisplay(),
   errorMessage: undefined,
   pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
-  language: query.lang ? query.lang : defaults.language
+  language: query.lang ? query.lang : defaults.language,
+  mobileDisplay: getInitialMobileState()
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE: {
@@ -54,6 +60,10 @@ const general = (state = {
         language: query.lang ? query.lang : defaultLanguage
       });
     }
+    case types.TOGGLE_MOBILE_DISPLAY:
+      return Object.assign({}, state, {
+        mobileDisplay: action.value
+      });
     default:
       return state;
   }
