@@ -51,7 +51,7 @@ export const FrequencyInfo = (
 
 export const MeasurementsInfo = (
   <>
-    This panel displays measurements.
+    This panel displays multidimensional data such as serological experimental results that are linked to samples in the tree.
     <br/>
     Change collection of measurements and various display options for the collection.
   </>
