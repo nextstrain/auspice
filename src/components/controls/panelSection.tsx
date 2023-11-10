@@ -23,14 +23,6 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
 
   const panelIsVisible = panelsToDisplay.includes(panel)
 
-  // Initially, panel visibility determines options visibility.
-  const [optionsAreVisible, setOptionsAreVisible] = React.useState(panelIsVisible);
-
-  // Subsequent panel visibility updates also determines options visibility.
-  React.useEffect(() => {
-    setOptionsAreVisible(panelIsVisible)
-  }, [panelIsVisible])
-
   return (
     <PanelSectionContainer>
       <PanelHeader
@@ -38,11 +30,8 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
         title={title}
         tooltip={tooltip}
         panelIsVisible={panelIsVisible}
-        hasOptions={options!==undefined}
-        optionsAreVisible={optionsAreVisible}
-        setOptionsAreVisible={setOptionsAreVisible}
       />
-      {optionsAreVisible && options}
+      {panelIsVisible && options}
     </PanelSectionContainer>
   );
 };

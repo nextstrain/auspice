@@ -50,7 +50,7 @@ export const PanelSectionContainer = styled.div`
 `;
 
 export const TitleAndIconContainer = styled.span`
-  display: inline-flex;
+  display: flex;
   align-items: center;
 `;
 
