@@ -24,19 +24,46 @@ export const ControlsContainer = styled.div`
 export const HeaderContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  font-family: ${(props) => props.theme["font-family"]};
-  font-size: 16px;
+  align-items: center;
   line-height: 28px;
   min-height: 28px; /* needed for safari, else the div height is 0 */
   margin-top: 15px;
   margin-bottom: 5px;
+`;
+
+export const PanelSectionContainer = styled.div`
+  // Less padding is necessary on the top because there is already some space
+  // from HeaderContainer's top margin.
+  padding-top: 2px;
+  padding-bottom: 8px;
+
+  // Add borders to delineate panel sections from other sections.
+  border-top: 1px solid ${(props) => props.theme.alternateBackground};
+  border-bottom: 1px solid ${(props) => props.theme.alternateBackground};
+
+  // Don't add a top border when there is already a bottom border from a sibling
+  // above.
+  & + & {
+    border-top: none;
+  }
+`;
+
+export const TitleAndIconContainer = styled.span`
+  display: inline-flex;
+  align-items: center;
+`;
+
+export const HeaderTitle = styled.span`
+  font-family: ${(props) => props.theme["font-family"]};
+  font-size: 16px;
   font-weight: 500;
   color: ${(props) => props.theme.color};
 `;
 
 export const HeaderIconContainer = styled.span`
-  padding-top: 4px;
-  padding-right: 3px;
+  display: inline-flex;
+  font-size: 16px;
+  padding-left: 6px;
   cursor: help;
   color: #888;
 `;

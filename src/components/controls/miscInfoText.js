@@ -1,9 +1,10 @@
 import React from "react";
 
 
-export const TreeOptionsInfo = (
+export const TreeInfo = (
   <>
-    Change various options relating to how the tree is displayed.
+    This panel displays the evolutionary relationships among samples, illustrating their genetic relatedness and inferred ancestry.
+    <br/>
     The exact options available depend on the dataset and specific analysis performed.
     <br/>
     If <em>Branch Length</em> is available, you can choose to display the tree branches in terms of (nucleotide) divergence or (inferred) time.
@@ -12,9 +13,9 @@ export const TreeOptionsInfo = (
 );
 
 
-export const MapOptionsInfo = (
+export const MapInfo = (
   <>
-    Change various options relating to how the map is displayed.
+    This panel displays the geographical distribution of samples.
     <br/>
     The <em>geographic resolution</em> chooses the metadata values which define where samples are placed on the map.
     This can be the same as the selected <em>color-by</em> but is often not!
@@ -27,23 +28,31 @@ export const AnimationOptionsInfo = (
   </>
 );
 
-export const PanelOptionsInfo = (
+export const PanelLayoutInfo = (
   <>
-    Control which panels are being displayed and whether to show the tree and the map side-by-side (<em>grid</em>) or expanded (<em>full</em>).
-    <br/>
-    Note that what options are available here are dataset specific!
+    Control whether to show the tree and the map side-by-side (<em>grid</em>) or expanded (<em>full</em>).
+  </>
+);
+
+export const EntropyInfo = (
+  <>
+    This panel displays the observed diversity across the current genome or a selected CDS. All options are in the panel itself.
   </>
 );
 
 export const FrequencyInfo = (
   <>
+    This panel displays the prevalence of a characteristic over time, determined by the <em>color-by</em>.
+    <br/>
     <em>Normalize frequencies</em> controls whether the vertical axis represents the entire dataset or only the samples currently visible (e.g. due to filtering).
     This option is not available when data is limited to prevent numerical issues.
   </>
 );
 
-export const MeasurementsOptionsInfo = (
+export const MeasurementsInfo = (
   <>
+    This panel displays multidimensional data such as serological experimental results that are linked to samples in the tree.
+    <br/>
     Change collection of measurements and various display options for the collection.
   </>
 );

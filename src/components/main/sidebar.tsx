@@ -13,7 +13,6 @@ export const Sidebar = (
   { width, height, displayNarrative, narrativeTitle, navBarHandler}
 ) => {
   const sidebarOpen = useSelector((state: RootState) => state.controls.sidebarOpen);
-  const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
 
   return (
     <ThemeProvider theme={sidebarTheme}>
@@ -27,12 +26,7 @@ export const Sidebar = (
         {displayNarrative ? (
           <Narrative height={height - narrativeNavBarHeight} width={width} />
         ) : (
-          <Controls
-            treeOn={panelsToDisplay.includes("tree")}
-            mapOn={panelsToDisplay.includes("map")}
-            frequenciesOn={panelsToDisplay.includes("frequencies")}
-            measurementsOn={panelsToDisplay.includes("measurements")}
-          />
+          <Controls />
         )}
       </SidebarContainer>
     </ThemeProvider>
