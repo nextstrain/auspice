@@ -31,6 +31,16 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
     setOptionsAreVisible(panelIsVisible)
   }, [panelIsVisible])
 
+  const [contentHeight, setContentHeight] = React.useState(1000);
+  const optionsContainer = React.useRef<HTMLDivElement>(null);
+
+  // FIXME: useLayoutEffect?
+  React.useEffect(() => {
+    if (optionsContainer.current) {
+      setContentHeight(optionsContainer.current.scrollHeight); // FIXME: offsetHeight?
+    }
+  }, [options]);
+
   return (
     <PanelSectionContainer>
       <PanelHeader
@@ -42,7 +52,7 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
         optionsAreVisible={optionsAreVisible}
         setOptionsAreVisible={setOptionsAreVisible}
       />
-      <PanelOptionsContainer className={`${optionsAreVisible ? "open" : ""}`}>
+      <PanelOptionsContainer ref={optionsContainer} className={`${optionsAreVisible ? "open" : ""}`} contentHeight={contentHeight}>
         {options}
       </PanelOptionsContainer>
     </PanelSectionContainer>

@@ -56,7 +56,7 @@ export const PanelOptionsContainer = styled.div`
 
   &.open {
     visibility: visible;
-    max-height: 100vh;
+    max-height: ${({ contentHeight }) => `${contentHeight}px`};
   }
 `
 
