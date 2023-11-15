@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { PanelSectionContainer } from "./styles";
+import { PanelOptionsContainer, PanelSectionContainer } from "./styles";
 import { Title, Tooltip } from "./annotatedTitle";
 import { PanelHeader, PanelId } from "./panelHeader";
 import { RootState } from "../../store";
@@ -42,7 +42,9 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
         optionsAreVisible={optionsAreVisible}
         setOptionsAreVisible={setOptionsAreVisible}
       />
-      {optionsAreVisible && options}
+      <PanelOptionsContainer className={`${optionsAreVisible ? "open" : ""}`}>
+        {options}
+      </PanelOptionsContainer>
     </PanelSectionContainer>
   );
 };

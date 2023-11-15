@@ -48,6 +48,18 @@ export const PanelSectionContainer = styled.div`
   }
 `;
 
+export const PanelOptionsContainer = styled.div`
+  visibility: hidden;
+  transition: visibility .5s, max-height .5s;
+  max-height: 0;
+  overflow: hidden;
+
+  &.open {
+    visibility: visible;
+    max-height: 100vh;
+  }
+`
+
 export const TitleAndIconContainer = styled.span`
   display: inline-flex;
   align-items: center;
