@@ -14,7 +14,7 @@ import { FetchError } from "../../util/exceptions";
  */
 
 export function useDatasetFetch(datasets) {
-  const dispatchRedux = useAppDispatch;
+  const dispatchRedux = useAppDispatch();
   const [datasetResponses, dispatchDatasetResponses] = useReducer(
     (state, action) => {
       if (action.reset) return {};
