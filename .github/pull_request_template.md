@@ -24,6 +24,7 @@ Please add a note if you need help with adding tests.
 -->
 
 - [ ] Checks pass
+- [ ] If making user-facing changes, add a message in [CHANGELOG.md](https://github.com/nextstrain/auspice/blob/HEAD/CHANGELOG.md) summarizing the changes in this PR
 - [ ] (to be done by a Nextstrain team member) [Create preview PRs on downstream repositories][1].
 
 [1]: https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md#test-on-downstream-repositories
