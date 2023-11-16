@@ -1,8 +1,8 @@
-### Description of proposed changes
+## Description of proposed changes
 
 <!-- What is the goal of this pull request? What does this pull request change? -->
 
-### Related issue(s)
+## Related issue(s)
 
 <!--
 Link any related issues here. Use GitHub's special keywords if appropriate¹.
@@ -11,7 +11,7 @@ Type `#` followed the name of an issue and GitHub will auto-suggest the issue nu
 ¹ https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/using-keywords-in-issues-and-pull-requests
 -->
 
-### Testing
+## Checklist
 
 <!--
 Make sure checks are successful at the bottom of the PR.
