@@ -101,7 +101,9 @@ class FinePrint extends React.Component {
             {dot}
             {this.downloadDataButton()}
             {dot}
-            {"Auspice v" + version}
+            <a href="https://docs.nextstrain.org/projects/auspice/page/releases/changelog.html" target="_blank" rel="noreferrer noopener">
+              {"Auspice v" + version}
+            </a>
           </Flex>
           <div style={{height: "5px"}}/>
           {getCustomFinePrint()}
