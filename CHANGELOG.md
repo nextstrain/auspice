@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.51.0 - 2023/11/16
+
+
 * Redesigned the panel sections in the sidebar. ([#1704](https://github.com/nextstrain/auspice/pull/1704))
     * Moved panel visibility toggles to the header.
     * Added the ability to show/hide panel options.
