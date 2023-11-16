@@ -4,6 +4,7 @@
     * Moved panel visibility toggles to the header.
     * Added the ability to show/hide panel options.
 * customisation: Renamed `sidebarTheme.unselectedBackground` to a more generic name, `sidebarTheme.alternateBackground`, while keeping backwards compatibility. ([#1704](https://github.com/nextstrain/auspice/pull/1704/commits/1ad4376bb3be9787181110d47fe8c5f26a207896))
+* Fixed a bug that prevented the narratives debugger (`/edit/narratives`) from working. ([#1725](https://github.com/nextstrain/auspice/issues/1725))
 
 ## version 2.50.0 - 2023/10/30
 
