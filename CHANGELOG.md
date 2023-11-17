@@ -1,5 +1,7 @@
 # Changelog
 
+* Added a link to this changelog from the Auspice view. ([#1727](https://github.com/nextstrain/auspice/pull/1727))
+
 ## version 2.51.0 - 2023/11/16
 
 
