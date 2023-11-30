@@ -24,6 +24,7 @@ const addParser = (parser) => {
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
   subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
   subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  subparser.addArgument('--customBuildOnly', {action: "storeTrue", help: "Error if a custom build is not found."});
   /* there are some options which we deliberately do not document via `--help`. */
   subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS}); /* related to the "static-site-generation" or "github-pages" */
 };
@@ -74,14 +75,14 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
     `Looking for datasets in ${datasetsPath}\nLooking for narratives in ${narrativesPath}`;
 };
 
-const getAuspiceBuild = () => {
+const getAuspiceBuild = (customBuildOnly) => {
   const cwd = path.resolve(process.cwd());
   const sourceDir = path.resolve(__dirname, "..");
 
   // Default to current working directory.
   let baseDir = cwd;
   if (!hasAuspiceBuild(cwd)) {
-    if (cwd === sourceDir) {
+    if (cwd === sourceDir || customBuildOnly) {
       utils.error(`Auspice build files not found under ${cwd}. Did you run \`auspice build\` in this directory?`);
       process.exit(1);
     }
@@ -115,7 +116,7 @@ const run = (args) => {
   app.use(compression());
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
 
-  const auspiceBuild = getAuspiceBuild();
+  const auspiceBuild = getAuspiceBuild(args.customBuildOnly);
   utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
