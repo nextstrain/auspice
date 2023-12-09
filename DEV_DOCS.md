@@ -137,10 +137,10 @@ The Auspice technical reference guide is available at [docs.nextstrain.org/proje
 
 To preview the Auspice documentation locally,
 
-1. Create and activate a Conda environment from `docs/environment.yml`. Example using Mamba:
+1. Create and activate a Conda environment from `docs/conda.yml`. Example using Mamba:
 
     ```bash
-    mamba env create --file docs/environment.yml
+    mamba env create --file docs/conda.yml
     conda activate auspice-docs
     ```
 
