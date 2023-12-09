@@ -140,4 +140,4 @@ jobs:
     uses: nextstrain/.github/.github/workflows/docs-ci.yaml@master
     with:
       docs-directory: docs/
-      environment-file: docs/environment.yml
+      environment-file: docs/conda.yml
