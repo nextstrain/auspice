@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { DateTime } from "luxon";
 import { headerFont } from "../../globalStyles";
 
 /**
@@ -107,7 +108,7 @@ function renderMaintainers(t, metadata) {
  * Renders a <span> containing "Data updated X", where X derives from `metadata.updated`
  */
 function renderDataUpdated(t, metadata) {
-  if (metadata.updated) {
+  if (DateTime.fromISO(metadata.updated).isValid) {
     return (
       <span>
         {`${t("Data updated")} ${metadata.updated}. `}
