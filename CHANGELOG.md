@@ -1,6 +1,7 @@
 # Changelog
 
 * Added a link to this changelog from the Auspice view. ([#1727](https://github.com/nextstrain/auspice/pull/1727))
+* Updated the "Data updated" date under the dataset title to be a relative date. ([#1731](https://github.com/nextstrain/auspice/pull/1731))
 
 ## version 2.51.0 - 2023/11/16
 
