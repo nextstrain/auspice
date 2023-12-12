@@ -12,7 +12,8 @@ import { headerFont } from "../../globalStyles";
  */
 @connect((state) => {
   return {
-    metadata: state.metadata
+    metadata: state.metadata,
+    language: state.general.language
   };
 })
 class Byline extends React.Component {
@@ -23,7 +24,7 @@ class Byline extends React.Component {
         {renderAvatar(t, this.props.metadata)}
         {renderBuildInfo(t, this.props.metadata)}
         {renderMaintainers(t, this.props.metadata)}
-        {renderDataUpdated(t, this.props.metadata)}
+        {renderDataUpdated(t, this.props.metadata, this.props.language)}
         {renderDataProvenance(t, this.props.metadata)}
       </>
     );
@@ -107,11 +108,12 @@ function renderMaintainers(t, metadata) {
  * Returns a React component detailing the date the data was last updated.
  * Renders a <span> containing "Data updated X", where X derives from `metadata.updated`
  */
-function renderDataUpdated(t, metadata) {
-  if (DateTime.fromISO(metadata.updated).isValid) {
+function renderDataUpdated(t, metadata, language) {
+  const date = DateTime.fromISO(metadata.updated);
+  if (date.isValid) {
     return (
       <span>
-        {`${t("Data updated")} ${metadata.updated}. `}
+        {`${t("Data updated")} ${date.toRelativeCalendar({locale: language})}. `}
       </span>
     );
   }
