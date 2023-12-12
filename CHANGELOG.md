@@ -1,6 +1,7 @@
 # Changelog
 
 * Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
+* Added a relative date to the "Data updated" line under the dataset title ([#1731](https://github.com/nextstrain/auspice/pull/1731))
 
 ## version 2.61.2 - 2024/11/19
 
