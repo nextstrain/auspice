@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 
 /* Webpack config generator */
 
@@ -80,7 +81,14 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   });
   const pluginHtml = new HtmlWebpackPlugin({
     filename: 'index.html',
-    template: './src/index.html'
+    template: './src/index.html',
+    title: 'Progressive Web Application'
+  });
+  const pluginSW = new WorkboxPlugin.GenerateSW({
+    // these options encourage the ServiceWorkers to get in there fast
+    // and not allow any straggling "old" SWs to hang around
+    clientsClaim: true,
+    skipWaiting: true,
   });
   const cleanWebpackPlugin = new CleanWebpackPlugin({
     cleanStaleWebpackAssets: true
@@ -90,12 +98,14 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
     pluginHtml,
+    pluginSW,
     cleanWebpackPlugin
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
     pluginCompress,
     pluginHtml,
+    pluginSW,
     cleanWebpackPlugin
   ];
 
