@@ -5,7 +5,6 @@ const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
 const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 
 /* Webpack config generator */
@@ -82,21 +81,16 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     filename: 'index.html',
     template: './src/index.html'
   });
-  const cleanWebpackPlugin = new CleanWebpackPlugin({
-    cleanStaleWebpackAssets: true
-  });
   const plugins = devMode ? [
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
     pluginHtml,
-    cleanWebpackPlugin
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
     pluginCompress,
     pluginHtml,
-    cleanWebpackPlugin
   ];
 
   if (analyzeBundle) {
@@ -186,7 +180,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       path: outputPath,
       filename: `auspice.[name].bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
-      publicPath: "/dist/"
+      publicPath: "/dist/",
+      clean: true,
     },
     resolve: {
       alias: aliasesToResolve,
