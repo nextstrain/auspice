@@ -9,8 +9,7 @@ import Flex from "./flex";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { hasExtension, getExtension } from "../../util/extensions";
-
-const logoPNG = require("../../images/favicon.png");
+import nextstrainLogo from "./nextstrain-logo-64.png";
 
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 
@@ -121,7 +120,7 @@ export function getCitation() {
   return (
     <Flex className='finePrint'>
       <a className='logoContainer' href="https://nextstrain.org">
-        <img alt="nextstrain.org" className='logo' width="24px" src={logoPNG}/>
+        <img alt="nextstrain.org" className='logo' width="24px" src={nextstrainLogo}/>
       </a>
       {"Powered by Nextstrain ("}
       <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
