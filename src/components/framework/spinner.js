@@ -1,7 +1,6 @@
 import React from "react";
 import Card from "./card";
-
-const nextstrainLogo = require("../../images/nextstrain-logo-small.png");
+import nextstrainLogo from "./nextstrain-logo-143.png";
 
 const Spinner = ({availableHeight=false}) => {
   if (!availableHeight) {
