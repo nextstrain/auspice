@@ -196,7 +196,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       path: outputPath,
       filename: `auspice.[name].bundle${!devMode ? ".[contenthash]" : ""}.js`,
       chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
-      publicPath: "/dist/"
     },
     resolve: {
       alias: aliasesToResolve,
@@ -207,43 +206,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       }
     },
     plugins,
-    optimization: {
-      minimize: !devMode,
-      splitChunks: {
-        minChunks: 3,
-        minSize: 8192,
-        cacheGroups: {
-          coreVendors: {
-            test: new RegExp("[\\\\/]node_modules[\\\\/](" + coreVendors.join("|") + ")[\\\\/]"),
-            name: "core-vendors",
-            enforce: true,
-            chunks: "all"
-          },
-          otherVendors: {
-            test: new RegExp("[\\\\/]node_modules[\\\\/](" + bigVendors.join("|") + ")[\\\\/]"),
-            name: "other-vendors",
-            enforce: true,
-            chunks: "all"
-          },
-          /**
-           * ATM the package size is <15kB and so not worth splitting,
-           * but it can be split further if it becomes huge
-           */
-          locales: {
-            test: /[\\/]src[\\/]locales[\\/](?!en)/,
-            name: "locales",
-            enforce: true,
-            chunks: "all"
-          },
-          default: {
-            minChunks: 3,
-            minSize: 8192,
-            reuseExistingChunk: false
-          },
-          defaultVendors: false
-        }
-      }
-    },
     module: {
       rules: [
         {

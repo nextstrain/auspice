@@ -113,7 +113,7 @@ const run = (args) => {
   utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
-  app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
+  app.use(express.static(auspiceBuild.distDir));
 
   let handlerMsg = "";
   if (args.gh_pages) {
@@ -121,15 +121,6 @@ const run = (args) => {
   } else {
     handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
   }
-
-  // FIXME: Define these routes in a better way
-  app.get("/service-worker.js", (req, res) => {
-    res.sendFile(path.join(auspiceBuild.baseDir, "dist/service-worker.js"));
-  });
-
-  app.get("/workbox-0858eadd.js", (req, res) => {
-    res.sendFile(path.join(auspiceBuild.baseDir, "dist/workbox-0858eadd.js"));
-  });
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
   app.get("*", (req, res) => {
