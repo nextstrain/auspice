@@ -13,7 +13,7 @@
 This documentation will walk through how to turn a narrative into a static PDF.
 We understand that there are multiple reasons why PDFs may be a necessary method of distribution, but stress that narratives are designed to be viewed through auspice where you have the ability to interact with and interrogate the data.
 
-If you run into any bugs, please [get in contact with us (email)](mailto:hello@nextstrain.org).
+If you run into any bugs, please [get in contact with us](https://nextstrain.org/contact).
 
 ## Prerequisites
 

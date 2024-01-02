@@ -13,7 +13,7 @@
 
 
 This documentation will walk us through constructing a narrative from scratch, based on [this example (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives).
-If you run into any bugs, please [get in contact with us (email)](mailto:hello@nextstrain.org).
+If you run into any bugs, please [get in contact with us](https://nextstrain.org/contact).
 
 ## Step 1: Get the Underlying Datasets
 
