@@ -18,7 +18,7 @@ Auspice started as the `nextstrain.org <https://nextstrain.org>`__ visualisation
 
 So in a way, this is the first proper Auspice release! There are a few big and visible changes, including using pie charts to represent discrete variables on a map, but a lot of the changes were done to make things easier behind the scenes. There are also a bunch of really cool features such as the ability to define custom servers, change the aesthetics of the Auspice client, display multiple trees and write narratives which were technically part of Auspice v1 but undocumented. This documentation website is now up to date and should allow you to understand how to use Auspice to its full potential (`contributions are always welcome! <https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md>`__)
 
-In general, we hope that this documentation and the help messages of the various ``auspice`` subcommands are vastly improved. The major changes which Auspice v2 brings are detailed below 👇 If you have any comments please `email us <mailto:hello@nextstrain.org>`__ or say hi on `twitter <https://twitter.com/nextstrain>`__.
+In general, we hope that this documentation and the help messages of the various ``auspice`` subcommands are vastly improved. The major changes which Auspice v2 brings are detailed below 👇 If you have any comments please `contact us <https://nextstrain.org/contact>`__ or say hi on `twitter <https://twitter.com/nextstrain>`__.
 
 I don't want to upgrade - how can I continue to use Auspice v1?
 ---------------------------------------------------------------

@@ -3,7 +3,7 @@ Client Customisation API
 
 .. warning::
 
-   The functionality detailed in this page needs more attention, both in terms of testing and code development. We expect there to be some bugs and possible API changes. If you rely on this functionality, we recommend you pin your installation of Auspice to a specific version. Please `get in touch with us <mailto:hello@nextstrain.org>`__ if you are using these customisations so that we can work with you!
+   The functionality detailed in this page needs more attention, both in terms of testing and code development. We expect there to be some bugs and possible API changes. If you rely on this functionality, we recommend you pin your installation of Auspice to a specific version. Please `get in touch with us <https://nextstrain.org/contact>`__ if you are using these customisations so that we can work with you!
 
 This page details the available options and format of the customisations available at (client) build time. They are contained in a JSON file supplied to Auspice via
 

@@ -67,7 +67,7 @@ If you've got a narrative working locally (i.e. running Auspice on your computer
 ## Known Bugs / Limitations
 
 Narratives are now being used in various settings, however some bugs remain.
-Please [get in touch (email)](mailto:hello@nextstrain.org) with any and all questions about narratives, or [file an issue on GitHub](https://github.com/nextstrain/auspice/issues/new) 🙏
+Please [get in touch](https://nextstrain.org/contact) with any and all questions about narratives, or [file an issue on GitHub](https://github.com/nextstrain/auspice/issues/new) 🙏
 
 * Styling may be slightly off on different browsers.
 
