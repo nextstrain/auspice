@@ -76,7 +76,7 @@ export const datasetSummary = ({nodes, visibility, mainTreeNumTips, branchLength
   /* parse filters */
   const filterTextArr = [];
   Object.keys(filters).forEach((filterName) => {
-    const n = Object.keys(visibleStateCounts[filterName]).length;
+    const n = visibleStateCounts[filterName].size;
     if (!n) return;
     filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
