@@ -15,7 +15,6 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
 
   nodes.forEach((node) => {
     traits.forEach((trait) => {                         // traits are "country" or "author" etc
-      const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
 
       if (terminalOnly && node.hasChildren) {
         return;
@@ -25,8 +24,10 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
         return;
       }
 
-      const currentValue = counts[trait].get(value) || 0;
-      counts[trait].set(value, currentValue+1);
+      const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
+      if (value===undefined) return;                    // check for invalid values
+      const currentValueCount = counts[trait].get(value) || 0;
+      counts[trait].set(value, currentValueCount+1);
     });
   });
   return counts;
