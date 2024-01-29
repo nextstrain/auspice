@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import AsyncSelect from "react-select/async";
 import { debounce } from 'lodash';
-import { controlsWidth, isValueValid, strainSymbol, genotypeSymbol} from "../../util/globals";
+import { controlsWidth, strainSymbol, genotypeSymbol} from "../../util/globals";
 import { collectGenotypeStates } from "../../util/treeMiscHelpers";
 import { applyFilter } from "../../actions/tree";
 import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } from "../../actions/measurements";
@@ -24,6 +24,7 @@ const DEBOUNCE_TIME = 200;
     activeFilters: state.controls.filters,
     colorings: state.metadata.colorings,
     totalStateCounts: state.tree.totalStateCounts,
+    canFilterByGenotype: !!state.entropy.genomeMap,
     nodes: state.tree.nodes,
     measurementsFieldsMap: state.measurements.collectionToDisplay.fields,
     measurementsFiltersMap: state.measurements.collectionToDisplay.filters,
@@ -54,22 +55,40 @@ class FilterData extends React.Component {
      * each time a filter is toggled on / off.
      */
     const options = [];
-    Object.keys(this.props.activeFilters)
-      .forEach((filterName) => {
-        const filterTitle = this.getFilterTitle(filterName);
-        const filterValuesCurrentlyActive = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
-        Array.from(this.props.totalStateCounts[filterName].keys())
-          .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
-          .filter((itemName) => !filterValuesCurrentlyActive.includes(itemName)) // remove already enabled filters
-          .sort() // filters are sorted alphabetically - probably not necessary for a select component
-          .forEach((itemName) => {
-            options.push({
-              label: `${filterTitle} → ${itemName}`,
-              value: [filterName, itemName]
-            });
-          });
-      });
-    if (genotypeSymbol in this.props.activeFilters) {
+
+    /**
+     * First set of options is from the totalStateCounts -- i.e. every node attr
+     * which we know about (minus any currently selected filters). Note that we
+     * can't filter the filters to those set on visible nodes, as selecting a
+     * filter from outside this is perfectly fine in many situations.
+     *
+     * Those which are colorings appear first (and in the order defined in
+     * colorings). Within each trait, the values are alphabetical
+     */
+    const coloringKeys = Object.keys(this.props.colorings||{});
+    const unorderedTraitNames = Object.keys(this.props.totalStateCounts);
+    const traitNames = [
+      ...coloringKeys.filter((name) => unorderedTraitNames.includes(name)),
+      ...unorderedTraitNames.filter((name) => !coloringKeys.includes(name))
+    ]
+    for (const traitName of traitNames) {
+      const traitData = this.props.totalStateCounts[traitName];
+      const traitTitle = this.getFilterTitle(traitName);
+      const filterValuesCurrentlyActive = new Set((this.props.activeFilters[traitName] || []).filter((x) => x.active).map((x) => x.value));
+      for (const traitValue of Array.from(traitData.keys()).sort()) {
+        if (filterValuesCurrentlyActive.has(traitValue)) continue;
+        options.push({
+          label: `${traitTitle} → ${traitValue}`,
+          value: [traitName, traitValue]
+        });
+      }
+    }
+
+    /**
+     * Genotype filter options are numerous, they're the set of all observed
+     * mutations
+     */
+    if (this.props.canFilterByGenotype) {
       Array.from(collectGenotypeStates(this.props.nodes))
         .sort()
         .forEach((o) => {
@@ -79,16 +98,16 @@ class FilterData extends React.Component {
           });
         });
     }
-    if (strainSymbol in this.props.activeFilters) {
-      this.props.nodes
-        .filter((n) => !n.hasChildren)
-        .forEach((n) => {
-          options.push({
-            label: `sample → ${n.name}`,
-            value: [strainSymbol, n.name]
-          });
+
+    this.props.nodes
+      .filter((n) => !n.hasChildren)
+      .forEach((n) => {
+        options.push({
+          label: `sample → ${n.name}`,
+          value: [strainSymbol, n.name]
         });
-    }
+      });
+
     if (this.props.measurementsOn && this.props.measurementsFiltersMap && this.props.measurementsFieldsMap) {
       this.props.measurementsFiltersMap.forEach(({values}, filterField) => {
         const { title } = this.props.measurementsFieldsMap.get(filterField);
@@ -148,7 +167,7 @@ class FilterData extends React.Component {
     const measurementsFilters = this.summariseMeasurementsFilters();
     /* When filter categories were dynamically created (via metadata drag&drop) the `options` here updated but `<Async>`
     seemed to use a cached version of all values & wouldn't update. Changing the key forces a rerender, but it's not ideal */
-    const divKey = String(Object.keys(this.props.activeFilters).length);
+    const divKey = String(Object.keys(this.props.totalStateCounts).join(","));
     return (
       <div style={styles.base} key={divKey}>
         <AsyncSelect

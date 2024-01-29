@@ -272,7 +272,7 @@ export const applyFilter = (mode, trait, values) => {
           console.error(`trying to ${mode} values from an un-initialised filter!`);
           return;
         }
-        newValues = controls.filters[trait].slice();
+        newValues = controls.filters[trait].map((f) => ({...f}));
         const currentItemNames = newValues.map((i) => i.value);
         for (const item of values) {
           const idx = currentItemNames.indexOf(item);

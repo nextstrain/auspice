@@ -247,7 +247,11 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
-      filters[action.trait] = action.values;
+      if (action.values.length) { // set the filters to the new values
+        filters[action.trait] = action.values;
+      } else {                    // remove if no active+inactive filters
+        delete filters[action.trait]
+      }
       return Object.assign({}, state, {
         filters
       });
@@ -284,7 +288,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { legendOpen: action.value });
     case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {
-        state.filters[colorBy] = [];
         state.coloringsPresentOnTree.add(colorBy);
       }
       let newState = Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
