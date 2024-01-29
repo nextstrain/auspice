@@ -565,7 +565,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleStateCounts, filePrefix, panelsInDOM, panelLayout, publications) => {
+export const SVG = (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
   /* make the text strings */
   const textStrings = [];
   textStrings.push(metadata.title);
@@ -575,9 +575,7 @@ export const SVG = (dispatch, t, metadata, nodes, filters, visibility, visibleSt
   textStrings.push(datasetSummary({
     mainTreeNumTips: metadata.mainTreeNumTips,
     nodes,
-    filters,
     visibility,
-    visibleStateCounts,
     t
   }));
   textStrings.push("");

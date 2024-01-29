@@ -21,8 +21,6 @@ import FiltersSummary from "./filtersSummary";
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
     metadata: state.metadata,
     nodes: state.tree.nodes,
-    visibleStateCounts: state.tree.visibleStateCounts,
-    filters: state.controls.filters,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     visibility: state.tree.visibility
   };

@@ -97,7 +97,6 @@ export const updateVisibleTipsAndBranchThicknesses = (
       idxOfFilteredRoot: data.idxOfFilteredRoot,
       cladeName: cladeSelected,
       selectedClade: cladeSelected,
-      stateCountAttrs: Object.keys(controls.filters)
     };
 
     if (controls.showTreeToo) {
@@ -168,7 +167,6 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
-      stateCountAttrs: Object.keys(controls.filters)
     };
     if (controls.showTreeToo) {
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
@@ -408,7 +406,6 @@ export const explodeTree = (attr) => (dispatch, getState) => {
     {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
   );
   visData.idxOfInViewRootNode = 0;
-  visData.stateCountAttrs = Object.keys(controls.filters);
   /* Changes in visibility require a recomputation of which legend items we wish to display */
   visData.visibleLegendValues = createVisibleLegendValues({
     colorBy: controls.colorBy,

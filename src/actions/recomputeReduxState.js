@@ -669,8 +669,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
   const newState = Object.assign({}, oldState, visAndThicknessData);
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
-  newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true);
+  newState.totalStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false, true);
 
   return newState;
 };

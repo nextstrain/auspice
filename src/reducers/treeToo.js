@@ -37,7 +37,6 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
-        // console.warn("NB missing visibleStateCounts from treeToo here");
         return Object.assign({}, state, {
           tangleTipLookup: action.tangleTipLookup,
           visibility: action.visibilityToo,

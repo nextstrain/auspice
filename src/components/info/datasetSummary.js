@@ -18,21 +18,6 @@ export const pluralise = (word, n) => {
   return word;
 };
 
-const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=true, fullStop=true}={}) => {
-  let ret;
-  if (!arr.length) return '';
-  if (arr.length === 1) {
-    ret = arr[0];
-  } else {
-    ret = arr.slice(0, -1).join(", ") + " and " + arr[arr.length-1];
-  }
-  if (prefix) ret = prefix + " " + ret;
-  if (suffix) ret += " " + suffix;
-  if (capatalise) ret = ret.charAt(0).toUpperCase();
-  if (fullStop) ret += ".";
-  return ret + " ";
-};
-
 export const styliseDateRange = (date) => {
   const dateStr = (typeof date === "number") ?
     numericToCalendar(date) :
@@ -49,7 +34,7 @@ export const styliseDateRange = (date) => {
 /**
  * @returns {string}
  */
-export const datasetSummary = ({nodes, visibility, mainTreeNumTips, branchLengthsToDisplay, filters, visibleStateCounts, t}) => {
+export const datasetSummary = ({nodes, visibility, mainTreeNumTips, branchLengthsToDisplay, t}) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
   let summary = ""; /* text returned from this function */
@@ -72,22 +57,5 @@ export const datasetSummary = ({nodes, visibility, mainTreeNumTips, branchLength
     );
   }
   summary += ".";
-
-  /* parse filters */
-  const filterTextArr = [];
-  Object.keys(filters).forEach((filterName) => {
-    const n = visibleStateCounts[filterName].size;
-    if (!n) return;
-    filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
-  });
-  const prefix = t("Comprising");
-  const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
-  if (filterText.length) {
-    summary += ` ${filterText}`;
-  } else if (summary.endsWith('.')) {
-    summary += " ";
-  } else {
-    summary += ". ";
-  }
   return summary;
 };
