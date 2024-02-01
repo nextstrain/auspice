@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
 import { FaDownload } from "react-icons/fa";
+import { DateTime } from "luxon";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
@@ -72,7 +73,7 @@ class FinePrint extends React.Component {
 
   getUpdated() {
     const { t } = this.props;
-    if (this.props.metadata.updated) {
+    if (DateTime.fromISO(this.props.metadata.updated).isValid) {
       return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
     }
     return null;
