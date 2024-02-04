@@ -8,7 +8,7 @@ import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { getDefaultFrequenciesState } from "../reducers/frequencies";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
-import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
+import { countTraitsAcrossTree, calcTotalTipsInTree, gatherTraitNames } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { castIncorrectTypes } from "../util/castJsonTypes";
@@ -100,16 +100,21 @@ const modifyStateViaURLQuery = (state, query) => {
     state["dateMax"] = query.dmax;
     state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
   }
+
+  /** Queries 's', 'gt', and 'f_<name>' correspond to active filters */
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
-    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
-      .map((value) => ({value, active: true})); /* all filters in the URL are "active" */
+    const filterName = filterKey.replace('f_', '');
+    const filterValues = query[filterKey] ? query[filterKey].split(',') : [];
+    state.filters[filterName] = filterValues.map((value) => ({value, active: true}))
   }
-  if (query.s) {   // selected strains are a filter too
-    state.filters[strainSymbol] = query.s.split(',').map((value) => ({value, active: true}));
+  if (query.s) {
+    const filterValues = query.s ? query.s.split(',') : [];
+    state.filters[strainSymbol] = filterValues.map((value) => ({value, active: true}));
   }
   if (query.gt) {
-    state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt);
+    state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt||"");
   }
+
   if (query.animate) {
     const params = query.animate.split(',');
     // console.log("start animation!", params);
@@ -225,19 +230,16 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
   if (metadata.filters) {
-    /* the `meta -> filters` JSON spec should define which filters are displayed in the footer.
-    Note that this UI may change, and if so then we can change this state name. */
+    /**
+     * this spec previously defined both the footer-filters and the
+     * sidebar-filters, however it now only defines the former as the sidebar
+     * surfaces all available attributes.
+     */
     state.filtersInFooter = [...metadata.filters];
-    /* TODO - these will be searchable => all available traits should be added and this block shifted up */
-    metadata.filters.forEach((v) => {
-      state.filters[v] = [];
-    });
   } else {
     console.warn("JSON did not include any filters");
     state.filtersInFooter = [];
   }
-  state.filters[strainSymbol] = [];
-  state.filters[genotypeSymbol] = []; // this doesn't necessitate that mutations are defined
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", "tipLabelKey", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',      'string',  "boolean"              , "boolean"];
@@ -579,32 +581,51 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     delete query.ci; // rm ci from the query if it doesn't apply
   }
 
-  /* ensure selected filters (via the URL query) are valid. If not, modify state + URL. */
-  const filterNames = Object.keys(state.filters).filter((filterName) => state.filters[filterName].length);
-  const stateCounts = countTraitsAcrossTree(tree.nodes, filterNames, false, true);
-  filterNames.forEach((filterName) => {
-    const validItems = state.filters[filterName]
-      .filter((item) => stateCounts[filterName].has(item.value));
-    state.filters[filterName] = validItems;
-    if (!validItems.length) {
-      delete query[`f_${filterName}`];
-    } else {
-      query[`f_${filterName}`] = validItems.map((x) => x.value).join(",");
+  /**
+   * Any filters currently set are done so via the URL query, which we validate now
+   * (and update the URL query accordingly)
+   */
+  const _queryKey = (traitName) => (traitName === strainSymbol) ? 's' :
+    (traitName === genotypeSymbol) ? 'gt' :
+      `f_${traitName}`;
+      
+  for (const traitName of Reflect.ownKeys(state.filters)) {
+    /* delete empty filters, e.g. "?f_country" or "?f_country=" */
+    if (!state.filters[traitName].length) {
+      delete state.filters[traitName];
+      delete query[_queryKey(traitName)];
+      continue
     }
-  });
-  if (state.filters[strainSymbol]) {
-    const validNames = tree.nodes.map((n) => n.name);
-    state.filters[strainSymbol] = state.filters[strainSymbol]
-      .filter((strainFilter) => validNames.includes(strainFilter.value));
-    query.s = state.filters[strainSymbol].map((f) => f.value).join(",");
-    if (!query.s) delete query.s;
+    /* delete filter names (e.g. country, region) which aren't observed on the tree */
+    if (!Object.keys(tree.totalStateCounts).includes(traitName) && traitName!==strainSymbol && traitName!==genotypeSymbol) {
+      delete state.filters[traitName];
+      delete query[_queryKey(traitName)];
+      continue
+    }
+    /* delete filter values (e.g. USA, Oceania) which aren't valid, i.e. observed on the tree */
+    const traitValues = state.filters[traitName].map((f) => f.value);
+    let validTraitValues;
+    if (traitName === strainSymbol) {
+      const nodeNames = new Set(tree.nodes.map((n) => n.name));
+      validTraitValues = traitValues.filter((v) => nodeNames.has(v));
+    } else if (traitName === genotypeSymbol) {
+      const observedMutations = collectGenotypeStates(tree.nodes);
+      validTraitValues = traitValues.filter((v) => observedMutations.has(v));
+    } else {
+      validTraitValues = traitValues.filter((value) => tree.totalStateCounts[traitName].has(value));
+    }
+    if (validTraitValues.length===0) {
+      delete state.filters[traitName];
+      delete query[_queryKey(traitName)];
+    } else if (traitValues.length !== validTraitValues.length) {
+      state.filters[traitName] = validTraitValues.map((value) => ({value, active: true}));
+      query[_queryKey(traitName)] = traitName === genotypeSymbol ?
+        encodeGenotypeFilters(state.filters[traitName]) :
+        validTraitValues.join(",");
+    }
   }
-  if (state.filters[genotypeSymbol]) {
-    const observedMutations = collectGenotypeStates(tree.nodes);
-    state.filters[genotypeSymbol] = state.filters[genotypeSymbol]
-      .filter((f) => observedMutations.has(f.value));
-    query.gt = encodeGenotypeFilters(state.filters[genotypeSymbol]);
-  }
+  /* Also remove any traitNames from the footer-displayed filters if they're not present on the tree */
+  state.filtersInFooter = state.filtersInFooter.filter((traitName) => traitName in tree.totalStateCounts);
 
   /* can we display branch length by div or num_date? */
   if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
@@ -667,11 +688,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
   );
 
   const newState = Object.assign({}, oldState, visAndThicknessData);
-  newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
-  newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true);
-
   return newState;
 };
 
@@ -868,6 +885,10 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
+
+  const stateCountAttrs = gatherTraitNames(tree.nodes, metadata.colorings);
+  tree.totalStateCounts = countTraitsAcrossTree(tree.nodes, stateCountAttrs, false, true);
+
   controls = checkAndCorrectErrorsInState(controls, metadata, entropy.genomeMap, query, tree, viewingNarrative); /* must run last */
 
 

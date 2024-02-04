@@ -16,7 +16,7 @@ const iconWidth = 25;
  * A React Component displaying buttons which trigger data-downloads. Intended for display within the
  * larger Download modal component
  */
-export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, distanceMeasure, panelsToDisplay, panelLayout, filters, visibility, visibleStateCounts, relevantPublications}) => {
+export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, distanceMeasure, panelsToDisplay, panelLayout, visibility, relevantPublications}) => {
   const totalTipCount = metadata.mainTreeNumTips;
   const selectedTipsCount = getNumSelectedTips(tree.nodes, tree.visibility);
   const partialData = selectedTipsCount !== totalTipCount;
@@ -100,9 +100,7 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
           t,
           metadata,
           tree.nodes,
-          filters,
           visibility,
-          visibleStateCounts,
           getFilePrefix(),
           panelsToDisplay,
           panelLayout,

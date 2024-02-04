@@ -15,7 +15,6 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
 
   nodes.forEach((node) => {
     traits.forEach((trait) => {                         // traits are "country" or "author" etc
-      const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
 
       if (terminalOnly && node.hasChildren) {
         return;
@@ -25,12 +24,43 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
         return;
       }
 
-      const currentValue = counts[trait].get(value) || 0;
-      counts[trait].set(value, currentValue+1);
+      const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
+      if (value===undefined) return;                    // check for invalid values
+      const currentValueCount = counts[trait].get(value) || 0;
+      counts[trait].set(value, currentValueCount+1);
     });
   });
   return counts;
 };
+
+
+/**
+ * Scan terminal nodes and gather all trait names with at least one valid value.
+ * Includes a hardcoded list of trait names we will ignore, as well as any trait
+ * which we know is continuous (via a colouring definition) because the
+ * filtering is not designed for these kinds of data (yet).
+ * @param {Array} nodes 
+ * @param {Object} colorings
+ * @returns {Array} list of trait names
+ */
+export const gatherTraitNames = (nodes, colorings) => {
+  const ignore = new Set([
+    'num_date',
+    ...Object.entries(colorings).filter(([_, info]) => info.type==='continuous').map(([name, _]) => name),
+  ])
+  const names = new Set();
+  for (const node of nodes) {
+    if (node.hasChildren) continue;
+    for (const traitName in node.node_attrs || {}) {
+      if (ignore.has(traitName)) continue;
+      if (names.has(traitName)) continue;
+      if (getTraitFromNode(node, traitName)) { // ensures validity
+        names.add(traitName);
+      }
+    }
+  }
+  return [...names]
+}
 
 /**
 * for each node, calculate the number of subtending tips which are visible

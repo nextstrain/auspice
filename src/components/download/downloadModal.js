@@ -50,8 +50,6 @@ export const publications = {
   entropy: state.entropy,
   tree: state.tree,
   nodes: state.tree.nodes,
-  visibleStateCounts: state.tree.visibleStateCounts,
-  filters: state.controls.filters,
   visibility: state.tree.visibility,
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout
@@ -164,9 +162,7 @@ class DownloadModal extends React.Component {
             {datasetSummary({
               mainTreeNumTips: this.props.metadata.mainTreeNumTips,
               nodes: this.props.nodes,
-              filters: this.props.filters,
               visibility: this.props.visibility,
-              visibleStateCounts: this.props.visibleStateCounts,
               t: this.props.t
             })}
           </div>

@@ -32,7 +32,6 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
     metadata: state.metadata,
     nodes: state.tree.nodes,
-    visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
     selectedClade: state.tree.selectedClade,

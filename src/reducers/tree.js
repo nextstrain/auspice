@@ -21,7 +21,6 @@ export const getDefaultTreeState = () => {
     vaccines: false,
     version: 0,
     idxOfInViewRootNode: 0,
-    visibleStateCounts: {},
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
@@ -52,7 +51,6 @@ const Tree = (state = getDefaultTreeState(), action) => {
         idxOfFilteredRoot: action.idxOfFilteredRoot,
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
-        visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);
@@ -72,13 +70,9 @@ const Tree = (state = getDefaultTreeState(), action) => {
     case types.ADD_EXTRA_METADATA:
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
       addNodeAttrs(state.nodes, action.newNodeAttrs);
-      // add the new colorings to visibleStateCounts & totalStateCounts so that they can function as filters
+      // add the new colorings to totalStateCounts so that they can function as filters
       return {
         ...state,
-        visibleStateCounts: {
-          ...state.visibleStateCounts,
-          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), state.visibility, true)
-        },
         totalStateCounts: {
           ...state.totalStateCounts,
           ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)

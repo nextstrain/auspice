@@ -102,6 +102,7 @@ export const decodeGenotypeFilters = (query) => {
       }
       return `${currentGene} ${x}`;
     })
+    .filter((value) => !!value)
     .map((value) => ({active: true, value})); // all URL filters _start_ active
 };
 

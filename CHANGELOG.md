@@ -1,5 +1,6 @@
 # Changelog
 
+* Sidebar filtering now contains all non-continuous metadata defined across the tree (i.e. all data within `node.node_attrs`). The traits listed in `meta.filters` are now only used to determine which filters to list in the footer of the page. ([#1743](https://github.com/nextstrain/auspice/pull/1743))
 * Added a link to this changelog from the Auspice view. ([#1727](https://github.com/nextstrain/auspice/pull/1727))
 
 ## version 2.51.0 - 2023/11/16

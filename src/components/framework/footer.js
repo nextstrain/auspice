@@ -180,7 +180,7 @@ export const getAcknowledgments = (metadata, dispatch) => {
 };
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
-  const activeValuesOfFilter = activeFilters[key].map((f) => f.value);
+  const activeValuesOfFilter = (activeFilters[key] || []).map((f) => f.value);
   const mode = activeValuesOfFilter.indexOf(value) === -1 ? "add" : "remove";
   dispatch(applyFilter(mode, key, [value]));
 };
@@ -245,11 +245,12 @@ class Footer extends React.Component {
   displayFilter(filterName) {
     const { t } = this.props;
     const totalStateCount = this.props.totalStateCounts[filterName];
+    if (!totalStateCount) return null;
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
-    const activeFilterItems = this.props.activeFilters[filterName].filter((x) => x.active).map((x) => x.value);
+    const activeFilterItems = (this.props.activeFilters[filterName] || []).filter((x) => x.active).map((x) => x.value);
     const title = (<div>
       {t("Filter by {{filterTitle}}", {filterTitle: filterTitle}) + ` (n=${totalStateCount.size})`}
-      {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", t("Clear {{filterName}} filter", { filterName: filterName})) : null}
+      {this.props.activeFilters?.[filterName]?.length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", t("Clear {{filterName}} filter", { filterName: filterName})) : null}
     </div>);
     return (
       <div>
@@ -293,16 +294,12 @@ class Footer extends React.Component {
           <div className='line'/>
           {getAcknowledgments(this.props.metadata, this.props.dispatch)}
           <div className='line'/>
-          {Object.keys(this.props.activeFilters)
-            .filter((name) => this.props.filtersInFooter.includes(name))
-            .map((name) => {
-              return (
-                <div key={name}>
-                  {this.displayFilter(name)}
-                  <div className='line'/>
-                </div>
-              );
-            })}
+          {this.props.filtersInFooter.map((name) => (
+            <div key={name}>
+              {this.displayFilter(name)}
+              <div className='line'/>
+            </div>
+          ))}
         </div>
       </FooterStyles>
     );
