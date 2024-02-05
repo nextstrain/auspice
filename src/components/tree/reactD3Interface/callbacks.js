@@ -13,13 +13,7 @@ export const onTipHover = function onTipHover(d) {
     this.state.treeToo;
   phylotree.svg.select("#"+getDomId("tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "tip",
-      event: "hover"
-    }
-  });
+  this.setState({hoveredNode: d});
 };
 
 export const onTipClick = function onTipClick(d) {
@@ -49,13 +43,7 @@ export const onBranchHover = function onBranchHover(d) {
   }
 
   /* Set the hovered state so that an info box can be displayed */
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "branch",
-      event: "hover"
-    }
-  });
+  this.setState({hoveredNode: d});
 };
 
 export const onBranchClick = function onBranchClick(d) {
@@ -104,7 +92,6 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
-  if (this.state.selectedNode.event!=="hover") return;
 
   /* Reset the stroke back to what it was before */
   branchStrokeForLeave(d);
@@ -115,19 +102,18 @@ export const onBranchLeave = function onBranchLeave(d) {
     tree.removeConfidence();
   }
   /* Set selectedNode state to an empty object, which will remove the info box */
-  this.setState({selectedNode: {}});
+  this.setState({hoveredNode: null});
 };
 
 export const onTipLeave = function onTipLeave(d) {
-  if (this.state.selectedNode.event!=="hover") return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  if (this.state.selectedNode) {
+  if (this.state.hoveredNode) {
     phylotree.svg.select("#"+getDomId("tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
-  this.setState({selectedNode: {}});
+  this.setState({hoveredNode: null});
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */

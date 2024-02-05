@@ -29,7 +29,7 @@ class Tree extends React.Component {
     };
     this.tangleRef = undefined;
     this.state = {
-      selectedNode: {},
+      hoveredNode: null,
       tree: null,
       treeToo: null
     };
@@ -199,7 +199,7 @@ class Tree extends React.Component {
           <Legend width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
-          selectedNode={this.state.selectedNode}
+          selectedNode={this.state.hoveredNode}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
