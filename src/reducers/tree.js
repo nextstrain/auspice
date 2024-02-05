@@ -24,7 +24,6 @@ export const getDefaultTreeState = () => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedStrain: undefined,
     selectedClade: undefined
   };
 };
@@ -51,7 +50,6 @@ const Tree = (state = getDefaultTreeState(), action) => {
         idxOfFilteredRoot: action.idxOfFilteredRoot,
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
-        selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);
     }

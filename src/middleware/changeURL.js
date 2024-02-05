@@ -185,7 +185,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      // query.s = action.selectedStrain ? action.selectedStrain : undefined;
       query.label = action.cladeName ? action.cladeName : undefined;
       break;
     }

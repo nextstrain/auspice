@@ -53,10 +53,6 @@ export const getDefaultControlsState = () => {
     defaults,
     available: undefined,
     canTogglePanelLayout: true,
-    selectedNode: null,
-    region: null,
-    search: null,
-    strain: null,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     scatterVariables: {},
@@ -120,14 +116,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return action.controls;
     case types.SET_AVAILABLE:
       return Object.assign({}, state, { available: action.data });
-    case types.NODE_MOUSEENTER:
-      return Object.assign({}, state, {
-        selectedNode: action.data
-      });
-    case types.NODE_MOUSELEAVE:
-      return Object.assign({}, state, {
-        selectedNode: null
-      });
     case types.CHANGE_EXPLODE_ATTR:
       return Object.assign({}, state, {
         explodeAttr: action.explodeAttr,

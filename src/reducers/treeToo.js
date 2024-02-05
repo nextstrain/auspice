@@ -45,7 +45,6 @@ const treeToo = (state = getDefaultTreeState(), action) => {
           branchThicknessVersion: action.branchThicknessVersionToo,
           idxOfInViewRootNode: action.idxOfInViewRootNodeToo,
           idxOfFilteredRoot: action.idxOfFilteredRootToo,
-          selectedStrain: action.selectedStrain
         });
       }
       return state;
