@@ -50,7 +50,7 @@ jobs:
           node-version: '16'
 
       - name: Checkout downstream repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
           path: ${{ env.DESTINATION_REPO_DIR }}
