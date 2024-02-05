@@ -2,6 +2,7 @@ import { updateVisibleTipsAndBranchThicknesses, applyFilter } from "../../../act
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
+import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -24,13 +25,7 @@ export const onTipHover = function onTipHover(d) {
 export const onTipClick = function onTipClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "tip",
-      event: "click"
-    }
-  });
+  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx});
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
@@ -69,13 +64,8 @@ export const onBranchClick = function onBranchClick(d) {
 
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
   if (window.event.shiftKey) {
-    this.setState({
-      selectedNode: {
-        node: d,
-        type: "branch",
-        event: "click"
-      }
-    });
+    // no need to dispatch a filter action
+    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx})
     return;
   }
 
@@ -141,15 +131,9 @@ export const onTipLeave = function onTipLeave(d) {
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */
-export const clearSelectedNode = function clearSelectedNode(selectedNode) {
-  const phylotree = selectedNode.node.that.params.orientation[0] === 1 ?
-    this.state.tree :
-    this.state.treeToo;
-  phylotree.svg.select("#"+getDomId("tip", selectedNode.node.n.name))
-    .attr("r", (dd) => dd["r"]);
-  this.setState({selectedNode: {}});
-  if (selectedNode.type==="tip") {
-    /* restore the tip visibility! */
-    this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.node.n.name]));
+export const clearSelectedNode = function clearSelectedNode(selectedNode, isTerminal) {
+  if (isTerminal) {
+    this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.name]));
   }
+  this.props.dispatch({type: DESELECT_NODE});
 };

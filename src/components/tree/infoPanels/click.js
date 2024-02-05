@@ -233,43 +233,45 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
 /**
  * A React component to display information about a tree tip in a modal-overlay style
  * @param  {Object}   props
- * @param  {Object}   props.tip              tip node selected
- * @param  {function} props.goAwayCallback
- * @param  {object}   props.colorings
+ * @param  {Object}   props.selectedNode
+ * @param  {Object[]} props.nodes
+ * @param  {function} props.clearSelectedNode
+ * @param  {Object}   props.colorings
+ * @param  {Object}   props.observedMutations
+ * @param  {function} props.geneSortFn
+ * @param  {function} props.t
  */
-const NodeClickedPanel = ({selectedNode, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
-  if (selectedNode.event!=="click") {return null;}
+const NodeClickedPanel = ({selectedNode, nodes, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
+  if (!selectedNode) return null;
+  const node = nodes[selectedNode.idx];
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
-  const node = selectedNode.node.n;
-  const isTip = selectedNode.type === "tip";
-  const isTerminal = node.fullTipCount===1;
-
-  const title = isTip ?
+  const isTerminal = !node.hasChildren;
+  const title = isTerminal ?
     node.name :
     isTerminal ?
       `Branch leading to ${node.name}` :
       "Internal branch";
 
   return (
-    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
+    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode, isTerminal)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
         <StrainName>{title}</StrainName>
         <table>
           <tbody>
-            {!isTip && item(t("Number of terminal tips"), node.fullTipCount)}
-            {isTip && <VaccineInfo node={node} t={t}/>}
+            {!isTerminal && item(t("Number of terminal tips"), node.fullTipCount)}
+            {isTerminal && <VaccineInfo node={node} t={t}/>}
             <SampleDate isTerminal={isTerminal} node={node} t={t}/>
-            {!isTip && item("Node name", node.name)}
-            {isTip && <PublicationInfo node={node} t={t}/>}
+            {!isTerminal && item("Node name", node.name)}
+            {isTerminal && <PublicationInfo node={node} t={t}/>}
             {getTraitsToDisplay(node).map((trait) => (
               <Trait node={node} trait={trait} colorings={colorings} key={trait} isTerminal={isTerminal}/>
             ))}
-            {isTip && <AccessionAndUrl node={node}/>}
+            {isTerminal && <AccessionAndUrl node={node}/>}
             {item("", "")}
           </tbody>
         </table>
-        <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTip} observedMutations={observedMutations}/>
+        <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTerminal} observedMutations={observedMutations}/>
         <p style={infoPanelStyles.comment}>
           {t("Click outside this box to go back to the tree")}
         </p>

@@ -43,8 +43,11 @@ class Tree extends React.Component {
     };
     /* pressing the escape key should dismiss an info modal (if one exists) */
     this.handlekeydownEvent = (event) => {
-      if (event.key==="Escape" && this.state.selectedNode?.node) {
-        this.clearSelectedNode(this.state.selectedNode);
+      if (event.key==="Escape" && this.props.selectedNode) {
+        this.clearSelectedNode(
+          this.props.selectedNode,
+          !this.props.tree.nodes[this.props.selectedNode.idx].hasChildren
+        );
       }
     };
   }
@@ -208,7 +211,8 @@ class Tree extends React.Component {
         />
         <NodeClickedPanel
           clearSelectedNode={this.clearSelectedNode}
-          selectedNode={this.state.selectedNode}
+          selectedNode={this.props.selectedNode}
+          nodes={this.props.tree.nodes}
           observedMutations={this.props.tree.observedMutations}
           colorings={this.props.colorings}
           geneSortFn={this.state.geneSortFn}

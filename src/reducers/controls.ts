@@ -71,6 +71,7 @@ export const getDefaultControlsState = () => {
     explodeAttr: undefined,
     selectedBranchLabel: "none",
     showAllBranchLabels: false,
+    selectedNode: null,
     canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
@@ -232,6 +233,13 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, {
         geoResolution: action.data
       });
+
+    case types.SELECT_NODE: {
+      return {...state, selectedNode: {name: action.name, idx: action.idx}};
+    }
+    case types.DESELECT_NODE: {
+      return {...state, selectedNode: null}
+    }
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
