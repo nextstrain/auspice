@@ -248,8 +248,20 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       } else {                    // remove if no active+inactive filters
         delete filters[action.trait]
       }
+
+      /* In the situation where a node-selected modal is active + we have
+      removed or inactivated the corresponding filter, then we want to remove
+      the modal */
+      let selectedNode = state.selectedNode
+      if (selectedNode) {
+        const filterInfo = filters?.[strainSymbol]?.find((f)=>f.value===selectedNode.name);
+        if (!filterInfo || !filterInfo.active) {
+          selectedNode = null;
+        }
+      }
       return Object.assign({}, state, {
-        filters
+        filters,
+        selectedNode,
       });
     }
     case types.TOGGLE_TEMPORAL_CONF:
