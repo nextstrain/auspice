@@ -10,7 +10,7 @@ export const onTipHover = function onTipHover(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select(getDomId("#tip", d.n.name))
+  phylotree.svg.select("#"+getDomId("tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
   this.setState({
     selectedNode: {
@@ -133,8 +133,8 @@ export const onTipLeave = function onTipLeave(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  if (!this.state.selectedNode) {
-    phylotree.svg.select(getDomId("#tip", d.n.name))
+  if (this.state.selectedNode) {
+    phylotree.svg.select("#"+getDomId("tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
   this.setState({selectedNode: {}});
@@ -145,7 +145,7 @@ export const clearSelectedNode = function clearSelectedNode(selectedNode) {
   const phylotree = selectedNode.node.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select(getDomId("#tip", selectedNode.node.n.name))
+  phylotree.svg.select("#"+getDomId("tip", selectedNode.node.n.name))
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedNode: {}});
   if (selectedNode.type==="tip") {
