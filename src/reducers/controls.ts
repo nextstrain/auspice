@@ -234,8 +234,11 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         geoResolution: action.data
       });
 
-    case types.SELECT_NODE: {
-      return {...state, selectedNode: {name: action.name, idx: action.idx}};
+    case types.SELECT_NODE: {      
+      const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
+      const existingFilterState = existingFilterInfo === undefined ? null :
+        existingFilterInfo.active ? 'active' : 'inactive';
+      return {...state, selectedNode: {name: action.name, idx: action.idx, existingFilterState}};
     }
     case types.DESELECT_NODE: {
       return {...state, selectedNode: null}

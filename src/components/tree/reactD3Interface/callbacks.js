@@ -19,6 +19,9 @@ export const onTipHover = function onTipHover(d) {
 export const onTipClick = function onTipClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
+  /* The order of these two dispatches is important: the reducer handling
+  `SELECT_NODE` must have access to the filtering state _prior_ to these filters
+  being applied */
   this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx});
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
@@ -119,7 +122,14 @@ export const onTipLeave = function onTipLeave(d) {
 /* clearSelectedNode when clicking to remove the node-selected modal */
 export const clearSelectedNode = function clearSelectedNode(selectedNode, isTerminal) {
   if (isTerminal) {
-    this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.name]));
+    /* perform the filtering action (if necessary) that will restore the
+    filtering state of the node prior to the selection */
+    if (!selectedNode.existingFilterState) {
+      this.props.dispatch(applyFilter("remove", strainSymbol, [selectedNode.name]));
+    } else if (selectedNode.existingFilterState==='inactive') {
+      this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.name]));
+    }
+    /* else the filter was already active, so leave it unchanged */
   }
   this.props.dispatch({type: DESELECT_NODE});
 };
