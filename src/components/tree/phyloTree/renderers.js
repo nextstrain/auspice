@@ -343,29 +343,18 @@ export const updateColorBy = function updateColorBy() {};
  */
 const handleBranchHoverColor = (d, c1, c2) => {
   if (!d) { return; }
-  const id = `T${d.that.id}_${d.n.parent.arrayIdx}_${d.n.arrayIdx}`;
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
-  const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
-
+  const tel = d.that.svg.select("#"+getDomId("branchT", d.n.name));
   if (!tel.empty()) { // Some displays don't have S & T parts of the branch
     tel.style("stroke", c2);
   }
-  const sel = d.that.svg.select(getDomId("#branchS", d.n.name));
+  
+  /* If we reinstate gradient stem colours this section must be updated; see the
+  commit which added this comment for the previous implementation */
+  const sel = d.that.svg.select("#"+getDomId("branchS", d.n.name));
   if (!sel.empty()) {
-    if (d.branchStroke === d.n.parent.shell.branchStroke) {
-      sel.style("stroke", c2);
-    } else {
-      // console.log("going to gradient " + el.attr("id"));
-      const begin = d.that.svg.select(`#${id}_begin`);
-      if (begin) {
-        begin.attr("stop-color", c1);
-      }
-      const end = d.that.svg.select(`#${id}_end`);
-      if (end) {
-        end.attr("stop-color", c2);
-      }
-    }
+    sel.style("stroke", c2);
   }
 };
 
