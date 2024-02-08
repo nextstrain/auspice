@@ -1,7 +1,5 @@
 import React, { lazy, Suspense } from 'react';
 import { connect } from "react-redux";
-// XXX FIXME react-18
-// import { hot } from 'react-hot-loader/root';
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
@@ -70,6 +68,4 @@ const Root = () => {
   );
 };
 
-// XXX FIXME react-18
-// export default hot(Root);
 export default Root;

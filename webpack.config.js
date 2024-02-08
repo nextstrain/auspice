@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 /* Webpack config generator */
 
@@ -17,11 +18,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   // Format is either "libName" or "libName:libPath"
   const coreDeps = [
     "react",
-    // XXX FIXME react-18: react-hot-loader won't support react 18; must switch to
-    // react-refresh slash builtin support hooks? unclear without more digging.
-    // see <https://github.com/facebook/react/issues/16604>
-    //"react-hot-loader",
-    //"react-dom:@hot-loader/react-dom",
     "regenerator-runtime",
     "core-js",
     "styled-components"
@@ -89,6 +85,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     cleanStaleWebpackAssets: true
   });
   const plugins = devMode ? [
+    new ReactRefreshWebpackPlugin(),
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
@@ -134,8 +131,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "regenerator-runtime",
     "whatwg-fetch",
     "style-loader",
-    // XXX FIXME react-18
-    //"@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
     "leaflet",
     "redux",

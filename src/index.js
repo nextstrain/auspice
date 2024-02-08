@@ -4,8 +4,6 @@ import "core-js";
 import "regenerator-runtime";
 import "css.escape";
 /* L I B R A R I E S */
-// XXX FIXME react-18
-// import "react-hot-loader";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";

@@ -114,13 +114,14 @@
     "typeface-lato": "^0.0.75",
     "webpack": "^5.74.0",
     "webpack-bundle-analyzer": "^3.9.0",
-    "webpack-dev-middleware": "^3.7.3",
-    "webpack-hot-middleware": "^2.25.2",
+    "webpack-dev-middleware": "^7.0.0",
+    "webpack-hot-middleware": "^2.26.1",
     "whatwg-fetch": "^0.10.1",
     "xlsx": "^0.17.1",
     "yaml-front-matter": "^4.0.0"
   },
   "devDependencies": {
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.5.11",
     "@types/leaflet": "^1.9.3",
     "@types/node": "^18.15.11",
     "@types/webpack-env": "^1.18.2",
@@ -135,6 +136,7 @@
     "jest-puppeteer": "^9.0.0",
     "puppeteer": "^20.6.0",
     "quoted-printable": "^1.0.1",
+    "react-refresh": "^0.14.0",
     "start-server-and-test": "^1.14.0",
     "typescript": "^5.0.2"
   }
