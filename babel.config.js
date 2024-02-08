@@ -29,7 +29,7 @@ module.exports = function babelConfig(api) {
   ];
   if (api.env("development")) {
     // XXX FIXME react-18
-    plugins.push(["react-hot-loader/babel", { safetyNet: false }]);
+    // plugins.push(["react-hot-loader/babel", { safetyNet: false }]);
   }
   if (process.env.BABEL_INCLUDE_TIMING_FUNCTIONS === "false") {
     plugins.push(["strip-function-call", {strip: ["timerStart", "timerEnd"]}]);

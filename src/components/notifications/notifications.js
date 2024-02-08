@@ -102,16 +102,17 @@ class Notifications extends React.Component {
       return null;
     }
     return (
+      null
       // XXX FIXME react-18: migrate from v1 → v2
       // <https://github.com/reactjs/react-transition-group/blob/master/Migration.md>
-      <CSSTransitionGroup className="notifications"
-        transitionName="notification"
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={500}
-        style={{zIndex: 20000}}
-      >
-        {this.props.stack.map((d) => this.generateEl(d))}
-      </CSSTransitionGroup>
+      // <CSSTransitionGroup className="notifications"
+      //   transitionName="notification"
+      //   transitionEnterTimeout={500}
+      //   transitionLeaveTimeout={500}
+      //   style={{zIndex: 20000}}
+      // >
+      //   {this.props.stack.map((d) => this.generateEl(d))}
+      // </CSSTransitionGroup>
     );
   }
 }
