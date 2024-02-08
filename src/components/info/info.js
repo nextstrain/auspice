@@ -35,7 +35,7 @@ class Info extends React.Component {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = computeStyles(this.props.width, this.props.browserWidth);
     const animating = this.props.animationPlayPauseButton === "Pause";
-    const showExtended = !animating && !this.props.selectedStrain;
+    const showExtended = !animating;
     return (
       <Card center infocard>
         <div style={styles.base}>

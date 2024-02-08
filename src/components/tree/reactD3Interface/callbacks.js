@@ -2,6 +2,7 @@ import { updateVisibleTipsAndBranchThicknesses, applyFilter } from "../../../act
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
+import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -12,25 +13,16 @@ export const onTipHover = function onTipHover(d) {
     this.state.treeToo;
   phylotree.svg.select("#"+getDomId("tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "tip",
-      event: "hover"
-    }
-  });
+  this.setState({hoveredNode: d});
 };
 
 export const onTipClick = function onTipClick(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "tip",
-      event: "click"
-    }
-  });
+  /* The order of these two dispatches is important: the reducer handling
+  `SELECT_NODE` must have access to the filtering state _prior_ to these filters
+  being applied */
+  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx});
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
@@ -54,13 +46,7 @@ export const onBranchHover = function onBranchHover(d) {
   }
 
   /* Set the hovered state so that an info box can be displayed */
-  this.setState({
-    selectedNode: {
-      node: d,
-      type: "branch",
-      event: "hover"
-    }
-  });
+  this.setState({hoveredNode: d});
 };
 
 export const onBranchClick = function onBranchClick(d) {
@@ -69,13 +55,8 @@ export const onBranchClick = function onBranchClick(d) {
 
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
   if (window.event.shiftKey) {
-    this.setState({
-      selectedNode: {
-        node: d,
-        type: "branch",
-        event: "click"
-      }
-    });
+    // no need to dispatch a filter action
+    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx})
     return;
   }
 
@@ -114,7 +95,6 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
-  if (this.state.selectedNode.event!=="hover") return;
 
   /* Reset the stroke back to what it was before */
   branchStrokeForLeave(d);
@@ -125,31 +105,31 @@ export const onBranchLeave = function onBranchLeave(d) {
     tree.removeConfidence();
   }
   /* Set selectedNode state to an empty object, which will remove the info box */
-  this.setState({selectedNode: {}});
+  this.setState({hoveredNode: null});
 };
 
 export const onTipLeave = function onTipLeave(d) {
-  if (this.state.selectedNode.event!=="hover") return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  if (this.state.selectedNode) {
+  if (this.state.hoveredNode) {
     phylotree.svg.select("#"+getDomId("tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
-  this.setState({selectedNode: {}});
+  this.setState({hoveredNode: null});
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */
-export const clearSelectedNode = function clearSelectedNode(selectedNode) {
-  const phylotree = selectedNode.node.that.params.orientation[0] === 1 ?
-    this.state.tree :
-    this.state.treeToo;
-  phylotree.svg.select("#"+getDomId("tip", selectedNode.node.n.name))
-    .attr("r", (dd) => dd["r"]);
-  this.setState({selectedNode: {}});
-  if (selectedNode.type==="tip") {
-    /* restore the tip visibility! */
-    this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.node.n.name]));
+export const clearSelectedNode = function clearSelectedNode(selectedNode, isTerminal) {
+  if (isTerminal) {
+    /* perform the filtering action (if necessary) that will restore the
+    filtering state of the node prior to the selection */
+    if (!selectedNode.existingFilterState) {
+      this.props.dispatch(applyFilter("remove", strainSymbol, [selectedNode.name]));
+    } else if (selectedNode.existingFilterState==='inactive') {
+      this.props.dispatch(applyFilter("inactivate", strainSymbol, [selectedNode.name]));
+    }
+    /* else the filter was already active, so leave it unchanged */
   }
+  this.props.dispatch({type: DESELECT_NODE});
 };

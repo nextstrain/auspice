@@ -401,13 +401,12 @@ const HoverInfoPanel = ({
   observedMutations,
   t
 }) => {
-  if (selectedNode.event !== "hover") return null;
-  const node = selectedNode.node.n;
+  if (!selectedNode) return null
+  const node = selectedNode.n;
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
-
   return (
     <Container node={node} panelDims={panelDims}>
-      {selectedNode.type === "tip" ? (
+      {node.hasChildren===false ? (
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>

@@ -53,10 +53,6 @@ export const getDefaultControlsState = () => {
     defaults,
     available: undefined,
     canTogglePanelLayout: true,
-    selectedNode: null,
-    region: null,
-    search: null,
-    strain: null,
     temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     scatterVariables: {},
@@ -75,6 +71,7 @@ export const getDefaultControlsState = () => {
     explodeAttr: undefined,
     selectedBranchLabel: "none",
     showAllBranchLabels: false,
+    selectedNode: null,
     canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
@@ -120,14 +117,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return action.controls;
     case types.SET_AVAILABLE:
       return Object.assign({}, state, { available: action.data });
-    case types.NODE_MOUSEENTER:
-      return Object.assign({}, state, {
-        selectedNode: action.data
-      });
-    case types.NODE_MOUSELEAVE:
-      return Object.assign({}, state, {
-        selectedNode: null
-      });
     case types.CHANGE_EXPLODE_ATTR:
       return Object.assign({}, state, {
         explodeAttr: action.explodeAttr,
@@ -244,6 +233,16 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, {
         geoResolution: action.data
       });
+
+    case types.SELECT_NODE: {      
+      const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
+      const existingFilterState = existingFilterInfo === undefined ? null :
+        existingFilterInfo.active ? 'active' : 'inactive';
+      return {...state, selectedNode: {name: action.name, idx: action.idx, existingFilterState}};
+    }
+    case types.DESELECT_NODE: {
+      return {...state, selectedNode: null}
+    }
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
@@ -252,8 +251,20 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       } else {                    // remove if no active+inactive filters
         delete filters[action.trait]
       }
+
+      /* In the situation where a node-selected modal is active + we have
+      removed or inactivated the corresponding filter, then we want to remove
+      the modal */
+      let selectedNode = state.selectedNode
+      if (selectedNode) {
+        const filterInfo = filters?.[strainSymbol]?.find((f)=>f.value===selectedNode.name);
+        if (!filterInfo || !filterInfo.active) {
+          selectedNode = null;
+        }
+      }
       return Object.assign({}, state, {
-        filters
+        filters,
+        selectedNode,
       });
     }
     case types.TOGGLE_TEMPORAL_CONF:
