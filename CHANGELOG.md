@@ -1,7 +1,18 @@
 # Changelog
 
+
 * Sidebar filtering now contains all non-continuous metadata defined across the tree (i.e. all data within `node.node_attrs`). The traits listed in `meta.filters` are now only used to determine which filters to list in the footer of the page. ([#1743](https://github.com/nextstrain/auspice/pull/1743))
+* The interaction between strain-selected modals and the corresponding strain-filter has been improved. We now preserve the strain filter state present before the node was clicked. ([#1749](https://github.com/nextstrain/auspice/issues/1749))
 * Added a link to this changelog from the Auspice view. ([#1727](https://github.com/nextstrain/auspice/pull/1727))
+* Updated "contact us"-type links to point to nextstrain.org/contact. ([#1734](https://github.com/nextstrain/auspice/issues/1734))
+* Bugfix: When showing the strain-selected modal, disabling the corresponding filter now clears the modal. ([#1749](https://github.com/nextstrain/auspice/issues/1749))
+
+_Internal changes which should not result in any different behaviour while using Auspice._
+
+* Updates to GitHub actions. ([#1739](https://github.com/nextstrain/auspice/issues/1739), [#1741](https://github.com/nextstrain/auspice/issues/1741))
+* Updates to documentation setup. ([#1730](https://github.com/nextstrain/auspice/issues/1730))
+* Updates to PR template. ([#1728](https://github.com/nextstrain/auspice/issues/1728))
+* Updated and then reverted Webpack configuration ([#1733](https://github.com/nextstrain/auspice/issues/1733), [#1738](https://github.com/nextstrain/auspice/issues/1738))
 
 ## version 2.51.0 - 2023/11/16
 
