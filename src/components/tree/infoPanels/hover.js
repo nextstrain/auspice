@@ -402,11 +402,12 @@ const HoverInfoPanel = ({
   t
 }) => {
   if (!selectedNode) return null
-  const node = selectedNode.n;
+  const node = selectedNode.node.n; // want the redux node, not the phylo node
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
   return (
     <Container node={node} panelDims={panelDims}>
-      {node.hasChildren===false ? (
+      {selectedNode.isBranch===false ? (
         <>
           <StrainName name={node.name}/>
           <VaccineInfo node={node} t={t}/>

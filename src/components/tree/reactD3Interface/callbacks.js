@@ -13,7 +13,9 @@ export const onTipHover = function onTipHover(d) {
     this.state.treeToo;
   phylotree.svg.select("#"+getDomId("tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
-  this.setState({hoveredNode: d});
+  this.setState({
+    hoveredNode: {node: d, isBranch: false}
+  });
 };
 
 export const onTipClick = function onTipClick(d) {
@@ -46,7 +48,9 @@ export const onBranchHover = function onBranchHover(d) {
   }
 
   /* Set the hovered state so that an info box can be displayed */
-  this.setState({hoveredNode: d});
+  this.setState({
+    hoveredNode: {node: d, isBranch: true}
+  });
 };
 
 export const onBranchClick = function onBranchClick(d) {
