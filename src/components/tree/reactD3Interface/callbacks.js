@@ -124,8 +124,8 @@ export const onTipLeave = function onTipLeave(d) {
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */
-export const clearSelectedNode = function clearSelectedNode(selectedNode, isTerminal) {
-  if (isTerminal) {
+export const clearSelectedNode = function clearSelectedNode(selectedNode) {
+  if (!selectedNode.isBranch) {
     /* perform the filtering action (if necessary) that will restore the
     filtering state of the node prior to the selection */
     if (!selectedNode.existingFilterState) {

@@ -256,7 +256,7 @@ const NodeClickedPanel = ({selectedNode, nodes, clearSelectedNode, colorings, ob
       "Internal branch";
 
   return (
-    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode, isTerminal)}>
+    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
         <StrainName>{title}</StrainName>
         <table>
