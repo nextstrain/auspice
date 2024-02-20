@@ -238,7 +238,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
       const existingFilterState = existingFilterInfo === undefined ? null :
         existingFilterInfo.active ? 'active' : 'inactive';
-      return {...state, selectedNode: {name: action.name, idx: action.idx, existingFilterState}};
+      return {...state, selectedNode: {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch}};
     }
     case types.DESELECT_NODE: {
       return {...state, selectedNode: null}
