@@ -44,10 +44,7 @@ class Tree extends React.Component {
     /* pressing the escape key should dismiss an info modal (if one exists) */
     this.handlekeydownEvent = (event) => {
       if (event.key==="Escape" && this.props.selectedNode) {
-        this.clearSelectedNode(
-          this.props.selectedNode,
-          !this.props.tree.nodes[this.props.selectedNode.idx].hasChildren
-        );
+        this.clearSelectedNode(this.props.selectedNode);
       }
     };
   }

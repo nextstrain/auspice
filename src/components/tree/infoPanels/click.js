@@ -247,31 +247,33 @@ const NodeClickedPanel = ({selectedNode, nodes, clearSelectedNode, colorings, ob
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
   const isTerminal = !node.hasChildren;
-  const title = isTerminal ?
+  const isTip = !selectedNode.isBranch;
+
+  const title = isTip ?
     node.name :
     isTerminal ?
       `Branch leading to ${node.name}` :
       "Internal branch";
 
   return (
-    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode, isTerminal)}>
+    <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
       <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
         <StrainName>{title}</StrainName>
         <table>
           <tbody>
-            {!isTerminal && item(t("Number of terminal tips"), node.fullTipCount)}
-            {isTerminal && <VaccineInfo node={node} t={t}/>}
+            {!isTip && item(t("Number of terminal tips"), node.fullTipCount)}
+            {isTip && <VaccineInfo node={node} t={t}/>}
             <SampleDate isTerminal={isTerminal} node={node} t={t}/>
-            {!isTerminal && item("Node name", node.name)}
-            {isTerminal && <PublicationInfo node={node} t={t}/>}
+            {!isTip && item("Node name", node.name)}
+            {isTip && <PublicationInfo node={node} t={t}/>}
             {getTraitsToDisplay(node).map((trait) => (
               <Trait node={node} trait={trait} colorings={colorings} key={trait} isTerminal={isTerminal}/>
             ))}
-            {isTerminal && <AccessionAndUrl node={node}/>}
+            {isTip && <AccessionAndUrl node={node}/>}
             {item("", "")}
           </tbody>
         </table>
-        <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTerminal} observedMutations={observedMutations}/>
+        <MutationTable node={node} geneSortFn={geneSortFn} isTip={isTip} observedMutations={observedMutations}/>
         <p style={infoPanelStyles.comment}>
           {t("Click outside this box to go back to the tree")}
         </p>

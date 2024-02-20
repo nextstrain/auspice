@@ -13,7 +13,9 @@ export const onTipHover = function onTipHover(d) {
     this.state.treeToo;
   phylotree.svg.select("#"+getDomId("tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
-  this.setState({hoveredNode: d});
+  this.setState({
+    hoveredNode: {node: d, isBranch: false}
+  });
 };
 
 export const onTipClick = function onTipClick(d) {
@@ -22,7 +24,7 @@ export const onTipClick = function onTipClick(d) {
   /* The order of these two dispatches is important: the reducer handling
   `SELECT_NODE` must have access to the filtering state _prior_ to these filters
   being applied */
-  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx});
+  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: false});
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
@@ -46,7 +48,9 @@ export const onBranchHover = function onBranchHover(d) {
   }
 
   /* Set the hovered state so that an info box can be displayed */
-  this.setState({hoveredNode: d});
+  this.setState({
+    hoveredNode: {node: d, isBranch: true}
+  });
 };
 
 export const onBranchClick = function onBranchClick(d) {
@@ -56,7 +60,7 @@ export const onBranchClick = function onBranchClick(d) {
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
   if (window.event.shiftKey) {
     // no need to dispatch a filter action
-    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx})
+    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true})
     return;
   }
 
@@ -120,8 +124,8 @@ export const onTipLeave = function onTipLeave(d) {
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */
-export const clearSelectedNode = function clearSelectedNode(selectedNode, isTerminal) {
-  if (isTerminal) {
+export const clearSelectedNode = function clearSelectedNode(selectedNode) {
+  if (!selectedNode.isBranch) {
     /* perform the filtering action (if necessary) that will restore the
     filtering state of the node prior to the selection */
     if (!selectedNode.existingFilterState) {
