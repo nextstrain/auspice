@@ -1,8 +1,8 @@
 # Changelog
 
+* Bugfix: Restore the intended behaviour when hovering or clicking on terminal branches. ([#1753](https://github.com/nextstrain/auspice/pull/1753))
+
 ## version 2.52.0 - 2024/02/09
-
-
 
 * Sidebar filtering now contains all non-continuous metadata defined across the tree (i.e. all data within `node.node_attrs`). The traits listed in `meta.filters` are now only used to determine which filters to list in the footer of the page. ([#1743](https://github.com/nextstrain/auspice/pull/1743))
 * The interaction between strain-selected modals and the corresponding strain-filter has been improved. We now preserve the strain filter state present before the node was clicked. ([#1749](https://github.com/nextstrain/auspice/issues/1749))
