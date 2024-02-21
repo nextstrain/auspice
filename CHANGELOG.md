@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.52.1 - 2024/02/21
+
+
 * Bugfix: Restore the intended behaviour when hovering or clicking on terminal branches. ([#1753](https://github.com/nextstrain/auspice/pull/1753))
 
 ## version 2.52.0 - 2024/02/09
