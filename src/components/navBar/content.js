@@ -1,7 +1,6 @@
 import React from "react";
 import styled from 'styled-components';
-
-const logoPNG = require("../../images/logo-light.svg");
+import logo from  "../auspice-logo.svg";
 
 const AuspiceNavBarContainer = styled.div`
   display: flex;
@@ -58,7 +57,7 @@ export const AuspiceNavBar = ({narrativeTitle, sidebar, width}) => {
     <AuspiceNavBarContainer>
       <div style={{flex: 1}}/>
       <LogoLink href="/">
-        <img alt="splashPage" width="40px" src={logoPNG}/>
+        <img alt="splashPage" width="40px" src={logo}/>
       </LogoLink>
       <div style={{flex: 1}}/>
       {renderTitle(narrativeTitle, width)}
