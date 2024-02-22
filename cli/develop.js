@@ -60,7 +60,7 @@ const run = (args) => {
 
   app.use((webpackDevMiddleware)(
     compiler,
-    {logLevel: 'warn', publicPath: webpackConfig.output.publicPath}
+    {publicPath: webpackConfig.output.publicPath}
   ));
   app.use((webpackHotMiddleware)(
     compiler,

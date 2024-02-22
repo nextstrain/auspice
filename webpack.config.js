@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 
 /* Webpack config generator */
 
@@ -17,8 +18,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   // Format is either "libName" or "libName:libPath"
   const coreDeps = [
     "react",
-    "react-hot-loader",
-    "react-dom:@hot-loader/react-dom",
     "regenerator-runtime",
     "core-js",
     "styled-components"
@@ -86,6 +85,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     cleanStaleWebpackAssets: true
   });
   const plugins = devMode ? [
+    new ReactRefreshWebpackPlugin(),
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
@@ -131,7 +131,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "regenerator-runtime",
     "whatwg-fetch",
     "style-loader",
-    "@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
     "leaflet",
     "redux",

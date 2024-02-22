@@ -9,7 +9,7 @@ import { removeAllFieldFilters, toggleAllFieldFilters, applyMeasurementFilter } 
 import { FilterBadge } from "../info/filterBadge";
 import { customSelectStyles } from "./customSelect";
 import { SidebarSubtitle } from "./styles";
-import VirtualizedMenuList from "./virtualizedMenuList";
+// import VirtualizedMenuList from "./virtualizedMenuList";
 
 const DEBOUNCE_TIME = 200;
 
@@ -180,7 +180,9 @@ class FilterData extends React.Component {
           isClearable={false}
           isSearchable
           isMulti={false}
-          components={{ DropdownIndicator: null, MenuList: VirtualizedMenuList }}
+          // XXX FIXME react-18
+          // components={{ DropdownIndicator: null, MenuList: VirtualizedMenuList }} 
+          components={{ DropdownIndicator: null }}
           onChange={this.selectionMade}
           styles={customSelectStyles}
         />
