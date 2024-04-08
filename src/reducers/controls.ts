@@ -77,7 +77,7 @@ export const getDefaultControlsState = () => {
     geoResolution: defaults.geoResolution,
     filters: defaults.filters,
     filtersInFooter: defaults.filtersInFooter,
-    showDownload: false,
+    modal: null,
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
@@ -273,13 +273,9 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
           on: !state.temporalConfidence.on
         })
       });
-    case types.TRIGGER_DOWNLOAD_MODAL:
+    case types.SET_MODAL:
       return Object.assign({}, state, {
-        showDownload: true
-      });
-    case types.DISMISS_DOWNLOAD_MODAL:
-      return Object.assign({}, state, {
-        showDownload: false
+        modal: action.modal || null
       });
     case types.REMOVE_TREE_TOO:
       return Object.assign({}, state, {

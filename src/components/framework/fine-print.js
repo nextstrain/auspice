@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
 import { FaDownload } from "react-icons/fa";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
+import { SET_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
@@ -82,7 +82,7 @@ class FinePrint extends React.Component {
     return (
       <button
         style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
-        onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
+        onClick={() => { this.props.dispatch({ type: SET_MODAL, modal: "download" }); }}
       >
         <FaDownload />
         <span style={{position: "relative"}}>{" "+t("Download data")}</span>
