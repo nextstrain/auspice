@@ -129,6 +129,39 @@ const data = ({distanceMeasure, colorBy, mainTreeNumTips, tangle}) => {
         return `${baseUrl}?${Object.entries(queries).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
       }
     },
+    {
+      name: 'microbetrace.cdc.gov',
+      valid() {
+        // MicrobeTrace should work similarly to Taxonium (see above)
+        // but trees >500 tips are very slow to load
+        return !tangle;
+      },
+      description() {
+        return this.valid() ? (
+          <>
+            View this data in MicrobeTrace (<a href='https://github.com/CDCgov/MicrobeTrace/wiki' target="_blank" rel="noreferrer noopener">learn more</a>).
+            {mainTreeNumTips>500 && (
+              <span>
+                {` Note that trees with over 500 tips may have trouble loading (this one has ${mainTreeNumTips}).`}
+              </span>
+            )}
+          </>
+        ) : (
+          <>
+            {`The current dataset isn't viewable in MicrobeTrace ${tangle ? `as tanglegrams aren't supported` : ''}`}
+          </>
+        )
+      },
+      url() {
+        /**
+         * As of 2024-04-09, the 'origin' must be nextstrain.org or next.nextstrain.org
+         * for these links to work. This means (nextstrain.org) the links coming from heroku
+         * review apps will not work.
+         */
+        const baseUrl = 'https://microbetrace.cdc.gov/MicrobeTrace';
+        return `${baseUrl}?url=${encodeURIComponent(`${origin}${pathname}`)}`
+      },
+    },
   ]
 }
 
