@@ -2,13 +2,14 @@ import React, { Suspense, lazy } from "react";
 import { connect } from "react-redux";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaExternalLinkSquareAlt } from "react-icons/fa";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { SET_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { hasExtension, getExtension } from "../../util/extensions";
+import { canShowLinkOuts } from "../modal/LinkOutModalContents.jsx";
 
 const logoPNG = require("../../images/favicon.png");
 
@@ -85,7 +86,19 @@ class FinePrint extends React.Component {
         onClick={() => { this.props.dispatch({ type: SET_MODAL, modal: "download" }); }}
       >
         <FaDownload />
-        <span style={{position: "relative"}}>{" "+t("Download data")}</span>
+        <span style={{position: "relative", paddingLeft: '3px'}}>{" "+t("Download data")}</span>
+      </button>
+    );
+  }
+  linkOutButton() {
+    const { t } = this.props;
+    return (
+      <button
+        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
+        onClick={() => { this.props.dispatch({ type: SET_MODAL, modal: "linkOut" }); }}
+      >
+        <FaExternalLinkSquareAlt />
+        <span style={{position: "relative", paddingLeft: '3px'}}>{" "+t("View in other platforms")}</span>
       </button>
     );
   }
@@ -96,10 +109,16 @@ class FinePrint extends React.Component {
     return (
       <FinePrintStyles>
         <div style={{width: width}}>
-          <Flex className='finePrint'>
+          <Flex className='finePrint' wrap='wrap'>
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}
+            {canShowLinkOuts() && (
+              <>
+                {dot}
+                {this.linkOutButton()}
+              </>
+            )}
             {dot}
             <a href="https://docs.nextstrain.org/projects/auspice/page/releases/changelog.html" target="_blank" rel="noreferrer noopener">
               {"Auspice v" + version}

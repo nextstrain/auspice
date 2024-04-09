@@ -6,6 +6,7 @@ import { SET_MODAL } from "../../actions/types";
 import { infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import DownloadModalContents from "../download/downloadModal";
+import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -84,6 +85,9 @@ class Modal extends React.Component {
     switch (this.props.modal) {
       case 'download':
         Contents = DownloadModalContents;
+        break;
+      case 'linkOut':
+        Contents = LinkOutModalContents;
         break;
       default:
         return null;
