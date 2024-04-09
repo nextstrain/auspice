@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import { infoPanelStyles } from "../../globalStyles";
 import { dataFont, lighterGrey} from "../../globalStyles";
 import { hasExtension, getExtension } from "../../util/extensions";
+import { isColorByGenotype, decodeColorByGenotype} from "../../util/getGenotype";
 
 
 /**
@@ -73,7 +74,62 @@ const ButtonContainer = styled.div`
 `
 
 const data = ({distanceMeasure, colorBy, mainTreeNumTips, tangle}) => {
-  return []
+  const pathname = window.location.pathname;
+  const origin = forceLinkOutHost || window.location.origin;
+  return [
+    {
+      name: 'taxonium.org',
+      valid() {
+        // MicrobeTrace should work with all nextstrain URLs which support the {GET, accept JSON} route
+        // which should be ~all of them (except authn-required routes, which won't work cross-origin,
+        // and which we don't attempt to detect here). Tanglegrams aren't supported.
+        return !tangle;
+      },
+      description() {
+        return this.valid() ? (
+          <>
+            Visualise this dataset in Taxonium (<a href='https://docs.taxonium.org/en/latest/' target="_blank" rel="noreferrer noopener">learn more</a>).
+          </>
+        ) : (
+          <>
+            {`The current dataset isn't viewable in taxonium ${tangle ? `as tanglegrams aren't supported` : ''}`}
+          </>
+        )
+      },
+      taxoniumColoring() {
+        if (isColorByGenotype(colorBy)) {
+          /* Taxonium syntax looks like 'color={"field":"genotype","pos":485,"gene":"M"}'
+          Note that taxonium (I think) does't backfill bases/residues for tips where there
+          are no observed mutations w.r.t. the root.
+          */
+          const subfields = ['"genotype"']; // include quoting as taxonium uses
+          const colorInfo = decodeColorByGenotype(colorBy);
+          // Multiple mutations (positions) aren't allowed
+          if (!colorInfo || colorInfo.positions.length>1) return null;
+          // The (integer) position is not enclosed in double quotes
+          subfields.push(`"pos":${colorInfo.positions[0]}`);
+          // The gene value is optional, without it we use nucleotide ("nt" in taxonium syntax)
+          if (colorInfo.aa) subfields.push(`"gene":"${colorInfo.gene}"`);
+          // Note that this string will be encoded when converted to a URL
+          return `{"field":${subfields.join(',')}}`;
+        }
+        return `{"field":"meta_${colorBy}"}`;
+      },
+      url() {
+        const baseUrl = 'https://taxonium.org';
+        const queries = {
+          treeUrl: `${origin}${pathname}`, // no nextstrain queries
+          treeType: 'nextstrain',
+          ladderizeTree: 'false', // keep same orientation as Auspice
+          xType: distanceMeasure==='num_date' ? 'x_time' : 'x_dist',
+        }
+        const color = this.taxoniumColoring();
+        if (color) queries.color = color;
+    
+        return `${baseUrl}?${Object.entries(queries).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
+      }
+    },
+  ]
 }
 
 export const LinkOutModalContents = () => {
