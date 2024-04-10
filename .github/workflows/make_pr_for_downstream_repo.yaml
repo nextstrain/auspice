@@ -54,6 +54,7 @@ jobs:
         with:
           repository: ${{ inputs.repository }}
           path: ${{ env.DESTINATION_REPO_DIR }}
+          token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
 
       - name: Install Auspice from PRs HEAD commit
         shell: bash
@@ -63,16 +64,15 @@ jobs:
           npm install nextstrain/auspice#${{ steps.detect-pr.outputs.auspice-sha }}
           git add package.json package-lock.json
 
+          git config user.name "nextstrain-bot"
+          git config user.email "nextstrain-bot@users.noreply.github.com"
+          git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
+
       - name: Create Pull Request
         id: cpr
-        uses: peter-evans/create-pull-request@v3
-        with:
-          path: ${{ env.DESTINATION_REPO_DIR }}
-          token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
-          branch: "nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
-          commit-message: "[testing only] Upgrade Auspice to ${{ github.sha }}"
-          author: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
-          committer: 'nextstrain-bot <nextstrain-bot@users.noreply.github.com>'
+        working-directory: ${{ env.DESTINATION_REPO_DIR }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
           title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ steps.detect-pr.outputs.pr-number }}'
           body: |
             This PR has been created to test this project running Auspice with changes from https://github.com/nextstrain/auspice/pull/${{ steps.detect-pr.outputs.pr-number }}.
@@ -81,10 +81,17 @@ jobs:
             This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
 
             This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
-          draft: true
-          delete-branch: true
-
-      - name: Check outputs
+          body_file: pr_body.txt
         run: |
-          echo "PR number: ${{ steps.cpr.outputs.pull-request-number }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "PR URL: ${{ steps.cpr.outputs.pull-request-url }}" >> "$GITHUB_STEP_SUMMARY"
+          branch="nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
+          git switch -c "$branch"
+          git push --force origin HEAD
+          pr_url=$(gh pr list --head "$branch" --json url | jq -r '.[0].url')
+
+          if [ "$pr_url" = "null" ]; then
+            echo "$body" > "$body_file"
+            pr_url="$(gh pr create --title "$title" --body-file "$body_file" --draft)"
+            echo "Pull request created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Pull request updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          fi
