@@ -40,8 +40,8 @@ jobs:
             exit 1
           fi
           MERGE_SHA=$(gh pr view $GITHUB_REF_NAME --repo nextstrain/auspice --json 'potentialMergeCommit' --jq '.potentialMergeCommit.oid')
-          echo "::set-output name=pr-number::$PR_NUMBER"
-          echo "::set-output name=auspice-sha::$MERGE_SHA"
+          echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "auspice-sha=$MERGE_SHA" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
