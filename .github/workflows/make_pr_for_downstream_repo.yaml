@@ -64,6 +64,10 @@ jobs:
           npm install nextstrain/auspice#${{ steps.detect-pr.outputs.auspice-sha }}
           git add package.json package-lock.json
 
+          git config user.name "nextstrain-bot"
+          git config user.email "nextstrain-bot@users.noreply.github.com"
+          git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
+
       - name: Create Pull Request
         working-directory: ${{ env.DESTINATION_REPO_DIR }}
         env:
@@ -78,13 +82,15 @@ jobs:
             This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
           body_file: pr_body.txt
         run: |
-          git config user.name "nextstrain-bot"
-          git config user.email "nextstrain-bot@users.noreply.github.com"
+          branch="nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
+          git switch -c "$branch"
+          git push --force origin HEAD
+          pr_url=$(gh pr list --head "$branch" --json url | jq -r '.[0].url')
 
-          git switch -c "nextstrain-bot/test-auspice-pr/${{ steps.detect-pr.outputs.pr-number }}"
-          git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
-          git push -u origin HEAD
-
-          echo "$body" > "$body_file"
-          pr_url="$(gh pr create --title "$title" --body-file "$body_file" --draft)"
-          echo "Pull request created for ${{ inputs.repository }}: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$pr_url" ]; then
+            echo "$body" > "$body_file"
+            pr_url="$(gh pr create --title "$title" --body-file "$body_file" --draft)"
+            echo "Pull request created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Pull request updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          fi
