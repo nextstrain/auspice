@@ -45,16 +45,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '16'
-
       - name: Checkout downstream repo
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
           path: ${{ env.DESTINATION_REPO_DIR }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
+
+      - uses: actions/setup-node@v4
+        with:
+          # Use Node.js version defined at a top-level package.json (ignoring
+          # inputs.directory). This is because we set it at the top level for
+          # nextstrain.org, not under auspice-client.
+          node-version-file: ${{ env.DESTINATION_REPO_DIR }}/package.json
 
       - name: Install Auspice from PRs HEAD commit
         shell: bash
