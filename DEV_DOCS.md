@@ -100,12 +100,7 @@ A Heroku pipeline for this repository is connected to GitHub under the nextstrai
 
 #### Test on downstream repositories
 
-Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it:
-
-1. Go to [the workflow page](https://github.com/nextstrain/auspice/actions/workflows/make_prs_for_other_repos.yaml).
-2. Select **Run workflow**.
-3. Pick the PR branch, select the downstream repositories you wish to test, and **Run workflow**.
-4. Wait for the workflow to finish running. The Auspice PR should show new reference links from the generated PRs.
+Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
 
 ## git-lfs
 
