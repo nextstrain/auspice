@@ -8,7 +8,7 @@ import Tree from "../tree";
 import Map from "../map/map";
 import Footer from "../framework/footer";
 import FinePrint from "../framework/fine-print";
-import DownloadModal from "../download/downloadModal";
+import Modal from "../modal/Modal.jsx";
 import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped";
 import { TOGGLE_SIDEBAR } from "../../actions/types";
@@ -134,7 +134,7 @@ class Main extends React.Component {
         <AnimationController/>
         <ErrorBoundary showNothing>
           <ThemeProvider theme={sidebarTheme}>
-            <DownloadModal/>
+            <Modal/>
           </ThemeProvider>
         </ErrorBoundary>
         <SidebarToggle

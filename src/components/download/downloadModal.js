@@ -1,10 +1,7 @@
 import React from "react";
-import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
-import { TRIGGER_DOWNLOAD_MODAL, DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { infoPanelStyles } from "../../globalStyles";
-import { stopProp } from "../tree/infoPanels/click";
 import { getAcknowledgments} from "../framework/footer";
 import { datasetSummary } from "../info/datasetSummary";
 import { DownloadButtons } from "./downloadButtons";
@@ -43,7 +40,6 @@ export const publications = {
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
-  show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
   distanceMeasure: state.controls.distanceMeasure,
   metadata: state.metadata,
@@ -54,58 +50,7 @@ export const publications = {
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout
 }))
-class DownloadModal extends React.Component {
-  constructor(props) {
-    super(props);
-    this.getStyles = (bw, bh) => {
-      return {
-        behind: { /* covers the screen */
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "all",
-          zIndex: 2000,
-          backgroundColor: "rgba(80, 80, 80, .20)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          wordWrap: "break-word",
-          wordBreak: "break-word"
-        },
-        title: {
-          fontWeight: 500,
-          fontSize: 32,
-          marginTop: "20px",
-          marginBottom: "20px"
-        },
-        secondTitle: {
-          fontWeight: 500,
-          marginTop: "0px",
-          marginBottom: "20px"
-        },
-        modal: {
-          marginLeft: 200,
-          marginTop: 130,
-          width: bw - (2 * 200),
-          height: bh - (2 * 130),
-          borderRadius: 2,
-          backgroundColor: "rgba(250, 250, 250, 1)",
-          overflowY: "auto"
-        },
-        break: {
-          marginBottom: "10px"
-        }
-      };
-    };
-    this.dismissModal = this.dismissModal.bind(this);
-  }
-  componentDidMount() {
-    Mousetrap.bind('d', () => {
-      this.props.dispatch({type: this.props.show ? DISMISS_DOWNLOAD_MODAL : TRIGGER_DOWNLOAD_MODAL});
-    });
-  }
+class DownloadModalContents extends React.Component {
   getRelevantPublications() {
     const x = [publications.nextstrain, publications.treetime];
     if (["cTiter", "rb", "ep", "ne"].indexOf(this.props.colorBy) !== -1) {
@@ -128,75 +73,53 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
-  dismissModal() {
-    this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
-  }
   render() {
-    const { t } = this.props;
-
-    if (!this.props.show) {
-      return null;
-    }
-    const panelStyle = {...infoPanelStyles.panel};
-    panelStyle.width = this.props.browserDimensions.width * 0.66;
-    panelStyle.maxWidth = panelStyle.width;
-    panelStyle.maxHeight = this.props.browserDimensions.height * 0.66;
-    panelStyle.fontSize = 14;
-    panelStyle.lineHeight = 1.4;
-
+    const { t, metadata } = this.props;
     const relevantPublications = this.getRelevantPublications();
-
-    const meta = this.props.metadata;
     return (
-      <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
-        <div style={panelStyle} onClick={(e) => stopProp(e)}>
-          <p style={infoPanelStyles.topRightMessage}>
-            ({t("click outside this box to return to the app")})
-          </p>
+      <>
+        <div style={infoPanelStyles.modalSubheading}>
+          {metadata.title} ({t("last updated")} {metadata.updated})
+        </div>
 
-          <div style={infoPanelStyles.modalSubheading}>
-            {meta.title} ({t("last updated")} {meta.updated})
-          </div>
+        <div>
+          {datasetSummary({
+            mainTreeNumTips: this.props.metadata.mainTreeNumTips,
+            nodes: this.props.nodes,
+            visibility: this.props.visibility,
+            t: this.props.t
+          })}
+        </div>
+        <div style={infoPanelStyles.break}/>
+        {" " + t("A full list of sequence authors is available via the TSV files below")}
+        <div style={infoPanelStyles.break}/>
+        {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
 
-          <div>
-            {datasetSummary({
-              mainTreeNumTips: this.props.metadata.mainTreeNumTips,
-              nodes: this.props.nodes,
-              visibility: this.props.visibility,
-              t: this.props.t
-            })}
-          </div>
-          <div style={infoPanelStyles.break}/>
-          {" " + t("A full list of sequence authors is available via the TSV files below")}
-          <div style={infoPanelStyles.break}/>
-          {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
+        <div style={infoPanelStyles.modalSubheading}>
+          {t("Data usage policy")}
+        </div>
+        {t("Data usage part 1") + " " + t("Data usage part 2")}
 
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Data usage policy")}
-          </div>
-          {t("Data usage part 1") + " " + t("Data usage part 2")}
-
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
-          </div>
-          {this.formatPublications(relevantPublications)}
+        <div style={infoPanelStyles.modalSubheading}>
+          {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
+        </div>
+        {this.formatPublications(relevantPublications)}
 
 
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Download data")}:
-          </div>
-          <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
-            <div style={{ width: "100%" }}>
-              <DownloadButtons {...this.props} relevantPublications={relevantPublications}/>
-            </div>
+        <div style={infoPanelStyles.modalSubheading}>
+          {t("Download data")}:
+        </div>
+        <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
+          <div style={{ width: "100%" }}>
+            <DownloadButtons {...this.props} relevantPublications={relevantPublications}/>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 }
 
 
-const WithTranslation = withTranslation()(DownloadModal);
+const WithTranslation = withTranslation()(DownloadModalContents);
 export default WithTranslation;
 
