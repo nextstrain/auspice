@@ -1,0 +1,21 @@
+name: "Preview on auspice.us"
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - labeled
+
+  workflow_dispatch:
+
+jobs:
+  run:
+    # Run if PR has the label and is updated or is newly labeled with the label
+    if: |
+      (github.event.action != 'labeled' && contains(github.event.pull_request.labels.*.name, 'preview on auspice.us')) ||
+      (github.event.action == 'labeled' && github.event.label.name == 'preview on auspice.us')
+    uses: ./.github/workflows/preview_on_downstream_repo.yaml
+    secrets: inherit
+    with:
+      repository: nextstrain/auspice.us
