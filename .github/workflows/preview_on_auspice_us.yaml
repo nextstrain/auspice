@@ -7,8 +7,6 @@ on:
       - reopened
       - labeled
 
-  workflow_dispatch:
-
 jobs:
   run:
     # Run if PR has the label and is updated or is newly labeled with the label
