@@ -150,3 +150,20 @@ export const PanelsFull = ({theme, selected, width}) => {
     </svg>
   );
 };
+
+
+export const Dataset = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
+  return (
+    <svg width={width} height={width + 5}>
+      <g transform="translate(0,7)">
+        <svg width={width} height={width} viewBox="0 0 30 30 ">
+          <g id="Group" stroke="none" strokeWidth="3" fill="none" fillRule="evenodd">
+            <path stroke={stroke} d={`M 11 3 L 1 15 L 11 27`}/>
+            <path stroke={stroke} d={`M 19 3 L 29 15 L 19 27`}/>
+          </g>
+        </svg>
+      </g>
+    </svg>
+  );
+};

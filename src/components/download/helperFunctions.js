@@ -1,6 +1,6 @@
 /* eslint no-restricted-syntax: 0 */
 import { unparse } from "papaparse";
-import { infoNotification, warningNotification } from "../../actions/notifications";
+import { errorNotification, infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
@@ -8,6 +8,7 @@ import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
+import { getDatasetNamesFromUrl, Dataset } from "../../actions/loadData";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -56,7 +57,8 @@ const MIME = {
   text: "text/plain;charset=utf-8;",
   csv: 'text/csv;charset=utf-8;',
   tsv: `text/tab-separated-values;charset=utf-8;`,
-  svg: "image/svg+xml;charset=utf-8"
+  svg: "image/svg+xml;charset=utf-8",
+  json: "application/json",
 };
 
 const treeToNexus = (tree, colorings, colorBy, temporal) => {
@@ -615,4 +617,34 @@ export const entropyTSV = (dispatch, filePrefix, entropy) => {
   const filename = `${filePrefix}_diversity.tsv`;
   write(filename, MIME.tsv, createTsvString(objectsToWrite, headerFields));
   dispatch(infoNotification({message: `Diversity data exported to ${filename}`}));
+};
+
+
+/**
+ * Write out Auspice JSON(s) for the current view. We do this by re-fetching the original
+ * JSON because we don't keep a copy of the unprocessed data around.
+ * 
+ * Sidecar files are not fetched, but we can also download them if desired.
+ * 
+ * Note that we are not viewing a narrative, as the download button functionality is disabled
+ * for narratives.
+ */
+export const auspiceJSON = (dispatch) => {
+  const filenames = [];
+  for (const datasetName of getDatasetNamesFromUrl(window.location.pathname)) {
+    if (!datasetName) continue; // e.g. no 2nd tree
+    const filename = datasetName.replace('/', '_') + '.json';
+    filenames.push(filename);
+    const dataset = new Dataset(datasetName);
+    dataset.fetchMain(); // initialises dataset.main (a promise)
+    dataset.main.then((jsonContents) => {
+      write(filename, MIME.json, JSON.stringify(jsonContents));
+    }).catch((err) => {
+      // I think this error path should be rarely (never!) encountered, because the fetch call has
+      // worked to load the dataset in the first place...
+      console.error(`Error fetching JSON for ${datasetName}: ${err}`);
+      dispatch(errorNotification({message: `Error preparing ${filename} JSON for download (see console for more info)`}));
+    });
+  }
+  dispatch(infoNotification({message: `Preparing Auspice JSON(s) for download: ${filenames.join(', ')}`}));
 };

@@ -10,6 +10,7 @@ import { getNumSelectedTips } from "../../util/treeVisibilityHelpers";
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
 const MetaIcon = withTheme(icons.Meta);
+const DatasetIcon = withTheme(icons.Dataset);
 const iconWidth = 25;
 
 /**
@@ -47,6 +48,14 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
         <p/>
         {partialData ? `Currently ${selectedTipsCount}/${totalTipCount} tips are displayed and will be downloaded.` : `Currently the entire dataset (${totalTipCount} tips) will be downloaded.`}
       </div>
+      {!gisaidProvenance && (
+        <Button
+          name="Auspice (Nextstrain) JSON"
+          description={`The main Auspice dataset JSON(s) for the current view`}
+          icon={<DatasetIcon width={iconWidth} selected />}
+          onClick={() => helpers.auspiceJSON(dispatch)}
+        />
+      )}
       <Button
         name={`${temporal ? 'TimeTree' : 'Tree'} (Newick)`}
         description={`Phylogenetic tree in Newick format with branch lengths in units of ${temporal?'years':'divergence'}.`}
