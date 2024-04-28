@@ -1,7 +1,16 @@
 # Changelog
 
-## version 2.52.1 - 2024/02/21
 
+* Add a download-JSON button within the downloads modal. This is disabled for GISAID sourced data. ([#1764](https://github.com/nextstrain/auspice/pull/1764))
+* Add link-outs to load the current dataset in external platforms MicrobeTrace and Taxonium. Note this functionality only works when Auspice is running within the larger nextstrain.org server. ([#1763](https://github.com/nextstrain/auspice/pull/1763))
+
+_Internal changes._
+
+* Use Nextstrain CLI to create PRs on other repos. ([#1765](https://github.com/nextstrain/auspice/pull/1765))
+* Create PRs on projects which depend on Auspice by adding a label ([#1767](https://github.com/nextstrain/auspice/pull/1767) and [#1768](https://github.com/nextstrain/auspice/pull/1768))
+
+
+## version 2.52.1 - 2024/02/21
 
 * Bugfix: Restore the intended behaviour when hovering or clicking on terminal branches. ([#1753](https://github.com/nextstrain/auspice/pull/1753))
 
