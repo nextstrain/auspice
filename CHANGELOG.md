@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.53.0 - 2024/04/29
+
+
 
 * Add a download-JSON button within the downloads modal. This is disabled for GISAID sourced data. ([#1764](https://github.com/nextstrain/auspice/pull/1764))
 * Add link-outs to load the current dataset in external platforms MicrobeTrace and Taxonium. Note this functionality only works when Auspice is running within the larger nextstrain.org server. ([#1763](https://github.com/nextstrain/auspice/pull/1763))
