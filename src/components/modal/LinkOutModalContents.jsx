@@ -189,6 +189,58 @@ function MicrobeTraceLinkOut() {
 }
 
 
+function NextcladeLinkOut() {
+  const displayName = 'nextclade';
+  const {pathname, origin} = clientDetails();
+  const {showTreeToo} = useSelector((state) => state.controls)
+  const {mainTreeNumTips, rootSequence} = useSelector((state) => state.metadata);
+
+  // All datasets which have a root-sequence (either in-line or sidecar) can theoretically work as Nextclade
+  // datasets. See <https://github.com/nextstrain/nextclade/pull/1455> for more thorough discussion here.
+  // Excessively big trees may be problematic (as Nextclade was designed around smaller reference trees), but
+  // exactly what the threshold is isn't known. Here I use a rather ad-hoc tip-count threshold:
+  const largeTreeWarning = mainTreeNumTips > 4000;
+
+  if (
+    showTreeToo || // Tanglegrams won't work (surprise surprise!)
+    !rootSequence  // Root sequence is required for Nextclade
+  ) {
+    return (
+      <ButtonContainer key={displayName}>
+        <InactiveButton>{displayName}</InactiveButton>
+        <ButtonDescription>
+          {`The current tree isn't usable as a Nextclade dataset as ${
+            showTreeToo ?
+              "tanglegrams aren't supported." :
+              "this dataset doesn't have a root-sequence (either within the main JSON or as a sidecar JSON)."
+          }`}
+        </ButtonDescription>
+      </ButtonContainer>
+    )
+  }
+
+  const url = `https://clades.nextstrain.org?dataset-json-url=${encodeURIComponent(`${origin}${pathname}`)}`
+  return (
+    <ButtonContainer key={displayName}>
+      <ButtonText href={url} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
+      <ButtonDescription>
+        {`Use this tree as a nextclade reference dataset which allows you to add new sequences (via drag-and-drop) and see them placed on the tree.
+        Note that manually curated datasets may be better suited to your use case, see `}
+        <a href='https://clades.nextstrain.org' target="_blank" rel="noreferrer noopener">clades.nextstrain.org</a>
+        {` for all reference datasets or read the `}
+        <a href='https://docs.nextstrain.org/projects/nextclade/en/stable/user/nextclade-web/index.html' target="_blank" rel="noreferrer noopener">
+          Nextclade Web documentation
+        </a>
+        {` for more details.`}
+        {largeTreeWarning && (
+          <span>
+            {` Note that large trees such as this may not work in Nextclade!`}
+          </span>
+        )}
+      </ButtonDescription>
+    </ButtonContainer>
+  )
+}
 
 export const LinkOutModalContents = () => {
   return (
@@ -208,6 +260,7 @@ export const LinkOutModalContents = () => {
 
       <div style={{paddingTop: '10px'}}/>
 
+      <NextcladeLinkOut />
       <TaxoniumLinkOut />
       <MicrobeTraceLinkOut />
 
