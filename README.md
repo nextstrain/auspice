@@ -1,7 +1,7 @@
 [![Build Status](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml?query=branch:master)
 [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
-![Conda Version](https://img.shields.io/conda/vn/bioconda/auspice)
-![Conda Platform](https://img.shields.io/conda/p/bioconda/auspice)
+[![Conda Version](https://img.shields.io/conda/vn/bioconda/auspice)](https://bioconda.github.io/recipes/auspice/README.html)
+[![Conda Platform](https://img.shields.io/conda/p/bioconda/auspice)](https://anaconda.org/bioconda/auspice/files)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## About Nextstrain
