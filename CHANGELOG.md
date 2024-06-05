@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.54.0 - 2024/06/06
+
+
 * Add a link-out to use datasets in Nextclade (this functionality is only enabled when running within the larger nextstrain.org ecosystem.)
 This builds on functionality introduced in [Nextclade 3.7.0](https://github.com/nextstrain/nextclade/releases/tag/3.7.0) allowing an Auspice dataset to be used as a nextclade dataset so that users can then add new sequences (via drag-and-drop) and see them placed on the tree. ([#1776](https://github.com/nextstrain/auspice/pull/1776))
 
