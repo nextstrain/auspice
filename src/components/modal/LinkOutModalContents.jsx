@@ -73,103 +73,124 @@ const ButtonContainer = styled.div`
   align-items: center;
 `
 
-const data = ({distanceMeasure, colorBy, mainTreeNumTips, tangle}) => {
-  const pathname = window.location.pathname;
-  const origin = forceLinkOutHost || window.location.origin;
-  return [
-    {
-      name: 'taxonium.org',
-      valid() {
-        // Taxonium should work with all nextstrain URLs which support the {GET, accept JSON} route
-        // which should be ~all of them (except authn-required routes, which won't work cross-origin,
-        // and which we don't attempt to detect here). Tanglegrams aren't supported.
-        return !tangle;
-      },
-      description() {
-        return this.valid() ? (
-          <>
-            Visualise this dataset in Taxonium (<a href='https://docs.taxonium.org/en/latest/' target="_blank" rel="noreferrer noopener">learn more</a>).
-          </>
-        ) : (
-          <>
-            {`The current dataset isn't viewable in taxonium ${tangle ? `as tanglegrams aren't supported` : ''}`}
-          </>
-        )
-      },
-      taxoniumColoring() {
-        if (isColorByGenotype(colorBy)) {
-          /* Taxonium syntax looks like 'color={"field":"genotype","pos":485,"gene":"M"}'
-          Note that taxonium (I think) does't backfill bases/residues for tips where there
-          are no observed mutations w.r.t. the root.
-          */
-          const subfields = ['"genotype"']; // include quoting as taxonium uses
-          const colorInfo = decodeColorByGenotype(colorBy);
-          // Multiple mutations (positions) aren't allowed
-          if (!colorInfo || colorInfo.positions.length>1) return null;
-          // The (integer) position is not enclosed in double quotes
-          subfields.push(`"pos":${colorInfo.positions[0]}`);
-          // The gene value is optional, without it we use nucleotide ("nt" in taxonium syntax)
-          if (colorInfo.aa) subfields.push(`"gene":"${colorInfo.gene}"`);
-          // Note that this string will be encoded when converted to a URL
-          return `{"field":${subfields.join(',')}}`;
-        }
-        return `{"field":"meta_${colorBy}"}`;
-      },
-      url() {
-        const baseUrl = 'https://taxonium.org';
-        const queries = {
-          treeUrl: `${origin}${pathname}`, // no nextstrain queries
-          treeType: 'nextstrain',
-          ladderizeTree: 'false', // keep same orientation as Auspice
-          xType: distanceMeasure==='num_date' ? 'x_time' : 'x_dist',
-        }
-        const color = this.taxoniumColoring();
-        if (color) queries.color = color;
-    
-        return `${baseUrl}?${Object.entries(queries).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
-      }
-    },
-    {
-      name: 'microbetrace.cdc.gov',
-      valid() {
-        // MicrobeTrace should work similarly to Taxonium (see above)
-        // but trees >500 tips are very slow to load
-        return !tangle;
-      },
-      description() {
-        return this.valid() ? (
-          <>
-            View this data in MicrobeTrace (<a href='https://github.com/CDCgov/MicrobeTrace/wiki' target="_blank" rel="noreferrer noopener">learn more</a>).
-            {mainTreeNumTips>500 && (
-              <span>
-                {` Note that trees with over 500 tips may have trouble loading (this one has ${mainTreeNumTips}).`}
-              </span>
-            )}
-          </>
-        ) : (
-          <>
-            {`The current dataset isn't viewable in MicrobeTrace ${tangle ? `as tanglegrams aren't supported` : ''}`}
-          </>
-        )
-      },
-      url() {
-        /**
-         * As of 2024-04-09, the 'origin' must be nextstrain.org or next.nextstrain.org
-         * for these links to work. This means (nextstrain.org) the links coming from heroku
-         * review apps will not work.
-         */
-        const baseUrl = 'https://microbetrace.cdc.gov/MicrobeTrace';
-        return `${baseUrl}?url=${encodeURIComponent(`${origin}${pathname}`)}`
-      },
-    },
-  ]
+function clientDetails() {
+  return {
+    pathname: window.location.pathname,
+    origin: forceLinkOutHost || window.location.origin,
+  }
 }
 
-export const LinkOutModalContents = () => {
+function TaxoniumLinkOut() {
+  const displayName = 'taxonium.org';
+  const {pathname, origin} = clientDetails();
   const {distanceMeasure, colorBy, showTreeToo} = useSelector((state) => state.controls)
-  const {mainTreeNumTips} = useSelector((state) => state.metadata);
-  const linkouts = data({distanceMeasure, colorBy, mainTreeNumTips, tangle: !!showTreeToo});
 
+  // Taxonium should work with all nextstrain URLs which support the {GET, accept JSON} route
+  // which should be ~all of them (except authn-required routes, which won't work cross-origin,
+  // and which we don't attempt to detect here). Tanglegrams aren't supported.
+  if (showTreeToo) {
+    return (
+      <ButtonContainer key={displayName}>
+        <InactiveButton>{displayName}</InactiveButton>
+        <ButtonDescription>
+          {`The current dataset isn't viewable in taxonium as tanglegrams aren't supported`}
+        </ButtonDescription>
+      </ButtonContainer>
+    )
+  }
+
+  return (
+    <ButtonContainer key={displayName}>
+      <ButtonText href={url()} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
+      <ButtonDescription>
+        Visualise this dataset in Taxonium (<a href='https://docs.taxonium.org/en/latest/' target="_blank" rel="noreferrer noopener">learn more</a>).
+      </ButtonDescription>
+    </ButtonContainer>
+  )
+
+  function taxoniumColoring() {
+    if (isColorByGenotype(colorBy)) {
+      /* Taxonium syntax looks like 'color={"field":"genotype","pos":485,"gene":"M"}'
+      Note that taxonium (I think) does't backfill bases/residues for tips where there
+      are no observed mutations w.r.t. the root.
+      */
+      const subfields = ['"genotype"']; // include quoting as taxonium uses
+      const colorInfo = decodeColorByGenotype(colorBy);
+      // Multiple mutations (positions) aren't allowed
+      if (!colorInfo || colorInfo.positions.length>1) return null;
+      // The (integer) position is not enclosed in double quotes
+      subfields.push(`"pos":${colorInfo.positions[0]}`);
+      // The gene value is optional, without it we use nucleotide ("nt" in taxonium syntax)
+      if (colorInfo.aa) subfields.push(`"gene":"${colorInfo.gene}"`);
+      // Note that this string will be encoded when converted to a URL
+      return `{"field":${subfields.join(',')}}`;
+    }
+    return `{"field":"meta_${colorBy}"}`;
+  }
+
+  function url() {
+    const baseUrl = 'https://taxonium.org';
+    const queries = {
+      treeUrl: `${origin}${pathname}`, // no nextstrain queries
+      treeType: 'nextstrain',
+      ladderizeTree: 'false', // keep same orientation as Auspice
+      xType: distanceMeasure==='num_date' ? 'x_time' : 'x_dist',
+    }
+    const color = taxoniumColoring();
+    if (color) queries.color = color;
+
+    return `${baseUrl}?${Object.entries(queries).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
+  }
+}
+
+function MicrobeTraceLinkOut() {
+  const displayName = 'microbetrace.cdc.gov';
+  const {pathname, origin} = clientDetails();
+  const {showTreeToo} = useSelector((state) => state.controls)
+  const {mainTreeNumTips} = useSelector((state) => state.metadata);
+
+  // MicrobeTrace should work similarly to Taxonium (see above)
+  // but trees >500 tips are very slow to load (we don't prevent the display of such trees,
+  // however we do show a warning)
+  if (showTreeToo) {
+    return (
+      <ButtonContainer key={displayName}>
+        <InactiveButton>{displayName}</InactiveButton>
+        <ButtonDescription>
+          {`The current dataset isn't viewable in MicrobeTrace as tanglegrams aren't supported`}
+        </ButtonDescription>
+      </ButtonContainer>
+    )
+  }
+
+  return (
+    <ButtonContainer key={displayName}>
+      <ButtonText href={url()} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
+      <ButtonDescription>
+        View this data in MicrobeTrace (<a href='https://github.com/CDCgov/MicrobeTrace/wiki' target="_blank" rel="noreferrer noopener">learn more</a>).
+        {mainTreeNumTips>500 && (
+          <span>
+            {` Note that trees with over 500 tips may have trouble loading (this one has ${mainTreeNumTips}).`}
+          </span>
+        )}
+      </ButtonDescription>
+    </ButtonContainer>
+  )
+
+  function url() {       
+    /**
+     * As of 2024-04-09, the 'origin' must be nextstrain.org or next.nextstrain.org
+     * for these links to work. This means (nextstrain.org) the links coming from heroku
+     * review apps will not work.
+     */
+    const baseUrl = 'https://microbetrace.cdc.gov/MicrobeTrace';
+    return `${baseUrl}?url=${encodeURIComponent(`${origin}${pathname}`)}`
+  }
+}
+
+
+
+export const LinkOutModalContents = () => {
   return (
     <>
       <div style={infoPanelStyles.modalSubheading}>
@@ -187,20 +208,8 @@ export const LinkOutModalContents = () => {
 
       <div style={{paddingTop: '10px'}}/>
 
-      {linkouts.map((d) => (
-        <ButtonContainer key={d.name}>
-          {d.valid() ? (
-            <ButtonText href={d.url()} target="_blank" rel="noreferrer noopener">{d.name}</ButtonText>
-          ) : (
-            <InactiveButton>{d.name}</InactiveButton>
-          )}
-          <ButtonDescription>{d.description()}</ButtonDescription>
-        </ButtonContainer>
-      ))}
-
-      {linkouts.length===0 && (
-        <div>{`The current data source and/or view settings aren't compatible with any platforms. Sorry!`}</div>
-      )}
+      <TaxoniumLinkOut />
+      <MicrobeTraceLinkOut />
 
     </>
   );
