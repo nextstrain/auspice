@@ -80,7 +80,7 @@ const data = ({distanceMeasure, colorBy, mainTreeNumTips, tangle}) => {
     {
       name: 'taxonium.org',
       valid() {
-        // MicrobeTrace should work with all nextstrain URLs which support the {GET, accept JSON} route
+        // Taxonium should work with all nextstrain URLs which support the {GET, accept JSON} route
         // which should be ~all of them (except authn-required routes, which won't work cross-origin,
         // and which we don't attempt to detect here). Tanglegrams aren't supported.
         return !tangle;
