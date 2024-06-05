@@ -1,8 +1,9 @@
 # Changelog
 
+* Add a link-out to use datasets in Nextclade (this functionality is only enabled when running within the larger nextstrain.org ecosystem.)
+This builds on functionality introduced in [Nextclade 3.7.0](https://github.com/nextstrain/nextclade/releases/tag/3.7.0) allowing an Auspice dataset to be used as a nextclade dataset so that users can then add new sequences (via drag-and-drop) and see them placed on the tree. ([#1776](https://github.com/nextstrain/auspice/pull/1776))
+
 ## version 2.53.0 - 2024/04/29
-
-
 
 * Add a download-JSON button within the downloads modal. This is disabled for GISAID sourced data. ([#1764](https://github.com/nextstrain/auspice/pull/1764))
 * Add link-outs to load the current dataset in external platforms MicrobeTrace and Taxonium. Note this functionality only works when Auspice is running within the larger nextstrain.org server. ([#1763](https://github.com/nextstrain/auspice/pull/1763))
