@@ -24,7 +24,7 @@ export const onTipClick = function onTipClick(d) {
   /* The order of these two dispatches is important: the reducer handling
   `SELECT_NODE` must have access to the filtering state _prior_ to these filters
   being applied */
-  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: false});
+  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: false, treeId: d.that.id});
   this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
 };
 
@@ -60,7 +60,7 @@ export const onBranchClick = function onBranchClick(d) {
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
   if (window.event.shiftKey) {
     // no need to dispatch a filter action
-    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true})
+    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id})
     return;
   }
 

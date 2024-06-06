@@ -5,6 +5,7 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
   getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
 import { MutationTable } from "./MutationTable";
+import { lhsTreeId} from "../tree";
 
 export const styles = {
   container: {
@@ -234,16 +235,21 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * A React component to display information about a tree tip in a modal-overlay style
  * @param  {Object}   props
  * @param  {Object}   props.selectedNode
- * @param  {Object[]} props.nodes
+ * @param  {Object[]} props.nodesLhsTree
+ * @param  {Object[]|undefined} props.nodesRhsTree
  * @param  {function} props.clearSelectedNode
  * @param  {Object}   props.colorings
  * @param  {Object}   props.observedMutations
  * @param  {function} props.geneSortFn
  * @param  {function} props.t
  */
-const NodeClickedPanel = ({selectedNode, nodes, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
+const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelectedNode, colorings, observedMutations, geneSortFn, t}) => {
   if (!selectedNode) return null;
-  const node = nodes[selectedNode.idx];
+  const node = (selectedNode.treeId===lhsTreeId ? nodesLhsTree : nodesRhsTree)?.[selectedNode.idx];
+  if (!node) {
+    console.error('Internal error retrieving selected node');
+    return null;
+  }
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
   const isTerminal = !node.hasChildren;

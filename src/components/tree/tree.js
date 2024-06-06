@@ -19,6 +19,8 @@ import { untangleTreeToo } from "./tangle/untangling";
 import { sortByGeneOrder } from "../../util/treeMiscHelpers";
 
 export const spaceBetweenTrees = 100;
+export const lhsTreeId = "LEFT";
+const rhsTreeId = "RIGHT";
 
 class Tree extends React.Component {
   constructor(props) {
@@ -51,7 +53,7 @@ class Tree extends React.Component {
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
-    newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT", props.treeToo.idxOfInViewRootNode);
+    newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
     if (attemptUntangle) {
       untangleTreeToo(newState.tree, newState.treeToo);
     }
@@ -61,7 +63,7 @@ class Tree extends React.Component {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
       const newState = {};
-      newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT", this.props.tree.idxOfInViewRootNode);
+      newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
       renderTree(this, true, newState.tree, this.props);
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
@@ -209,7 +211,8 @@ class Tree extends React.Component {
         <NodeClickedPanel
           clearSelectedNode={this.clearSelectedNode}
           selectedNode={this.props.selectedNode}
-          nodes={this.props.tree.nodes}
+          nodesLhsTree={this.props.tree.nodes}
+          nodesRhsTree={this.props.treeToo?.nodes}
           observedMutations={this.props.tree.observedMutations}
           colorings={this.props.colorings}
           geneSortFn={this.state.geneSortFn}
