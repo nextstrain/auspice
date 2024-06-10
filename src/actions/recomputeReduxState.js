@@ -983,7 +983,7 @@ export const createStateFromQueryOrJSONs = ({
     treeNodes: tree.nodes,
     treeTooNodes: treeToo ? treeToo.nodes : undefined,
     visibility: tree.visibility,
-    visibilityToo: treeToo ? treeToo.visibilityToo : undefined
+    visibilityToo: treeToo?.visibility,
   });
 
   /* calculate entropy in view */
