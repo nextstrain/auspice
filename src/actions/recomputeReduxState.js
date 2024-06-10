@@ -1032,7 +1032,7 @@ export const createStateFromQueryOrJSONs = ({
 };
 
 export const createTreeTooState = ({
-  treeTooJSON, /* raw json data */
+  json, /* raw json data */
   oldState,
   originalTreeUrl,
   secondTreeUrl, /* treeToo URL */
@@ -1040,10 +1040,14 @@ export const createTreeTooState = ({
 }) => {
   /* TODO: reconcile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
-  let controls = oldState.controls;
+
+  const metadata = {...oldState.metadata};
+  updateMetadataStateViaSecondTree(metadata, json, oldState.entropy?.genomeMap);
+
+  let controls = {...oldState.controls};
   const tree = Object.assign({}, oldState.tree);
   tree.name = originalTreeUrl;
-  let treeToo = treeJsonToState(treeTooJSON);
+  let treeToo = treeJsonToState(json.tree);
   treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
@@ -1051,7 +1055,7 @@ export const createTreeTooState = ({
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);
+  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
   const nodeColors = calcNodeColor(treeToo, colorScale);
   tree.nodeColors = calcNodeColor(tree, colorScale); // also update main tree's colours
   tree.nodeColorsVersion++;
@@ -1065,5 +1069,5 @@ export const createTreeTooState = ({
     tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
   );
 
-  return {tree, treeToo, controls};
+  return {tree, treeToo, controls, metadata};
 };
