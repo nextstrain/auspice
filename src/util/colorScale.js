@@ -39,10 +39,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     if (isColorByGenotype(colorBy)) {
       genotype = decodeColorByGenotype(colorBy);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
+      if (treeToo && metadata.identicalGenomeMapAcrossBothTrees) {
+        setGenotype(treeToo.nodes, genotype.gene, genotype.positions, metadata.rootSequenceSecondTree);
+      }
     }
     const scaleType = genotype ? "categorical" : colorings[colorBy].type;
     if (genotype) {
-      ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, genotype.aa));
+      ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
       if (scaleType === "continuous" || scaleType==="temporal") {
@@ -152,8 +155,8 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   };
 }
 
-function createScaleForGenotype(t1nodes, aaGenotype) {
-  const legendValues = orderOfGenotypeAppearance(t1nodes, aaGenotype);
+function createScaleForGenotype(t1nodes, t2nodes, aaGenotype) {
+  const legendValues = orderOfGenotypeAppearance(t1nodes, t2nodes, aaGenotype);
   const trueValues = aaGenotype ?
     legendValues.filter((x) => x !== "X" && x !== "-" && x !== "") :
     legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N" && x !== "");

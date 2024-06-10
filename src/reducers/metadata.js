@@ -10,6 +10,8 @@ const Metadata = (state = {
   loaded: false, /* see comment in the sequences reducer for explanation */
   metadata: null,
   rootSequence: undefined,
+  identicalGenomeMapAcrossBothTrees: false,
+  rootSequenceSecondTree: undefined,
   colorOptions // this can't be removed as the colorScale currently runs before it should
 }, action) => {
   switch (action.type) {
@@ -18,6 +20,7 @@ const Metadata = (state = {
         loaded: false
       });
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+    case types.TREE_TOO_DATA:
     case types.CLEAN_START:
       return action.metadata;
     case types.ADD_EXTRA_METADATA: {
@@ -41,6 +44,11 @@ const Metadata = (state = {
     }
     case types.SET_ROOT_SEQUENCE:
       return {...state, rootSequence: action.data};
+    case types.REMOVE_TREE_TOO:
+      return Object.assign({}, state, {
+        identicalGenomeMapAcrossBothTrees: false,
+        rootSequenceSecondTree: undefined,
+      });
     default:
       return state;
   }

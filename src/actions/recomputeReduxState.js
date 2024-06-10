@@ -1,5 +1,5 @@
 import queryString from "query-string";
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isEqualWith } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
@@ -12,7 +12,7 @@ import { countTraitsAcrossTree, calcTotalTipsInTree, gatherTraitNames } from "..
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { castIncorrectTypes } from "../util/castJsonTypes";
-import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
+import { entropyCreateState, genomeMap as createGenomeMap } from "../util/entropyCreateStateFromJsons";
 import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
@@ -800,6 +800,47 @@ const createMetadataStateFromJSON = (json) => {
   return metadata;
 };
 
+/**
+ * Conceptually similar to `createMetadataStateFromJSON` but here looking at metadata from
+ * the (optional) second tree and only considers certain properties at the moment.
+ */
+function updateMetadataStateViaSecondTree(metadata, json, genomeMap) {
+
+  // For genotype colourings across multiple trees we need to know if the genome
+  // maps are identical¹ across both trees
+  //
+  // ¹ This could be relaxed in the future - currently we enforce that the order
+  //   of genes matches. We could also make this more fine grained and allow the
+  //   2nd tree to have a subset of CDSs (wrt the main tree), with genotypes
+  //   only working for the shared CDSs.     
+  if (genomeMap && json.meta.genome_annotations) {
+    try {
+      metadata.identicalGenomeMapAcrossBothTrees = isEqualWith(
+        genomeMap,
+        createGenomeMap(json.meta.genome_annotations),
+        (objValue, othValue, indexOrKey) => {
+          if (indexOrKey==='color') return true; // don't compare CDS colors!
+          // don't compare metadata section as there may be Infinities here
+          // (and if everything else is equal then the metadata will be the same too)
+          if (indexOrKey==='metadata') return true;
+          return undefined; // use lodash's default comparison
+        }
+      )
+    } catch (e) {
+      if (e instanceof Error) console.error(e.message);
+    }
+    if (!metadata.identicalGenomeMapAcrossBothTrees) {
+      console.warn("Heads up! The two trees have different genome_annotations and thus genotype colorings will only be applied to the LHS tree")
+    }
+  }
+
+  if (metadata.identicalGenomeMapAcrossBothTrees && json.root_sequence) {
+    /* in-line root sequence (not sidecar) */
+    metadata.rootSequenceSecondTree = json.root_sequence;
+  }
+
+}
+
 export const getNarrativePageFromQuery = (query, narrative) => {
   let n = parseInt(query.n, 10) || 0;
   /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -842,6 +883,8 @@ export const createStateFromQueryOrJSONs = ({
       castIncorrectTypes(metadata, treeToo);
       treeToo.debug = "RIGHT";
       treeToo.name = secondTreeName;
+      updateMetadataStateViaSecondTree(metadata, secondTreeDataset, entropy?.genomeMap)
+
       /* TODO: calc & display num tips in 2nd tree */
       // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
     }
@@ -940,7 +983,7 @@ export const createStateFromQueryOrJSONs = ({
     treeNodes: tree.nodes,
     treeTooNodes: treeToo ? treeToo.nodes : undefined,
     visibility: tree.visibility,
-    visibilityToo: treeToo ? treeToo.visibilityToo : undefined
+    visibilityToo: treeToo?.visibility,
   });
 
   /* calculate entropy in view */
@@ -994,7 +1037,7 @@ export const createStateFromQueryOrJSONs = ({
 };
 
 export const createTreeTooState = ({
-  treeTooJSON, /* raw json data */
+  json, /* raw json data */
   oldState,
   originalTreeUrl,
   secondTreeUrl, /* treeToo URL */
@@ -1002,10 +1045,14 @@ export const createTreeTooState = ({
 }) => {
   /* TODO: reconcile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
-  let controls = oldState.controls;
+
+  const metadata = {...oldState.metadata};
+  updateMetadataStateViaSecondTree(metadata, json, oldState.entropy?.genomeMap);
+
+  let controls = {...oldState.controls};
   const tree = Object.assign({}, oldState.tree);
   tree.name = originalTreeUrl;
-  let treeToo = treeJsonToState(treeTooJSON);
+  let treeToo = treeJsonToState(json.tree);
   treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
@@ -1013,7 +1060,7 @@ export const createTreeTooState = ({
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);
+  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
   const nodeColors = calcNodeColor(treeToo, colorScale);
   tree.nodeColors = calcNodeColor(tree, colorScale); // also update main tree's colours
   tree.nodeColorsVersion++;
@@ -1027,5 +1074,5 @@ export const createTreeTooState = ({
     tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
   );
 
-  return {tree, treeToo, controls};
+  return {tree, treeToo, controls, metadata};
 };
