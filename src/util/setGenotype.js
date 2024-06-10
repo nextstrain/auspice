@@ -67,15 +67,20 @@ export const setGenotype = (nodes, prot, positions, rootSequence) => {
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
 
-export const orderOfGenotypeAppearance = (nodes, aaGenotype) => {
+export const orderOfGenotypeAppearance = (nodes, nodesSecondTree, aaGenotype) => {
   const seen = {};
-  nodes.forEach((n) => {
+
+  function addGenotype(n) {
     let numDate = getTraitFromNode(n, "num_date");
     if (numDate === undefined) numDate = 0;
     if (!seen[n.currentGt] || numDate < seen[n.currentGt]) {
       seen[n.currentGt] = numDate;
     }
-  });
+  }
+
+  nodes.forEach(addGenotype);
+  if (nodesSecondTree) nodesSecondTree.forEach(addGenotype);
+
   const ordered = Object.keys(seen);
   ordered.sort((a, b) => seen[a] < seen[b] ? -1 : 1);
   let orderedBases;
