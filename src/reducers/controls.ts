@@ -234,11 +234,16 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         geoResolution: action.data
       });
 
-    case types.SELECT_NODE: {      
+    case types.SELECT_NODE: {
+      /**
+       * We don't store a (reference to) the node itself as that breaks redux's immutability checking,
+       * instead we store the information needed to access it from the nodes array(s)
+       */
       const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
       const existingFilterState = existingFilterInfo === undefined ? null :
         existingFilterInfo.active ? 'active' : 'inactive';
-      return {...state, selectedNode: {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch}};
+      const selectedNode = {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch, treeId: action.treeId};
+      return {...state, selectedNode};
     }
     case types.DESELECT_NODE: {
       return {...state, selectedNode: null}
