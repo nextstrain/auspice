@@ -834,6 +834,11 @@ function updateMetadataStateViaSecondTree(metadata, json, genomeMap) {
     }
   }
 
+  if (metadata.identicalGenomeMapAcrossBothTrees && json.root_sequence) {
+    /* in-line root sequence (not sidecar) */
+    metadata.rootSequenceSecondTree = json.root_sequence;
+  }
+
 }
 
 export const getNarrativePageFromQuery = (query, narrative) => {

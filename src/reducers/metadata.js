@@ -11,6 +11,7 @@ const Metadata = (state = {
   metadata: null,
   rootSequence: undefined,
   identicalGenomeMapAcrossBothTrees: false,
+  rootSequenceSecondTree: undefined,
   colorOptions // this can't be removed as the colorScale currently runs before it should
 }, action) => {
   switch (action.type) {
