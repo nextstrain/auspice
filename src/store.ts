@@ -21,6 +21,7 @@ const store = configureStore({
       immutableCheck: process.env.SKIP_REDUX_CHECKS
         ? false
         : {
+          warnAfter: 100, // ms. Default is 32.
           ignoredPaths: [
             'tree.nodes',
             'tree.vaccines',
