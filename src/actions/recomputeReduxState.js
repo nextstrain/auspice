@@ -690,26 +690,6 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
   return newState;
 };
 
-const removePanelIfPossible = (panels, name) => {
-  const idx = panels.indexOf(name);
-  if (idx !== -1) {
-    panels.splice(idx, 1);
-  }
-};
-
-const modifyControlsViaTreeToo = (controls, name) => {
-  controls.showTreeToo = name;
-  controls.showTangle = true;
-  controls.layout = "rect"; /* must be rectangular for two trees */
-  controls.panelsToDisplay = controls.panelsToDisplay.slice();
-  removePanelIfPossible(controls.panelsToDisplay, "map");
-  removePanelIfPossible(controls.panelsToDisplay, "entropy");
-  removePanelIfPossible(controls.panelsToDisplay, "frequencies");
-  controls.canTogglePanelLayout = false;
-  controls.panelLayout = "full";
-  return controls;
-};
-
 /**
  * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
  * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
@@ -877,14 +857,7 @@ export const createStateFromQueryOrJSONs = ({
     tree.name = mainTreeName;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (secondTreeDataset) {
-      treeToo = treeJsonToState(secondTreeDataset.tree);
-      castIncorrectTypes(metadata, treeToo);
-      treeToo.debug = "RIGHT";
-      treeToo.name = secondTreeName;
-      updateMetadataStateViaSecondTree(metadata, secondTreeDataset, entropy?.genomeMap)
-
-      /* TODO: calc & display num tips in 2nd tree */
-      // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
+      ({treeToo, metadata} = instantiateSecondTree(secondTreeDataset, metadata, entropy?.genomeMap, secondTreeName));
     }
 
     /* new controls state - don't apply query yet (or error check!) */
@@ -965,11 +938,7 @@ export const createStateFromQueryOrJSONs = ({
   tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
 
   if (treeToo && treeToo.loaded) {
-    treeToo.nodeColorsVersion = tree.nodeColorsVersion;
-    treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
-    controls = modifyControlsViaTreeToo(controls, treeToo.name);
-    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
+    treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
   }
 
   /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
@@ -1044,33 +1013,60 @@ export const createTreeTooState = ({
   /* TODO: reconcile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
 
-  const metadata = {...oldState.metadata};
-  updateMetadataStateViaSecondTree(metadata, json, oldState.entropy?.genomeMap);
-
-  let controls = {...oldState.controls};
   const tree = Object.assign({}, oldState.tree);
   tree.name = originalTreeUrl;
-  let treeToo = treeJsonToState(json.tree);
-  treeToo.name = secondTreeUrl;
-  treeToo.debug = "RIGHT";
-  controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
-  controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
+  let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl)
 
-  /* calculate colours if loading from JSONs or if the query demands change */
-  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
-  const nodeColors = calcNodeColor(treeToo, colorScale);
-  tree.nodeColors = calcNodeColor(tree, colorScale); // also update main tree's colours
+  /* recompute the controls state now that we have new data */
+  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata.colorings);
+  /* recalculate the color scale with updated tree data */
+  controls.colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
+  controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
+  /* and update the color scale as applied to the LHS tree */
+  tree.nodeColors = calcNodeColor(tree, controls.colorScale);
   tree.nodeColorsVersion++;
 
-  controls.colorScale = colorScale;
-  controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
-  treeToo.nodeColorsVersion = colorScale.version;
-  treeToo.nodeColors = nodeColors;
-
-  treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
-    tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
-  );
+  treeToo = updateSecondTree(tree, treeToo, controls, dispatch);
 
   return {tree, treeToo, controls, metadata};
 };
+
+
+/**
+ * Code which is common to both loading a second tree within `createStateFromQueryOrJSONs` and
+ * `createTreeTooState`.
+ */
+function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTreeName) {
+  const treeToo = treeJsonToState(secondTreeDataset.tree);
+  castIncorrectTypes(metadata, treeToo);
+  treeToo.debug = "RIGHT";
+  treeToo.name = secondTreeName;
+  updateMetadataStateViaSecondTree({...metadata}, secondTreeDataset, genomeMap)
+
+  /* TODO: calc & display num tips in 2nd tree */
+  // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
+
+  return {treeToo, metadata}
+}
+
+/**
+ * Update colours and control state options. This function requires that the controls state
+ * has been instantiated (e.g. the colorScale has been computed)
+ */
+function updateSecondTree(tree, treeToo, controls, dispatch) {
+  treeToo.nodeColorsVersion = tree.nodeColorsVersion;
+  treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
+  treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
+
+  /* modify controls */
+  controls.showTreeToo = treeToo.name;
+  controls.showTangle = true;
+  controls.layout = "rect"; /* must be rectangular for two trees */
+  controls.panelsToDisplay = controls.panelsToDisplay
+    .filter((name) => !["map", "entropy", "frequencies"].includes(name));
+  controls.canTogglePanelLayout = false;
+  controls.panelLayout = "full";
+
+  return treeToo;
+}
