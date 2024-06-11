@@ -374,7 +374,11 @@ export const branchStrokeForHover = function branchStrokeForHover(d) {
  * in practice, elements (or portions of elements) render outside this.
  */
 export const setClipMask = function setClipMask() {
-  const [xMin, xMax, yMin, yMax] = [...this.xScale.range(), ...this.yScale.range()];
+  const [yMin, yMax] = this.yScale.range();
+  // for the RHS tree (if there is one) ensure that xMin < xMax, else width<0 which some
+  // browsers don't like. See <https://github.com/nextstrain/auspice/issues/1755>
+  let [xMin, xMax] = this.xScale.range();
+  if (parseInt(xMin, 10)>parseInt(xMax, 10)) [xMin, xMax] = [xMax, xMin];
   const x0 = xMin - 5;
   const width = xMax - xMin + 20;  // RHS overflow is not problematic
   const y0 = yMin - 15;            // some overflow at top is ok
