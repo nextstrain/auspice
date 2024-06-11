@@ -26,6 +26,8 @@ const DEBOUNCE_TIME = 200;
     totalStateCounts: state.tree.totalStateCounts,
     canFilterByGenotype: !!state.entropy.genomeMap,
     nodes: state.tree.nodes,
+    nodesSecondTree: state.treeToo?.nodes,
+    totalStateCountsSecondTree: state.treeToo?.totalStateCounts,
     measurementsFieldsMap: state.measurements.collectionToDisplay.fields,
     measurementsFiltersMap: state.measurements.collectionToDisplay.filters,
     measurementsFilters: state.controls.measurementsFilters
@@ -66,16 +68,24 @@ class FilterData extends React.Component {
      * colorings). Within each trait, the values are alphabetical
      */
     const coloringKeys = Object.keys(this.props.colorings||{});
-    const unorderedTraitNames = Object.keys(this.props.totalStateCounts);
+    const unorderedTraitNames = [
+      ...Object.keys(this.props.totalStateCounts),
+      ...Object.keys(this.props.totalStateCountsSecondTree),
+    ]
     const traitNames = [
       ...coloringKeys.filter((name) => unorderedTraitNames.includes(name)),
       ...unorderedTraitNames.filter((name) => !coloringKeys.includes(name))
     ]
     for (const traitName of traitNames) {
-      const traitData = this.props.totalStateCounts[traitName];
+      const traitData = new Set([
+        ...(this.props.totalStateCounts[traitName]?.keys() || []),
+        ...(this.props.totalStateCountsSecondTree?.[traitName]?.keys() || []),
+      ]);
+      
+      this.props.totalStateCounts[traitName];
       const traitTitle = this.getFilterTitle(traitName);
       const filterValuesCurrentlyActive = new Set((this.props.activeFilters[traitName] || []).filter((x) => x.active).map((x) => x.value));
-      for (const traitValue of Array.from(traitData.keys()).sort()) {
+      for (const traitValue of Array.from(traitData).sort()) {
         if (filterValuesCurrentlyActive.has(traitValue)) continue;
         options.push({
           label: `${traitTitle} → ${traitValue}`,
@@ -89,7 +99,12 @@ class FilterData extends React.Component {
      * mutations
      */
     if (this.props.canFilterByGenotype) {
-      Array.from(collectGenotypeStates(this.props.nodes))
+      const observedGenotypes = collectGenotypeStates(this.props.nodes); // set of "nuc:123A", "S:418K", etc
+      const observedGenotypesSecondTree = this.props.nodesSecondTree ?
+        collectGenotypeStates(this.props.nodesSecondTree).difference(observedGenotypes) :
+        new Set();
+      Array.from(observedGenotypes)
+        .concat(Array.from(observedGenotypesSecondTree))
         .sort()
         .forEach((o) => {
           options.push({
@@ -99,14 +114,29 @@ class FilterData extends React.Component {
         });
     }
 
-    this.props.nodes
+    /**
+     * Add all (terminal) node names, calling each a "sample"
+     */
+    const sampleNames = this.props.nodes
       .filter((n) => !n.hasChildren)
-      .forEach((n) => {
+      .map((n) => n.name);
+    sampleNames.forEach((name) => {
         options.push({
-          label: `sample → ${n.name}`,
-          value: [strainSymbol, n.name]
+          label: `sample → ${name}`,
+          value: [strainSymbol, name]
         });
       });
+    if (this.props.nodesSecondTree) {
+      const seenNames = new Set(sampleNames);
+      this.props.nodesSecondTree
+        .filter((n) => !n.hasChildren && !seenNames.has(n.name))
+        .forEach((n) => {
+          options.push({
+            label: `sample → ${n.name}`,
+            value: [strainSymbol, n.name]
+          });
+        });
+    }
 
     if (this.props.measurementsOn && this.props.measurementsFiltersMap && this.props.measurementsFieldsMap) {
       this.props.measurementsFiltersMap.forEach(({values}, filterField) => {

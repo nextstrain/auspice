@@ -1043,6 +1043,10 @@ function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTre
   treeToo.name = secondTreeName;
   updateMetadataStateViaSecondTree({...metadata}, secondTreeDataset, genomeMap)
 
+  const secondTreeColorings = convertColoringsListToDict(secondTreeDataset.meta?.colorings || []);
+  const stateCountAttrs = gatherTraitNames(treeToo.nodes, secondTreeColorings);
+  treeToo.totalStateCounts = countTraitsAcrossTree(treeToo.nodes, stateCountAttrs, false, true);
+
   /* TODO: calc & display num tips in 2nd tree */
   // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
 
