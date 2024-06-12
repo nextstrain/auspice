@@ -313,6 +313,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 const Measurements = ({height, width, showLegend}) => {
   const measurementsLoaded = useSelector((state) => state.measurements.loaded);
   const measurementsError = useSelector((state) => state.measurements.error);
+  const showOnlyPanels = useSelector((state) => state.controls.showOnlyPanels);
 
   const [title, setTitle] = useState("Measurements");
 
@@ -332,7 +333,7 @@ const Measurements = ({height, width, showLegend}) => {
   };
 
   return (
-    <Card title={title} titleStyles={getCardTitleStyle()}>
+    <Card infocard={showOnlyPanels} title={title} titleStyles={getCardTitleStyle()}>
       {measurementsLoaded &&
         (measurementsError ?
           <Flex style={{ height, width}} direction="column" justifyContent="center">

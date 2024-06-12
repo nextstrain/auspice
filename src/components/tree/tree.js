@@ -193,7 +193,7 @@ class Tree extends React.Component {
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
-      <Card center title={t("Phylogeny")}>
+      <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")}>
         <ErrorBoundary>
           <Legend width={this.props.width}/>
         </ErrorBoundary>

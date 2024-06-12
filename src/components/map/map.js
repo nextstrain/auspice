@@ -56,7 +56,8 @@ import "../../css/mapbox.css";
       state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
     ),
     legendValues: state.controls.colorScale.legendValues,
-    showTransmissionLines: state.controls.showTransmissionLines
+    showTransmissionLines: state.controls.showTransmissionLines,
+    showOnlyPanels: state.controls.showOnlyPanels
   };
 })
 
@@ -614,7 +615,7 @@ class Map extends React.Component {
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
+      <Card center infocard={this.props.showOnlyPanels} title={transmissionsExist ? t("Transmissions") : t("Geography")}>
         {this.props.legend && <ErrorBoundary>
           <Legend right width={this.props.width} />
         </ErrorBoundary>}
