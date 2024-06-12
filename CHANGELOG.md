@@ -2,6 +2,7 @@
 
 * Tangletrees can now be coloured by genotype (previously such a colouring would only work for the LHS tree). This requires the genome annotation (in the dataset JSON) to be identical across both datasets. This can be especially useful when comparing trees generated from the same sequences or a similar set of sequences in order to understand the differences in tree structure. ([#1785](https://github.com/nextstrain/auspice/pull/1783))
 * Bugfix: The legend entries shown for a tangletree may not have shown values only observed in the RHS tree when the dataset was first loaded. ([#1785](https://github.com/nextstrain/auspice/pull/1783))
+* Bugfix: Multiple trees ("tanglegrams") now render correctly in Safari. ([#1786](https://github.com/nextstrain/auspice/pull/1786))
 
 ## version 2.54.1 - 2024/06/10
 
