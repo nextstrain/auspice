@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.54.3 - 2024/06/12
+
+
 * Minor improvement to the [onlyPanels](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/view-settings.html#url-query-options) view - we now also hide the panel name and top-border. ([#1790](https://github.com/nextstrain/auspice/pull/1790))
 
 ## version 2.54.2 - 2024/06/12
