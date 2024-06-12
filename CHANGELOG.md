@@ -1,8 +1,11 @@
 # Changelog
 
-* remove missing warning then dataset JSON has no `.meta.geo_resolutions` field ([#1791](https://github.com/nextstrain/auspice/pull/1791))
+* A number of improvements when viewing multiple trees (tangletrees) ([#1788](https://github.com/nextstrain/auspice/pull/1788))
+  * Attributes only present on the RHS tree are now available as filter options, as well as genotypes and node names unique to the RHS tree.
+  * Filter badges (shown in the header) now indicate how many matches are present in both trees (formerly only the LHS tree was considered)
+  * Branch labels unique to the RHS tree are now available
+* remove missing warning when dataset JSON has no `.meta.geo_resolutions` field ([#1791](https://github.com/nextstrain/auspice/pull/1791))
 * Add support for Node.js version 22. ([#1779](https://github.com/nextstrain/auspice/pull/1779))
-
 
 ## version 2.54.3 - 2024/06/12
 
