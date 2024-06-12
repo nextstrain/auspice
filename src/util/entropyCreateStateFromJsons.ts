@@ -1,9 +1,8 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
-type JsonAnnotations = Record<string, JsonAnnotation>
-// enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
-type Strand = string;
+export type JsonAnnotations = Record<string, JsonAnnotation>
+type Strand = "+" | "-"; // note that other GFF-valid options are '.' and '?' but not used in Auspice datasets
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
@@ -141,7 +140,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
   return [chromosome];
 }
 
-export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
+export const entropyCreateState = (genomeAnnotations: JsonAnnotations|undefined) => {
   if (genomeAnnotations) {
     try {
       return {

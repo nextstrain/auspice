@@ -15,7 +15,7 @@ import { entropyCreateState, genomeMap as createGenomeMap } from "../util/entrop
 import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
-import { applyInViewNodesToTree } from "../actions/tree";
+import { applyInViewNodesToTree } from "./tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
@@ -23,6 +23,10 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, loadMeasurements } from "./measurements";
+
+import { DatasetJson } from "../types/datasetJson";
+import { IncompleteMetadataState, convertIncompleteMetadataStateToMetadataState } from "../reducers/metadata";
+import { RootState } from "../store";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -153,8 +157,10 @@ const modifyStateViaURLQuery = (state, query) => {
         console.error("Invalid 'animate' URL query (invalid date range)")
         delete query.animate
       } else {
-        window.NEXTSTRAIN.animationStartPoint = _dminNum;
-        window.NEXTSTRAIN.animationEndPoint = _dmaxNum;
+        if ('NEXTSTRAIN' in window) {
+          (window.NEXTSTRAIN as any).animationStartPoint = calendarToNumeric(params[0]);
+          (window.NEXTSTRAIN as any).animationEndPoint = calendarToNumeric(params[1]);
+        }
         state.dateMin = _dmin;
         state.dateMax = _dmax;
         state.dateMinNumeric = _dminNum;
@@ -268,13 +274,14 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',      'string',  "boolean"              , "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
-      if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
-        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) {
+      const key = keysToCheckFor[i] as string; // cast as TS doesn't know i is a valid index of keysToCheckFor
+      if (Object.hasOwnProperty.call(metadata.displayDefaults, key)) {
+        if (typeof metadata.displayDefaults[key] === expectedTypes[i]) {
           if (keysToCheckFor[i] === "sidebar") {
-            if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
+            if (metadata.displayDefaults[key] === "open") {
               state.defaults.sidebarOpen = true;
               state.sidebarOpen = true;
-            } else if (metadata.displayDefaults[keysToCheckFor[i]]=== "closed") {
+            } else if (metadata.displayDefaults[key]=== "closed") {
               state.defaults.sidebarOpen = false;
               state.sidebarOpen = false;
             } else {
@@ -282,8 +289,8 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
             }
           } else {
             /* most of the time if key=geoResolution, set both state.geoResolution and state.defaults.geoResolution */
-            state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
-            state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+            state[key] = metadata.displayDefaults[key];
+            state.defaults[key] = metadata.displayDefaults[key];
           }
         } else {
           console.error("Skipping 'display_default' for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
@@ -403,7 +410,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state.coloringsPresentOnTree = new Set();
   state.coloringsPresentOnTreeWithConfidence = new Set(); // subset of above
 
-  let coloringsToCheck = [];
+  let coloringsToCheck: string[] = [];
   if (colorings) {
     coloringsToCheck = Object.keys(colorings);
   }
@@ -467,7 +474,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, viewingNarrative) => {
+const checkAndCorrectErrorsInState = (state, metadata: IncompleteMetadataState, genomeMap, query, tree, viewingNarrative) => {
   /* want to check that the (currently set) colorBy (state.colorBy) is valid,
    * and fall-back to an available colorBy if not
    */
@@ -618,7 +625,8 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
       continue
     }
     /* delete filter names (e.g. country, region) which aren't observed on the tree */
-    if (!Object.keys(tree.totalStateCounts).includes(traitName) && traitName!==strainSymbol && traitName!==genotypeSymbol) {
+    // TS TODO - remove the following cast (and check code _was_ working as I thought it was...)
+    if (!Object.keys(tree.totalStateCounts).includes(traitName as string) && traitName!==strainSymbol && traitName!==genotypeSymbol) {
       delete state.filters[traitName];
       delete query[_queryKey(traitName)];
       continue
@@ -732,11 +740,10 @@ const convertColoringsListToDict = (coloringsList) => {
 };
 
 /**
- *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
-const createMetadataStateFromJSON = (json) => {
-  const metadata = {};
+const createMetadataStateFromJSON = (json: DatasetJson): IncompleteMetadataState => {
+  const metadata: IncompleteMetadataState = {loaded: false};
   if (json.meta.colorings) {
     metadata.colorings = convertColoringsListToDict(json.meta.colorings);
   }
@@ -794,10 +801,10 @@ const createMetadataStateFromJSON = (json) => {
   }
 
 
-  if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
+  if (Object.prototype.hasOwnProperty.call(json.meta, "loaded")) {
     console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
   }
-  metadata.loaded = true;
+  // metadata.loaded = true; // TODO XXX
   return metadata;
 };
 
@@ -819,7 +826,7 @@ function updateMetadataStateViaSecondTree(metadata, json, genomeMap) {
       metadata.identicalGenomeMapAcrossBothTrees = isEqualWith(
         genomeMap,
         createGenomeMap(json.meta.genome_annotations),
-        (objValue, othValue, indexOrKey) => {
+        (_objValue, _othValue, indexOrKey) => {
           if (indexOrKey==='color') return true; // don't compare CDS colors!
           // don't compare metadata section as there may be Infinities here
           // (and if everything else is equal then the metadata will be the same too)
@@ -852,6 +859,19 @@ export const getNarrativePageFromQuery = (query, narrative) => {
   return n;
 };
 
+/* TS TODO */
+interface CreateStateArgs {
+  json: DatasetJson | false;
+  secondTreeDataset: any;
+  measurementsData: any;
+  oldState: RootState | false;
+  narrativeBlocks: any; /* if in a narrative this argument is set */
+  mainTreeName: string | false;
+  secondTreeName: string | false;
+  query?: any;
+  dispatch: any; /* redux should define this for us... */
+}
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   measurementsData = false, /* raw measurements json data or error, only used when main json is provided */
@@ -862,8 +882,9 @@ export const createStateFromQueryOrJSONs = ({
   secondTreeName = false,
   query,
   dispatch
-}) => {
-  let tree, treeToo, entropy, controls, metadata, narrative, frequencies, measurements;
+}: CreateStateArgs) => {
+  let tree, treeToo, entropy, controls, narrative, frequencies, measurements;
+  let metadata: IncompleteMetadataState;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */
@@ -895,11 +916,14 @@ export const createStateFromQueryOrJSONs = ({
     entropy = {...oldState.entropy};
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
-    metadata = {...oldState.metadata};
+    metadata = {...oldState.metadata, loaded: false};
     frequencies = {...oldState.frequencies};
     measurements = {...oldState.measurements};
     controls = restoreQueryableStateToDefaults(controls);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
+  } else {
+    // can this _ever_ occur? If it does then `metadata` is undefined...
+    throw new Error("TKTK")
   }
 
   /* For the creation of state, we want to parse out URL query parameters
@@ -949,7 +973,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (json || controls.colorBy !== oldState.controls.colorBy) {
+  if (json || (oldState && controls.colorBy !== oldState.controls.colorBy)) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
@@ -1043,7 +1067,9 @@ export const createStateFromQueryOrJSONs = ({
   /* if narratives then switch the query back to ?n=<SLIDE> for display */
   if (narrativeBlocks) query = {n: narrativeSlideIdx};
 
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, measurements, query};
+  const meta = convertIncompleteMetadataStateToMetadataState(metadata);
+
+  return {tree, treeToo, metadata: meta, entropy, controls, narrative, frequencies, measurements, query};
 };
 
 export const createTreeTooState = ({
