@@ -20,7 +20,8 @@ import "../../css/entropy.css";
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale,
     colorOptions: state.metadata.colorings,
-    normalizeFrequencies: state.controls.normalizeFrequencies
+    normalizeFrequencies: state.controls.normalizeFrequencies,
+    showOnlyPanels: state.controls.showOnlyPanels    
   };
 })
 
@@ -102,7 +103,7 @@ class Frequencies extends React.Component {
     const { t } = this.props;
     const {tipCount, fullTipCount} = this.props.nodes[0];
     return (
-      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)} ${t(normString(this.props.normalizeFrequencies, tipCount, fullTipCount))})`}>
+      <Card infocard={this.props.showOnlyPanels} title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)} ${t(normString(this.props.normalizeFrequencies, tipCount, fullTipCount))})`}>
         <div
           id="freqinfo"
           style={{

@@ -79,7 +79,8 @@ const getStyles = (width) => {
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
     panelLayout: state.controls.panelLayout,
-    narrativeMode: state.narrative.display
+    narrativeMode: state.narrative.display,
+    showOnlyPanels: state.controls.showOnlyPanels
   };
 })
 class Entropy extends React.Component {
@@ -258,7 +259,7 @@ class Entropy extends React.Component {
   render() {
     const styles = getStyles(this.props.width);
     return (
-      <Card title={this.title()}>
+      <Card infocard={this.props.showOnlyPanels} title={this.title()}>
         <InfoPanel d3event={this.state.hovered.d3event} width={this.props.width} height={this.props.height}>
           {this.state.hovered ? this.state.hovered.tooltip(this.props.t) : null}
         </InfoPanel>
