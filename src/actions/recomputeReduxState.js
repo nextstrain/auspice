@@ -308,7 +308,7 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
     if (Object.keys(metadata.colorings).includes('gt')) {
-      console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " + 
+      console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " +
       "check that 'metadata.genome_annotations' is correct and that mutations have been assigned to 'branch_attrs' on the tree.")
       delete metadata.colorings.gt;
     }
@@ -544,8 +544,6 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
       console.error("Error detected. Setting geoResolution to ", state.geoResolution);
       delete query.r; // no-op if query.r doesn't exist
     }
-  } else {
-    console.warn("JSONs did not include `geoResolutions`");
   }
 
   /* show label */
@@ -588,7 +586,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   const _queryKey = (traitName) => (traitName === strainSymbol) ? 's' :
     (traitName === genotypeSymbol) ? 'gt' :
       `f_${traitName}`;
-      
+
   for (const traitName of Reflect.ownKeys(state.filters)) {
     /* delete empty filters, e.g. "?f_country" or "?f_country=" */
     if (!state.filters[traitName].length) {
@@ -812,7 +810,7 @@ function updateMetadataStateViaSecondTree(metadata, json, genomeMap) {
   // ¹ This could be relaxed in the future - currently we enforce that the order
   //   of genes matches. We could also make this more fine grained and allow the
   //   2nd tree to have a subset of CDSs (wrt the main tree), with genotypes
-  //   only working for the shared CDSs.     
+  //   only working for the shared CDSs.
   if (genomeMap && json.meta.genome_annotations) {
     try {
       metadata.identicalGenomeMapAcrossBothTrees = isEqualWith(

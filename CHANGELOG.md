@@ -1,5 +1,8 @@
 # Changelog
 
+* remove missing warning then dataset JSON has no `.meta.geo_resolutions` field ([#1791](https://github.com/nextstrain/auspice/pull/1791))
+
+
 ## version 2.54.3 - 2024/06/12
 
 
