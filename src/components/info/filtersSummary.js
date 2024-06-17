@@ -33,6 +33,7 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     metadata: state.metadata,
     nodes: state.tree.nodes,
     totalStateCounts: state.tree.totalStateCounts,
+    totalStateCountsSecondTree: state.treeToo?.totalStateCounts,
     visibility: state.tree.visibility,
     selectedClade: state.tree.selectedClade,
     dateMin: state.controls.dateMin,
@@ -86,7 +87,19 @@ class FiltersSummary extends React.Component {
       .sort((a, b) => a.value < b.value ? -1 : a.value > b.value ? 1 : 0)
       .map((item) => {
         let label = `${item.value}`;
-        if (filterName!==strainSymbol) label+= ` (${this.props.totalStateCounts[filterName].get(item.value)})`;
+        if (filterName!==strainSymbol) {
+          /* Add the _total_ occurrences in parentheses. We don't compute the intersections / visible values here -
+          e.g. we can have "England (5)" "North America (100)" even though such an intersection will deselect everything.
+          If we have two trees shown we show both values.
+          */
+          const tree1count = this.props.totalStateCounts[filterName]?.get(item.value) ?? 0;
+          if (this.props.totalStateCountsSecondTree) {
+            const tree2count = this.props.totalStateCountsSecondTree[filterName]?.get(item.value) ?? 0;
+            label+=` (L: ${tree1count}, R: ${tree2count})`;
+          } else {
+            label+=` (${tree1count})`;
+          }
+        }
         return this.createIndividualBadge({filterName, item, label, onHoverMessage});
       });
   }

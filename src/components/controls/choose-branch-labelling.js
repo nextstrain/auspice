@@ -11,7 +11,10 @@ import Toggle from "./toggle";
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
   showAll: state.controls.showAllBranchLabels,
-  available: state.tree.availableBranchLabels,
+  available: Array.from(
+    (new Set(state.tree.availableBranchLabels))
+      .union(new Set(state.treeToo?.availableBranchLabels ?? []))
+  ),
   canRenderBranchLabels: state.controls.canRenderBranchLabels
 }))
 class ChooseBranchLabelling extends React.Component {
