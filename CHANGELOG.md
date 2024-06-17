@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.55.0 - 2024/06/17
+
+
 * A number of improvements when viewing multiple trees (tangletrees) ([#1788](https://github.com/nextstrain/auspice/pull/1788))
   * Attributes only present on the RHS tree are now available as filter options, as well as genotypes and node names unique to the RHS tree.
   * Filter badges (shown in the header) now indicate how many matches are present in both trees (formerly only the LHS tree was considered)
