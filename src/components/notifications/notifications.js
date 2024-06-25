@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+// XXX FIXME react-18: migrate from v1 → v2
+// <https://github.com/reactjs/react-transition-group/blob/master/Migration.md>
 import { CSSTransitionGroup } from "react-transition-group";
 import { REMOVE_NOTIFICATION } from "../../actions/types";
 
@@ -100,14 +102,17 @@ class Notifications extends React.Component {
       return null;
     }
     return (
-      <CSSTransitionGroup className="notifications"
-        transitionName="notification"
-        transitionEnterTimeout={500}
-        transitionLeaveTimeout={500}
-        style={{zIndex: 20000}}
-      >
-        {this.props.stack.map((d) => this.generateEl(d))}
-      </CSSTransitionGroup>
+      null
+      // XXX FIXME react-18: migrate from v1 → v2
+      // <https://github.com/reactjs/react-transition-group/blob/master/Migration.md>
+      // <CSSTransitionGroup className="notifications"
+      //   transitionName="notification"
+      //   transitionEnterTimeout={500}
+      //   transitionLeaveTimeout={500}
+      //   style={{zIndex: 20000}}
+      // >
+      //   {this.props.stack.map((d) => this.generateEl(d))}
+      // </CSSTransitionGroup>
     );
   }
 }
