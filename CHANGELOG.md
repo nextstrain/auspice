@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.55.1 - 2024/06/25
+
+
 * Small bugfix to the filter badge improvements introduced in v2.55.0 where we incorrectly showed the 2-tree display when viewing a single tree. ([#1794](https://github.com/nextstrain/auspice/pull/1794))
 
 ## version 2.55.0 - 2024/06/17
