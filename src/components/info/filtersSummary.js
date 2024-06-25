@@ -93,7 +93,7 @@ class FiltersSummary extends React.Component {
           If we have two trees shown we show both values.
           */
           const tree1count = this.props.totalStateCounts[filterName]?.get(item.value) ?? 0;
-          if (this.props.totalStateCountsSecondTree) {
+          if (this.props.totalStateCountsSecondTree && Reflect.ownKeys(this.props.totalStateCountsSecondTree).length) {
             const tree2count = this.props.totalStateCountsSecondTree[filterName]?.get(item.value) ?? 0;
             label+=` (L: ${tree1count}, R: ${tree2count})`;
           } else {
