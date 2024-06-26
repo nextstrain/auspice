@@ -26,14 +26,12 @@ class ChooseSecondTree extends React.Component {
       .replace(/\/$/, '')
       .split(':')[0];
 
-    let options = [];
-    this.props.available.datasets
-    .filter((dataset) => {
-      if (dataset.request === displayedDataset) {
-        options = [...dataset.secondTreeOptions];
-      }
-      return null;
-    });
+    const options = [...new Set(
+      this.props.available.datasets
+        .filter((dataset) => dataset.request === displayedDataset)
+        .flatMap((dataset) => dataset.secondTreeOptions)
+        .filter((opt) => !!opt) // .secondTreeOptions is not required
+    )]
 
     if (this.props.showTreeToo) options.unshift("REMOVE");
 
