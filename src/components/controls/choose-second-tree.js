@@ -33,6 +33,9 @@ class ChooseSecondTree extends React.Component {
         .filter((opt) => !!opt) // .secondTreeOptions is not required
     )]
 
+    // Don't display the sidebar UI if we're just going to display an empty dropdown!
+    if (!options.length) return null;
+
     if (this.props.showTreeToo) options.unshift("REMOVE");
 
     const selectOptions = options.map((opt) => ({value: opt, label: opt}));
