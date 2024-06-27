@@ -66,7 +66,7 @@ export const getDefaultControlsState = () => {
     absoluteDateMax: dateMax,
     absoluteDateMaxNumeric: dateMaxNumeric,
     colorBy: defaults.colorBy,
-    colorByConfidence: { display: false, on: false },
+    colorByConfidence: false,
     colorScale: undefined,
     explodeAttr: undefined,
     selectedBranchLabel: "none",
