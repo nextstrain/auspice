@@ -1,5 +1,8 @@
 # Changelog
 
+* We no longer show the "second tree" sidebar dropdown when there are no available options. The possible options are defined by [the charon/getAvailable API](https://docs.nextstrain.org/projects/auspice/en/stable/server/api.html) response and as such vary depending on the server in use. ([#1795](https://github.com/nextstrain/auspice/pull/1795))
+
+
 ## version 2.55.1 - 2024/06/25
 
 
