@@ -1,6 +1,6 @@
 import { select } from "d3-selection";
 import 'd3-transition';
-import { calcBranchStrokeCols, getBrighterColor } from "../../../util/colorHelpers";
+import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
 
@@ -16,6 +16,7 @@ export const renderTree = (that, main, phylotree, props) => {
   if (Object.prototype.hasOwnProperty.call(props.scatterVariables, "showBranches") && props.scatterVariables.showBranches===false) {
     renderBranchLabels=false;
   }
+  const tipStrokeColors = calculateStrokeColors(treeState, false, props.colorByConfidence, props.colorBy);
   /* simply the call to phylotree.render */
   phylotree.render(
     select(ref),
@@ -43,9 +44,9 @@ export const renderTree = (that, main, phylotree, props) => {
     treeState.visibility,
     props.temporalConfidence.on, /* drawConfidence? */
     treeState.vaccines,
-    calcBranchStrokeCols(treeState, props.colorByConfidence, props.colorBy),
-    treeState.nodeColors,
-    treeState.nodeColors.map(getBrighterColor),
+    calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy), 
+    tipStrokeColors,
+    tipStrokeColors.map(getBrighterColor), // tip fill colors
     treeState.tipRadii, /* might be null */
     [props.dateMinNumeric, props.dateMaxNumeric],
     props.scatterVariables

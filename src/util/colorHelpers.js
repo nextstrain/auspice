@@ -68,11 +68,14 @@ export const calcNodeColor = (tree, colorScale) => {
 // scale entropy such that higher entropy maps to a grayer less-certain branch
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.6;
-export const branchOpacityFunction = scalePow()
+const branchOpacityFunction = scalePow()
   .exponent([0.6])
-  .domain([0, 2.0])
-  .range([0.4, 1])
+  .domain([0, 2.0]) // entropy values close to 0 -> ~100% confidence, close to 2 -> very little confidence
+  .range([0.4, 1])  // 0 -> return original node colour, 1 -> return branchInterpolateColour
   .clamp(true);
+const tipOpacityFunction = branchOpacityFunction
+  .copy()
+  .range([0, 0.9]); // if entropy close to 0 return the original node color
 
 
 // entropy calculation precomputed in augur
@@ -80,23 +83,39 @@ export const branchOpacityFunction = scalePow()
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
 
 /**
- * calculate array of HEXs to actually be displayed.
- * (colorBy) confidences manifest as opacity ramps
+ * Calculate an array of stroke colors to render for a branch or tip node. These are "grey-er" versions
+ * of the underlying `tree.nodeColours`. The degree of grey-ness is obtained via interpolation
+ * between the node color and `branchOpacityConstant`. The interpolation parameter varies
+ * depending on the confidence we have in the trait (the entropy), with more confidence resulting
+ * in more saturated colours. For branches we always make them slightly greyer (even in the absence
+ * of uncertainty) for purely aesthetic reasons.
  * @param {obj} tree phyloTree object
+ * @param {bool} branch will this color be used for the branch or the tip?
  * @param {bool} confidence enabled?
  * @return {array} array of hex's. 1-1 with nodes.
  */
-export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
+export const calculateStrokeColors = (tree, branch, confidence, colorBy) => {
   if (confidence === true) {
-    return tree.nodeColors.map((col, idx) => {
-      const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
-      const opacity = entropy ? branchOpacityFunction(entropy) : branchOpacityConstant;
-      return rgb(interpolateRgb(col, branchInterpolateColour)(opacity)).toString();
-    });
+    return tree.nodeColors.map(branch ? _confidenceBranchColor : _confidenceTipColor)
   }
-  return tree.nodeColors.map((col) => {
-    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
-  });
+  return branch ? tree.nodeColors.map(_defaultBranchColor) : tree.nodeColors;
+
+  function _confidenceBranchColor(col, idx) {
+    const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
+    if (!entropy) return _defaultBranchColor(col);
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
+  }
+
+  function _confidenceTipColor(col, idx) {
+    if (tree.nodes[idx].hasChildren) return undefined; // skip computation for internal nodes
+    const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
+    if (!entropy) return col;
+    return rgb(interpolateRgb(col, branchInterpolateColour)(tipOpacityFunction(entropy))).toString();
+  }
+
+  function _defaultBranchColor(col) {
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString()
+  }
 };
 
 
