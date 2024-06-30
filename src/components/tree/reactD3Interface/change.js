@@ -1,4 +1,4 @@
-import { calcBranchStrokeCols, getBrighterColor } from "../../../util/colorHelpers";
+import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 
 export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps, newProps) => {
   const args = {};
@@ -16,9 +16,9 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
       (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
       newProps.colorByConfidence !== oldProps.colorByConfidence)) {
     args.changeColorBy = true;
-    args.branchStroke = calcBranchStrokeCols(newTreeRedux, newProps.colorByConfidence, newProps.colorBy);
-    args.tipStroke = newTreeRedux.nodeColors;
-    args.fill = newTreeRedux.nodeColors.map(getBrighterColor);
+    args.branchStroke = calculateStrokeColors(newTreeRedux, true, newProps.colorByConfidence, newProps.colorBy);
+    args.tipStroke = calculateStrokeColors(newTreeRedux, false, newProps.colorByConfidence, newProps.colorBy);
+    args.fill = args.tipStroke.map(getBrighterColor);
   }
 
   /* visibility */
