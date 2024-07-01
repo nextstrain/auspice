@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.56.0 - 2024/07/01
+
+
 * We now use the reported confidence / entropy values to change the saturation of tips (circles) on the tree, which matches the behaviour seen for branches. If there is no (or very little) uncertainty in these nodes then the tips will appear the same as seen in previous versions of Auspice. ([#1796](https://github.com/nextstrain/auspice/pull/1796))
 * We no longer show the "second tree" sidebar dropdown when there are no available options. The possible options are defined by [the charon/getAvailable API](https://docs.nextstrain.org/projects/auspice/en/stable/server/api.html) response and as such vary depending on the server in use. ([#1795](https://github.com/nextstrain/auspice/pull/1795))
 
