@@ -197,7 +197,7 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
   drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);
 
   // Add threshold(s) if provided
-  if (thresholds !== null) {
+  if (thresholds !== null && thresholds !== undefined) {
     for (const threshold of thresholds) {
       const thresholdXValue = xScale(threshold);
       svg.append("line")
