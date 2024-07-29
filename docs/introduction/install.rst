@@ -36,7 +36,7 @@ If you look at the :doc:`release notes <../releases/changelog>` you can see the 
 Install Auspice as a developer
 ==============================
 
-See `DEV_DOCS.md <https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md#developer-installation>__`.
+See `DEV_DOCS.md <https://github.com/nextstrain/auspice/blob/-/DEV_DOCS.md#developer-installation>`__.
 
 Testing if it worked
 ====================
