@@ -197,8 +197,9 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
   drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);
 
   // Add threshold(s) if provided
-  if (thresholds !== null) {
+  if (Array.isArray(thresholds)) {
     for (const threshold of thresholds) {
+      if (typeof threshold !== "number") continue;
       const thresholdXValue = xScale(threshold);
       svg.append("line")
         .attr("class", classes.threshold)

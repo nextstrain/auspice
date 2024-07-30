@@ -73,7 +73,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   if (collection["display_defaults"]) {
     const {
       group_by,
-      measurement_display,
+      measurements_display,
       show_overall_mean,
       show_threshold
     } = collection["display_defaults"];
@@ -81,8 +81,8 @@ const getCollectionDisplayControls = (controls, collection) => {
     if (group_by) {
       newControls.measurementsGroupBy = group_by;
     }
-    if (measurement_display) {
-      newControls.measurementsDisplay = measurement_display;
+    if (measurements_display) {
+      newControls.measurementsDisplay = measurements_display;
     }
     if (typeof show_overall_mean === "boolean") {
       newControls.measurementsShowOverallMean = show_overall_mean;
