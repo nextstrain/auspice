@@ -8,7 +8,7 @@ import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
-import { getDatasetNamesFromUrl, Dataset } from "../../actions/loadData";
+import { Dataset } from "../../actions/loadData";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -623,15 +623,15 @@ export const entropyTSV = (dispatch, filePrefix, entropy) => {
 /**
  * Write out Auspice JSON(s) for the current view. We do this by re-fetching the original
  * JSON because we don't keep a copy of the unprocessed data around.
- * 
+ *
  * Sidecar files are not fetched, but we can also download them if desired.
- * 
+ *
  * Note that we are not viewing a narrative, as the download button functionality is disabled
  * for narratives.
  */
-export const auspiceJSON = (dispatch) => {
+export const auspiceJSON = (dispatch, datasetNames) => {
   const filenames = [];
-  for (const datasetName of getDatasetNamesFromUrl(window.location.pathname)) {
+  for (const datasetName of datasetNames) {
     if (!datasetName) continue; // e.g. no 2nd tree
     const filename = datasetName.replace('/', '_') + '.json';
     filenames.push(filename);
