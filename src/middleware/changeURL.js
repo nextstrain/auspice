@@ -229,7 +229,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.CLEAN_START:
-      if (action.pathnameShouldBe && !action.narrative) {
+      if (typeof action.pathnameShouldBe === "string" && !action.narrative) {
         pathname = action.pathnameShouldBe;
         break;
       }
