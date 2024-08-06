@@ -59,7 +59,7 @@ The [writing a narrative](../../tutorials/narratives-how-to-write.md) tutorial w
 
 If you've got a narrative working locally (i.e. running Auspice on your computer) and want to share the results then you have two options:
 
-1. Use the community functionality of nextstrain.org (the easier option, detailed in [Share via Community on GitHub](../guides/share/community-builds.html)).
+1. Use the community functionality of nextstrain.org (the easier option, detailed in [Share via Community on GitHub](../share/community-builds.md)).
 2. Implement an Auspice server yourself (the harder option, see [the server documentation](https://docs.nextstrain.org/projects/auspice/en/stable/server/overview.html)).
 
 
