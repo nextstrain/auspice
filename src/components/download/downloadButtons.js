@@ -6,6 +6,7 @@ import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 import { getNumSelectedTips } from "../../util/treeVisibilityHelpers";
+import { getDatasetNamesFromUrl } from "../../actions/loadData";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -35,6 +36,10 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
       }
     }
   }
+  /* Verify that we can parse dataset name from URL to support Auspice JSON download */
+  const datasetNames = getDatasetNamesFromUrl(window.location.pathname);
+  const supportAuspiceJsonDownload = !gisaidProvenance && datasetNames.some(Boolean);
+
   const entropyBar = entropy?.selectedCds===nucleotide_gene ? "nucleotide" : "codon";
 
   return (
@@ -48,12 +53,12 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
         <p/>
         {partialData ? `Currently ${selectedTipsCount}/${totalTipCount} tips are displayed and will be downloaded.` : `Currently the entire dataset (${totalTipCount} tips) will be downloaded.`}
       </div>
-      {!gisaidProvenance && (
+      {supportAuspiceJsonDownload && (
         <Button
           name="Auspice (Nextstrain) JSON"
           description={`The main Auspice dataset JSON(s) for the current view`}
           icon={<DatasetIcon width={iconWidth} selected />}
-          onClick={() => helpers.auspiceJSON(dispatch)}
+          onClick={() => helpers.auspiceJSON(dispatch, datasetNames)}
         />
       )}
       <Button
