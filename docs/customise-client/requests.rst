@@ -39,7 +39,7 @@ External Requests
 Leaflet
 ~~~~~~~
 
-We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles. There is one `initial CSS request <https://unpkg.com/leaflet@1.0.1/dist/leaflet.css>`__ which is always made, regardless of whether a map is displayed.
+We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles.
 
 If a map is displayed by Auspice the individual tiles are requested from api.mapbox.com. Panning and zooming of the map result in futher requests for tiles. These are requested using our hardcoded access key, however this may change to a build-time-customisation in the future.
 
