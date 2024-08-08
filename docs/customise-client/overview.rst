@@ -3,7 +3,7 @@ Overview (Client)
 ======================================
 
 
-Auspice allows you to customise the appearance and functionality of Auspice `when the client is built <../introduction/how-to-run.html#auspice-build>`_.
+Auspice allows you to customise the appearance and functionality of Auspice :ref:`when the client is built <auspice-build>`.
 This is how Auspice running locally and nextstrain.org look different, despite both using "Auspice".
 
 .. image:: ../assets/auspice-vs-nextstrain.png
