@@ -27,7 +27,7 @@ Currently the client is able to make three requests:
 For instance, when you're running ``auspice view`` if you go to `localhost:4000/charon/getAvailable <http://localhost:4000/charon/getAvailable>`_ you'll see a list of the available datasets and narratives known to the server.
 Similarly, nextstrain.org is a server which has handlers for these three API endpoints, so if you visit `nextstrain.org/charon/getAvailable <https://nextstrain.org/charon/getAvailable>`_ you'll see Nextstrain's available datasets.
 
-See `the server API <../server/api.html>`_ for details about each of these requests.
+See :doc:`the server API <./api>` for details about each of these requests.
 
 .. note::
    Note that "/charon" can be changed to any address you wish by customising the client at build time.
@@ -45,7 +45,7 @@ Customising the Default Auspice Server
 ======================================
 
 You can customise the default Auspice server by supplying your own handlers for each of the three GET requests.
-See `the API documentation <../server/api.html#supplying-custom-handlers-to-the-auspice-server>`_ for how to define these and provide them to `auspice view`.
+See :ref:`the API documentation <server-api-supplying-custom-handlers>` for how to define these and provide them to `auspice view`.
 
 
 AGPL Source Code Requirement
