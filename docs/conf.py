@@ -66,3 +66,18 @@ html_theme_options = {
 intersphinx_mapping = {
     'docs.nextstrain.org': ('https://docs.nextstrain.org/en/latest/', None),
 }
+
+
+# -- Linkchecking ------------------------------------------------------------
+
+linkcheck_ignore = [
+     # we have links to localhost for explanatory purposes; obviously
+     # they will never work in the linkchecker
+     r'http://localhost:\d+',
+]
+linkcheck_anchors_ignore_for_url = [
+     # Github uses anchor-looking links for highlighting lines but
+     # handles the actual resolution with Javascript, so skip anchor
+     # checks for Github URLs:
+     r'https://github.com',
+]
