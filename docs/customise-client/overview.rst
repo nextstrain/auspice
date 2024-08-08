@@ -21,7 +21,7 @@ This is achieved by providing a JSON at build time to Auspice which defines the 
 `Here's <https://github.com/nextstrain/nextstrain.org/blob/master/auspice-client/customisations/config.json>`_ the file used by nextstrain.org to change the appearance of Auspice in the above image.
 
 
-See the `client customisation API <api.html>`_ for the available options.
+See the :doc:`client customisation API <./api>` for the available options.
 
 AGPL Source Code Requirement
 ============================

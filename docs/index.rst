@@ -42,7 +42,7 @@ License and Copyright
 
 Copyright © 2014-2020 Trevor Bedford and Richard Neher.
 
-Source code to Nextstrain is made available under the terms of the `GNU Affero General Public License <LICENSE.txt>`_ (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+Source code to Nextstrain is made available under the terms of the `GNU Affero General Public License <https://github.com/nextstrain/auspice/blob/-/LICENSE.txt>`_ (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
 
 
 .. toctree::

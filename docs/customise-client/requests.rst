@@ -1,7 +1,7 @@
 Requests Made from the Client
 =============================
 
-The Auspice client will make a number of requests to various endpoints, which this document aims to provide an overview of. Some of these are dependent on the `build-time customisations <./api>`__ in use, and we plan to allow more flexibility here using this mechanism.
+The Auspice client will make a number of requests to various endpoints, which this document aims to provide an overview of. Some of these are dependent on the :doc:`build-time customisations <./api>` in use, and we plan to allow more flexibility here using this mechanism.
 
 Requests to the Auspice Server
 ------------------------------
