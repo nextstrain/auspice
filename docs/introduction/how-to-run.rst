@@ -43,6 +43,8 @@ This is the main command we'll run Auspice with, as it makes Auspice available i
 
 For more complicated setups, where you define your own server handlers, see :ref:`supplying custom handlers to the Auspice server <server-api-supplying-custom-handlers>`.
 
+.. _auspice-build:
+
 ``auspice build``
 -----------------
 
