@@ -36,11 +36,6 @@ The initial Auspice page (i.e. the one which displays a listing of available dat
 External Requests
 -----------------
 
-Fonts
-~~~~~
-
-Two initial requests for fonts are made, for `Google-hosted Lato fonts (CSS) <https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500,700>`__ and `font-awesome (CSS) <https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css%22%3E>`__. These in turn make a number of subsequent requests for the individual font files etc.
-
 Leaflet
 ~~~~~~~
 
