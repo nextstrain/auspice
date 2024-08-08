@@ -1216,7 +1216,7 @@ This also fixed potential issues related to loading datasets where the URL queri
 * Disable Untangling
 
 ## version 1.21.1 - 2018/06/04
-* Narratives are now sourced from [the static github repo](https://github.com/nextstrain/static/tree/master/narratives)
+* Narratives are now sourced from [the static github repo](https://github.com/nextstrain/static/tree/eea71fc22299c1d7febd25ea0ec1b00dcd286a3a~/narratives)
 
 ## version 1.21.0 - 2018/06/01
 * Untangling via a simple algorithm upon 2nd tree load
