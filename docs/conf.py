@@ -66,3 +66,23 @@ html_theme_options = {
 intersphinx_mapping = {
     'docs.nextstrain.org': ('https://docs.nextstrain.org/en/latest/', None),
 }
+
+
+# -- Linkchecking ------------------------------------------------------------
+
+## NOTE: for both sets of regular expressions that follow, the
+## underlying linkchecker code uses `re.match()` to apply them to URLs
+## — so there's already an implicit "only at the beginning of a
+## string" matching happening, and something like a plain `r'google'`
+## regular expression will _NOT_ match all google.com URLs.
+linkcheck_ignore = [
+     # we have links to localhost for explanatory purposes; obviously
+     # they will never work in the linkchecker
+     r'^http://localhost:\d+',
+]
+linkcheck_anchors_ignore_for_url = [
+     # Github uses anchor-looking links for highlighting lines but
+     # handles the actual resolution with Javascript, so skip anchor
+     # checks for Github URLs:
+     r'^https://github\.com',
+]
