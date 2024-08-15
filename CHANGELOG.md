@@ -1217,7 +1217,7 @@ This also fixed potential issues related to loading datasets where the URL queri
 * Disable Untangling
 
 ## version 1.21.1 - 2018/06/04
-* Narratives are now sourced from [the static github repo](https://github.com/nextstrain/static/tree/master/narratives)
+* Narratives are now sourced from [the static github repo](https://github.com/nextstrain/static/tree/eea71fc22299c1d7febd25ea0ec1b00dcd286a3a~/narratives)
 
 ## version 1.21.0 - 2018/06/01
 * Untangling via a simple algorithm upon 2nd tree load
@@ -1396,7 +1396,7 @@ This also fixed potential issues related to loading datasets where the URL queri
 ## version 1.14.0 - 2018/02/27
 
 ### Features
-* Strain search (using [awesomplete](https://leaverou.github.io/awesomplete/)).
+* Strain search (using [awesomplete](https://projects.verou.me/awesomplete/)).
 This highlights the path to a single tip and increases the tip radius.
 Strain is stored in the URL query (`s=...`) and can be restored via URL.
 Selected strain also appears in the info panel (top of screen).

@@ -1,7 +1,7 @@
 Requests Made from the Client
 =============================
 
-The Auspice client will make a number of requests to various endpoints, which this document aims to provide an overview of. Some of these are dependent on the `build-time customisations <./api>`__ in use, and we plan to allow more flexibility here using this mechanism.
+The Auspice client will make a number of requests to various endpoints, which this document aims to provide an overview of. Some of these are dependent on the :doc:`build-time customisations <./api>` in use, and we plan to allow more flexibility here using this mechanism.
 
 Requests to the Auspice Server
 ------------------------------
@@ -36,15 +36,10 @@ The initial Auspice page (i.e. the one which displays a listing of available dat
 External Requests
 -----------------
 
-Fonts
-~~~~~
-
-Two initial requests for fonts are made, for `Google-hosted Lato fonts (CSS) <https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500,700>`__ and `font-awesome (CSS) <https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css%22%3E>`__. These in turn make a number of subsequent requests for the individual font files etc.
-
 Leaflet
 ~~~~~~~
 
-We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles. There is one `initial CSS request <https://unpkg.com/leaflet@1.0.1/dist/leaflet.css>`__ which is always made, regardless of whether a map is displayed.
+We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles.
 
 If a map is displayed by Auspice the individual tiles are requested from api.mapbox.com. Panning and zooming of the map result in futher requests for tiles. These are requested using our hardcoded access key, however this may change to a build-time-customisation in the future.
 
