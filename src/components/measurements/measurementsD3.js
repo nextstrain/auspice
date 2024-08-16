@@ -386,8 +386,13 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues
     const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
     // Order the color groups by the legend value order so that we have a stable order for the means
-    legendValues
-      .filter((attribute) => String(attribute) in colorByGroups)
+    const orderedColorGroups = orderBy(
+      Object.keys(colorByGroups),
+      (key) => legendValues.indexOf(key),
+      "asc"
+    );
+
+    orderedColorGroups
       .forEach((attribute) => {
         const {color, values} = colorByGroups[attribute];
         drawMeanAndStandardDeviation(
