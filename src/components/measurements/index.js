@@ -41,6 +41,17 @@ const useDeepCompareMemo = (value) => {
   return ref.current;
 };
 
+/**
+ * A wrapper around React's useCallback hook that does a deep comparison of the
+ * dependencies.
+ * @param {function} fn
+ * @param {Array} dependencies
+ * @returns
+ */
+const useDeepCompareCallback = (fn, dependencies) => {
+  return useCallback(fn, dependencies.map(useDeepCompareMemo))
+}
+
 // Checks visibility against global NODE_VISIBLE
 const isVisible = (visibility) => visibility === NODE_VISIBLE;
 
@@ -160,7 +171,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, groupByValueOrder);
 
   // Cache D3 scale functions to allow deep comparison to work below for svgData
-  const xScale = useCallback(createXScale(width, measurements), [width, measurements]);
+  const xScale = useDeepCompareCallback(createXScale(width, filteredMeasurements), [width, filteredMeasurements]);
   const yScale = useCallback(createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({
