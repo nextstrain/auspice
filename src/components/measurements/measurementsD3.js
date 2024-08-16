@@ -58,12 +58,14 @@ const getSubplotDOMId = (groupingValueIndex) => `measurement_subplot_${groupingV
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
  * values as the domain and the panelWidth with hard-coded padding values as
- * the range. Expected to be shared across all subplots.
+ * the range. The optional paddingProportion can be provided to include additional
+ * padding for the domain. Expected to be shared across all subplots.
  * @param {number} panelWidth
  * @param {Array<Object>} measurements
+ * @param {number} [paddingProportion=0.1]
  * @returns {function}
  */
-export const createXScale = (panelWidth, measurements) => {
+export const createXScale = (panelWidth, measurements, paddingProportion = 0.1) => {
   // Padding the xScale based on proportion
   // Copied from https://github.com/d3/d3-scale/issues/150#issuecomment-561304239
   function padLinear([x0, x1], k) {
@@ -73,7 +75,7 @@ export const createXScale = (panelWidth, measurements) => {
 
   return (
     scaleLinear()
-      .domain(padLinear(extent(measurements, (m) => m.value), 0.1))
+      .domain(padLinear(extent(measurements, (m) => m.value), paddingProportion))
       .range([layout.leftPadding, panelWidth - layout.rightPadding])
       .nice()
   );
