@@ -64,9 +64,16 @@ const getSubplotDOMId = (groupingValueIndex) => `measurement_subplot_${groupingV
  * @returns {function}
  */
 export const createXScale = (panelWidth, measurements) => {
+  // Padding the xScale based on proportion
+  // Copied from https://github.com/d3/d3-scale/issues/150#issuecomment-561304239
+  function padLinear([x0, x1], k) {
+    const dx = (x1 - x0) * k / 2;
+    return [x0 - dx, x1 + dx];
+  }
+
   return (
     scaleLinear()
-      .domain(extent(measurements, (m) => m.value))
+      .domain(padLinear(extent(measurements, (m) => m.value), 0.1))
       .range([layout.leftPadding, panelWidth - layout.rightPadding])
       .nice()
   );
