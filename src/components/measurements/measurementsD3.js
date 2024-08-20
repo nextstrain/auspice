@@ -58,15 +58,24 @@ const getSubplotDOMId = (groupingValueIndex) => `measurement_subplot_${groupingV
 /**
  * Creates the D3 linear scale for the x-axis with the provided measurements'
  * values as the domain and the panelWidth with hard-coded padding values as
- * the range. Expected to be shared across all subplots.
+ * the range. The optional paddingProportion can be provided to include additional
+ * padding for the domain. Expected to be shared across all subplots.
  * @param {number} panelWidth
  * @param {Array<Object>} measurements
+ * @param {number} [paddingProportion=0.1]
  * @returns {function}
  */
-export const createXScale = (panelWidth, measurements) => {
+export const createXScale = (panelWidth, measurements, paddingProportion = 0.1) => {
+  // Padding the xScale based on proportion
+  // Copied from https://github.com/d3/d3-scale/issues/150#issuecomment-561304239
+  function padLinear([x0, x1], k) {
+    const dx = (x1 - x0) * k / 2;
+    return [x0 - dx, x1 + dx];
+  }
+
   return (
     scaleLinear()
-      .domain(extent(measurements, (m) => m.value))
+      .domain(padLinear(extent(measurements, (m) => m.value), paddingProportion))
       .range([layout.leftPadding, panelWidth - layout.rightPadding])
       .nice()
   );
@@ -377,8 +386,13 @@ export const drawMeansForColorBy = (ref, svgData, treeStrainColors, legendValues
     const ySpacing = (layout.subplotHeight - 4 * layout.subplotPadding) / (numberOfColorByAttributes - 1);
     let yValue = layout.subplotPadding;
     // Order the color groups by the legend value order so that we have a stable order for the means
-    legendValues
-      .filter((attribute) => String(attribute) in colorByGroups)
+    const orderedColorGroups = orderBy(
+      Object.keys(colorByGroups),
+      (key) => legendValues.indexOf(key),
+      "asc"
+    );
+
+    orderedColorGroups
       .forEach((attribute) => {
         const {color, values} = colorByGroups[attribute];
         drawMeanAndStandardDeviation(

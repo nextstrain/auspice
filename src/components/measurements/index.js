@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useRef, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
@@ -40,6 +40,17 @@ const useDeepCompareMemo = (value) => {
   }
   return ref.current;
 };
+
+/**
+ * A wrapper around React's useCallback hook that does a deep comparison of the
+ * dependencies.
+ * @param {function} fn
+ * @param {Array} dependencies
+ * @returns
+ */
+const useDeepCompareCallback = (fn, dependencies) => {
+  return useCallback(fn, dependencies.map(useDeepCompareMemo))
+}
 
 // Checks visibility against global NODE_VISIBLE
 const isVisible = (visibility) => visibility === NODE_VISIBLE;
@@ -159,9 +170,9 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   }
   const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, groupByValueOrder);
 
-  // Memoize D3 scale functions to allow deep comparison to work below for svgData
-  const xScale = useMemo(() => createXScale(width, measurements), [width, measurements]);
-  const yScale = useMemo(() => createYScale(), []);
+  // Cache D3 scale functions to allow deep comparison to work below for svgData
+  const xScale = useDeepCompareCallback(createXScale(width, filteredMeasurements), [width, filteredMeasurements]);
+  const yScale = useCallback(createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({
     containerHeight: height,
@@ -172,8 +183,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     groupingOrderedValues,
     groupedMeasurements
   });
-  // Memoize handleHover function to avoid extra useEffect calls
-  const handleHover = useMemo(() => (data, dataType, mouseX, mouseY, colorByAttr=null) => {
+  // Cache handleHover function to avoid extra useEffect calls
+  const handleHover = useCallback((data, dataType, mouseX, mouseY, colorByAttr=null) => {
     let newHoverData = null;
     if (data !== null) {
       // Set color-by attribute as title if provided
