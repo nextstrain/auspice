@@ -137,7 +137,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_WORKFLOW_DISPATCH }}
 
   build-docs:
-    uses: nextstrain/.github/.github/workflows/docs-ci.yaml@master
+    uses: nextstrain/.github/.github/workflows/docs-ci.yaml@check-external-links-29
     with:
       docs-directory: docs/
       environment-file: docs/conda.yml
