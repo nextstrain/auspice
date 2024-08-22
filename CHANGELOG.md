@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.56.1 - 2024/08/22
+
+
 * Fix bug where app crashed if measurements JSON did not define thresholds ([#1802](https://github.com/nextstrain/auspice/pull/1802))
 * Fix bug where measurements display did not honor the default `measurements_display` ([#1802](https://github.com/nextstrain/auspice/pull/1802))
 * Only display download-JSON button if the dataset name can be parsed from pathname ([#1804](https://github.com/nextstrain/auspice/pull/1804))
