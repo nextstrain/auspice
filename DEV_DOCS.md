@@ -194,9 +194,27 @@ If a translation of a particular string is not yet available, then auspice will 
 
 ## Releases & versioning
 
-1. Run the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as the GitHub workflow is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
-    - Ensure the [docker-base CI action triggered by nextstrain-bot](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml?query=branch%3Amaster+actor%3Anextstrain-bot) runs successfully.
-2. Update the version on Bioconda:
+Releasing Auspice requires a few manual steps as there are so many downstream targets which are each to be updated with the new version.
+
+1. Compare the git history against the previous release (e.g. [view master vs release branch on GitHub](https://github.com/nextstrain/auspice/compare/release...master)) and ensure all changes are reflected in `CHANGELOG.md`.
+   If new entries are needed, commit these and push them to the remote (GitHub).
+1. Ensure you are on the master branch and up to date with the remote, have `node` and `npm` in your environment, and are logged into the GitHub CLI (`gh auth status`).
+1. Run the `./releaseNewVersion.sh` script.
+    This will prompt you for the version number increase and push changes to both the master and release branches.
+    * Auspice's [CI Action](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml) will publish the new version to npm. 
+    It takes some time for the new version to appear in the npm registry.
+    To check if it has been released run `npm view auspice versions --json | tail`; you may wish to wait for the email to the slack channel `#nextstrain-admin` but it's unclear if there is still a lag after the email arrives before it's available to `npm` APIs.
+    None of the following numbered steps will work until the new version is available on npm. 
+    * The release script will automatically create an entry on [github.com/nextstrain/auspice/releases](https://github.com/nextstrain/auspice/releases/) containing information from the changelog.
+    * Ensure the [docker-base CI action triggered by nextstrain-bot](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml?query=branch%3Amaster+actor%3Anextstrain-bot) runs successfully.
+    (This action in nextstrain/docker-base is triggered by Auspice's CI action and installs Auspice from the release branch such that it's not dependant on availability in npm.)
+1. Updates to nextstrain sites which depend on Auspice:
+    1. Nextstrain.org will check daily for a new version of Auspice and [automatically merge the resulting PR](https://github.com/nextstrain/nextstrain.org/blob/175171e0e1c1b331538729a1168598227d08698d/.github/workflows/dependabot-automation.yml), which results in [the canary site](https://next.nextstrain.org) being updated.
+        * You can [trigger this check](https://github.com/nextstrain/nextstrain.org/blob/175171e0e1c1b331538729a1168598227d08698d/.github/dependabot.yml#L16-L17) as soon as the new version is available on npm if you wish.
+        * To see the updated Auspice on [nextstrain.org](https://nextstrain.org) you'll need to promote the canary server.
+    1. Auspice.us will similarly [check daily for a new version](https://github.com/nextstrain/auspice.us/blob/master/.github/dependabot.yml) however the resulting PR must be merged manually.
+    1. Nextclade uses the same approach as auspice.us and is usually merged by Ivan.
+1. Update the version on Bioconda:
     1. [Click to edit the Bioconda recipe](https://github.com/bioconda/bioconda-recipes/edit/master/recipes/auspice/meta.yaml). Or, consider using [the Nextstrain fork](https://github.com/nextstrain/bioconda-recipes) to create PRs that other team members can contribute to.
     2. Make the following changes:
         1. Update the version number in the first line.
@@ -209,6 +227,5 @@ If a translation of a particular string is not yet available, then auspice will 
                 | shasum -a 256 \
                 | cut -f 1 -d " "
             ```
-
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
-3. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
+1. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
