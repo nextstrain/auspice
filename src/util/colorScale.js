@@ -48,9 +48,12 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
-      if (scaleType === "continuous" || scaleType==="temporal") {
+      if (scaleType === "temporal" || colorBy === "num_date") {
         ({continuous, colorScale, legendBounds, legendValues} =
-          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes, scaleType==="temporal"));
+          createTemporalScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+      } else if (scaleType === "continuous") {
+        ({continuous, colorScale, legendBounds, legendValues} =
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
@@ -218,19 +221,10 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
-function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTemporal) {
-  /* Note that a temporal scale is treated very similar to a continuous one... for the time being.
-     In the future it'd be nice to allow YYYY-MM-DD values, but that's for another PR (and comes
-     with its own complexities - what about -XX dates?)                     james june 2022    */
-  // console.log("making a continuous color scale for ", colorBy);
-  if (colorBy==="num_date") {
-    /* before numeric scales were a definable type, num_date was specified as continuous */
-    isTemporal = true;
-  }
+function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
+
   let minMax;
-  if (isTemporal) {
-    // empty - minMax not needed
-  } else if (colorBy==="lbi") {
+  if (colorBy==="lbi") {
     minMax = [0, 0.7]; /* TODO: this is for historical reasons, and we should switch to a provided scale */
   } else {
     minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
@@ -244,8 +238,46 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   if (anchorPoints) {
     domain = anchorPoints.map((pt) => pt[0]);
     range = anchorPoints.map((pt) => pt[1]);
-  } else if (isTemporal) {
-    /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
+  } else {
+    range = colors[9];
+    domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
+  }
+  const scale = scaleLinear().domain(domain).range(range);
+
+  let legendValues;
+  if (colorBy==="lbi") {
+    /* TODO: this is for historical reasons, and we should switch to a provided scale */
+    legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
+  } else {
+    const spread = minMax[1] - minMax[0];
+    const dp = spread > 5 ? 2 : 3;
+    /* if legend values are identical (for the specified number of decimal places) then we
+    should filter them out */
+    legendValues = genericDomain
+      .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
+      .filter((el, idx, values) => values.indexOf(el)===idx);
+  }
+  // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
+  if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
+
+  return {
+    continuous: true,
+    colorScale: (val) => isValueValid(val) ? scale(val) : unknownColor,
+    legendBounds: createLegendBounds(legendValues),
+    legendValues
+  };
+}
+
+
+function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
+
+  /* user-defined anchor points across the scale - note previously temporal scales could use this,
+  although I doubt any did */
+  // const anchorPoints = _validateContinuousAnchorPoints(providedScale);
+
+  /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
+  let domain, range;
+  {
     let rootDate = getTraitFromNode(t1nodes[0], colorBy);
     let vals = t1nodes.filter((n) => !n.hasChildren)
       .map((n) => getTraitFromNode(n, colorBy));
@@ -265,27 +297,12 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
     domain.push(vals[vals.length-1]);
     domain = [...new Set(domain)]; /* filter to unique values only */
     range = colors[domain.length]; /* use the right number of colours */
-  } else {
-    range = colors[9];
-    domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
   }
+
   const scale = scaleLinear().domain(domain).range(range);
 
-  let legendValues;
-  if (isTemporal) {
-    legendValues = domain.slice(1);
-  } else if (colorBy==="lbi") {
-    /* TODO: this is for historical reasons, and we should switch to a provided scale */
-    legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
-  } else {
-    const spread = minMax[1] - minMax[0];
-    const dp = spread > 5 ? 2 : 3;
-    /* if legend values are identical (for the specified number of decimal places) then we
-    should filter them out */
-    legendValues = genericDomain
-      .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
-      .filter((el, idx, values) => values.indexOf(el)===idx);
-  }
+  const legendValues = domain.slice(1);
+
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
