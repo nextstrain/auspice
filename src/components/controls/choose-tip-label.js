@@ -8,7 +8,7 @@ import CustomSelect from "./customSelect";
 
 @connect((state) => ({
   selected: state.controls.tipLabelKey,
-  options: collectAvailableTipLabelOptions(state.metadata.colorings)
+  options: collectAvailableTipLabelOptions(state.tree.nodeAttrKeys, state.metadata.colorings)
 }))
 class ChooseTipLabel extends React.Component {
   constructor(props) {
@@ -43,11 +43,17 @@ const WithTranslation = withTranslation()(ChooseTipLabel);
 export default WithTranslation;
 
 /**
- * collect available tip labellings -- currently this is based on the available
- * colorings but we ignore genotype (this could be implemented in the future,
- * but it's not straightforward)
+ * available tip labellings are all observed node_attrs as well as two special cases:
+ * no tip labels / hide & the node name ("sample name"). If a node_attr is a coloring
+ * then we display the coloring title.
+ * 
+ * Note that this only considers the main (LHS) tree. It is trivial for this function
+ * to consider the RHS tree, however the logic in `recomputeReduxState.js` doesn't
+ * make it straightforward to provide the RHS `nodeAttrKeys` when we construct these.
+ * 
+ * In the future we could add genotype, but it's not straightforward.
  */
-export function collectAvailableTipLabelOptions(colorings) {
+export function collectAvailableTipLabelOptions(nodeAttrKeys, colorings) {
   return [
     /**
      * We should consider using a Symbol for the 'none' value so that it
@@ -56,10 +62,7 @@ export function collectAvailableTipLabelOptions(colorings) {
      */
     {value: 'none', label: "none"},
     {value: strainSymbol, label: "Sample Name"},
-    ...Object.entries(colorings)
-      .filter((keyValue) => keyValue[0] !== 'gt' && keyValue[0] !== 'none')
-      .map(([key, value]) => {
-        return {value: key, label: value.title};
-      })
+    ...Array.from(nodeAttrKeys)
+      .map((key) => ({value: key, label: (colorings[key]||{})?.title||key}))
   ];
 }

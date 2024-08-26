@@ -10,11 +10,15 @@ const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
  * node.hasChildren {bool}
  * node.arrayIdx  {integer} - the index of the node in the nodes array
  * @param  {array} nodes redux tree nodes
- * @return {array} input array (kinda unnecessary)
+ * @return {Object} ret 
+ * @return {Set} ret.nodeAttrKeys collection of all `node_attr` keys whose values are Objects
+ * @return {Array} ret.nodes input array (kinda unnecessary)
+ * 
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 const processNodes = (nodes) => {
   const nodeNamesSeen = new Set();
+  const nodeAttrKeys = new Set();
   calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
     d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
@@ -32,8 +36,15 @@ const processNodes = (nodes) => {
       console.warn(`Tree node detected with a duplicate name. Changing '${prev}' to '${d.name}' and continuing...`);
     }
     nodeNamesSeen.add(d.name);
+
+    for (const [attrKey, attrValue] of Object.entries(d.node_attrs || {})) {
+      if (typeof attrValue === 'object' && 'value' in attrValue) {
+        nodeAttrKeys.add(attrKey)
+      }
+    }
+
   });
-  return nodes;
+  return {nodeAttrKeys, nodes};
 };
 
 /**
@@ -165,7 +176,7 @@ export const treeJsonToState = (treeJSON) => {
     nodesArray.push(...flattenTree(treeRootNode));
   }
   nodesArray.unshift(makeSubtreeRootNode(nodesArray, subtreeIndicies));
-  const nodes = processNodes(nodesArray);
+  const {nodeAttrKeys, nodes} = processNodes(nodesArray);
   addParentInfo(nodesArray);
   const vaccines = nodes.filter((d) => {
     const v = getVaccineFromNode(d);
@@ -174,6 +185,6 @@ export const treeJsonToState = (treeJSON) => {
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   const observedMutations = collectObservedMutations(nodesArray);
   return Object.assign({}, getDefaultTreeState(), {
-    nodes, vaccines, observedMutations, availableBranchLabels, loaded: true
+    nodes, nodeAttrKeys, vaccines, observedMutations, availableBranchLabels, loaded: true
   });
 };
