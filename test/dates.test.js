@@ -93,3 +93,50 @@ test("dates are prettified as expected", () => {
   expect(prettifyDate("MONTH", "2020-01-01")).toStrictEqual("2020-Jan");
   expect(prettifyDate("CENTURY", "-3000-01-01")).toStrictEqual("-3000"); // BCE
 });
+
+
+const ambiguousCalendarDates = {
+  "2024-XX-XX": 2024.5,
+  "2024-01-XX": 2024.044,
+  "2024-11-XX": 2024.88, 
+  "2024-12-XX": 2024.96,
+}
+
+test("calendarToNumeric doesn't allow ambiguous dates unless requested", () => {
+  for (const [calendarDate, _] of Object.entries(ambiguousCalendarDates)) {
+    expect(calendarToNumeric(calendarDate)).toBe(undefined)
+  }
+});
+
+test("calendarToNumeric allows ambiguous dates when requested", () => {
+  for (const [calendarDate, numericDate] of Object.entries(ambiguousCalendarDates)) {
+    expect(calendarToNumeric(calendarDate, true)).toBeCloseTo(numericDate);
+  }
+});
+
+const invalidUnambiguousCalendarDates = [
+  "string",
+  "-string",
+  "2024-XX-01",
+  "2024-X-XX",
+  "2024-XX-XXX",
+  2024.123,
+]
+
+test("calendarToNumeric returns undefined for erroneous dates without ambiguity", () => {
+  for (const calendarDate of invalidUnambiguousCalendarDates) {
+    expect(calendarToNumeric(calendarDate)).toBe(undefined);
+  }
+});
+
+const invalidAmbiguousCalendarDates = [
+  "2024-XX-01",
+  "2024-X-XX",
+  "2024-XX-XXX",
+]
+
+test("calendarToNumeric returns undefined for erroneous dates with ambiguity", () => {
+  for (const calendarDate of invalidAmbiguousCalendarDates) {
+    expect(calendarToNumeric(calendarDate, true)).toBe(undefined);
+  }
+});
