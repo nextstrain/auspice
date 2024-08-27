@@ -1,5 +1,5 @@
 import { tipRadius, tipRadiusOnLegendMatch } from "./globals";
-import { getTipColorAttribute } from "./colorHelpers";
+import { getTipColorAttribute, numDate } from "./colorHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
@@ -13,7 +13,10 @@ import { getTraitFromNode } from "./treeMiscHelpers";
 * @returns bool
 */
 export const determineLegendMatch = (selectedLegendItem: (string|number), node:any, colorScale:any) => {
-  const nodeAttr = getTipColorAttribute(node, colorScale);
+  let nodeAttr = getTipColorAttribute(node, colorScale);
+  if (colorScale.scaleType === 'temporal') {
+    nodeAttr = numDate(nodeAttr);
+  }
   if (colorScale.continuous) {
     if (selectedLegendItem === colorScale.legendValues[0] && nodeAttr===colorScale.legendBounds[selectedLegendItem][0]) {
       return true;

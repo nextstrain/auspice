@@ -5,7 +5,7 @@ import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, isValueValid, NODE_VISIBLE } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
-import { getExtraVals } from "./colorHelpers";
+import { getExtraVals, numDate } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
@@ -274,19 +274,22 @@ function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
   /* user-defined anchor points across the scale - note previously temporal scales could use this,
   although I doubt any did */
   // const anchorPoints = _validateContinuousAnchorPoints(providedScale);
+  if (providedScale) {
+    console.error("Auspice currently doesn't allow a JSON-provided 'scale' for temporal colorings");
+  }
 
   /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
   let domain, range;
   {
-    let rootDate = getTraitFromNode(t1nodes[0], colorBy);
+    let rootDate = numDate(getTraitFromNode(t1nodes[0], colorBy));
     let vals = t1nodes.filter((n) => !n.hasChildren)
-      .map((n) => getTraitFromNode(n, colorBy));
+      .map((n) => numDate(getTraitFromNode(n, colorBy)));
     if (t2nodes) {
-      const treeTooRootDate = getTraitFromNode(t2nodes[0], colorBy);
+      const treeTooRootDate = numDate(getTraitFromNode(t2nodes[0], colorBy));
       if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
       vals.concat(
         t2nodes.filter((n) => !n.hasChildren)
-          .map((n) => getTraitFromNode(n, colorBy))
+          .map((n) => numDate(getTraitFromNode(n, colorBy)))
       );
     }
     vals = vals.sort();
@@ -306,9 +309,14 @@ function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
+  const colorScale = (val) => {
+    const d = numDate(val);
+    return d===undefined ? unknownColor : scale(d);
+  };
+
   return {
     continuous: true,
-    colorScale: (val) => isValueValid(val) ? scale(val) : unknownColor,
+    colorScale,
     legendBounds: createLegendBounds(legendValues),
     legendValues
   };
@@ -457,6 +465,10 @@ function _validateContinuousAnchorPoints(providedScale) {
  */
 function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
   if (!Array.isArray(providedLegend)) return false;
+  if (scaleType==='temporal') {
+    console.error("Auspice currently doesn't allow a JSON-provided 'legend' for temporal colorings");
+    return false;
+  }
 
   const data = scaleType==="continuous" ?
     providedLegend.filter((d) => typeof d.value === "number") : // continuous scales _must_ have numeric stops
