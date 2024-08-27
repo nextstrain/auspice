@@ -231,7 +231,7 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   }
 
   /* user-defined anchor points across the scale */
-  const anchorPoints = _validateContinuousAnchorPoints(providedScale);
+  const anchorPoints = _validateAnchorPoints(providedScale, (val) => typeof val==="number");
 
   /* make the continuous scale */
   let domain, range;
@@ -271,16 +271,13 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
 
 function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
 
-  /* user-defined anchor points across the scale - note previously temporal scales could use this,
-  although I doubt any did */
-  // const anchorPoints = _validateContinuousAnchorPoints(providedScale);
-  if (providedScale) {
-    console.error("Auspice currently doesn't allow a JSON-provided 'scale' for temporal colorings");
-  }
-
-  /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
   let domain, range;
-  {
+  const anchorPoints = _validateAnchorPoints(providedScale, (val) => numDate(val)!==undefined);
+  if (anchorPoints) {
+    domain = anchorPoints.map((pt) => numDate(pt[0]));
+    range = anchorPoints.map((pt) => pt[1]);
+  } else {
+    /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
     let rootDate = numDate(getTraitFromNode(t1nodes[0], colorBy));
     let vals = t1nodes.filter((n) => !n.hasChildren)
       .map((n) => numDate(getTraitFromNode(n, colorBy)));
@@ -304,7 +301,7 @@ function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
 
   const scale = scaleLinear().domain(domain).range(range);
 
-  const legendValues = domain.slice(1);
+  const legendValues = anchorPoints ? domain.slice() : domain.slice(1);
 
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
@@ -437,11 +434,11 @@ function createLegendBounds(legendValues) {
   return legendBounds;
 }
 
-function _validateContinuousAnchorPoints(providedScale) {
+function _validateAnchorPoints(providedScale, validator) {
   if (!Array.isArray(providedScale)) return false;
   const ap = providedScale.filter((item) =>
     Array.isArray(item) && item.length===2 &&
-    typeof item[0]==="number" && // idx0 is the numerical value to anchor against
+    validator(item[0]) &&
     typeof item[1]==="string" && item[1].match(/#[0-9A-Fa-f]{6}/) // schema demands full-length colour hexes
   );
   if (ap.length<2) return false; // need at least 2 valid points
@@ -466,7 +463,8 @@ function _validateContinuousAnchorPoints(providedScale) {
 function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
   if (!Array.isArray(providedLegend)) return false;
   if (scaleType==='temporal') {
-    console.error("Auspice currently doesn't allow a JSON-provided 'legend' for temporal colorings");
+    console.error("Auspice currently doesn't allow a JSON-provided 'legend' for temporal colorings, "+
+      "however all provided 'scale' entries will be shown in the legend");
     return false;
   }
 
