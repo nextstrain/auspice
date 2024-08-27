@@ -35,14 +35,19 @@ function Controls() {
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const canTogglePanelLayout = useSelector((state: RootState) => state.controls.canTogglePanelLayout);
+  const branchLengthsToDisplay = useSelector((state: RootState) => state.controls.branchLengthsToDisplay);
 
   return (
     <ControlsContainer>
       <ChooseDataset />
 
-      <ControlHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
-      <DateRangeInputs />
-      <AnimationControls />
+      {branchLengthsToDisplay !== 'divOnly' &&
+        <>
+          <ControlHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
+          <DateRangeInputs />
+          <AnimationControls />
+        </>
+      }
 
       <ControlHeader title={t("sidebar:Color By")} tooltip={ColorByInfo}/>
       <ColorBy />
@@ -110,10 +115,12 @@ function Controls() {
         />
       }
 
-      <span style={{ marginTop: "10px" }}>
-        <ControlHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
-        <AnimationOptions />
-      </span>
+      {branchLengthsToDisplay !== "divOnly" &&
+        <span style={{ marginTop: "10px" }}>
+          <ControlHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
+          <AnimationOptions />
+        </span>
+      }
 
       {canTogglePanelLayout &&
         <>
