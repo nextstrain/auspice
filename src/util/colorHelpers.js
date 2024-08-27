@@ -4,6 +4,7 @@ import scalePow from "d3-scale/src/pow";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { isValueValid } from "./globals";
+import { calendarToNumeric } from "./dateHelpers";
 
 /**
  * Average over the visible colours for a given location
@@ -147,3 +148,19 @@ export const getColorByTitle = (colorings, colorBy) => {
   return colorings[colorBy] === undefined ?
     "" : colorings[colorBy].title;
 };
+
+/**
+ * We allow values (on nodes) to be encoded as numeric dates (2021.123) or
+ * YYYY-MM-DD strings. This helper function handles this flexibility and
+ * translates any provided value to either a number or undefined.
+ */
+export function numDate(value) {
+  switch (typeof value) {
+    case "number":
+      return value;
+    case "string":
+      return calendarToNumeric(value, true); // allow XX ambiguity
+    default:
+      return undefined;
+  }
+}

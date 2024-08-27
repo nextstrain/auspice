@@ -5,7 +5,7 @@ import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, isValueValid, NODE_VISIBLE } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
-import { getExtraVals } from "./colorHelpers";
+import { getExtraVals, numDate } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
@@ -48,9 +48,12 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
-      if (scaleType === "continuous" || scaleType==="temporal") {
+      if (scaleType === "temporal" || colorBy === "num_date") {
         ({continuous, colorScale, legendBounds, legendValues} =
-          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes, scaleType==="temporal"));
+          createTemporalScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+      } else if (scaleType === "continuous") {
+        ({continuous, colorScale, legendBounds, legendValues} =
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
@@ -218,53 +221,23 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
-function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTemporal) {
-  /* Note that a temporal scale is treated very similar to a continuous one... for the time being.
-     In the future it'd be nice to allow YYYY-MM-DD values, but that's for another PR (and comes
-     with its own complexities - what about -XX dates?)                     james june 2022    */
-  // console.log("making a continuous color scale for ", colorBy);
-  if (colorBy==="num_date") {
-    /* before numeric scales were a definable type, num_date was specified as continuous */
-    isTemporal = true;
-  }
+function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
+
   let minMax;
-  if (isTemporal) {
-    // empty - minMax not needed
-  } else if (colorBy==="lbi") {
+  if (colorBy==="lbi") {
     minMax = [0, 0.7]; /* TODO: this is for historical reasons, and we should switch to a provided scale */
   } else {
     minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
   }
 
   /* user-defined anchor points across the scale */
-  const anchorPoints = _validateContinuousAnchorPoints(providedScale);
+  const anchorPoints = _validateAnchorPoints(providedScale, (val) => typeof val==="number");
 
   /* make the continuous scale */
   let domain, range;
   if (anchorPoints) {
     domain = anchorPoints.map((pt) => pt[0]);
     range = anchorPoints.map((pt) => pt[1]);
-  } else if (isTemporal) {
-    /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-    let rootDate = getTraitFromNode(t1nodes[0], colorBy);
-    let vals = t1nodes.filter((n) => !n.hasChildren)
-      .map((n) => getTraitFromNode(n, colorBy));
-    if (t2nodes) {
-      const treeTooRootDate = getTraitFromNode(t2nodes[0], colorBy);
-      if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
-      vals.concat(
-        t2nodes.filter((n) => !n.hasChildren)
-          .map((n) => getTraitFromNode(n, colorBy))
-      );
-    }
-    vals = vals.sort();
-    domain = [rootDate];
-    const n = 10;
-    const spaceBetween = parseInt(vals.length / (n - 1), 10);
-    for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
-    domain.push(vals[vals.length-1]);
-    domain = [...new Set(domain)]; /* filter to unique values only */
-    range = colors[domain.length]; /* use the right number of colours */
   } else {
     range = colors[9];
     domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
@@ -272,9 +245,7 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   const scale = scaleLinear().domain(domain).range(range);
 
   let legendValues;
-  if (isTemporal) {
-    legendValues = domain.slice(1);
-  } else if (colorBy==="lbi") {
+  if (colorBy==="lbi") {
     /* TODO: this is for historical reasons, and we should switch to a provided scale */
     legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
   } else {
@@ -292,6 +263,57 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes, isTempo
   return {
     continuous: true,
     colorScale: (val) => isValueValid(val) ? scale(val) : unknownColor,
+    legendBounds: createLegendBounds(legendValues),
+    legendValues
+  };
+}
+
+
+function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
+
+  let domain, range;
+  const anchorPoints = _validateAnchorPoints(providedScale, (val) => numDate(val)!==undefined);
+  if (anchorPoints) {
+    domain = anchorPoints.map((pt) => numDate(pt[0]));
+    range = anchorPoints.map((pt) => pt[1]);
+  } else {
+    /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
+    let rootDate = numDate(getTraitFromNode(t1nodes[0], colorBy));
+    let vals = t1nodes.filter((n) => !n.hasChildren)
+      .map((n) => numDate(getTraitFromNode(n, colorBy)));
+    if (t2nodes) {
+      const treeTooRootDate = numDate(getTraitFromNode(t2nodes[0], colorBy));
+      if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
+      vals.concat(
+        t2nodes.filter((n) => !n.hasChildren)
+          .map((n) => numDate(getTraitFromNode(n, colorBy)))
+      );
+    }
+    vals = vals.sort();
+    domain = [rootDate];
+    const n = 10;
+    const spaceBetween = parseInt(vals.length / (n - 1), 10);
+    for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
+    domain.push(vals[vals.length-1]);
+    domain = [...new Set(domain)]; /* filter to unique values only */
+    range = colors[domain.length]; /* use the right number of colours */
+  }
+
+  const scale = scaleLinear().domain(domain).range(range);
+
+  const legendValues = anchorPoints ? domain.slice() : domain.slice(1);
+
+  // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
+  if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
+
+  const colorScale = (val) => {
+    const d = numDate(val);
+    return d===undefined ? unknownColor : scale(d);
+  };
+
+  return {
+    continuous: true,
+    colorScale,
     legendBounds: createLegendBounds(legendValues),
     legendValues
   };
@@ -412,11 +434,11 @@ function createLegendBounds(legendValues) {
   return legendBounds;
 }
 
-function _validateContinuousAnchorPoints(providedScale) {
+function _validateAnchorPoints(providedScale, validator) {
   if (!Array.isArray(providedScale)) return false;
   const ap = providedScale.filter((item) =>
     Array.isArray(item) && item.length===2 &&
-    typeof item[0]==="number" && // idx0 is the numerical value to anchor against
+    validator(item[0]) &&
     typeof item[1]==="string" && item[1].match(/#[0-9A-Fa-f]{6}/) // schema demands full-length colour hexes
   );
   if (ap.length<2) return false; // need at least 2 valid points
@@ -440,6 +462,11 @@ function _validateContinuousAnchorPoints(providedScale) {
  */
 function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
   if (!Array.isArray(providedLegend)) return false;
+  if (scaleType==='temporal') {
+    console.error("Auspice currently doesn't allow a JSON-provided 'legend' for temporal colorings, "+
+      "however all provided 'scale' entries will be shown in the legend");
+    return false;
+  }
 
   const data = scaleType==="continuous" ?
     providedLegend.filter((d) => typeof d.value === "number") : // continuous scales _must_ have numeric stops

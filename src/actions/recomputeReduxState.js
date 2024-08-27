@@ -92,13 +92,31 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.tl) {
     state["tipLabelKey"] = query.tl===strainSymbolUrlString ? strainSymbol : query.tl;
   }
+
   if (query.dmin) {
-    state["dateMin"] = query.dmin;
-    state["dateMinNumeric"] = calendarToNumeric(query.dmin);
+    const dateNum = calendarToNumeric(query.dmin);
+    if (_validDate(dateNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric)) {
+      state["dateMin"] = query.dmin;
+      state["dateMinNumeric"] = dateNum;
+    } else {
+      console.error(`URL query "dmin=${query.dmin}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      delete query.dmin;
+    }
   }
   if (query.dmax) {
-    state["dateMax"] = query.dmax;
-    state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
+    const dateNum = calendarToNumeric(query.dmax);
+    if (_validDate(dateNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric)) {
+      if ((query.dmin && dateNum <= state.dateMinNumeric)) {
+        console.error(`Requested "dmax=${query.dmax}" is earlier than "dmin=${query.dmin}", ignoring dmax.`);
+        delete query.dmax;
+      } else {
+        state["dateMax"] = query.dmax;
+        state["dateMaxNumeric"] = dateNum;
+      }
+    } else {
+      console.error(`URL query "dmax=${query.dmax}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      delete query.dmax;
+    }
   }
 
   /** Queries 's', 'gt', and 'f_<name>' correspond to active filters */
@@ -115,21 +133,39 @@ const modifyStateViaURLQuery = (state, query) => {
     state.filters[genotypeSymbol] = decodeGenotypeFilters(query.gt||"");
   }
 
+  state.animationPlayPauseButton = "Play";
   if (query.animate) {
     const params = query.animate.split(',');
-    // console.log("start animation!", params);
-    window.NEXTSTRAIN.animationStartPoint = calendarToNumeric(params[0]);
-    window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(params[1]);
-    state.dateMin = params[0];
-    state.dateMax = params[1];
-    state.dateMinNumeric = calendarToNumeric(params[0]);
-    state.dateMaxNumeric = calendarToNumeric(params[1]);
-    state.mapAnimationShouldLoop = params[2] === "1";
-    state.mapAnimationCumulative = params[3] === "1";
-    state.mapAnimationDurationInMilliseconds = parseInt(params[4], 10);
-    state.animationPlayPauseButton = "Pause";
-  } else {
-    state.animationPlayPauseButton = "Play";
+    if (params.length!==5) {
+      console.error("Invalid 'animate' URL query (not enough fields)");
+      delete query.animate;
+    } else if (state.branchLengthsToDisplay==='divOnly') {
+      console.error("Invalid 'animate' URL query (tree is not a timetree)");
+      delete query.animate;
+    } else {
+      const [_dmin, _dminNum] = [params[0], calendarToNumeric(params[0])];
+      const [_dmax, _dmaxNum] = [params[1], calendarToNumeric(params[1])];
+      if (
+        !_validDate(_dminNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
+        !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
+        _dminNum >= _dmaxNum
+      ) {
+        console.error("Invalid 'animate' URL query (invalid date range)")
+        delete query.animate
+      } else {
+        window.NEXTSTRAIN.animationStartPoint = _dminNum;
+        window.NEXTSTRAIN.animationEndPoint = _dmaxNum;
+        state.dateMin = _dmin;
+        state.dateMax = _dmax;
+        state.dateMinNumeric = _dminNum;
+        state.dateMaxNumeric = _dmaxNum;
+        state.mapAnimationShouldLoop = params[2] === "1";
+        state.mapAnimationCumulative = params[3] === "1";
+        const duration = parseInt(params[4], 10);
+        state.mapAnimationDurationInMilliseconds = isNaN(duration) ? 30_000 : duration;
+        state.animationPlayPauseButton = "Pause";
+      }
+    }
   }
   if (query.branchLabel) {
     state.selectedBranchLabel = query.branchLabel;
@@ -171,6 +207,10 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
   return state;
+
+  function _validDate(dateNum, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+    return !(dateNum===undefined || dateNum > absoluteDateMaxNumeric || dateNum < absoluteDateMinNumeric);
+  }
 };
 
 const restoreQueryableStateToDefaults = (state) => {
@@ -209,23 +249,6 @@ const restoreQueryableStateToDefaults = (state) => {
 };
 
 const modifyStateViaMetadata = (state, metadata, genomeMap) => {
-  if (metadata.date_range) {
-    /* this may be useful if, e.g., one were to want to display an outbreak
-    from 2000-2005 (the default is the present day) */
-    if (metadata.date_range.date_min) {
-      state["dateMin"] = metadata.date_range.date_min;
-      state["dateMinNumeric"] = calendarToNumeric(state["dateMin"]);
-      state["absoluteDateMin"] = metadata.date_range.date_min;
-      state["absoluteDateMinNumeric"] = calendarToNumeric(state["absoluteDateMin"]);
-      state["mapAnimationStartDate"] = metadata.date_range.date_min;
-    }
-    if (metadata.date_range.date_max) {
-      state["dateMax"] = metadata.date_range.date_max;
-      state["dateMaxNumeric"] = calendarToNumeric(state["dateMax"]);
-      state["absoluteDateMax"] = metadata.date_range.date_max;
-      state["absoluteDateMaxNumeric"] = calendarToNumeric(state["absoluteDateMax"]);
-    }
-  }
   if (metadata.analysisSlider) {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
