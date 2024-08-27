@@ -249,23 +249,6 @@ const restoreQueryableStateToDefaults = (state) => {
 };
 
 const modifyStateViaMetadata = (state, metadata, genomeMap) => {
-  if (metadata.date_range) {
-    /* this may be useful if, e.g., one were to want to display an outbreak
-    from 2000-2005 (the default is the present day) */
-    if (metadata.date_range.date_min) {
-      state["dateMin"] = metadata.date_range.date_min;
-      state["dateMinNumeric"] = calendarToNumeric(state["dateMin"]);
-      state["absoluteDateMin"] = metadata.date_range.date_min;
-      state["absoluteDateMinNumeric"] = calendarToNumeric(state["absoluteDateMin"]);
-      state["mapAnimationStartDate"] = metadata.date_range.date_min;
-    }
-    if (metadata.date_range.date_max) {
-      state["dateMax"] = metadata.date_range.date_max;
-      state["dateMaxNumeric"] = calendarToNumeric(state["dateMax"]);
-      state["absoluteDateMax"] = metadata.date_range.date_max;
-      state["absoluteDateMaxNumeric"] = calendarToNumeric(state["absoluteDateMax"]);
-    }
-  }
   if (metadata.analysisSlider) {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
