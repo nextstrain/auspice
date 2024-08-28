@@ -98,9 +98,12 @@ export function getFirstMatchingScatterVariable(options, tryTheseFirst, notThisV
 export function addScatterAxisInfo(scatterVariables, axis, controls, tree, metadata) {
   const axisVar = scatterVariables[axis];
   const knownContinuousKeys = ["div", "num_date", "displayOrder"];
-  if (knownContinuousKeys.includes(axisVar) || metadata.colorings[axisVar].type==="continuous") {
+  if (knownContinuousKeys.includes(axisVar) || metadata.colorings[axisVar].type==="continuous" ||
+    metadata.colorings[axisVar].type==="temporal")
+  {
     scatterVariables[`${axis}Continuous`] = true;
     scatterVariables[`${axis}Domain`] = undefined;
+    scatterVariables[`${axis}Temporal`] = metadata.colorings[axisVar]?.type==="temporal";
     return scatterVariables;
   }
   const trait = scatterVariables[axis]==="gt" ? controls.colorBy : scatterVariables[axis];
@@ -109,12 +112,14 @@ export function addScatterAxisInfo(scatterVariables, axis, controls, tree, metad
 }
 
 export function addScatterAxisGivenColorScale(scatterVariables, colorScale, axis) {
-  if (colorScale.scaleType==="continuous") {
+  if (colorScale.scaleType==="continuous" || colorScale.scaleType==="temporal") {
     scatterVariables[`${axis}Continuous`] = true;
     scatterVariables[`${axis}Domain`] = undefined;
+    scatterVariables[`${axis}Temporal`] = colorScale.scaleType==="temporal";
     return scatterVariables;
   }
   scatterVariables[`${axis}Continuous`] = false;
   scatterVariables[`${axis}Domain`] = colorScale.domain.slice();
+  scatterVariables[`${axis}Temporal`] = false;
   return scatterVariables;
 }
