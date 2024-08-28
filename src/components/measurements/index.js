@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useState } from "react";
+import React, { useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
@@ -40,17 +40,6 @@ const useDeepCompareMemo = (value) => {
   }
   return ref.current;
 };
-
-/**
- * A wrapper around React's useCallback hook that does a deep comparison of the
- * dependencies.
- * @param {function} fn
- * @param {Array} dependencies
- * @returns
- */
-const useDeepCompareCallback = (fn, dependencies) => {
-  return useCallback(fn, dependencies.map(useDeepCompareMemo))
-}
 
 // Checks visibility against global NODE_VISIBLE
 const isVisible = (visibility) => visibility === NODE_VISIBLE;
@@ -170,9 +159,18 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   }
   const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, groupByValueOrder);
 
-  // Cache D3 scale functions to allow deep comparison to work below for svgData
-  const xScale = useDeepCompareCallback(createXScale(width, filteredMeasurements), [width, filteredMeasurements]);
-  const yScale = useCallback(createYScale(), []);
+  //
+  /**
+   * Memoize D3 scale functions to allow deep comparison to work below for svgData
+   * Using `useMemo` instead of `useCallback` because `useCallback` is specifically designed for inline functions
+   * and will raise lint errors, see https://github.com/facebook/react/issues/19240#issuecomment-652945246
+   *
+   * Silencing warnings for useMemo's dependency list since we need to do a deep comparison of `filteredMeasurements` array
+   *  -Jover, 28 August 2024
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const xScale = useMemo(() => createXScale(width, filteredMeasurements), [width, filteredMeasurements].map(useDeepCompareMemo));
+  const yScale = useMemo(() => createYScale(), []);
   // Memoize all data needed for basic SVG to avoid extra re-drawings
   const svgData = useDeepCompareMemo({
     containerHeight: height,
