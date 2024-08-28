@@ -578,9 +578,9 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
 
   /* check tip label is valid. We use the function which generates the options for the dropdown here.
    * state.defaults.tipLabelKey is set by the JSON's display_defaults (default: strainSymbol)
-   * state.tipLabelKey is first set the JSON and then overridden via the URL query (default: state.defaults.tipLabelKey)
+   * state.tipLabelKey is initially the same value and then overridden via the URL query (default: state.defaults.tipLabelKey)
    */
-  const validTipLabels = collectAvailableTipLabelOptions(metadata.colorings).map((o) => o.value);
+  const validTipLabels = collectAvailableTipLabelOptions(tree.nodeAttrKeys, metadata.colorings).map((o) => o.value);
   if (!validTipLabels.includes(state.defaults.tipLabelKey)) {
     console.error("Invalid JSON-defined tip label:", state.defaults.tipLabelKey);
     state.defaults.tipLabelKey = strainSymbol;

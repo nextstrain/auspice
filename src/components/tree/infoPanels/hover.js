@@ -5,9 +5,10 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
   getFullAuthorInfoFromNode, getTipChanges, getBranchMutations } from "../../../util/treeMiscHelpers";
-import { isValueValid } from "../../../util/globals";
+import { isValueValid, strainSymbol } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
+import { nodeDisplayName } from "./helpers";
 
 export const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -31,12 +32,6 @@ export const InfoLine = ({name, value, padBelow=false}) => {
     </div>
   );
 };
-
-const StrainName = ({name}) => (
-  <div style={infoPanelStyles.tooltipHeading}>
-    {name}
-  </div>
-);
 
 /**
  * A React component to display information about the branch's time & divergence (where applicable)
@@ -267,13 +262,12 @@ const BranchMutations = ({node, geneSortFn, observedMutations, t}) => {
  * @param  {Object} props
  * @param  {Object} props.node  branch node which is currently highlighted
  */
-const BranchDescendents = ({node, t}) => {
+const BranchDescendants = ({node, t, tipLabelKey}) => {
   const [name, value] = node.fullTipCount === 1 ?
-    [t("Branch leading to"), node.name] :
+    [nodeDisplayName(t, node, tipLabelKey, true), ""] :
     [t("Number of descendants")+":", node.fullTipCount];
   return <InfoLine name={name} value={value} padBelow/>;
 };
-
 
 /**
  * A React component to show vaccine information, if present
@@ -399,17 +393,20 @@ const HoverInfoPanel = ({
   colorings,
   geneSortFn,
   observedMutations,
+  tipLabelKey,
   t
 }) => {
   if (!selectedNode) return null
   const node = selectedNode.node.n; // want the redux node, not the phylo node
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
-
   return (
     <Container node={node} panelDims={panelDims}>
       {selectedNode.isBranch===false ? (
         <>
-          <StrainName name={node.name}/>
+          <div style={infoPanelStyles.tooltipHeading}>
+            {nodeDisplayName(t, node, tipLabelKey, false)}
+          </div>
+          {tipLabelKey!==strainSymbol && <InfoLine name="Node name:" value={node.name}/>}
           <VaccineInfo node={node} t={t}/>
           <TipMutations node={node} t={t}/>
           <BranchLength node={node} t={t}/>
@@ -419,7 +416,7 @@ const HoverInfoPanel = ({
         </>
       ) : (
         <>
-          <BranchDescendents node={node} t={t}/>
+          <BranchDescendants node={node} t={t} tipLabelKey={tipLabelKey}/>
           <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
