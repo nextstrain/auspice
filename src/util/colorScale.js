@@ -223,12 +223,7 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
 
 function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
 
-  let minMax;
-  if (colorBy==="lbi") {
-    minMax = [0, 0.7]; /* TODO: this is for historical reasons, and we should switch to a provided scale */
-  } else {
-    minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
-  }
+  const minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
 
   /* user-defined anchor points across the scale */
   const anchorPoints = _validateAnchorPoints(providedScale, (val) => typeof val==="number");
@@ -244,19 +239,14 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   }
   const scale = scaleLinear().domain(domain).range(range);
 
-  let legendValues;
-  if (colorBy==="lbi") {
-    /* TODO: this is for historical reasons, and we should switch to a provided scale */
-    legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
-  } else {
-    const spread = minMax[1] - minMax[0];
-    const dp = spread > 5 ? 2 : 3;
-    /* if legend values are identical (for the specified number of decimal places) then we
-    should filter them out */
-    legendValues = genericDomain
-      .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
-      .filter((el, idx, values) => values.indexOf(el)===idx);
-  }
+  const spread = minMax[1] - minMax[0];
+  const dp = spread > 5 ? 2 : 3;
+  /* if legend values are identical (for the specified number of decimal places) then we
+  should filter them out */
+  const legendValues = genericDomain
+    .map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)))
+    .filter((el, idx, values) => values.indexOf(el)===idx);
+
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
