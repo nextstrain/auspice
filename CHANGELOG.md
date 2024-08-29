@@ -6,6 +6,15 @@
   ([#1668](https://github.com/nextstrain/auspice/pull/1668))
 * The specified tip label is surfaced more prominently within the the on-hover info boxes & on-click modals.
   ([#1668](https://github.com/nextstrain/auspice/pull/1668))
+* Temporal colour scales can now use YYYY-MM-DD values (previously only numeric dates were allowed).
+  Ambiguous (YYYY-MM-XX, YYYY-XX-XX) dates are allowed and the midpoint of the range will be used to choose the colour.
+  ([#1832](https://github.com/nextstrain/auspice/pull/1832), [#1836](https://github.com/nextstrain/auspice/pull/1836))
+* Parsing and error handling for URL query-encoded dates (`dmin`, `dmax`, `animate`) has been improved.
+  ([#1832](https://github.com/nextstrain/auspice/pull/1832))
+* Div-only trees (i.e. no timetree) now hide the date / animation sections in the sidebar.
+  ([#1834](https://github.com/nextstrain/auspice/pull/1834))
+* Improvements to how we use React within the measurements panel (should not result in any user-facing changes).
+  ([#1838](https://github.com/nextstrain/auspice/pull/1838))
 
 ## version 2.56.1 - 2024/08/22
 
