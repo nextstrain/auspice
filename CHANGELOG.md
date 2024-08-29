@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.57.0 - 2024/08/30
+
+
 * Remove hardcoded color scale for LBI ([#1842](https://github.com/nextstrain/auspice/pull/1842))
 * Any `node_attr` in the tree can be used as a tip label, as well as the special-cases of strain-name and "none".
   Previously we only allowed valid colorings.
