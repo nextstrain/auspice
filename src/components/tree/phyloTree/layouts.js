@@ -6,6 +6,7 @@ import {point as scalePoint} from "d3-scale/src/band";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
+import { numDate } from "../../../util/colorHelpers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -96,6 +97,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
+      if (this.scatterVariables.xTemporal) {
+        [d.x, d.px] = [numDate(d.x, true), numDate(d.px, true)]
+      }
     }
     // set y and parent  values
     if (this.scatterVariables.y==="div") {
@@ -109,6 +113,9 @@ export const scatterplotLayout = function scatterplotLayout() {
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
+      if (this.scatterVariables.yTemporal) {
+        [d.y, d.py] = [numDate(d.y, true), numDate(d.py, true)]
+      }
     }
   });
 
