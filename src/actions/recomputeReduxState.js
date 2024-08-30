@@ -146,8 +146,8 @@ const modifyStateViaURLQuery = (state, query) => {
       const [_dmin, _dminNum] = [params[0], calendarToNumeric(params[0])];
       const [_dmax, _dmaxNum] = [params[1], calendarToNumeric(params[1])];
       if (
-        !_validDate(_dminNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
-        !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
+        !_validDate(_dminNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) ||
+        !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) ||
         _dminNum >= _dmaxNum
       ) {
         console.error("Invalid 'animate' URL query (invalid date range)")
