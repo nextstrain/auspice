@@ -65,17 +65,22 @@ const Tree = (state = getDefaultTreeState(), action) => {
       });
     case types.TREE_TOO_DATA:
       return action.tree;
-    case types.ADD_EXTRA_METADATA:
+    case types.ADD_EXTRA_METADATA: {
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
       addNodeAttrs(state.nodes, action.newNodeAttrs);
+      // add the new nodeAttrKeys to ensure tip labels get updated
+      const nodeAttrKeys = new Set(state.nodeAttrKeys);
+      Object.keys(action.newColorings).forEach((attr) => nodeAttrKeys.add(attr));
       // add the new colorings to totalStateCounts so that they can function as filters
       return {
         ...state,
         totalStateCounts: {
           ...state.totalStateCounts,
           ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
-        }
+        },
+        nodeAttrKeys
       };
+    }
     default:
       return state;
   }
