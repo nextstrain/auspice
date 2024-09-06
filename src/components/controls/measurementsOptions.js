@@ -2,9 +2,8 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
-import { changeMeasurementsCollection, toggleOverallMean } from "../../actions/measurements";
+import { changeMeasurementsCollection,changeMeasurementsDisplay, toggleOverallMean } from "../../actions/measurements";
 import {
-  CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
   TOGGLE_MEASUREMENTS_THRESHOLD
 } from "../../actions/types";
@@ -93,13 +92,13 @@ const MeasurementsOptions = () => {
       </SidebarSubtitle>
       <SidebarButton
         selected={display === "mean"}
-        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "mean" });}}
+        onClick={() => {dispatch(changeMeasurementsDisplay("mean"));}}
       >
         {"Mean ± SD"}
       </SidebarButton>
       <SidebarButton
         selected={display === "raw"}
-        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "raw" });}}
+        onClick={() => {dispatch(changeMeasurementsDisplay("raw"));}}
       >
         {"Raw"}
       </SidebarButton>
