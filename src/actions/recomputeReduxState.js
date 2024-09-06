@@ -208,7 +208,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
 
-  /* Process query params for measurements panel. These all start with `m_` prefix to avoid conflicts */
+  /* Process query params for measurements panel. These all start with `m_` or `mf_` prefix to avoid conflicts */
   state = {...state, ...createMeasurementsControlsFromQuery(query)}
 
   return state;

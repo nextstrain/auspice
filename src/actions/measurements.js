@@ -1,4 +1,4 @@
-import { pick } from "lodash";
+import { cloneDeep, pick } from "lodash";
 import { measurementIdSymbol } from "../util/globals";
 import { defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
 import {
@@ -106,7 +106,7 @@ function getCollectionDefaultControl(controlKey, collection) {
  */
 const getCollectionDisplayControls = (controls, collection) => {
   // Copy current control options for measurements
-  const newControls = pick(controls, Object.keys(defaultMeasurementsControlState));
+  const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
@@ -114,20 +114,22 @@ const getCollectionDisplayControls = (controls, collection) => {
   }
 
   // Verify that current filters are valid for the new collection
-  Object.entries(newControls.measurementsFilters).forEach(([field, valuesMap]) => {
-    // Delete filter for field that does not exist in the new collection filters
-    if (!collection.filters.has(field)) {
-      return delete newControls.measurementsFilters[field];
-    }
-    // Clone nested Map to avoid changing redux state in place
-    newControls.measurementsFilters[field] = new Map(valuesMap);
-    return [...valuesMap.keys()].forEach((value) => {
-      // Delete filter for values that do not exist within the field of the new collection
-      if (!collection.filters.get(field).values.has(value)) {
-        newControls.measurementsFilters[field].delete(value);
-      }
-    });
-  });
+  newControls.measurementsFilters = Object.fromEntries(
+    Object.entries(newControls.measurementsFilters)
+      .map(([field, valuesMap]) => {
+        // Clone nested Map to avoid changing redux state in place
+        // Delete filter for values that do not exist within the field of the new collection
+        const newValuesMap = new Map([...valuesMap].filter(([value]) => {
+          return collection.filters.get(field)?.values.has(value)
+        }));
+        return [field, newValuesMap];
+      })
+      .filter(([field, valuesMap]) => {
+        // Delete filter for field that does not exist in the new collection filters
+        // or filters where none of the values are valid
+        return collection.filters.has(field) && valuesMap.size;
+      })
+  )
 
   // Ensure controls use collection's defaults or app defaults if this is
   // the initial loading of the measurements JSON
@@ -278,19 +280,20 @@ export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, get
  * - Jover, 19 January 2022
  */
 export const applyMeasurementFilter = (field, value, active) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   measurementsFilters[field].set(value, {active});
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
   });
 };
 
 export const removeSingleFilter = (field, value) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   measurementsFilters[field].delete(value);
@@ -303,23 +306,25 @@ export const removeSingleFilter = (field, value) => (dispatch, getState) => {
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
   });
 };
 
 export const removeAllFieldFilters = (field) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   delete measurementsFilters[field];
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
   });
 };
 
 export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   for (const fieldValue of measurementsFilters[field].keys()) {
@@ -327,7 +332,8 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
   }
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
   });
 };
 
@@ -386,10 +392,21 @@ const controlToQueryParamMap = {
   measurementsShowThreshold: "m_threshold",
 };
 
+/* mf_<field> correspond to active measurements filters */
+const filterQueryPrefix = "mf_";
+export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
+  const newQuery = cloneDeep(query);
+  // Remove measurements filter query params that are not included in the newQueryParams
+  Object.keys(query)
+    .filter((queryParam) => queryParam.startsWith(filterQueryPrefix) && !(queryParam in newQueryParams))
+    .forEach((queryParam) => delete newQuery[queryParam]);
+  return newQuery
+}
+
 function createMeasurementsQueryFromControls(measurementControls, collection) {
   const newQuery = {};
   for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
-    const queryKey = controlToQueryParamMap[controlKey];
+    let queryKey = controlToQueryParamMap[controlKey];
     const collectionDefault = getCollectionDefaultControl(controlKey, collection);
     const controlDefault = collectionDefault !== undefined ? collectionDefault : defaultMeasurementsControlState[controlKey];
     // Remove URL param if control state is the same as the default state
@@ -409,6 +426,21 @@ function createMeasurementsQueryFromControls(measurementControls, collection) {
             newQuery[queryKey] = controlValue ? "show" : "hide";
           } else {
             newQuery[queryKey] = "";
+          }
+          break;
+        case "measurementsFilters":
+          // First clear all of the measurements filter query params
+          for (const field of collection.filters.keys()) {
+            queryKey = filterQueryPrefix + field;
+            newQuery[queryKey] = "";
+          }
+          // Then add back measurements filter query params for active filters only
+          for (const [field, values] of Object.entries(controlValue)) {
+            queryKey = filterQueryPrefix + field;
+            const activeFilterValues = [...values]
+              .filter(([fieldValue, {active}]) => active)
+              .map(([fieldValue]) => fieldValue);
+            newQuery[queryKey] = activeFilterValues;
           }
           break;
         default:
@@ -449,6 +481,18 @@ export function createMeasurementsControlsFromQuery(query){
     } else {
       console.error(`Ignoring invalid query param ${queryKey}=${queryValue}, value should be one of ${expectedValues}`);
     }
+  }
+
+  // Accept any value here because we cannot validate the query before the measurements JSON is loaded
+  for (const filterKey of Object.keys(query).filter((c) => c.startsWith(filterQueryPrefix))) {
+    const field = filterKey.replace(filterQueryPrefix, '');
+    const filterValues = Array.isArray(query[filterKey]) ? query[filterKey] : [query[filterKey]];
+    const measurementsFilters = {...newState.measurementsFilters};
+    measurementsFilters[field] = new Map(measurementsFilters[field]);
+    for (const value of filterValues) {
+      measurementsFilters[field].set(value, {active: true});
+    }
+    newState.measurementsFilters = measurementsFilters;
   }
   return newState;
 }

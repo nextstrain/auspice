@@ -199,7 +199,7 @@ class FiltersSummary extends React.Component {
             {". "}
           </>
         }
-        {Object.keys(this.props.measurementsFilters).length > 0 &&
+      {(Object.keys(this.props.measurementsFilters).length > 0 && this.props.measurementsFields !== undefined) &&
           <>
             <br/>
             {t("Measurements filtered to") + " "}

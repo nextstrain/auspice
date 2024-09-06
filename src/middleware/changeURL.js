@@ -4,6 +4,7 @@ import { numericToCalendar } from "../util/dateHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
+import { removeInvalidMeasurementsFilterQuery } from "../actions/measurements";
 
 export const strainSymbolUrlString = "__strain__";
 
@@ -224,10 +225,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.LOAD_MEASUREMENTS: // fallthrough
     case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
+    case types.APPLY_MEASUREMENTS_FILTER:
+      query = removeInvalidMeasurementsFilterQuery(query, action.queryParams)
+      query = {...query, ...action.queryParams};
+      break;
     case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
     case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
     case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN: // fallthrough
-    case types.TOGGLE_MEASUREMENTS_THRESHOLD:
+    case types.TOGGLE_MEASUREMENTS_THRESHOLD: // fallthrough
       query = {...query, ...action.queryParams};
       break;
     default:

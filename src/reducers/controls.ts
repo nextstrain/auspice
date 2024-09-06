@@ -363,10 +363,9 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
     case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
     case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN: // fallthrough
-    case types.TOGGLE_MEASUREMENTS_THRESHOLD:
-      return {...state, ...action.controls};
+    case types.TOGGLE_MEASUREMENTS_THRESHOLD: // fallthrough
     case types.APPLY_MEASUREMENTS_FILTER:
-      return {...state, measurementsFilters: action.data};
+      return {...state, ...action.controls};
     /**
      * Currently the CHANGE_ZOOM action (entropy panel zoom changed) does not
      * update the zoomMin/zoomMax, and as such they only represent the initially
