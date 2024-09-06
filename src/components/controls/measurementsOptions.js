@@ -2,10 +2,9 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
-import { changeMeasurementsCollection,changeMeasurementsDisplay, toggleOverallMean } from "../../actions/measurements";
+import { changeMeasurementsCollection,changeMeasurementsDisplay, toggleOverallMean, toggleThreshold } from "../../actions/measurements";
 import {
-  CHANGE_MEASUREMENTS_GROUP_BY,
-  TOGGLE_MEASUREMENTS_THRESHOLD
+  CHANGE_MEASUREMENTS_GROUP_BY
 } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle, SidebarButton } from "./styles";
@@ -117,7 +116,7 @@ const MeasurementsOptions = () => {
         }
         on={showThreshold}
         label="Show measurement threshold(s)"
-        callback={() => dispatch({type: TOGGLE_MEASUREMENTS_THRESHOLD, data: !showThreshold})}
+        callback={() => dispatch(toggleThreshold())}
       />
     </div>
   );

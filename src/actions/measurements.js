@@ -6,7 +6,8 @@ import {
   CHANGE_MEASUREMENTS_COLLECTION,
   CHANGE_MEASUREMENTS_DISPLAY,
   LOAD_MEASUREMENTS,
-  TOGGLE_MEASUREMENTS_OVERALL_MEAN
+  TOGGLE_MEASUREMENTS_OVERALL_MEAN,
+  TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
 
 /**
@@ -339,6 +340,18 @@ export const toggleOverallMean = () => (dispatch, getState) => {
   });
 }
 
+export const toggleThreshold = () => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const controlKey = "measurementsShowThreshold";
+  const newControls = { [controlKey]: !controls[controlKey] };
+
+  dispatch({
+    type: TOGGLE_MEASUREMENTS_THRESHOLD,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+  });
+};
+
 export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const controlKey = "measurementsDisplay";
@@ -354,6 +367,7 @@ export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) =>
 const controlToQueryParamMap = {
   measurementsDisplay: "m_display",
   measurementsShowOverallMean: "m_overallMean",
+  measurementsShowThreshold: "m_threshold",
 };
 
 function createMeasurementsQueryFromControls(measurementControls, collection) {
@@ -372,6 +386,13 @@ function createMeasurementsQueryFromControls(measurementControls, collection) {
           break;
         case "measurementsShowOverallMean":
           newQuery[queryKey] = controlValue ? "show" : "hide";
+          break;
+        case "measurementsShowThreshold":
+          if (collection.thresholds) {
+            newQuery[queryKey] = controlValue ? "show" : "hide";
+          } else {
+            newQuery[queryKey] = "";
+          }
           break;
         default:
           console.error(`Ignoring unsupported control ${controlKey}`);
@@ -393,7 +414,8 @@ export function createMeasurementsControlsFromQuery(query){
         expectedValues = ["mean", "raw"];
         conversionFn = () => queryValue;
         break;
-      case "m_overallMean":
+      case "m_overallMean": // fallthrough
+      case "m_threshold":
         expectedValues = ["show", "hide"];
         conversionFn = () => queryValue === "show" ? true : false;
         break;
