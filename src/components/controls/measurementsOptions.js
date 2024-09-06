@@ -2,10 +2,13 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
-import { changeMeasurementsCollection,changeMeasurementsDisplay, toggleOverallMean, toggleThreshold } from "../../actions/measurements";
 import {
-  CHANGE_MEASUREMENTS_GROUP_BY
-} from "../../actions/types";
+  changeMeasurementsCollection,
+  changeMeasurementsDisplay,
+  changeMeasurementsGroupBy,
+  toggleOverallMean,
+  toggleThreshold
+} from "../../actions/measurements";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
@@ -78,12 +81,7 @@ const MeasurementsOptions = () => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt) => {
-            dispatch({
-              type: CHANGE_MEASUREMENTS_GROUP_BY,
-              data: opt.value
-            });
-          }}
+          onChange={(opt) => {dispatch(changeMeasurementsGroupBy(opt.value));}}
         />
       </div>
       <SidebarSubtitle>

@@ -5,6 +5,7 @@ import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
   CHANGE_MEASUREMENTS_DISPLAY,
+  CHANGE_MEASUREMENTS_GROUP_BY,
   LOAD_MEASUREMENTS,
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD,
@@ -48,30 +49,32 @@ function getCollectionDefaultControl(controlKey, collection) {
   }
   const collectionDefaults = collection["display_defaults"] || {};
   const displayDefaultKey = collectionControlToDisplayDefaults[controlKey];
-  const defaultControl = collectionDefaults[displayDefaultKey];
+  let defaultControl = collectionDefaults[displayDefaultKey];
   // Check default is a valid value for the control key
-  if (defaultControl !== undefined) {
-    switch (controlKey) {
-      case 'measurementsGroupBy':
-        if (!collection.fields.has(defaultControl)) {
-          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of collection's fields`)
-          defaultControl = undefined;
+  switch (controlKey) {
+    case 'measurementsGroupBy':
+      if (defaultControl === undefined || !collection.groupings.has(defaultControl)) {
+        if (defaultControl !== undefined) {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of collection's groupings. Using first grouping as default`)
         }
-        break;
-      case 'measurementsDisplay':
-        const expectedValues = ["mean", "raw"];
-        if (!expectedValues.includes(defaultControl)) {
-          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
-          defaultControl = undefined;
-        }
-        break;
-      case 'measurementsShowOverallMean':
-        if (typeof defaultControl !== "boolean") {
-          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
-          defaultControl = undefined;
-        }
-        break;
-      case 'measurementsShowThreshold':
+        defaultControl = collection.groupings.keys().next().value;
+      }
+      break;
+    case 'measurementsDisplay':
+      const expectedValues = ["mean", "raw"];
+      if (defaultControl !== undefined && !expectedValues.includes(defaultControl)) {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
+        defaultControl = undefined;
+      }
+      break;
+    case 'measurementsShowOverallMean':
+      if (defaultControl !== undefined && typeof defaultControl !== "boolean") {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
+        defaultControl = undefined;
+      }
+      break;
+    case 'measurementsShowThreshold':
+      if (defaultControl !== undefined) {
         if (!Array.isArray(collection.thresholds) ||
             !collection.thresholds.some((threshold) => typeof threshold === "number")) {
           console.error(`Ignoring ${displayDefaultKey} value because collection does not have valid thresholds`)
@@ -80,13 +83,13 @@ function getCollectionDefaultControl(controlKey, collection) {
           console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
           defaultControl = undefined;
         }
-        break;
-      case 'measurementsFilters':
-        console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
-        break;
-      default:
-        console.error(`Skipping unknown control key ${controlKey}`);
-    }
+      }
+      break;
+    case 'measurementsFilters':
+      console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
+      break;
+    default:
+      console.error(`Skipping unknown control key ${controlKey}`);
   }
   return defaultControl;
 }
@@ -104,10 +107,10 @@ function getCollectionDefaultControl(controlKey, collection) {
 const getCollectionDisplayControls = (controls, collection) => {
   // Copy current control options for measurements
   const newControls = pick(controls, Object.keys(defaultMeasurementsControlState));
-  // Checks the current group by is available as a field in collection
-  if (!collection.fields.has(newControls.measurementsGroupBy)) {
-    // If current group by is not available as a field, then default to the first grouping option.
-    [newControls.measurementsGroupBy] = collection.groupings.keys();
+  // Checks the current group by is available as a grouping in collection
+  // If it doesn't exist, set to undefined so it will get filled in with collection's default
+  if (!collection.groupings.has(newControls.measurementsGroupBy)) {
+    newControls.measurementsGroupBy = undefined
   }
 
   // Verify that current filters are valid for the new collection
@@ -364,8 +367,21 @@ export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) =>
   });
 }
 
+export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const controlKey = "measurementsGroupBy";
+  const newControls = { [controlKey]: newGroupBy };
+
+  dispatch({
+    type: CHANGE_MEASUREMENTS_GROUP_BY,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+  });
+}
+
 const controlToQueryParamMap = {
   measurementsDisplay: "m_display",
+  measurementsGroupBy: "m_groupBy",
   measurementsShowOverallMean: "m_overallMean",
   measurementsShowThreshold: "m_threshold",
 };
@@ -381,7 +397,8 @@ function createMeasurementsQueryFromControls(measurementControls, collection) {
       newQuery[queryKey] = "";
     } else {
       switch(controlKey) {
-        case "measurementsDisplay":
+        case "measurementsDisplay": // fallthrough
+        case "measurementsGroupBy":
           newQuery[queryKey] = controlValue;
           break;
         case "measurementsShowOverallMean":
@@ -412,6 +429,12 @@ export function createMeasurementsControlsFromQuery(query){
     switch(queryKey) {
       case "m_display":
         expectedValues = ["mean", "raw"];
+        conversionFn = () => queryValue;
+        break;
+      case "m_groupBy":
+        // Accept any value here because we cannot validate the query before
+        // the measurements JSON is loaded
+        expectedValues = [queryValue];
         conversionFn = () => queryValue;
         break;
       case "m_overallMean": // fallthrough

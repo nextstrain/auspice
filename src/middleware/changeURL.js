@@ -225,6 +225,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.LOAD_MEASUREMENTS: // fallthrough
     case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
     case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
+    case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
     case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN: // fallthrough
     case types.TOGGLE_MEASUREMENTS_THRESHOLD:
       query = {...query, ...action.queryParams};
