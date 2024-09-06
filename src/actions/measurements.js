@@ -64,33 +64,31 @@ const getCollectionDisplayControls = (controls, collection) => {
     });
   });
 
-  if (collection["display_defaults"]) {
-    const {
-      group_by,
-      measurements_display,
-      show_overall_mean,
-      show_threshold
-    } = collection["display_defaults"];
-
-    if (group_by) {
-      newControls.measurementsGroupBy = group_by;
-    }
-    if (measurements_display) {
-      newControls.measurementsDisplay = measurements_display;
-    }
-    if (typeof show_overall_mean === "boolean") {
-      newControls.measurementsShowOverallMean = show_overall_mean;
-    }
-    if (typeof show_threshold === "boolean") {
-      newControls.measurementsShowThreshold = show_threshold;
-    }
+  const collectionControlToDisplayDefaults = {
+    measurementsGroupBy: 'group_by',
+    measurementsDisplay: 'measurements_display',
+    measurementsShowOverallMean: 'show_overall_mean',
+    measurementsShowThreshold: 'show_threshold'
   }
-
-  // Ensure controls use app defaults if no collection defaults are defined
+  const collectionDefaults = collection["display_defaults"] || {};
+  // Ensure controls use collection's defaults or app defaults if this is
+  // the initial loading of the measurements JSON
   for (const [key, value] of Object.entries(newControls)) {
     // Skip values that are not undefined because this indicates they are URL params or existing controls
     if (value !== undefined) continue;
-    newControls[key] = defaultMeasurementsControlState[key];
+    const displayDefaultKey = collectionControlToDisplayDefaults[key];
+    let defaultControl = collectionDefaults[displayDefaultKey];
+    if (defaultControl !== undefined) {
+      // Validity checks for default controls
+      switch (key) {
+        case measurementsShowThreshold: //fallthrough
+        case measurementsShowOverallMean:
+          if (typeof defaultControl !== "boolean") {
+            defaultControl = undefined;
+          }
+      }
+    }
+    newControls[key] = defaultControl !== undefined ? defaultControl : defaultMeasurementsControlState[key];
   }
 
   return newControls;
