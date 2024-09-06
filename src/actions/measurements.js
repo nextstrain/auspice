@@ -30,6 +30,65 @@ export const getCollectionToDisplay = (collections, collectionKey) => {
 };
 
 /**
+ * Map the controlKey to the default value in collectionDefaults
+ * Checks if the collection default is a valid value for the control
+ * @param {string} controlKey
+ * @param {Object} collection
+ * @returns {*}
+ */
+function getCollectionDefaultControl(controlKey, collection) {
+  const collectionControlToDisplayDefaults = {
+    measurementsGroupBy: 'group_by',
+    measurementsDisplay: 'measurements_display',
+    measurementsShowOverallMean: 'show_overall_mean',
+    measurementsShowThreshold: 'show_threshold'
+  }
+  const collectionDefaults = collection["display_defaults"] || {};
+  const displayDefaultKey = collectionControlToDisplayDefaults[controlKey];
+  const defaultControl = collectionDefaults[displayDefaultKey];
+  // Check default is a valid value for the control key
+  if (defaultControl !== undefined) {
+    switch (controlKey) {
+      case 'measurementsGroupBy':
+        if (!collection.fields.has(defaultControl)) {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of collection's fields`)
+          defaultControl = undefined;
+        }
+        break;
+      case 'measurementsDisplay':
+        const expectedValues = ["mean", "raw"];
+        if (!expectedValues.includes(defaultControl)) {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
+          defaultControl = undefined;
+        }
+        break;
+      case 'measurementsShowOverallMean':
+        if (typeof defaultControl !== "boolean") {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
+          defaultControl = undefined;
+        }
+        break;
+      case 'measurementsShowThreshold':
+        if (!Array.isArray(collection.thresholds) ||
+            !collection.thresholds.some((threshold) => typeof threshold === "number")) {
+          console.error(`Ignoring ${displayDefaultKey} value because collection does not have valid thresholds`)
+          defaultControl = undefined;
+        } else if (typeof defaultControl !== "boolean") {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
+          defaultControl = undefined;
+        }
+        break;
+      case 'measurementsFilters':
+        console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
+        break;
+      default:
+        console.error(`Skipping unknown control key ${controlKey}`);
+    }
+  }
+  return defaultControl;
+}
+
+/**
  * Constructs the controls redux state for the measurements panel based on
  * config values within the provided collection.
  *
@@ -64,30 +123,12 @@ const getCollectionDisplayControls = (controls, collection) => {
     });
   });
 
-  const collectionControlToDisplayDefaults = {
-    measurementsGroupBy: 'group_by',
-    measurementsDisplay: 'measurements_display',
-    measurementsShowOverallMean: 'show_overall_mean',
-    measurementsShowThreshold: 'show_threshold'
-  }
-  const collectionDefaults = collection["display_defaults"] || {};
   // Ensure controls use collection's defaults or app defaults if this is
   // the initial loading of the measurements JSON
   for (const [key, value] of Object.entries(newControls)) {
     // Skip values that are not undefined because this indicates they are URL params or existing controls
     if (value !== undefined) continue;
-    const displayDefaultKey = collectionControlToDisplayDefaults[key];
-    let defaultControl = collectionDefaults[displayDefaultKey];
-    if (defaultControl !== undefined) {
-      // Validity checks for default controls
-      switch (key) {
-        case measurementsShowThreshold: //fallthrough
-        case measurementsShowOverallMean:
-          if (typeof defaultControl !== "boolean") {
-            defaultControl = undefined;
-          }
-      }
-    }
+    let defaultControl = getCollectionDefaultControl(key, collection);
     newControls[key] = defaultControl !== undefined ? defaultControl : defaultMeasurementsControlState[key];
   }
 
