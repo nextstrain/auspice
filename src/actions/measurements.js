@@ -1,5 +1,6 @@
 import { pick } from "lodash";
 import { measurementIdSymbol } from "../util/globals";
+import { defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
@@ -36,18 +37,11 @@ export const getCollectionToDisplay = (collections, collectionKey) => {
  * If the current `measurementsGrouping` does not exist in the collection, then
  * defaults to the first grouping option.
  * @param {Object} collection
- * @returns {Object}
+ * @returns {MeasurementsControlState}
  */
 const getCollectionDisplayControls = (controls, collection) => {
-  const measurementsControls = [
-    "measurementsGroupBy",
-    "measurementsDisplay",
-    "measurementsShowOverallMean",
-    "measurementsShowThreshold",
-    "measurementsFilters"
-  ];
   // Copy current control options for measurements
-  const newControls = pick(controls, measurementsControls);
+  const newControls = pick(controls, Object.keys(defaultMeasurementsControlState));
   // Checks the current group by is available as a field in collection
   if (!collection.fields.has(newControls.measurementsGroupBy)) {
     // If current group by is not available as a field, then default to the first grouping option.
@@ -90,6 +84,13 @@ const getCollectionDisplayControls = (controls, collection) => {
     if (typeof show_threshold === "boolean") {
       newControls.measurementsShowThreshold = show_threshold;
     }
+  }
+
+  // Ensure controls use app defaults if no collection defaults are defined
+  for (const [key, value] of Object.entries(newControls)) {
+    // Skip values that are not undefined because this indicates they are URL params or existing controls
+    if (value !== undefined) continue;
+    newControls[key] = defaultMeasurementsControlState[key];
   }
 
   return newControls;

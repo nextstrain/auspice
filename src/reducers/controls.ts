@@ -12,7 +12,7 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
-export interface ControlsState {
+export interface BasicControlsState {
   panelsAvailable: string[]
   panelsToDisplay: string[]
   showTreeToo: boolean
@@ -22,6 +22,18 @@ export interface ControlsState {
   // TODO: add all other props explicitly and remove this.
   [propName: string]: any;
 }
+
+export interface MeasurementsControlState {
+  measurementsGroupBy: string | undefined,
+  measurementsDisplay: string | undefined,
+  measurementsShowOverallMean: boolean | undefined,
+  measurementsShowThreshold: boolean | undefined,
+  measurementsFilters: {
+    [key: string]: Map<string, {active: boolean}>
+  }
+}
+
+export interface ControlsState extends BasicControlsState, MeasurementsControlState {}
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -100,11 +112,28 @@ export const getDefaultControlsState = () => {
     showTransmissionLines: true,
     normalizeFrequencies: true,
     measurementsGroupBy: undefined,
-    measurementsDisplay: "mean",
-    measurementsShowOverallMean: true,
-    measurementsShowThreshold: true,
+    measurementsDisplay: undefined,
+    measurementsShowOverallMean: undefined,
+    measurementsShowThreshold: undefined,
     measurementsFilters: {}
   };
+};
+
+/**
+ * Keeping measurements control state separate from getDefaultControlsState
+ * in order to be able to differentiate when the page is loaded with and without
+ * URL params for the measurements panel.
+ *
+ * The initial control state is constructed then the URL params update the state.
+ * However, the measurements JSON is loaded after this, so it needs a way to
+ * differentiate the clean slate vs the added URL params.
+ */
+export const defaultMeasurementsControlState: MeasurementsControlState = {
+  measurementsGroupBy: undefined,
+  measurementsDisplay: "mean",
+  measurementsShowOverallMean: true,
+  measurementsShowThreshold: true,
+  measurementsFilters: {}
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
