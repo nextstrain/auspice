@@ -252,6 +252,7 @@ export const loadMeasurements = ({collections, defaultCollection}) => (dispatch,
 
   dispatch({
     type: LOAD_MEASUREMENTS,
+    defaultCollectionKey: collectionToDisplay.key,
     collections,
     collectionToDisplay,
     controls: newControls,
