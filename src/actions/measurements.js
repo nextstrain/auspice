@@ -4,7 +4,8 @@ import { defaultMeasurementsControlState, MeasurementsControlState } from "../re
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
-  LOAD_MEASUREMENTS
+  LOAD_MEASUREMENTS,
+  TOGGLE_MEASUREMENTS_OVERALL_MEAN
 } from "./types";
 
 /**
@@ -231,7 +232,6 @@ export const parseMeasurementsJSON = (json) => {
 };
 
 export const loadMeasurements = ({collections, defaultCollection}) => (dispatch, getState) => {
-  // TODO: Load controls from state to get potential url query parameters
   const { tree, controls } = getState();
   if (!tree.loaded) {
     throw new Error("tree not loaded");
@@ -240,23 +240,29 @@ export const loadMeasurements = ({collections, defaultCollection}) => (dispatch,
   // Get the collection to display to set up default controls
   // TODO: consider url query parameter?
   const collectionToDisplay = getCollectionToDisplay(collections, defaultCollection);
+  const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay);
 
   dispatch({
     type: LOAD_MEASUREMENTS,
     collections,
     collectionToDisplay,
-    controls: getCollectionDisplayControls(controls, collectionToDisplay)
+    controls: newControls,
+    queryParams
   });
 };
 
 export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey);
+  const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay);
 
   dispatch({
     type: CHANGE_MEASUREMENTS_COLLECTION,
     collectionToDisplay,
-    controls: getCollectionDisplayControls(controls, collectionToDisplay)
+    controls: newControls,
+    queryParams
   });
 };
 
@@ -319,3 +325,64 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
     data: measurementsFilters
   });
 };
+
+export const toggleOverallMean = () => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const controlKey = "measurementsShowOverallMean";
+  const newControls = { [controlKey]: !controls[controlKey] };
+
+  dispatch({
+    type: TOGGLE_MEASUREMENTS_OVERALL_MEAN,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+  });
+}
+
+const controlToQueryParamMap = {
+  measurementsShowOverallMean: "m_overallMean",
+};
+
+function createMeasurementsQueryFromControls(measurementControls, collection) {
+  const newQuery = {};
+  for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
+    const queryKey = controlToQueryParamMap[controlKey];
+    const collectionDefault = getCollectionDefaultControl(controlKey, collection);
+    const controlDefault = collectionDefault !== undefined ? collectionDefault : defaultMeasurementsControlState[controlKey];
+    // Remove URL param if control state is the same as the default state
+    if (controlValue === controlDefault) {
+      newQuery[queryKey] = "";
+    } else {
+      switch(controlKey) {
+        case "measurementsShowOverallMean":
+          newQuery[queryKey] = controlValue ? "show" : "hide";
+          break;
+        default:
+          console.error(`Ignoring unsupported control ${controlKey}`);
+      }
+    }
+  }
+  return newQuery;
+}
+
+export function createMeasurementsControlsFromQuery(query){
+  const newState = {};
+  for (const [controlKey, queryKey] of Object.entries(controlToQueryParamMap)) {
+    const queryValue = query[queryKey];
+    if (queryValue === undefined) continue;
+    let expectedValues = [];
+    let conversionFn = () => null;
+    switch(queryKey) {
+      case "m_overallMean":
+        expectedValues = ["show", "hide"];
+        conversionFn = () => queryValue === "show" ? true : false;
+        break;
+    }
+
+    if(expectedValues.includes(queryValue)) {
+      newState[controlKey] = conversionFn();
+    } else {
+      console.error(`Ignoring invalid query param ${queryKey}=${queryValue}, value should be one of ${expectedValues}`);
+    }
+  }
+  return newState;
+}

@@ -2,11 +2,10 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
-import { changeMeasurementsCollection } from "../../actions/measurements";
+import { changeMeasurementsCollection, toggleOverallMean } from "../../actions/measurements";
 import {
   CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
-  TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD
 } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
@@ -109,7 +108,7 @@ const MeasurementsOptions = () => {
         display
         on={showOverallMean}
         label="Show overall mean ± SD"
-        callback={() => dispatch({type: TOGGLE_MEASUREMENTS_OVERALL_MEAN, data: !showOverallMean})}
+        callback={() => dispatch(toggleOverallMean())}
       />
       <Toggle
         // Only display threshold toggle if the collection has a valid threshold

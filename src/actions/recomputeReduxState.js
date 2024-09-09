@@ -23,6 +23,7 @@ import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
+import { createMeasurementsControlsFromQuery } from "./measurements";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -206,8 +207,11 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.regression==="hide") state.scatterVariables.showRegression = false;
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
-  return state;
 
+  /* Process query params for measurements panel. These all start with `m_` prefix to avoid conflicts */
+  state = {...state, ...createMeasurementsControlsFromQuery(query)}
+
+  return state;
   function _validDate(dateNum, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
     return !(dateNum===undefined || dateNum > absoluteDateMaxNumeric || dateNum < absoluteDateMinNumeric);
   }

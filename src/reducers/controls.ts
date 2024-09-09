@@ -358,15 +358,14 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return state;
     }
-    case types.LOAD_MEASUREMENTS: /* fallthrough */
-    case types.CHANGE_MEASUREMENTS_COLLECTION:
+    case types.LOAD_MEASUREMENTS: // fallthrough
+    case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
+    case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN:
       return {...state, ...action.controls};
     case types.CHANGE_MEASUREMENTS_GROUP_BY:
       return {...state, measurementsGroupBy: action.data};
     case types.TOGGLE_MEASUREMENTS_THRESHOLD:
       return {...state, measurementsShowThreshold: action.data};
-    case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN:
-      return {...state, measurementsShowOverallMean: action.data};
     case types.CHANGE_MEASUREMENTS_DISPLAY:
       return {...state, measurementsDisplay: action.data};
     case types.APPLY_MEASUREMENTS_FILTER:
