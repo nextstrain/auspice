@@ -104,6 +104,24 @@ function getCollectionDefaultControl(controlKey, collection) {
 }
 
 /**
+ * Returns the default control state for the provided collection
+ * Returns teh default control state for the app if the collection is not loaded yet
+ * @param {Object} collection
+ * @returns {MeasurementsControlState}
+ */
+export function getCollectionDefaultControls(collection) {
+  const defaultControls = {...defaultMeasurementsControlState};
+  if (Object.keys(collection).length) {
+    defaultControls.measurementsCollectionKey = collection.key;
+    for (const [key, value] of Object.entries(defaultControls)) {
+      const collectionDefault = getCollectionDefaultControl(key, collection);
+      defaultControls[key] = collectionDefault !== undefined ? collectionDefault : value;
+    }
+  }
+  return defaultControls;
+}
+
+/**
  * Constructs the controls redux state for the measurements panel based on
  * config values within the provided collection.
  *
@@ -143,11 +161,11 @@ const getCollectionDisplayControls = (controls, collection) => {
 
   // Ensure controls use collection's defaults or app defaults if this is
   // the initial loading of the measurements JSON
+  const collectionDefaultControls = getCollectionDefaultControls(collection);
   for (const [key, value] of Object.entries(newControls)) {
     // Skip values that are not undefined because this indicates they are URL params or existing controls
     if (value !== undefined) continue;
-    const defaultControl = getCollectionDefaultControl(key, collection);
-    newControls[key] = defaultControl !== undefined ? defaultControl : defaultMeasurementsControlState[key];
+    newControls[key] = collectionDefaultControls[key]
   }
 
   return newControls;
