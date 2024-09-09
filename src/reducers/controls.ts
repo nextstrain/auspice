@@ -24,6 +24,7 @@ export interface BasicControlsState {
 }
 
 export interface MeasurementsControlState {
+  measurementsCollectionKey: string | undefined,
   measurementsGroupBy: string | undefined,
   measurementsDisplay: string | undefined,
   measurementsShowOverallMean: boolean | undefined,
@@ -111,6 +112,7 @@ export const getDefaultControlsState = () => {
     showOnlyPanels: false,
     showTransmissionLines: true,
     normalizeFrequencies: true,
+    measurementsCollectionKey: undefined,
     measurementsGroupBy: undefined,
     measurementsDisplay: undefined,
     measurementsShowOverallMean: undefined,
@@ -129,6 +131,7 @@ export const getDefaultControlsState = () => {
  * differentiate the clean slate vs the added URL params.
  */
 export const defaultMeasurementsControlState: MeasurementsControlState = {
+  measurementsCollectionKey: undefined,
   measurementsGroupBy: undefined,
   measurementsDisplay: "mean",
   measurementsShowOverallMean: true,

@@ -13,20 +13,22 @@ import {
 
 /**
  * Find the collection within collections that has a key matching the provided
- * collectionKey.
+ * collectionKey. The default collection is defined by the provided defaultKey.
  *
- * If collectionKey is not provided, returns the first collection.
- * If no matches are found, returns the first collection.
+ * If collectionKey is not provided, returns the default collection.
+ * If no matches are found, returns the default collection.
  * If multiple matches are found, only returns the first matching collection.
  *
  * @param {Array<Object>} collections
  * @param {string} collectionKey
+ * @param {string} defaultKey
  * @returns {Object}
  */
-export const getCollectionToDisplay = (collections, collectionKey) => {
-  if (!collectionKey) return collections[0];
+export const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
+  const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
+  if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
-  if (potentialCollections.length === 0) return collections[0];
+  if (potentialCollections.length === 0) return defaultCollection;
   if (potentialCollections.length > 1) {
     console.error(`Found multiple collections with key ${collectionKey}. Returning the first matching collection only.`);
   }
@@ -85,6 +87,7 @@ function getCollectionDefaultControl(controlKey, collection) {
         }
       }
       break;
+    case 'measurementsCollectionKey': // fallthrough
     case 'measurementsFilters':
       console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
       break;
@@ -107,6 +110,7 @@ function getCollectionDefaultControl(controlKey, collection) {
 const getCollectionDisplayControls = (controls, collection) => {
   // Copy current control options for measurements
   const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
+  newControls.measurementsCollectionKey = collection.key;
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
@@ -244,15 +248,20 @@ export const loadMeasurements = ({collections, defaultCollection}) => (dispatch,
     throw new Error("tree not loaded");
   }
 
+  const collectionKeys = collections.map((collection) => collection.key);
+  let defaultCollectionKey = defaultCollection;
+  if (!collectionKeys.includes(defaultCollectionKey)) {
+    defaultCollectionKey = collectionKeys[0];
+  }
+
   // Get the collection to display to set up default controls
-  // TODO: consider url query parameter?
-  const collectionToDisplay = getCollectionToDisplay(collections, defaultCollection);
+  const collectionToDisplay = getCollectionToDisplay(collections, controls.measurementsCollectionKey, defaultCollectionKey);
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
-  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, defaultCollectionKey);
 
   dispatch({
     type: LOAD_MEASUREMENTS,
-    defaultCollectionKey: collectionToDisplay.key,
+    defaultCollectionKey,
     collections,
     collectionToDisplay,
     controls: newControls,
@@ -262,9 +271,9 @@ export const loadMeasurements = ({collections, defaultCollection}) => (dispatch,
 
 export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
   const { controls, measurements } = getState();
-  const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey);
+  const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey, measurements.defaultCollectionKey);
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
-  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, measurements.defaultCollectionKey);
 
   dispatch({
     type: CHANGE_MEASUREMENTS_COLLECTION,
@@ -289,7 +298,7 @@ export const applyMeasurementFilter = (field, value, active) => (dispatch, getSt
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
     controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
@@ -308,7 +317,7 @@ export const removeSingleFilter = (field, value) => (dispatch, getState) => {
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
     controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
@@ -334,7 +343,7 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
     controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
@@ -358,7 +367,7 @@ export const toggleThreshold = () => (dispatch, getState) => {
   dispatch({
     type: TOGGLE_MEASUREMENTS_THRESHOLD,
     controls: newControls,
-    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
@@ -382,11 +391,12 @@ export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) =>
   dispatch({
     type: CHANGE_MEASUREMENTS_GROUP_BY,
     controls: newControls,
-    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 }
 
 const controlToQueryParamMap = {
+  measurementsCollectionKey: "m_collection",
   measurementsDisplay: "m_display",
   measurementsGroupBy: "m_groupBy",
   measurementsShowOverallMean: "m_overallMean",
@@ -404,7 +414,7 @@ export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
   return newQuery
 }
 
-function createMeasurementsQueryFromControls(measurementControls, collection) {
+function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
   const newQuery = {};
   for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
     let queryKey = controlToQueryParamMap[controlKey];
@@ -415,6 +425,13 @@ function createMeasurementsQueryFromControls(measurementControls, collection) {
       newQuery[queryKey] = "";
     } else {
       switch(controlKey) {
+        case "measurementsCollectionKey":
+          if (controlValue !== defaultCollectionKey) {
+            newQuery[queryKey] = controlValue;
+          } else {
+            newQuery[queryKey] = "";
+          }
+          break;
         case "measurementsDisplay": // fallthrough
         case "measurementsGroupBy":
           newQuery[queryKey] = controlValue;
@@ -464,6 +481,7 @@ export function createMeasurementsControlsFromQuery(query){
         expectedValues = ["mean", "raw"];
         conversionFn = () => queryValue;
         break;
+      case "m_collection": // fallthrough
       case "m_groupBy":
         // Accept any value here because we cannot validate the query before
         // the measurements JSON is loaded
