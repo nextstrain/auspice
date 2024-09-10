@@ -259,7 +259,7 @@ const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelect
    * vs clicking on the tip (circle) itself */
   const isTerminal = !node.hasChildren;
   const isTip = !selectedNode.isBranch;
-  const shouldShowNodeName = tipLabelKey!==strainSymbol;
+  const shouldShowNodeName = tipLabelKey!==strainSymbol || !isTerminal;
 
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => clearSelectedNode(selectedNode)}>
