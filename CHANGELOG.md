@@ -1,5 +1,7 @@
 # Changelog
 
+* Fix bug where drag-and-drop metadata columns were no longer included as tip labels ([#1845](https://github.com/nextstrain/auspice/pull/1845))
+
 ## version 2.57.0 - 2024/08/30
 
 

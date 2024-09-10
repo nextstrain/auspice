@@ -10,10 +10,10 @@ const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
  * node.hasChildren {bool}
  * node.arrayIdx  {integer} - the index of the node in the nodes array
  * @param  {array} nodes redux tree nodes
- * @return {Object} ret 
+ * @return {Object} ret
  * @return {Set} ret.nodeAttrKeys collection of all `node_attr` keys whose values are Objects
  * @return {Array} ret.nodes input array (kinda unnecessary)
- * 
+ *
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 const processNodes = (nodes) => {
