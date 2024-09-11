@@ -1,6 +1,9 @@
 # Changelog
 
 * Fix bug where drag-and-drop metadata columns were no longer included as tip labels ([#1845](https://github.com/nextstrain/auspice/pull/1845))
+* Fixed a bug where internal node names were sometimes omitted from the branch info modal (arrived at via shift-clicking on a branch).
+  They are now always displayed irrespective of the selected tip label.
+  ([#1849](https://github.com/nextstrain/auspice/pull/1849))
 
 ## version 2.57.0 - 2024/08/30
 
