@@ -47,7 +47,6 @@ jobs:
           git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
 
       - name: Create Pull Request
-        id: cpr
         working-directory: ${{ env.DESTINATION_REPO_DIR }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
