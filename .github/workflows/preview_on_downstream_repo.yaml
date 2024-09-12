@@ -59,7 +59,6 @@ jobs:
             This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
 
             This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
-          body_file: pr_body.txt
         run: |
           branch="nextstrain-bot/test-auspice-pr/${{ github.event.number }}"
           git switch -c "$branch"
@@ -67,8 +66,7 @@ jobs:
           pr_url=$(gh pr list --head "$branch" --json url | jq -r '.[0].url')
 
           if [ "$pr_url" = "null" ]; then
-            echo "$body" > "$body_file"
-            pr_url="$(gh pr create --title "$title" --body-file "$body_file" --draft)"
+            pr_url="$(gh pr create --title "$title" --body "$body" --draft)"
             echo "Pull request created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Pull request updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
