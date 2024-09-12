@@ -4,6 +4,8 @@
 * Fixed a bug where internal node names were sometimes omitted from the branch info modal (arrived at via shift-clicking on a branch).
   They are now always displayed irrespective of the selected tip label.
   ([#1849](https://github.com/nextstrain/auspice/pull/1849))
+* Added URL params for measurements panel controls: m_collection, m_display, m_groupBy, m_overallMean, m_threshold, and mf_*.
+  See [docs](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/view-settings.html#measurements-panel-url-query-options) for more details. ([#1848](https://github.com/nextstrain/auspice/pull/1848))
 
 ## version 2.57.0 - 2024/08/30
 
