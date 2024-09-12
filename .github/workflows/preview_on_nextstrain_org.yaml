@@ -6,6 +6,7 @@ on:
       - synchronize
       - reopened
       - labeled
+      - closed
 
 jobs:
   run:
@@ -18,3 +19,4 @@ jobs:
     with:
       repository: nextstrain/nextstrain.org
       directory: auspice-client
+      cleanup: ${{ github.event.action == 'closed' }}
