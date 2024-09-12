@@ -60,7 +60,8 @@ jobs:
             Note that Auspice has been installed with changes from both the PR's source and target branches.
             This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
 
-            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
+            This message PR is maintained by a [GitHub Actions workflow](https://github.com/nextstrain/auspice/blob/-/.github/workflows/preview_on_downstream_repo.yaml).
+            It will be automatically kept up to date and closed when the upstream PR has been merged or closed.
         run: |
           git switch -c "$branch"
           git push --force origin HEAD
