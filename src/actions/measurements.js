@@ -1,32 +1,125 @@
-import { pick } from "lodash";
+import { cloneDeep, pick } from "lodash";
 import { measurementIdSymbol } from "../util/globals";
+import { defaultMeasurementsControlState } from "../reducers/controls";
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
-  LOAD_MEASUREMENTS
+  CHANGE_MEASUREMENTS_DISPLAY,
+  CHANGE_MEASUREMENTS_GROUP_BY,
+  LOAD_MEASUREMENTS,
+  TOGGLE_MEASUREMENTS_OVERALL_MEAN,
+  TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
 
 /**
  * Find the collection within collections that has a key matching the provided
- * collectionKey.
+ * collectionKey. The default collection is defined by the provided defaultKey.
  *
- * If collectionKey is not provided, returns the first collection.
- * If no matches are found, returns the first collection.
+ * If collectionKey is not provided, returns the default collection.
+ * If no matches are found, returns the default collection.
  * If multiple matches are found, only returns the first matching collection.
  *
  * @param {Array<Object>} collections
  * @param {string} collectionKey
+ * @param {string} defaultKey
  * @returns {Object}
  */
-export const getCollectionToDisplay = (collections, collectionKey) => {
-  if (!collectionKey) return collections[0];
+export const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
+  const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
+  if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
-  if (potentialCollections.length === 0) return collections[0];
+  if (potentialCollections.length === 0) return defaultCollection;
   if (potentialCollections.length > 1) {
     console.error(`Found multiple collections with key ${collectionKey}. Returning the first matching collection only.`);
   }
   return potentialCollections[0];
 };
+
+/**
+ * Map the controlKey to the default value in collectionDefaults
+ * Checks if the collection default is a valid value for the control
+ * @param {string} controlKey
+ * @param {Object} collection
+ * @returns {*}
+ */
+function getCollectionDefaultControl(controlKey, collection) {
+  const collectionControlToDisplayDefaults = {
+    measurementsGroupBy: 'group_by',
+    measurementsDisplay: 'measurements_display',
+    measurementsShowOverallMean: 'show_overall_mean',
+    measurementsShowThreshold: 'show_threshold'
+  }
+  const collectionDefaults = collection["display_defaults"] || {};
+  const displayDefaultKey = collectionControlToDisplayDefaults[controlKey];
+  let defaultControl = collectionDefaults[displayDefaultKey];
+  // Check default is a valid value for the control key
+  switch (controlKey) {
+    case 'measurementsGroupBy': {
+      if (defaultControl === undefined || !collection.groupings.has(defaultControl)) {
+        if (defaultControl !== undefined) {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of collection's groupings. Using first grouping as default`)
+        }
+        defaultControl = collection.groupings.keys().next().value;
+      }
+      break;
+    }
+    case 'measurementsDisplay': {
+      const expectedValues = ["mean", "raw"];
+      if (defaultControl !== undefined && !expectedValues.includes(defaultControl)) {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
+        defaultControl = undefined;
+      }
+      break;
+    }
+    case 'measurementsShowOverallMean': {
+      if (defaultControl !== undefined && typeof defaultControl !== "boolean") {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
+        defaultControl = undefined;
+      }
+      break;
+    }
+    case 'measurementsShowThreshold': {
+      if (defaultControl !== undefined) {
+        if (!Array.isArray(collection.thresholds) ||
+            !collection.thresholds.some((threshold) => typeof threshold === "number")) {
+          console.error(`Ignoring ${displayDefaultKey} value because collection does not have valid thresholds`)
+          defaultControl = undefined;
+        } else if (typeof defaultControl !== "boolean") {
+          console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be a boolean`)
+          defaultControl = undefined;
+        }
+      }
+      break;
+    }
+    case 'measurementsCollectionKey': // fallthrough
+    case 'measurementsFilters': {
+      // eslint-disable-next-line no-console
+      console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
+      break;
+    }
+    default:
+      console.error(`Skipping unknown control key ${controlKey}`);
+  }
+  return defaultControl;
+}
+
+/**
+ * Returns the default control state for the provided collection
+ * Returns teh default control state for the app if the collection is not loaded yet
+ * @param {Object} collection
+ * @returns {MeasurementsControlState}
+ */
+export function getCollectionDefaultControls(collection) {
+  const defaultControls = {...defaultMeasurementsControlState};
+  if (Object.keys(collection).length) {
+    defaultControls.measurementsCollectionKey = collection.key;
+    for (const [key, value] of Object.entries(defaultControls)) {
+      const collectionDefault = getCollectionDefaultControl(key, collection);
+      defaultControls[key] = collectionDefault !== undefined ? collectionDefault : value;
+    }
+  }
+  return defaultControls;
+}
 
 /**
  * Constructs the controls redux state for the measurements panel based on
@@ -36,60 +129,43 @@ export const getCollectionToDisplay = (collections, collectionKey) => {
  * If the current `measurementsGrouping` does not exist in the collection, then
  * defaults to the first grouping option.
  * @param {Object} collection
- * @returns {Object}
+ * @returns {MeasurementsControlState}
  */
 const getCollectionDisplayControls = (controls, collection) => {
-  const measurementsControls = [
-    "measurementsGroupBy",
-    "measurementsDisplay",
-    "measurementsShowOverallMean",
-    "measurementsShowThreshold",
-    "measurementsFilters"
-  ];
   // Copy current control options for measurements
-  const newControls = pick(controls, measurementsControls);
-  // Checks the current group by is available as a field in collection
-  if (!collection.fields.has(newControls.measurementsGroupBy)) {
-    // If current group by is not available as a field, then default to the first grouping option.
-    [newControls.measurementsGroupBy] = collection.groupings.keys();
+  const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
+  newControls.measurementsCollectionKey = collection.key;
+  // Checks the current group by is available as a grouping in collection
+  // If it doesn't exist, set to undefined so it will get filled in with collection's default
+  if (!collection.groupings.has(newControls.measurementsGroupBy)) {
+    newControls.measurementsGroupBy = undefined
   }
 
   // Verify that current filters are valid for the new collection
-  Object.entries(newControls.measurementsFilters).forEach(([field, valuesMap]) => {
-    // Delete filter for field that does not exist in the new collection filters
-    if (!collection.filters.has(field)) {
-      return delete newControls.measurementsFilters[field];
-    }
-    // Clone nested Map to avoid changing redux state in place
-    newControls.measurementsFilters[field] = new Map(valuesMap);
-    return [...valuesMap.keys()].forEach((value) => {
-      // Delete filter for values that do not exist within the field of the new collection
-      if (!collection.filters.get(field).values.has(value)) {
-        newControls.measurementsFilters[field].delete(value);
-      }
-    });
-  });
+  newControls.measurementsFilters = Object.fromEntries(
+    Object.entries(newControls.measurementsFilters)
+      .map(([field, valuesMap]) => {
+        // Clone nested Map to avoid changing redux state in place
+        // Delete filter for values that do not exist within the field of the new collection
+        const newValuesMap = new Map([...valuesMap].filter(([value]) => {
+          return collection.filters.get(field)?.values.has(value)
+        }));
+        return [field, newValuesMap];
+      })
+      .filter(([field, valuesMap]) => {
+        // Delete filter for field that does not exist in the new collection filters
+        // or filters where none of the values are valid
+        return collection.filters.has(field) && valuesMap.size;
+      })
+  )
 
-  if (collection["display_defaults"]) {
-    const {
-      group_by,
-      measurements_display,
-      show_overall_mean,
-      show_threshold
-    } = collection["display_defaults"];
-
-    if (group_by) {
-      newControls.measurementsGroupBy = group_by;
-    }
-    if (measurements_display) {
-      newControls.measurementsDisplay = measurements_display;
-    }
-    if (typeof show_overall_mean === "boolean") {
-      newControls.measurementsShowOverallMean = show_overall_mean;
-    }
-    if (typeof show_threshold === "boolean") {
-      newControls.measurementsShowThreshold = show_threshold;
-    }
+  // Ensure controls use collection's defaults or app defaults if this is
+  // the initial loading of the measurements JSON
+  const collectionDefaultControls = getCollectionDefaultControls(collection);
+  for (const [key, value] of Object.entries(newControls)) {
+    // Skip values that are not undefined because this indicates they are URL params or existing controls
+    if (value !== undefined) continue;
+    newControls[key] = collectionDefaultControls[key]
   }
 
   return newControls;
@@ -191,32 +267,43 @@ export const parseMeasurementsJSON = (json) => {
 };
 
 export const loadMeasurements = ({collections, defaultCollection}) => (dispatch, getState) => {
-  // TODO: Load controls from state to get potential url query parameters
   const { tree, controls } = getState();
   if (!tree.loaded) {
     throw new Error("tree not loaded");
   }
 
+  const collectionKeys = collections.map((collection) => collection.key);
+  let defaultCollectionKey = defaultCollection;
+  if (!collectionKeys.includes(defaultCollectionKey)) {
+    defaultCollectionKey = collectionKeys[0];
+  }
+
   // Get the collection to display to set up default controls
-  // TODO: consider url query parameter?
-  const collectionToDisplay = getCollectionToDisplay(collections, defaultCollection);
+  const collectionToDisplay = getCollectionToDisplay(collections, controls.measurementsCollectionKey, defaultCollectionKey);
+  const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, defaultCollectionKey);
 
   dispatch({
     type: LOAD_MEASUREMENTS,
+    defaultCollectionKey,
     collections,
     collectionToDisplay,
-    controls: getCollectionDisplayControls(controls, collectionToDisplay)
+    controls: newControls,
+    queryParams
   });
 };
 
 export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
   const { controls, measurements } = getState();
-  const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey);
+  const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey, measurements.defaultCollectionKey);
+  const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
+  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, measurements.defaultCollectionKey);
 
   dispatch({
     type: CHANGE_MEASUREMENTS_COLLECTION,
     collectionToDisplay,
-    controls: getCollectionDisplayControls(controls, collectionToDisplay)
+    controls: newControls,
+    queryParams
   });
 };
 
@@ -227,19 +314,20 @@ export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, get
  * - Jover, 19 January 2022
  */
 export const applyMeasurementFilter = (field, value, active) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   measurementsFilters[field].set(value, {active});
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
 export const removeSingleFilter = (field, value) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   measurementsFilters[field].delete(value);
@@ -252,23 +340,25 @@ export const removeSingleFilter = (field, value) => (dispatch, getState) => {
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
 export const removeAllFieldFilters = (field) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   delete measurementsFilters[field];
 
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
   });
 };
 
 export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => {
-  const { controls } = getState();
+  const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   for (const fieldValue of measurementsFilters[field].keys()) {
@@ -276,6 +366,176 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
   }
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
-    data: measurementsFilters
+    controls: { measurementsFilters },
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
+
+export const toggleOverallMean = () => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const controlKey = "measurementsShowOverallMean";
+  const newControls = { [controlKey]: !controls[controlKey] };
+
+  dispatch({
+    type: TOGGLE_MEASUREMENTS_OVERALL_MEAN,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+  });
+}
+
+export const toggleThreshold = () => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const controlKey = "measurementsShowThreshold";
+  const newControls = { [controlKey]: !controls[controlKey] };
+
+  dispatch({
+    type: TOGGLE_MEASUREMENTS_THRESHOLD,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
+  });
+};
+
+export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) => {
+  const { measurements } = getState();
+  const controlKey = "measurementsDisplay";
+  const newControls = { [controlKey]: newDisplay };
+
+  dispatch({
+    type: CHANGE_MEASUREMENTS_DISPLAY,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+  });
+}
+
+export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) => {
+  const { measurements } = getState();
+  const controlKey = "measurementsGroupBy";
+  const newControls = { [controlKey]: newGroupBy };
+
+  dispatch({
+    type: CHANGE_MEASUREMENTS_GROUP_BY,
+    controls: newControls,
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
+  });
+}
+
+const controlToQueryParamMap = {
+  measurementsCollectionKey: "m_collection",
+  measurementsDisplay: "m_display",
+  measurementsGroupBy: "m_groupBy",
+  measurementsShowOverallMean: "m_overallMean",
+  measurementsShowThreshold: "m_threshold",
+};
+
+/* mf_<field> correspond to active measurements filters */
+const filterQueryPrefix = "mf_";
+export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
+  const newQuery = cloneDeep(query);
+  // Remove measurements filter query params that are not included in the newQueryParams
+  Object.keys(query)
+    .filter((queryParam) => queryParam.startsWith(filterQueryPrefix) && !(queryParam in newQueryParams))
+    .forEach((queryParam) => delete newQuery[queryParam]);
+  return newQuery
+}
+
+function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
+  const newQuery = {};
+  for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
+    let queryKey = controlToQueryParamMap[controlKey];
+    const collectionDefault = getCollectionDefaultControl(controlKey, collection);
+    const controlDefault = collectionDefault !== undefined ? collectionDefault : defaultMeasurementsControlState[controlKey];
+    // Remove URL param if control state is the same as the default state
+    if (controlValue === controlDefault) {
+      newQuery[queryKey] = "";
+    } else {
+      switch(controlKey) {
+        case "measurementsCollectionKey":
+          if (controlValue !== defaultCollectionKey) {
+            newQuery[queryKey] = controlValue;
+          } else {
+            newQuery[queryKey] = "";
+          }
+          break;
+        case "measurementsDisplay": // fallthrough
+        case "measurementsGroupBy":
+          newQuery[queryKey] = controlValue;
+          break;
+        case "measurementsShowOverallMean":
+          newQuery[queryKey] = controlValue ? "show" : "hide";
+          break;
+        case "measurementsShowThreshold":
+          if (collection.thresholds) {
+            newQuery[queryKey] = controlValue ? "show" : "hide";
+          } else {
+            newQuery[queryKey] = "";
+          }
+          break;
+        case "measurementsFilters":
+          // First clear all of the measurements filter query params
+          for (const field of collection.filters.keys()) {
+            queryKey = filterQueryPrefix + field;
+            newQuery[queryKey] = "";
+          }
+          // Then add back measurements filter query params for active filters only
+          for (const [field, values] of Object.entries(controlValue)) {
+            queryKey = filterQueryPrefix + field;
+            const activeFilterValues = [...values]
+              .filter(([_, {active}]) => active)
+              .map(([fieldValue]) => fieldValue);
+            newQuery[queryKey] = activeFilterValues;
+          }
+          break;
+        default:
+          console.error(`Ignoring unsupported control ${controlKey}`);
+      }
+    }
+  }
+  return newQuery;
+}
+
+export function createMeasurementsControlsFromQuery(query){
+  const newState = {};
+  for (const [controlKey, queryKey] of Object.entries(controlToQueryParamMap)) {
+    const queryValue = query[queryKey];
+    if (queryValue === undefined) continue;
+    let expectedValues = [];
+    let conversionFn = () => null;
+    switch(queryKey) {
+      case "m_display":
+        expectedValues = ["mean", "raw"];
+        conversionFn = () => queryValue;
+        break;
+      case "m_collection": // fallthrough
+      case "m_groupBy":
+        // Accept any value here because we cannot validate the query before
+        // the measurements JSON is loaded
+        expectedValues = [queryValue];
+        conversionFn = () => queryValue;
+        break;
+      case "m_overallMean": // fallthrough
+      case "m_threshold":
+        expectedValues = ["show", "hide"];
+        conversionFn = () => queryValue === "show";
+        break;
+    }
+
+    if(expectedValues.includes(queryValue)) {
+      newState[controlKey] = conversionFn();
+    } else {
+      console.error(`Ignoring invalid query param ${queryKey}=${queryValue}, value should be one of ${expectedValues}`);
+    }
+  }
+
+  // Accept any value here because we cannot validate the query before the measurements JSON is loaded
+  for (const filterKey of Object.keys(query).filter((c) => c.startsWith(filterQueryPrefix))) {
+    const field = filterKey.replace(filterQueryPrefix, '');
+    const filterValues = Array.isArray(query[filterKey]) ? query[filterKey] : [query[filterKey]];
+    const measurementsFilters = {...newState.measurementsFilters};
+    measurementsFilters[field] = new Map(measurementsFilters[field]);
+    for (const value of filterValues) {
+      measurementsFilters[field].set(value, {active: true});
+    }
+    newState.measurementsFilters = measurementsFilters;
+  }
+  return newState;
+}

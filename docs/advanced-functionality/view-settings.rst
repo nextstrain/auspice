@@ -128,3 +128,25 @@ URL queries are the part of the URL coming after the ``?`` character, and typica
 **See this in action:**
 
 For instance, go to `nextstrain.org/flu/seasonal/h3n2/ha/2y?c=num_date&d=tree,map&m=div&r=region <https://nextstrain.org/flu/seasonal/h3n2/ha/2y?c=num_date&d=tree,map&m=div&p=grid&r=region>`__ and you'll see how we've changed the coloring to a temporal scale (``c=num_date``), we're only showing the tree & map panels (``d=tree,map``), the tree x-axis is divergence (``m=div``) and the map resolution is region (``r=region``).
+
+Measurements panel URL query options
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The following query options are specifically for the measurements panel.
+
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| Key                  | Description                                               | Example(s)                                                   |
++======================+===========================================================+==============================================================+
+| ``m_collection``     | Specify which collection to display                       | ``m_collection=h3n2_ha_cell_hi``                             |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| ``m_display``        | Toggle measurements display between mean and raw          | ``m_display=mean`` or ``m_display=raw``                      |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| ``m_groupBy``        | Specify group by field to use                             | ``m_groupBy=reference_strain``                               |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| ``m_overallMean``    | Show or hide the overall mean display                     | ``m_overallMean=show`` or ``m_overallMean=hide``             |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| ``m_threshold``      | Show or hide the threshold(s)                             | ``m_threshold=show`` or ``m_threshold=hide``                 |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+
+| ``mf_<field_name>``  | | Filters for the measurements data. Multiple values for  | | ``mf_reference_strain=A/Alabama/5/2010``                   |
+|                      | | the same field are specified by multiple query params   | | ``mf_clade_reference=145S.2&mf_clade_reference=158N/189K`` |
++----------------------+-----------------------------------------------------------+--------------------------------------------------------------+

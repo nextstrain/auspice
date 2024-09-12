@@ -12,7 +12,7 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
-export interface ControlsState {
+export interface BasicControlsState {
   panelsAvailable: string[]
   panelsToDisplay: string[]
   showTreeToo: boolean
@@ -22,6 +22,19 @@ export interface ControlsState {
   // TODO: add all other props explicitly and remove this.
   [propName: string]: any;
 }
+
+export interface MeasurementsControlState {
+  measurementsCollectionKey: string | undefined,
+  measurementsGroupBy: string | undefined,
+  measurementsDisplay: string | undefined,
+  measurementsShowOverallMean: boolean | undefined,
+  measurementsShowThreshold: boolean | undefined,
+  measurementsFilters: {
+    [key: string]: Map<string, {active: boolean}>
+  }
+}
+
+export interface ControlsState extends BasicControlsState, MeasurementsControlState {}
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -99,12 +112,31 @@ export const getDefaultControlsState = () => {
     showOnlyPanels: false,
     showTransmissionLines: true,
     normalizeFrequencies: true,
+    measurementsCollectionKey: undefined,
     measurementsGroupBy: undefined,
-    measurementsDisplay: "mean",
-    measurementsShowOverallMean: true,
-    measurementsShowThreshold: true,
+    measurementsDisplay: undefined,
+    measurementsShowOverallMean: undefined,
+    measurementsShowThreshold: undefined,
     measurementsFilters: {}
   };
+};
+
+/**
+ * Keeping measurements control state separate from getDefaultControlsState
+ * in order to be able to differentiate when the page is loaded with and without
+ * URL params for the measurements panel.
+ *
+ * The initial control state is constructed then the URL params update the state.
+ * However, the measurements JSON is loaded after this, so it needs a way to
+ * differentiate the clean slate vs the added URL params.
+ */
+export const defaultMeasurementsControlState: MeasurementsControlState = {
+  measurementsCollectionKey: undefined,
+  measurementsGroupBy: undefined,
+  measurementsDisplay: "mean",
+  measurementsShowOverallMean: true,
+  measurementsShowThreshold: true,
+  measurementsFilters: {}
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
@@ -329,19 +361,14 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return state;
     }
-    case types.LOAD_MEASUREMENTS: /* fallthrough */
-    case types.CHANGE_MEASUREMENTS_COLLECTION:
-      return {...state, ...action.controls};
-    case types.CHANGE_MEASUREMENTS_GROUP_BY:
-      return {...state, measurementsGroupBy: action.data};
-    case types.TOGGLE_MEASUREMENTS_THRESHOLD:
-      return {...state, measurementsShowThreshold: action.data};
-    case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN:
-      return {...state, measurementsShowOverallMean: action.data};
-    case types.CHANGE_MEASUREMENTS_DISPLAY:
-      return {...state, measurementsDisplay: action.data};
+    case types.LOAD_MEASUREMENTS: // fallthrough
+    case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
+    case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
+    case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
+    case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN: // fallthrough
+    case types.TOGGLE_MEASUREMENTS_THRESHOLD: // fallthrough
     case types.APPLY_MEASUREMENTS_FILTER:
-      return {...state, measurementsFilters: action.data};
+      return {...state, ...action.controls};
     /**
      * Currently the CHANGE_ZOOM action (entropy panel zoom changed) does not
      * update the zoomMin/zoomMax, and as such they only represent the initially

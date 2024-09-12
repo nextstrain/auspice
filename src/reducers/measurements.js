@@ -8,6 +8,7 @@ import {
 export const getDefaultMeasurementsState = () => ({
   error: undefined,
   loaded: false,
+  defaultCollectionKey: "",
   collections: [],
   collectionToDisplay: {}
 });
@@ -20,6 +21,7 @@ const measurements = (state = getDefaultMeasurementsState(), action) => {
       return {
         ...state,
         loaded: true,
+        defaultCollectionKey: action.defaultCollectionKey,
         collections: action.collections,
         collectionToDisplay: action.collectionToDisplay
       };

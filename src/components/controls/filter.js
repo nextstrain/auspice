@@ -81,7 +81,7 @@ class FilterData extends React.Component {
         ...(this.props.totalStateCounts[traitName]?.keys() || []),
         ...(this.props.totalStateCountsSecondTree?.[traitName]?.keys() || []),
       ]);
-      
+
       this.props.totalStateCounts[traitName];
       const traitTitle = this.getFilterTitle(traitName);
       const filterValuesCurrentlyActive = new Set((this.props.activeFilters[traitName] || []).filter((x) => x.active).map((x) => x.value));
@@ -175,6 +175,7 @@ class FilterData extends React.Component {
     });
   }
   summariseMeasurementsFilters = () => {
+    if (this.props.measurementsFieldsMap === undefined) return [];
     return Object.entries(this.props.measurementsFilters).map(([field, valuesMap]) => {
       const activeFiltersCount = Array.from(valuesMap.values()).reduce((prevCount, currentValue) => {
         return currentValue.active ? prevCount + 1 : prevCount;

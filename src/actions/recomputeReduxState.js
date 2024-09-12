@@ -23,6 +23,7 @@ import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
+import { createMeasurementsControlsFromQuery, getCollectionDefaultControls, getCollectionToDisplay } from "./measurements";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -146,8 +147,8 @@ const modifyStateViaURLQuery = (state, query) => {
       const [_dmin, _dminNum] = [params[0], calendarToNumeric(params[0])];
       const [_dmax, _dmaxNum] = [params[1], calendarToNumeric(params[1])];
       if (
-        !_validDate(_dminNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
-        !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) || 
+        !_validDate(_dminNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) ||
+        !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) ||
         _dminNum >= _dmaxNum
       ) {
         console.error("Invalid 'animate' URL query (invalid date range)")
@@ -206,8 +207,11 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.regression==="hide") state.scatterVariables.showRegression = false;
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
-  return state;
 
+  /* Process query params for measurements panel. These all start with `m_` or `mf_` prefix to avoid conflicts */
+  state = {...state, ...createMeasurementsControlsFromQuery(query)}
+
+  return state;
   function _validDate(dateNum, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
     return !(dateNum===undefined || dateNum > absoluteDateMaxNumeric || dateNum < absoluteDateMinNumeric);
   }
@@ -899,6 +903,12 @@ export const createStateFromQueryOrJSONs = ({
     measurements = {...oldState.measurements};
     controls = restoreQueryableStateToDefaults(controls);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
+    /* If available, reset to the default collection and the collection's default controls
+    so that narrative queries are respected between slides */
+    if (measurements.loaded) {
+      measurements.collectionToDisplay = getCollectionToDisplay(measurements.collections, "", measurements.defaultCollectionKey)
+      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
+    }
   }
 
   /* For the creation of state, we want to parse out URL query parameters
@@ -912,6 +922,18 @@ export const createStateFromQueryOrJSONs = ({
     narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
     /* replace the query with the information which can guide the view */
     query = queryString.parse(narrative[narrativeSlideIdx].query);
+    /**
+     * Special case where narrative includes query param for new measurements collection `m_collection`
+     * We need to reset the measurements and controls to the new collection's defaults before
+     * processing the remaining query params
+     */
+    if (query.m_collection && measurements.loaded) {
+      const newCollectionToDisplay = getCollectionToDisplay(measurements.collections, query.m_collection, measurements.defaultCollectionKey);
+      measurements.collectionToDisplay = newCollectionToDisplay;
+      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
+      // Delete `m_collection` so there's no chance of things getting mixed up when processing remaining query params
+      delete query.m_collection;
+    }
   }
 
   controls = modifyStateViaURLQuery(controls, query);

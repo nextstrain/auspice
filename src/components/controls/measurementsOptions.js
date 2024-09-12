@@ -2,13 +2,13 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
 import { isEqual } from "lodash";
-import { changeMeasurementsCollection } from "../../actions/measurements";
 import {
-  CHANGE_MEASUREMENTS_DISPLAY,
-  CHANGE_MEASUREMENTS_GROUP_BY,
-  TOGGLE_MEASUREMENTS_OVERALL_MEAN,
-  TOGGLE_MEASUREMENTS_THRESHOLD
-} from "../../actions/types";
+  changeMeasurementsCollection,
+  changeMeasurementsDisplay,
+  changeMeasurementsGroupBy,
+  toggleOverallMean,
+  toggleThreshold
+} from "../../actions/measurements";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
@@ -81,12 +81,7 @@ const MeasurementsOptions = () => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt) => {
-            dispatch({
-              type: CHANGE_MEASUREMENTS_GROUP_BY,
-              data: opt.value
-            });
-          }}
+          onChange={(opt) => {dispatch(changeMeasurementsGroupBy(opt.value));}}
         />
       </div>
       <SidebarSubtitle>
@@ -94,13 +89,13 @@ const MeasurementsOptions = () => {
       </SidebarSubtitle>
       <SidebarButton
         selected={display === "mean"}
-        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "mean" });}}
+        onClick={() => {dispatch(changeMeasurementsDisplay("mean"));}}
       >
         {"Mean ± SD"}
       </SidebarButton>
       <SidebarButton
         selected={display === "raw"}
-        onClick={() => {dispatch({ type: CHANGE_MEASUREMENTS_DISPLAY, data: "raw" });}}
+        onClick={() => {dispatch(changeMeasurementsDisplay("raw"));}}
       >
         {"Raw"}
       </SidebarButton>
@@ -109,7 +104,7 @@ const MeasurementsOptions = () => {
         display
         on={showOverallMean}
         label="Show overall mean ± SD"
-        callback={() => dispatch({type: TOGGLE_MEASUREMENTS_OVERALL_MEAN, data: !showOverallMean})}
+        callback={() => dispatch(toggleOverallMean())}
       />
       <Toggle
         // Only display threshold toggle if the collection has a valid threshold
@@ -119,7 +114,7 @@ const MeasurementsOptions = () => {
         }
         on={showThreshold}
         label="Show measurement threshold(s)"
-        callback={() => dispatch({type: TOGGLE_MEASUREMENTS_THRESHOLD, data: !showThreshold})}
+        callback={() => dispatch(toggleThreshold())}
       />
     </div>
   );
