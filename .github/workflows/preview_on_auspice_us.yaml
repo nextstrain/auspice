@@ -6,6 +6,7 @@ on:
       - synchronize
       - reopened
       - labeled
+      - closed
 
 jobs:
   run:
@@ -17,3 +18,4 @@ jobs:
     secrets: inherit
     with:
       repository: nextstrain/auspice.us
+      cleanup: ${{ github.event.action == 'closed' }}

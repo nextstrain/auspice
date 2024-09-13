@@ -9,18 +9,23 @@ on:
         required: false
         type: string
         default: .
+      cleanup:
+        required: true
+        type: boolean
 
 # Cancel any in-progress runs of a caller workflow on the same branch.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-jobs:
-  run:
-    runs-on: ubuntu-latest
+env:
+  branch: nextstrain-bot/test-auspice-pr/${{ github.event.number }}
 
-    env:
-      DESTINATION_REPO_DIR: repo
+jobs:
+  sync:
+    name: Create or update downstream PR
+    if: ${{ !inputs.cleanup }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/setup-node@v4
@@ -31,12 +36,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.repository }}
-          path: ${{ env.DESTINATION_REPO_DIR }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
 
       - name: Install Auspice from PRs HEAD commit
         shell: bash
-        working-directory: ${{ env.DESTINATION_REPO_DIR }}/${{ inputs.directory }}
+        working-directory: ${{ inputs.directory }}
         run: |
           npm ci
           npm install nextstrain/auspice#${{ github.sha }}
@@ -47,8 +51,6 @@ jobs:
           git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
 
       - name: Create Pull Request
-        id: cpr
-        working-directory: ${{ env.DESTINATION_REPO_DIR }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
           title: '[bot] [DO NOT MERGE] Test Auspice PR ${{ github.event.number }}'
@@ -58,18 +60,34 @@ jobs:
             Note that Auspice has been installed with changes from both the PR's source and target branches.
             This will surface any issues that can arise from merging the PR in Auspice. To address these issues locally, update the source branch (e.g. with a git rebase).
 
-            This message and corresponding commits were automatically created by a GitHub Action from [nextstrain/auspice](https://github.com/nextstrain/auspice).
-          body_file: pr_body.txt
+            This message PR is maintained by a [GitHub Actions workflow](https://github.com/nextstrain/auspice/blob/-/.github/workflows/preview_on_downstream_repo.yaml).
+            It will be automatically kept up to date and closed when the upstream PR has been merged or closed.
         run: |
-          branch="nextstrain-bot/test-auspice-pr/${{ github.event.number }}"
           git switch -c "$branch"
           git push --force origin HEAD
           pr_url=$(gh pr list --head "$branch" --json url | jq -r '.[0].url')
 
           if [ "$pr_url" = "null" ]; then
-            echo "$body" > "$body_file"
-            pr_url="$(gh pr create --title "$title" --body-file "$body_file" --draft)"
+            pr_url="$(gh pr create --title "$title" --body "$body" --draft)"
             echo "Pull request created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Pull request updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+  cleanup:
+    name: Cleanup downstream PR
+    if: inputs.cleanup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout downstream repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.repository }}
+          token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
+
+      - env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
+        run: |
+          gh pr close "$branch"
+          git push --delete origin "$branch"
