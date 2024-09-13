@@ -17,7 +17,7 @@ Auspice has some hardcoded defaults, largely for historical reasons. Each of the
 -  Default geographic resolution is "country", if available.
 -  Default colouring is "country", if available.
 -  Default branch labelling is "clade", if available.
--  Default tip labelling is the sample / strain name (`node.name`)
+-  Default tip labelling is the sample / strain name (``node.name``)
 
 Dataset (JSON) configurable defaults
 ------------------------------------

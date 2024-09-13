@@ -83,7 +83,16 @@ v1 Auspice JSONs used 0-based starts for the gene positions and ``1``/``-1`` for
 Changes to how node data is stored
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Each tree node (internal & terminal) can now contain the following properties \* ``name`` (required) -- formerly this was ``strain`` \* ``node_attrs`` -- attributes associated with the node (sequence, date, location) as opposed to changes from one node to another. \* Node attributes can now be objects and contain confidence information if available. \* A ``hidden`` node attribute can control Auspice's display of the node \* Author information is now contained under the ``author`` key, and the ``author_info`` dictionary is no longer present in the JSON. \* ``branch_attrs`` -- attributes associated with the branch from the parent node to this node, such as branch lengths, mutations, support values \* ``branch_attrs.mutations`` -- both AA & nucleotide mutations are now defined in the same object. \* ``children`` (unchanged)
+Each tree node (internal & terminal) can now contain the following properties
+
+* ``name`` (required) -- formerly this was ``strain``
+* ``node_attrs`` -- attributes associated with the node (sequence, date, location) as opposed to changes from one node to another.
+* Node attributes can now be objects and contain confidence information if available.
+* A ``hidden`` node attribute can control Auspice's display of the node
+* Author information is now contained under the ``author`` key, and the ``author_info`` dictionary is no longer present in the JSON.
+* ``branch_attrs`` -- attributes associated with the branch from the parent node to this node, such as branch lengths, mutations, support values
+* ``branch_attrs.mutations`` -- both AA & nucleotide mutations are now defined in the same object.
+* ``children`` (unchanged)
 
 Colorings, geographic resolutions, and defaults
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
