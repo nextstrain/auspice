@@ -49,6 +49,7 @@ class Tree extends React.Component {
       }
     };
   }
+
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
@@ -58,6 +59,7 @@ class Tree extends React.Component {
     }
     renderTree(this, false, newState.treeToo, props);
   }
+
   componentDidMount() {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
@@ -71,6 +73,7 @@ class Tree extends React.Component {
       this.setState(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
+
   componentDidUpdate(prevProps) {
     let newState = {};
     let rightTreeUpdated = false;
