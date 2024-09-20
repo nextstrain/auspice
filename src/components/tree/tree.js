@@ -37,7 +37,6 @@ class Tree extends React.Component {
     };
     /* bind callbacks */
     this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
-    // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
         root: [0, 0]
