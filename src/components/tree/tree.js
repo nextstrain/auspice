@@ -35,19 +35,22 @@ class Tree extends React.Component {
       tree: null,
       treeToo: null
     };
+
     /* bind callbacks */
     this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
-    this.redrawTree = () => {
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-        root: [0, 0]
-      }));
-    };
-    /* pressing the escape key should dismiss an info modal (if one exists) */
-    this.handlekeydownEvent = (event) => {
-      if (event.key==="Escape" && this.props.selectedNode) {
-        this.clearSelectedNode(this.props.selectedNode);
-      }
-    };
+  }
+
+  redrawTree = () => {
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+      root: [0, 0]
+    }));
+  }
+
+  /* pressing the escape key should dismiss an info modal (if one exists) */
+  handlekeydownEvent = (event) => {
+    if (event.key==="Escape" && this.props.selectedNode) {
+      this.clearSelectedNode(this.props.selectedNode);
+    }
   }
 
   setUpAndRenderTreeToo(props, newState) {
