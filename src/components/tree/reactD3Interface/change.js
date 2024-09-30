@@ -86,6 +86,14 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
 
+  console.log(oldProps.rootIndicies, newProps.rootIndicies)
+  if (oldProps.rootIndicies !== newProps.rootIndicies) {
+    console.log("CHANGE.JS rootIndicies newLayout")
+    // args.newLayout = newProps.layout;
+    args.changeNodeOrder = true;
+  }
+
+
   /* zoom to a clade / reset zoom to entire tree */
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];

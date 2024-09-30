@@ -27,7 +27,8 @@ const Tree = connect((state) => ({
   tipLabelKey: state.controls.tipLabelKey,
   narrativeMode: state.narrative.display,
   animationPlayPauseButton: state.controls.animationPlayPauseButton,
-  showOnlyPanels: state.controls.showOnlyPanels
+  showOnlyPanels: state.controls.showOnlyPanels,
+  rootIndicies: state.tree.nodes[0].children.map((n) => n.arrayIdx).join(","), // TODO HACK
 }))(UnconnectedTree);
 
 export default Tree;

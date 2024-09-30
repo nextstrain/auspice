@@ -1,3 +1,6 @@
+import { errorNotification } from "../../../actions/notifications";
+import { updateVisibleTipsAndBranchThicknesses } from "../../../actions/tree";
+
 /*
 move flip node pair to move root from parent to node
      ----a        ----a
@@ -8,28 +11,64 @@ move flip node pair to move root from parent to node
  -----e
 
  */
-const flipNode = (node, parent) => {
-  // should assert that node is child of parent
+const flipNode = (node, parent, mutations) => {
+  console.log(`flipNode, moving ${parent.name} to now be a child of ${node.name}`)
+
+  const _l = parent.children.length;
   parent.children = parent.children.filter((d) => {return d!==node;});
+  console.assert(_l - 1 === parent.children.length, "BUG FIXME")
+  
+  const grandParent = parent.parent;
 
-  node.children.push(parent);
-  parent.parent = node;
-  node.parent = undefined;
-
-  //flip branch length
-  parent.branchLength = node.branchLength;
-  node.branchLength = undefined;
+  node.children.push(parent); // old parent is now a child of node,
+  parent.parent = node;       // so its parent is the node
+  // Branch length changes done separately (cumulative, not per-node)
 
   //flip mutations
-  parent.muts = node.muts.forEach((m) => {
-    return m[m.length-1] + m.substring(1,m.length-1) + m[0];
-  });
-  node.mutations = undefined;
-  for (gene in node.aa_muts){
-    parent.aa_muts[gene] = node.aa_muts[gene].forEach((m) => {
-      return m[m.length-1] + m.substring(1,m.length-1) + m[0];
-    });
-    parent.aa_muts[gene] = undefined;
+  node.mutations = {}
+  parent.mutations = Object.fromEntries(
+    Object.entries(mutations[node.arrayIdx]).map(([name, data]) => {
+      const flipped = data.map((m) => m[m.length-1] + m.substring(1,m.length-1) + m[0])
+      return [name,flipped]
+    })
+  )
+
+  console.log(`\tConsidering parent of ${parent.name}: ${grandParent.name}...`)
+  
+  if (parent===grandParent) {
+    console.log("\t\t *** ABORT ***");
+    return
+  }
+
+  flipNode(parent,grandParent, mutations)
+
+}
+
+
+function storePreviousBranchInformation(root) {
+  const branchLengths = {}
+  const mutations = {}
+  const stack = [root]
+  while (stack.length) {
+    const node = stack.pop()
+    for (const child of (node.children || [])) {
+      branchLengths[child.arrayIdx] = child.node_attrs.div - node.node_attrs.div;
+      mutations[child.arrayIdx] = child.branch_attrs.mutations
+      stack.push(child)
+    }
+  }
+  return {branchLengths, mutations};
+}
+
+function recalculateDivergence(root, branchLengths) {
+  const stack = [root]
+  root.node_attrs.div = 0
+  while (stack.length) {
+    const node = stack.pop()
+    for (const child of (node.children || [])) {
+      child.node_attrs.div = node.node_attrs.div + branchLengths[child.arrayIdx]
+      stack.push(child)
+    }
   }
 }
 
@@ -72,25 +111,36 @@ const bridgeNode = (node) => {
 /*
 change the root of the tree from node oldRoot to node newRoot
  */
-const reroot = (newRoot, oldRoot) => {
-  // determine the chain of nodes connecting the new to old root.
-  const pathToOldRoot = [newRoot];
-  let tmpNode = newRoot;
-  while (tmpNode!==oldRoot){
-    tmpNode = tmpNode.parent;
-    pathToOldRoot.push(tmpNode);
+export const reroot = (newPhyloRootNode) => (dispatch, getState) => {
+
+  /**
+   * TODO - make sure we can't reroot if in:
+   * temporal tree
+   * exploded tree
+   * 
+   */
+
+  const {tree} = getState();
+  const newRootNode = newPhyloRootNode.n;
+  console.log("REROOT", newRootNode, tree)
+
+  if (!newRootNode.hasChildren) {
+    dispatch(errorNotification({
+      message: "Can't reroot on a terminal branch!",
+    }));
+    return;
   }
 
-  // starting at the old root, move the root along the chain towards
-  // the new root. The last node in the chain (newRoot) is treated separately
-  for (let i=pathToOldRoot.length-1; i>0; i--){
-    flipNode(pathToOldRoot[i-1], pathToOldRoot[i]);
-  }
 
-  // introduce new node above newRoot.
-  const plength = pathToOldRoot.length;
-  addNewRoot(pathToOldRoot[plength-2], pathToOldRoot[plength-1]);
+  const {branchLengths, mutations} = storePreviousBranchInformation(tree.nodes[0])
+  console.log("mutations", mutations)
+  flipNode(newRootNode, newRootNode.parent, mutations)
+  newRootNode.parent = newRootNode;
+  tree.nodes[0].children = [newRootNode]; // TODO - handle subtrees
+  recalculateDivergence(tree.nodes[0], branchLengths)
 
-  // remove redundant node if previous root was bifurcating
-  bridgeNode(oldRoot);
+  console.log("tree", tree)
+
+  dispatch(updateVisibleTipsAndBranchThicknesses())
+
 }

@@ -3,6 +3,7 @@ import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
+import { reroot } from "../reroot/reroot";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -63,6 +64,11 @@ export const onBranchClick = function onBranchClick(d) {
     this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id})
     return;
   }
+
+  if (window.event.metaKey) {
+    return this.props.dispatch(reroot(d));
+  }
+``
 
   const root = [undefined, undefined];
   let cladeSelected;
