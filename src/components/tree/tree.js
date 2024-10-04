@@ -115,17 +115,16 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
-      this.props.treeToo.idxOfInViewRootNode !== 0;
-
     const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
       this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
     const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
       this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
     const activeZoomButton = filteredTree || filteredTreeToo;
 
-    const treeIsZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
+    const anyTreeZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
       this.props.treeToo.idxOfInViewRootNode !== 0;
+
+    const activeResetTreeButton = anyTreeZoomed;
 
     return {
       treeButtonsDiv: {
@@ -151,9 +150,9 @@ class Tree extends React.Component {
       zoomOutButton: {
         zIndex: 100,
         display: "inline-block",
-        cursor: treeIsZoomed ? "pointer" : "auto",
-        color: treeIsZoomed ? darkGrey : lightGrey,
-        pointerEvents: treeIsZoomed ? "auto" : "none",
+        cursor: anyTreeZoomed ? "pointer" : "auto",
+        color: anyTreeZoomed ? darkGrey : lightGrey,
+        pointerEvents: anyTreeZoomed ? "auto" : "none",
         marginRight: "4px"
       }
     };
