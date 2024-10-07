@@ -6,7 +6,7 @@ import entropy from "./entropy";
 import controls, { ControlsState } from "./controls";
 import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
-import narrative from "./narrative";
+import narrative, { NarrativeState } from "./narrative";
 import treeToo from "./treeToo";
 import general from "./general";
 import jsonCache from "./jsonCache";
@@ -20,7 +20,7 @@ interface RootState {
   entropy: ReturnType<typeof entropy>
   browserDimensions: ReturnType<typeof browserDimensions>
   notifications: ReturnType<typeof notifications>
-  narrative: any
+  narrative: NarrativeState
   treeToo: ReturnType<typeof treeToo>
   general: ReturnType<typeof general>
   jsonCache: ReturnType<typeof jsonCache>
