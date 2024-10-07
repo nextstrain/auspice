@@ -48,6 +48,7 @@ if (process.env.NODE_ENV !== 'production' && module.hot) {
 }
 
 // Infer types from the store.
+// This is more clearly defined in src/reducers/index.ts but exported here.
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 

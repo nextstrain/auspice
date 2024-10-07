@@ -3,7 +3,7 @@ import metadata from "./metadata";
 import tree from "./tree";
 import frequencies from "./frequencies";
 import entropy from "./entropy";
-import controls from "./controls";
+import controls, { ControlsState } from "./controls";
 import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
 import narrative from "./narrative";
@@ -12,7 +12,22 @@ import general from "./general";
 import jsonCache from "./jsonCache";
 import measurements from "./measurements";
 
-const rootReducer = combineReducers({
+interface RootState {
+  metadata: ReturnType<typeof metadata>
+  tree: ReturnType<typeof tree>
+  frequencies: ReturnType<typeof frequencies>
+  controls: ControlsState
+  entropy: ReturnType<typeof entropy>
+  browserDimensions: ReturnType<typeof browserDimensions>
+  notifications: ReturnType<typeof notifications>
+  narrative: any
+  treeToo: ReturnType<typeof treeToo>
+  general: ReturnType<typeof general>
+  jsonCache: ReturnType<typeof jsonCache>
+  measurements: ReturnType<typeof measurements>
+}
+
+const rootReducer = combineReducers<RootState>({
   metadata,
   tree,
   frequencies,
