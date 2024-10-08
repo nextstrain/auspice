@@ -89,6 +89,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
+      filters: controls.filters,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
