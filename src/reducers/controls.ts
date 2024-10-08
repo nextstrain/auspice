@@ -12,7 +12,21 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
+interface Defaults {
+  distanceMeasure: string
+  layout: string
+  geoResolution: string
+  filters: Record<string, any>
+  filtersInFooter: string[]
+  colorBy: string
+  selectedBranchLabel: string
+  tipLabelKey: typeof strainSymbol
+  showTransmissionLines: boolean
+  sidebarOpen?: boolean
+}
+
 export interface BasicControlsState {
+  defaults: Defaults
   panelsAvailable: string[]
   panelsToDisplay: string[]
   showTreeToo: boolean
@@ -40,7 +54,7 @@ export interface ControlsState extends BasicControlsState, MeasurementsControlSt
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 export const getDefaultControlsState = () => {
-  const defaults: Partial<ControlsState> = {
+  const defaults: Defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
     geoResolution: defaultGeoResolution,
