@@ -91,8 +91,8 @@ export interface TreeComponentPropsFromState {
 // FIXME: is this Partial<TreeComponentProps>?
 export interface TreeComponentState {
   hoveredNode: PhyloNode | null
-  tree: PhyloTree | null
-  treeToo: PhyloTree | null
+  tree?: PhyloTree
+  treeToo?: PhyloTree
   geneSortFn?: any
   selectedNode?: {}
 }
@@ -117,8 +117,8 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     this.tangleRef = undefined;
     this.state = {
       hoveredNode: null,
-      tree: null,
-      treeToo: null
+      tree: undefined,
+      treeToo: undefined
     };
 
     /* bind callbacks */
@@ -139,6 +139,10 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   setUpAndRenderTreeToo(props: TreeComponentProps, newState: TreeComponentState) {
+    if (newState.treeToo === undefined) {
+      return;
+    }
+
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
     newState.treeToo = new PhyloTreeConstructor(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
@@ -153,7 +157,10 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
       newState.tree = new PhyloTreeConstructor(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
-      renderTree(this, true, newState.tree!, this.props);
+      if (newState.tree === undefined) {
+        return;
+      }
+      renderTree(this, true, newState.tree, this.props);
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState as TreeComponentState); /* modifies newState in place */
       }
@@ -163,6 +170,10 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   override componentDidUpdate(prevProps: TreeComponentProps) {
+    if (this.state.tree === undefined) {
+      return;
+    }
+
     let newState: Partial<TreeComponentState> = {};
     let rightTreeUpdated = false;
 
@@ -170,13 +181,13 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     const {
       newState: potentialNewState,
       change: leftTreeUpdated,
-    } = changePhyloTreeViaPropsComparison(true, this.state.tree!, prevProps, this.props);
+    } = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
     if (potentialNewState) newState = potentialNewState;
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
     if (prevProps.showTreeToo !== this.props.showTreeToo) {
       if (!this.props.showTreeToo) { /* turned off -> remove the 2nd tree */
-        newState.treeToo = null;
+        newState.treeToo = undefined;
       } else { /* turned on -> render the 2nd tree */
         if (this.state.treeToo) { /* tree has been swapped -> remove the old tree */
           this.state.treeToo.clearSVG();

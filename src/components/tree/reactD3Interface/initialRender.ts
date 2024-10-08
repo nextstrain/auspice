@@ -14,7 +14,7 @@ export const renderTree = (
 ) => {
   const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
   const treeState = main ? props.tree : props.treeToo;
-  if (!treeState.loaded) {
+  if (!treeState.loaded || ref === undefined) {
     console.warn("can't run renderTree (not loaded)");
     return;
   }
@@ -26,7 +26,7 @@ export const renderTree = (
   const tipStrokeColors = calculateStrokeColors(treeState, false, props.colorByConfidence, props.colorBy);
 
   phylotree.render({
-    svg: select(ref!),
+    svg: select(ref),
     layout: props.layout,
     distance: props.distanceMeasure,
     focus: props.focus,

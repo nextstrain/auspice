@@ -340,6 +340,9 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
     scatterVariables = undefined
   }: ChangeParams = params;
 
+  // Return if render hasn't happened yet
+  if (!this.timeLastRenderRequested) return;
+
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
   const elemsToUpdate = new Set<TreeElement>(); /* what needs updating? E.g. ".branch", ".tip" etc */
@@ -350,7 +353,8 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
-  if ((Date.now() - this.timeLastRenderRequested!) < idealTransitionTime * 2) {
+
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
     transitionTime = 0;
   }
 

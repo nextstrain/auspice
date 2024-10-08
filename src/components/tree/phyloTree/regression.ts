@@ -16,12 +16,15 @@ export interface Regression {
  * The regression is forced to pass through nodes[0].
  */
 function calculateRegressionThroughRoot(nodes: PhyloNode[]): Regression {
+  if (!nodes[0]) {
+    throw new Error("`nodes` must contain at least one entry to calculate the regression through the root.");
+  }
   const terminalNodes = nodes.filter((d) => !d.n.hasChildren && d.visibility === NODE_VISIBLE);
   const nTips = terminalNodes.length;
   if (nTips===0) {
     return {slope: undefined, intercept: undefined, r2: undefined};
   }
-  const offset = nodes[0]!.x;
+  const offset = nodes[0].x;
   const XY = sum(
     terminalNodes.map((d) => (d.y) * (d.x - offset))
   ) / nTips;
@@ -66,11 +69,17 @@ export function calculateRegression(this: PhyloTree) {
 }
 
 export function makeRegressionText(regression: Regression, layout: string, yScale: any): string {
+  if (regression.intercept === undefined ||
+      regression.slope === undefined ||
+      regression.r2 === undefined)  {
+    return "";
+  }
+
   if (layout==="clock") {
     if (guessAreMutationsPerSite(yScale)) {
-      return `rate estimate: ${regression.slope!.toExponential(2)} subs per site per year`;
+      return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
     }
     return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
   }
-  return `intercept = ${regression.intercept!.toPrecision(3)}, slope = ${regression.slope!.toPrecision(3)}, R^2 = ${regression.r2!.toPrecision(3)}`;
+  return `intercept = ${regression.intercept.toPrecision(3)}, slope = ${regression.slope.toPrecision(3)}, R^2 = ${regression.r2.toPrecision(3)}`;
 }

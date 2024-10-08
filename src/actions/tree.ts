@@ -25,18 +25,21 @@ import { PhyloNode } from "../components/tree/phyloTree/types";
  */
 export const applyInViewNodesToTree = (idx: number | undefined, tree: TreeState) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
-  if (tree.nodes[0]!.shell) {
+
+  if (!tree.nodes[0] || !tree.nodes[validIdxRoot]) return;
+
+  if (tree.nodes[0].shell) {
     tree.nodes.forEach((d) => {
       d.shell.inView = false;
       d.shell.update = true;
     });
-    if (tree.nodes[validIdxRoot]!.hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot]!.shell, (d: PhyloNode) => {d.inView = true;});
-    } else if (tree.nodes[validIdxRoot]!.parent.arrayIdx===0) {
+    if (tree.nodes[validIdxRoot].hasChildren) {
+      applyToChildren(tree.nodes[validIdxRoot].shell, (d: PhyloNode) => {d.inView = true;});
+    } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
       // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
-      tree.nodes[validIdxRoot]!.shell.inView = true;
+      tree.nodes[validIdxRoot].shell.inView = true;
     } else {
-      applyToChildren(tree.nodes[validIdxRoot]!.parent.shell, (d: PhyloNode) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d: PhyloNode) => {d.inView = true;});
     }
   } else {
     /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
@@ -50,7 +53,7 @@ export const applyInViewNodesToTree = (idx: number | undefined, tree: TreeState)
         for (const child of node.children) _markChildrenInView(child);
       }
     };
-    const startingNode = tree.nodes[validIdxRoot]!.hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot]!.parent;
+    const startingNode = tree.nodes[validIdxRoot].hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot].parent;
     _markChildrenInView(startingNode);
   }
 

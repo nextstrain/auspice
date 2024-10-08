@@ -157,7 +157,9 @@ export const drawTips = function drawTips(this: PhyloTree) {
   if (!("tips" in this.groups)) {
     this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
   }
-  this.groups.tips!
+  if (!this.groups.tips) throw "tips should be set at this point!"
+
+  this.groups.tips
     .selectAll(".tip")
     .data(this.nodes.filter((d) => !d.n.hasChildren))
     .enter()
@@ -230,10 +232,12 @@ export const drawBranches = function drawBranches(this: PhyloTree) {
   if (!("branchTee" in this.groups)) {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
   }
+  if (!this.groups.branchTee) throw "branchTee should be set at this point!"
+
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
-    this.groups.branchTee!.selectAll("*").remove();
+    this.groups.branchTee.selectAll("*").remove();
   } else {
-    this.groups.branchTee!
+    this.groups.branchTee
       .selectAll('.branch')
       .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
       .enter()
@@ -265,7 +269,9 @@ export const drawBranches = function drawBranches(this: PhyloTree) {
   if (!("branchStem" in this.groups)) {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
   }
-  this.groups.branchStem!
+  if (!this.groups.branchStem) throw "branchStem should be set at this point!"
+
+  this.groups.branchStem
     .selectAll('.branch')
     .data(this.nodes.filter((d) => d.displayOrder !== undefined))
     .enter()
@@ -296,12 +302,14 @@ export const drawBranches = function drawBranches(this: PhyloTree) {
  */
 export const drawRegression = function drawRegression(this: PhyloTree) {
   /* check we have computed a sensible regression before attempting to draw */
-  if (this.regression!.slope===undefined) {
+  if (this.regression === undefined ||
+      this.regression.intercept === undefined ||
+      this.regression.slope === undefined) {
     return;
   }
 
-  const leftY = this.yScale(this.regression!.intercept! + this.xScale.domain()[0] * this.regression!.slope);
-  const rightY = this.yScale(this.regression!.intercept! + this.xScale.domain()[1] * this.regression!.slope);
+  const leftY = this.yScale(this.regression.intercept + this.xScale.domain()[0] * this.regression.slope);
+  const rightY = this.yScale(this.regression.intercept + this.xScale.domain()[1] * this.regression.slope);
 
   const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
@@ -309,8 +317,9 @@ export const drawRegression = function drawRegression(this: PhyloTree) {
   if (!("regression" in this.groups)) {
     this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", "url(#treeClip)");
   }
+  if (!this.groups.regression) throw "regression should be set at this point!"
 
-  this.groups.regression!
+  this.groups.regression
     .append("path")
     .attr("d", path)
     .attr("class", "regression")
@@ -321,9 +330,9 @@ export const drawRegression = function drawRegression(this: PhyloTree) {
 
   /* Compute & draw regression text. Note that the text hasn't been created until now,
   as we need to wait until rendering time when the scales have been calculated */
-  this.groups.regression!
+  this.groups.regression
     .append("text")
-    .text(makeRegressionText(this.regression!, this.layout, this.yScale))
+    .text(makeRegressionText(this.regression, this.layout, this.yScale))
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)
@@ -413,8 +422,8 @@ const handleBranchHoverColor = (d: PhyloNode, c1: string, c2: string) => {
 };
 
 export const branchStrokeForLeave = function branchStrokeForLeave(d: PhyloNode) {
-  if (!d) { return; }
-  handleBranchHoverColor(d, d.n.parent.shell.branchStroke!, d.branchStroke!);
+  if (!d || !d.n.parent.shell.branchStroke || !d.branchStroke) { return; }
+  handleBranchHoverColor(d, d.n.parent.shell.branchStroke, d.branchStroke);
 };
 
 export const branchStrokeForHover = function branchStrokeForHover(d: PhyloNode) {

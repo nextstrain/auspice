@@ -143,13 +143,24 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTree) {
  * Utility function for the unrooted tree layout. See `unrootedLayout` for details.
  */
 const unrootedPlaceSubtree = (node: PhyloNode, totalLeafWeight: number) => {
-  const branchLength = node.depth! - node.pDepth!;
-  node.x = node.px! + branchLength * Math.cos(node.tau! + node.w! * 0.5);
-  node.y = node.py! + branchLength * Math.sin(node.tau! + node.w! * 0.5);
-  let eta = node.tau!; // eta is the cumulative angle for the wedges in the layout
+  // FIXME: consider an UnrootedPhyloNode that guarantees presence of these? will need some casting...
+  if (node.depth === undefined ||
+      node.pDepth === undefined ||
+      node.px === undefined ||
+      node.py === undefined ||
+      node.tau === undefined ||
+      node.w === undefined ||
+      node.n.children === undefined
+  ) {
+    return;
+  }
+  const branchLength = node.depth - node.pDepth;
+  node.x = node.px + branchLength * Math.cos(node.tau + node.w * 0.5);
+  node.y = node.py + branchLength * Math.sin(node.tau + node.w * 0.5);
+  let eta = node.tau; // eta is the cumulative angle for the wedges in the layout
   if (node.n.hasChildren) {
-    for (let i = 0; i < node.n.children!.length; i++) {
-      const ch = node.n.children![i]!.shell;
+    for (const child of node.n.children) {
+      const ch = child.shell;
       ch.w = 2 * Math.PI * leafWeight(ch.n) / totalLeafWeight;
       ch.tau = eta;
       eta += ch.w;
