@@ -1,20 +1,27 @@
 import { sum } from "d3-array";
 import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { PhyloTree } from "./phyloTree";
+import { PhyloNode } from "./types";
 
+export interface Regression {
+  slope?: number
+  intercept?: number
+  r2?: number
+}
 
 /**
  * this function calculates a regression between
  * the x and y values of terminal nodes which are also visible.
  * The regression is forced to pass through nodes[0].
  */
-function calculateRegressionThroughRoot(nodes) {
+function calculateRegressionThroughRoot(nodes: PhyloNode[]): Regression {
   const terminalNodes = nodes.filter((d) => !d.n.hasChildren && d.visibility === NODE_VISIBLE);
   const nTips = terminalNodes.length;
   if (nTips===0) {
     return {slope: undefined, intercept: undefined, r2: undefined};
   }
-  const offset = nodes[0].x;
+  const offset = nodes[0]!.x;
   const XY = sum(
     terminalNodes.map((d) => (d.y) * (d.x - offset))
   ) / nTips;
@@ -31,7 +38,7 @@ function calculateRegressionThroughRoot(nodes) {
  * Calculate regression through visible terminal nodes which have both x & y values
  * set. These values must be numeric.
  */
-function calculateRegressionWithFreeIntercept(nodes) {
+function calculateRegressionWithFreeIntercept(nodes: PhyloNode[]): Regression {
   const terminalNodesWithXY = nodes.filter(
     (d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined && d.visibility === NODE_VISIBLE
   );
@@ -50,7 +57,7 @@ function calculateRegressionWithFreeIntercept(nodes) {
 }
 
 /** sets this.regression  */
-export function calculateRegression() {
+export function calculateRegression(this: PhyloTree) {
   if (this.layout==="clock") {
     this.regression = calculateRegressionThroughRoot(this.nodes);
   } else {
@@ -58,12 +65,12 @@ export function calculateRegression() {
   }
 }
 
-export function makeRegressionText(regression, layout, yScale) {
+export function makeRegressionText(regression: Regression, layout: string, yScale: any): string {
   if (layout==="clock") {
     if (guessAreMutationsPerSite(yScale)) {
-      return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+      return `rate estimate: ${regression.slope!.toExponential(2)} subs per site per year`;
     }
     return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
   }
-  return `intercept = ${regression.intercept.toPrecision(3)}, slope = ${regression.slope.toPrecision(3)}, R^2 = ${regression.r2.toPrecision(3)}`;
+  return `intercept = ${regression.intercept!.toPrecision(3)}, slope = ${regression.slope!.toPrecision(3)}, R^2 = ${regression.r2!.toPrecision(3)}`;
 }

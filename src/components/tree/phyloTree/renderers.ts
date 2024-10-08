@@ -3,35 +3,89 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
-/**
- * @param {d3 selection} svg      -- the svg into which the tree is drawn
- * @param {string} layout         -- the layout to be used, e.g. "rect"
- * @param {string} distance       -- the property used as branch length, e.g. div or num_date
- * @param {string} focus          -- whether to focus on filtered nodes
- * @param {object} parameters     -- an object that contains options that will be added to this.params
- * @param {object} callbacks      -- an object with call back function defining mouse behavior
- * @param {array} branchThickness -- array of branch thicknesses (same ordering as tree nodes)
- * @param {array} visibility      -- array of visibility of nodes(same ordering as tree nodes)
- * @param {bool} drawConfidence   -- should confidence intervals be drawn?
- * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
- * @param {array} branchStroke    -- branch stroke colour for each node (set onto each node)
- * @param {array} tipStroke       -- tip stroke colour for each node (set onto each node)
- * @param {array} tipFill         -- tip fill colour for each node (set onto each node)
- * @param {array|null} tipRadii   -- array of tip radius'
- * @param {array} dateRange
- * @param {object} scatterVariables  -- {x, y} properties to map nodes => scatterplot (only used if layout="scatter")
- * @return {null}
- */
-export const render = function render(svg, layout, distance, focus, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
+import { PhyloTree } from "./phyloTree";
+import { Callbacks, Distance, Layout, Params, PhyloNode, ReduxNode, ScatterVariables, Visibility } from "./types";
+import { Selection } from "d3";
+
+export const render = function render(
+  this: PhyloTree,
+{
+  svg,
+  layout,
+  distance,
+  focus,
+  parameters,
+  callbacks,
+  branchThickness,
+  visibility,
+  drawConfidence,
+  vaccines,
+  branchStroke,
+  tipStroke,
+  tipFill,
+  tipRadii,
+  dateRange,
+  scatterVariables
+}: {
+  /** the svg into which the tree is drawn */
+  svg: Selection<SVGGElement, unknown, HTMLElement, any>
+
+  /** the layout to be used, e.g. "rect" */
+  layout: Layout
+
+  /** the property used as branch length, e.g. div or num_date */
+  distance: Distance
+
+  /** whether to focus on filtered nodes */
+  focus: boolean
+
+  /** an object that contains options that will be added to this.params */
+  parameters: Partial<Params>
+
+  /** an object with call back function defining mouse behavior */
+  callbacks: Callbacks
+
+  /** array of branch thicknesses (same ordering as tree nodes) */
+  branchThickness: number[]
+
+  /** array of visibility of nodes(same ordering as tree nodes) */
+  visibility: Visibility[]
+
+  /** should confidence intervals be drawn? */
+  drawConfidence: boolean
+
+  /** should vaccine crosses (and dotted lines if applicable) be drawn? */
+  vaccines: ReduxNode[]
+
+  /** branch stroke colour for each node (set onto each node) */
+  branchStroke: string[]
+
+  /** tip stroke colour for each node (set onto each node) */
+  tipStroke: string[]
+
+  /** tip fill colour for each node (set onto each node) */
+  tipFill: string[]
+
+  /** array of tip radius' */
+  tipRadii: number[] | null
+
+  dateRange: [number, number]
+
+  /** {x, y} properties to map nodes => scatterplot (only used if layout="scatter") */
+  scatterVariables: ScatterVariables
+}) {
   timerStart("phyloTree render()");
   this.svg = svg;
-  this.params = Object.assign(this.params, parameters);
+  this.params = {
+    ...this.params,
+    ...parameters
+  };
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.dateRange = dateRange;
 
   /* set nodes stroke / fill */
-  this.nodes.forEach((d, i) => {
+  this.nodes.forEach((d: PhyloNode, i: number) => {
     d.branchStroke = branchStroke[i];
     d.tipStroke = tipStroke[i];
     d.fill = tipFill[i];
@@ -69,19 +123,19 @@ export const render = function render(svg, layout, distance, focus, parameters, 
  * adds crosses to the vaccines
  * @return {null}
  */
-export const drawVaccines = function drawVaccines() {
+export const drawVaccines = function drawVaccines(this: PhyloTree) {
   if (!this.vaccines || !this.vaccines.length) return;
 
   if (!("vaccines" in this.groups)) {
     this.groups.vaccines = this.svg.append("g").attr("id", "vaccines");
   }
-  this.groups.vaccines
+  this.groups.vaccines!
     .selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
     .append("path")
     .attr("class", "vaccineCross")
-    .attr("d", (d) => d.vaccineCross)
+    .attr("d", (d) => d.vaccineCross!)
     .style("stroke", "#333")
     .style("stroke-width", 2 * this.params.branchStrokeWidth)
     .style("fill", "none")
@@ -97,13 +151,13 @@ export const drawVaccines = function drawVaccines() {
  * adds all the tip circles to the svg, they have class tip
  * @return {null}
  */
-export const drawTips = function drawTips() {
+export const drawTips = function drawTips(this: PhyloTree) {
   timerStart("drawTips");
   const params = this.params;
   if (!("tips" in this.groups)) {
     this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
   }
-  this.groups.tips
+  this.groups.tips!
     .selectAll(".tip")
     .data(this.nodes.filter((d) => !d.n.hasChildren))
     .enter()
@@ -130,9 +184,8 @@ export const drawTips = function drawTips() {
  * given a tree node, decide whether the branch should be rendered
  * This enforces the "hidden" property set on `node.node_attrs.hidden`
  * in the dataset JSON
- * @return {string}
  */
-export const getBranchVisibility = (d) => {
+export const getBranchVisibility = (d: PhyloNode) => {
   const hiddenSetting = d.n.node_attrs && d.n.node_attrs.hidden;
   if (hiddenSetting &&
     (
@@ -151,7 +204,7 @@ export const getBranchVisibility = (d) => {
  * @param {obj} d node
  * @param {string} b branch type -- either "T" (tee) or "S" (stem)
  */
-export const strokeForBranch = (d, _b) => {
+export const strokeForBranch = (d: PhyloNode, _b?: string) => {
   /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
   cause the branches to not appear, we're falling back to the previous solution which
   doesn't use gradients. The commented code remains & hopefully a solution can be
@@ -168,7 +221,7 @@ export const strokeForBranch = (d, _b) => {
  * adds all branches to the svg, these are paths with class branch, which comprise two groups
  * @return {null}
  */
-export const drawBranches = function drawBranches() {
+export const drawBranches = function drawBranches(this: PhyloTree) {
   timerStart("drawBranches");
   const params = this.params;
 
@@ -178,9 +231,9 @@ export const drawBranches = function drawBranches() {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
   }
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
-    this.groups.branchTee.selectAll("*").remove();
+    this.groups.branchTee!.selectAll("*").remove();
   } else {
-    this.groups.branchTee
+    this.groups.branchTee!
       .selectAll('.branch')
       .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
       .enter()
@@ -212,7 +265,7 @@ export const drawBranches = function drawBranches() {
   if (!("branchStem" in this.groups)) {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
   }
-  this.groups.branchStem
+  this.groups.branchStem!
     .selectAll('.branch')
     .data(this.nodes.filter((d) => d.displayOrder !== undefined))
     .enter()
@@ -241,14 +294,14 @@ export const drawBranches = function drawBranches() {
  * draws the regression line in the svg and adds a text with the rate estimate
  * @return {null}
  */
-export const drawRegression = function drawRegression() {
+export const drawRegression = function drawRegression(this: PhyloTree) {
   /* check we have computed a sensible regression before attempting to draw */
-  if (this.regression.slope===undefined) {
+  if (this.regression!.slope===undefined) {
     return;
   }
 
-  const leftY = this.yScale(this.regression.intercept + this.xScale.domain()[0] * this.regression.slope);
-  const rightY = this.yScale(this.regression.intercept + this.xScale.domain()[1] * this.regression.slope);
+  const leftY = this.yScale(this.regression!.intercept! + this.xScale.domain()[0] * this.regression!.slope);
+  const rightY = this.yScale(this.regression!.intercept! + this.xScale.domain()[1] * this.regression!.slope);
 
   const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
@@ -257,7 +310,7 @@ export const drawRegression = function drawRegression() {
     this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", "url(#treeClip)");
   }
 
-  this.groups.regression
+  this.groups.regression!
     .append("path")
     .attr("d", path)
     .attr("class", "regression")
@@ -268,9 +321,9 @@ export const drawRegression = function drawRegression() {
 
   /* Compute & draw regression text. Note that the text hasn't been created until now,
   as we need to wait until rendering time when the scales have been calculated */
-  this.groups.regression
+  this.groups.regression!
     .append("text")
-    .text(makeRegressionText(this.regression, this.layout, this.yScale))
+    .text(makeRegressionText(this.regression!, this.layout, this.yScale))
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)
@@ -280,16 +333,16 @@ export const drawRegression = function drawRegression() {
     .style("font-family", this.params.fontFamily);
 };
 
-export const removeRegression = function removeRegression() {
+export const removeRegression = function removeRegression(this: PhyloTree) {
   if ("regression" in this.groups) {
-    this.groups.regression.selectAll("*").remove();
+    this.groups.regression!.selectAll("*").remove();
   }
 };
 
 /*
  * add and remove elements from tree, initial render
  */
-export const clearSVG = function clearSVG() {
+export const clearSVG = function clearSVG(this: PhyloTree) {
   this.svg.selectAll("*").remove();
 };
 
@@ -338,11 +391,11 @@ export const updateColorBy = function updateColorBy() {};
 /** given a node `d` which is being hovered, update it's colour to emphasize
  * that it's being hovered. This updates the SVG element stroke style in-place
  * _or_ updates the SVG gradient def in place.
- * @param {PhyloNode} d node
- * @param {string} c1 colour of the parent (start of the branch)
- * @param {string} c2 colour of the node (end of the branch)
+ * @param d node
+ * @param c1 colour of the parent (start of the branch)
+ * @param c2 colour of the node (end of the branch)
  */
-const handleBranchHoverColor = (d, c1, c2) => {
+const handleBranchHoverColor = (d: PhyloNode, c1: string, c2: string) => {
   if (!d) { return; }
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
@@ -359,12 +412,12 @@ const handleBranchHoverColor = (d, c1, c2) => {
   }
 };
 
-export const branchStrokeForLeave = function branchStrokeForLeave(d) {
+export const branchStrokeForLeave = function branchStrokeForLeave(d: PhyloNode) {
   if (!d) { return; }
-  handleBranchHoverColor(d, d.n.parent.shell.branchStroke, d.branchStroke);
+  handleBranchHoverColor(d, d.n.parent.shell.branchStroke!, d.branchStroke!);
 };
 
-export const branchStrokeForHover = function branchStrokeForHover(d) {
+export const branchStrokeForHover = function branchStrokeForHover(d: PhyloNode) {
   if (!d) { return; }
   handleBranchHoverColor(d, getEmphasizedColor(d.n.parent.shell.branchStroke), getEmphasizedColor(d.branchStroke));
 };
@@ -374,7 +427,7 @@ export const branchStrokeForHover = function branchStrokeForHover(d) {
  * and regression lines. In theory, we can clip to exactly the {xy}Scale range, however
  * in practice, elements (or portions of elements) render outside this.
  */
-export const setClipMask = function setClipMask() {
+export const setClipMask = function setClipMask(this: PhyloTree) {
   const [yMin, yMax] = this.yScale.range();
   // for the RHS tree (if there is one) ensure that xMin < xMax, else width<0 which some
   // browsers don't like. See <https://github.com/nextstrain/auspice/issues/1755>

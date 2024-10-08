@@ -1,8 +1,9 @@
-import { connect } from "react-redux";
+import { connect, MapStateToProps } from "react-redux";
 import UnconnectedTree from "./tree";
 import { RootState } from "../../store";
+import { TreeComponentPropsFromState } from "./tree";
 
-const Tree = connect((state: RootState) => ({
+const mapStateToProps: MapStateToProps<TreeComponentPropsFromState, {}, RootState> = (state: RootState) => ({
   tree: state.tree,
   treeToo: state.treeToo,
   selectedNode: state.controls.selectedNode,
@@ -31,6 +32,8 @@ const Tree = connect((state: RootState) => ({
   narrativeMode: state.narrative.display,
   animationPlayPauseButton: state.controls.animationPlayPauseButton,
   showOnlyPanels: state.controls.showOnlyPanels
-}))(UnconnectedTree);
+});
+
+const Tree = connect(mapStateToProps)(UnconnectedTree);
 
 export default Tree;

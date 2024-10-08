@@ -7,6 +7,8 @@ import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
+import { PhyloTree } from "./phyloTree";
+import { Distance, Layout, Params, PhyloNode, ScatterVariables } from "./types";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -14,7 +16,11 @@ import { numDate } from "../../../util/colorHelpers";
  * @param layout -- the layout to be used, has to be one of
  *                  ["rect", "radial", "unrooted", "clock", "scatter"]
  */
-export const setLayout = function setLayout(layout, scatterVariables) {
+export const setLayout = function setLayout(
+  this: PhyloTree,
+  layout?: Layout,
+  scatterVariables?: ScatterVariables,
+) {
   // console.log("set layout");
   timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
@@ -54,7 +60,7 @@ export const setLayout = function setLayout(layout, scatterVariables) {
  * assignes x,y coordinates for a rectangular layout
  * @return {null}
  */
-export const rectangularLayout = function rectangularLayout() {
+export const rectangularLayout = function rectangularLayout(this: PhyloTree) {
   this.nodes.forEach((d) => {
     d.y = d.displayOrder; // precomputed y-values
     d.x = d.depth;    // depth according to current distance
@@ -74,7 +80,7 @@ export const rectangularLayout = function rectangularLayout() {
  * assign x,y coordinates for nodes based upon user-selected variables
  * TODO: timeVsRootToTip is a specific instance of this
  */
-export const scatterplotLayout = function scatterplotLayout() {
+export const scatterplotLayout = function scatterplotLayout(this: PhyloTree) {
   if (!this.scatterVariables) {
     console.error("Scatterplot called without variables");
     return;
@@ -84,7 +90,7 @@ export const scatterplotLayout = function scatterplotLayout() {
     nodeOrdering(this.nodes) :
     undefined;
 
-  this.nodes.forEach((d) => {
+  for (const d of this.nodes) {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
       d.x = getDivFromNode(d.n);
@@ -117,7 +123,7 @@ export const scatterplotLayout = function scatterplotLayout() {
         [d.y, d.py] = [numDate(d.y, true), numDate(d.py, true)]
       }
     }
-  });
+  };
 
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -135,17 +141,15 @@ export const scatterplotLayout = function scatterplotLayout() {
 
 /**
  * Utility function for the unrooted tree layout. See `unrootedLayout` for details.
- * @param {PhyloNode} node
- * @param {number} totalLeafWeight
  */
-const unrootedPlaceSubtree = (node, totalLeafWeight) => {
-  const branchLength = node.depth - node.pDepth;
-  node.x = node.px + branchLength * Math.cos(node.tau + node.w * 0.5);
-  node.y = node.py + branchLength * Math.sin(node.tau + node.w * 0.5);
-  let eta = node.tau; // eta is the cumulative angle for the wedges in the layout
+const unrootedPlaceSubtree = (node: PhyloNode, totalLeafWeight: number) => {
+  const branchLength = node.depth! - node.pDepth!;
+  node.x = node.px! + branchLength * Math.cos(node.tau! + node.w! * 0.5);
+  node.y = node.py! + branchLength * Math.sin(node.tau! + node.w! * 0.5);
+  let eta = node.tau!; // eta is the cumulative angle for the wedges in the layout
   if (node.n.hasChildren) {
-    for (let i = 0; i < node.n.children.length; i++) {
-      const ch = node.n.children[i].shell; // ch is a <PhyloNode>
+    for (let i = 0; i < node.n.children!.length; i++) {
+      const ch = node.n.children![i]!.shell;
       ch.w = 2 * Math.PI * leafWeight(ch.n) / totalLeafWeight;
       ch.tau = eta;
       eta += ch.w;
@@ -166,7 +170,7 @@ const unrootedPlaceSubtree = (node, totalLeafWeight) => {
  * done recursively via a the function unrootedPlaceSubtree
  * @return {null}
  */
-export const unrootedLayout = function unrootedLayout() {
+export const unrootedLayout = function unrootedLayout(this: PhyloTree) {
   /* the angle of a branch (i.e. the line leading to the node) is `tau + 0.5*w`
     `tau` stores the previous angle which has been used
     `w` is a measurement of the angle occupied by the clade defined by this node
@@ -216,7 +220,7 @@ export const unrootedLayout = function unrootedLayout() {
  * arcs and whether that arc is more than pi or not
  * @return {null}
  */
-export const radialLayout = function radialLayout() {
+export const radialLayout = function radialLayout(this: PhyloTree) {
   const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
   const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
@@ -252,7 +256,10 @@ export const radialLayout = function radialLayout() {
  * calculate coordinates. Parent depth is assigned as well.
  * @sideEffect sets this.distance -> "div" or "num_date"
  */
-export const setDistance = function setDistance(distanceAttribute) {
+export const setDistance = function setDistance(
+  this: PhyloTree,
+  distanceAttribute?: Distance,
+) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
   if (distanceAttribute) {
@@ -294,7 +301,7 @@ export const setDistance = function setDistance(distanceAttribute) {
  * which are used to map the x,y coordinates to the screen
  * @param {margins} -- object with "right, left, top, bottom" margins
  */
-export const setScales = function setScales() {
+export const setScales = function setScales(this: PhyloTree) {
 
   if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
     this.xScale = scalePoint().round(false).align(0.5).padding(0.5);
@@ -339,7 +346,7 @@ export const setScales = function setScales() {
 * coordinates to their places on the screen
 * @return {null}
 */
-export const mapToScreen = function mapToScreen() {
+export const mapToScreen = function mapToScreen(this: PhyloTree) {
   timerStart("mapToScreen");
 
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
@@ -550,7 +557,7 @@ function jitter(axis, scale, nodes) {
 }
 
 
-function getTipLabelPadding(params, inViewTerminalNodes) {
+function getTipLabelPadding(params: Params, inViewTerminalNodes: PhyloNode[]) {
   let padBy = 0;
   if (inViewTerminalNodes.length < params.tipLabelBreakL1) {
 
@@ -571,6 +578,6 @@ function getTipLabelPadding(params, inViewTerminalNodes) {
   return padBy;
 }
 
-function leafWeight(node) {
+function leafWeight(node: PhyloNode) {
   return node.tipCount + 0.15*(node.fullTipCount-node.tipCount);
 }

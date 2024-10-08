@@ -10,6 +10,8 @@ import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
 import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
+import { TreeState } from "../components/tree/tree";
+import { PhyloNode } from "../components/tree/phyloTree/types";
 
 
 /**
@@ -21,20 +23,20 @@ import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
  * @param {Int} idx - index of displayed root node
  * @param {ReduxTreeState} tree
  */
-export const applyInViewNodesToTree = (idx, tree) => {
+export const applyInViewNodesToTree = (idx: number | undefined, tree: TreeState) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
-  if (tree.nodes[0].shell) {
+  if (tree.nodes[0]!.shell) {
     tree.nodes.forEach((d) => {
       d.shell.inView = false;
       d.shell.update = true;
     });
-    if (tree.nodes[validIdxRoot].hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
-    } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
+    if (tree.nodes[validIdxRoot]!.hasChildren) {
+      applyToChildren(tree.nodes[validIdxRoot]!.shell, (d: PhyloNode) => {d.inView = true;});
+    } else if (tree.nodes[validIdxRoot]!.parent.arrayIdx===0) {
       // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
-      tree.nodes[validIdxRoot].shell.inView = true;
+      tree.nodes[validIdxRoot]!.shell.inView = true;
     } else {
-      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot]!.parent.shell, (d: PhyloNode) => {d.inView = true;});
     }
   } else {
     /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
@@ -48,7 +50,7 @@ export const applyInViewNodesToTree = (idx, tree) => {
         for (const child of node.children) _markChildrenInView(child);
       }
     };
-    const startingNode = tree.nodes[validIdxRoot].hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot].parent;
+    const startingNode = tree.nodes[validIdxRoot]!.hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot]!.parent;
     _markChildrenInView(startingNode);
   }
 
@@ -61,15 +63,20 @@ export const applyInViewNodesToTree = (idx, tree) => {
  * this fn relies on the "inView" attr of nodes
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
- * @param  {array|undefined} root Change the in-view part of the tree. [root idx tree1, root idx tree2].
- *                                [0, 0]: reset. [undefined, undefined]: do nothing
- * @param  {string | undefined} cladeSelected
+ * @param  root Change the in-view part of the tree. [root idx tree1, root idx tree2].
+ *              [0, 0]: reset. [undefined, undefined]: do nothing
+ * @param  cladeSelected
  * @return {function} a function to be handled by redux (thunk)
  */
-export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], cladeSelected = undefined} = {}
+export const updateVisibleTipsAndBranchThicknesses = ({
+  root = [undefined, undefined],
+  cladeSelected = undefined
+}: {
+  root?: [number | undefined, number | undefined],
+  cladeSelected?: string,
+} = {}
 ) => {
-  return (dispatch, getState) => {
+  return (dispatch: any, getState: any) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */

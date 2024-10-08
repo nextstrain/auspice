@@ -12,8 +12,8 @@ import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
+import { Layout, ScatterVariables } from "../components/tree/phyloTree/types";
 
-type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
 
 interface Defaults {
   distanceMeasure: string
@@ -24,23 +24,71 @@ interface Defaults {
   filtersInFooter: string[]
   colorBy: string
   selectedBranchLabel: string
-  tipLabelKey: typeof strainSymbol
+  tipLabelKey: string
   showTransmissionLines: boolean
   sidebarOpen?: boolean
 }
 
 export interface BasicControlsState {
   defaults: Defaults
+
+  available?: boolean
+  canTogglePanelLayout: boolean
+  temporalConfidence: {
+    exists: boolean
+    display: boolean
+    on: boolean
+  }
   layout: Layout
+  scatterVariables: ScatterVariables
+  distanceMeasure: string
+  focus: boolean
+  dateMin: string
+  dateMinNumeric: number
+  dateMax: string
+  dateMaxNumeric: number
+  absoluteDateMin: string
+  absoluteDateMinNumeric: number
+  absoluteDateMax: string
+  absoluteDateMaxNumeric: number
+  colorBy: string
+  colorByConfidence: boolean
+  colorScale?: {
+    visibleLegendValues: any
+  }
+  explodeAttr?: any
+  selectedBranchLabel: string
+  showAllBranchLabels: boolean
+  selectedNode: any | null
+  canRenderBranchLabels: boolean
+  analysisSlider: boolean
+  geoResolution: string
+  filters: Record<string, any>
+  filtersInFooter: string[]
+  modal: 'download' | 'linkOut' | null
+  quickdraw: boolean
+  mapAnimationDurationInMilliseconds: number
+  mapAnimationStartDate: any
+  mapAnimationCumulative: boolean
+  mapAnimationShouldLoop: boolean
+  animationPlayPauseButton: "Play" | "Pause"
   panelsAvailable: string[]
   panelsToDisplay: string[]
+  panelLayout: string
+  tipLabelKey: string
   showTreeToo: boolean
-  canTogglePanelLayout: boolean
-  focus: boolean
+  showTangle: boolean
+  zoomMin?: number
+  zoomMax?: number
+  branchLengthsToDisplay: string
+  sidebarOpen: boolean
+  treeLegendOpen?: boolean  // FIXME: unused?
+  mapLegendOpen?: boolean  // FIXME: unused?
+  showOnlyPanels: boolean
+  showTransmissionLines: boolean
+  normalizeFrequencies: boolean
 
-  // This allows arbitrary prop names while TypeScript adoption is incomplete.
-  // TODO: add all other props explicitly and remove this.
-  [propName: string]: any;
+  coloringsPresentOnTree?: Set<string>
 }
 
 export interface MeasurementsControlState {
@@ -59,7 +107,7 @@ export interface ControlsState extends BasicControlsState, MeasurementsControlSt
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
-export const getDefaultControlsState = () => {
+export const getDefaultControlsState = (): ControlsState => {
   const defaults: Defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
@@ -84,6 +132,7 @@ export const getDefaultControlsState = () => {
   const dateMinNumeric = calendarToNumeric(dateMin);
   const dateMaxNumeric = calendarToNumeric(dateMax);
   return {
+    // FIXME: add a default for coloringsPresentOnTree
     defaults,
     available: undefined,
     canTogglePanelLayout: true,
@@ -357,7 +406,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { legendOpen: action.value });
     case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {
-        state.coloringsPresentOnTree.add(colorBy);
+        // FIXME: add a default for coloringsPresentOnTree
+        state.coloringsPresentOnTree!.add(colorBy);
       }
       let newState = Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
       if (action.newGeoResolution && !state.panelsAvailable.includes("map")) {
