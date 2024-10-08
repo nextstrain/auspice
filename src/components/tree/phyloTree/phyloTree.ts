@@ -1,5 +1,6 @@
 import { createDefaultParams } from "./defaultParams";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import { NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "../../../util/globals";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -9,8 +10,79 @@ import * as confidence from "./confidence";
 import * as labels from "./labels";
 import * as regression from "./regression";
 
+
+export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
+
+export type Visibility = typeof NODE_NOT_VISIBLE | typeof NODE_VISIBLE_TO_MAP_ONLY | typeof NODE_VISIBLE
+
+export interface ReduxNode {
+  inView?: boolean
+  name: string
+  shell: PhyloNode
+  hasChildren: boolean
+  parent: ReduxNode
+}
+
+export interface PhyloNode {
+  that: PhyloTree
+  n: ReduxNode
+  x: number
+  y: number
+  inView: boolean
+  visibility?: Visibility
+  update?: boolean
+}
+
+export interface PhyloTree {
+  grid: boolean
+  attributes: string[]
+  params: ReturnType<typeof createDefaultParams>
+  groups: Record<string, any>
+  id: string
+  nodes: PhyloNode[]
+  zoomNode: PhyloNode
+  strainToNode: Record<string, PhyloNode>
+  change: typeof change
+  modifySVG: typeof modifySVG
+  modifySVGInStages: typeof modifySVGInStages
+  render: typeof renderers.render
+  clearSVG: typeof renderers.clearSVG
+  setClipMask: typeof renderers.setClipMask
+  drawTips: typeof renderers.drawTips
+  drawBranches: typeof renderers.drawBranches
+  drawVaccines: typeof renderers.drawVaccines
+  drawRegression: typeof renderers.drawRegression
+  removeRegression: typeof renderers.removeRegression
+  updateColorBy: typeof renderers.updateColorBy
+  setDistance: typeof layouts.setDistance
+  setLayout: typeof layouts.setLayout
+  rectangularLayout: typeof layouts.rectangularLayout
+  scatterplotLayout: typeof layouts.scatterplotLayout
+  unrootedLayout: typeof layouts.unrootedLayout
+  radialLayout: typeof layouts.radialLayout
+  setScales: typeof layouts.setScales
+  mapToScreen: typeof layouts.mapToScreen
+  calculateRegression: typeof regression.calculateRegression
+  removeConfidence: typeof confidence.removeConfidence
+  drawConfidence: typeof confidence.drawConfidence
+  drawSingleCI: typeof confidence.drawSingleCI
+  drawBranchLabels: typeof labels.drawBranchLabels
+  removeBranchLabels: typeof labels.removeBranchLabels
+  updateBranchLabels: typeof labels.updateBranchLabels
+  updateTipLabels: typeof labels.updateTipLabels
+  removeTipLabels: typeof labels.removeTipLabels
+  hideGrid: typeof grid.hideGrid
+  addGrid: typeof grid.addGrid
+  showTemporalSlice: typeof grid.showTemporalSlice
+  hideTemporalSlice: typeof grid.hideTemporalSlice
+
+  confidencesInSVG: boolean
+  regression: regression.Regression
+  layout: Layout
+}
+
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
-const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
+const PhyloTree = function PhyloTree(this: PhyloTree, reduxNodes: ReduxNode[], id: string, idxOfInViewRootNode: number) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = createDefaultParams();
@@ -24,17 +96,17 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
    -- this.nodes[i].n = reduxNodes[i]
    -- reduxNodes[i].shell = this.nodes[i] */
   this.nodes = reduxNodes.map((d) => {
-    const phyloNode = {
+    const phyloNode: PhyloNode = {
       that: this,
-      n: d, /* a back link to the redux node */
+      n: d,
       x: 0,
       y: 0,
       inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
     };
-    d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
+    d.shell = phyloNode;
     return phyloNode;
   });
-  this.zoomNode = this.nodes[idxOfInViewRootNode];
+  this.zoomNode = this.nodes[idxOfInViewRootNode]!;
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */

@@ -6,11 +6,12 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 import { makeTipLabelFunc } from "./labels";
+import { PhyloNode, PhyloTree, Visibility } from "./phyloTree";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
  */
-const updateNodesWithNewData = (nodes, newNodeProps) => {
+const updateNodesWithNewData = (nodes: PhyloNode[], newNodeProps) => {
   // console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
   // let tmp = 0;
   nodes.forEach((d, i) => {
@@ -116,7 +117,7 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
  * @transitionTime {INT} - in ms. if 0 then no transition (timerFlush is used)
  * @extras {dict} - extra keywords to tell this function to call certain phyloTree update methods. In flux.
  */
-export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
+export const modifySVG = function modifySVG(this: PhyloTree, elemsToUpdate, svgPropsToUpdate, transitionTime: number, extras) {
   let updateCall;
   const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
@@ -199,7 +200,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
  * step 2: when step 1 has finished, move tips across the screen.
  * step 3: when step 2 has finished, redraw everything. No transition here.
  */
-export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips, extras) {
+export const modifySVGInStages = function modifySVGInStages(this: PhyloTree, elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips, extras) {
   elemsToUpdate.delete(".tip");
   this.hideGrid();
   let inProgress = 0; /* counter of transitions currently in progress */
@@ -243,36 +244,66 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
  * simply call change and tell it what should be changed.
  * try to do a single change() call with as many things as possible in it
  */
-export const change = function change({
-  /* booleans for what should be changed */
-  changeColorBy = false,
-  changeVisibility = false,
-  changeTipRadii = false,
-  changeBranchThickness = false,
-  showConfidences = false,
-  removeConfidences = false,
-  zoomIntoClade = false,
-  svgHasChangedDimensions = false,
-  animationInProgress = false,
-  changeNodeOrder = false,
-  /* change these things to provided value (unless undefined) */
-  newDistance = undefined,
-  newLayout = undefined,
-  updateLayout = undefined, // todo - this seems identical to `newLayout`
-  newBranchLabellingKey = undefined,
-  showAllBranchLabels = undefined,
-  newTipLabelKey = undefined,
-  /* arrays of data (the same length as nodes) */
-  branchStroke = undefined,
-  tipStroke = undefined,
-  fill = undefined,
-  visibility = undefined,
-  tipRadii = undefined,
-  branchThickness = undefined,
-  /* other data */
-  focus = undefined,
-  scatterVariables = undefined
-}) {
+export interface ChangeParams {
+  changeColorBy?: boolean
+  changeVisibility?: boolean
+  changeTipRadii?: boolean
+  changeBranchThickness?: boolean
+  showConfidences?: boolean
+  removeConfidences?: boolean
+  zoomIntoClade?: false | PhyloNode
+  svgHasChangedDimensions?: boolean
+  animationInProgress?: boolean
+  changeNodeOrder?: boolean
+  newDistance?: any
+  newLayout?: any
+  updateLayout?: any
+  newBranchLabellingKey?: any
+  showAllBranchLabels?: any
+  newTipLabelKey?: any
+  branchStroke?: any[]
+  tipStroke?: any[]
+  fill?: any[]
+  visibility?: Visibility[]
+  tipRadii?: any[]
+  branchThickness?: any[]
+  focus: boolean
+  scatterVariables?: any
+}
+
+
+export const change = function change(this: PhyloTree, params: ChangeParams) {
+  const {
+    /* booleans for what should be changed */
+    changeColorBy = false,
+    changeVisibility = false,
+    changeTipRadii = false,
+    changeBranchThickness = false,
+    showConfidences = false,
+    removeConfidences = false,
+    zoomIntoClade = false,
+    svgHasChangedDimensions = false,
+    animationInProgress = false,
+    changeNodeOrder = false,
+    /* change these things to provided value (unless undefined) */
+    newDistance = undefined,
+    newLayout = undefined,
+    updateLayout = undefined, // todo - this seems identical to `newLayout`
+    newBranchLabellingKey = undefined,
+    showAllBranchLabels = undefined,
+    newTipLabelKey = undefined,
+    /* arrays of data (the same length as nodes) */
+    branchStroke = undefined,
+    tipStroke = undefined,
+    fill = undefined,
+    visibility = undefined,
+    tipRadii = undefined,
+    branchThickness = undefined,
+    /* other data */
+    focus = undefined,
+    scatterVariables = undefined
+  } = params;
+
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
   const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
