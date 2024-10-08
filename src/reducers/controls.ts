@@ -12,8 +12,11 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 
+type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
+
 export interface BasicControlsState {
   defaults: Defaults
+  layout: Layout
   panelsAvailable: string[]
   panelsToDisplay: string[]
   showTreeToo: boolean
@@ -39,7 +42,7 @@ export interface ControlsState extends BasicControlsState, MeasurementsControlSt
 
 interface Defaults {
   distanceMeasure: string
-  layout: string
+  layout: Layout
   geoResolution: string
   filters: Record<string, any>
   filtersInFooter: string[]
