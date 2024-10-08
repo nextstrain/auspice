@@ -1,8 +1,10 @@
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
+import { ChangeParams } from "../phyloTree/change";
+import { TreeProps } from "../tree";
 
-export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps, newProps) => {
-  const args = {};
-  const newState = {};
+export const changePhyloTreeViaPropsComparison = (mainTree: boolean, phylotree, oldProps: TreeProps, newProps: TreeProps) => {
+  const args: ChangeParams = {};
+  const newState: any = {};
   /* do not use oldProps.tree or newTreeRedux */
   const oldTreeRedux = mainTree ? oldProps.tree : oldProps.treeToo;
   const newTreeRedux = mainTree ? newProps.tree : newProps.treeToo;
