@@ -115,12 +115,27 @@ function getDisplayOrderCallback(nodes, focus) {
    */
   let displayOrder = 0;
 
+  /**
+   * Keep track of whether the previous node was selected
+   */
+  let previousWasVisible;
+
   if (focus) {
-    const nSelected = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
-    const yPerSelected = (0.8 * nodes.length) / nSelected;
-    const yPerUnselected = (0.2 * nodes.length) / (nodes.length - nSelected);
+    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const yPerFocused = (0.8 * nodes.length) / numVisible;
+    const yPerUnfocused = (0.2 * nodes.length) / (nodes.length - numVisible);
+
     return (node) => {
-      displayOrder += node.visibility === NODE_VISIBLE ? yPerSelected : yPerUnselected;
+      // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
+      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
+        displayOrder += yPerFocused;
+      } else {
+        displayOrder += yPerUnfocused;
+      }
+
+      // Update for the next node
+      previousWasVisible = node.visibility === NODE_VISIBLE;
+
       return displayOrder;
     };
   } else {
