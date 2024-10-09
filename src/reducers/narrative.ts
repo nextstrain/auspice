@@ -37,10 +37,11 @@ const narrative = (
 ): NarrativeState => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
+      return {
+        ...state,
         loaded: false,
-        display: false
-      });
+        display: false,
+      };
     case types.CLEAN_START:
       if (action.narrative) {
         const blocks = action.narrative;
@@ -56,12 +57,18 @@ const narrative = (
       return state;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       if (Object.prototype.hasOwnProperty.call(action.query, "n")) {
-        return Object.assign({}, state, {blockIdx: action.query.n});
+        return {
+          ...state,
+          blockIdx: action.query.n,
+        };
       }
       return state;
     case types.TOGGLE_NARRATIVE:
       if (state.loaded) {
-        return Object.assign({}, state, {display: action.narrativeOn});
+        return {
+          ...state,
+          display: action.narrativeOn,
+        };
       }
       console.warn("Attempted to toggle narrative that was not loaded");
       return state;
