@@ -16,6 +16,7 @@ function ToggleFocus({ tooltip, treeFocus, layout, dispatch, mobileDisplay }: {
   dispatch: Dispatch;
   mobileDisplay: boolean;
 }) {
+  // Focus functionality is only available to layouts that have the concept of a unitless y-axis
   const validLayouts = new Set(["rect", "radial"]);
   if (!validLayouts.has(layout)) return <></>;
 
