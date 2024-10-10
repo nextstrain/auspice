@@ -140,7 +140,7 @@ function getDisplayOrderCallback(nodes, focus) {
     };
   } else {
     // No focus: 1 unit per node
-    return (node) => {
+    return (_node) => {
       displayOrder += 1;
       return displayOrder;
     };
