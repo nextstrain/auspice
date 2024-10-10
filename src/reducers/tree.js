@@ -42,6 +42,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       const newStates = {
+        filters: action.filters,
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,
         branchThickness: action.branchThickness,

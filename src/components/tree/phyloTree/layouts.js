@@ -5,7 +5,7 @@ import scaleLinear from "d3-scale/src/linear";
 import {point as scalePoint} from "d3-scale/src/band";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
-import { stemParent, nodeOrdering } from "./helpers";
+import { setDisplayOrder, stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 
 /**
@@ -288,6 +288,15 @@ export const setDistance = function setDistance(distanceAttribute) {
   timerEnd("setDistance");
 };
 
+/**
+ * Recalculates y values based on focus setting
+ * @param treeFocus -- whether to focus on filtered nodes
+ */
+export const setTreeFocus = function setTreeFocus(treeFocus) {
+  timerStart("setTreeFocus");
+  setDisplayOrder(this.nodes, treeFocus || false);
+  timerEnd("setTreeFocus");
+};
 
 /**
  * Initializes and sets the range of the scales (this.xScale, this.yScale)
