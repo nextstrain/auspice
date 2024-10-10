@@ -10,7 +10,7 @@ import { RootState } from "../../store";
 
 
 function ToggleFocus({ tooltip, treeFocus, layout, dispatch, mobileDisplay }: {
-  tooltip: Element;
+  tooltip: React.ReactElement;
   treeFocus: boolean;
   layout: "rect" | "radial" | "unrooted" | "clock" | "scatter";
   dispatch: Dispatch;
