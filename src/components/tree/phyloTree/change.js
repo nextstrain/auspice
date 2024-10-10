@@ -1,6 +1,6 @@
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren, setDisplayOrder } from "./helpers";
+import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
