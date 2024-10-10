@@ -1,6 +1,6 @@
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren } from "./helpers";
+import { applyToChildren, setDisplayOrder } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
@@ -324,6 +324,7 @@ export const change = function change({
   }
 
   if (changeNodeOrder) {
+    setDisplayOrder(this.nodes);
     this.setDistance();
   }
 
