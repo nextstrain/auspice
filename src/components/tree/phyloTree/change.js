@@ -324,7 +324,6 @@ export const change = function change({
   }
 
   if (changeNodeOrder) {
-    setDisplayOrder(this.nodes);
     this.setDistance();
   }
 

@@ -1,6 +1,6 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId, setDisplayOrder } from "./helpers";
+import { getDomId } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 /**
@@ -41,7 +41,6 @@ export const render = function render(svg, layout, distance, treeFocus, paramete
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder(this.nodes);
   this.setDistance(distance);
   this.setTreeFocus(treeFocus);
   this.setLayout(layout, scatterVariables);
