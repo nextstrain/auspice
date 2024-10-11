@@ -2,6 +2,7 @@
 import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -84,6 +85,8 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
  * @returns {undefined}
  */
 export const setDisplayOrder = (nodes, focus) => {
+  timerStart("setDisplayOrder");
+
   const getDisplayOrder = getDisplayOrderCallback(nodes, focus);
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = nodes[0].n.fullTipCount;
@@ -101,6 +104,8 @@ export const setDisplayOrder = (nodes, focus) => {
   /* note that nodes[0] is a dummy node holding each subtree */
   nodes[0].displayOrder = undefined;
   nodes[0].displayOrderRange = [undefined, undefined];
+
+  timerEnd("setDisplayOrder");
 };
 
 /**
