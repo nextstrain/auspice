@@ -38,6 +38,11 @@ jobs:
           repository: ${{ inputs.repository }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
 
+      - name: auspice build --includeTiming for nextstrain.org
+        run: |
+          git apply <(wget -q -O - https://github.com/nextstrain/nextstrain.org/commit/0671e90b0cdfa55d0ee5b01d0b78bc933cedb121.patch)
+          git add build.sh
+
       - name: Install Auspice from PRs HEAD commit
         shell: bash
         working-directory: ${{ inputs.directory }}
