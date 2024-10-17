@@ -215,10 +215,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, updatesToState);
     }
     case types.TOGGLE_FOCUS: {
-      let newValue = !state.focus;
-      return Object.assign({}, state, {
-        focus: newValue
-      });
+      return {...state, focus: !state.focus}
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };
