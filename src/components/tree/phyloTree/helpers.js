@@ -35,20 +35,29 @@ export const applyToChildren = (phyloNode, func) => {
  * of nodes in a rectangular tree.
  * If `yCounter` is undefined then we wish to hide the node and all descendants of it
  * @param {PhyloNode} node
- * @param {function} getDisplayOrder
+ * @param {function} incrementer
  * @param {int|undefined} yCounter
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
  */
-export const setDisplayOrderRecursively = (node, getDisplayOrder, yCounter) => {
+export const setDisplayOrderRecursively = (node, incrementer, yCounter) => {
+  /**
+   * NOTE: switching from a recursive function to consuming a stack (whilst adding new nodes
+   * to it as required) is probably? the best way to be convey `previousWasVisible` and thus get
+   * symmetric padding around focus groups
+   */
+
   const children = node.n.children; // (redux) tree node
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, getDisplayOrder, yCounter);
+      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter);
     }
   } else {
-    node.displayOrder = (node.n.fullTipCount===0 || yCounter===undefined) ? yCounter : yCounter + getDisplayOrder(node);
-    node.displayOrderRange = [node.displayOrder, node.displayOrder];
+    if (!(node.n.fullTipCount===0 || yCounter===undefined)) { // FIXME XXX
+      yCounter += incrementer(node)
+    }
+    node.displayOrder = yCounter;
+    node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
   /* if here, then all children have displayOrders, but we don't. */
@@ -87,17 +96,34 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
 export const setDisplayOrder = (nodes, focus) => {
   timerStart("setDisplayOrder");
 
-  const getDisplayOrder = getDisplayOrderCallback(nodes, focus);
+  // const getDisplayOrder = getDisplayOrderCallback(nodes, focus);
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
+  let incrementer = (_node, _prevNode) => 1;
+
+  if (focus) {
+    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
+    const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
+    const yPerUnfocused = ((1 - yProportionFocused) * nodes.length) / (nodes.length - numVisible);
+    const previousWasVisible = false; // TODO XXX
+    incrementer = (node) => {
+      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
+        return yPerFocused;
+      } else {
+        return yPerUnfocused;
+      }
+    }
+  }
+
   let yCounter = 0;
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
-      setDisplayOrderRecursively(nodes[subtree.arrayIdx], getDisplayOrder, undefined);
+      setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined);
     } else {
-      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], getDisplayOrder, yCounter);
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter);
       yCounter+=spaceBetweenSubtrees;
     }
   }
@@ -108,51 +134,51 @@ export const setDisplayOrder = (nodes, focus) => {
   timerEnd("setDisplayOrder");
 };
 
-/**
- * @param {Array<PhyloNode>} nodes
- * @param {boolean} focus
- * @returns fn to return a display order (y position) for a node
- */
-function getDisplayOrderCallback(nodes, focus) {
-  /**
-   * Start at 0 and increase with each node.
-   * Note that this value is shared across invocations of the callback.
-   */
-  let displayOrder = 0;
+// /**
+//  * @param {Array<PhyloNode>} nodes
+//  * @param {boolean} focus
+//  * @returns fn to return a display order (y position) for a node
+//  */
+// function getDisplayOrderCallback(nodes, focus) {
+//   /**
+//    * Start at 0 and increase with each node.
+//    * Note that this value is shared across invocations of the callback.
+//    */
+//   let displayOrder = 0;
 
-  /**
-   * Keep track of whether the previous node was selected
-   */
-  let previousWasVisible;
+//   /**
+//    * Keep track of whether the previous node was selected
+//    */
+//   let previousWasVisible;
 
-  if (focus) {
-    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
-    const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
-    const yProportionUnfocused = 1 - yProportionFocused;
-    const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
-    const yPerUnfocused = (yProportionUnfocused * nodes.length) / (nodes.length - numVisible);
+//   if (focus) {
+//     const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+//     const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
+//     const yProportionUnfocused = 1 - yProportionFocused;
+//     const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
+//     const yPerUnfocused = (yProportionUnfocused * nodes.length) / (nodes.length - numVisible);
 
-    return (node) => {
-      // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
-      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
-        displayOrder += yPerFocused;
-      } else {
-        displayOrder += yPerUnfocused;
-      }
+//     return (node) => {
+//       // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
+//       if (node.visibility === NODE_VISIBLE || previousWasVisible) {
+//         displayOrder += yPerFocused;
+//       } else {
+//         displayOrder += yPerUnfocused;
+//       }
 
-      // Update for the next node
-      previousWasVisible = node.visibility === NODE_VISIBLE;
+//       // Update for the next node
+//       previousWasVisible = node.visibility === NODE_VISIBLE;
 
-      return displayOrder;
-    };
-  } else {
-    // No focus: 1 unit per node
-    return (_node) => {
-      displayOrder += 1;
-      return displayOrder;
-    };
-  }
-}
+//       return displayOrder;
+//     };
+//   } else {
+//     // No focus: 1 unit per node
+//     return (_node) => {
+//       displayOrder += 1;
+//       return displayOrder;
+//     };
+//   }
+// }
 
 export const formatDivergence = (divergence) => {
   return divergence > 1 ?
