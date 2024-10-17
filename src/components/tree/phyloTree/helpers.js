@@ -100,21 +100,21 @@ export const setDisplayOrder = (nodes, focus) => {
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
-  let incrementer = (_node, _prevNode) => 1;
+  let incrementer = (_node) => 1;
 
   if (focus) {
     const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
     const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
     const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
     const yPerUnfocused = ((1 - yProportionFocused) * nodes.length) / (nodes.length - numVisible);
-    const previousWasVisible = false; // TODO XXX
-    incrementer = (node) => {
-      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
-        return yPerFocused;
-      } else {
-        return yPerUnfocused;
+    incrementer = (() => {
+      let previousWasVisible = false
+      return (node) => {
+        const y = (node.visibility === NODE_VISIBLE || previousWasVisible) ? yPerFocused : yPerUnfocused;
+        previousWasVisible = node.visibility === NODE_VISIBLE;
+        return y;
       }
-    }
+    })()
   }
 
   let yCounter = 0;
