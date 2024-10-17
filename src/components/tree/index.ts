@@ -1,7 +1,8 @@
 import { connect } from "react-redux";
 import UnconnectedTree from "./tree";
+import { RootState } from "../../store";
 
-const Tree = connect((state) => ({
+const Tree = connect((state: RootState) => ({
   tree: state.tree,
   treeToo: state.treeToo,
   selectedNode: state.controls.selectedNode,
