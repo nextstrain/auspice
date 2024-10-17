@@ -41,7 +41,7 @@ export const render = function render(svg, layout, distance, focus, parameters, 
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder(this.nodes, focus);
+  setDisplayOrder({nodes: this.nodes, focus});
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();

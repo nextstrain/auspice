@@ -80,11 +80,12 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
  * PhyloTree can subsequently use this information. Accessed by prototypes
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
- * @param {Array<PhyloNode>} nodes
- * @param {boolean} focus
+ * @param {Object} props
+ * @param {Array<PhyloNode>} props.nodes
+ * @param {boolean} props.focus
  * @returns {undefined}
  */
-export const setDisplayOrder = (nodes, focus) => {
+export const setDisplayOrder = ({nodes, focus}) => {
   timerStart("setDisplayOrder");
 
   const getDisplayOrder = getDisplayOrderCallback(nodes, focus);

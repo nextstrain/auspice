@@ -55,6 +55,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   /* explode! */
   if (oldProps.explodeAttr !== newProps.explodeAttr) {
     args.changeNodeOrder = true;
+    args.newFocus = newProps.focus;
   }
 
   /* enable/disable focus */

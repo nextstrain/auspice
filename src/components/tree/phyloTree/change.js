@@ -324,7 +324,7 @@ export const change = function change({
   }
 
   if (changeNodeOrder) {
-    setDisplayOrder(this.nodes);
+    setDisplayOrder({nodes: this.nodes, focus: newFocus});
     this.setDistance();
   }
 
@@ -361,7 +361,7 @@ export const change = function change({
   /* distance */
   if (newDistance || updateLayout) this.setDistance(newDistance);
   /* focus */
-  if (updateLayout) setDisplayOrder(this.nodes, newFocus);
+  if (updateLayout) setDisplayOrder({nodes: this.nodes, focus: newFocus});
   /* layout (must run after distance and focus) */
   if (newDistance || newLayout || updateLayout || changeNodeOrder) {
     this.setLayout(newLayout || this.layout, scatterVariables);
