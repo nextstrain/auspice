@@ -126,7 +126,7 @@ function getDisplayOrderCallback(nodes, focus) {
   let previousWasVisible;
 
   if (focus) {
-    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const numVisible = nodes[0].n.tipCount;
     const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
     const yProportionUnfocused = 1 - yProportionFocused;
     const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
