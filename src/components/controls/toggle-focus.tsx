@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { ImLab } from "react-icons/im";
 import { FaInfoCircle } from "react-icons/fa";
 import { Dispatch } from "@reduxjs/toolkit";
 import Toggle from "./toggle";
@@ -22,8 +21,7 @@ function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
 
   const label = (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <span>Focus on Selected</span>
-      <ImLab style={{ margin: "0 5px" }} />
+      <span style={{ marginRight: "5px" }}>Focus on Selected</span>
       {tooltip && !mobileDisplay && (
         <>
           <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-focus">
@@ -40,6 +38,7 @@ function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
   return (
     <Toggle
       display
+      isExperimental={true}
       on={focus}
       callback={() => dispatch({ type: TOGGLE_FOCUS })}
       label={label}
