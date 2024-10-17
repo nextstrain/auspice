@@ -13,7 +13,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   const dateRangeChange = oldProps.dateMinNumeric !== newProps.dateMinNumeric ||
                           oldProps.dateMaxNumeric !== newProps.dateMaxNumeric;
 
-  const filterChange = oldTreeRedux.filters !== newTreeRedux.filters;
+  const filterChange = oldProps.filters !== newProps.filters;
 
   /* do any properties on the tree object need to be updated?
   Note that updating properties itself won't trigger any visual changes */
