@@ -92,7 +92,7 @@ export const setDisplayOrder = ({nodes, focus}) => {
   timerStart("setDisplayOrder");
 
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
-  const numTips = nodes[0].n.fullTipCount;
+  const numTips = focus ? nodes[0].n.tipCount : nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
 
   // No focus: 1 unit per node
