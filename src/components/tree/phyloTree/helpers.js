@@ -100,7 +100,13 @@ export const setDisplayOrder = ({nodes, focus}) => {
 
   if (focus) {
     const numVisible = nodes[0].n.tipCount;
-    const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
+
+    let yProportionFocused = 0.8;
+    // Adjust for a small number of visible tips (n<4)
+    yProportionFocused = Math.min(yProportionFocused, numVisible / 5);
+    // Adjust for a large number of visible tips (>80% of all tips)
+    yProportionFocused = Math.max(yProportionFocused, numVisible / nodes.length);
+
     const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
     const yPerUnfocused = ((1 - yProportionFocused) * nodes.length) / (nodes.length - numVisible);
     incrementer = (() => {
