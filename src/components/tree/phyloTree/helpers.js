@@ -40,30 +40,36 @@ export const applyToChildren = (phyloNode, func) => {
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
  */
-export const setDisplayOrderRecursively = (node, incrementer, yCounter) => {
-  /**
-   * NOTE: switching from a recursive function to consuming a stack (whilst adding new nodes
-   * to it as required) is probably? the best way to be convey `previousWasVisible` and thus get
-   * symmetric padding around focus groups
-   */
+export const setDisplayOrderRecursively = (rootNode, incrementer, yCounter) => {
 
-  const children = node.n.children; // (redux) tree node
-  if (children && children.length) {
-    for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter);
+  const stack = [rootNode];
+  const internalNodesStack = [];
+  let previousTerminalNode;
+  while (stack.length) {
+    const node = stack.pop();
+    const children = node.n.children; // (redux) tree node
+    if (children && children.length) {
+      for (const child of children) {
+        stack.push(child.shell)
+      }
+      internalNodesStack.push(node)
+    } else {
+      if (!(node.n.fullTipCount===0 || yCounter===undefined)) { // FIXME XXX
+        yCounter += incrementer(node, previousTerminalNode)
+        previousTerminalNode = node;
+      }
+      node.displayOrder = yCounter;
+      node.displayOrderRange = [yCounter, yCounter];
     }
-  } else {
-    if (!(node.n.fullTipCount===0 || yCounter===undefined)) { // FIXME XXX
-      yCounter += incrementer(node)
-    }
-    node.displayOrder = yCounter;
-    node.displayOrderRange = [yCounter, yCounter];
-    return yCounter;
   }
-  /* if here, then all children have displayOrders, but we don't. */
-  node.displayOrder = children.reduce((acc, d) => acc + d.shell.displayOrder, 0) / children.length;
-  node.displayOrderRange = [children[0].shell.displayOrder, children[children.length - 1].shell.displayOrder];
-  return yCounter;
+
+  while (internalNodesStack.length) {
+    const node = internalNodesStack.pop();
+    const children = node.n.children;
+    node.displayOrder = children.reduce((acc, d) => acc + d.shell.displayOrder, 0) / children.length;
+    node.displayOrderRange = [children[0].shell.displayOrder, children[children.length - 1].shell.displayOrder];
+  }
+
 };
 
 /**
@@ -101,15 +107,13 @@ export const setDisplayOrder = (nodes, focus) => {
   const numTips = nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
   let incrementer = (_node, _prevNode) => 1;
-
   if (focus) {
-    const numVisible = nodes.filter((d) => !d.hasChildren && d.visibility === NODE_VISIBLE).length;
+    const numVisible = nodes[0].n.tipCount;
     const yProportionFocused = Math.max(0.8, numVisible / nodes.length);
     const yPerFocused = (yProportionFocused * nodes.length) / numVisible;
     const yPerUnfocused = ((1 - yProportionFocused) * nodes.length) / (nodes.length - numVisible);
-    const previousWasVisible = false; // TODO XXX
-    incrementer = (node) => {
-      if (node.visibility === NODE_VISIBLE || previousWasVisible) {
+    incrementer = (node, previousNode) => {
+      if (node.visibility === NODE_VISIBLE || previousNode?.visibility === NODE_VISIBLE) {
         return yPerFocused;
       } else {
         return yPerUnfocused;
@@ -121,6 +125,7 @@ export const setDisplayOrder = (nodes, focus) => {
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
+      // JAMES: can we work out when this happens? Why are such subtrees ever created?
       setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined);
     } else {
       yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter);
