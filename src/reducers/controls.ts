@@ -216,9 +216,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     }
     case types.TOGGLE_FOCUS: {
       let newValue = !state.focus;
-      if ("focus" in action) {
-        newValue = action.focus;
-      }
       return Object.assign({}, state, {
         focus: newValue
       });
