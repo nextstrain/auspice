@@ -8,6 +8,7 @@ const Tree = connect((state: RootState) => ({
   selectedNode: state.controls.selectedNode,
   dateMinNumeric: state.controls.dateMinNumeric,
   dateMaxNumeric: state.controls.dateMaxNumeric,
+  filters: state.controls.filters,
   quickdraw: state.controls.quickdraw,
   colorBy: state.controls.colorBy,
   colorByConfidence: state.controls.colorByConfidence,
