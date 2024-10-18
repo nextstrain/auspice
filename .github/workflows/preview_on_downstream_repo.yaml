@@ -42,6 +42,7 @@ jobs:
         shell: bash
         working-directory: ${{ inputs.directory }}
         run: |
+          npm config set ignore-scripts true
           npm ci
           npm install nextstrain/auspice#${{ github.sha }}
           git add package.json package-lock.json
