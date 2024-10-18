@@ -1,4 +1,5 @@
 import React from "react";
+import { ImLab } from "react-icons/im";
 import styled from 'styled-components';
 import { SidebarSubtitle } from "./styles";
 
@@ -27,6 +28,11 @@ const ToggleSubtitle = styled(SidebarSubtitle)`
   margin-top: 4px;
   width: 200px;
 `;
+
+const ExperimentalIcon = styled.span`
+  color: ${(props) => props.theme.color};
+  margin-right: 5px;
+`
 
 const Slider = styled.div`
   & {
@@ -73,11 +79,16 @@ const Input = styled.input`
 `;
 
 
-const Toggle = ({display, on, callback, label, style={}}) => {
+const Toggle = ({display, isExperimental = false, on, callback, label, style={}}) => {
   if (!display) return null;
 
   return (
     <ToggleContainer style={style}>
+      {isExperimental &&
+        <ExperimentalIcon>
+          <ImLab />
+        </ExperimentalIcon>
+      }
       <ToggleBackground>
         <Input type="checkbox" checked={on} onChange={callback}/>
         <Slider/>

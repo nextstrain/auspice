@@ -1,5 +1,10 @@
 # Changelog
 
+* Added an experimental "Focus on Selected" toggle in the sidebar.
+  When focusing on selected nodes, nodes that do not match the filter will occupy less vertical space on the tree.
+  Only applicable to rectangular and radial layouts.
+  ([#1373](https://github.com/nextstrain/auspice/pull/1373))
+
 ## version 2.58.0 - 2024/09/12
 
 

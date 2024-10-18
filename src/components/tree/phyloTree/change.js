@@ -258,6 +258,7 @@ export const change = function change({
   /* change these things to provided value (unless undefined) */
   newDistance = undefined,
   newLayout = undefined,
+  newFocus = undefined,
   updateLayout = undefined, // todo - this seems identical to `newLayout`
   newBranchLabellingKey = undefined,
   showAllBranchLabels = undefined,
@@ -323,7 +324,7 @@ export const change = function change({
   }
 
   if (changeNodeOrder) {
-    setDisplayOrder(this.nodes);
+    setDisplayOrder({nodes: this.nodes, focus: newFocus});
     this.setDistance();
   }
 
@@ -359,7 +360,9 @@ export const change = function change({
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance || updateLayout) this.setDistance(newDistance);
-  /* layout (must run after distance) */
+  /* focus */
+  if (updateLayout) setDisplayOrder({nodes: this.nodes, focus: newFocus});
+  /* layout (must run after distance and focus) */
   if (newDistance || newLayout || updateLayout || changeNodeOrder) {
     this.setLayout(newLayout || this.layout, scatterVariables);
   }

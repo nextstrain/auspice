@@ -38,10 +38,18 @@ jobs:
           repository: ${{ inputs.repository }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
 
+      # Apply https://github.com/nextstrain/nextstrain.org/pull/1041
+      - name: Fix Heroku build
+        run: |
+          git apply <(wget -q -O - https://github.com/nextstrain/nextstrain.org/pull/1041.patch)
+          git add build.sh
+
       - name: Install Auspice from PRs HEAD commit
         shell: bash
         working-directory: ${{ inputs.directory }}
+        # Apply https://github.com/nextstrain/auspice/pull/1870
         run: |
+          npm config set ignore-scripts true
           npm ci
           npm install nextstrain/auspice#${{ github.sha }}
           git add package.json package-lock.json
