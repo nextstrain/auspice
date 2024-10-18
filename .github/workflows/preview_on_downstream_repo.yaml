@@ -41,7 +41,9 @@ jobs:
       - name: Install Auspice from PRs HEAD commit
         shell: bash
         working-directory: ${{ inputs.directory }}
+        # Apply https://github.com/nextstrain/auspice/pull/1870
         run: |
+          npm config set ignore-scripts true
           npm ci
           npm install nextstrain/auspice#${{ github.sha }}
           git add package.json package-lock.json
