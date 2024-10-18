@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with:
-          node-version: '16'
+          node-version: '20'
 
       - name: Checkout downstream repo
         uses: actions/checkout@v4
@@ -41,7 +41,10 @@ jobs:
       - name: Install Auspice from PRs HEAD commit
         shell: bash
         working-directory: ${{ inputs.directory }}
+        env:
+          NODE_ENV: production
         run: |
+          npm config set ignore-scripts true
           npm ci
           npm install nextstrain/auspice#${{ github.sha }}
           git add package.json package-lock.json
