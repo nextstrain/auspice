@@ -23,7 +23,8 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedClade: undefined
+    selectedClade: undefined,
+    streams: null, // TODO XXX
   };
 };
 

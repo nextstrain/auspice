@@ -246,6 +246,7 @@ export interface PhyloTreeType {
     regression?: Selection<SVGDefsElement, unknown, null, unknown>
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
+    streams?: Selection<SVGDefsElement, unknown, null, unknown>
   }
   hideGrid: typeof grid.hideGrid
   hideTemporalSlice: typeof grid.hideTemporalSlice
@@ -294,4 +295,11 @@ export interface PhyloTreeType {
   yScale: any
 
   zoomNode: PhyloNode
+
+  streams: {[key:string]: any}  // TODO XXX
+  mask: (1|0)[]
+  drawStreams: typeof renderers.drawStreams
+  phyloStreams: {[key:string]: any}  // TODO XXX
+  streamLayout: typeof layouts.streamLayout
+
 }

@@ -77,6 +77,7 @@ export interface TreeState {
   version: number
   visibility: Visibility[] | null
   visibilityVersion: number
+  streams: any // TODO XXX
 }
 
 export interface TreeTooState extends TreeState {

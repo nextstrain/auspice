@@ -59,5 +59,6 @@ export const renderTree = (
     tipRadii: treeState.tipRadii,
     dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
     scatterVariables: props.scatterVariables,
+    streams: treeState.streams,
   });
 };

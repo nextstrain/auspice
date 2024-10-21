@@ -23,6 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, loadMeasurements } from "./measurements";
+import { partitionIntoStreams } from "../util/partitionIntoStreams.js";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -992,6 +993,11 @@ export const createStateFromQueryOrJSONs = ({
     visibility: tree.visibility,
     visibilityToo: treeToo?.visibility,
   });
+
+  /* STREAMS */
+  tree.streams = partitionIntoStreams(tree.nodes, controls.colorScale)
+  console.log("tree.streams", tree.streams)
+
 
   /* calculate entropy in view */
   if (entropy.loaded) {

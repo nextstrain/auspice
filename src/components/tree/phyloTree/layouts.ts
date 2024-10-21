@@ -29,6 +29,8 @@ export const setLayout = function setLayout(
     this.layout = layout;
   }
 
+  this.streamLayout();
+
   // remove any regression. This will be recalculated if required.
   this.regression = undefined;
 
@@ -71,6 +73,44 @@ export const rectangularLayout = function rectangularLayout(this: PhyloTreeType)
     });
   }
 };
+
+
+export function streamLayout(this: PhyloTreeType): void {
+
+  // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
+  this.phyloStreams = this.streams.map((stream) => {
+    // the range of the displayOrder for all nodes in this stream
+    const displayOrders = stream.nodeIdxs.flat().reduce((acc, nodeIdx) => {
+      const value = this.nodes[nodeIdx].displayOrder;
+      if (acc[0] > value) acc[0] = value;
+      if (acc[1] < value) acc[1] = value;
+      return acc;
+    }, [Infinity, -Infinity])
+
+    
+    // the extent of that displayOrder scaled by maxNodesInInterval
+    const displayOrderScalar = (displayOrders[1] - displayOrders[0]) / stream.maxNodesInInterval;
+    const baseDisplayOrder = displayOrders[0];
+    console.log("displayOrders", displayOrders, "displayOrderScalar", displayOrderScalar)
+
+    // convert countsByCategory to displayOrderByColorBy
+    // P.S.     stream.countsByCategory[categoryIdx][pivotIdx] = count
+    // target:  displayOrderByColorBy  [categoryIdx][pivotIdx] = [displayOrder, displayOrder]
+    const displayOrderByCategory = stream.countsByCategory.reduce((acc, countsAcrossPivots, categoryIdx) => {
+      acc.push(countsAcrossPivots.map((count, pivotIdx) => {
+        const base = categoryIdx===0 ? baseDisplayOrder : acc[categoryIdx-1][pivotIdx][1];
+        return [base, base + count*displayOrderScalar];
+      }))
+      return acc;
+    }, []);
+
+    // NOTE: for num_date the value is the x value. Easy.
+    return {displayOrderByCategory}
+  });
+  
+  console.log("this.phyloStreams", this.phyloStreams)
+
+}
 
 /**
  * assign x,y coordinates for nodes based upon user-selected variables
@@ -516,6 +556,19 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       }
     });
   }
+
+  // PROTOTYPE
+  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+    const reduxStream = this.streams[streamIdx]; // urgh need better names
+    stream.x = reduxStream.pivots.map((pivot) => this.xScale(pivot))
+    stream.y = stream.displayOrderByCategory.map((displayOrderByPivot) => {
+      return displayOrderByPivot.map(([min,max]) => {
+        return [this.yScale(min), this.yScale(max)]
+      })
+    })
+  }
+
+
   timerEnd("mapToScreen");
 };
 
