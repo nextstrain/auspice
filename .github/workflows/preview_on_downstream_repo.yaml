@@ -13,9 +13,9 @@ on:
         required: true
         type: boolean
 
-# Cancel any in-progress runs of a caller workflow on the same branch.
+# Cancel any in-progress runs of a caller workflow on the same pull request.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.number }}
   cancel-in-progress: true
 
 env:
