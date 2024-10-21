@@ -1,6 +1,8 @@
 /* eslint-disable no-param-reassign */
 import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
+import { NODE_VISIBLE } from "../../../util/globals";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -33,18 +35,22 @@ export const applyToChildren = (phyloNode, func) => {
  * of nodes in a rectangular tree.
  * If `yCounter` is undefined then we wish to hide the node and all descendants of it
  * @param {PhyloNode} node
+ * @param {function} incrementer
  * @param {int|undefined} yCounter
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
  */
-export const setDisplayOrderRecursively = (node, yCounter) => {
+export const setDisplayOrderRecursively = (node, incrementer, yCounter) => {
   const children = node.n.children; // (redux) tree node
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, yCounter);
+      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter);
     }
   } else {
-    node.displayOrder = (node.n.fullTipCount===0 || yCounter===undefined) ? yCounter : ++yCounter;
+    if (node.n.fullTipCount !== 0 && yCounter !== undefined) {
+      yCounter += incrementer(node);
+    }
+    node.displayOrder = yCounter;
     node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
@@ -77,26 +83,63 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
  * PhyloTree can subsequently use this information. Accessed by prototypes
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
- * @param {Array<PhyloNode>} nodes
+ * @param {Object} props
+ * @param {Array<PhyloNode>} props.nodes
+ * @param {boolean} props.focus
  * @returns {undefined}
  */
-export const setDisplayOrder = (nodes) => {
+export const setDisplayOrder = ({nodes, focus}) => {
+  timerStart("setDisplayOrder");
+
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
-  const numTips = nodes[0].n.fullTipCount;
+  const numTips = focus ? nodes[0].n.tipCount : nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
+
+  // No focus: 1 unit per node
+  let incrementer = (_node) => 1;
+
+  if (focus) {
+    const nVisible = nodes[0].n.tipCount;
+    const nTotal = nodes[0].n.fullTipCount;
+
+    let yProportionFocused = 0.8;
+    // Adjust for a small number of visible tips (n<4)
+    yProportionFocused = Math.min(yProportionFocused, nVisible / 5);
+    // Adjust for a large number of visible tips (>80% of all tips)
+    yProportionFocused = Math.max(yProportionFocused, nVisible / nTotal);
+
+    const yPerFocused = (yProportionFocused * nTotal) / nVisible;
+    const yPerUnfocused = ((1 - yProportionFocused) * nTotal) / (nTotal - nVisible);
+
+    incrementer = (() => {
+      let previousWasVisible = false;
+      return (node) => {
+        // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
+        const y = (node.visibility === NODE_VISIBLE || previousWasVisible) ? yPerFocused : yPerUnfocused;
+
+        // Update for the next node
+        previousWasVisible = node.visibility === NODE_VISIBLE;
+
+        return y;
+      }
+    })();
+  }
+
   let yCounter = 0;
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
-      setDisplayOrderRecursively(nodes[subtree.arrayIdx], undefined);
+      setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined);
     } else {
-      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], yCounter);
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter);
       yCounter+=spaceBetweenSubtrees;
     }
   }
   /* note that nodes[0] is a dummy node holding each subtree */
   nodes[0].displayOrder = undefined;
   nodes[0].displayOrderRange = [undefined, undefined];
+
+  timerEnd("setDisplayOrder");
 };
 
 
