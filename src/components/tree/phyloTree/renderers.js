@@ -3,6 +3,8 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
+import { area, curveCatmullRom } from "d3-shape";
+
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
@@ -20,15 +22,21 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {array|null} tipRadii   -- array of tip radius'
  * @param {array} dateRange
  * @param {object} scatterVariables  -- {x, y} properties to map nodes => scatterplot (only used if layout="scatter")
+ * @param {object} streams        -- TODO XXX
  * @return {null}
  */
-export const render = function render(svg, layout, distance, focus, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables) {
+export const render = function render(svg, layout, distance, focus, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange, scatterVariables, streams) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.dateRange = dateRange;
+  // As long as we keep redux.tree.streams the same object, and also streams.mask the same array,
+  // the following should be references and thus always in-sync.
+  // (of course we'll need to call the appropriate render functions on an update)
+  this.mask = streams?.mask;
+  this.streams = streams?.streams;
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -55,6 +63,7 @@ export const render = function render(svg, layout, distance, focus, parameters, 
   this.drawBranches();
   this.updateTipLabels();
   this.drawTips();
+  this.drawStreams();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.regression) this.drawRegression();
@@ -105,7 +114,7 @@ export const drawTips = function drawTips() {
   }
   this.groups.tips
     .selectAll(".tip")
-    .data(this.nodes.filter((d) => !d.n.hasChildren))
+    .data(this.nodes.filter((d) => !d.n.hasChildren).filter((d) => this.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("circle")
     .attr("class", "tip")
@@ -182,7 +191,10 @@ export const drawBranches = function drawBranches() {
   } else {
     this.groups.branchTee
       .selectAll('.branch')
-      .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
+      .data(this.nodes
+        .filter((d) => d.n.hasChildren && d.displayOrder !== undefined)
+        .filter((d) => this.mask?.[d.n.arrayIdx]===1)
+      )
       .enter()
       .append("path")
       .attr("class", "branch T")
@@ -214,7 +226,7 @@ export const drawBranches = function drawBranches() {
   }
   this.groups.branchStem
     .selectAll('.branch')
-    .data(this.nodes.filter((d) => d.displayOrder !== undefined))
+    .data(this.nodes.filter((d) => d.displayOrder !== undefined).filter((d) => this.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("path")
     .attr("class", "branch S")
@@ -235,6 +247,36 @@ export const drawBranches = function drawBranches() {
 
   timerEnd("drawBranches");
 };
+
+export function drawStreams() {
+
+  if (!("streams" in this.groups)) {
+    this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
+  } else {
+    this.groups.streams.selectAll("*").remove();
+  }
+
+  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+
+    const areaObj = area()
+      .x((d, pivotIdx) => {
+        // console.log("area d, i", d, pivotIdx);
+        return stream.x[pivotIdx]})
+      .y0((d) => d[0])
+      .y1((d) => d[1])
+      .curve(curveCatmullRom.alpha(0.5))
+
+
+    this.groups.streams.selectAll(`.stream${streamIdx}`)
+      .data(stream.y)
+      .enter()
+      .append("path")
+      .attr("d", areaObj)
+      .attr("fill", (d, i) => this.streams[streamIdx].categoryColors[i])
+  }
+
+
+}
 
 
 /**

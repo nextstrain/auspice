@@ -50,6 +50,7 @@ export const renderTree = (that, main, phylotree, props) => {
     tipStrokeColors.map(getBrighterColor), // tip fill colors
     treeState.tipRadii, /* might be null */
     [props.dateMinNumeric, props.dateMaxNumeric],
-    props.scatterVariables
+    props.scatterVariables,
+    treeState.streams,
   );
 };

@@ -59,6 +59,7 @@ PhyloTree.prototype.drawVaccines = renderers.drawVaccines;
 PhyloTree.prototype.drawRegression = renderers.drawRegression;
 PhyloTree.prototype.removeRegression = renderers.removeRegression;
 PhyloTree.prototype.updateColorBy = renderers.updateColorBy;
+PhyloTree.prototype.drawStreams = renderers.drawStreams;
 
 /* C A L C U L A T E    G E O M E T R I E S  E T C   ( M O D I F I E S    N O D E S ,    N O T    S V G ) */
 PhyloTree.prototype.setDistance = layouts.setDistance;
@@ -70,6 +71,7 @@ PhyloTree.prototype.radialLayout = layouts.radialLayout;
 PhyloTree.prototype.setScales = layouts.setScales;
 PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
 PhyloTree.prototype.calculateRegression = regression.calculateRegression;
+PhyloTree.prototype.streamLayout = layouts.streamLayout;
 
 /* C O N F I D E N C E    I N T E R V A L S */
 PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
