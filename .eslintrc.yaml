@@ -21,6 +21,7 @@ globals:
 
 rules:
   # Code quality rules
+  eqeqeq: error
   "@typescript-eslint/no-empty-function": ["error", { "allow": ["arrowFunctions"] }]
   "@typescript-eslint/no-explicit-any": off # Allow explicit any to make incremental TypeScript adoption easier.
   no-unused-vars: off
