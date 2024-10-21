@@ -91,7 +91,7 @@ function* parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
   const titleLinkSelector = "h1 > a:only-child";
   const isTitle = (node) =>
     node.nodeType === Node.ELEMENT_NODE &&
-    node.querySelector(titleLinkSelector) != null;
+    node.querySelector(titleLinkSelector) !== null;
 
   for (const titleLink of doc.querySelectorAll(titleLinkSelector)) {
     const slide = doc.createElement("slide");
