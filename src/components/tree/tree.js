@@ -35,21 +35,24 @@ class Tree extends React.Component {
       tree: null,
       treeToo: null
     };
+
     /* bind callbacks */
     this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
-    // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
-    this.redrawTree = () => {
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-        root: [0, 0]
-      }));
-    };
-    /* pressing the escape key should dismiss an info modal (if one exists) */
-    this.handlekeydownEvent = (event) => {
-      if (event.key==="Escape" && this.props.selectedNode) {
-        this.clearSelectedNode(this.props.selectedNode);
-      }
-    };
   }
+
+  redrawTree = () => {
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+      root: [0, 0]
+    }));
+  }
+
+  /* pressing the escape key should dismiss an info modal (if one exists) */
+  handlekeydownEvent = (event) => {
+    if (event.key==="Escape" && this.props.selectedNode) {
+      this.clearSelectedNode(this.props.selectedNode);
+    }
+  }
+
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
@@ -59,6 +62,7 @@ class Tree extends React.Component {
     }
     renderTree(this, false, newState.treeToo, props);
   }
+
   componentDidMount() {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
@@ -72,6 +76,7 @@ class Tree extends React.Component {
       this.setState(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
+
   componentDidUpdate(prevProps) {
     let newState = {};
     let rightTreeUpdated = false;
@@ -110,16 +115,13 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
-      this.props.treeToo.idxOfInViewRootNode !== 0;
-
     const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
       this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
     const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
       this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
     const activeZoomButton = filteredTree || filteredTreeToo;
 
-    const treeIsZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
+    const anyTreeZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
       this.props.treeToo.idxOfInViewRootNode !== 0;
 
     return {
@@ -133,8 +135,8 @@ class Tree extends React.Component {
         zIndex: 100,
         display: "inline-block",
         marginLeft: 4,
-        cursor: activeResetTreeButton ? "pointer" : "auto",
-        color: activeResetTreeButton ? darkGrey : lightGrey
+        cursor: anyTreeZoomed ? "pointer" : "auto",
+        color: anyTreeZoomed ? darkGrey : lightGrey
       },
       zoomToSelectedButton: {
         zIndex: 100,
@@ -146,9 +148,9 @@ class Tree extends React.Component {
       zoomOutButton: {
         zIndex: 100,
         display: "inline-block",
-        cursor: treeIsZoomed ? "pointer" : "auto",
-        color: treeIsZoomed ? darkGrey : lightGrey,
-        pointerEvents: treeIsZoomed ? "auto" : "none",
+        cursor: anyTreeZoomed ? "pointer" : "auto",
+        color: anyTreeZoomed ? darkGrey : lightGrey,
+        pointerEvents: anyTreeZoomed ? "auto" : "none",
         marginRight: "4px"
       }
     };
