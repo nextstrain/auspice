@@ -6,6 +6,7 @@ import { SidebarSubtitle } from "./styles";
 const ToggleContainer = styled.div`
   // Same as ToggleBackground, necessary for panel toggles.
   height: 21px;
+  position: relative;
 `
 
 const ToggleBackground = styled.label`
@@ -31,7 +32,9 @@ const ToggleSubtitle = styled(SidebarSubtitle)`
 
 const ExperimentalIcon = styled.span`
   color: ${(props) => props.theme.color};
-  margin-right: 5px;
+  position: absolute;
+  left: -12px;
+  top: 6px;
 `
 
 const Slider = styled.div`
