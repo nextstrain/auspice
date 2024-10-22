@@ -6,7 +6,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 import { makeTipLabelFunc } from "./labels";
-import { PhyloNode, PhyloTree, Visibility } from "./phyloTree";
+import { Layout, PhyloNode, PhyloTree, Visibility } from "./phyloTree";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -255,22 +255,33 @@ export interface ChangeParams {
   svgHasChangedDimensions?: boolean
   animationInProgress?: boolean
   changeNodeOrder?: boolean
+  focus?: boolean
+
   newDistance?: any
-  newLayout?: any
-  updateLayout?: any
-  newBranchLabellingKey?: any
-  showAllBranchLabels?: any
+  newLayout?: Layout
+  updateLayout?: boolean
+  newBranchLabellingKey?: string
+  showAllBranchLabels?: boolean
   newTipLabelKey?: any
-  branchStroke?: any[]
-  tipStroke?: any[]
+
+  branchStroke?: string[]
+  tipStroke?: (string | undefined)[]
   fill?: any[]
   visibility?: Visibility[]
   tipRadii?: any[]
   branchThickness?: any[]
-  focus: boolean
+
   scatterVariables?: any
 }
 
+interface Extras {
+  removeConfidences: boolean
+  showConfidences: boolean
+  newBranchLabellingKey?: string
+
+  timeSliceHasPotentiallyChanged?: boolean
+  hideTipLabels?: boolean
+}
 
 export const change = function change(this: PhyloTree, params: ChangeParams) {
   const {
@@ -424,7 +435,7 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
     elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
   }
 
-  const extras = { removeConfidences, showConfidences, newBranchLabellingKey };
+  const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
   if (useModifySVGInStages) {

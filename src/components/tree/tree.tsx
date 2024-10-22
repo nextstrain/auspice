@@ -28,48 +28,61 @@ interface TreeNode {
 }
 
 interface TreeState {
-  branchThickness: any
+  branchThickness: number[]
+  branchThicknessVersion: number
   idxOfFilteredRoot?: number
   idxOfInViewRootNode: number
   loaded: boolean
   name: string
-  nodeColors: any
+  nodeColors: string[]
   nodeColorsVersion: number
   nodes: ReduxNode[]
-  observedMutations: any
-  tipRadii: any
+  observedMutations: Record<string, number>
+  tipRadii: number[]
+  tipRadiiVersion: number
   vaccines: any
   visibility: Visibility[]
   visibilityVersion: number
 }
 
 interface TreeTooState extends TreeState {
-  tangleTipLookup: any
+  tangleTipLookup: any[][]
 }
 
-export interface TreeComponentProps extends WithTranslation {
+export interface TreeComponentProps extends WithTranslation, TreeComponentPropsFromState {
+  dispatch: (action: any) => void
+  height: number
+  width: number
+}
+
+// FIXME: source these types from state
+export interface TreeComponentPropsFromState {
+  animationPlayPauseButton: "Play" | "Pause"
   canRenderBranchLabels: boolean
   colorBy: any
-  colorByConfidence: any
+  colorByConfidence: boolean
   colorings: any
   colorScale: any
   dateMaxNumeric: number
   dateMinNumeric: number
-  dispatch: (action: any) => void
   distanceMeasure: any
+  explodeAttr: any
+  filters: any[]
+  focus: boolean
   genomeMap: any
-  height: number
   layout: Layout
   narrativeMode: boolean
+  panelsToDisplay: string[]
+  quickdraw: boolean
   scatterVariables: {
     showBranches?: boolean
   }
-  selectedBranchLabel: any
+  selectedBranchLabel: string
   selectedNode: any
+  showAllBranchLabels: boolean
   showOnlyPanels: boolean
   showTangle: boolean
   showTreeToo: boolean
-  showAllBranchLabels: boolean
   temporalConfidence: {
     display: boolean
     on: boolean
@@ -77,7 +90,6 @@ export interface TreeComponentProps extends WithTranslation {
   tipLabelKey: any
   tree: TreeState
   treeToo: TreeTooState
-  width: number
 }
 
 
