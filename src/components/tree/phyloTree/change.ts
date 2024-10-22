@@ -285,6 +285,7 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
     svgHasChangedDimensions = false,
     animationInProgress = false,
     changeNodeOrder = false,
+    focus = false,
     /* change these things to provided value (unless undefined) */
     newDistance = undefined,
     newLayout = undefined,
@@ -300,7 +301,6 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
     tipRadii = undefined,
     branchThickness = undefined,
     /* other data */
-    focus = undefined,
     scatterVariables = undefined
   } = params;
 
