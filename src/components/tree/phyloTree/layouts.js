@@ -77,7 +77,8 @@ export function streamLayout() {
 
   // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
   this.phyloStreams = this.streams.map((stream) => {
-    // the range of the displayOrder for all nodes in this stream
+    // the range of the displayOrder for all nodes in this stream. NOTE: this won't work for nested
+    // streams, we'd have to deduct them from what we do here...
     const displayOrders = stream.nodeIdxs.flat().reduce((acc, nodeIdx) => {
       const value = this.nodes[nodeIdx].displayOrder;
       if (acc[0] > value) acc[0] = value;
@@ -85,7 +86,6 @@ export function streamLayout() {
       return acc;
     }, [Infinity, -Infinity])
 
-    
     // the extent of that displayOrder scaled by maxNodesInInterval
     const displayOrderScalar = (displayOrders[1] - displayOrders[0]) / stream.maxNodesInInterval;
     const baseDisplayOrder = displayOrders[0];
@@ -101,6 +101,17 @@ export function streamLayout() {
       }))
       return acc;
     }, []);
+
+    // center the stream graphs
+    const displayOrderMidpoint = displayOrders[0] + (displayOrders[1] - displayOrders[0])/2;
+    const nPivots = displayOrderByCategory[0].length;    
+    for (let pivotIdx=0; pivotIdx<nPivots; pivotIdx++) {
+      const range = [displayOrderByCategory.at(0).at(pivotIdx).at(0), displayOrderByCategory.at(-1).at(pivotIdx).at(1)];
+      const shift = displayOrderMidpoint - (range[0] + (range[1]-range[0])/2);
+      for (const displayOrderAcrossPivots of displayOrderByCategory) {
+        displayOrderAcrossPivots[pivotIdx] = displayOrderAcrossPivots[pivotIdx].map((y) => y+=shift);
+      }
+    }
 
     // NOTE: for num_date the value is the x value. Easy.
     return {displayOrderByCategory}
