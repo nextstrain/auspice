@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.59.0 - 2024/10/22
+
+
 * Added an experimental "Focus on Selected" toggle in the sidebar.
   When focusing on selected nodes, nodes that do not match the filter will occupy less vertical space on the tree.
   Only applicable to rectangular and radial layouts.
