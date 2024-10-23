@@ -52,7 +52,7 @@ class ChooseMetric extends React.Component {
 
         {this.props.showTreeToo ?
           null : (
-            <div style={{margin: 5}}>
+            <div style={{marginBottom: 5}}>
               <Toggle
                 display={this.props.temporalConfidence.display}
                 on={this.props.temporalConfidence.on}

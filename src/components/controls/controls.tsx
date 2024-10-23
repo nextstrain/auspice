@@ -66,8 +66,8 @@ function Controls() {
           tooltip={TreeInfo}
           options={<>
             <ChooseLayout />
-            <ToggleFocus tooltip={ToggleFocusInfo} />
             <ChooseMetric />
+            <ToggleFocus tooltip={ToggleFocusInfo} />
             <ChooseBranchLabelling />
             <ChooseTipLabel />
             <ChooseSecondTree />

@@ -1,5 +1,8 @@
 # Changelog
 
+* Moved the "Focus on Selected" toggle next to the "Show confidence intervals" toggle.
+  ([#1875](https://github.com/nextstrain/auspice/pull/1875))
+
 ## version 2.59.0 - 2024/10/22
 
 
