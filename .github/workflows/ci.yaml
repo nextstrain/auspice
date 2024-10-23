@@ -20,7 +20,7 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: node --version
       # Build is implicit with the "prepare" life cycle script
-      - run: npm ci
+      - run: npm ci --loglevel verbose
 
   unit-test:
     runs-on: ubuntu-latest
@@ -36,7 +36,7 @@ jobs:
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
-      - run: npm ci --ignore-scripts
+      - run: npm ci --loglevel verbose --ignore-scripts
       - run: npm test
 
   smoke-test:
@@ -49,7 +49,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - run: npm ci
+      - run: npm ci --loglevel verbose
       - run: npm run get-data
       - run: npm run smoke-test:ci
 
@@ -66,7 +66,7 @@ jobs:
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
-      - run: npm ci --ignore-scripts
+      - run: npm ci --loglevel verbose --ignore-scripts
       - run: npm run lint
 
   type-check:
@@ -79,7 +79,7 @@ jobs:
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
-      - run: npm ci --ignore-scripts
+      - run: npm ci --loglevel verbose --ignore-scripts
       - run: npm run type-check
 
   bundlesize:
@@ -89,7 +89,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-      - run: npm ci
+      - run: npm ci --loglevel verbose
       - run: npx --yes bundlesize
 
   # Ensure package-lock.json is synced with package.json.
@@ -123,7 +123,7 @@ jobs:
           node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: node --version
-      - run: npm ci
+      - run: npm ci --loglevel verbose
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
