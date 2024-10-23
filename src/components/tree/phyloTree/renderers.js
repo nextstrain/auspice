@@ -36,7 +36,7 @@ export const render = function render(svg, layout, distance, focus, parameters, 
   // the following should be references and thus always in-sync.
   // (of course we'll need to call the appropriate render functions on an update)
   this.mask = streams?.mask;
-  this.streams = streams?.streams;
+  this.streams = streams; // TODO - supply as a arg? Must revisit
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -272,7 +272,7 @@ export function drawStreams() {
       .enter()
       .append("path")
       .attr("d", areaObj)
-      .attr("fill", (d, i) => this.streams[streamIdx].categoryColors[i])
+      .attr("fill", (d, i) => this.streams.streams[streamIdx].categoryColors[i])
   }
 
 

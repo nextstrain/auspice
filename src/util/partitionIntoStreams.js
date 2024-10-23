@@ -2,13 +2,18 @@ import { getTraitFromNode } from "./treeMiscHelpers"
 
 
 // Prototype - hardcode the CA of streams
-const FOUNDERS = [
-  "NODE_0000731",
-  "NODE_0000648",
-  "NODE_0000038",
-]
-
-
+function _isFounderNode(node) {
+  const FOUNDERS = [
+    "NODE_0000731",
+    "NODE_0001569", // NOTE - other founder nodes are descendants of this clade
+    "NODE_0000648",
+    "NODE_0000038",
+    "NODE_0001227",
+    "NODE_0001571",
+    // "NODE_0001773", // VERY BASAL IN TREE - everything is a descendant of this node
+  ]
+  return FOUNDERS.includes(node.name);
+}
 
 
 
@@ -19,21 +24,37 @@ const FOUNDERS = [
  * - only works for temporal tree
  */
 export function partitionIntoStreams(nodes, colorScale) {
+  
+  const {founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder} =
+    getFounderTree(nodes[0], _isFounderNode);
+
 
   const streams = {
     streams: [],
     mask: nodes.map((_) => 1), // 1 = show nodes as normal, 0 = mask out, nodes are part of a stream
+    // founderTree,
+    founderIndiciesToDescendantFounderIndicies,
+    founderIndiciesPostorder,
   }
-  
-  for (const founderNodeName of FOUNDERS) {
-    const stream = {}
-    
-    const nodesInStream = []
 
-    const stack = [getNode(nodes, founderNodeName)]
+  streams.streams = founderIndiciesPostorder.map((founderIdx) => {
+    const stream = {};
+    stream.founderIdx = founderIdx;
+    const nodesInStream = [];
+    const founderNode = nodes[founderIdx];
+    stream.founderName = founderNode.name;
+    const stack = [founderNode];
     while (stack.length) {
       const node = stack.pop();
+      if (founderIndiciesToDescendantFounderIndicies[founderNode.arrayIdx].includes(node.arrayIdx)) {
+        // console.log("Stream for", founderNode.name, "skipping subtree of", node.name)
+        continue
+      }
       streams.mask[node.arrayIdx] = 0;
+      // Don't mask the founder node so we can draw a branch to the start of the stream.
+      // Note - this double counts this node I think
+      // TODO - extend the stem of the founder node branch to join with the stream start point.
+      // if (node.arrayIdx===founderNode.arrayIdx) streams.mask[node.arrayIdx] = 1;
       nodesInStream.push(node);
       for (const child of node.children || []) {
         stack.push(child)
@@ -48,18 +69,10 @@ export function partitionIntoStreams(nodes, colorScale) {
     stream.numNodes = nodesInStream.length;
     stream.maxNodesInInterval = Math.max(...stream.nodeIdxs.map((idxs) => idxs.length));
     stream.countsByCategory = groupNodesByCategory(nodes, stream.nodeIdxs, colorScale.colorBy, stream.categories);
-    streams.streams.push(stream);
-  }
+    return stream;
+  })
 
   return streams;
-}
-
-
-function getNode(nodes, name) {
-  for (const node of nodes) {
-    if (node.name===name) return node
-  }
-  throw new Error("didn't find node!!!")
 }
 
 function observedCategories(nodes, colorScale) {
@@ -119,4 +132,56 @@ function groupNodesByCategory(nodes, nodeIdxsByPivot, colorBy, categories) {
       return nodeIdxs.filter((nodeIdx) => getTraitFromNode(nodes[nodeIdx], colorBy)===category).length
     })
   })
+}
+
+/**
+ * 
+ * @param {object} rootNode redux tree node
+ * @param {function} isFounderNode
+ */
+function getFounderTree(rootNode, isFounderNode) {
+  // Tree of nodes (in the main tree) which define stream trees
+  const founderTree = {children: []};
+  const nodesInStreamFounderTree = [];
+
+  function traverse(node, streamParentNode=founderTree) {
+    let newNode;
+    if (isFounderNode(node)) {
+      // add this as a child to the appropriate parent not in streamFounderTree
+      newNode = {children: [], parent: streamParentNode, arrayIdx:node.arrayIdx, name: node.name}
+      streamParentNode.children.push(newNode)
+      nodesInStreamFounderTree.push(newNode)
+    }
+    for (const child of node.children || []) {
+      traverse(child, newNode||streamParentNode)
+    }
+  }
+  traverse(rootNode);
+
+  // Create mapping of founder nodes (indicies) to all their descendant indicies
+  const founderIndiciesToDescendantFounderIndicies = Object.fromEntries(
+    nodesInStreamFounderTree.map((node) => {
+      const descendantIndicies = [];
+      const stack = [node]
+      while (stack.length) {
+        const n = stack.shift();
+        if (n.arrayIdx!==node.arrayIdx) descendantIndicies.push(n.arrayIdx);
+        for (const child of n.children || []) stack.push(child);
+      }
+      return [node.arrayIdx, descendantIndicies]
+    })
+  )
+
+  // Create a list of founder indicies in postorder order, such that we can trivially visit
+  // the nodes without needing traversals
+  const founderIndiciesPostorder = [];
+  function postorder(node) {
+    for (const child of node.children||[]) {
+      postorder(child);
+    }
+    if (node.arrayIdx!==undefined) founderIndiciesPostorder.push(node.arrayIdx);
+  }
+  postorder(founderTree)
+
+  return {founderTree, founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder};
 }
