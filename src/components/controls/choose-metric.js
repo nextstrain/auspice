@@ -4,6 +4,7 @@ import { withTranslation } from "react-i18next";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
+import { toggleStreamTree } from "../../actions/streamTrees";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
 
@@ -14,7 +15,8 @@ import Toggle from "./toggle";
     layout: state.controls.layout,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    temporalConfidence: state.controls.temporalConfidence
+    temporalConfidence: state.controls.temporalConfidence,
+    showStreamTrees: state.controls.showStreamTrees,
   };
 })
 class ChooseMetric extends React.Component {
@@ -62,6 +64,16 @@ class ChooseMetric extends React.Component {
             </div>
           )
         }
+
+        <div style={{margin: 5}}>
+          <Toggle
+            display
+            isExperimental
+            on={this.props.showStreamTrees}
+            callback={() => this.props.dispatch(toggleStreamTree())}
+            label={t("sidebar:Show stream trees")}
+          />
+        </div>
       </div>
     );
   }

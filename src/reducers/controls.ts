@@ -234,6 +234,7 @@ export const getDefaultControlsState = (): ControlsState => {
     tipLabelKey: defaults.tipLabelKey,
     showTreeToo: false,
     showTangle: false,
+    showStreamTrees: true, // TODO XXX. We also need some concept of "canShowStreamTrees"
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
@@ -461,6 +462,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
+    case types.TOGGLE_STREAM_TREE:
+      return {...state, showStreamTrees: action.showStreamTrees};
     case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);
