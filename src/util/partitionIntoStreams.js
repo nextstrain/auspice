@@ -3,13 +3,17 @@ import { getTraitFromNode } from "./treeMiscHelpers"
 
 // Prototype - hardcode the CA of streams
 function _isFounderNode(node) {
+
+  // if (node?.branch_attrs?.labels?.clade) return true;
+  // return false;
+
   const FOUNDERS = [
     "NODE_0000731",
     "NODE_0001569", // NOTE - other founder nodes are descendants of this clade
     "NODE_0000648",
-    "NODE_0000038",
-    "NODE_0001227",
-    "NODE_0001571",
+    // "NODE_0000038",
+    // "NODE_0001227",
+    // "NODE_0001571",
     // "NODE_0001773", // VERY BASAL IN TREE - everything is a descendant of this node
   ]
   return FOUNDERS.includes(node.name);
@@ -23,7 +27,7 @@ function _isFounderNode(node) {
  * - only works for categorical colorScale
  * - only works for temporal tree
  */
-export function partitionIntoStreams(nodes, colorScale) {
+export function partitionIntoStreams(nodes, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   
   const {founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder} =
     getFounderTree(nodes[0], _isFounderNode);
@@ -62,7 +66,7 @@ export function partitionIntoStreams(nodes, colorScale) {
     }
     stream.categories = observedCategories(nodesInStream, colorScale);
     stream.categoryColors = stream.categories.map((value) => colorScale.scale(value))
-    const pivotData = calcPivots(nodesInStream);
+    const pivotData = calcPivots(nodesInStream, absoluteDateMinNumeric, absoluteDateMaxNumeric);
     stream.pivotIntervals = pivotData.intervals;
     stream.pivots = pivotData.pivots;
     stream.nodeIdxs = groupNodesIntoIntervals(nodesInStream, pivotData.intervals); // indexed by pivot idx
@@ -87,14 +91,17 @@ function observedCategories(nodes, colorScale) {
   return Array.from(values).sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b))
 }
 
-function calcPivots(nodes) {
+function calcPivots(nodes, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   const domain = nodes.reduce((acc, node) => {
     const value = getTraitFromNode(node, "num_date"); // TODO XXX
     if (acc[0] > value) acc[0] = value;
     if (acc[1] < value) acc[1] = value;
     return acc;
   }, [Infinity, -Infinity])
-  const nPivots = 10; // TODO XXX
+
+  const domainFraction = (domain[1]-domain[0]) / (absoluteDateMaxNumeric - absoluteDateMinNumeric);
+  const availablePivots = 50;
+  const nPivots = Math.ceil(domainFraction * availablePivots);
   const size = (domain[1]-domain[0])/(nPivots-1);
   const intervals = Array.from(Array(nPivots), undefined);
   intervals[0] = [domain[0], domain[0] + size/2];

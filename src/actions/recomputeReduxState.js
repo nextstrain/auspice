@@ -995,7 +995,7 @@ export const createStateFromQueryOrJSONs = ({
   });
 
   /* STREAMS */
-  tree.streams = partitionIntoStreams(tree.nodes, controls.colorScale)
+  tree.streams = partitionIntoStreams(tree.nodes, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
   console.log("tree.streams", tree.streams)
 
 
