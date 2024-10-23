@@ -32,6 +32,7 @@ const ToggleSubtitle = styled(SidebarSubtitle)`
 
 const ExperimentalIcon = styled.span`
   color: ${(props) => props.theme.color};
+  font-size: 10px;
   position: absolute;
   left: -12px;
   top: 6px;

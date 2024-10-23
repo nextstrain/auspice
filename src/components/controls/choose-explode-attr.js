@@ -41,7 +41,7 @@ class ChooseExplodeAttr extends React.Component {
       <div style={{paddingTop: 10}}>
         <SidebarSubtitleFlex data-tip data-for="explode_tree">
           <span style={{ position: "relative" }}>
-            <ImLab style={{ position: "absolute", left: "-14px", top: "1px" }}/>
+            <ImLab style={{ position: "absolute", left: "-14px", top: "2px", fontSize: "10px" }}/>
             {t("sidebar:Explode Tree By")}
           </span>
           {tooltip && !this.props.mobileDisplay && (
