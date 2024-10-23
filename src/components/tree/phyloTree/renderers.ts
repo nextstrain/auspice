@@ -93,7 +93,7 @@ export const render = function render(
   // the following should be references and thus always in-sync.
   // (of course we'll need to call the appropriate render functions on an update)
   this.mask = streams?.mask;
-  this.streams = streams?.streams;
+  this.streams = streams; // TODO - supply as a arg? Must revisit
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -328,7 +328,7 @@ export function drawStreams(this: PhyloTreeType): void {
       .enter()
       .append("path")
       .attr("d", areaObj as any)  // TODO XXX
-      .attr("fill", (_d, i) => this.streams[streamIdx].categoryColors[i])
+      .attr("fill", (_d, i) => this.streams.streams[streamIdx].categoryColors[i])
   }
 
 

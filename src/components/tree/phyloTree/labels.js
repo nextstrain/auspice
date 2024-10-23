@@ -142,6 +142,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
       this.nodes.filter(
         (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key]
       )
+      .filter((d) => this.mask?.[d.n.arrayIdx]===1)
     )
     .enter()
     .append("text")

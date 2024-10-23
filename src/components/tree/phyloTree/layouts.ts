@@ -77,21 +77,46 @@ export const rectangularLayout = function rectangularLayout(this: PhyloTreeType)
 
 export function streamLayout(this: PhyloTreeType): void {
 
-  // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
-  this.phyloStreams = this.streams.map((stream) => {
-    // the range of the displayOrder for all nodes in this stream. NOTE: this won't work for nested
-    // streams, we'd have to deduct them from what we do here...
-    const displayOrders = stream.nodeIdxs.flat().reduce((acc, nodeIdx) => {
-      const value = this.nodes[nodeIdx].displayOrder;
-      if (acc[0] > value) acc[0] = value;
-      if (acc[1] < value) acc[1] = value;
-      return acc;
-    }, [Infinity, -Infinity])
+  const displayOrderUsed = {}
 
-    // the extent of that displayOrder scaled by maxNodesInInterval
-    const displayOrderScalar = (displayOrders[1] - displayOrders[0]) / stream.maxNodesInInterval;
+  // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
+  // NOTE: this.streams is postorder (i.e. the founder nodes are postorder w.r.t other founders in the main tree)
+  this.phyloStreams = this.streams.streams.map((stream) => {
+    const founderNode = this.nodes[stream.founderIdx];
+
+    // First get the display order range of the entire subtree of founderNode
+    // (This includes subclades which may themselves be streams)
+    function getDisplayOrder(node, top=true) {
+      if ((node.children || []).length) return getDisplayOrder(node.children.at(top?0:-1), top);
+      return node.shell.displayOrder;
+    }
+
+    const getDisplayOrderExSubtrees = (node, top=true) => {
+      const children = (node.children || []).filter((child) => !this.streams.founderIndiciesPostorder.includes(child.arrayIdx));
+      if (children.length) return getDisplayOrderExSubtrees(children.at(top?0:-1), top);
+      return node.shell.displayOrder;
+    }
+
+    const displayOrders = [getDisplayOrder(founderNode.n, false), getDisplayOrder(founderNode.n)]
+    const displayOrdersExSubtrees = [getDisplayOrderExSubtrees(founderNode.n, false), getDisplayOrderExSubtrees(founderNode.n)]
+
+    // Store the value for other streams to query (note - this is why we iterate through streams postorder)
+    // displayOrderRanges[stream.founderIdx] = displayOrders;
+    
+    // Get the total display order used up by _this_ stream, taking into account the display orders
+    // which may be used for descendant streams (note- this is why we iterate through streams postorder)
+    const displayOrderTotal = (displayOrders[1] - displayOrders[0]) -
+      this.streams.founderIndiciesToDescendantFounderIndicies[stream.founderIdx].reduce(
+        (acc, founderIdx) => acc + displayOrderUsed[founderIdx],
+        0
+      )
+
+    // Store the value for other streams to query 
+    displayOrderUsed[stream.founderIdx] = displayOrderTotal;
+
+    // scale this display order by maxNodesInInterval so the stream never exceeds the allocated range
+    const displayOrderScalar = displayOrderTotal / stream.maxNodesInInterval;
     const baseDisplayOrder = displayOrders[0];
-    console.log("displayOrders", displayOrders, "displayOrderScalar", displayOrderScalar)
 
     // convert countsByCategory to displayOrderByColorBy
     // P.S.     stream.countsByCategory[categoryIdx][pivotIdx] = count
@@ -105,7 +130,8 @@ export function streamLayout(this: PhyloTreeType): void {
     }, []);
 
     // center the stream graphs
-    const displayOrderMidpoint = displayOrders[0] + (displayOrders[1] - displayOrders[0])/2;
+    // const displayOrderMidpoint = displayOrders[0] + (displayOrders[1] - displayOrders[0])/2;
+    const displayOrderMidpoint = displayOrdersExSubtrees[0] + (displayOrdersExSubtrees[1] - displayOrdersExSubtrees[0])/2;
     const nPivots = displayOrderByCategory[0].length;    
     for (let pivotIdx=0; pivotIdx<nPivots; pivotIdx++) {
       const range = [displayOrderByCategory.at(0).at(pivotIdx).at(0), displayOrderByCategory.at(-1).at(pivotIdx).at(1)];
@@ -120,7 +146,6 @@ export function streamLayout(this: PhyloTreeType): void {
   });
   
   console.log("this.phyloStreams", this.phyloStreams)
-
 }
 
 /**
@@ -570,7 +595,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
 
   // PROTOTYPE
   for (const [streamIdx, stream] of this.phyloStreams.entries()) {
-    const reduxStream = this.streams[streamIdx]; // urgh need better names
+    const reduxStream = this.streams.streams[streamIdx]; // urgh need better names
     stream.x = reduxStream.pivots.map((pivot) => this.xScale(pivot))
     stream.y = stream.displayOrderByCategory.map((displayOrderByPivot) => {
       return displayOrderByPivot.map(([min,max]) => {
