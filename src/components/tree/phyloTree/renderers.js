@@ -35,7 +35,6 @@ export const render = function render(svg, layout, distance, focus, parameters, 
   // As long as we keep redux.tree.streams the same object, and also streams.mask the same array,
   // the following should be references and thus always in-sync.
   // (of course we'll need to call the appropriate render functions on an update)
-  this.mask = streams?.mask;
   this.streams = streams; // TODO - supply as a arg? Must revisit
 
   /* set nodes stroke / fill */
@@ -114,7 +113,7 @@ export const drawTips = function drawTips() {
   }
   this.groups.tips
     .selectAll(".tip")
-    .data(this.nodes.filter((d) => !d.n.hasChildren).filter((d) => this.mask?.[d.n.arrayIdx]===1))
+    .data(this.nodes.filter((d) => !d.n.hasChildren).filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("circle")
     .attr("class", "tip")
@@ -193,7 +192,7 @@ export const drawBranches = function drawBranches() {
       .selectAll('.branch')
       .data(this.nodes
         .filter((d) => d.n.hasChildren && d.displayOrder !== undefined)
-        .filter((d) => this.mask?.[d.n.arrayIdx]===1)
+        .filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1)
       )
       .enter()
       .append("path")
@@ -226,7 +225,7 @@ export const drawBranches = function drawBranches() {
   }
   this.groups.branchStem
     .selectAll('.branch')
-    .data(this.nodes.filter((d) => d.displayOrder !== undefined).filter((d) => this.mask?.[d.n.arrayIdx]===1))
+    .data(this.nodes.filter((d) => d.displayOrder !== undefined).filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("path")
     .attr("class", "branch S")

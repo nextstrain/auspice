@@ -1000,9 +1000,8 @@ export const createStateFromQueryOrJSONs = ({
   });
 
   /* STREAMS */
-  tree.streams = partitionIntoStreams(tree.nodes, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
+  tree.streams = partitionIntoStreams(controls.showStreamTrees, tree.nodes, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
   console.log("tree.streams", tree.streams)
-
 
   /* calculate entropy in view */
   if (entropy.loaded) {

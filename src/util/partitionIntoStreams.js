@@ -27,19 +27,20 @@ function _isFounderNode(node) {
  * - only works for categorical colorScale
  * - only works for temporal tree
  */
-export function partitionIntoStreams(nodes, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+export function partitionIntoStreams(enabled, nodes, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   
-  const {founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder} =
-    getFounderTree(nodes[0], _isFounderNode);
-
-
   const streams = {
     streams: [],
     mask: nodes.map((_) => 1), // 1 = show nodes as normal, 0 = mask out, nodes are part of a stream
-    // founderTree,
-    founderIndiciesToDescendantFounderIndicies,
-    founderIndiciesPostorder,
   }
+
+  if (!enabled) return streams;
+
+  const {founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder} =
+    getFounderTree(nodes[0], _isFounderNode);
+
+  streams.founderIndiciesToDescendantFounderIndicies = founderIndiciesToDescendantFounderIndicies;
+  streams.founderIndiciesPostorder = founderIndiciesPostorder;
 
   streams.streams = founderIndiciesPostorder.map((founderIdx) => {
     const stream = {};

@@ -63,6 +63,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version
       });
+    case types.TOGGLE_STREAM_TREE:
+      return {...state, streams: action.streams};
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA: {

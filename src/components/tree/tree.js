@@ -81,6 +81,21 @@ class Tree extends React.Component {
     let newState = {};
     let rightTreeUpdated = false;
 
+    /**
+     * Turning on/off streams requires a lot of d3 work (certain dom elements need to be added/removed, not just updated)
+     * so just re-render everything. Note that this doesn't preserve zooming :(
+     * TODO XXX - we want to utilise the canonical changePhyloTreeViaPropsComparison approach here, obviously
+     */
+    if (prevProps.showStreamTrees !== this.props.showStreamTrees) {
+      this.state.tree.clearSVG();
+      const newState = {};
+      newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
+      renderTree(this, true, newState.tree, this.props);
+      this.setState(newState); /* this will trigger an unnecessary CDU :( */
+      return;
+    }
+
+
     /* potentially change the (main / left hand) tree */
     const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
     if (potentialNewState) newState = potentialNewState;
