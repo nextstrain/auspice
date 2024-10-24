@@ -77,7 +77,8 @@ const Tree = (
       return {
         ...state,
         nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version
+        nodeColorsVersion: action.version,
+        streams: action.streams, // replace entire structure
       };
     case types.TOGGLE_STREAM_TREE:
       return {...state, streams: action.streams};
