@@ -343,6 +343,8 @@ export const change = function change({
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity")
       .add("visibility");
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    elemsToUpdate.add('.stream')
   }
 
   if (changeNodeOrder) {
