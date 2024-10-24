@@ -158,7 +158,6 @@ export function streamLayout(this: PhyloTreeType): void {
     phyloStream.displayOrderByCategory = displayOrderByCategory; // this is overwritten each update cycle - is this ok?
   });
   
-  console.log("this.phyloStreams", this.phyloStreams)
 }
 
 /**
