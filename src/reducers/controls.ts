@@ -149,6 +149,8 @@ export interface BasicControlsState {
   tipLabelKey: string | symbol
   zoomMax?: number
   zoomMin?: number
+
+  showStreamTrees: boolean
 }
 
 export interface MeasurementsControlState {

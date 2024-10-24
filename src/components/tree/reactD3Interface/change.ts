@@ -43,6 +43,7 @@ export const changePhyloTreeViaPropsComparison = (
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
     args.changeVisibility = true;
     args.visibility = newTreeRedux.visibility;
+    args.streams = newTreeRedux.streams;
   }
 
   /* tip radii */

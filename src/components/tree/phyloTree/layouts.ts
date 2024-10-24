@@ -115,6 +115,8 @@ export function streamLayout(this: PhyloTreeType): void {
     displayOrderUsed[stream.founderIdx] = displayOrderTotal;
 
     // scale this display order by maxNodesInInterval so the stream never exceeds the allocated range
+    // note that maxNodesInInterval doesn't take into account visibility settings, i.e. it's max nodes assuming everything's visible
+    // I think this works well for filtering, but unsure about zooming
     const displayOrderScalar = displayOrderTotal / stream.maxNodesInInterval;
     const baseDisplayOrder = displayOrders[0];
 
@@ -594,19 +596,27 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   }
 
   // PROTOTYPE
-  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
-    const reduxStream = this.streams.streams[streamIdx]; // urgh need better names
-    stream.x = reduxStream.pivots.map((pivot) => this.xScale(pivot))
-    stream.y = stream.displayOrderByCategory.map((displayOrderByPivot) => {
-      return displayOrderByPivot.map(([min,max]) => {
-        return [this.yScale(min), this.yScale(max)]
-      })
-    })
-  }
+  mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale)
 
 
   timerEnd("mapToScreen");
 };
+
+
+/**
+ * modifies phyloStreams object in place
+ */
+export function mapStreamsToScreen(streams, phyloStreams, xScale, yScale) {
+  for (const [streamIdx, stream] of phyloStreams.entries()) {
+    const reduxStream = streams.streams[streamIdx]; // urgh need better names
+    stream.x = reduxStream.pivots.map((pivot) => xScale(pivot))
+    stream.y = stream.displayOrderByCategory.map((displayOrderByPivot) => {
+      return displayOrderByPivot.map(([min,max]) => {
+        return [yScale(min), yScale(max)]
+      })
+    })
+  }
+}
 
 const JITTER_MIN_STEP_SIZE = 50; // pixels
 

@@ -217,6 +217,7 @@ export interface ChangeParams {
   // other data //
   scatterVariables?: ScatterVariables
   performanceFlags?: PerformanceFlags
+  streams?: any // TODO XXX
 }
 
 export interface PhyloTreeType {

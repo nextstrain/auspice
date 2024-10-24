@@ -98,10 +98,9 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
      */
     if (prevProps.showStreamTrees !== this.props.showStreamTrees) {
       this.state.tree.clearSVG();
-      const newState = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
       renderTree(this, true, newState.tree, this.props);
-      this.setState(newState); /* this will trigger an unnecessary CDU :( */
+      this.setState<never>(newState); /* this will trigger an unnecessary CDU :( */
       return;
     }
 
