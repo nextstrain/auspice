@@ -3,8 +3,15 @@ import 'd3-transition';
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
+import { PhyloTree } from "../phyloTree/phyloTree";
+import { TreeComponent, TreeComponentProps } from "../tree";
 
-export const renderTree = (that, main, phylotree, props) => {
+export const renderTree = (
+  that: TreeComponent,
+  main: boolean,
+  phylotree: PhyloTree,
+  props: TreeComponentProps,
+) => {
   const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
   const treeState = main ? props.tree : props.treeToo;
   if (!treeState.loaded) {

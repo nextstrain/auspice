@@ -1,10 +1,10 @@
 import React from "react";
-import { withTranslation } from "react-i18next";
+import { withTranslation, WithTranslation } from "react-i18next";
 import { FaSearchMinus } from "react-icons/fa";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
-import PhyloTree from "./phyloTree/phyloTree";
+import PhyloTreeConstructor, { Layout, PhyloTree, ReduxNode, Visibility } from "./phyloTree/phyloTree";
 import { getParentBeyondPolytomy } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";
@@ -22,8 +22,97 @@ export const spaceBetweenTrees = 100;
 export const lhsTreeId = "LEFT";
 const rhsTreeId = "RIGHT";
 
-class Tree extends React.Component {
-  constructor(props) {
+interface TreeNode {
+  arrayIdx: number
+  [key: string]: any
+}
+
+interface TreeState {
+  branchThickness: number[]
+  branchThicknessVersion: number
+  idxOfFilteredRoot?: number
+  idxOfInViewRootNode: number
+  loaded: boolean
+  name: string
+  nodeColors: string[]
+  nodeColorsVersion: number
+  nodes: ReduxNode[]
+  observedMutations: Record<string, number>
+  tipRadii: number[]
+  tipRadiiVersion: number
+  vaccines: any
+  visibility: Visibility[]
+  visibilityVersion: number
+}
+
+interface TreeTooState extends TreeState {
+  tangleTipLookup: any[][]
+}
+
+export interface TreeComponentProps extends WithTranslation, TreeComponentPropsFromState {
+  dispatch: (action: any) => void
+  height: number
+  width: number
+}
+
+// FIXME: source these types from state
+export interface TreeComponentPropsFromState {
+  animationPlayPauseButton: "Play" | "Pause"
+  canRenderBranchLabels: boolean
+  colorBy: any
+  colorByConfidence: boolean
+  colorings: any
+  colorScale: any
+  dateMaxNumeric: number
+  dateMinNumeric: number
+  distanceMeasure: any
+  explodeAttr: any
+  filters: any[]
+  focus: boolean
+  genomeMap: any
+  layout: Layout
+  narrativeMode: boolean
+  panelsToDisplay: string[]
+  quickdraw: boolean
+  scatterVariables: {
+    showBranches?: boolean
+  }
+  selectedBranchLabel: string
+  selectedNode: any
+  showAllBranchLabels: boolean
+  showOnlyPanels: boolean
+  showTangle: boolean
+  showTreeToo: boolean
+  temporalConfidence: {
+    display: boolean
+    on: boolean
+  }
+  tipLabelKey: any
+  tree: TreeState
+  treeToo: TreeTooState
+}
+
+
+// FIXME: is this Partial<TreeComponentProps>?
+interface TreeComponentState {
+  hoveredNode: TreeNode | null
+  tree: PhyloTree | null
+  treeToo: PhyloTree | null
+  geneSortFn?: any
+}
+
+// FIXME: convert to functional component first?
+export class TreeComponent extends React.Component<TreeComponentProps, TreeComponentState> {
+
+  // FIXME: check these
+  domRefs: {
+    mainTree?: SVGSVGElement | null;
+    secondTree?: SVGSVGElement | null;
+  };
+  tangleRef?: Tangle | null;
+  clearSelectedNode: (node: any) => void;
+
+  constructor(props: TreeComponentProps) {
     super(props);
     this.domRefs = {
       mainTree: undefined,
@@ -47,38 +136,38 @@ class Tree extends React.Component {
   }
 
   /* pressing the escape key should dismiss an info modal (if one exists) */
-  handlekeydownEvent = (event) => {
+  handlekeydownEvent = (event: KeyboardEvent) => {
     if (event.key==="Escape" && this.props.selectedNode) {
       this.clearSelectedNode(this.props.selectedNode);
     }
   }
 
-  setUpAndRenderTreeToo(props, newState) {
+  setUpAndRenderTreeToo(props: TreeComponentProps, newState: TreeComponentState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
-    newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
+    newState.treeToo = new PhyloTreeConstructor(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
     if (attemptUntangle) {
       untangleTreeToo(newState.tree, newState.treeToo);
     }
     renderTree(this, false, newState.treeToo, props);
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
-      const newState = {};
-      newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
+      const newState: Partial<TreeComponentState> = {};
+      newState.tree = new PhyloTreeConstructor(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
       renderTree(this, true, newState.tree, this.props);
       if (this.props.showTreeToo) {
-        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
+        this.setUpAndRenderTreeToo(this.props, newState as TreeComponentState); /* modifies newState in place */
       }
       newState.geneSortFn = sortByGeneOrder(this.props.genomeMap);
-      this.setState(newState); /* this will trigger an unnecessary CDU :( */
+      this.setState(newState as TreeComponentState); /* this will trigger an unnecessary CDU :( */
     }
   }
 
-  componentDidUpdate(prevProps) {
-    let newState = {};
+  override componentDidUpdate(prevProps: TreeComponentProps) {
+    let newState: Partial<TreeComponentState> = {};
     let rightTreeUpdated = false;
 
     /* potentially change the (main / left hand) tree */
@@ -94,7 +183,7 @@ class Tree extends React.Component {
           this.state.treeToo.clearSVG();
         }
         newState.tree = this.state.tree; // setUpAndRenderTreeToo needs newState.tree
-        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
+        this.setUpAndRenderTreeToo(this.props, newState as TreeComponentState); /* modifies newState in place */
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
@@ -107,10 +196,10 @@ class Tree extends React.Component {
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }
-    if (Object.keys(newState).length) this.setState(newState);
+    if (Object.keys(newState).length) this.setState(newState as TreeComponentState);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
@@ -156,7 +245,7 @@ class Tree extends React.Component {
     };
   };
 
-  renderTreeDiv({width, height, mainTree}) {
+  renderTreeDiv({ width, height, mainTree }: { width: number; height: number; mainTree: boolean }) {
     return (
       <svg
         id={mainTree ? "MainTree" : "SecondTree"}
@@ -190,7 +279,7 @@ class Tree extends React.Component {
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
   }
 
-  render() {
+  override render() {
     const { t } = this.props;
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
@@ -272,5 +361,4 @@ class Tree extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Tree);
-export default WithTranslation;
+export default withTranslation()(TreeComponent);

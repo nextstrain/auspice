@@ -7,7 +7,7 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
  * @param {string} distance       -- the property used as branch length, e.g. div or num_date
- * @param {string} focus          -- whether to focus on filtered nodes
+ * @param {boolean} focus         -- whether to focus on filtered nodes
  * @param {object} parameters     -- an object that contains options that will be added to this.params
  * @param {object} callbacks      -- an object with call back function defining mouse behavior
  * @param {array} branchThickness -- array of branch thicknesses (same ordering as tree nodes)
