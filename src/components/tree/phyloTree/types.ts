@@ -25,7 +25,8 @@ export type TreeElement =
   ".tip" |
   ".tipLabel" |
   ".vaccineCross" |
-  ".vaccineDottedLine"
+  ".vaccineDottedLine" |
+  ".stream"
 
 export interface Regression {
   intercept?: number
@@ -300,7 +301,7 @@ export interface PhyloTreeType {
   streams: {[key:string]: any}  // TODO XXX
   mask: (1|0)[]
   drawStreams: typeof renderers.drawStreams
-  phyloStreams: {[key:string]: any}  // TODO XXX
+  phyloStreams: any[] // TODO XXX
   streamLayout: typeof layouts.streamLayout
 
 }

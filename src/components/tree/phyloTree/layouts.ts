@@ -8,6 +8,7 @@ import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
+import { area, curveCatmullRom } from "d3-shape";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -79,9 +80,18 @@ export function streamLayout(this: PhyloTreeType): void {
 
   const displayOrderUsed = {}
 
+  if (!this.phyloStreams) {
+    /* it's important we only set this up once, as DOM elements will bind to data within, so we need to mutate it */
+    this.phyloStreams = this.streams.streams.map((_) => ({}))
+  }
+
   // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
   // NOTE: this.streams is postorder (i.e. the founder nodes are postorder w.r.t other founders in the main tree)
-  this.phyloStreams = this.streams.streams.map((stream) => {
+  // this.phyloStreams = this.streams.streams.map((stream) => {
+  this.phyloStreams.forEach((phyloStream, streamIdx) => {
+
+    const stream = this.streams.streams[streamIdx];
+
     const founderNode = this.nodes[stream.founderIdx];
 
     // First get the display order range of the entire subtree of founderNode
@@ -144,7 +154,8 @@ export function streamLayout(this: PhyloTreeType): void {
     }
 
     // NOTE: for num_date the value is the x value. Easy.
-    return {displayOrderByCategory}
+    // return {displayOrderByCategory}
+    phyloStream.displayOrderByCategory = displayOrderByCategory; // this is overwritten each update cycle - is this ok?
   });
   
   console.log("this.phyloStreams", this.phyloStreams)
@@ -604,15 +615,35 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
 
 
 /**
- * modifies phyloStreams object in place
+ * modifies phyloStreams object in place (as it's attached to a DOM node I think, right?)
  */
 export function mapStreamsToScreen(streams, phyloStreams, xScale, yScale) {
+  for (const phyloStream of phyloStreams) {
+    /* it's important we only set this up once, as DOM elements will bind to data within, so we need to mutate it */
+    if (!phyloStream.ripples) {
+      const _area = area()
+        .x((d) => d.x)
+        .y0((d) => d.y0)
+        .y1((d) => d.y1)
+        .curve(curveCatmullRom.alpha(0.5))
+    
+      phyloStream.ripples = phyloStream.displayOrderByCategory.map((displayOrderByPivot) => {
+        return displayOrderByPivot.map(() => {
+          return {area: _area}
+        })
+      })
+    }
+  }
+
   for (const [streamIdx, stream] of phyloStreams.entries()) {
     const reduxStream = streams.streams[streamIdx]; // urgh need better names
-    stream.x = reduxStream.pivots.map((pivot) => xScale(pivot))
-    stream.y = stream.displayOrderByCategory.map((displayOrderByPivot) => {
-      return displayOrderByPivot.map(([min,max]) => {
-        return [yScale(min), yScale(max)]
+    stream.displayOrderByCategory.forEach((displayOrderByPivot, categoryIdx) => {
+      stream.ripples[categoryIdx].update = true; // TODO XXX - needed as we filter on this property before updating the DOM.
+      // TODO XXX - we could work out whether we should actually update things here, i.e. whether anything's changed
+      displayOrderByPivot.forEach(([min,max], pivotIdx) => {
+        stream.ripples[categoryIdx][pivotIdx].x  = xScale(reduxStream.pivots[pivotIdx]);
+        stream.ripples[categoryIdx][pivotIdx].y0 = yScale(min);
+        stream.ripples[categoryIdx][pivotIdx].y1 = yScale(max);
       })
     })
   }

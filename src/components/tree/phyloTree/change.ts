@@ -189,6 +189,19 @@ export const modifySVG = function modifySVG(
     if (this.regression) this.drawRegression();
   }
 
+  if (elemsToUpdate.has('.stream')) {
+    /** Generating this here rather than `createUpdateCall` as we often don't want to update paths (SVG 'd' properties) for tips/branches
+     * when we do want to update them for streams. Currently it's all-or-nothing within `createUpdateCall` - all paths are updated or none are.
+     */
+    const updateCall = (selection) => {
+      selection.attr("d", (d) => {
+        return d[0].area(d);
+      })
+    }
+    genericSelectAndModify(this.svg, ".stream", updateCall, transitionTime);
+  }
+
+
   /* confidence intervals */
   if (extras.removeConfidences && this.confidencesInSVG) {
     this.removeConfidence(); /* do not use a transition time - it's too clunky (too many elements?) */
@@ -357,9 +370,8 @@ export const change = function change(
     mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
     console.log("Updated phylotree streams data & recomputed layout");
     /* add stream SVG elements */
-    this.drawStreams()
-
-
+    // this.drawStreams(); // this would tear it down and rebuild it (slow...)
+    elemsToUpdate.add('.stream')
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
