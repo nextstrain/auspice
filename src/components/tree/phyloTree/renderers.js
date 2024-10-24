@@ -251,30 +251,33 @@ export function drawStreams() {
 
   if (!("streams" in this.groups)) {
     this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
+    // add a group to encapsulate each stream
+    this.groups.streams.selectAll('g')
+      .data(this.phyloStreams)
+      .enter()
+      .append("g")
+      .attr("id", (d,i) => `stream${i}`);
   } else {
     this.groups.streams.selectAll("*").remove();
   }
 
   for (const [streamIdx, stream] of this.phyloStreams.entries()) {
-
-    const areaObj = area()
-      .x((d, pivotIdx) => {
-        // console.log("area d, i", d, pivotIdx);
-        return stream.x[pivotIdx]})
-      .y0((d) => d[0])
-      .y1((d) => d[1])
-      .curve(curveCatmullRom.alpha(0.5))
-
-
-    this.groups.streams.selectAll(`.stream${streamIdx}`)
-      .data(stream.y)
+    /**
+     * The element each selector gets ("d") is an element of stream.ripples, so
+     * d is an array with length=numPivots.
+     * Each of those elements, i.e. d[i], is an object with x, y0, y1 and a pointer to the
+     * area generator
+     */
+    this.groups.streams.select(`#stream${streamIdx}`)
+      .selectAll(`.stream`)
+      .data(stream.ripples)
       .enter()
       .append("path")
-      .attr("d", areaObj)
+      .attr("class", `stream`)
+      .attr("d", (d) => d[0].area(d))
       .attr("fill", (d, i) => this.streams.streams[streamIdx].categoryColors[i])
   }
-
-
+    // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
 }
 
 
