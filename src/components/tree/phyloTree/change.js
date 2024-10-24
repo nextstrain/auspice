@@ -322,7 +322,6 @@ export const change = function change({
     this.streams = streams;
     this.streamLayout(); // recompute displayOrder values across pivots
     mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
-    console.log("Updated phylotree streams data & recomputed layout");
     /* add stream SVG elements */
     // this.drawStreams(); // this would tear it down and rebuild it (slow...)
     elemsToUpdate.add('.stream')
@@ -375,6 +374,12 @@ export const change = function change({
       zoomIntoClade :
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d) => {d.inView = true;});
+
+    /* PROTOTYPE STREAM TREES */
+    this.streams = streams;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    elemsToUpdate.add('.stream')
   }
   if (svgHasChangedDimensions || changeNodeOrder) {
     this.nodes.forEach((d) => {d.update = true;});

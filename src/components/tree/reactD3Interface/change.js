@@ -30,10 +30,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   }
 
   /* visibility */
+  // TODO XXX - under what circumstances is this conditional true vs (`dateRangeChange || filterChange`)?
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
     args.changeVisibility = true;
     args.visibility = newTreeRedux.visibility;
-    args.streams = newTreeRedux.streams;
+    args.streams = newTreeRedux.streams; // or just reach in and do phylotree.streams = newTreeRedux.streams?
   }
 
   /* tip radii */
@@ -116,6 +117,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     if (newProps.layout === "unrooted") {
       args.updateLayout = true;
     }
+    args.streams = newTreeRedux.streams; // or just reach in and do phylotree.streams = newTreeRedux.streams?
   }
 
   if (oldProps.width !== newProps.width || oldProps.height !== newProps.height) {

@@ -156,7 +156,6 @@ export function streamLayout() {
     phyloStream.displayOrderByCategory = displayOrderByCategory; // this is overwritten each update cycle - is this ok?
   });
   
-  console.log("this.phyloStreams", this.phyloStreams)
 }
 
 /**
