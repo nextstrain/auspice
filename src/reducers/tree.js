@@ -51,6 +51,16 @@ const Tree = (state = getDefaultTreeState(), action) => {
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
       };
+      if (action.countsByCategoryPerStream) {
+        newStates.streams = {
+          ...state.streams,
+          streams: state.streams.streams.map((stream, idx) => ({
+            ...stream, 
+            countsByCategory: action.countsByCategoryPerStream[idx]
+          }))
+        };
+      }
+
       return Object.assign({}, state, newStates);
     }
     case types.UPDATE_TIP_RADII:

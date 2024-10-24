@@ -1,4 +1,5 @@
 import { getTraitFromNode } from "./treeMiscHelpers"
+import { NODE_VISIBLE } from "./globals";
 
 
 // Prototype - hardcode the CA of streams
@@ -27,7 +28,7 @@ function _isFounderNode(node) {
  * - only works for categorical colorScale
  * - only works for temporal tree
  */
-export function partitionIntoStreams(enabled, nodes, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+export function partitionIntoStreams(enabled, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   
   const streams = {
     streams: [],
@@ -65,15 +66,17 @@ export function partitionIntoStreams(enabled, nodes, colorScale, absoluteDateMin
         stack.push(child)
       }
     }
+    // categories may have zero counts associated with them (over all pivots) depending on visibility settings
     stream.categories = observedCategories(nodesInStream, colorScale);
     stream.categoryColors = stream.categories.map((value) => colorScale.scale(value))
     const pivotData = calcPivots(nodesInStream, absoluteDateMinNumeric, absoluteDateMaxNumeric);
     stream.pivotIntervals = pivotData.intervals;
     stream.pivots = pivotData.pivots;
+    // nodeIdxs are all nodes, visible and not visible
     stream.nodeIdxs = groupNodesIntoIntervals(nodesInStream, pivotData.intervals); // indexed by pivot idx
-    stream.numNodes = nodesInStream.length;
+    // stream.numNodes = nodesInStream.length;
     stream.maxNodesInInterval = Math.max(...stream.nodeIdxs.map((idxs) => idxs.length));
-    stream.countsByCategory = groupNodesByCategory(nodes, stream.nodeIdxs, colorScale.colorBy, stream.categories);
+    stream.countsByCategory = countsByCategory(nodes, stream.nodeIdxs, visibility, colorScale.colorBy, stream.categories);
     return stream;
   })
 
@@ -134,14 +137,15 @@ function groupNodesIntoIntervals(nodes, intervals) {
   return groups;
 }
 
-function groupNodesByCategory(nodes, nodeIdxsByPivot, colorBy, categories) {
+export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, categories) {
   return categories.map((category) => {
     return nodeIdxsByPivot.map((nodeIdxs) => {
-      return nodeIdxs.filter((nodeIdx) => getTraitFromNode(nodes[nodeIdx], colorBy)===category).length
+      return nodeIdxs.filter(
+        (nodeIdx) => getTraitFromNode(nodes[nodeIdx], colorBy)===category && visibility[nodeIdx]===NODE_VISIBLE
+      ).length
     })
   })
 }
-
 /**
  * 
  * @param {object} rootNode redux tree node

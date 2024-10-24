@@ -6,6 +6,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 import { makeTipLabelFunc } from "./labels";
+import { mapStreamsToScreen } from "./layouts";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -271,6 +272,7 @@ export const change = function change({
   branchThickness = undefined,
   /* other data */
   focus = undefined,
+  streams = undefined, // PROTOTYPE
   scatterVariables = undefined
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -303,6 +305,15 @@ export const change = function change({
     elemsToUpdate.add(".tip").add(".tipLabel").add(".branchLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
     nodePropsToModify.visibility = visibility;
+
+    this.streams = streams;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    console.log("Updated phylotree streams data & recomputed layout");
+    /* add stream SVG elements */
+    this.drawStreams()
+
+
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
