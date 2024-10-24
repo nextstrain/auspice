@@ -4,6 +4,7 @@ import { calcColorScale } from "../util/colorScale";
 import { timerStart, timerEnd } from "../util/perf";
 import { changeEntropyCdsSelection } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
+import { partitionIntoStreams } from "../util/partitionIntoStreams";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string */
@@ -27,13 +28,18 @@ export const changeColorBy = (providedColorBy = undefined) => {
 
     dispatch(changeEntropyCdsSelection(colorBy));
 
+    // Recompute streams 
+    const streams = partitionIntoStreams(controls.showStreamTrees, tree.nodes, tree.visibility, colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
+
+
     dispatch({
       type: types.NEW_COLORS,
       colorBy,
       colorScale,
       nodeColors,
       nodeColorsToo,
-      version: colorScale.version
+      version: colorScale.version,
+      streams
     });
 
     if (frequencies.loaded) {

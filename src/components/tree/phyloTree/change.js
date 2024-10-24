@@ -356,6 +356,14 @@ export const change = function change({
   // recalculate gradients here?
   if (changeColorBy) {
     this.updateColorBy();
+
+    /* PROTOTYPE STREAM TREES */
+    this.streams = streams;
+    this.phyloStreams = undefined;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    this.drawStreams(); // remove & redraw
+
   }
   // recalculate existing regression if needed
   if (changeVisibility && this.regression) {

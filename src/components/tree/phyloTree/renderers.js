@@ -249,6 +249,7 @@ export const drawBranches = function drawBranches() {
 
 export function drawStreams() {
 
+  /* initial set up - should only ever run once */
   if (!("streams" in this.groups)) {
     this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
     // add a group to encapsulate each stream
@@ -257,10 +258,11 @@ export function drawStreams() {
       .enter()
       .append("g")
       .attr("id", (d,i) => `stream${i}`);
-  } else {
-    this.groups.streams.selectAll("*").remove();
   }
 
+  /* if we call drawStreams() we're not trying to update, we want to remove all stream paths & redraw everything */
+  this.groups.streams.selectAll(".stream").remove();
+  
   for (const [streamIdx, stream] of this.phyloStreams.entries()) {
     /**
      * The element each selector gets ("d") is an element of stream.ripples, so
@@ -277,7 +279,7 @@ export function drawStreams() {
       .attr("d", (d) => d[0].area(d))
       .attr("fill", (d, i) => this.streams.streams[streamIdx].categoryColors[i])
   }
-    // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
+  // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
 }
 
 

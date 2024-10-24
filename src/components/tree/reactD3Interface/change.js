@@ -27,6 +27,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.branchStroke = calculateStrokeColors(newTreeRedux, true, newProps.colorByConfidence, newProps.colorBy);
     args.tipStroke = calculateStrokeColors(newTreeRedux, false, newProps.colorByConfidence, newProps.colorBy);
     args.fill = args.tipStroke.map(getBrighterColor);
+    args.streams = newTreeRedux.streams;
   }
 
   /* visibility */
