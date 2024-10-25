@@ -447,7 +447,7 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
   }
   /* mapToScreen */
   if (
-    svgPropsToUpdate.has(["stroke-width"]) ||
+    svgPropsToUpdate.has("stroke-width") ||
     newDistance ||
     newLayout ||
     changeNodeOrder ||
@@ -465,7 +465,7 @@ export const change = function change(this: PhyloTree, params: ChangeParams) {
   }
 
   const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
-  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
+  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
   extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
