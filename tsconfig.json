@@ -13,6 +13,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
   "compilerOptions": {
     /* Language and Environment */
     "jsx": "react",                                      /* Specify what JSX code is generated. */
+    "target": "es2015",
 
     /* Modules */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
