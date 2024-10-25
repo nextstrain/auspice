@@ -63,7 +63,6 @@ export const applyInViewNodesToTree = (idx, tree) => {
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {array|undefined} root Change the in-view part of the tree. [root idx tree1, root idx tree2].
  *                                [0, 0]: reset. [undefined, undefined]: do nothing
- * @param  {object | undefined} tipSelected
  * @param  {string | undefined} cladeSelected
  * @return {function} a function to be handled by redux (thunk)
  */
