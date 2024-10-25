@@ -474,8 +474,8 @@ export function createVisibleLegendValues({
           .map((n) => genotype ? n.currentGt : getTraitFromNode(n, colorBy));
         legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
       }
-      legendValuesObserved = new Set(legendValuesObserved);
-      const visibleLegendValues = legendValues.filter((v) => legendValuesObserved.has(v));
+      const legendValuesObservedSet = new Set(legendValuesObserved);
+      const visibleLegendValues = legendValues.filter((v) => legendValuesObservedSet.has(v));
       return visibleLegendValues;
     }
   }
