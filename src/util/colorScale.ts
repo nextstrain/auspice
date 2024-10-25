@@ -117,7 +117,8 @@ export const calcColorScale = (
     };
   } catch (err) {
     /* Catch all errors to avoid app crashes */
-    console.error("Error creating color scales. Details:\n", err.message);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Error creating color scales. Details:\n", errorMessage);
     return {
       scale: () => unknownColor,
       continuous: false,
