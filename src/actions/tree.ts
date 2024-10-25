@@ -398,7 +398,7 @@ const _traverseAndCreateSubtrees = (
         subtreeRootNode.parent = root;
       });
       node.unexplodedChildren = originalChildren;
-      node.children = node.children.filter((c, idx) => {
+      node.children = node.children.filter((_c, idx) => {
         return !childrenToPrune.includes(idx);
       });
       /* it may be the case that the node now has no children (they're all subtrees!) */

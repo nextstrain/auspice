@@ -396,7 +396,7 @@ const handleBranchHoverColor = (
   d: PhyloNode,
 
   /** colour of the parent (start of the branch) */
-  c1: string,
+  _c1: string,
 
   /** colour of the node (end of the branch) */
   c2: string,
