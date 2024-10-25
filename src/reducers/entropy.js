@@ -13,7 +13,7 @@ const Entropy = (state = defaultEntropyState(), action) => {
   switch (action.type) {
     case types.DATA_INVALID:
       return {loaded: false, showCounts: false};
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState? /* fallthrough */
     case types.CLEAN_START:
       return action.entropy;
     case types.ENTROPY_DATA:

@@ -38,7 +38,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* first switch: query change */
   switch (action.type) {
     case types.CLEAN_START: // fallthrough
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState?
       /* don't use queries when debugging a narrative as those URLs aren't intended to be restorable (yet) */
       if (state.general.displayComponent==="debugNarrative") break;
       query = action.query;

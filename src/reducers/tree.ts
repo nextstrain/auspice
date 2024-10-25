@@ -1,35 +1,8 @@
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { addNodeAttrs } from "../util/treeMiscHelpers";
-import * as types from "../actions/types";
 import { TreeState } from "../components/tree/tree";
-import { Visibility } from "../components/tree/phyloTree/types";
 
-// FIXME: consider using createSlice which has better type inference
-interface Action {
-  type: typeof types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE |
-        typeof types.CLEAN_START |
-        typeof types.DATA_INVALID |
-        typeof types.CHANGE_EXPLODE_ATTR |
-        typeof types.CHANGE_DATES_VISIBILITY_THICKNESS |
-        typeof types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS |
-        typeof types.UPDATE_TIP_RADII |
-        typeof types.NEW_COLORS |
-        typeof types.TREE_TOO_DATA |
-        typeof types.ADD_EXTRA_METADATA
-  branchThickness?: number[]
-  branchThicknessVersion?: number
-  cladeName?: string
-  data?: any
-  idxOfFilteredRoot?: number
-  idxOfInViewRootNode?: number
-  newColorings?: Record<string, any>
-  newNodeAttrs?: any
-  nodeColors?: string[]
-  tree?: TreeState
-  version?: number
-  visibility?: Visibility[]
-  visibilityVersion?: number
-}
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
@@ -57,67 +30,63 @@ export const getDefaultTreeState = (): TreeState => {
   };
 };
 
-const Tree = (state: TreeState = getDefaultTreeState(), action: Action): TreeState => {
-  switch (action.type) {
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
-    case types.CLEAN_START:
-      return action.tree;
-    case types.DATA_INVALID:
-      return {
-        ...state,
-        loaded: false,
-      };
-    case types.CHANGE_EXPLODE_ATTR: /* fallthrough */
-    case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
-    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      const newStates: Partial<TreeState> = {
-        visibility: action.visibility,
-        visibilityVersion: action.visibilityVersion,
-        branchThickness: action.branchThickness,
-        branchThicknessVersion: action.branchThicknessVersion,
-        idxOfInViewRootNode: action.idxOfInViewRootNode,
-        idxOfFilteredRoot: action.idxOfFilteredRoot,
-        cladeName: action.cladeName,
-        selectedClade: action.cladeName,
-      };
-      return {
-        ...state,
-        ...newStates,
-      };
-    }
-    case types.UPDATE_TIP_RADII:
-      return {
-        ...state,
-        tipRadii: action.data,
-        tipRadiiVersion: action.version,
-      };
-    case types.NEW_COLORS:
-      return {
-        ...state,
-        nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version,
-      };
-    case types.TREE_TOO_DATA:
-      return action.tree;
-    case types.ADD_EXTRA_METADATA: {
-      // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      addNodeAttrs(state.nodes, action.newNodeAttrs);
-      // add the new nodeAttrKeys to ensure tip labels get updated
+const treeSlice = createSlice({
+  name: 'tree',
+  initialState: getDefaultTreeState(),
+  reducers: {
+    urlQueryChangeWithComputedState(state, action: PayloadAction<TreeState>) {
+      return action.payload;
+    },
+    cleanStart(state, action: PayloadAction<TreeState>) {
+      return action.payload;
+    },
+    dataInvalid(state) {
+      state.loaded = false;
+    },
+    changeExplodeAttr(state, action: PayloadAction<Partial<TreeState>>) {
+      Object.assign(state, action.payload);
+    },
+    changeDatesVisibilityThickness(state, action: PayloadAction<Partial<TreeState>>) {
+      Object.assign(state, action.payload);
+    },
+    updateVisibilityAndBranchThickness(state, action: PayloadAction<Partial<TreeState>>) {
+      Object.assign(state, action.payload);
+    },
+    updateTipRadii(state, action: PayloadAction<{ data: any, version: number }>) {
+      state.tipRadii = action.payload.data;
+      state.tipRadiiVersion = action.payload.version;
+    },
+    newColors(state, action: PayloadAction<{ nodeColors: string[], version: number }>) {
+      state.nodeColors = action.payload.nodeColors;
+      state.nodeColorsVersion = action.payload.version;
+    },
+    treeTooData(state, action: PayloadAction<TreeState>) {
+      return action.payload;
+    },
+    addExtraMetadata(state, action: PayloadAction<{ newNodeAttrs: any, newColorings: Record<string, any> }>) {
+      addNodeAttrs(state.nodes, action.payload.newNodeAttrs);
       const nodeAttrKeys = new Set(state.nodeAttrKeys);
-      Object.keys(action.newColorings).forEach((attr) => nodeAttrKeys.add(attr));
-      // add the new colorings to totalStateCounts so that they can function as filters
-      return {
-        ...state,
-        totalStateCounts: {
-          ...state.totalStateCounts,
-          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
-        },
-        nodeAttrKeys,
+      Object.keys(action.payload.newColorings).forEach((attr) => nodeAttrKeys.add(attr));
+      state.totalStateCounts = {
+        ...state.totalStateCounts,
+        ...countTraitsAcrossTree(state.nodes, Object.keys(action.payload.newColorings), false, true)
       };
+      state.nodeAttrKeys = nodeAttrKeys;
     }
-    default:
-      return state;
   }
-};
+});
 
-export default Tree;
+export const {
+  urlQueryChangeWithComputedState,
+  cleanStart,
+  dataInvalid,
+  changeExplodeAttr,
+  changeDatesVisibilityThickness,
+  updateVisibilityAndBranchThickness,
+  updateTipRadii,
+  newColors,
+  treeTooData,
+  addExtraMetadata
+} = treeSlice.actions;
+
+export default treeSlice.reducer;

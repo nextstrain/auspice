@@ -15,7 +15,7 @@ export const getDefaultMeasurementsState = () => ({
 
 const measurements = (state = getDefaultMeasurementsState(), action) => {
   switch (action.type) {
-    case URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+    case URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState?
       return { ...action.measurements };
     case LOAD_MEASUREMENTS:
       return {

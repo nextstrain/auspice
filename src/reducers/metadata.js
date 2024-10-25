@@ -19,7 +19,7 @@ const Metadata = (state = {
       return Object.assign({}, state, {
         loaded: false
       });
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState?
     case types.TREE_TOO_DATA:
     case types.CLEAN_START:
       return action.metadata;

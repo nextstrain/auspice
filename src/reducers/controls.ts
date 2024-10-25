@@ -212,7 +212,7 @@ export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => 
 
 const Controls = (state: ControlsState = getDefaultControlsState(), action): ControlsState => {
   switch (action.type) {
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState? /* fallthrough */
     case types.CLEAN_START:
       return action.controls;
     case types.SET_AVAILABLE:

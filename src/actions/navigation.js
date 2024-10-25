@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { urlQueryChangeWithComputedState } from "../reducers/tree";
 import { getDatasetNamesFromUrl } from "./loadData";
 import { errorNotification } from "./notifications";
 
@@ -41,8 +42,7 @@ const updateNarrativeDataset = async (dispatch, datasets, narrativeBlocks, path,
     const secondDataset = datasets[secondTreeName];
     const mainJson = await mainDataset.main;
     const secondJson = secondDataset ? (await secondDataset.main) : false;
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    dispatch(urlQueryChangeWithComputedState({
       ...createStateFromQueryOrJSONs({
         json: mainJson,
         secondTreeDataset: secondJson,
@@ -54,7 +54,7 @@ const updateNarrativeDataset = async (dispatch, datasets, narrativeBlocks, path,
       }),
       pushState: true,
       query
-    });
+    }));
     mainDataset.loadSidecars(dispatch);
   } catch (err) {
     dispatch(errorNotification({
@@ -104,12 +104,11 @@ export const changePage = ({
         dispatch }
     );
     // same dispatch as case 2 but the state comes from the query not from a JSON
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    dispatch(urlQueryChangeWithComputedState({
       ...newState,
       pushState: push,
       query
-    });
+    }));
   } else if (changeDatasetOnly) {
     /* Case 2 (see docstring): the path (dataset) has changed but the we want to remain on the current page and update state with the new dataset */
     updateNarrativeDataset(dispatch, oldState.jsonCache.jsons, oldState.narrative.blocks, path, query);

@@ -55,7 +55,7 @@ const narrative = (
         };
       }
       return state;
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState?
       if (Object.prototype.hasOwnProperty.call(action.query, "n")) {
         return {
           ...state,

@@ -12,7 +12,7 @@ export const getDefaultFrequenciesState = () => ({
 /* TODO: initial data should simply be {loaded: false} */
 const frequencies = (state = getDefaultFrequenciesState(), action) => {
   switch (action.type) {
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:  // FIXME: use urlQueryChangeWithComputedState? // fallthrough
     case types.LOAD_FREQUENCIES:
       return action.frequencies ? action.frequencies : state;
     case types.FREQUENCY_MATRIX: {
