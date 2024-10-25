@@ -61,7 +61,7 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
   if (this.props.narrativeMode) return;
 
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
-  if (window.event.shiftKey) {
+  if (window.event instanceof KeyboardEvent && window.event.shiftKey) {
     // no need to dispatch a filter action
     this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id})
     return;
