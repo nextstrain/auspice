@@ -477,11 +477,11 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
     if (this.scatterVariables.showBranches) {
       this.nodes.forEach((d) => {
         d.branch = d.xBase===hiddenXPosition || d.xTip===hiddenXPosition || d.yBase===hiddenYPosition || d.yTip===hiddenYPosition ?
-          [""] :
+          ["", ""] :
           [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
       });
     } else {
-      this.nodes.forEach((d) => {d.branch=[];});
+      this.nodes.forEach((d) => {d.branch=["", ""];});
     }
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => { // d is a <PhyloNode>
@@ -491,8 +491,8 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
       // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
       d.branch =[
-        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`],
-        [` M ${d.xTip},${stemRange[0]} L ${d.xTip},${stemRange[1]}`]
+        ` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`,
+        ` M ${d.xTip},${stemRange[0]} L ${d.xTip},${stemRange[1]}`
       ];
       if (this.params.confidence) {
         d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
@@ -508,11 +508,11 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
         " L "+d.xTip.toString()+" "+d.yTip.toString(), ""
       ];
       if (d.n.hasChildren) {
-        d.branch[1] =[" M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
+        d.branch[1] = " M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
         " A "+(this.xScale(d.depth)-this.xScale(offset)).toString()+" "+
         (this.yScale(d.depth)-this.yScale(offset)).toString()+
         " 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
-        " "+this.xScale(d.xCBarEnd).toString()+","+this.yScale(d.yCBarEnd).toString()];
+        " "+this.xScale(d.xCBarEnd).toString()+","+this.yScale(d.yCBarEnd).toString();
       }
     });
   }
