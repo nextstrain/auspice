@@ -192,13 +192,13 @@ function createScaleForGenotype(
   const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
   // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
   if (legendValues.indexOf("-") !== -1) {
-    range.push(rgb(217, 217, 217));
+    range.push(rgb(217, 217, 217).formatHex());
   }
   if (legendValues.indexOf("N") !== -1 && !aaGenotype) {
-    range.push(rgb(153, 153, 153));
+    range.push(rgb(153, 153, 153).formatHex());
   }
   if (legendValues.indexOf("X") !== -1) {
-    range.push(rgb(102, 102, 102));
+    range.push(rgb(102, 102, 102).formatHex());
   }
   return {
     colorScale: scaleOrdinal<string>().domain(domain).range(range),
