@@ -20,6 +20,7 @@ export interface PhyloTree {
     branchStem?: Selection<SVGGElement, unknown, HTMLElement, any>
     branchTee?: Selection<SVGGElement, unknown, HTMLElement, any>
     clipPath?: Selection<SVGGElement, unknown, HTMLElement, any>
+    confidenceIntervals?: Selection<SVGGElement, unknown, HTMLElement, any>
     regression?: Selection<SVGGElement, unknown, HTMLElement, any>
     tips?: Selection<SVGGElement, unknown, HTMLElement, any>
     vaccines?: Selection<SVGGElement, unknown, HTMLElement, any>

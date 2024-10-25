@@ -21,8 +21,17 @@ export type TreeElement =
 
 export type Visibility = typeof NODE_NOT_VISIBLE | typeof NODE_VISIBLE_TO_MAP_ONLY | typeof NODE_VISIBLE
 
+export interface TemporalConfidence {
+  exists: boolean
+  display: boolean
+  on: boolean
+}
+
 export interface ReduxNode {
   arrayIdx?: number
+  branch_attrs: {
+    labels?: Record<string, any>
+  }
   children?: ReduxNode[]
   currentGt?: number
   hasChildren: boolean
@@ -34,6 +43,9 @@ export interface ReduxNode {
   parent: ReduxNode
   shell: PhyloNode
 }
+
+/** [root idx tree1, root idx tree2] */
+export type Root = [number | undefined, number | undefined]
 
 /** Properties can be any property on PhyloNode but as an array for multiple nodes */
 export interface PropsForPhyloNodes {

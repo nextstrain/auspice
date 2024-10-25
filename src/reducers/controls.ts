@@ -12,7 +12,8 @@ import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
-import { Layout, ScatterVariables } from "../components/tree/phyloTree/types";
+import { Layout, ScatterVariables, TemporalConfidence } from "../components/tree/phyloTree/types";
+import { TreeNode } from "../components/tree/tree";
 
 
 interface Defaults {
@@ -34,11 +35,7 @@ export interface BasicControlsState {
 
   available?: boolean
   canTogglePanelLayout: boolean
-  temporalConfidence: {
-    exists: boolean
-    display: boolean
-    on: boolean
-  }
+  temporalConfidence: TemporalConfidence
   layout: Layout
   scatterVariables: ScatterVariables
   distanceMeasure: string
@@ -59,7 +56,7 @@ export interface BasicControlsState {
   explodeAttr?: any
   selectedBranchLabel: string
   showAllBranchLabels: boolean
-  selectedNode: any | null
+  selectedNode: TreeNode | null
   canRenderBranchLabels: boolean
   analysisSlider: boolean
   geoResolution: string
@@ -348,7 +345,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
       const existingFilterState = existingFilterInfo === undefined ? null :
         existingFilterInfo.active ? 'active' : 'inactive';
-      const selectedNode = {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch, treeId: action.treeId};
+      const selectedNode: TreeNode = {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch, treeId: action.treeId};
       return {...state, selectedNode};
     }
     case types.DESELECT_NODE: {

@@ -11,7 +11,7 @@ import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 import { TreeState } from "../components/tree/tree";
-import { PhyloNode } from "../components/tree/phyloTree/types";
+import { PhyloNode, Root } from "../components/tree/phyloTree/types";
 
 
 /**
@@ -75,7 +75,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
   root = [undefined, undefined],
   cladeSelected = undefined
 }: {
-  root?: [number | undefined, number | undefined],
+  root?: Root,
   cladeSelected?: string,
 } = {}
 ) => {

@@ -5,7 +5,7 @@ import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTreeConstructor, { PhyloTree } from "./phyloTree/phyloTree";
-import { Layout, PhyloNode, ReduxNode, ScatterVariables, Visibility } from "./phyloTree/types";
+import { Layout, PhyloNode, ReduxNode, Root, ScatterVariables, TemporalConfidence, Visibility } from "./phyloTree/types";
 import { getParentBeyondPolytomy } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";
@@ -25,6 +25,7 @@ const rhsTreeId = "RIGHT";
 
 
 export interface TreeState {
+  availableBranchLabels: string[]
   branchThickness: number[]
   branchThicknessVersion: number
   idxOfFilteredRoot?: number
@@ -73,24 +74,30 @@ export interface TreeComponentPropsFromState {
   quickdraw: boolean
   scatterVariables: ScatterVariables
   selectedBranchLabel: string
-  selectedNode: any
+  selectedNode: TreeNode
   showAllBranchLabels: boolean
   showOnlyPanels: boolean
   showTangle: boolean
   showTreeToo: boolean
-  temporalConfidence: {
-    display: boolean
-    on: boolean
-  }
+  temporalConfidence: TemporalConfidence
   tipLabelKey: string
   tree: TreeState
   treeToo: TreeTooState
 }
 
+// FIXME: is this ReduxNode?
+export interface TreeNode {
+  existingFilterState?: "active" | "inactive" | null
+  idx?: number
+  isBranch: boolean
+  name?: string
+  node?: PhyloNode
+  treeId?: string
+}
 
 // FIXME: is this Partial<TreeComponentProps>?
 export interface TreeComponentState {
-  hoveredNode: PhyloNode | null
+  hoveredNode: TreeNode | null
   tree?: PhyloTree
   treeToo?: PhyloTree
   geneSortFn?: any
@@ -106,7 +113,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     secondTree?: string;
   };
   tangleRef?: Tangle;
-  clearSelectedNode: (node: any) => void;
+  clearSelectedNode: (node: PhyloNode) => void;
 
   constructor(props: TreeComponentProps) {
     super(props);
@@ -280,7 +287,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   };
 
   zoomBack = () => {
-    const root: [number | undefined, number | undefined] = [undefined, undefined];
+    const root: Root = [undefined, undefined];
     // Zoom out of main tree if index of root node is not 0
     if (this.props.tree.idxOfInViewRootNode !== 0) {
       const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
