@@ -259,7 +259,7 @@ export const updateTipRadii = (
       d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
       if (tt) {
         const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
-        d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
+        d.dataToo = calcTipRadii({tipSelectedIdx: idx, colorScale, tree: treeToo});
       }
     } else {
       d.data = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree});
