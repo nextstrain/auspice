@@ -201,9 +201,9 @@ export const isValueValid = (value) => {
   // booleans, valid strings & numbers are valid.
   return true;
 };
-export const strainSymbol = Symbol('strain');
-export const genotypeSymbol = Symbol('genotype');
-export const measurementIdSymbol = Symbol('measurementId');
+export const strainSymbol = 'strain';
+export const genotypeSymbol = 'genotype';
+export const measurementIdSymbol = 'measurementId';
 
 /**
  * Address to fetch tiles from (including access key).
