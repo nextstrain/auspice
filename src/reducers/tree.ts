@@ -1,11 +1,40 @@
 import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { addNodeAttrs } from "../util/treeMiscHelpers";
 import * as types from "../actions/types";
+import { TreeState } from "../components/tree/tree";
+import { Visibility } from "../components/tree/phyloTree/types";
+
+// FIXME: consider using createSlice which has better type inference
+interface Action {
+  type: typeof types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE |
+        typeof types.CLEAN_START |
+        typeof types.DATA_INVALID |
+        typeof types.CHANGE_EXPLODE_ATTR |
+        typeof types.CHANGE_DATES_VISIBILITY_THICKNESS |
+        typeof types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS |
+        typeof types.UPDATE_TIP_RADII |
+        typeof types.NEW_COLORS |
+        typeof types.TREE_TOO_DATA |
+        typeof types.ADD_EXTRA_METADATA
+  branchThickness?: number[]
+  branchThicknessVersion?: number
+  cladeName?: string
+  data?: any
+  idxOfFilteredRoot?: number
+  idxOfInViewRootNode?: number
+  newColorings?: Record<string, any>
+  newNodeAttrs?: any
+  nodeColors?: string[]
+  tree?: TreeState
+  version?: number
+  visibility?: Visibility[]
+  visibilityVersion?: number
+}
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
 
-export const getDefaultTreeState = () => {
+export const getDefaultTreeState = (): TreeState => {
   return {
     loaded: false,
     nodes: null,
@@ -28,20 +57,20 @@ export const getDefaultTreeState = () => {
   };
 };
 
-
-const Tree = (state = getDefaultTreeState(), action) => {
+const Tree = (state: TreeState = getDefaultTreeState(), action: Action): TreeState => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.tree;
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return {
+        ...state,
+        loaded: false,
+      };
     case types.CHANGE_EXPLODE_ATTR: /* fallthrough */
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      const newStates = {
+      const newStates: Partial<TreeState> = {
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,
         branchThickness: action.branchThickness,
@@ -51,18 +80,23 @@ const Tree = (state = getDefaultTreeState(), action) => {
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
       };
-      return Object.assign({}, state, newStates);
+      return {
+        ...state,
+        ...newStates,
+      };
     }
     case types.UPDATE_TIP_RADII:
-      return Object.assign({}, state, {
+      return {
+        ...state,
         tipRadii: action.data,
-        tipRadiiVersion: action.version
-      });
+        tipRadiiVersion: action.version,
+      };
     case types.NEW_COLORS:
-      return Object.assign({}, state, {
+      return {
+        ...state,
         nodeColors: action.nodeColors,
-        nodeColorsVersion: action.version
-      });
+        nodeColorsVersion: action.version,
+      };
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA: {
@@ -78,7 +112,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
           ...state.totalStateCounts,
           ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
         },
-        nodeAttrKeys
+        nodeAttrKeys,
       };
     }
     default:

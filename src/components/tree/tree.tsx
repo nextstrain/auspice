@@ -26,20 +26,25 @@ const rhsTreeId = "RIGHT";
 
 export interface TreeState {
   availableBranchLabels: string[]
-  branchThickness: number[]
+  branchThickness: number[] | null
   branchThicknessVersion: number
+  cladeName?: string
   idxOfFilteredRoot?: number
   idxOfInViewRootNode: number
   loaded: boolean
-  name: string
-  nodeColors: string[]
+  name?: string
+  nodeAttrKeys?: Set<string>
+  nodeColors: string[] | null
   nodeColorsVersion: number
-  nodes: ReduxNode[]
+  nodes: ReduxNode[] | null
   observedMutations: Record<string, number>
-  tipRadii: number[]
+  selectedClade?: string
+  tipRadii: number[] | null
   tipRadiiVersion: number
+  totalStateCounts: Record<string, any>
   vaccines: any
-  visibility: Visibility[]
+  version: number
+  visibility: Visibility[] | null
   visibilityVersion: number
 }
 
