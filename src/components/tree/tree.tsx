@@ -94,7 +94,7 @@ export interface TreeComponentState {
   tree?: PhyloTree
   treeToo?: PhyloTree
   geneSortFn?: any
-  selectedNode?: {}
+  selectedNode?: Record<string, never>
 }
 
 // FIXME: convert to functional component first?
