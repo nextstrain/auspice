@@ -418,7 +418,7 @@ export const change = function change(
   }
   /* mapToScreen */
   if (
-    svgPropsToUpdate.has(["stroke-width"]) ||
+    svgPropsToUpdate.has("stroke-width") ||
     newDistance ||
     newLayout ||
     changeNodeOrder ||
