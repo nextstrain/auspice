@@ -436,7 +436,7 @@ export const change = function change(
   }
 
   const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
-  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
+  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
   extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
