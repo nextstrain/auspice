@@ -338,7 +338,7 @@ function createTemporalScale(
     vals = vals.sort();
     domain = [rootDate];
     const n = 10;
-    const spaceBetween = parseInt(vals.length / (n - 1), 10);
+    const spaceBetween = Math.trunc(vals.length / (n - 1));
     for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
     domain.push(vals[vals.length-1]);
     domain = [...new Set(domain)]; /* filter to unique values only */
