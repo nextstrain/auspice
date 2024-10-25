@@ -223,7 +223,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     }
-    case types.LOAD_MEASUREMENTS: // fallthrough
     case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
     case types.APPLY_MEASUREMENTS_FILTER:
       query = removeInvalidMeasurementsFilterQuery(query, action.queryParams)

@@ -858,6 +858,7 @@ export const getNarrativePageFromQuery = (query, narrative) => {
 
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  measurementsData = false, /* measurements data, only used when main json is provided */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false, /* if in a narrative this argument is set */
@@ -876,7 +877,7 @@ export const createStateFromQueryOrJSONs = ({
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
     /* ensure default measurements state */
-    measurements = getDefaultMeasurementsState();
+    measurements = measurementsData || getDefaultMeasurementsState();
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     castIncorrectTypes(metadata, tree);
@@ -891,6 +892,9 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
+    if (measurements.collectionToDisplay) {
+      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
+    }
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
     can affect props comparisons. Due to the size of some of the state, we only do this selectively */

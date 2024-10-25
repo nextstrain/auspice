@@ -4,7 +4,7 @@ import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
-import { parseMeasurementsJSON, loadMeasurements } from "./measurements";
+import { parseMeasurementsJSON } from "./measurements";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
@@ -70,6 +70,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       const secondDataset = secondName ? new Dataset(secondName) : undefined;
       try {
         mainDataset.fetchMain();
+        mainDataset.fetchAndParseMeasurements(dispatch);
         if (secondDataset) secondDataset.fetchMain();
         await dispatchCleanStart(dispatch, mainDataset, secondDataset, query);
       } catch (err) {
@@ -121,13 +122,16 @@ function narrativeFetchingErrorNotification(err) {
  */
 async function dispatchCleanStart(dispatch, main, second, query, narrativeBlocks) {
   const json = await main.main;
+  const measurementsData = main.measurements ? (await main.measurements) : undefined;
   const secondTreeDataset = second ? (await second.main) : undefined;
   const pathnameShouldBe = second ? `${main.pathname}:${second.pathname}` : main.pathname;
+
   dispatch({
     type: types.CLEAN_START,
     pathnameShouldBe: narrativeBlocks ? undefined : pathnameShouldBe,
     ...createStateFromQueryOrJSONs({
       json,
+      measurementsData,
       secondTreeDataset,
       query,
       narrativeBlocks,
@@ -155,6 +159,7 @@ async function loadNarrative(dispatch, url, query) {
   let initialSuccess = true;
   try {
     datasets[initialNames[0]].fetchMain();
+    datasets[initialNames[0]].fetchAndParseMeasurements(dispatch);
     if (initialNames[1]) datasets[initialNames[1]].fetchMain();
     await dispatchCleanStart(dispatch, datasets[initialNames[0]], datasets[initialNames[1]], query, blocks);
   } catch (err1) {
@@ -162,6 +167,7 @@ async function loadNarrative(dispatch, url, query) {
     try {
       // if the initial dataset call fails, we try the frontmatter one.
       datasets[frontmatterNames[0]].fetchMain();
+      datasets[frontmatterNames[0]].fetchAndParseMeasurements(dispatch);
       if (frontmatterNames[1]) datasets[frontmatterNames[1]].fetchMain();
       await dispatchCleanStart(dispatch, datasets[frontmatterNames[0]], datasets[frontmatterNames[1]], query, blocks);
       dispatch(narrativeFetchingErrorNotification(err1));
@@ -181,6 +187,7 @@ async function loadNarrative(dispatch, url, query) {
   /* trigger dataset / fetches fill in cache with pending promises */
   Object.values(datasets).forEach((dataset) => {
     dataset.fetchMain();
+    dataset.fetchAndParseMeasurements(dispatch);
     dataset.fetchSidecars();
   });
   return dispatch({type: types.CACHE_JSONS, jsons: datasets});
@@ -282,6 +289,28 @@ Dataset.prototype.fetchMain = function fetchMain() {
     })
     .then((res) => res.json());
 };
+Dataset.prototype.fetchAndParseMeasurements = async function fetchAndParseMeasurements(dispatch) {
+  /**
+   * Separate from fetchSidecars because we want to fetch and parse the
+   * measurements JSON upfront to simplify the central merging of controls and URL params.
+   * Separate from fetchMain because we don't want errors in the measurements JSON
+   * to crash the app if the main tree can load.
+   */
+  const mainJson = await this.main;
+  if (!mainJson) throw new Error("Cannot fetch measurements JSON since the main JSON didn't succeed.");
+
+  if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
+    this.measurements = fetchJSON(this.apiCalls.measurements)
+      .then((data) => parseMeasurementsJSON(data))
+      .catch((err) => {
+        const errorMessage = `Failed to ${err instanceof FetchError ? 'fetch' : 'parse'} measurements collections`;
+        console.error(errorMessage, err.message);
+        dispatch(warningNotification({message: errorMessage}));
+        // Save error message to display if user toggles panel again
+        dispatch({ type: types.UPDATE_MEASUREMENTS_ERROR, data: errorMessage });
+      });
+  }
+};
 Dataset.prototype.fetchSidecars = async function fetchSidecars() {
   /**
    * If deemed appropriate, fetch sidecars and store the resulting promise as `this.<sidecarName>`.
@@ -302,12 +331,6 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
   if (!mainJson.root_sequence && !this.rootSequence) {
     // Note that the browser may log a GET error if the above 404s
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
-      .catch((reason) => Promise.resolve(reason))
-  }
-
-  if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
-    this.measurements = fetchJSON(this.apiCalls.measurements)
-      .then((json) => parseMeasurementsJSON(json))
       .catch((reason) => Promise.resolve(reason))
   }
 };
@@ -345,23 +368,6 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
       console.error(reason);
       dispatch(warningNotification({message: "Failed to parse root sequence JSON"}));
     })
-  }
-  if (this.measurements) {
-    this.measurements
-      .then((data) => {
-        if (data instanceof Error) throw data;
-        return data
-      })
-      .then((data) => dispatch(loadMeasurements(data)))
-      .catch((err) => {
-        const errorMessage = `Failed to ${err instanceof FetchError ? 'fetch' : 'parse'} measurements collections`;
-        console.error(errorMessage, err.message);
-        dispatch(warningNotification({message: errorMessage}));
-        // Hide measurements panel
-        dispatch(togglePanelDisplay("measurements"));
-        // Save error message to display if user toggles panel again
-        dispatch({ type: types.UPDATE_MEASUREMENTS_ERROR, data: errorMessage });
-      });
   }
 };
 Dataset.prototype.fetchAvailable = async function fetchAvailable() {
