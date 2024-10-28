@@ -263,7 +263,7 @@ export function guessAreMutationsPerSite(
  * Is the node a subtree root node? (implies that we have either exploded trees or
  * the dataset has multiple subtrees to display)
  */
-const isSubtreeRoot = (n: ReduxNode): boolean => (n.parent.name === "__ROOT" && n.parentInfo.original);
+const isSubtreeRoot = (n: ReduxNode): boolean => (n.parent.name === "__ROOT" && n.parentInfo.original !== undefined);
 
 /**
  * Gets the parent node to be used for stem / branch calculation.
