@@ -7,7 +7,6 @@ import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../ut
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { getDefaultFrequenciesState } from "../reducers/frequencies";
-import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { countTraitsAcrossTree, calcTotalTipsInTree, gatherTraitNames } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -23,7 +22,7 @@ import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
-import { createMeasurementsControlsFromQuery, getCollectionDefaultControls, getCollectionToDisplay } from "./measurements";
+import { createMeasurementsControlsFromQuery, getCollectionDefaultControls, getCollectionToDisplay, loadMeasurements } from "./measurements";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -858,6 +857,7 @@ export const getNarrativePageFromQuery = (query, narrative) => {
 
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  measurementsData = false, /* raw measurements json data or error, only used when main json is provided */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false, /* if in a narrative this argument is set */
@@ -875,8 +875,8 @@ export const createStateFromQueryOrJSONs = ({
     entropy = entropyCreateState(json.meta.genome_annotations);
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
-    /* ensure default measurements state */
-    measurements = getDefaultMeasurementsState();
+    /* Load measurements if available, otherwise ensure default measurements state */
+    measurements = loadMeasurements(measurementsData, dispatch);
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     castIncorrectTypes(metadata, tree);
@@ -891,6 +891,9 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
+    if (measurements.loaded) {
+      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
+    }
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
     can affect props comparisons. Due to the size of some of the state, we only do this selectively */

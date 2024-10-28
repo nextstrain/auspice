@@ -4,7 +4,6 @@ import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState, getNarrativePageFromQuery } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
-import { parseMeasurementsJSON, loadMeasurements } from "./measurements";
 import { fetchJSON, fetchWithErrorHandling } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { parseMarkdownNarrativeFile } from "../util/parseNarrative";
@@ -12,7 +11,6 @@ import { NoContentError, FetchError} from "../util/exceptions";
 import { parseMarkdown } from "../util/parseMarkdown";
 import { updateColorByWithRootSequenceData } from "../actions/colors";
 import { explodeTree } from "./tree";
-import { togglePanelDisplay } from "./panelDisplay";
 
 export function getDatasetNamesFromUrl(url) {
   let secondTreeUrl;
@@ -121,6 +119,7 @@ function narrativeFetchingErrorNotification(err) {
  */
 async function dispatchCleanStart(dispatch, main, second, query, narrativeBlocks) {
   const json = await main.main;
+  const measurementsData = main.measurements ? (await main.measurements) : undefined;
   const secondTreeDataset = second ? (await second.main) : undefined;
   const pathnameShouldBe = second ? `${main.pathname}:${second.pathname}` : main.pathname;
   dispatch({
@@ -128,6 +127,7 @@ async function dispatchCleanStart(dispatch, main, second, query, narrativeBlocks
     pathnameShouldBe: narrativeBlocks ? undefined : pathnameShouldBe,
     ...createStateFromQueryOrJSONs({
       json,
+      measurementsData,
       secondTreeDataset,
       query,
       narrativeBlocks,
@@ -280,7 +280,19 @@ Dataset.prototype.fetchMain = function fetchMain() {
       }
       return res;
     })
-    .then((res) => res.json());
+    .then((res) => res.json())
+    .then((json) => {
+      if (json.meta.panels && json.meta.panels.includes("measurements") && !this.measurements) {
+        /**
+         * Fetch measurements and store the resulting promise.
+         * Avoid the browser's default unhandled promise rejection logging and
+         * just resolve to an Error object that will be handled appropriately in loadMeasurements.
+         */
+        this.measurements = fetchJSON(this.apiCalls.measurements)
+          .catch((reason) => Promise.resolve(reason));
+      }
+      return json;
+    });
 };
 Dataset.prototype.fetchSidecars = async function fetchSidecars() {
   /**
@@ -302,12 +314,6 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
   if (!mainJson.root_sequence && !this.rootSequence) {
     // Note that the browser may log a GET error if the above 404s
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
-      .catch((reason) => Promise.resolve(reason))
-  }
-
-  if (mainJson.meta.panels && mainJson.meta.panels.includes("measurements") && !this.measurements) {
-    this.measurements = fetchJSON(this.apiCalls.measurements)
-      .then((json) => parseMeasurementsJSON(json))
       .catch((reason) => Promise.resolve(reason))
   }
 };
@@ -345,23 +351,6 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
       console.error(reason);
       dispatch(warningNotification({message: "Failed to parse root sequence JSON"}));
     })
-  }
-  if (this.measurements) {
-    this.measurements
-      .then((data) => {
-        if (data instanceof Error) throw data;
-        return data
-      })
-      .then((data) => dispatch(loadMeasurements(data)))
-      .catch((err) => {
-        const errorMessage = `Failed to ${err instanceof FetchError ? 'fetch' : 'parse'} measurements collections`;
-        console.error(errorMessage, err.message);
-        dispatch(warningNotification({message: errorMessage}));
-        // Hide measurements panel
-        dispatch(togglePanelDisplay("measurements"));
-        // Save error message to display if user toggles panel again
-        dispatch({ type: types.UPDATE_MEASUREMENTS_ERROR, data: errorMessage });
-      });
   }
 };
 Dataset.prototype.fetchAvailable = async function fetchAvailable() {

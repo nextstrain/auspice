@@ -1,6 +1,6 @@
 import {
   CHANGE_MEASUREMENTS_COLLECTION,
-  LOAD_MEASUREMENTS,
+  CLEAN_START,
   UPDATE_MEASUREMENTS_ERROR,
   URL_QUERY_CHANGE_WITH_COMPUTED_STATE
 } from "../actions/types";
@@ -15,16 +15,9 @@ export const getDefaultMeasurementsState = () => ({
 
 const measurements = (state = getDefaultMeasurementsState(), action) => {
   switch (action.type) {
+    case CLEAN_START: // fallthrough
     case URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       return { ...action.measurements };
-    case LOAD_MEASUREMENTS:
-      return {
-        ...state,
-        loaded: true,
-        defaultCollectionKey: action.defaultCollectionKey,
-        collections: action.collections,
-        collectionToDisplay: action.collectionToDisplay
-      };
     case CHANGE_MEASUREMENTS_COLLECTION:
       return {
         ...state,

@@ -40,11 +40,13 @@ const updateNarrativeDataset = async (dispatch, datasets, narrativeBlocks, path,
     const mainDataset = datasets[mainTreeName];
     const secondDataset = datasets[secondTreeName];
     const mainJson = await mainDataset.main;
+    const measurementsData = mainDataset.measurements ? (await mainDataset.measurements) : undefined;
     const secondJson = secondDataset ? (await secondDataset.main) : false;
     dispatch({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
       ...createStateFromQueryOrJSONs({
         json: mainJson,
+        measurementsData,
         secondTreeDataset: secondJson,
         mainTreeName,
         secondTreeName,

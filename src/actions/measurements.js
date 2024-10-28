@@ -1,12 +1,13 @@
 import { cloneDeep, pick } from "lodash";
 import { measurementIdSymbol } from "../util/globals";
 import { defaultMeasurementsControlState } from "../reducers/controls";
+import { getDefaultMeasurementsState } from "../reducers/measurements";
+import { warningNotification } from "./notifications";
 import {
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
   CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
-  LOAD_MEASUREMENTS,
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
@@ -171,7 +172,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   return newControls;
 };
 
-export const parseMeasurementsJSON = (json) => {
+const parseMeasurementsJSON = (json) => {
   const collections = json["collections"];
   if (!collections || collections.length === 0) {
     throw new Error("Measurements JSON does not have collections");
@@ -263,34 +264,45 @@ export const parseMeasurementsJSON = (json) => {
     );
   });
 
-  return {collections, defaultCollection: json["default_collection"]};
-};
-
-export const loadMeasurements = ({collections, defaultCollection}) => (dispatch, getState) => {
-  const { tree, controls } = getState();
-  if (!tree.loaded) {
-    throw new Error("tree not loaded");
-  }
-
   const collectionKeys = collections.map((collection) => collection.key);
-  let defaultCollectionKey = defaultCollection;
+  let defaultCollectionKey = json["default_collection"];
   if (!collectionKeys.includes(defaultCollectionKey)) {
     defaultCollectionKey = collectionKeys[0];
   }
-
-  // Get the collection to display to set up default controls
-  const collectionToDisplay = getCollectionToDisplay(collections, controls.measurementsCollectionKey, defaultCollectionKey);
-  const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
-  const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, defaultCollectionKey);
-
-  dispatch({
-    type: LOAD_MEASUREMENTS,
+  const collectionToDisplay = collections.filter((collection) => collection.key === defaultCollectionKey)[0];
+  return {
+    loaded: true,
+    error: undefined,
     defaultCollectionKey,
     collections,
-    collectionToDisplay,
-    controls: newControls,
-    queryParams
-  });
+    collectionToDisplay
+  }
+};
+
+export const loadMeasurements = (measurementsData, dispatch) => {
+  let measurementState = getDefaultMeasurementsState();
+  let warningMessage = "";
+  if (measurementsData === undefined) {
+    // eslint-disable-next-line no-console
+    console.debug("No measurements JSON fetched");
+  } else if (measurementsData instanceof Error) {
+    console.error(measurementsData);
+    warningMessage = "Failed to fetch measurements collections";
+  } else {
+    try {
+      measurementState = { ...measurementState, ...parseMeasurementsJSON(measurementsData) };
+    } catch (error) {
+      console.error(error);
+      warningMessage = "Failed to parse measurements collections";
+    }
+  }
+
+  if (warningMessage) {
+    measurementState.error = warningMessage;
+    dispatch(warningNotification({ message: warningMessage }));
+  }
+
+  return measurementState;
 };
 
 export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
