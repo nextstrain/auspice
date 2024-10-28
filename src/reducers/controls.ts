@@ -386,7 +386,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return state;
     }
-    case types.LOAD_MEASUREMENTS: // fallthrough
     case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
     case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
     case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
