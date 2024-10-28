@@ -470,6 +470,10 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   if (!this.okToDrawBars) {return;}
   this._groups.mainBars.selectAll("*").remove();
 
+  // bars may be undefined when the underlying data is marked as stale but the panel's still rendered
+  // (it's necessarily off-screen for this to occur, but we still call rendering code)
+  if (!this.bars) {return;}
+
   /* Calculate bar width */
   const validXPos = this.scales.xMain.domain()[0]; // any value inside the scale's domain will do
   let barWidth = this.scales.xMain(validXPos+1) - this.scales.xMain(validXPos); // pixels between 2 nucleotides

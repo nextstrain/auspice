@@ -14,7 +14,7 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
     controls.animationPlayPauseButton !== "Play"
   ) {return;}
 
-  if (!controls.panelsToDisplay.includes("entropy")) {
+  if (!controls.panelsToDisplay.includes("entropy") || entropy.onScreen===false) {
     if (entropy.bars===undefined) {
       return; // no need to dispatch another action - the state's already been invalidated
     }
