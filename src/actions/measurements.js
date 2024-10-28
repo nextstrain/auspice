@@ -25,7 +25,7 @@ import {
  * @param {string} defaultKey
  * @returns {Object}
  */
-export const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
+const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
   const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
   if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
@@ -109,7 +109,7 @@ function getCollectionDefaultControl(controlKey, collection) {
  * @param {Object} collection
  * @returns {MeasurementsControlState}
  */
-export function getCollectionDefaultControls(collection) {
+function getCollectionDefaultControls(collection) {
   const defaultControls = {...defaultMeasurementsControlState};
   if (Object.keys(collection).length) {
     for (const [key, value] of Object.entries(defaultControls)) {
@@ -447,7 +447,7 @@ export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
   return newQuery
 }
 
-export function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
+function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
   const newQuery = {
     m_collection: collection.key === defaultCollectionKey ? "" : collection.key
   };
@@ -497,49 +497,100 @@ export function createMeasurementsQueryFromControls(measurementControls, collect
   return newQuery;
 }
 
-export function createMeasurementsControlsFromQuery(query){
-  const newState = {};
+/**
+ * Parses the current collection's controls from measurements and updates them
+ * with valid query parameters.
+ *
+ * In cases where the query param is invalid, the query param is removed from the
+ * returned query object.
+ * @param {Object} measurements
+ * @param {Object} query
+ * @returns {Object}
+ */
+export const combineMeasurementsControlsAndQuery = (measurements, query) => {
+  const updatedQuery = cloneDeep(query);
+  const collectionKeys = measurements.collections.map((collection) => collection.key);
+  // Remove m_collection query if it's invalid or the default collection key
+  if (!collectionKeys.includes(updatedQuery.m_collection) ||
+    updatedQuery.m_collection === measurements.defaultCollectionKey) {
+    delete updatedQuery.m_collection;
+  }
+  // Parse collection's default controls
+  const collectionKey = updatedQuery.m_collection || measurements.defaultCollectionKey;
+  const collectionToDisplay = getCollectionToDisplay(measurements.collections, collectionKey, measurements.defaultCollectionKey)
+  const collectionControls = getCollectionDefaultControls(collectionToDisplay);
+  const collectionGroupings = Array.from(collectionToDisplay.groupings.keys());
+  // Modify controls via query
   for (const [controlKey, queryKey] of Object.entries(controlToQueryParamMap)) {
-    const queryValue = query[queryKey];
+    const queryValue = updatedQuery[queryKey];
     if (queryValue === undefined) continue;
-    let expectedValues = [];
-    let conversionFn = () => null;
+    let newControlState = undefined;
     switch(queryKey) {
       case "m_display":
-        expectedValues = ["mean", "raw"];
-        conversionFn = () => queryValue;
+        if (queryValue === "mean" || queryValue === "raw") {
+          newControlState = queryValue;
+        }
         break;
-      case "m_collection": // fallthrough
       case "m_groupBy":
-        // Accept any value here because we cannot validate the query before
-        // the measurements JSON is loaded
-        expectedValues = [queryValue];
-        conversionFn = () => queryValue;
+        // Verify value is a valid grouping of collection
+        if (collectionGroupings.includes(queryValue)) {
+          newControlState = queryValue;
+        }
         break;
-      case "m_overallMean": // fallthrough
+      case "m_overallMean":
+        if (queryValue === "show" || queryValue === "hide") {
+          newControlState = queryValue === "show";
+        }
+        break;
       case "m_threshold":
-        expectedValues = ["show", "hide"];
-        conversionFn = () => queryValue === "show";
+        if (collectionToDisplay.thresholds &&
+            (queryValue === "show" || queryValue === "hide")) {
+          newControlState = queryValue === "show";
+        }
         break;
+      default:
+        console.error(`Ignoring unsupported query ${queryKey}`);
     }
 
-    if(expectedValues.includes(queryValue)) {
-      newState[controlKey] = conversionFn();
-    } else {
-      console.error(`Ignoring invalid query param ${queryKey}=${queryValue}, value should be one of ${expectedValues}`);
+    // Remove query if it's invalid or the same as the collection's default controls
+    if (newControlState === undefined || newControlState === collectionControls[controlKey]) {
+        delete updatedQuery[queryKey];
+        continue;
     }
+    collectionControls[controlKey] = newControlState
   }
 
-  // Accept any value here because we cannot validate the query before the measurements JSON is loaded
-  for (const filterKey of Object.keys(query).filter((c) => c.startsWith(filterQueryPrefix))) {
+  // Special handling of the filter query since these can be arbitrary query keys `mf_*`
+  for (const filterKey of Object.keys(updatedQuery).filter((c) => c.startsWith(filterQueryPrefix))) {
+    // Remove and ignore query for invalid fields
     const field = filterKey.replace(filterQueryPrefix, '');
-    const filterValues = Array.isArray(query[filterKey]) ? query[filterKey] : [query[filterKey]];
-    const measurementsFilters = {...newState.measurementsFilters};
+    if (!collectionToDisplay.filters.has(field)) {
+      delete updatedQuery[filterKey];
+      continue;
+    }
+
+    // Remove and ignore query for invalid field values
+    const collectionFieldValues = collectionToDisplay.filters.get(field).values;
+    const filterValues = Array.isArray(updatedQuery[filterKey]) ? updatedQuery[filterKey] : [updatedQuery[filterKey]];
+    const validFilterValues = filterValues.filter((value) => collectionFieldValues.has(value));
+    if (!validFilterValues.length) {
+      delete updatedQuery[filterKey];
+      continue;
+    }
+
+    // Set field filter controls and query to the valid filter values
+    updatedQuery[filterKey] = validFilterValues;
+    const measurementsFilters = {...collectionControls.measurementsFilters};
     measurementsFilters[field] = new Map(measurementsFilters[field]);
-    for (const value of filterValues) {
+    for (const value of validFilterValues) {
       measurementsFilters[field].set(value, {active: true});
     }
-    newState.measurementsFilters = measurementsFilters;
+    collectionControls.measurementsFilters = measurementsFilters;
+
   }
-  return newState;
+  return {
+    collectionToDisplay,
+    collectionControls,
+    updatedQuery
+  }
 }
