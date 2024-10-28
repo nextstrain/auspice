@@ -343,20 +343,19 @@ const Measurements = ({height, width, showLegend}) => {
 
   return (
     <Card infocard={showOnlyPanels} title={title} titleStyles={getCardTitleStyle()}>
-      {measurementsLoaded &&
-        (measurementsError ?
-          <Flex style={{ height, width}} direction="column" justifyContent="center">
-            <p style={{ textAlign: "center" }}>
-              {measurementsError}
-            </p>
-          </Flex> :
-          <MeasurementsPlot
-            height={height}
-            width={width}
-            showLegend={showLegend}
-            setPanelTitle={setTitle}
-          />
-        )
+      {measurementsError ?
+        <Flex style={{ height, width}} direction="column" justifyContent="center">
+          <p style={{ textAlign: "center" }}>
+            {measurementsError}
+          </p>
+        </Flex> :
+          (measurementsLoaded &&
+            <MeasurementsPlot
+              height={height}
+              width={width}
+              showLegend={showLegend}
+              setPanelTitle={setTitle}
+            />)
       }
     </Card>
   );
