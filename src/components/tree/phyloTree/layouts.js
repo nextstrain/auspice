@@ -1,8 +1,7 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
 import { min, max } from "d3-array";
-import scaleLinear from "d3-scale/src/linear";
-import {point as scalePoint} from "d3-scale/src/band";
+import { scaleLinear, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
