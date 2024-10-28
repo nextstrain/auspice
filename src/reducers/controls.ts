@@ -137,7 +137,8 @@ export const getDefaultControlsState = () => {
     measurementsDisplay: undefined,
     measurementsShowOverallMean: undefined,
     measurementsShowThreshold: undefined,
-    measurementsFilters: {}
+    measurementsFilters: {},
+    performanceFlags: new Map(),
   };
 };
 
