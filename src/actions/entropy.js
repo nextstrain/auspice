@@ -13,6 +13,15 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
     !entropy.genomeMap ||
     controls.animationPlayPauseButton !== "Play"
   ) {return;}
+
+  if (!controls.panelsToDisplay.includes("entropy")) {
+    if (entropy.bars===undefined) {
+      return; // no need to dispatch another action - the state's already been invalidated
+    }
+    // clear the entropy data so we don't keep an out-of-date copy
+    return dispatch({type: types.ENTROPY_DATA, data: undefined, maxYVal: 1});
+  }
+
   const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
   dispatch({type: types.ENTROPY_DATA, data, maxYVal});
 }, 500, { leading: false, trailing: true });
