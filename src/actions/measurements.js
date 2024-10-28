@@ -170,7 +170,8 @@ const getCollectionDisplayControls = (controls, collection) => {
 };
 
 const parseMeasurementsJSON = (json) => {
-  const collections = json["collections"];
+  // Avoid editing the original json values since they are cached for narratives
+  const collections = cloneDeep(json["collections"]);
   if (!collections || collections.length === 0) {
     throw new Error("Measurements JSON does not have collections");
   }
