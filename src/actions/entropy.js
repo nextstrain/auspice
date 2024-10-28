@@ -15,7 +15,7 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
   ) {return;}
   const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
   dispatch({type: types.ENTROPY_DATA, data, maxYVal});
-}, 500, { leading: true, trailing: true });
+}, 500, { leading: false, trailing: true });
 
 /**
  * Returns a thunk which makes zero or one dispatches to update the entropy reducer
