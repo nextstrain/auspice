@@ -99,15 +99,12 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
 
 const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
   // console.log("general svg update for", treeElem);
-  svg.selectAll(treeElem)
-    .filter((d) => d.update)
-    .transition().duration(transitionTime)
-    .call(updateCall);
-  if (!transitionTime) {
-    /* https://github.com/d3/d3-timer#timerFlush */
-    timerFlush();
-    // console.log("\t\t--FLUSHING TIMER--");
+  let selection = svg.selectAll(treeElem)
+    .filter((d) => d.update);
+  if (transitionTime) {
+    selection = selection.transition().duration(transitionTime);
   }
+  selection.call(updateCall);
 };
 
 /* use D3 to select and modify elements, such that a given element is only ever modified _once_
@@ -271,7 +268,8 @@ export const change = function change({
   branchThickness = undefined,
   /* other data */
   focus = undefined,
-  scatterVariables = undefined
+  scatterVariables = undefined,
+  performanceFlags = {},
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
@@ -280,10 +278,11 @@ export const change = function change({
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
   const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
 
+
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
-  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2 || performanceFlags.get("skipTreeAnimation")===true) {
     transitionTime = 0;
   }
 

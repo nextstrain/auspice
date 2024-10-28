@@ -14,13 +14,15 @@ export const performanceFlags = (_store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START: {
       modifiedAction = {...action};
-      modifiedAction.controls.performanceFlags = calculate()
+      modifiedAction.controls.performanceFlags = calculate(action)
     }
   }
   return next(modifiedAction || action); // send action to other middleware / reducers
 };
 
-function calculate() {
+function calculate({tree}) {
   const flags = new Map();
+  const totalTipCount = tree?.nodes?.[0]?.fullTipCount;
+  flags.set("skipTreeAnimation", totalTipCount > 4000);
   return flags;
 }
