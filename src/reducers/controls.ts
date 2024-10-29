@@ -108,8 +108,11 @@ export interface BasicControlsState {
   canTogglePanelLayout: boolean
   colorBy: string
   colorByConfidence: boolean
-  coloringsPresentOnTree?: Set<string>
-  coloringsPresentOnTreeWithConfidence?: Set<string>
+  coloringsPresentOnTree: Set<string>
+
+  /** subset of coloringsPresentOnTree */
+  coloringsPresentOnTreeWithConfidence: Set<string>
+
   colorScale?: ColorScale
   dateMax: string
   dateMaxNumeric: number
@@ -207,6 +210,8 @@ export const getDefaultControlsState = (): ControlsState => {
     colorBy: defaults.colorBy,
     colorByConfidence: false,
     colorScale: undefined,
+    coloringsPresentOnTree: new Set(),
+    coloringsPresentOnTreeWithConfidence: new Set(),
     explodeAttr: undefined,
     selectedBranchLabel: "none",
     showAllBranchLabels: false,

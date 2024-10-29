@@ -400,8 +400,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
    * only when a file is dropped. (I've gone down too many rabbit holes in this PR to
    * do this now, unfortunately.)                                           james, 2023
    */
-  state.coloringsPresentOnTree = new Set();
-  state.coloringsPresentOnTreeWithConfidence = new Set(); // subset of above
 
   let coloringsToCheck = [];
   if (colorings) {
