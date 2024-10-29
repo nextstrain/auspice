@@ -234,7 +234,6 @@ export const updateTipRadii = (
     tipSelectedIdx = false,
     selectedLegendItem = false,
     geoFilter = [],
-    searchNodes = false
   }: {
     /** the strain to highlight (always tree 1) */
     tipSelectedIdx?: number | false,
@@ -244,8 +243,6 @@ export const updateTipRadii = (
 
     /** a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to */
     geoFilter?: [string, string] | [],
-
-    searchNodes?: PhyloNode[] | false
   } = {}
 ): ThunkFunction => {
   return (dispatch, getState) => {
@@ -262,8 +259,8 @@ export const updateTipRadii = (
         d.dataToo = calcTipRadii({tipSelectedIdx: idx, colorScale, tree: treeToo});
       }
     } else {
-      d.data = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree: treeToo});
+      d.data = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree: treeToo});
     }
     dispatch(d);
   };

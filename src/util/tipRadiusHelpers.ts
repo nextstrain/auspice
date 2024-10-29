@@ -1,7 +1,6 @@
 import { tipRadius, tipRadiusOnLegendMatch } from "./globals";
 import { getTipColorAttribute, numDate } from "./colorHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
-import { PhyloNode } from "../components/tree/phyloTree/types";
 import { ColorScale } from "../reducers/controls";
 import { ReduxNode, TreeState } from "../reducers/tree/types";
 
@@ -60,7 +59,6 @@ export const calcTipRadii = ({
   tipSelectedIdx = false,
   selectedLegendItem = false,
   geoFilter = [],
-  searchNodes = false,
   colorScale,
   tree
 }: {
@@ -72,8 +70,6 @@ export const calcTipRadii = ({
 
   geoFilter?: [string, string] | []
 
-  searchNodes?: PhyloNode[] | false
-
   colorScale: ColorScale
 
   tree: TreeState
@@ -82,8 +78,6 @@ export const calcTipRadii = ({
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (geoFilter.length===2 && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLocationMatch(d, geoFilter[0], geoFilter[1]) ? tipRadiusOnLegendMatch : tipRadius);
-  } else if (searchNodes) {
-    return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
