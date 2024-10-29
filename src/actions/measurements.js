@@ -92,7 +92,6 @@ function getCollectionDefaultControl(controlKey, collection) {
       }
       break;
     }
-    case 'measurementsCollectionKey': // fallthrough
     case 'measurementsFilters': {
       // eslint-disable-next-line no-console
       console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
@@ -113,7 +112,6 @@ function getCollectionDefaultControl(controlKey, collection) {
 export function getCollectionDefaultControls(collection) {
   const defaultControls = {...defaultMeasurementsControlState};
   if (Object.keys(collection).length) {
-    defaultControls.measurementsCollectionKey = collection.key;
     for (const [key, value] of Object.entries(defaultControls)) {
       const collectionDefault = getCollectionDefaultControl(key, collection);
       defaultControls[key] = collectionDefault !== undefined ? collectionDefault : value;
@@ -135,7 +133,6 @@ export function getCollectionDefaultControls(collection) {
 const getCollectionDisplayControls = (controls, collection) => {
   // Copy current control options for measurements
   const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
-  newControls.measurementsCollectionKey = collection.key;
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
@@ -365,7 +362,7 @@ export const removeAllFieldFilters = (field) => (dispatch, getState) => {
   dispatch({
     type: APPLY_MEASUREMENTS_FILTER,
     controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
 
@@ -391,7 +388,7 @@ export const toggleOverallMean = () => (dispatch, getState) => {
   dispatch({
     type: TOGGLE_MEASUREMENTS_OVERALL_MEAN,
     controls: newControls,
-    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 }
 
@@ -415,7 +412,7 @@ export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) =>
   dispatch({
     type: CHANGE_MEASUREMENTS_DISPLAY,
     controls: newControls,
-    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay)
+    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 }
 
@@ -432,7 +429,6 @@ export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) =>
 }
 
 const controlToQueryParamMap = {
-  measurementsCollectionKey: "m_collection",
   measurementsDisplay: "m_display",
   measurementsGroupBy: "m_groupBy",
   measurementsShowOverallMean: "m_overallMean",
@@ -450,8 +446,10 @@ export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
   return newQuery
 }
 
-function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
-  const newQuery = {};
+export function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
+  const newQuery = {
+    m_collection: collection.key === defaultCollectionKey ? "" : collection.key
+  };
   for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
     let queryKey = controlToQueryParamMap[controlKey];
     const collectionDefault = getCollectionDefaultControl(controlKey, collection);
@@ -461,13 +459,6 @@ function createMeasurementsQueryFromControls(measurementControls, collection, de
       newQuery[queryKey] = "";
     } else {
       switch(controlKey) {
-        case "measurementsCollectionKey":
-          if (controlValue !== defaultCollectionKey) {
-            newQuery[queryKey] = controlValue;
-          } else {
-            newQuery[queryKey] = "";
-          }
-          break;
         case "measurementsDisplay": // fallthrough
         case "measurementsGroupBy":
           newQuery[queryKey] = controlValue;
