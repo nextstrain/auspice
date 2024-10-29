@@ -126,7 +126,6 @@ export interface BasicControlsState {
   mapAnimationDurationInMilliseconds: number
   mapAnimationShouldLoop: boolean
   mapAnimationStartDate: unknown
-  mapLegendOpen?: boolean
   modal: 'download' | 'linkOut' | null
   normalizeFrequencies: boolean
   panelLayout: string
@@ -145,7 +144,6 @@ export interface BasicControlsState {
   sidebarOpen: boolean
   temporalConfidence: TemporalConfidence
   tipLabelKey: string | symbol
-  treeLegendOpen?: boolean
   zoomMax?: number
   zoomMin?: number
 }
@@ -235,8 +233,6 @@ export const getDefaultControlsState = (): ControlsState => {
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
-    treeLegendOpen: undefined,
-    mapLegendOpen: undefined,
     showOnlyPanels: false,
     showTransmissionLines: true,
     normalizeFrequencies: true,
