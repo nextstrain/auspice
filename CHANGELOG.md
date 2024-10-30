@@ -104,7 +104,7 @@ This builds on functionality introduced in [Nextclade 3.7.0](https://github.com/
 
 _Internal changes._
 
-* Use Nextstrain CLI to create PRs on other repos. ([#1765](https://github.com/nextstrain/auspice/pull/1765))
+* Use GitHub CLI to create PRs on other repos. ([#1765](https://github.com/nextstrain/auspice/pull/1765))
 * Create PRs on projects which depend on Auspice by adding a label ([#1767](https://github.com/nextstrain/auspice/pull/1767) and [#1768](https://github.com/nextstrain/auspice/pull/1768))
 
 
