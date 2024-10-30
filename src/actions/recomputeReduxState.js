@@ -923,6 +923,11 @@ export const createStateFromQueryOrJSONs = ({
     measurements.collectionToDisplay = collectionToDisplay;
     controls = {...controls, ...collectionControls};
     query = updatedQuery;
+  } else {
+    // Hide measurements panel if loading failed
+    controls.panelsToDisplay = controls.panelsToDisplay.filter((panel) => panel !== "measurements");
+    controls.canTogglePanelLayout = hasMultipleGridPanels(controls.panelsToDisplay);
+    controls.panelLayout = controls.canTogglePanelLayout ? controls.panelLayout : "full";
   }
 
   /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
