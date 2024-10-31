@@ -9,10 +9,17 @@ function _isFounderNode(node) {
   // return false;
 
   const FOUNDERS = [
-    "NODE_0000731",
-    "NODE_0001569", // NOTE - other founder nodes are descendants of this clade
-    "NODE_0000648",
+    // "NODE_0000731",
+    // "NODE_0001569", // NOTE - other founder nodes are descendants of this clade
+    // "NODE_0000648",
     // "NODE_0000038",
+
+
+    "NODE_0019794",
+    "NODE_0015887",
+    "NODE_0000777",
+
+
     // "NODE_0001227",
     // "NODE_0001571",
     // "NODE_0001773", // VERY BASAL IN TREE - everything is a descendant of this node
@@ -25,7 +32,7 @@ function _isFounderNode(node) {
 /**
  * CAVEATS:
  * - only works for trees with "FOUNDERS" in it
- * - only works for categorical colorScale
+ * - only works for categorical colorScal`e
  * - only works for temporal tree
  */
 export function partitionIntoStreams(enabled, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
