@@ -343,19 +343,19 @@ const Measurements = ({height, width, showLegend}) => {
 
   return (
     <Card infocard={showOnlyPanels} title={title} titleStyles={getCardTitleStyle()}>
-      {measurementsError ?
+      {measurementsLoaded ?
+        <MeasurementsPlot
+          height={height}
+          width={width}
+          showLegend={showLegend}
+          setPanelTitle={setTitle}
+        /> :
         <Flex style={{ height, width}} direction="column" justifyContent="center">
           <p style={{ textAlign: "center" }}>
-            {measurementsError}
+            {measurementsError ||
+              "Failed to fetch/load measurements due to unknown error"}
           </p>
-        </Flex> :
-          (measurementsLoaded &&
-            <MeasurementsPlot
-              height={height}
-              width={width}
-              showLegend={showLegend}
-              setPanelTitle={setTitle}
-            />)
+        </Flex>
       }
     </Card>
   );
