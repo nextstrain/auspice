@@ -109,6 +109,7 @@ export interface BasicControlsState {
   colorBy: string
   colorByConfidence: boolean
   coloringsPresentOnTree?: Set<string>
+  coloringsPresentOnTreeWithConfidence?: Set<string>
   colorScale?: ColorScale
   dateMax: string
   dateMaxNumeric: number
