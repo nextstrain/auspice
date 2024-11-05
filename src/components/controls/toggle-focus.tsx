@@ -1,18 +1,17 @@
 import React from "react";
 import { connect } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
-import { Dispatch } from "@reduxjs/toolkit";
 import Toggle from "./toggle";
 import { SidebarIconContainer, StyledTooltip } from "./styles";
 import { TOGGLE_FOCUS } from "../../actions/types";
-import { RootState } from "../../store";
+import { AppDispatch, RootState } from "../../store";
 
 
 function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
   tooltip: React.ReactElement;
   focus: boolean;
   layout: "rect" | "radial" | "unrooted" | "clock" | "scatter";
-  dispatch: Dispatch;
+  dispatch: AppDispatch;
   mobileDisplay: boolean;
 }) {
   // Focus functionality is only available to layouts that have the concept of a unitless y-axis
