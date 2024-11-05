@@ -22,6 +22,16 @@ const Entropy = (state = defaultEntropyState(), action) => {
         bars: action.data,
         maxYVal: action.maxYVal
       });
+    case types.TOGGLE_PANEL_DISPLAY:
+      if (action.entropyData) {
+        return {...state, bars: action.entropyData, maxYVal: action.entropyMaxYVal}
+      }
+      return state;
+    case types.ENTROPY_ONSCREEN_CHANGE:
+      if (action.entropyData) {
+        return {...state, onScreen: action.onScreen, bars: action.entropyData, maxYVal: action.entropyMaxYVal}
+      }
+      return {...state, onScreen: action.onScreen};
     case types.ENTROPY_COUNTS_TOGGLE:
       return Object.assign({}, state, {
         showCounts: action.showCounts

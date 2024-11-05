@@ -12,10 +12,11 @@ import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalSt
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
 import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
+import { ENTROPY_ONSCREEN_CHANGE } from "../../actions/types";
 import { timerStart, timerEnd } from "../../util/perf";
 import { encodeColorByGenotype } from "../../util/getGenotype";
 import { nucleotide_gene } from "../../util/globals";
-import { getCdsByName } from "../../util/entropy";
+import { getCdsByName, calcEntropyInView } from "../../util/entropy";
 import { StyledTooltip } from "../controls/styles";
 import "../../css/entropy.css";
 
@@ -69,6 +70,7 @@ const getStyles = (width) => {
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
+    onScreen: state.entropy.onScreen,
     colorBy: state.controls.colorBy,
     /**
      * Note that zoomMin & zoomMax only represent the state when changed by a URL
@@ -194,9 +196,28 @@ class Entropy extends React.Component {
     }
     this.setState({chart});
   }
+  visibilityOnScreenChange(entries) {
+    if (entries.length!==1) {
+      return console.error(`Unexpected IntersectionObserver callback entries of length`, entries.length);
+    }
+    const onScreen = entries[0].isIntersecting;
+    if (onScreen===this.props.onScreen) return; // can happen when component initially rendered
+    // if gone off screen or come back on screen with the bars still valid then we don't need to recalculate entropy data
+    if (!onScreen || this.props.bars) {
+      return this.props.dispatch({type: ENTROPY_ONSCREEN_CHANGE, onScreen})
+    }
+    // else if back on screen and the bars are invalid then we need to regenerate them
+    this.props.dispatch((dispatch, getState) => {
+      const { entropy, tree } = getState();
+      const [entropyData, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
+      dispatch({type: ENTROPY_ONSCREEN_CHANGE, onScreen, entropyData, entropyMaxYVal});
+    });
+  }
   componentDidMount() {
     if (this.props.loaded) {
-      this.setUp(this.props);
+      this.setUp(this.props); 
+      const observer = new IntersectionObserver(this.visibilityOnScreenChange.bind(this), {threshold: 0.0});
+      observer.observe(this.d3entropy)
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {

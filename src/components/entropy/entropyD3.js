@@ -465,10 +465,38 @@ EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars(
   }
 };
 
+EntropyChart.prototype._drawLoadingState = function _drawLoadingState() {
+  this._groups.mainBars
+    .append("rect")
+    .attr("class", "loading")
+    .attr("x", 0)
+    .attr("y", 0)
+    .attr("width", () => this.scales.xMain.range()[1])
+    .attr("height", () => this.scales.y.range()[0])
+    .attr("fill-opacity", 0.1)
+  this._groups.mainBars
+    .append("text")
+    .attr("y", () => this.scales.y.range()[0]/2)
+    .attr("x", () => this.scales.xMain.range()[1]/2)
+    .attr("pointer-events", "none")
+    .attr("text-anchor", "middle")       // horizontal axis
+    .attr("dominant-baseline", "middle") // vertical axis
+    .style("fill", darkGrey)
+    .style("font-size", '5rem')
+    .style("font-weight", 200)
+    .text('data loading')
+}
+
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype._drawBars = function _drawBars() {
   if (!this.okToDrawBars) {return;}
   this._groups.mainBars.selectAll("*").remove();
+
+  // bars may be undefined when the underlying data is marked as stale but the panel's still rendered
+  // (it's necessarily off-screen for this to occur, but we still call rendering code)
+  if (!this.bars) {
+    return this._drawLoadingState();
+  }
 
   /* Calculate bar width */
   const validXPos = this.scales.xMain.domain()[0]; // any value inside the scale's domain will do

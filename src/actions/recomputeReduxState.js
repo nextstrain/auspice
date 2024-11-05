@@ -1014,6 +1014,7 @@ export const createStateFromQueryOrJSONs = ({
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
+    entropy.onScreen = true;
   }
 
   /* update frequencies if they exist (not done for new JSONs) */
