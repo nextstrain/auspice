@@ -36,8 +36,8 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   constructor(props: TreeComponentProps) {
     super(props);
     this.domRefs = {
-      mainTree: undefined,
-      secondTree: undefined
+      mainTree: null,
+      secondTree: null
     };
     this.tangleRef = undefined;
     this.state = {
