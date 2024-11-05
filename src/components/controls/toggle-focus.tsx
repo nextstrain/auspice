@@ -4,13 +4,14 @@ import { FaInfoCircle } from "react-icons/fa";
 import Toggle from "./toggle";
 import { SidebarIconContainer, StyledTooltip } from "./styles";
 import { TOGGLE_FOCUS } from "../../actions/types";
+import { Layout } from "../../reducers/controls";
 import { AppDispatch, RootState } from "../../store";
 
 
 function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
   tooltip: React.ReactElement;
   focus: boolean;
-  layout: "rect" | "radial" | "unrooted" | "clock" | "scatter";
+  layout: Layout;
   dispatch: AppDispatch;
   mobileDisplay: boolean;
 }) {
