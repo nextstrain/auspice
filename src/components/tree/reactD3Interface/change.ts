@@ -121,7 +121,6 @@ export const changePhyloTreeViaPropsComparison = (
   if (zoomChange) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
-    newState.selectedNode = {};
     if (newProps.layout === "unrooted") {
       args.updateLayout = true;
     }
