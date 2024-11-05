@@ -1,5 +1,7 @@
 # Changelog
 
+* Performance improvement: We no longer recompute the entropy data (which can be expensive) when the entropy panel is toggled off or off-screen. ([#1879](https://github.com/nextstrain/auspice/pull/1879))
+
 ## version 2.59.1 - 2024/10/23
 
 
