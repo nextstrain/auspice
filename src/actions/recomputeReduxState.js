@@ -928,6 +928,11 @@ export const createStateFromQueryOrJSONs = ({
     controls.panelsToDisplay = controls.panelsToDisplay.filter((panel) => panel !== "measurements");
     controls.canTogglePanelLayout = hasMultipleGridPanels(controls.panelsToDisplay);
     controls.panelLayout = controls.canTogglePanelLayout ? controls.panelLayout : "full";
+    // Remove all measurements query params which start with `m_` or `mf_`
+    query = Object.fromEntries(
+      Object.entries(query)
+        .filter(([key, _]) => !(key.startsWith("m_") || key.startsWith("mf_")))
+    );
   }
 
   /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
