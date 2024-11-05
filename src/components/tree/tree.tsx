@@ -73,7 +73,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     renderTree(this, false, newState.treeToo, props);
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
@@ -87,7 +87,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     }
   }
 
-  componentDidUpdate(prevProps: TreeComponentProps) {
+  override componentDidUpdate(prevProps: TreeComponentProps) {
     let newState: Partial<TreeComponentState> = {};
     let rightTreeUpdated = false;
 
@@ -124,7 +124,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     if (Object.keys(newState).length) this.setState(newState);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
@@ -216,7 +216,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
   }
 
-  render() {
+  override render() {
     const { t } = this.props;
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
