@@ -1,6 +1,5 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
-import { min, max } from "d3-array";
 import { scaleLinear, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
@@ -317,7 +316,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
     // Force Square: TODO, harmonize with the map to screen
     const xExtend = width - this.margins.left - this.margins.right;
     const yExtend = height - this.margins.bottom - this.margins.top;
-    const minExtend = min([xExtend, yExtend]);
+    const minExtend = Math.min(xExtend, yExtend);
     const xSlack = xExtend - minExtend;
     const ySlack = yExtend - minExtend;
     this.xScale.range([0.5 * xSlack + this.margins.left, width - 0.5 * xSlack - this.margins.right]);
@@ -422,7 +421,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* Radial / Unrooted layouts need to be square since branch lengths
   depend on this */
   if (this.layout === "radial" || this.layout === "unrooted") {
-    const maxSpan = max([spanY, spanX]);
+    const maxSpan = Math.max(spanY, spanX);
     const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
     const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
     xDomain = [xDomain[0]-xSlack, xDomain[0]+maxSpan-xSlack];
