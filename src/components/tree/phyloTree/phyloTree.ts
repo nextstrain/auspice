@@ -1,5 +1,7 @@
+import { ReduxNode } from "../../../reducers/tree/types";
 import { createDefaultParams } from "./defaultParams";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import { PhyloNode, PhyloTreeType } from "./types";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -10,7 +12,12 @@ import * as labels from "./labels";
 import * as regression from "./regression";
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
-const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
+const PhyloTree = function PhyloTree(
+  this: PhyloTreeType,
+  reduxNodes: ReduxNode[],
+  id: string,
+  idxOfInViewRootNode: number,
+): void {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = createDefaultParams();
@@ -24,14 +31,14 @@ const PhyloTree = function PhyloTree(reduxNodes, id, idxOfInViewRootNode) {
    -- this.nodes[i].n = reduxNodes[i]
    -- reduxNodes[i].shell = this.nodes[i] */
   this.nodes = reduxNodes.map((d) => {
-    const phyloNode = {
+    const phyloNode: PhyloNode = {
       that: this,
-      n: d, /* a back link to the redux node */
+      n: d,
       x: 0,
       y: 0,
       inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
     };
-    d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
+    d.shell = phyloNode;
     return phyloNode;
   });
   this.zoomNode = this.nodes[idxOfInViewRootNode];

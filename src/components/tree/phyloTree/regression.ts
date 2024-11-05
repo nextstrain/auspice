@@ -1,6 +1,7 @@
 import { sum } from "d3-array";
 import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { PhyloNode, PhyloTreeType, Regression } from "./types";
 
 
 /**
@@ -8,7 +9,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
  * the x and y values of terminal nodes which are also visible.
  * The regression is forced to pass through nodes[0].
  */
-function calculateRegressionThroughRoot(nodes) {
+function calculateRegressionThroughRoot(nodes: PhyloNode[]): Regression {
   const terminalNodes = nodes.filter((d) => !d.n.hasChildren && d.visibility === NODE_VISIBLE);
   const nTips = terminalNodes.length;
   if (nTips===0) {
@@ -31,7 +32,7 @@ function calculateRegressionThroughRoot(nodes) {
  * Calculate regression through visible terminal nodes which have both x & y values
  * set. These values must be numeric.
  */
-function calculateRegressionWithFreeIntercept(nodes) {
+function calculateRegressionWithFreeIntercept(nodes: PhyloNode[]): Regression {
   const terminalNodesWithXY = nodes.filter(
     (d) => (!d.n.hasChildren) && d.x!==undefined && d.y!==undefined && d.visibility === NODE_VISIBLE
   );
@@ -50,7 +51,7 @@ function calculateRegressionWithFreeIntercept(nodes) {
 }
 
 /** sets this.regression  */
-export function calculateRegression() {
+export function calculateRegression(this: PhyloTreeType) {
   if (this.layout==="clock") {
     this.regression = calculateRegressionThroughRoot(this.nodes);
   } else {
@@ -58,7 +59,11 @@ export function calculateRegression() {
   }
 }
 
-export function makeRegressionText(regression, layout, yScale) {
+export function makeRegressionText(
+  regression: Regression,
+  layout: string,
+  yScale: d3.ScaleContinuousNumeric<number, number>,
+): string {
   if (layout==="clock") {
     if (guessAreMutationsPerSite(yScale)) {
       return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;

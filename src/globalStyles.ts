@@ -15,7 +15,7 @@ export const goColor = "#89B77F"; // green
 export const pauseColor = "#E39B39"; // orange
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
-export const sidebarField = {
+export const sidebarField: React.CSSProperties = {
   backgroundColor: "#FFF",
   fontFamily: dataFont,
   width: controlsWidth - 13,
@@ -31,7 +31,7 @@ export const sidebarField = {
   marginBottom: "3px"
 };
 
-export const materialButton = {
+export const materialButton: React.CSSProperties = {
   border: "0px",
   backgroundColor: "inherit",
   marginLeft: 0,
@@ -50,7 +50,7 @@ export const materialButton = {
   outline: 0
 };
 
-export const materialButtonSelected = {
+export const materialButtonSelected: React.CSSProperties = {
   border: "0px",
   backgroundColor: "inherit",
   marginLeft: 0,
@@ -69,7 +69,7 @@ export const materialButtonSelected = {
   outline: 0
 };
 
-export const materialButtonOutline = {
+export const materialButtonOutline: React.CSSProperties = {
   border: "1px solid #CCC",
   backgroundColor: "inherit",
   borderRadius: 3,
@@ -86,7 +86,7 @@ export const materialButtonOutline = {
   verticalAlign: "top"
 };
 
-export const tabSingle = {
+export const tabSingle: React.CSSProperties = {
   borderTop: "1px solid #BBB",
   borderLeft: "1px solid #CCC",
   borderRight: "1px solid #CCC",
@@ -104,7 +104,7 @@ export const tabSingle = {
   textTransform: "uppercase"
 };
 
-export const tabGroup = {
+export const tabGroup: React.CSSProperties = {
   borderTop: "1px solid #BBB",
   borderLeft: "1px solid #CCC",
   borderRight: "1px solid #CCC",
@@ -117,7 +117,7 @@ export const tabGroup = {
   backgroundColor: "#fff"
 };
 
-export const tabGroupMember = {
+export const tabGroupMember: React.CSSProperties = {
   border: "none",
   backgroundColor: "inherit",
   padding: 0,
@@ -130,7 +130,7 @@ export const tabGroupMember = {
   fontSize: 12
 };
 
-export const tabGroupMemberSelected = {
+export const tabGroupMemberSelected: React.CSSProperties = {
   border: "none",
   backgroundColor: "inherit",
   padding: 0,
@@ -144,7 +144,10 @@ export const tabGroupMemberSelected = {
 };
 
 
-export const titleStyles = {
+export const titleStyles: {
+  big: React.CSSProperties
+  small: React.CSSProperties
+} = {
   big: {
     fontFamily: titleFont,
     fontSize: 76,
@@ -166,7 +169,21 @@ export const titleStyles = {
   }
 };
 
-export const infoPanelStyles = {
+export const infoPanelStyles: {
+  branchInfoHeading: React.CSSProperties
+  buttonLink: React.CSSProperties
+  tooltip: React.CSSProperties
+  modalContainer: React.CSSProperties
+  panel: React.CSSProperties
+  modalHeading: React.CSSProperties
+  modalSubheading: React.CSSProperties
+  tooltipHeading: React.CSSProperties
+  comment: React.CSSProperties
+  topRightMessage: React.CSSProperties
+  list: React.CSSProperties
+  item: React.CSSProperties
+  break: React.CSSProperties
+} = {
   branchInfoHeading: {
     fontSize: 15,
     fontWeight: 400,

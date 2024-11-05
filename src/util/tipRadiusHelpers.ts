@@ -1,18 +1,26 @@
 import { tipRadius, tipRadiusOnLegendMatch } from "./globals";
 import { getTipColorAttribute, numDate } from "./colorHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { PhyloNode } from "../components/tree/phyloTree/types";
+import { ColorScale } from "../reducers/controls";
+import { ReduxNode, TreeState } from "../reducers/tree/types";
 
 /**
 * equates a single tip and a legend element
 * exact match is required for categorical quantities such as genotypes, regions
 * continuous variables need to fall into the interval (lower_bound, upper_bound]
 * except for the first (smallest) legend value where we also match value=lower_bound
-* @param {string|number} selectedLegendItem e.g. "USA" or 2021
-* @param {object} node - node (tip) in question
-* @param {object} colorScale - used to get the value of the attribute being used for colouring
-* @returns bool
 */
-export const determineLegendMatch = (selectedLegendItem: (string|number), node:any, colorScale:any) => {
+export const determineLegendMatch = (
+  /** e.g. "USA" or 2021 */
+  selectedLegendItem: string | number,
+
+  /** node (tip) in question */
+  node: ReduxNode,
+
+  /** used to get the value of the attribute being used for colouring */
+  colorScale: ColorScale
+): boolean => {
   let nodeAttr = getTipColorAttribute(node, colorScale);
   if (colorScale.scaleType === 'temporal') {
     nodeAttr = numDate(nodeAttr);
@@ -29,34 +37,53 @@ export const determineLegendMatch = (selectedLegendItem: (string|number), node:a
 
 /**
  * Does the `node`s trait for the given `geoResolution` match the `geoValueToMatch`?
- * @param {object} node - node (tip) in question
- * @param {string} geoResolution - Geographic resolution (e.g. "division", "country", "region")
- * @param {string} geoValueToMatch - Value to match (e.g. "New Zealand", "New York")
- * @returns bool
  */
-const determineLocationMatch = (node:any, geoResolution:string, geoValueToMatch:string) => {
+const determineLocationMatch = (
+  /** node (tip) in question */
+  node: ReduxNode,
+
+  /** Geographic resolution (e.g. "division", "country", "region") */
+  geoResolution: string,
+
+  /** Value to match (e.g. "New Zealand", "New York") */
+  geoValueToMatch: string
+): boolean => {
   return geoValueToMatch === getTraitFromNode(node, geoResolution);
 };
 
 /**
 * produces the array of tip radii - if nothing's selected this is the hardcoded tipRadius
 * if there's a selectedLegendItem, then values will be small (like normal) or big (for those tips selected)
-* @param selectedLegendItem - value of the selected tip attribute (numeric or string) OPTIONAL
-* @param tipSelectedIdx - idx of a single tip to show with increased tipRadius OPTIONAL
-* @param colorScale - node (tip) in question
-* @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false, colorScale, tree}:
-  {tipSelectedIdx:(number|false), selectedLegendItem:(number|string|false), geoFilter:([string, string]|[]), searchNodes:any, colorScale:any, tree:any}
-) => {
+export const calcTipRadii = ({
+  tipSelectedIdx = false,
+  selectedLegendItem = false,
+  geoFilter = [],
+  searchNodes = false,
+  colorScale,
+  tree
+}: {
+  /** idx of a single tip to show with increased tipRadius */
+  tipSelectedIdx?: number | false
+
+  /** value of the selected tip attribute (numeric or string) */
+  selectedLegendItem?: number | string | false
+
+  geoFilter?: [string, string] | []
+
+  searchNodes?: PhyloNode[] | false
+
+  colorScale: ColorScale
+
+  tree: TreeState
+}): number[] | null => {
   if (selectedLegendItem !== false && tree && tree.nodes) {
-    return tree.nodes.map((d:any) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (geoFilter.length===2 && tree && tree.nodes) {
-    return tree.nodes.map((d:any) => determineLocationMatch(d, geoFilter[0], geoFilter[1]) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d) => determineLocationMatch(d, geoFilter[0], geoFilter[1]) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (searchNodes) {
-    return tree.nodes.map((d:any) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;

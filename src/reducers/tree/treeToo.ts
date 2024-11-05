@@ -1,18 +1,21 @@
-import * as types from "../actions/types";
-import { addNodeAttrs } from "../util/treeMiscHelpers";
-import { getDefaultTreeState } from "./tree";
-/* A version increase (i.e. props.version !== nextProps.version) necessarily implies
-that the tree is loaded as they are set on the same action */
+import { AnyAction } from "@reduxjs/toolkit";
+import { getDefaultTreeState } from ".";
+import { addNodeAttrs } from "../../util/treeMiscHelpers";
+import * as types from "../../actions/types";
+import { TreeTooState } from "./types";
 
-const treeToo = (state = getDefaultTreeState(), action) => {
-
+const treeToo = (
+  state: TreeTooState = getDefaultTreeState(),
+  action: AnyAction,
+): TreeTooState => {
   /* There are only a few actions we should always listen for, as they can change
   the presence / absence of the second tree */
   switch (action.type) {
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return {
+        ...state,
+        loaded: false,
+      };
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       if (action.treeToo) {
@@ -37,7 +40,8 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fallthrough */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
-        return Object.assign({}, state, {
+        return {
+          ...state,
           tangleTipLookup: action.tangleTipLookup,
           visibility: action.visibilityToo,
           visibilityVersion: action.visibilityVersionToo,
@@ -45,20 +49,22 @@ const treeToo = (state = getDefaultTreeState(), action) => {
           branchThicknessVersion: action.branchThicknessVersionToo,
           idxOfInViewRootNode: action.idxOfInViewRootNodeToo,
           idxOfFilteredRoot: action.idxOfFilteredRootToo,
-        });
+        };
       }
       return state;
     case types.UPDATE_TIP_RADII:
-      return Object.assign({}, state, {
+      return {
+        ...state,
         tipRadii: action.dataToo,
-        tipRadiiVersion: action.version
-      });
+        tipRadiiVersion: action.version,
+      };
     case types.NEW_COLORS:
       if (action.nodeColorsToo) {
-        return Object.assign({}, state, {
+        return {
+          ...state,
           nodeColors: action.nodeColorsToo,
-          nodeColorsVersion: action.version
-        });
+          nodeColorsVersion: action.version,
+        };
       }
       return state;
     case types.ADD_EXTRA_METADATA:

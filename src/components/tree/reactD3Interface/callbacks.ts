@@ -1,12 +1,15 @@
-import { updateVisibleTipsAndBranchThicknesses, applyFilter } from "../../../actions/tree";
+import { updateVisibleTipsAndBranchThicknesses, applyFilter, Root } from "../../../actions/tree";
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
+import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
+import { SelectedNode } from "../../../reducers/controls";
+import { TreeComponent } from "../tree";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
-export const onTipHover = function onTipHover(d) {
+export const onTipHover = function onTipHover(this: TreeComponent, d: PhyloNode): void {
   if (d.visibility !== NODE_VISIBLE) return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
@@ -18,7 +21,7 @@ export const onTipHover = function onTipHover(d) {
   });
 };
 
-export const onTipClick = function onTipClick(d) {
+export const onTipClick = function onTipClick(this: TreeComponent, d: PhyloNode): void {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
   /* The order of these two dispatches is important: the reducer handling
@@ -29,7 +32,7 @@ export const onTipClick = function onTipClick(d) {
 };
 
 
-export const onBranchHover = function onBranchHover(d) {
+export const onBranchHover = function onBranchHover(this: TreeComponent, d: PhyloNode): void {
   if (d.visibility !== NODE_VISIBLE) return;
 
   branchStrokeForHover(d);
@@ -53,7 +56,7 @@ export const onBranchHover = function onBranchHover(d) {
   });
 };
 
-export const onBranchClick = function onBranchClick(d) {
+export const onBranchClick = function onBranchClick(this: TreeComponent, d: PhyloNode): void {
   if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
 
@@ -64,12 +67,12 @@ export const onBranchClick = function onBranchClick(d) {
     return;
   }
 
-  const root = [undefined, undefined];
-  let cladeSelected;
+  const root: Root = [undefined, undefined];
+  let cladeSelected: string | undefined;
   // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
   // (The order of the drop-down on the menu)
   // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
-  let legalBranchLabels;
+  let legalBranchLabels: string[] | undefined;
   // Check has some branch labels, and remove 'aa' ones.
   if (d.n.branch_attrs &&
     d.n.branch_attrs.labels !== undefined) {
@@ -98,7 +101,7 @@ export const onBranchClick = function onBranchClick(d) {
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
-export const onBranchLeave = function onBranchLeave(d) {
+export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: PhyloNode): void {
 
   /* Reset the stroke back to what it was before */
   branchStrokeForLeave(d);
@@ -112,7 +115,7 @@ export const onBranchLeave = function onBranchLeave(d) {
   this.setState({hoveredNode: null});
 };
 
-export const onTipLeave = function onTipLeave(d) {
+export const onTipLeave = function onTipLeave(this: TreeComponent, d: PhyloNode): void {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
@@ -124,7 +127,7 @@ export const onTipLeave = function onTipLeave(d) {
 };
 
 /* clearSelectedNode when clicking to remove the node-selected modal */
-export const clearSelectedNode = function clearSelectedNode(selectedNode) {
+export const clearSelectedNode = function clearSelectedNode(this: TreeComponent, selectedNode: SelectedNode): void {
   if (!selectedNode.isBranch) {
     /* perform the filtering action (if necessary) that will restore the
     filtering state of the node prior to the selection */

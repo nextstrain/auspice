@@ -3,8 +3,16 @@ import 'd3-transition';
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
+import { PhyloTreeType } from "../phyloTree/types";
+import { TreeComponent } from "../tree";
+import { TreeComponentProps } from "../types";
 
-export const renderTree = (that, main, phylotree, props) => {
+export const renderTree = (
+  that: TreeComponent,
+  main: boolean,
+  phylotree: PhyloTreeType,
+  props: TreeComponentProps,
+): void => {
   const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
   const treeState = main ? props.tree : props.treeToo;
   if (!treeState.loaded) {
@@ -17,7 +25,7 @@ export const renderTree = (that, main, phylotree, props) => {
     renderBranchLabels=false;
   }
   const tipStrokeColors = calculateStrokeColors(treeState, false, props.colorByConfidence, props.colorBy);
-  /* simply the call to phylotree.render */
+
   phylotree.render({
     svg: select(ref),
     layout: props.layout,
