@@ -279,11 +279,13 @@ const parseMeasurementsJSON = (json) => {
 
 export const loadMeasurements = (measurementsData, dispatch) => {
   let measurementState = getDefaultMeasurementsState();
+  /* Just return default state there are no measurements data to load */
+  if (!measurementsData) {
+    return measurementState
+  }
+
   let warningMessage = "";
-  if (measurementsData === undefined) {
-    // eslint-disable-next-line no-console
-    console.debug("No measurements JSON fetched");
-  } else if (measurementsData instanceof Error) {
+  if (measurementsData instanceof Error) {
     console.error(measurementsData);
     warningMessage = "Failed to fetch measurements collections";
   } else {
