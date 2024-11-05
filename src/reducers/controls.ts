@@ -110,8 +110,8 @@ export const getDefaultControlsState = () => {
     canRenderBranchLabels: true,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
-    filters: defaults.filters,
-    filtersInFooter: defaults.filtersInFooter,
+    filters: JSON.parse(JSON.stringify(defaults.filters)),
+    filtersInFooter: JSON.parse(JSON.stringify(defaults.filtersInFooter)),
     modal: null,
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
