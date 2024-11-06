@@ -127,6 +127,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   const change = Object.keys(args).length;
   if (change) {
     args.animationInProgress = newProps.animationPlayPauseButton === "Pause";
+    args.performanceFlags = newProps.performanceFlags;
     // console.log('\n\n** ', phylotree.id, 'changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }

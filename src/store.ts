@@ -3,10 +3,12 @@ import { changeURLMiddleware } from "./middleware/changeURL";
 import rootReducer from "./reducers";
 // import { loggingMiddleware } from "./middleware/logActions";
 import { keepScatterplotStateInSync } from "./middleware/scatterplot";
+import { performanceFlags } from "./middleware/performanceFlags";
 
 const middleware = [
   keepScatterplotStateInSync,
   changeURLMiddleware,
+  performanceFlags,
   // loggingMiddleware
 ];
 

@@ -30,7 +30,8 @@ const Tree = connect((state: RootState) => ({
   tipLabelKey: state.controls.tipLabelKey,
   narrativeMode: state.narrative.display,
   animationPlayPauseButton: state.controls.animationPlayPauseButton,
-  showOnlyPanels: state.controls.showOnlyPanels
+  showOnlyPanels: state.controls.showOnlyPanels,
+  performanceFlags: state.controls.performanceFlags,
 }))(UnconnectedTree);
 
 export default Tree;
