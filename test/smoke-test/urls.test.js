@@ -1,6 +1,8 @@
 const {readFileSync} = require('fs');
 const {expect, test} = require('@playwright/test');
 
+test.describe.configure({ mode: 'parallel' });
+
 const testCases = [];
 
 // Load a suite of smoke tests from a simple text file. File is of the format:
