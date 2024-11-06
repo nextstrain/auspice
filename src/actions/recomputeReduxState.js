@@ -7,7 +7,6 @@ import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../ut
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { getDefaultFrequenciesState } from "../reducers/frequencies";
-import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { countTraitsAcrossTree, calcTotalTipsInTree, gatherTraitNames } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -23,7 +22,7 @@ import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
-import { createMeasurementsControlsFromQuery, getCollectionDefaultControls, getCollectionToDisplay } from "./measurements";
+import { combineMeasurementsControlsAndQuery, loadMeasurements } from "./measurements";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -207,9 +206,6 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.regression==="hide") state.scatterVariables.showRegression = false;
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
-
-  /* Process query params for measurements panel. These all start with `m_` or `mf_` prefix to avoid conflicts */
-  state = {...state, ...createMeasurementsControlsFromQuery(query)}
 
   return state;
   function _validDate(dateNum, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
@@ -858,6 +854,7 @@ export const getNarrativePageFromQuery = (query, narrative) => {
 
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  measurementsData = false, /* raw measurements json data or error, only used when main json is provided */
   secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false, /* if in a narrative this argument is set */
@@ -875,8 +872,8 @@ export const createStateFromQueryOrJSONs = ({
     entropy = entropyCreateState(json.meta.genome_annotations);
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
-    /* ensure default measurements state */
-    measurements = getDefaultMeasurementsState();
+    /* Load measurements if available, otherwise ensure default measurements state */
+    measurements = loadMeasurements(measurementsData, dispatch);
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     castIncorrectTypes(metadata, tree);
@@ -903,12 +900,6 @@ export const createStateFromQueryOrJSONs = ({
     measurements = {...oldState.measurements};
     controls = restoreQueryableStateToDefaults(controls);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
-    /* If available, reset to the default collection and the collection's default controls
-    so that narrative queries are respected between slides */
-    if (measurements.loaded) {
-      measurements.collectionToDisplay = getCollectionToDisplay(measurements.collections, "", measurements.defaultCollectionKey)
-      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
-    }
   }
 
   /* For the creation of state, we want to parse out URL query parameters
@@ -922,21 +913,27 @@ export const createStateFromQueryOrJSONs = ({
     narrativeSlideIdx = getNarrativePageFromQuery(query, narrative);
     /* replace the query with the information which can guide the view */
     query = queryString.parse(narrative[narrativeSlideIdx].query);
-    /**
-     * Special case where narrative includes query param for new measurements collection `m_collection`
-     * We need to reset the measurements and controls to the new collection's defaults before
-     * processing the remaining query params
-     */
-    if (query.m_collection && measurements.loaded) {
-      const newCollectionToDisplay = getCollectionToDisplay(measurements.collections, query.m_collection, measurements.defaultCollectionKey);
-      measurements.collectionToDisplay = newCollectionToDisplay;
-      controls = {...controls, ...getCollectionDefaultControls(measurements.collectionToDisplay)};
-      // Delete `m_collection` so there's no chance of things getting mixed up when processing remaining query params
-      delete query.m_collection;
-    }
   }
 
   controls = modifyStateViaURLQuery(controls, query);
+
+  /* Special handling of measurements controls and query params */
+  if (measurements.loaded) {
+    const { collectionToDisplay, collectionControls, updatedQuery} = combineMeasurementsControlsAndQuery(measurements, query);
+    measurements.collectionToDisplay = collectionToDisplay;
+    controls = {...controls, ...collectionControls};
+    query = updatedQuery;
+  } else {
+    // Hide measurements panel if loading failed
+    controls.panelsToDisplay = controls.panelsToDisplay.filter((panel) => panel !== "measurements");
+    controls.canTogglePanelLayout = hasMultipleGridPanels(controls.panelsToDisplay);
+    controls.panelLayout = controls.canTogglePanelLayout ? controls.panelLayout : "full";
+    // Remove all measurements query params which start with `m_` or `mf_`
+    query = Object.fromEntries(
+      Object.entries(query)
+        .filter(([key, _]) => !(key.startsWith("m_") || key.startsWith("mf_")))
+    );
+  }
 
   /* certain narrative slides prescribe the main panel to simply render narrative-provided markdown content */
   if (narrativeBlocks && narrative[narrativeSlideIdx].mainDisplayMarkdown) {

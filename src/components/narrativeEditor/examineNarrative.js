@@ -202,6 +202,7 @@ const ExamineNarrative = ({narrative, datasetResponses, setDisplayNarrative}) =>
         preserveCache: true, // specific for the narrative debugger
         ...createStateFromQueryOrJSONs({
           json: await narrative.datasets[datasetNames[0]].main,
+          measurementsData: narrative.datasets[datasetNames[0]].measurements ? (await narrative.datasets[datasetNames[0]].measurements) : undefined,
           secondTreeDataset: datasetNames[1] ? await narrative.datasets[datasetNames[1]].main : undefined,
           query: n ? {n} : {}, // query is things like n=3 to load a specific page
           narrativeBlocks: narrative.blocks,

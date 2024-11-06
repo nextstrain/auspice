@@ -118,4 +118,3 @@ async function fetchDatasetAndSidecars(name, dataset, dispatchDatasetResponses) 
     console.error("Programming error within fetchDatasetAndSidecars", err);
   }
 }
-
