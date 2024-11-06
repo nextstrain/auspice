@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.60.0 - 2024/11/07
+
+
 * Performance improvement: We no longer attempt to animate actions on trees with over 4000 tips which results in more responsive interactions. ([#1880](https://github.com/nextstrain/auspice/pull/1880))
 * Performance improvement: We no longer recompute the entropy data (which can be expensive) when the entropy panel is toggled off or off-screen. ([#1879](https://github.com/nextstrain/auspice/pull/1879))
 * Bugfix: narrative slide changes which removed a filter would not work as expected in some cases ([#1883](https://github.com/nextstrain/auspice/pull/1883))
