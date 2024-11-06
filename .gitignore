@@ -16,5 +16,8 @@ node_modules/
 npm-debug.log
 *tgz
 
+### playwright ###
+.playwright/
+
 ### IDE ###
 .vscode/*

@@ -1,5 +1,5 @@
 const {readFileSync} = require('fs');
-const {decode} = require('quoted-printable');
+const {expect, test} = require('@playwright/test');
 
 const testCases = [];
 
@@ -24,22 +24,18 @@ for (const line of text.split(/\r?\n/)) {
   testCases.push(testCase);
 }
 
-describe("smoke test rendering of paths in urls.txt", () => {
+test.describe("smoke test rendering of paths in urls.txt", () => {
   for (const testCase of testCases) {
     // eslint-disable-next-line no-loop-func
-    it(`it appropriately renders ${testCase.path}`, async () => {
-      const url = `${BASE_URL}${testCase.path}`;
-      const resp = await page.goto(url, { waitUntil: 'networkidle2' });
+    test(`it appropriately renders ${testCase.path}`, async ({ page }) => {
+      const resp = await page.goto(testCase.path, { waitUntil: 'networkidle' });
       expect(resp.status()).toEqual(200);
-      // Create a Devtools session for fetching MIME HTML snapshot:
-      const client = await page.target().createCDPSession();
-      await client.send('Page.enable');
-      // Takes a MIME HTML snapshot of page, and makes sure it contains
-      // our smoke test text content:
-      const snapshotText = decode((await client.send('Page.captureSnapshot')).data);
+      // Retrieve the page contents, and make sure it contains our smoke test
+      // text content:
+      const content = await page.content();
       for (const assertion of testCase.assertions) {
         try {
-          expect(snapshotText).toEqual(expect.stringContaining(assertion));
+          expect(content).toContain(assertion);
         } catch (_err) {
           throw Error(`could not find text "${assertion}" on page ${testCase.path}`);
         }
