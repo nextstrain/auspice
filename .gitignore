@@ -7,7 +7,6 @@ big_flu
 s3/
 /local_narratives/
 /datasets/
-**/__diff_output__
 
 ### OSX ###
 .DS_Store
@@ -16,6 +15,9 @@ s3/
 node_modules/
 npm-debug.log
 *tgz
+
+### playwright ###
+.playwright/
 
 ### IDE ###
 .vscode/*

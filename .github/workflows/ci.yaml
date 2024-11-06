@@ -51,7 +51,8 @@ jobs:
           node-version: ${{ matrix.node }}
       - run: npm ci --loglevel verbose
       - run: npm run get-data
-      - run: npm run smoke-test:ci
+      - run: npx playwright install chromium
+      - run: npm run smoke-test
 
   lint:
     runs-on: ubuntu-latest

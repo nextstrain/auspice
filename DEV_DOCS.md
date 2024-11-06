@@ -53,9 +53,7 @@ From a fork: `git pull --rebase upstream master`
 We use the following libraries for all kinds of testing, so it'd help to read the docs to get familiar with their APIs and features:
 
 1. [`Jest`](https://github.com/facebook/jest)
-2. [`Puppeteer`](https://github.com/puppeteer/puppeteer/)
-3. [`Jest-Puppeteer`](https://github.com/smooth-code/jest-puppeteer)
-4. [`Jest-Image-Snapshot`](https://github.com/americanexpress/jest-image-snapshot)
+2. [`Playwright`](https://playwright.dev)
 
 When you submit a pull request to the auspice repository, certain tests will need to pass before it can be merged.
 
@@ -75,11 +73,13 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 Auspice used to have integration testing using jest + puppeteer, however this was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
 Ideally this functionality will be brought back, and that PR would be a good place to start.
+If embarking on this journey, consider using Playwright since it is already used for smoke tests.
 
 #### For smoke tests
 
 1. Fetch the datasets with `npm run get-data`.
-2. Ensure you are **not** currently running the site locally, then run `npm run smoke-test:ci`.
+2. Install the testing browser with `npx playwright install chromium`.
+3. Run `npm run smoke-test`.
 
 
 #### Test Tips
