@@ -1,6 +1,15 @@
 # Changelog
 
+* Performance improvement: We no longer attempt to animate actions on trees with over 4000 tips which results in more responsive interactions. ([#1880](https://github.com/nextstrain/auspice/pull/1880))
 * Performance improvement: We no longer recompute the entropy data (which can be expensive) when the entropy panel is toggled off or off-screen. ([#1879](https://github.com/nextstrain/auspice/pull/1879))
+* Bugfix: narrative slide changes which removed a filter would not work as expected in some cases ([#1883](https://github.com/nextstrain/auspice/pull/1883))
+
+#### Internal / development changes
+* Refactor how the measurement-sidecar JSON is loaded ([#1881](https://github.com/nextstrain/auspice/pull/1881))
+* Move jest config to TypeScript  ([#1885](https://github.com/nextstrain/auspice/pull/1885))
+* Move jest-puppeteer with Playright  ([#1884](https://github.com/nextstrain/auspice/pull/1884))
+* Verbose logging during CI ([#1876](https://github.com/nextstrain/auspice/pull/1876))
+
 
 ## version 2.59.1 - 2024/10/23
 
