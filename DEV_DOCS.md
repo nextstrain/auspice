@@ -55,7 +55,6 @@ We use the following libraries for all kinds of testing, so it'd help to read th
 1. [`Jest`](https://github.com/facebook/jest)
 2. [`Puppeteer`](https://github.com/puppeteer/puppeteer/)
 3. [`Jest-Puppeteer`](https://github.com/smooth-code/jest-puppeteer)
-4. [`Jest-Image-Snapshot`](https://github.com/americanexpress/jest-image-snapshot)
 
 When you submit a pull request to the auspice repository, certain tests will need to pass before it can be merged.
 
