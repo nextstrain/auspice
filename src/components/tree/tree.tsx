@@ -83,7 +83,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
       newState.geneSortFn = sortByGeneOrder(this.props.genomeMap);
-      this.setState(newState); /* this will trigger an unnecessary CDU :( */
+      this.setState<never>(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
 
@@ -121,7 +121,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }
-    if (Object.keys(newState).length) this.setState(newState);
+    if (Object.keys(newState).length) this.setState<never>(newState);
   }
 
   override componentWillUnmount() {
