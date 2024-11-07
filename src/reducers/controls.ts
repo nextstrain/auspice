@@ -78,8 +78,8 @@ export const getDefaultControlsState = () => {
     defaults.sidebarOpen = initialSidebarState.sidebarOpen;
   }
 
-  const dateMin = numericToCalendar(currentNumDate() - defaultDateRange);
-  const dateMax = currentCalDate();
+  const dateMin = numericToCalendar(1900);
+  const dateMax = numericToCalendar(currentNumDate() + 100); // 100 years into the future
   const dateMinNumeric = calendarToNumeric(dateMin);
   const dateMaxNumeric = calendarToNumeric(dateMax);
   return {

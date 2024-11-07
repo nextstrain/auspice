@@ -151,8 +151,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
     const dates = {
-      dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
-      dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
+      dateMinNumeric: newMin ? calendarToNumeric(newMin) : Math.min(controls.dateMinNumeric, tree.nodesByNumDate[0][0]),
+      dateMaxNumeric: newMax ? calendarToNumeric(newMax) : Math.max(controls.dateMaxNumeric, tree.nodesByNumDate[tree.nodesByNumDate.length-1][0])
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
     const dispatchObj = {
