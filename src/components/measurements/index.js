@@ -1,6 +1,7 @@
 import React, { useCallback, useRef, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
+import { changeColorByToMeasurements } from "../../actions/measurements";
 import { NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
@@ -127,6 +128,7 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
 };
 
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
+  const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
   const legendValues = useSelector((state) => state.controls.colorScale.legendValues, isEqual);
@@ -220,6 +222,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     setHoverData(newHoverData);
   }, [fields, colorings, colorBy]);
 
+  const handleClickOnGrouping = useCallback((grouping, measurements) => {
+    dispatch(changeColorByToMeasurements(grouping, measurements))
+  }, [dispatch])
+
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
   }, [setPanelTitle, title, fields, groupBy]);
@@ -230,8 +236,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     // the scroll position on whitespace.
     svgContainerRef.current.scrollTop = 0;
     clearMeasurementsSVG(d3Ref.current, d3XAxisRef.current);
-    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData);
-  }, [svgData]);
+    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData, handleClickOnGrouping);
+  }, [svgData, handleClickOnGrouping]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {

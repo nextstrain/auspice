@@ -596,3 +596,14 @@ export const combineMeasurementsControlsAndQuery = (measurements, query) => {
     updatedQuery
   }
 }
+
+
+export const changeColorByToMeasurements = (grouping, measurements = undefined) => (dispatch, getState) => {
+  console.log(grouping)
+  console.log(measurements)
+  // First save grouping and measurements into Redux state (controls.measurementsColorings?)
+  // dispatch(setMeasurementsColorings)
+  // Then use the measurements colorings to change the colorBy
+  // const measurementsColorBy = "m_<groupBy>_<grouping>" or "m_<groupin>"?
+  // dispatch(changeColorBy(measurementsColorBy))
+}
