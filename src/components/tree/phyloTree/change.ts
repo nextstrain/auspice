@@ -311,7 +311,7 @@ export const change = function change(
     branchThickness = undefined,
     focus = undefined,
     scatterVariables = undefined,
-    performanceFlags = {},
+    performanceFlags = undefined,
   }: ChangeParams
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
