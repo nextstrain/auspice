@@ -297,6 +297,7 @@ export const change = function change(
     svgHasChangedDimensions = false,
     animationInProgress = false,
     changeNodeOrder = false,
+    focus = false,
     newDistance = undefined,
     newLayout = undefined,
     updateLayout = undefined,
@@ -309,7 +310,6 @@ export const change = function change(
     visibility = undefined,
     tipRadii = undefined,
     branchThickness = undefined,
-    focus = undefined,
     scatterVariables = undefined,
     performanceFlags = undefined,
   }: ChangeParams

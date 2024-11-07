@@ -196,6 +196,7 @@ export interface ChangeParams {
   svgHasChangedDimensions?: boolean
   animationInProgress?: boolean
   changeNodeOrder?: boolean
+  focus?: boolean
 
   // change these things to provided value (unless undefined) //
   newDistance?: Distance
@@ -214,7 +215,6 @@ export interface ChangeParams {
   branchThickness?: number[]
 
   // other data //
-  focus?: boolean
   scatterVariables?: ScatterVariables
   performanceFlags?: PerformanceFlags
 }
