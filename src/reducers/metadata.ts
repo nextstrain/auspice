@@ -1,7 +1,7 @@
 import * as types from "../actions/types";
 import { DatasetJsonRootSequence, DatasetJson, DatasetJsonMeta } from "../types/datasetJson";
 
-export interface MetadataState {
+export interface MetadataState { // TODO -- work out exactly what properties you want to have as required here
   loaded: true;
   rootSequence: DatasetJsonRootSequence;
   identicalGenomeMapAcrossBothTrees: boolean;
@@ -13,7 +13,7 @@ export interface MetadataState {
   displayDefaults: Record<string,any>; // TODO XXX
   panels: Required<DatasetJsonMeta>['panels'];
   mainTreeNumTips: number;
-  title: Required<DatasetJsonMeta>['title'];
+  title: DatasetJsonMeta['title'];
   version: DatasetJson['version'];
   filters: Required<DatasetJsonMeta>['filters'];
   dataProvenance: Required<DatasetJsonMeta>['data_provenance'];
@@ -30,7 +30,7 @@ export function convertIncompleteMetadataStateToMetadataState(meta: IncompleteMe
   // and we don't want to be doing that. What's the best path here?
   const expectedProperties: [string, string, any][] = [
     // THIS IS INCOMPLETE - TODO XXX
-    ["title", "string", null],
+    // ["title", "string", null], // title is optional!
     ["version", "string", null],
     ["filters", "string", []],
     ["updated", "string", new Error("JSON.meta missing property 'updated' which is essential")], // TKTK - it's not essential, just for testing
