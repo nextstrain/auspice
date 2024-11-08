@@ -1,11 +1,34 @@
 import React from "react";
-import { connect } from "react-redux";
+import { connect, ConnectedProps } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import Byline from "./byline";
 import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
+import { RootState } from "../../store";
+
+const mapState = (state: RootState) => {
+  // can we generalise the mapState function so the following is for free?
+  if (!state.metadata.loaded) { // loaded is the discriminant property to narrow types
+    throw new Error("Something's gone seriously wrong")
+  }
+  return {
+    browserWidth: state.browserDimensions.browserDimensions.width,
+    animationPlayPauseButton: state.controls.animationPlayPauseButton,
+    metadata: state.metadata,
+    nodes: state.tree.nodes,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    visibility: state.tree.visibility
+  }
+}
+const connector = connect(mapState)
+type PropsFromRedux = ConnectedProps<typeof connector>
+
+interface Props extends PropsFromRedux {
+  t: any; // TODO XXX - look up how to type WithTranslation
+  width: number;
+}
 
 /**
  * The <Info> panel is shown above data viz panels and conveys static and dynamic
@@ -15,22 +38,12 @@ import FiltersSummary from "./filtersSummary";
  * Dataset summary (dynamic)
  * Current Filters (dynamic)
  */
-@connect((state) => {
-  return {
-    browserWidth: state.browserDimensions.browserDimensions.width,
-    animationPlayPauseButton: state.controls.animationPlayPauseButton,
-    metadata: state.metadata,
-    nodes: state.tree.nodes,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    visibility: state.tree.visibility
-  };
-})
-class Info extends React.Component {
+class Info extends React.Component<Props> {
   constructor(props) {
     super(props);
   }
 
-  render() {
+  override render() {
     const { t } = this.props;
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = computeStyles(this.props.width, this.props.browserWidth);
@@ -40,15 +53,15 @@ class Info extends React.Component {
       <Card center infocard>
         <div style={styles.base}>
 
-          <div width={this.props.width} style={styles.title}>
-            {this.props.metadata.title || ""}
+          <div style={styles.title}>
+            {this.props.metadata.title}
           </div>
 
-          <div width={this.props.width} style={styles.byline}>
-            <Byline/>
+          <div style={styles.byline}>
+            <Byline metadata={this.props.metadata}/>
           </div>
 
-          <div width={this.props.width} style={styles.n}>
+          <div style={styles.n}>
             {animating ? t("Animation in progress") + ". " : null}
             {showExtended &&
               <>
@@ -111,5 +124,5 @@ function computeStyles(width, browserWidth) {
   };
 }
 
-const WithTranslation = withTranslation()(Info);
+const WithTranslation = withTranslation()(connector(Info));
 export default WithTranslation;

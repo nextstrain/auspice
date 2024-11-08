@@ -1,25 +1,25 @@
 import React from "react";
-import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
 import { headerFont } from "../../globalStyles";
+import { MetadataState} from "../../reducers/metadata";
+
+interface Props {
+  t: any; // TODO XXX - look up how to type WithTranslation
+  metadata: MetadataState
+}
 
 /**
  * React component for the byline of the current dataset.
  * This details (non-dynamic) information about the dataset, such as the
  * maintainers, source, data provenance etc.
  */
-@connect((state) => {
-  return {
-    metadata: state.metadata
-  };
-})
-class Byline extends React.Component {
-  render() {
+class Byline extends React.Component<Props> {
+  override render() {
     const { t } = this.props;
     return (
       <>
-        {renderAvatar(t, this.props.metadata)}
+        {renderAvatar(this.props.metadata)}
         {renderBuildInfo(t, this.props.metadata)}
         {renderMaintainers(t, this.props.metadata)}
         {renderDataUpdated(t, this.props.metadata)}
@@ -38,9 +38,9 @@ const AvatarImg = styled.img`
  * Renders the GitHub avatar of the current dataset for datasets with a `buildUrl`
  * which is a GitHub repo. The avatar image is fetched from GitHub (by the client).
  */
-function renderAvatar(t, metadata) {
+function renderAvatar(metadata: MetadataState) {
   const repo = metadata.buildUrl;
-  if (typeof repo === 'string') {
+  if (repo) {
     const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
     if (match) {
       return (
@@ -55,10 +55,10 @@ function renderAvatar(t, metadata) {
  * Returns a React component detailing the source of the build (pipeline).
  * Renders a <span> containing "Built with X", where X derives from `metadata.buildUrl`
  */
-function renderBuildInfo(t, metadata) {
+function renderBuildInfo(t, metadata: MetadataState) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
-    if (typeof repo === 'string') {
+    if (typeof repo === 'string') { // TODO - we can relax this now that we have proper types
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
@@ -80,11 +80,11 @@ function renderBuildInfo(t, metadata) {
  * Returns a React component detailing the maintainers of the build (pipeline).
  * Renders a <span> containing "Maintained by X", where X derives from `metadata.maintainers`
  */
-function renderMaintainers(t, metadata) {
+function renderMaintainers(t, metadata: MetadataState): JSX.Element | null {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
     maintainersArray = metadata.maintainers;
-    if (Array.isArray(maintainersArray) && maintainersArray.length) {
+    if (Array.isArray(maintainersArray) && maintainersArray.length) {  // TODO - we can relax this now that we have proper types
       return (
         <span>
           {t("Maintained by") + " "}
@@ -106,7 +106,7 @@ function renderMaintainers(t, metadata) {
  * Returns a React component detailing the date the data was last updated.
  * Renders a <span> containing "Data updated X", where X derives from `metadata.updated`
  */
-function renderDataUpdated(t, metadata) {
+function renderDataUpdated(t, metadata: MetadataState): JSX.Element | null {
   if (metadata.updated) {
     return (
       <span>
@@ -122,7 +122,7 @@ function renderDataUpdated(t, metadata) {
  * Renders a <span> containing "Enabled by data from X", where X derives from `metadata.dataProvenance`
  * Note that this function includes logic to special-case certain values which may appear there.
  */
-function renderDataProvenance(t, metadata) {
+function renderDataProvenance(t, metadata: MetadataState): JSX.Element | null {
   if (!Array.isArray(metadata.dataProvenance)) return null;
   const sources = metadata.dataProvenance
     .filter((source) => typeof source === "object")
@@ -174,7 +174,7 @@ const BylineLink = styled.a`
   font-weight: 500;
 `;
 
-function Link({url, children}) {
+function Link({url, children}): JSX.Element {
   return (
     <BylineLink rel="noopener noreferrer" href={url} target="_blank">
       {children}
