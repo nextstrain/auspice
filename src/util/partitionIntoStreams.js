@@ -52,8 +52,8 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
 
   streams.streams = founderIndiciesPostorder.map((founderIdx) => {
     const stream = {};
-    stream.founderIdx = founderIdx;
-    const nodesInStream = [];
+    stream.founderIdx = founderIdx; // index of the root node (not part of the stream as it's not a tip)
+    const nodesInStream = []; // TERMINAL NODES ONLY
     const founderNode = nodes[founderIdx];
     stream.founderName = founderNode.name;
     const stack = [founderNode];
@@ -68,7 +68,11 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
       // Note - this double counts this node I think
       // TODO - extend the stem of the founder node branch to join with the stream start point.
       // if (node.arrayIdx===founderNode.arrayIdx) streams.mask[node.arrayIdx] = 1;
-      nodesInStream.push(node);
+
+      // nodesInStream is terminal only
+      if (!node.hasChildren) {
+        nodesInStream.push(node);
+      }
       for (const child of node.children || []) {
         stack.push(child)
       }
