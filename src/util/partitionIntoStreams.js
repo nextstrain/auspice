@@ -1,21 +1,28 @@
 import { getTraitFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
+import { sum } from "d3-array";
 
 
 // Prototype - hardcode the CA of streams
 function _isFounderNode(node) {
 
-  // if (node?.branch_attrs?.labels?.clade) return true;
-  // return false;
-
-
+  if (node?.branch_attrs?.labels?.clade) return true;
+  return false;
 
 
   const FOUNDERS = [
     // ZIKA:
-    "NODE_0000200", // 133, including below, so 40 of its own
-    "NODE_0000241", // 93 tips
+    // "NODE_0000200", // 133, including below, so 40 of its own
+    // "NODE_0000241", // 93 tips
     // "NODE_0000001"
+
+  
+    // FLU:
+    "NODE_0001834",
+    "NODE_0001220", // 1220
+    "NODE_0001102", // 80
+    "NODE_0000729", // 729, less 154 = 575
+    "NODE_0001261", // 154
   ]
   return FOUNDERS.includes(node.name);
 }
@@ -37,12 +44,9 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
 
   if (!enabled) return streams;
 
-  const {founderIndiciesToDescendantFounderIndicies, foundersPostorder} =
+  const {founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups} =
     getFounderTree(nodes, _isFounderNode);
-
-  // TODO XXX only one use of founderIndiciesToDescendantFounderIndicies which can be removed
-  streams.founderIndiciesToDescendantFounderIndicies = founderIndiciesToDescendantFounderIndicies;
-  // streams.foundersPostorder = foundersPostorder;
+  streams.streamGroups = streamGroups;
 
   streams.streams = foundersPostorder.map((founderInfo) => { // TKTK
     const stream = {};
@@ -89,11 +93,29 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
     // stream.numNodes = nodesInStream.length;
     stream.maxNodesInInterval = Math.max(...stream.nodeIdxs.map((idxs) => idxs.length));
     stream.countsByCategory = countsByCategory(nodes, stream.nodeIdxs, visibility, colorScale.colorBy, stream.categories);
+    const descendantFounderIndicies = founderIndiciesToDescendantFounderIndicies[founderNode.arrayIdx];
+    stream.fullTipCountExSubstreams = calcFullTipCountExSubstreams(nodes, stream.founderIdx, descendantFounderIndicies);
     return stream;
   })
 
   return streams;
 }
+
+
+function calcFullTipCountExSubstreams(nodes, founderNodeIdx, descendantFounderIndicies) {
+  let fullTipCount = nodes[founderNodeIdx].fullTipCount;
+  const stack = [nodes[founderNodeIdx]];
+  while (stack.length) {
+    const node = stack.pop();
+    if (descendantFounderIndicies.includes(node.arrayIdx)) {
+      fullTipCount -= nodes[node.arrayIdx].fullTipCount;
+    } else {
+      for (const child of (node.children || [])) stack.push(child);
+    }
+  }
+  return fullTipCount;
+}
+
 
 function observedCategories(nodes, colorScale) {
   const colorBy = colorScale.colorBy;
@@ -223,7 +245,21 @@ function getFounderTree(treeNodes, isFounderNode) {
     })
   }
   postorder(founderTree)
+  foundersPostorder.forEach((f, i) => {f.streamIdx = i;});
 
-  console.log({founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder})
-  return {founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder};
+  const streamGroups = founderTree.children.map((n) => { // n: founderTreeNode
+    const indicies = [];
+    const stack = [n];
+    while (stack.length) {
+      const m = stack.shift(); // preorder
+      indicies.push(foundersPostorder.filter((d) => d.idx===m.arrayIdx)[0].streamIdx);
+      // indicies.push(m.arrayIdx);
+      for (const child of m.children) stack.unshift(child);
+    }
+    return indicies;
+  })
+
+
+  console.log({founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups})
+  return {founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups};
 }

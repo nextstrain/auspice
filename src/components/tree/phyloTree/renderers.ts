@@ -305,6 +305,8 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
 
 export function drawStreams(this: PhyloTreeType): void {
 
+  if (!this.phyloStreams) return;
+
   /* initial set up - should only ever run once */
   if (!("streams" in this.groups)) {
     this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");

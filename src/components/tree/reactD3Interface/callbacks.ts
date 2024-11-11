@@ -106,6 +106,10 @@ export function onStreamConnectorClick(phyloStream) {
   console.log("CLICK", phyloStream, this)
   const root = [this.state.tree.streams.streams[phyloStream.streamIdx].founderIdx, undefined];
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected: undefined}));
+
+  // TODO - this zoom is wrong because underneath it all we're zooming to the display Order values of the subtree
+  // but streams don't occupy those values (well, sometimes they do)
+
   // TODO XXX - second trees
   // TODO XXX - zoom out behaviour
 }
