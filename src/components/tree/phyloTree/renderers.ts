@@ -119,6 +119,7 @@ export const render = function render(
   this.updateTipLabels();
   this.drawTips();
   this.drawStreams();
+  this.drawStreamConnectors();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.regression) this.drawRegression();
@@ -317,8 +318,11 @@ export function drawStreams(this: PhyloTreeType): void {
 
   /* if we call drawStreams() we're not trying to update, we want to remove all stream paths & redraw everything */
   this.groups.streams.selectAll(".stream").remove();
+  this.groups.streams.selectAll(".connector").remove();
+
   
   for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+    console.log("rendering stream", streamIdx)
     /**
      * The element each selector gets ("d") is an element of stream.ripples, so
      * d is an array with length=numPivots.
@@ -335,6 +339,22 @@ export function drawStreams(this: PhyloTreeType): void {
       .attr("fill", (_d, i:number) => this.streams.streams[streamIdx].categoryColors[i])
   }
   // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
+
+  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+    this.groups.streams.select(`#stream${streamIdx}`)
+      .append("path")
+      .attr("class", 'connector')
+      .attr("d", stream.connectorPath)
+      .style("stroke-width", this.streams.streams[streamIdx].founderVisibility ? 2 : 1)
+      .style("stroke-dasharray", "3 2")
+      .style("stroke", () => this.streams.streams[streamIdx].startingColor)
+      .style("fill", "none")
+      .style('visibility', 'visible');
+  }
+}
+
+export function drawStreamConnectors() {
+  console.log("drawStreamConnectors is currently a no-op")
 }
 
 

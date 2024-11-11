@@ -88,7 +88,7 @@ export function streamLayout(this: PhyloTreeType): void {
   // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
   // NOTE: this.streams is postorder (i.e. the founder nodes are postorder w.r.t other founders in the main tree)
   // this.phyloStreams = this.streams.streams.map((stream) => {
-  this.phyloStreams.forEach((phyloStream, streamIdx) => {
+  const intermediates = this.phyloStreams.map((phyloStream, streamIdx) => {
 
     const stream = this.streams.streams[streamIdx];
 
@@ -102,7 +102,9 @@ export function streamLayout(this: PhyloTreeType): void {
     }
 
     const getDisplayOrderExSubtrees = (node, top=true) => {
-      const children = (node.children || []).filter((child) => !this.streams.founderIndiciesPostorder.includes(child.arrayIdx));
+      const founderIndicies = this.streams.streams.map((f) => f.founderIdx);
+
+      const children = (node.children || []).filter((child) => !founderIndicies.includes(child.arrayIdx));
       if (children.length) return getDisplayOrderExSubtrees(children.at(top?0:-1), top);
       return node.shell.displayOrder;
     }
@@ -115,6 +117,7 @@ export function streamLayout(this: PhyloTreeType): void {
     
     // Get the total display order used up by _this_ stream, taking into account the display orders
     // which may be used for descendant streams (note- this is why we iterate through streams postorder)
+    // TODO XXX - only use of founderIndiciesToDescendantFounderIndicies
     const displayOrderTotal = (displayOrders[1] - displayOrders[0]) -
       this.streams.founderIndiciesToDescendantFounderIndicies[stream.founderIdx].reduce(
         (acc, founderIdx) => acc + displayOrderUsed[founderIdx],
@@ -156,8 +159,54 @@ export function streamLayout(this: PhyloTreeType): void {
     // NOTE: for num_date the value is the x value. Easy.
     // return {displayOrderByCategory}
     phyloStream.displayOrderByCategory = displayOrderByCategory; // this is overwritten each update cycle - is this ok?
+
+    return {displayOrderMidpoint};
+
   });
-  
+
+  /**
+   * Second loop (once displayOrderByCategory has been calculated for all streams) to work out the connectors
+   * a.k.a. branches between streams.
+   * TODO XXX: branch visibility -- partially done, but bugs
+   * TODO XXX: zoom / move
+   * TODO XXX: branch confidence / opacity / color
+   */
+  this.phyloStreams.forEach((phyloStream, streamIdx) => {
+    const stream = this.streams.streams[streamIdx];
+    let endDisplayOrder, endPivot;
+    // finds the first pivot index where we draw some of the stream
+    for (let pivotIdx=0; pivotIdx<phyloStream.displayOrderByCategory[0].length; pivotIdx++) {
+      if (phyloStream.displayOrderByCategory.at(0).at(pivotIdx)[0] !== phyloStream.displayOrderByCategory.at(-1).at(pivotIdx)[1]) {
+        // TODO XXX BUG both these are undefined if there's no visible nodes in the stream!
+        endDisplayOrder = intermediates[streamIdx].displayOrderMidpoint;
+        endPivot = stream.pivots[pivotIdx];
+        // Note that drawing a line to the (x-val of the) pivot isn't quite right once we use curves over the pivots
+        break
+      }
+    }
+    const startXVal = getTraitFromNode(this.nodes[stream.originatingNodeIdx].n, "num_date");
+    // connector start if parent not a stream
+    if (stream.originatingStreamIdx===null) {
+      // Increase the tee length of the parent node (a "normal" branch in the tree) so it matches the y-position of the (branch to the) stream
+      const treePhyloNode = this.nodes[stream.originatingNodeIdx];
+      const teeIdx = treePhyloNode.displayOrder > intermediates[streamIdx].displayOrderMidpoint ? 1 : 0;
+      treePhyloNode.displayOrderRange[teeIdx] = endDisplayOrder;
+      phyloStream.connectorFn = function(x, y) { // scale functions
+        return `M ${x(startXVal)} ${y(endDisplayOrder)} H ${x(endPivot)}`;
+      }
+    } else { // parent is a stream, so a little bit more complex
+      // const parentStream = this.streams.streams[stream.originatingStreamIdx];
+      // const closestPivotIdx = parentStream.pivots.map((p) => Math.abs(p-xVal)).reduce((res, d, i) => (!res?.[0] || d<res[0]) ? [d,i] : res, [])[1];
+      // One approach is to work out the category the originatingNodeIdx comes from and draw the branch to that,
+      // but easier to just draw it to the displayOrderMidpoint of the stream
+      const startDisplayOrder = intermediates[stream.originatingStreamIdx].displayOrderMidpoint;
+      phyloStream.connectorFn = function(x, y) { // scale functions
+        return `M ${x(startXVal)} ${y(startDisplayOrder)} L ${x(startXVal)} ${y(endDisplayOrder)} L ${x(endPivot)} ${y(endDisplayOrder)}`;
+      }
+    }
+  });
+
+  // console.log("this.phyloStreams", this.phyloStreams)
 }
 
 /**
@@ -645,6 +694,9 @@ export function mapStreamsToScreen(streams, phyloStreams, xScale, yScale) {
         stream.ripples[categoryIdx][pivotIdx].y1 = yScale(max);
       })
     })
+
+    stream.connectorPath = stream.connectorFn(xScale, yScale)
+    console.log("stream.connectorPath", stream.connectorPath)
   }
 }
 

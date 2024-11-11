@@ -5,24 +5,17 @@ import { NODE_VISIBLE } from "./globals";
 // Prototype - hardcode the CA of streams
 function _isFounderNode(node) {
 
-  // if (node?.branch_attrs?.labels?.clade) return true;
-  // return false;
+  if (node?.branch_attrs?.labels?.clade) return true;
+  return false;
+
+
+
 
   const FOUNDERS = [
-    // "NODE_0000731",
-    // "NODE_0001569", // NOTE - other founder nodes are descendants of this clade
-    // "NODE_0000648",
-    // "NODE_0000038",
-
-
-    "NODE_0019794",
-    "NODE_0015887",
-    "NODE_0000777",
-
-
-    // "NODE_0001227",
-    // "NODE_0001571",
-    // "NODE_0001773", // VERY BASAL IN TREE - everything is a descendant of this node
+    // ZIKA:
+    "NODE_0000200", // 133, including below, so 40 of its own
+    "NODE_0000241", // 93 tips
+    // "NODE_0000001"
   ]
   return FOUNDERS.includes(node.name);
 }
@@ -44,17 +37,22 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
 
   if (!enabled) return streams;
 
-  const {founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder} =
-    getFounderTree(nodes[0], _isFounderNode);
+  const {founderIndiciesToDescendantFounderIndicies, foundersPostorder} =
+    getFounderTree(nodes, _isFounderNode);
 
+  // TODO XXX only one use of founderIndiciesToDescendantFounderIndicies which can be removed
   streams.founderIndiciesToDescendantFounderIndicies = founderIndiciesToDescendantFounderIndicies;
-  streams.founderIndiciesPostorder = founderIndiciesPostorder;
+  // streams.foundersPostorder = foundersPostorder;
 
-  streams.streams = founderIndiciesPostorder.map((founderIdx) => {
+  streams.streams = foundersPostorder.map((founderInfo) => { // TKTK
     const stream = {};
-    stream.founderIdx = founderIdx; // index of the root node (not part of the stream as it's not a tip)
+    stream.founderIdx = founderInfo.idx; // index of the root node (not part of the stream as it's not a tip)
+    stream.founderVisibility = visibility[stream.founderIdx]===NODE_VISIBLE;
+
+    stream.originatingNodeIdx = founderInfo.originatingNodeIdx;
+    stream.originatingStreamIdx = foundersPostorder.reduce((ret, v, i) => v.idx===founderInfo.originatingStreamFounderIdx ? i : ret, null)
     const nodesInStream = []; // TERMINAL NODES ONLY
-    const founderNode = nodes[founderIdx];
+    const founderNode = nodes[founderInfo.idx];
     stream.founderName = founderNode.name;
     const stack = [founderNode];
     while (stack.length) {
@@ -80,6 +78,9 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
     // categories may have zero counts associated with them (over all pivots) depending on visibility settings
     stream.categories = observedCategories(nodesInStream, colorScale);
     stream.categoryColors = stream.categories.map((value) => colorScale.scale(value))
+    // TODO XXX - the starting color needs to be modified if it is to match the branches!
+    // See calculateStrokeColors, but this would need refactoring
+    stream.startingColor = colorScale.scale(getTraitFromNode(nodes[founderInfo.idx], colorScale.colorBy))
     const pivotData = calcPivots(nodesInStream, absoluteDateMinNumeric, absoluteDateMaxNumeric);
     stream.pivotIntervals = pivotData.intervals;
     stream.pivots = pivotData.pivots;
@@ -149,6 +150,7 @@ function groupNodesIntoIntervals(nodes, intervals) {
 }
 
 export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, categories) {
+  console.log("countsByCategory")
   return categories.map((category) => {
     return nodeIdxsByPivot.map((nodeIdxs) => {
       return nodeIdxs.filter(
@@ -157,12 +159,18 @@ export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, ca
     })
   })
 }
+
+export function streamConnectorVisibility() {
+  // TODO XXX - returns boolean - is the founderIdx visible ? and then render has access to this!
+}
+
+
 /**
  * 
  * @param {object} rootNode redux tree node
  * @param {function} isFounderNode
  */
-function getFounderTree(rootNode, isFounderNode) {
+function getFounderTree(treeNodes, isFounderNode) {
   // Tree of nodes (in the main tree) which define stream trees
   const founderTree = {children: []};
   const nodesInStreamFounderTree = [];
@@ -179,7 +187,7 @@ function getFounderTree(rootNode, isFounderNode) {
       traverse(child, newNode||streamParentNode)
     }
   }
-  traverse(rootNode);
+  traverse(treeNodes[0]);
 
   // Create mapping of founder nodes (indicies) to all their descendant indicies
   const founderIndiciesToDescendantFounderIndicies = Object.fromEntries(
@@ -197,14 +205,25 @@ function getFounderTree(rootNode, isFounderNode) {
 
   // Create a list of founder indicies in postorder order, such that we can trivially visit
   // the nodes without needing traversals
-  const founderIndiciesPostorder = [];
+  const foundersPostorder = []
   function postorder(node) {
     for (const child of node.children||[]) {
       postorder(child);
     }
-    if (node.arrayIdx!==undefined) founderIndiciesPostorder.push(node.arrayIdx);
+    if (node.arrayIdx===undefined) {
+      return
+    }
+    foundersPostorder.push({
+      idx: node.arrayIdx,
+      rootName: node.name,
+      originatingNodeIdx: treeNodes[node.arrayIdx].parent.arrayIdx,
+      originatingStreamFounderIdx: Object.hasOwn(node.parent, "arrayIdx") ? node.parent.arrayIdx : null,
+      childStreamFounders: node?.children?.map((c) => c.arrayIdx) || [],
+      // NOTE: no concept of child-non-streams, i.e. can't have a normal tree sprout from a stream
+    })
   }
   postorder(founderTree)
 
-  return {founderTree, founderIndiciesToDescendantFounderIndicies, founderIndiciesPostorder};
+  console.log({founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder})
+  return {founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder};
 }
