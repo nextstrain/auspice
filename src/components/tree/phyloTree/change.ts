@@ -199,6 +199,11 @@ export const modifySVG = function modifySVG(
       })
     }
     genericSelectAndModify(this.svg, ".stream", updateCall, transitionTime);
+    const connectorUpdateCall = (selection) => {
+      selection.attr("d", (d) => d.connectorPath);
+      // TODO -- update visibility? I.e. stroke width?
+    }
+    genericSelectAndModify(this.svg, ".connector", connectorUpdateCall, transitionTime);
   }
 
 

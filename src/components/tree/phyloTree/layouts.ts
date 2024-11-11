@@ -82,7 +82,7 @@ export function streamLayout(this: PhyloTreeType): void {
 
   if (!this.phyloStreams) {
     /* it's important we only set this up once, as DOM elements will bind to data within, so we need to mutate it */
-    this.phyloStreams = this.streams.streams.map((_) => ({}))
+    this.phyloStreams = this.streams.streams.map((_, streamIdx) => ({streamIdx}))
   }
 
   // TODO XXX - need to store this internally, but do we need this.streams or should this be an arg?
@@ -696,7 +696,7 @@ export function mapStreamsToScreen(streams, phyloStreams, xScale, yScale) {
     })
 
     stream.connectorPath = stream.connectorFn(xScale, yScale)
-    console.log("stream.connectorPath", stream.connectorPath)
+    stream.update = true; // needed for current `change` methods to work
   }
 }
 

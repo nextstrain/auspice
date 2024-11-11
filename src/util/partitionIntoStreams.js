@@ -5,8 +5,8 @@ import { NODE_VISIBLE } from "./globals";
 // Prototype - hardcode the CA of streams
 function _isFounderNode(node) {
 
-  if (node?.branch_attrs?.labels?.clade) return true;
-  return false;
+  // if (node?.branch_attrs?.labels?.clade) return true;
+  // return false;
 
 
 

@@ -322,7 +322,6 @@ export function drawStreams(this: PhyloTreeType): void {
 
   
   for (const [streamIdx, stream] of this.phyloStreams.entries()) {
-    console.log("rendering stream", streamIdx)
     /**
      * The element each selector gets ("d") is an element of stream.ripples, so
      * d is an array with length=numPivots.
@@ -340,16 +339,23 @@ export function drawStreams(this: PhyloTreeType): void {
   }
   // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
 
-  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+
+
+  for (const [streamIdx, phyloStream] of this.phyloStreams.entries()) {
     this.groups.streams.select(`#stream${streamIdx}`)
+      .selectAll(`.connector`)
+      .data([phyloStream])
+      .enter()
       .append("path")
-      .attr("class", 'connector')
-      .attr("d", stream.connectorPath)
+      .attr("class", `connector`)
+      .attr("d", (d) => d.connectorPath)
       .style("stroke-width", this.streams.streams[streamIdx].founderVisibility ? 2 : 1)
-      .style("stroke-dasharray", "3 2")
+      .style("stroke-dasharray", "5 2")
       .style("stroke", () => this.streams.streams[streamIdx].startingColor)
       .style("fill", "none")
-      .style('visibility', 'visible');
+      .style('visibility', 'visible')
+      .style('cursor', 'pointer') // using a dashed line doesn't play nicely with onhover/onclick behaviour :(
+      .on("click", this.callbacks.onStreamConnectorClick);
   }
 }
 
