@@ -26,7 +26,8 @@ export type TreeElement =
   ".tipLabel" |
   ".vaccineCross" |
   ".vaccineDottedLine" |
-  ".stream"
+  ".stream" |
+  ".connector"
 
 export interface Regression {
   intercept?: number
@@ -218,6 +219,8 @@ export interface ChangeParams {
   // other data //
   scatterVariables?: ScatterVariables
   performanceFlags?: PerformanceFlags
+
+  showStreams?: boolean
   streams?: any // TODO XXX
 }
 

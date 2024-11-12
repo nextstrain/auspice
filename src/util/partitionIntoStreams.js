@@ -172,7 +172,6 @@ function groupNodesIntoIntervals(nodes, intervals) {
 }
 
 export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, categories) {
-  console.log("countsByCategory")
   return categories.map((category) => {
     return nodeIdxsByPivot.map((nodeIdxs) => {
       return nodeIdxs.filter(

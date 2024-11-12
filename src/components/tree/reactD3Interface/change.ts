@@ -40,6 +40,14 @@ export const changePhyloTreeViaPropsComparison = (
     args.streams = newTreeRedux.streams;
   }
 
+  /* toggle on-off stream trees? 
+     NOTE: currently this is all-or-nothing, but one day it'll be per-stream */
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees) {
+    console.log("prop change!", oldProps.showStreamTrees, newProps.showStreamTrees)
+    args.showStreams = newProps.showStreamTrees;
+    args.streams = newTreeRedux.streams;
+  }
+
   /* visibility */
   // TODO XXX - under what circumstances is this conditional true vs (`dateRangeChange || filterChange`)?
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
