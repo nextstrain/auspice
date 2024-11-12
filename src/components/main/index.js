@@ -23,6 +23,7 @@ import ErrorBoundary from "../../util/errorBoundary";
 import Spinner, { PanelSpinner } from "../framework/spinner";
 import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
 import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
+import PanelErrorBoundary from "../errorBoundaries/panelErrorBoundary";
 
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
@@ -155,11 +156,17 @@ class Main extends React.Component {
           }
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ?
-            <Tree
+            <PanelErrorBoundary
               width={this.inGrid() ? grid.width : full.width}
               height={this.inGrid() ? grid.height : full.height}
-              key={keyName}
-            /> :
+              name="tree"
+            >
+              <Tree
+                width={this.inGrid() ? grid.width : full.width}
+                height={this.inGrid() ? grid.height : full.height}
+                key={keyName}
+              />
+            </PanelErrorBoundary> :
             null
           }
           {this.props.panelsToDisplay.includes("measurements") ?
@@ -172,34 +179,50 @@ class Main extends React.Component {
                 />
               }
             >
-              <Measurements
+              <PanelErrorBoundary
                 width={this.inGrid() ? grid.width : full.width}
                 height={this.inGrid() ? grid.height : full.height}
-                key={keyName+"_measurements"}
-                showLegend={this.shouldShowMeasurementsLegend()}
-              />
+                name="measurements"
+              >
+                <Measurements
+                  width={this.inGrid() ? grid.width : full.width}
+                  height={this.inGrid() ? grid.height : full.height}
+                  key={keyName+"_measurements"}
+                  showLegend={this.shouldShowMeasurementsLegend()}
+                />
+              </PanelErrorBoundary>
             </Suspense> :
             null
           }
           {this.props.panelsToDisplay.includes("map") ?
-            <Map
+            <PanelErrorBoundary
               width={this.shouldMapBeInGrid() ? grid.width : full.width}
               height={this.shouldMapBeInGrid() ? grid.height : full.height}
-              key={keyName+"_map"}
-              justGotNewDatasetRenderNewMap={false}
-              legend={this.shouldShowMapLegend()}
-            /> :
+              name="map"
+            >
+              <Map
+                width={this.shouldMapBeInGrid() ? grid.width : full.width}
+                height={this.shouldMapBeInGrid() ? grid.height : full.height}
+                key={keyName+"_map"}
+                justGotNewDatasetRenderNewMap={false}
+                legend={this.shouldShowMapLegend()}
+              />
+            </PanelErrorBoundary> :
             null
           }
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
-              <Entropy width={chartEntropy.width} height={chartEntropy.height} key={keyName+"_entropy"}/>
+              <PanelErrorBoundary width={chartEntropy.width} height={chartEntropy.height} name="entropy">
+                <Entropy width={chartEntropy.width} height={chartEntropy.height} key={keyName+"_entropy"}/>
+              </PanelErrorBoundary>
             </Suspense>) :
             null
           }
           {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
             (<Suspense fallback={null}>
-              <Frequencies width={chartFrequencies.width} height={chartFrequencies.height} key={keyName+"_frequencies"}/>
+              <PanelErrorBoundary width={chartFrequencies.width} height={chartFrequencies.height} name="frequencies">
+                <Frequencies width={chartFrequencies.width} height={chartFrequencies.height} key={keyName+"_frequencies"}/>
+              </PanelErrorBoundary>
             </Suspense>) :
             null
           }
