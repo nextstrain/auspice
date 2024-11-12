@@ -1,6 +1,7 @@
 import { dataFont, darkGrey } from "../../../globalStyles";
+import { Params } from "./types";
 
-export const createDefaultParams = () => ({
+export const createDefaultParams = (): Params => ({
   regressionStroke: darkGrey,
   regressionWidth: 6,
   majorGridStroke: "#DDD",

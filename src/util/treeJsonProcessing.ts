@@ -1,24 +1,25 @@
 import { getDefaultTreeState } from "../reducers/tree";
+import { Mutations, ReduxNode, TreeState } from "../reducers/tree/types";
 import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
 import { calcFullTipCounts } from "./treeCountingHelpers";
 
 const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
 
 /**
- * Adds certain properties to the nodes array - for each node in nodes it adds
- * node.fullTipCount - see calcFullTipCounts() description
- * node.hasChildren {bool}
- * node.arrayIdx  {integer} - the index of the node in the nodes array
- * @param  {array} nodes redux tree nodes
- * @return {Object} ret
- * @return {Set} ret.nodeAttrKeys collection of all `node_attr` keys whose values are Objects
- * @return {Array} ret.nodes input array (kinda unnecessary)
- *
- * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
+ * Adds the following properties to each node:
+ * - fullTipCount
+ * - hasChildren
+ * - arrayIdx
  */
-const processNodes = (nodes) => {
-  const nodeNamesSeen = new Set();
-  const nodeAttrKeys = new Set();
+const processNodes = (nodes: ReduxNode[]): {
+  /** collection of all `node_attr` keys whose values are Objects */
+  nodeAttrKeys: Set<string>
+
+  /** input array (kinda unnecessary) */
+  nodes: ReduxNode[]
+} => {
+  const nodeNamesSeen = new Set<string>();
+  const nodeAttrKeys = new Set<string>();
   calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
     d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
@@ -50,10 +51,9 @@ const processNodes = (nodes) => {
 /**
  * Scan the tree for `node.branch_attrs.labels` dictionaries and collect all available
  * (These are the options for the "Branch Labels" sidebar dropdown)
- * @param {Array} nodes tree nodes (flat)
  */
-const processBranchLabelsInPlace = (nodes) => {
-  const availableBranchLabels = new Set();
+const processBranchLabelsInPlace = (nodes: ReduxNode[]): string[] => {
+  const availableBranchLabels = new Set<string>();
   nodes.forEach((n) => {
     if (n.branch_attrs && n.branch_attrs.labels) {
       Object.keys(n.branch_attrs.labels)
@@ -68,8 +68,11 @@ const processBranchLabelsInPlace = (nodes) => {
 };
 
 
-const makeSubtreeRootNode = (nodesArray, subtreeIndicies) => {
-  const node = {
+const makeSubtreeRootNode = (
+  nodesArray: ReduxNode[],
+  subtreeIndicies: number[],
+): ReduxNode => {
+  const node: ReduxNode = {
     name: "__ROOT",
     node_attrs: {hidden: "always"},
     children: subtreeIndicies.map((idx) => nodesArray[idx])
@@ -87,11 +90,16 @@ const makeSubtreeRootNode = (nodesArray, subtreeIndicies) => {
 *  Pre-order tree traversal visits each node using stack.
 *  Checks if leaf node based on node.children
 *  pushes all children into stack and continues traversal.
-*  @param root - deserialized JSON root to begin traversal
-*  @returns array  - final array of nodes in order with no dups
 */
-const flattenTree = (root) => {
-  const stack = [], array = [];
+const flattenTree = (
+  /** deserialized JSON root to begin traversal */
+  root: ReduxNode,
+): ReduxNode[] => {
+  const stack: ReduxNode[] = [];
+
+  /** final array of nodes in order with no dups */
+  const array: ReduxNode[] = [];
+
   stack.push(root);
   while (stack.length !== 0) {
     const node = stack.pop();
@@ -111,11 +119,13 @@ const flattenTree = (root) => {
 *  Pre-order tree traversal visits each node using stack.
 *  Checks if leaf node based on node.children
 *  pushes all children into stack and continues traversal.
-*  @param root - deserialized JSON root to begin traversal
 */
-const appendParentsToTree = (root) => {
+const appendParentsToTree = (
+  /** deserialized JSON root to begin traversal */
+  root: ReduxNode,
+): void => {
   root.parent = root;
-  const stack = [];
+  const stack: ReduxNode[] = [];
   stack.push(root);
 
   while (stack.length !== 0) {
@@ -133,9 +143,8 @@ const appendParentsToTree = (root) => {
  * Currently this is limited in scope, but is intended to parse
  * information on a branch_attr indicating information about minor/
  * major parents (e.g. recombination, subtree position in another tree).
- * @param {Array<Node>} nodes
  */
-const addParentInfo = (nodes) => {
+const addParentInfo = (nodes: ReduxNode[]): void => {
   nodes.forEach((n) => {
     n.parentInfo = {
       original: n.parent
@@ -145,16 +154,12 @@ const addParentInfo = (nodes) => {
 
 /**
  * Collects all mutations on the tree
- * @param  {Node[]} nodesArray
- * @return {Object}
- *         keys are mutations in gene:fromPosTo format (e.g. nuc:A123T)
- *         values are integers representing occurrences on tree
  * @todo   The original remit of this function was for homoplasy detection.
  *         If storing all the mutations becomes an issue, we may be able use an array
  *         of mutations observed more than once.
  */
-const collectObservedMutations = (nodesArray) => {
-  const mutations = {};
+const collectObservedMutations = (nodesArray: ReduxNode[]): Mutations => {
+  const mutations: Mutations = {};
   nodesArray.forEach((n) => {
     if (!n.branch_attrs || !n.branch_attrs.mutations) return;
     Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
@@ -166,9 +171,9 @@ const collectObservedMutations = (nodesArray) => {
   return mutations;
 };
 
-export const treeJsonToState = (treeJSON) => {
+export const treeJsonToState = (treeJSON): TreeState => {
   const trees = Array.isArray(treeJSON) ? treeJSON : [treeJSON];
-  const nodesArray = [];
+  const nodesArray: ReduxNode[] = [];
   const subtreeIndicies = [];
   for (const treeRootNode of trees) {
     appendParentsToTree(treeRootNode);
@@ -184,7 +189,13 @@ export const treeJsonToState = (treeJSON) => {
   });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   const observedMutations = collectObservedMutations(nodesArray);
-  return Object.assign({}, getDefaultTreeState(), {
-    nodes, nodeAttrKeys, vaccines, observedMutations, availableBranchLabels, loaded: true
-  });
+  return {
+    ...getDefaultTreeState(),
+    nodes,
+    nodeAttrKeys,
+    vaccines,
+    observedMutations,
+    availableBranchLabels,
+    loaded: true,
+  };
 };

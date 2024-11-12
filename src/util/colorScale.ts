@@ -1,5 +1,4 @@
-import scaleOrdinal from "d3-scale/src/ordinal";
-import scaleLinear from "d3-scale/src/linear";
+import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
@@ -10,19 +9,24 @@ import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
+import { ColoringInfo, Legend, Metadata } from "../metadata";
+import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
+import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
 
 export const unknownColor = "#ADB1B3";
 
 /**
  * calculate the color scale.
- * @param {string} colorBy - provided trait to use as color
- * @param {object} controls
- * @param {object} tree
- * @param {object} treeToo
- * @param {object} metadata
- * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array|undefined, genotype: null|object, scaleType: null|string, visibleLegendValues: Array}}
  */
-export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
+export const calcColorScale = (
+  /** provided trait to use as color */
+  colorBy: string,
+
+  controls: ControlsState,
+  tree: TreeState,
+  treeToo: TreeTooState,
+  metadata: Metadata,
+): ColorScale => {
   try {
     if (colorBy === "none") {
       throw new Error("colorBy is 'none'. Falling back to a default, uninformative color scale.");
@@ -33,9 +37,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     const colorings = metadata.colorings;
     const treeTooNodes = treeToo ? treeToo.nodes : undefined;
     let continuous = false;
-    let colorScale, legendValues, legendBounds, legendLabels, domain;
+    let colorScale: (val: any) => string;
+    let legendValues: LegendValues;
+    let legendBounds: LegendBounds;
+    let legendLabels: LegendLabels;
+    let domain: unknown[];
 
-    let genotype;
+    let genotype: Genotype;
     if (isColorByGenotype(colorBy)) {
       genotype = decodeColorByGenotype(colorBy);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
@@ -43,7 +51,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         setGenotype(treeToo.nodes, genotype.gene, genotype.positions, metadata.rootSequenceSecondTree);
       }
     }
-    const scaleType = genotype ? "categorical" : colorings[colorBy].type;
+    const scaleType: ScaleType = genotype ? "categorical" : colorings[colorBy].type;
     if (genotype) {
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
@@ -109,7 +117,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     };
   } catch (err) {
     /* Catch all errors to avoid app crashes */
-    console.error("Error creating color scales. Details:\n", err.message);
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error("Error creating color scales. Details:\n", errorMessage);
     return {
       scale: () => unknownColor,
       continuous: false,
@@ -125,14 +134,23 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   }
 };
 
-export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedScale, t1nodes, t2nodes) {
+export function createNonContinuousScaleFromProvidedScaleMap(
+  colorBy: string,
+  providedScale: [string, string][],
+  t1nodes: ReduxNode[],
+  t2nodes: ReduxNode[] | undefined,
+): {
+  continuous: boolean
+  legendValues: LegendValues
+  colorScale: ColorScale["scale"]
+} {
   // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
   if (!Array.isArray(providedScale)) {
     throw new Error(`${colorBy} has defined a scale which wasn't an array`);
   }
   /* The providedScale may have duplicate names (not ideal, but it happens). In this case we should
   filter out duplicates (taking the first of the duplicates is fine) & print a console warning */
-  const colorMap = new Map();
+  const colorMap = new Map<string, string>();
   for (const [name, colorHex] of providedScale) {
     if (colorMap.has(name)) {
       console.warn(`User provided color scale contained a duplicate entry for ${colorBy}→${name} which is ignored.`);
@@ -143,7 +161,7 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   let domain = Array.from(colorMap).map((x) => x[0]);
 
   /* create shades of grey for values in the tree which weren't defined in the provided scale */
-  const extraVals = getExtraVals(t1nodes, t2nodes, colorBy, domain);
+  const extraVals: string[] = getExtraVals(t1nodes, t2nodes, colorBy, domain);
   if (extraVals.length) { // we must add these to the domain + provide a color value
     domain = domain.concat(extraVals);
     const extraColors = createListOfColors(extraVals.length, ["#BDC3C6", "#868992"]);
@@ -154,11 +172,18 @@ export function createNonContinuousScaleFromProvidedScaleMap(colorBy, providedSc
   return {
     continuous: false, /* colorMaps can't (yet) be continuous */
     legendValues: domain,
-    colorScale: (val) => (colorMap.get(val) || unknownColor)
+    colorScale: (val: string) => (colorMap.get(val) || unknownColor)
   };
 }
 
-function createScaleForGenotype(t1nodes, t2nodes, aaGenotype) {
+function createScaleForGenotype(
+  t1nodes: ReduxNode[],
+  t2nodes: ReduxNode[],
+  aaGenotype: boolean,
+): {
+  colorScale: ColorScale["scale"]
+  legendValues: LegendValues
+} {
   const legendValues = orderOfGenotypeAppearance(t1nodes, t2nodes, aaGenotype);
   const trueValues = aaGenotype ?
     legendValues.filter((x) => x !== "X" && x !== "-" && x !== "") :
@@ -167,21 +192,30 @@ function createScaleForGenotype(t1nodes, t2nodes, aaGenotype) {
   const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
   // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
   if (legendValues.indexOf("-") !== -1) {
-    range.push(rgb(217, 217, 217));
+    range.push(rgb(217, 217, 217).formatHex());
   }
   if (legendValues.indexOf("N") !== -1 && !aaGenotype) {
-    range.push(rgb(153, 153, 153));
+    range.push(rgb(153, 153, 153).formatHex());
   }
   if (legendValues.indexOf("X") !== -1) {
-    range.push(rgb(102, 102, 102));
+    range.push(rgb(102, 102, 102).formatHex());
   }
   return {
-    colorScale: scaleOrdinal().domain(domain).range(range),
+    colorScale: scaleOrdinal<string>().domain(domain).range(range),
     legendValues
   };
 }
 
-function createOrdinalScale(colorBy, t1nodes, t2nodes) {
+function createOrdinalScale(
+  colorBy: string,
+  t1nodes: ReduxNode[],
+  t2nodes: ReduxNode[],
+): {
+  continuous: boolean
+  colorScale: ColorScale["scale"]
+  legendValues: LegendValues
+  legendBounds: LegendBounds
+} {
   /* currently, ordinal scales are only implemented for those with integer values.
   TODO: we should be able to have non-numerical ordinal scales (e.g.
   `["small", "medium", "large"]`) however we currently cannot specify this ordering
@@ -190,7 +224,8 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   let legendValues = getDiscreteValuesFromTree(t1nodes, t2nodes, colorBy);
   const allInteger = legendValues.every((x) => Number.isInteger(x));
   let continuous = false;
-  let colorScale, legendBounds;
+  let colorScale: ColorScale["scale"];
+  let legendBounds: Record<number, [number, number]>;
 
   if (allInteger) {
     const minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
@@ -204,7 +239,7 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
       duplication, as this is identical to that of the continuous scale below */
       console.warn("Using a continous scale as there are too many values in the ordinal scale");
       continuous = true;
-      const scale = scaleLinear().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
+      const scale = scaleLinear<string>().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
       colorScale = (val) => isValueValid(val) ? scale(val): unknownColor;
       const spread = minMax[1] - minMax[0];
       const dp = spread > 5 ? 2 : 3;
@@ -221,7 +256,17 @@ function createOrdinalScale(colorBy, t1nodes, t2nodes) {
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
-function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
+function createContinuousScale(
+  colorBy: string,
+  providedScale,
+  t1nodes: ReduxNode[],
+  t2nodes: ReduxNode[],
+): {
+  continuous: boolean
+  colorScale: ColorScale["scale"]
+  legendBounds: LegendBounds
+  legendValues: LegendValues
+} {
 
   const minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
 
@@ -229,7 +274,8 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
   const anchorPoints = _validateAnchorPoints(providedScale, (val) => typeof val==="number");
 
   /* make the continuous scale */
-  let domain, range;
+  let domain: number[];
+  let range: string[];
   if (anchorPoints) {
     domain = anchorPoints.map((pt) => pt[0]);
     range = anchorPoints.map((pt) => pt[1]);
@@ -237,7 +283,7 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
     range = colors[9];
     domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
   }
-  const scale = scaleLinear().domain(domain).range(range);
+  const scale = scaleLinear<string>().domain(domain).range(range);
 
   const spread = minMax[1] - minMax[0];
   const dp = spread > 5 ? 2 : 3;
@@ -252,16 +298,27 @@ function createContinuousScale(colorBy, providedScale, t1nodes, t2nodes) {
 
   return {
     continuous: true,
-    colorScale: (val) => isValueValid(val) ? scale(val) : unknownColor,
+    colorScale: (val: number) => isValueValid(val) ? scale(val) : unknownColor,
     legendBounds: createLegendBounds(legendValues),
     legendValues
   };
 }
 
 
-function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
+function createTemporalScale(
+  colorBy: string,
+  providedScale,
+  t1nodes: ReduxNode[],
+  t2nodes: ReduxNode[],
+): {
+  continuous: boolean
+  colorScale: ColorScale["scale"]
+  legendBounds: LegendBounds
+  legendValues: LegendValues
+} {
 
-  let domain, range;
+  let domain: number[];
+  let range: string[];
   const anchorPoints = _validateAnchorPoints(providedScale, (val) => numDate(val)!==undefined);
   if (anchorPoints) {
     domain = anchorPoints.map((pt) => numDate(pt[0]));
@@ -282,14 +339,14 @@ function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
     vals = vals.sort();
     domain = [rootDate];
     const n = 10;
-    const spaceBetween = parseInt(vals.length / (n - 1), 10);
+    const spaceBetween = Math.trunc(vals.length / (n - 1));
     for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
     domain.push(vals[vals.length-1]);
     domain = [...new Set(domain)]; /* filter to unique values only */
     range = colors[domain.length]; /* use the right number of colours */
   }
 
-  const scale = scaleLinear().domain(domain).range(range);
+  const scale = scaleLinear<string>().domain(domain).range(range);
 
   const legendValues = anchorPoints ? domain.slice() : domain.slice(1);
 
@@ -310,26 +367,40 @@ function createTemporalScale(colorBy, providedScale, t1nodes, t2nodes) {
 }
 
 
-function getMinMaxFromTree(nodes, nodesToo, attr) {
+function getMinMaxFromTree(
+  nodes: ReduxNode[],
+  nodesToo: ReduxNode[],
+  attr: string,
+): [number, number] {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  const vals = arr.map((n) => getTraitFromNode(n, attr))
+  const vals: number[] = arr.map((n) => getTraitFromNode(n, attr))
     .filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i)
     .map((v) => +v); // coerce throw new Error(to numeric
   return [min(vals), max(vals)];
 }
 
-/* this creates a (ramped) list of colours
-   this is necessary as ordinal scales can't interpolate colours.
-   range: [a,b], the colours to go between */
-function createListOfColors(n, range) {
-  const scale = scaleLinear().domain([0, n])
+/**
+ * this creates a (ramped) list of colours
+ * this is necessary as ordinal scales can't interpolate colours.
+ */
+function createListOfColors(
+  n: number,
+
+  /** the colours to go between */
+  range: [string, string],
+) {
+  const scale = scaleLinear<string>().domain([0, n])
     .interpolate(interpolateHcl)
     .range(range);
   return d3Range(0, n).map(scale);
 }
 
-function getDiscreteValuesFromTree(nodes, nodesToo, attr) {
+function getDiscreteValuesFromTree(
+  nodes: ReduxNode[],
+  nodesToo: ReduxNode[] | undefined,
+  attr: string,
+): LegendValues {
   const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
     const stateCountSecondTree = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
@@ -348,7 +419,12 @@ function getDiscreteValuesFromTree(nodes, nodesToo, attr) {
  * This code is in this file to help future refactors, as the colorScale code has grown a lot
  * and could be greatly improved.                                             james, dec 2021
  */
-export function getLegendOrder(attr, coloringInfo, nodesA, nodesB) {
+export function getLegendOrder(
+  attr: string,
+  coloringInfo: ColoringInfo,
+  nodesA: ReduxNode[],
+  nodesB: ReduxNode[] | undefined,
+): LegendValues {
   if (isColorByGenotype(attr)) {
     console.warn("legend ordering for genotypes not yet implemented");
     return [];
@@ -357,7 +433,7 @@ export function getLegendOrder(attr, coloringInfo, nodesA, nodesB) {
     console.warn("legend ordering for continuous scales not yet implemented");
     return [];
   }
-  if (coloringInfo.scale) { /* scale set via JSON */
+  if (coloringInfo.scale) {
     return createNonContinuousScaleFromProvidedScaleMap(attr, coloringInfo.scale, nodesA, nodesB).legendValues;
   }
   return getDiscreteValuesFromTree(nodesA, nodesB, attr);
@@ -366,56 +442,70 @@ export function getLegendOrder(attr, coloringInfo, nodesA, nodesB) {
 /**
  * Dynamically create legend values based on visibility for ordinal and categorical scale types.
  */
-export function createVisibleLegendValues({colorBy, scaleType, genotype, legendValues, treeNodes, treeTooNodes, visibility, visibilityToo}) {
+export function createVisibleLegendValues({
+  colorBy,
+  scaleType,
+  genotype,
+  legendValues,
+  treeNodes,
+  treeTooNodes,
+  visibility,
+  visibilityToo,
+}: {
+  colorBy: string
+  scaleType: ScaleType
+  genotype: Genotype
+  legendValues: LegendValues
+  treeNodes: ReduxNode[]
+  treeTooNodes?: ReduxNode[] | null
+  visibility: Visibility[]
+  visibilityToo?: Visibility[]
+}): LegendValues {
   if (visibility) {
     // filter according to scaleType, e.g. continuous is different to categorical which is different to boolean
     // filtering will involve looping over reduxState.tree.nodes and comparing with reduxState.tree.visibility
     if (scaleType === "ordinal" || scaleType === "categorical") {
-      let legendValuesObserved = treeNodes
+      let legendValuesObserved: LegendValues = treeNodes
         .filter((n, i) => (!n.hasChildren && visibility[i]===NODE_VISIBLE))
         .map((n) => genotype ? n.currentGt : getTraitFromNode(n, colorBy));
       // if the 2nd tree is enabled, compute visible legend values and merge the values.
       if (treeTooNodes && visibilityToo) {
-        const legendValuesObservedToo = treeTooNodes
+        const legendValuesObservedToo: LegendValues = treeTooNodes
           .filter((n, i) => (!n.hasChildren && visibilityToo[i]===NODE_VISIBLE))
           .map((n) => genotype ? n.currentGt : getTraitFromNode(n, colorBy));
         legendValuesObserved = [...legendValuesObserved, ...legendValuesObservedToo];
       }
-      legendValuesObserved = new Set(legendValuesObserved);
-      const visibleLegendValues = legendValues.filter((v) => legendValuesObserved.has(v));
+      const legendValuesObservedSet = new Set(legendValuesObserved);
+      const visibleLegendValues = legendValues.filter((v) => legendValuesObservedSet.has(v));
       return visibleLegendValues;
     }
   }
   return legendValues.slice();
 }
 
-function createDiscreteScale(domain, type) {
+function createDiscreteScale(domain: string[], type: ScaleType) {
   // note: colors[n] has n colors
-  let colorList;
+  let colorList: string[];
   if (type==="ordinal" || type==="categorical") {
     /* TODO: use different colours! */
     colorList = domain.length < colors.length ?
       colors[domain.length].slice() :
       colors[colors.length - 1].slice();
   }
-  const scale = scaleOrdinal().domain(domain).range(colorList);
+  const scale = scaleOrdinal<string>().domain(domain).range(colorList);
   return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 }
 
-function booleanColorScale(val) {
+function booleanColorScale(val: unknown): string {
   if (!isValueValid(val)) return unknownColor;
   if (["true", "1", "yes"].includes(String(val).toLowerCase())) return "#4C90C0";
   return "#CBB742";
 }
 
-/**
- * @param {Array<Number>} legendValues
- * @returns {Record<Number, [Number, Number]>}
- */
-function createLegendBounds(legendValues) {
-  const valBetween = (x0, x1) => x0 + 0.5*(x1-x0);
+function createLegendBounds(legendValues: number[]): LegendBounds {
+  const valBetween = (x0: number, x1: number) => x0 + 0.5*(x1-x0);
   const len = legendValues.length;
-  const legendBounds = {};
+  const legendBounds: LegendBounds = {};
   legendBounds[legendValues[0]] = [-Infinity, valBetween(legendValues[0], legendValues[1])];
   for (let i = 1; i < len - 1; i++) {
     legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
@@ -424,7 +514,10 @@ function createLegendBounds(legendValues) {
   return legendBounds;
 }
 
-function _validateAnchorPoints(providedScale, validator) {
+function _validateAnchorPoints(
+  providedScale: unknown[],
+  validator: (val: unknown) => boolean,
+): unknown[] | false {
   if (!Array.isArray(providedScale)) return false;
   const ap = providedScale.filter((item) =>
     Array.isArray(item) && item.length===2 &&
@@ -437,20 +530,19 @@ function _validateAnchorPoints(providedScale, validator) {
 
 /**
  * Parse the user-defined `legend` for a given coloring to produce legendValues, legendLabels and legendBounds.
- *
- * @param {Array|undefined} providedLegend JSON-defined `legend` array of objects. Object keys:
- *        `value` used to compute the legend swatch colour. The type of this depends on the scaleType.
- *                Continuous scales demand numeric values, however few restrictions are placed on other scales.
- *        `display` -> string|numeric. Optional. Displayed in the legend. Falls back to `value` if missing.
- *        `bounds` -> array of 2 numerics. Optional. Custom legendBounds. Only considered for continuous scales.
- * @param {Array} currentLegendValues Dynamically generated legendValues (via traversal of tree(s)).
- * @param {string} scaleType
- * @returns {false|object}. Returned object has keys:
- *        `legendValues` -> array of numeric legend values for display
- *        `legendBounds` -> {object|undefined} See `createLegendBounds()` for format
- *        `legendLabels` -> {Map|undefined} A map of legendValues to a value for display in the legend.
  */
-function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleType) {
+function parseUserProvidedLegendData(
+  providedLegend: Legend | undefined,
+
+  /** Dynamically generated legendValues (via traversal of tree(s)). */
+  currentLegendValues: LegendValues,
+
+  scaleType: ScaleType,
+): {
+  legendValues: LegendValues
+  legendLabels: LegendLabels
+  legendBounds: LegendBounds
+} | false {
   if (!Array.isArray(providedLegend)) return false;
   if (scaleType==='temporal') {
     console.error("Auspice currently doesn't allow a JSON-provided 'legend' for temporal colorings, "+
@@ -466,19 +558,19 @@ function parseUserProvidedLegendData(providedLegend, currentLegendValues, scaleT
     return false;
   }
 
-  const legendValues = data.map((d) => d.value);
+  const legendValues: LegendValues = data.map((d) => d.value);
 
-  const legendLabels = new Map(
+  const legendLabels: LegendLabels = new Map(
     data.map((d) => {
       return (typeof d.display === "string" || typeof d.display === "number") ? [d.value, d.display] : [d.value, d.value];
     })
   );
 
-  let legendBounds = {};
+  let legendBounds: LegendBounds = {};
   if (scaleType==="continuous") {
     const boundArrays = data.map((d) => d.bounds)
       .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
-      .map(([a, b]) => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
+      .map(([a, b]): [number, number] => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
       .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
         for (let i=0; i<idx; i++) {
           const previousBound = arr[i];

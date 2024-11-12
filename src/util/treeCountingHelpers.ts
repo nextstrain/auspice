@@ -1,16 +1,25 @@
+import { Colorings } from "../metadata";
+import { ReduxNode, TraitCounts, Visibility } from "../reducers/tree/types";
 import { NODE_VISIBLE } from "./globals";
 import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
 * traverse the tree to get state counts for supplied traits.
-* @param {Array} nodes - list of nodes
-* @param {Array} traits - list of traits to count across the tree
-* @param {Array | false} visibility - if Array provided then only consider visible nodes. If false, consider all nodes.
-* @param {bool} terminalOnly - only consider terminal / leaf nodes?
-* @return {obj} keys: the traits. Values: an object mapping trait values -> INT
 */
-export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) => {
-  const counts = {};
+export const countTraitsAcrossTree = (
+  /** list of nodes */
+  nodes: ReduxNode[],
+
+  /** list of traits to count across the tree */
+  traits: string[],
+
+  /** if Array provided then only consider visible nodes. If false, consider all nodes. */
+  visibility: Visibility[] | false,
+
+  /** only consider terminal / leaf nodes? */
+  terminalOnly: boolean,
+): TraitCounts => {
+  const counts: TraitCounts = {};
   traits.forEach((trait) => {counts[trait] = new Map();});
 
   nodes.forEach((node) => {
@@ -39,16 +48,16 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
  * Includes a hardcoded list of trait names we will ignore, as well as any trait
  * which we know is continuous (via a colouring definition) because the
  * filtering is not designed for these kinds of data (yet).
- * @param {Array} nodes 
- * @param {Object} colorings
- * @returns {Array} list of trait names
  */
-export const gatherTraitNames = (nodes, colorings) => {
+export const gatherTraitNames = (
+  nodes: ReduxNode[],
+  colorings: Colorings,
+): string[] => {
   const ignore = new Set([
     'num_date',
     ...Object.entries(colorings).filter(([_, info]) => info.type==='continuous').map(([name, _]) => name),
   ])
-  const names = new Set();
+  const names = new Set<string>();
   for (const node of nodes) {
     if (node.hasChildren) continue;
     for (const traitName in node.node_attrs || {}) {
@@ -63,12 +72,15 @@ export const gatherTraitNames = (nodes, colorings) => {
 }
 
 /**
-* for each node, calculate the number of subtending tips which are visible
-* side effects: n.tipCount for each node
-* @param {Node} node - deserialized JSON root to begin traversal
-* @param {Array<Int>} visibility
-*/
-export const calcTipCounts = (node, visibility) => {
+ * for each node, calculate the number of subtending tips which are visible
+ * side effects: n.tipCount for each node
+ */
+export const calcTipCounts = (
+  /** deserialized JSON root to begin traversal */
+  node: ReduxNode,
+
+  visibility: Visibility[],
+): void => {
   node.tipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {
@@ -82,9 +94,8 @@ export const calcTipCounts = (node, visibility) => {
 
 /**
  * calculate the total number of tips in the tree
- * @param {Array<Node>} nodes flat list of all nodes
  */
-export const calcTotalTipsInTree = (nodes) => {
+export const calcTotalTipsInTree = (nodes: ReduxNode[]): number => {
   let count = 0;
   nodes.forEach((n) => {
     if (!n.hasChildren) count++;
@@ -95,9 +106,11 @@ export const calcTotalTipsInTree = (nodes) => {
 /**
 * for each node, calculate the number of subtending tips (alive or dead)
 * side effects: n.fullTipCount for each node
-* @param {Node} node - deserialized JSON root to begin traversal
 */
-export const calcFullTipCounts = (node) => {
+export const calcFullTipCounts = (
+  /** deserialized JSON root to begin traversal */
+  node: ReduxNode,
+): void => {
   node.fullTipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {

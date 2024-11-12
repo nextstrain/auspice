@@ -1,3 +1,4 @@
+import { AnyAction } from "@reduxjs/toolkit";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import * as types from "./types";
@@ -10,7 +11,18 @@ import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
 import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
+import { PhyloNode } from "../components/tree/phyloTree/types";
+import { Metadata } from "../metadata";
+import { AppDispatch, RootState } from "../store";
+import { ReduxNode, TreeState } from "../reducers/tree/types";
 
+type RootIndex = number | undefined
+
+/** [root idx tree1, root idx tree2] */
+export type Root = [RootIndex, RootIndex]
+
+/** A function to be handled by redux (thunk) */
+type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void
 
 /**
  * Updates the `inView` property of nodes which depends on the currently selected
@@ -18,10 +30,13 @@ import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
  * Note that this property is historically the remit of PhyloTree, however this function
  * may be called before those objects are created; in this case we store the property on
  * the tree node itself.
- * @param {Int} idx - index of displayed root node
- * @param {ReduxTreeState} tree
  */
-export const applyInViewNodesToTree = (idx, tree) => {
+export const applyInViewNodesToTree = (
+  /** index of displayed root node */
+  idx: RootIndex,
+
+  tree: TreeState,
+): number => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
   if (tree.nodes[0].shell) {
     tree.nodes.forEach((d) => {
@@ -29,12 +44,12 @@ export const applyInViewNodesToTree = (idx, tree) => {
       d.shell.update = true;
     });
     if (tree.nodes[validIdxRoot].hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].shell, (d: PhyloNode) => {d.inView = true;});
     } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
       // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
       tree.nodes[validIdxRoot].shell.inView = true;
     } else {
-      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d: PhyloNode) => {d.inView = true;});
     }
   } else {
     /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
@@ -42,7 +57,7 @@ export const applyInViewNodesToTree = (idx, tree) => {
       d.inView = false;
     });
     /* note that we cannot use `applyToChildren` as that operates on PhyloNodes */
-    const _markChildrenInView = (node) => {
+    const _markChildrenInView = (node: ReduxNode) => {
       node.inView = true;
       if (node.children) {
         for (const child of node.children) _markChildrenInView(child);
@@ -61,15 +76,21 @@ export const applyInViewNodesToTree = (idx, tree) => {
  * this fn relies on the "inView" attr of nodes
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
- * @param  {array|undefined} root Change the in-view part of the tree. [root idx tree1, root idx tree2].
- *                                [0, 0]: reset. [undefined, undefined]: do nothing
- * @param  {object | undefined} tipSelected
- * @param  {string | undefined} cladeSelected
- * @return {function} a function to be handled by redux (thunk)
  */
-export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], cladeSelected = undefined} = {}
-) => {
+export const updateVisibleTipsAndBranchThicknesses = ({
+  root = [undefined, undefined],
+  cladeSelected = undefined,
+}: {
+  /**
+   * Change the in-view part of the tree.
+   *
+   * [0, 0]: reset. [undefined, undefined]: do nothing
+   */
+  root?: Root
+
+  cladeSelected?: string
+} = {}
+): ThunkFunction => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
@@ -87,7 +108,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
     );
-    const dispatchObj = {
+    const dispatchObj: AnyAction = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
@@ -142,11 +163,17 @@ export const updateVisibleTipsAndBranchThicknesses = (
  * date changes need to update tip visibility & branch thicknesses
  * this can be done in a single action
  * NB calling this without specifying newMin OR newMax is a no-op
- * @param  {string|false} newMin optional
- * @param  {string|false} newMax optional
- * @return {null} side-effects: a single action
+ * side-effects: a single action
  */
-export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
+export const changeDateFilter = ({
+  newMin = false,
+  newMax = false,
+  quickdraw = false,
+}: {
+  newMin?: string | false
+  newMax?: string | false
+  quickdraw?: boolean
+}): ThunkFunction => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
@@ -155,7 +182,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
-    const dispatchObj = {
+    const dispatchObj: AnyAction = {
       type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
       quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
@@ -200,18 +227,28 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
 
 /**
  * NB all params are optional - supplying none resets the tip radii to defaults
- * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
- * @param  {int} tipSelectedIdx the strain to highlight (always tree 1)
- * @param  {array} geoFilter a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to
- * @return {null} side-effects: a single action
+ * side-effects: a single action
  */
 export const updateTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false} = {}
-) => {
+  {
+    tipSelectedIdx = false,
+    selectedLegendItem = false,
+    geoFilter = [],
+  }: {
+    /** the strain to highlight (always tree 1) */
+    tipSelectedIdx?: number | false,
+
+    /** value of the attr. if scale is continuous a bound will be used. */
+    selectedLegendItem?: string | number | false,
+
+    /** a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to */
+    geoFilter?: [string, string] | [],
+  } = {}
+): ThunkFunction => {
   return (dispatch, getState) => {
     const { controls, tree, treeToo } = getState();
     const colorScale = controls.colorScale;
-    const d = {
+    const d: AnyAction = {
       type: types.UPDATE_TIP_RADII, version: tree.tipRadiiVersion + 1
     };
     const tt = controls.showTreeToo;
@@ -219,11 +256,11 @@ export const updateTipRadii = (
       d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
       if (tt) {
         const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
-        d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
+        d.dataToo = calcTipRadii({tipSelectedIdx: idx, colorScale, tree: treeToo});
       }
     } else {
-      d.data = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree: treeToo});
+      d.data = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree: treeToo});
     }
     dispatch(d);
   };
@@ -231,16 +268,22 @@ export const updateTipRadii = (
 
 /**
  * Apply a filter to the current selection (i.e. filtered / "on" values associated with this trait)
- * Explanation of the modes:
- *    "add" -> add the values to the current selection (if any exists).
- *    "inactivate" -> inactivate values (i.e. change active prop to false). To activate just use "add".
- *    "remove" -> remove the values from the current selection
- *    "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
- * @param {string} mode allowed values: "set", "add", "remove"
- * @param {string} trait the trait name of the filter ("authors", "country" etcetera)
- * @param {Array of strings} values the values (see above)
  */
-export const applyFilter = (mode, trait, values) => {
+export const applyFilter = (
+  /** Explanation of the modes:
+   *  - "add" -> add the values to the current selection (if any exists).
+   *  - "inactivate" -> inactivate values (i.e. change active prop to false). To activate just use "add".
+   *  - "remove" -> remove the values from the current selection
+   *  - "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
+   */
+  mode: "add" | "inactivate" | "remove" | "set",
+  
+  /** the trait name of the filter ("authors", "country" etcetera) */
+  trait: string | symbol,
+
+  /** the values (see above) */
+  values: string[],
+): ThunkFunction => {
   return (dispatch, getState) => {
     const { controls } = getState();
     const currentlyFilteredTraits = Reflect.ownKeys(controls.filters);
@@ -297,16 +340,15 @@ export const applyFilter = (mode, trait, values) => {
   };
 };
 
-export const toggleTemporalConfidence = () => ({
+export const toggleTemporalConfidence = (): AnyAction => ({
   type: types.TOGGLE_TEMPORAL_CONF
 });
 
 
 /**
  * restore original state by iterating over all nodes and restoring children to unexplodedChildren (as necessary)
- * @param {Array<Node>} nodes
  */
-const _resetExpodedTree = (nodes) => {
+const _resetExpodedTree = (nodes: ReduxNode[]): void => {
   nodes.forEach((n) => {
     if (Object.prototype.hasOwnProperty.call(n, 'unexplodedChildren')) {
       n.children = n.unexplodedChildren;
@@ -324,11 +366,17 @@ const _resetExpodedTree = (nodes) => {
  * create subtrees where branches have different attrs.
  * Note: because the children of a node may change, we store the previous (unexploded) children
  * as `unexplodedChildren` so we can return to the original tree.
- * @param {Node} root - root node of entire tree
- * @param {Node} node - current node being traversed
- * @param {String} attr - trait name to determine if a child should become subtree
  */
-const _traverseAndCreateSubtrees = (root, node, attr) => {
+const _traverseAndCreateSubtrees = (
+  /** root node of entire tree */
+  root: ReduxNode,
+
+  /** current node being traversed */
+  node: ReduxNode,
+
+  /** trait name to determine if a child should become subtree */
+  attr: string,
+): void => {
   // store original children so we traverse the entire tree
   const originalChildren = node.hasChildren ? [...node.children] : [];
 
@@ -347,7 +395,7 @@ const _traverseAndCreateSubtrees = (root, node, attr) => {
         subtreeRootNode.parent = root;
       });
       node.unexplodedChildren = originalChildren;
-      node.children = node.children.filter((c, idx) => {
+      node.children = node.children.filter((_c, idx) => {
         return !childrenToPrune.includes(idx);
       });
       /* it may be the case that the node now has no children (they're all subtrees!) */
@@ -364,7 +412,11 @@ const _traverseAndCreateSubtrees = (root, node, attr) => {
 /**
  * sort the subtrees by the order the trait would appear in the legend
  */
-const _orderSubtrees = (metadata, nodes, attr) => {
+const _orderSubtrees = (
+  metadata: Metadata,
+  nodes: ReduxNode[],
+  attr: string,
+): void => {
   const attrValueOrder = getLegendOrder(attr, metadata.colorings[attr], nodes, undefined);
   nodes[0].children.sort((childA, childB) => {
     const [attrA, attrB] = [getTraitFromNode(childA, attr), getTraitFromNode(childB, attr)];
@@ -381,43 +433,47 @@ const _orderSubtrees = (metadata, nodes, attr) => {
   });
 };
 
-export const explodeTree = (attr) => (dispatch, getState) => {
-  const {tree, metadata, controls} = getState();
-  _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
-  if (attr) {
-    const root = tree.nodes[0];
-    _traverseAndCreateSubtrees(root, root, attr);
-    if (root.unexplodedChildren.length === root.children.length) {
-      dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
-      return;
+export const explodeTree = (
+  attr: string | undefined,
+): ThunkFunction => {
+  return (dispatch, getState) => {
+    const {tree, metadata, controls} = getState();
+    _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
+    if (attr) {
+      const root = tree.nodes[0];
+      _traverseAndCreateSubtrees(root, root, attr);
+      if (root.unexplodedChildren.length === root.children.length) {
+        dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
+        return;
+      }
+      _orderSubtrees(metadata, tree.nodes, attr);
     }
-    _orderSubtrees(metadata, tree.nodes, attr);
-  }
-  /* tree splitting necessitates recalculation of tip counts */
-  calcFullTipCounts(tree.nodes[0]);
-  calcTipCounts(tree.nodes[0], tree.visibility);
-  /* we default to zooming out completely whenever we explode the tree. There are nicer behaviours here,
-  such as re-calculating the MRCA of visible nodes, but this comes at the cost of increased complexity.
-  Note that the functions called here involve a lot of code duplication and are good targets for refactoring */
-  applyInViewNodesToTree(0, tree);
-  const visData = calculateVisiblityAndBranchThickness(
-    tree,
-    controls,
-    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
-  );
-  visData.idxOfInViewRootNode = 0;
-  /* Changes in visibility require a recomputation of which legend items we wish to display */
-  visData.visibleLegendValues = createVisibleLegendValues({
-    colorBy: controls.colorBy,
-    genotype: controls.colorScale.genotype,
-    scaleType: controls.colorScale.scaleType,
-    legendValues: controls.colorScale.legendValues,
-    treeNodes: tree.nodes,
-    visibility: visData.visibility
-  });
-  dispatch({
-    type: types.CHANGE_EXPLODE_ATTR,
-    explodeAttr: attr,
-    ...visData
-  });
+    /* tree splitting necessitates recalculation of tip counts */
+    calcFullTipCounts(tree.nodes[0]);
+    calcTipCounts(tree.nodes[0], tree.visibility);
+    /* we default to zooming out completely whenever we explode the tree. There are nicer behaviours here,
+    such as re-calculating the MRCA of visible nodes, but this comes at the cost of increased complexity.
+    Note that the functions called here involve a lot of code duplication and are good targets for refactoring */
+    applyInViewNodesToTree(0, tree);
+    const visData = calculateVisiblityAndBranchThickness(
+      tree,
+      controls,
+      {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
+    );
+    visData.idxOfInViewRootNode = 0;
+    /* Changes in visibility require a recomputation of which legend items we wish to display */
+    visData.visibleLegendValues = createVisibleLegendValues({
+      colorBy: controls.colorBy,
+      genotype: controls.colorScale.genotype,
+      scaleType: controls.colorScale.scaleType,
+      legendValues: controls.colorScale.legendValues,
+      treeNodes: tree.nodes,
+      visibility: visData.visibility
+    });
+    dispatch({
+      type: types.CHANGE_EXPLODE_ATTR,
+      explodeAttr: attr,
+      ...visData
+    });
+  };
 };

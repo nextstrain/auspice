@@ -12,35 +12,143 @@ import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
+import { Distance } from "../components/tree/phyloTree/types";
 
-type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
+
+export interface ColorScale {
+  colorBy: string
+  continuous: boolean
+  domain?: unknown[]
+  genotype: Genotype | null
+  legendBounds?: LegendBounds
+  legendLabels?: LegendLabels
+  legendValues: LegendValues
+  scale: (value: any) => string
+  scaleType: ScaleType | null
+  version: number
+  visibleLegendValues: LegendValues
+}
+
+export interface Genotype {
+  gene: string
+  positions: number[]
+  aa: boolean
+}
+
+export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
+
+export type LegendBounds = {
+  [key: string | number]: [number, number]
+}
+
+/** A map of legendValues to a value for display in the legend. */
+export type LegendLabels = Map<unknown, unknown>
+
+/** An array of values to display in the legend. */
+// TODO: I think this should be number[] | string[] but that requires adding type guards
+export type LegendValues = any[]
+
+export type PerformanceFlags = Map<string, boolean>
+
+export interface SelectedNode {
+  existingFilterState: "active" | "inactive" | null
+  idx: number
+  isBranch: boolean
+  name: string
+  treeId: string
+}
+
+export type ScaleType = "ordinal" | "categorical" | "continuous" | "temporal" | "boolean"
+
+export interface ScatterVariables {
+  showBranches?: boolean
+  showRegression?: boolean
+  x?: string
+  xContinuous?: boolean
+  xDomain?: number[]
+  xTemporal?: boolean
+  y?: string
+  yContinuous?: boolean
+  yDomain?: number[]
+  yTemporal?: boolean
+}
+
+export interface TemporalConfidence {
+  exists: boolean
+  display: boolean
+  on: boolean
+}
 
 interface Defaults {
-  distanceMeasure: string
+  distanceMeasure: Distance
   layout: Layout
   focus: boolean
   geoResolution: string
-  filters: Record<string, any>
+  filters: Record<string, unknown>
   filtersInFooter: string[]
   colorBy: string
   selectedBranchLabel: string
-  tipLabelKey: typeof strainSymbol
+  tipLabelKey: string | symbol
   showTransmissionLines: boolean
   sidebarOpen?: boolean
 }
 
 export interface BasicControlsState {
   defaults: Defaults
+
+  absoluteDateMax: string
+  absoluteDateMaxNumeric: number
+  absoluteDateMin: string
+  absoluteDateMinNumeric: number
+  analysisSlider: boolean
+  animationPlayPauseButton: "Play" | "Pause"
+  available?: boolean
+  branchLengthsToDisplay: string
+  canRenderBranchLabels: boolean
+  canTogglePanelLayout: boolean
+  colorBy: string
+  colorByConfidence: boolean
+  coloringsPresentOnTree: Set<string>
+
+  /** subset of coloringsPresentOnTree */
+  coloringsPresentOnTreeWithConfidence: Set<string>
+
+  colorScale?: ColorScale
+  dateMax: string
+  dateMaxNumeric: number
+  dateMin: string
+  dateMinNumeric: number
+  distanceMeasure: Distance
+  explodeAttr?: string
+  filters: Record<string | symbol, Array<{ value: string, active: boolean }>>
+  filtersInFooter: string[]
+  focus: boolean
+  geoResolution: string
   layout: Layout
+  mapAnimationCumulative: boolean
+  mapAnimationDurationInMilliseconds: number
+  mapAnimationShouldLoop: boolean
+  mapAnimationStartDate: unknown
+  modal: 'download' | 'linkOut' | null
+  normalizeFrequencies: boolean
+  panelLayout: string
   panelsAvailable: string[]
   panelsToDisplay: string[]
+  performanceFlags: PerformanceFlags
+  quickdraw: boolean
+  scatterVariables: ScatterVariables
+  selectedBranchLabel: string
+  selectedNode: SelectedNode | null
+  showAllBranchLabels: boolean
+  showOnlyPanels: boolean
+  showTangle: boolean
+  showTransmissionLines: boolean
   showTreeToo: boolean
-  canTogglePanelLayout: boolean
-  focus: boolean
-
-  // This allows arbitrary prop names while TypeScript adoption is incomplete.
-  // TODO: add all other props explicitly and remove this.
-  [propName: string]: any;
+  sidebarOpen: boolean
+  temporalConfidence: TemporalConfidence
+  tipLabelKey: string | symbol
+  zoomMax?: number
+  zoomMin?: number
 }
 
 export interface MeasurementsControlState {
@@ -58,7 +166,7 @@ export interface ControlsState extends BasicControlsState, MeasurementsControlSt
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
-export const getDefaultControlsState = () => {
+export const getDefaultControlsState = (): ControlsState => {
   const defaults: Defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
@@ -102,6 +210,8 @@ export const getDefaultControlsState = () => {
     colorBy: defaults.colorBy,
     colorByConfidence: false,
     colorScale: undefined,
+    coloringsPresentOnTree: new Set(),
+    coloringsPresentOnTreeWithConfidence: new Set(),
     explodeAttr: undefined,
     selectedBranchLabel: "none",
     showAllBranchLabels: false,
@@ -128,8 +238,6 @@ export const getDefaultControlsState = () => {
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
-    treeLegendOpen: undefined,
-    mapLegendOpen: undefined,
     showOnlyPanels: false,
     showTransmissionLines: true,
     normalizeFrequencies: true,
@@ -297,7 +405,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       const existingFilterInfo = (state.filters?.[strainSymbol]||[]).find((info) => info.value===action.name);
       const existingFilterState = existingFilterInfo === undefined ? null :
         existingFilterInfo.active ? 'active' : 'inactive';
-      const selectedNode = {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch, treeId: action.treeId};
+      const selectedNode: SelectedNode = {name: action.name, idx: action.idx, existingFilterState, isBranch: action.isBranch, treeId: action.treeId};
       return {...state, selectedNode};
     }
     case types.DESELECT_NODE: {

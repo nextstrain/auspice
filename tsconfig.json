@@ -13,6 +13,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
   "compilerOptions": {
     /* Language and Environment */
     "jsx": "react",                                      /* Specify what JSX code is generated. */
+    "target": "es2015",
 
     /* Modules */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
@@ -31,6 +32,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
 
     /* Type Checking */
     "strict": true,                                      /* Enable all strict type-checking options. */
+    "strictNullChecks": false,                           /* Allow unhandled false/null/undefined values to make incremental TypeScript adoption easier. */
     "noImplicitAny": false,                              /* Allow implicit any to make incremental TypeScript adoption easier. */
     "noUnusedLocals": true,                              /* Enable error reporting when a local variables aren't read. */
     "noUnusedParameters": true,                          /* Raise an error when a function parameter isn't read */

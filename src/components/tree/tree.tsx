@@ -1,7 +1,8 @@
 import React from "react";
 import { withTranslation } from "react-i18next";
 import { FaSearchMinus } from "react-icons/fa";
-import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import { Root, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import { SelectedNode } from "../../reducers/controls";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
@@ -17,17 +18,26 @@ import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundary";
 import { untangleTreeToo } from "./tangle/untangling";
 import { sortByGeneOrder } from "../../util/treeMiscHelpers";
+import { TreeComponentProps, TreeComponentState } from "./types";
 
 export const spaceBetweenTrees = 100;
 export const lhsTreeId = "LEFT";
 const rhsTreeId = "RIGHT";
 
-class Tree extends React.Component {
-  constructor(props) {
+export class TreeComponent extends React.Component<TreeComponentProps, TreeComponentState> {
+
+  domRefs: {
+    mainTree: SVGSVGElement | null;
+    secondTree: SVGSVGElement | null;
+  };
+  tangleRef?: Tangle;
+  clearSelectedNode: (node: SelectedNode) => void;
+
+  constructor(props: TreeComponentProps) {
     super(props);
     this.domRefs = {
-      mainTree: undefined,
-      secondTree: undefined
+      mainTree: null,
+      secondTree: null
     };
     this.tangleRef = undefined;
     this.state = {
@@ -47,13 +57,13 @@ class Tree extends React.Component {
   }
 
   /* pressing the escape key should dismiss an info modal (if one exists) */
-  handlekeydownEvent = (event) => {
+  handlekeydownEvent = (event: KeyboardEvent) => {
     if (event.key==="Escape" && this.props.selectedNode) {
       this.clearSelectedNode(this.props.selectedNode);
     }
   }
 
-  setUpAndRenderTreeToo(props, newState) {
+  setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
     newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
@@ -63,26 +73,29 @@ class Tree extends React.Component {
     renderTree(this, false, newState.treeToo, props);
   }
 
-  componentDidMount() {
+  override componentDidMount() {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
-      const newState = {};
+      const newState: Partial<TreeComponentState> = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
       renderTree(this, true, newState.tree, this.props);
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
       newState.geneSortFn = sortByGeneOrder(this.props.genomeMap);
-      this.setState(newState); /* this will trigger an unnecessary CDU :( */
+      this.setState<never>(newState); /* this will trigger an unnecessary CDU :( */
     }
   }
 
-  componentDidUpdate(prevProps) {
-    let newState = {};
+  override componentDidUpdate(prevProps: TreeComponentProps) {
+    let newState: Partial<TreeComponentState> = {};
     let rightTreeUpdated = false;
 
     /* potentially change the (main / left hand) tree */
-    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
+    const {
+      newState: potentialNewState,
+      change: leftTreeUpdated,
+    } = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
     if (potentialNewState) newState = potentialNewState;
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
@@ -98,23 +111,29 @@ class Tree extends React.Component {
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
-      let _unusedNewState;
-      [_unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
-      /* note, we don't incorporate _unusedNewState into the state? why not? */
+      ({
+        change: rightTreeUpdated,
+      } = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props));
+      /* note, we don't incorporate newState into the state? why not? */
     }
 
     /* we may need to (imperatively) tell the tangle to redraw */
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }
-    if (Object.keys(newState).length) this.setState(newState);
+    if (Object.keys(newState).length) this.setState<never>(newState);
   }
 
-  componentWillUnmount() {
+  override componentWillUnmount() {
     document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
-  getStyles = () => {
+  getStyles = (): {
+    treeButtonsDiv: React.CSSProperties
+    resetTreeButton: React.CSSProperties
+    zoomToSelectedButton: React.CSSProperties
+    zoomOutButton: React.CSSProperties
+  } => {
     const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
       this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
     const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
@@ -156,7 +175,15 @@ class Tree extends React.Component {
     };
   };
 
-  renderTreeDiv({width, height, mainTree}) {
+  renderTreeDiv({
+    width,
+    height,
+    mainTree,
+  }: {
+    width: number
+    height: number
+    mainTree: boolean
+  }) {
     return (
       <svg
         id={mainTree ? "MainTree" : "SecondTree"}
@@ -175,22 +202,21 @@ class Tree extends React.Component {
   };
 
   zoomBack = () => {
-    let newRoot, newRootToo;
+    const root: Root = [undefined, undefined];
     // Zoom out of main tree if index of root node is not 0
     if (this.props.tree.idxOfInViewRootNode !== 0) {
       const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
-      newRoot = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
+      root[0] = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
     }
     // Also zoom out of second tree if index of root node is not 0
     if (this.props.treeToo.idxOfInViewRootNode !== 0) {
       const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
-      newRootToo = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
+      root[1] = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
     }
-    const root = [newRoot, newRootToo];
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
   }
 
-  render() {
+  override render() {
     const { t } = this.props;
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
@@ -272,5 +298,4 @@ class Tree extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Tree);
-export default WithTranslation;
+export default withTranslation()(TreeComponent);

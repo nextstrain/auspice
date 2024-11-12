@@ -1,8 +1,18 @@
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
+import { ChangeParams, PhyloTreeType } from "../phyloTree/types";
+import { TreeComponentProps, TreeComponentState } from "../types";
 
-export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps, newProps) => {
-  const args = {};
-  const newState = {};
+export const changePhyloTreeViaPropsComparison = (
+  mainTree: boolean,
+  phylotree: PhyloTreeType,
+  oldProps: TreeComponentProps,
+  newProps: TreeComponentProps,
+): {
+  newState: Partial<TreeComponentState> | false
+  change: boolean
+} => {
+  const args: ChangeParams = {};
+  const newState: Partial<TreeComponentState> = {};
   /* do not use oldProps.tree or newTreeRedux */
   const oldTreeRedux = mainTree ? oldProps.tree : oldProps.treeToo;
   const newTreeRedux = mainTree ? newProps.tree : newProps.treeToo;
@@ -111,7 +121,6 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   if (zoomChange) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
-    newState.selectedNode = {};
     if (newProps.layout === "unrooted") {
       args.updateLayout = true;
     }
@@ -124,12 +133,15 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.svgHasChangedDimensions = true;
   }
 
-  const change = Object.keys(args).length;
+  const change = Object.keys(args).length > 0;
   if (change) {
     args.animationInProgress = newProps.animationPlayPauseButton === "Pause";
     args.performanceFlags = newProps.performanceFlags;
     // console.log('\n\n** ', phylotree.id, 'changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }
-  return [Object.keys(newState).length ? newState : false, change];
+  return {
+    newState: Object.keys(newState).length ? newState : false,
+    change,
+  };
 };

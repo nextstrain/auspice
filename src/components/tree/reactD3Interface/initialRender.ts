@@ -3,8 +3,16 @@ import 'd3-transition';
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
+import { PhyloTreeType } from "../phyloTree/types";
+import { TreeComponent } from "../tree";
+import { TreeComponentProps } from "../types";
 
-export const renderTree = (that, main, phylotree, props) => {
+export const renderTree = (
+  that: TreeComponent,
+  main: boolean,
+  phylotree: PhyloTreeType,
+  props: TreeComponentProps,
+): void => {
   const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
   const treeState = main ? props.tree : props.treeToo;
   if (!treeState.loaded) {
@@ -17,13 +25,13 @@ export const renderTree = (that, main, phylotree, props) => {
     renderBranchLabels=false;
   }
   const tipStrokeColors = calculateStrokeColors(treeState, false, props.colorByConfidence, props.colorBy);
-  /* simply the call to phylotree.render */
-  phylotree.render(
-    select(ref),
-    props.layout,
-    props.distanceMeasure,
-    props.focus,
-    { /* parameters (modifies PhyloTree's defaults) */
+
+  phylotree.render({
+    svg: select(ref),
+    layout: props.layout,
+    distance: props.distanceMeasure,
+    focus: props.focus,
+    parameters: { /* modifies PhyloTree's defaults */
       grid: true,
       confidence: props.temporalConfidence.display,
       branchLabelKey: renderBranchLabels && props.selectedBranchLabel,
@@ -32,7 +40,7 @@ export const renderTree = (that, main, phylotree, props) => {
       tipLabels: true,
       showTipLabels: true
     },
-    { /* callbacks */
+    callbacks: {
       onTipHover: callbacks.onTipHover.bind(that),
       onTipClick: callbacks.onTipClick.bind(that),
       onBranchHover: callbacks.onBranchHover.bind(that),
@@ -41,15 +49,15 @@ export const renderTree = (that, main, phylotree, props) => {
       onTipLeave: callbacks.onTipLeave.bind(that),
       tipLabel: makeTipLabelFunc(props.tipLabelKey)
     },
-    treeState.branchThickness, /* guaranteed to be in redux by now */
-    treeState.visibility,
-    props.temporalConfidence.on, /* drawConfidence? */
-    treeState.vaccines,
-    calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy), 
-    tipStrokeColors,
-    tipStrokeColors.map(getBrighterColor), // tip fill colors
-    treeState.tipRadii, /* might be null */
-    [props.dateMinNumeric, props.dateMaxNumeric],
-    props.scatterVariables
-  );
+    branchThickness: treeState.branchThickness, /* guaranteed to be in redux by now */
+    visibility: treeState.visibility,
+    drawConfidence: props.temporalConfidence.on,
+    vaccines: treeState.vaccines,
+    branchStroke: calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy), 
+    tipStroke: tipStrokeColors,
+    tipFill: tipStrokeColors.map(getBrighterColor),
+    tipRadii: treeState.tipRadii,
+    dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
+    scatterVariables: props.scatterVariables,
+  });
 };

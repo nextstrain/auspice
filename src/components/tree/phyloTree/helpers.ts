@@ -3,11 +3,16 @@ import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { ReduxNode } from "../../../reducers/tree/types";
+import { Distance, PhyloNode } from "./types";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
  */
-export const getDomId = (type, strain) => {
+export const getDomId = (
+  type: string,
+  strain: string,
+): string => {
   // Replace non-alphanumeric characters with dashes (probably unnecessary)
   const name = `${type}_${strain}`.replace(/(\W+)/g, '-');
   return CSS.escape(name);
@@ -16,10 +21,13 @@ export const getDomId = (type, strain) => {
 /**
  * this function takes a call back and applies it recursively
  * to all child nodes, including internal nodes
- * @param {PhyloNode} node
- * @param {Function} func - function to apply to each children. Is passed a single argument, the <PhyloNode> of the children.
  */
-export const applyToChildren = (phyloNode, func) => {
+export const applyToChildren = (
+  phyloNode: PhyloNode,
+
+  /** function to apply to each child. Is passed a single argument, the <PhyloNode> of the children. */
+  func: (node: PhyloNode) => void,
+): void => {
   func(phyloNode);
   const node = phyloNode.n;
   if ((!node.hasChildren) || (node.children === undefined)) { // in case clade set by URL, terminal hasn't been set yet!
@@ -34,13 +42,14 @@ export const applyToChildren = (phyloNode, func) => {
  * Calculates the display order of all nodes, which corresponds to the vertical position
  * of nodes in a rectangular tree.
  * If `yCounter` is undefined then we wish to hide the node and all descendants of it
- * @param {PhyloNode} node
- * @param {function} incrementer
- * @param {int|undefined} yCounter
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
- * @returns {int|undefined} current yCounter after assignment to the tree originating from `node`
+ * Returns the current yCounter after assignment to the tree originating from `node`
  */
-export const setDisplayOrderRecursively = (node, incrementer, yCounter) => {
+export const setDisplayOrderRecursively = (
+  node: PhyloNode,
+  incrementer: (node: PhyloNode) => number,
+  yCounter?: number,
+): number | undefined => {
   const children = node.n.children; // (redux) tree node
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
@@ -65,7 +74,10 @@ export const setDisplayOrderRecursively = (node, incrementer, yCounter) => {
  * the returned value is to be interpreted as a count of the number of tips that would
  * otherwise fit in the gap
  */
-function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
+function _getSpaceBetweenSubtrees(
+  numSubtrees: number,
+  numTips: number,
+): number {
   if (numSubtrees===1 || numTips<10) {
     return 0;
   }
@@ -83,12 +95,14 @@ function _getSpaceBetweenSubtrees(numSubtrees, numTips) {
  * PhyloTree can subsequently use this information. Accessed by prototypes
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
- * @param {Object} props
- * @param {Array<PhyloNode>} props.nodes
- * @param {boolean} props.focus
- * @returns {undefined}
  */
-export const setDisplayOrder = ({nodes, focus}) => {
+export const setDisplayOrder = ({
+  nodes,
+  focus,
+}: {
+  nodes: PhyloNode[]
+  focus: boolean
+}): void => {
   timerStart("setDisplayOrder");
 
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
@@ -143,7 +157,7 @@ export const setDisplayOrder = ({nodes, focus}) => {
 };
 
 
-export const formatDivergence = (divergence) => {
+export const formatDivergence = (divergence: number): string | number => {
   return divergence > 1 ?
     Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
     divergence > 0.01 ?
@@ -156,7 +170,7 @@ export const formatDivergence = (divergence) => {
  * This differs depending on which tree is in view so it's helpful to access it
  * by reaching into phyotree to get it
  */
-export const getIdxOfInViewRootNode = (node) => {
+export const getIdxOfInViewRootNode = (node: ReduxNode): number => {
   return node.shell.that.zoomNode.n.arrayIdx;
 };
 
@@ -164,7 +178,11 @@ export const getIdxOfInViewRootNode = (node) => {
  * Are the provided nodes within some divergence / time of each other?
  * NOTE: `otherNode` is always closer to the root in the tree than `node`
  */
-function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
+function isWithinBranchTolerance(
+  node: ReduxNode,
+  otherNode: ReduxNode,
+  distanceMeasure: Distance,
+): boolean {
   if (distanceMeasure === "num_date") {
     /* We calculate the threshold by reaching into phylotree to extract the date range of the dataset
     and then split the data into ~50 slices. This could be refactored to not reach into phylotree. */
@@ -183,7 +201,7 @@ function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
  * Walk up the tree from node until we find either a node which has a nucleotide mutation or we
  * reach the root of the (sub)tree. Gaps, deletions and undeletions do not count as mutations here.
  */
-function findFirstBranchWithAMutation(node) {
+function findFirstBranchWithAMutation(node: ReduxNode): ReduxNode {
   if (node.parent === node) {
     return node;
   }
@@ -200,13 +218,12 @@ function findFirstBranchWithAMutation(node) {
  * branch length threshold (either divergence or time). This is useful for finding the node
  * beyond a polytomy, or polytomy-like structure. If nucleotide mutations are defined on
  * the tree (and distanceMeasure=div) then we find the first branch with a mutation.
- * @param {object} node - tree node
- * @param {string} distanceMeasure -- 'num_date' or 'div'
- * @param {object} observedMutations
- * @returns {object} the closest node up the tree (towards the root) which is beyond
- * some threshold
  */
-export const getParentBeyondPolytomy = (node, distanceMeasure, observedMutations) => {
+export const getParentBeyondPolytomy = (
+  node: ReduxNode,
+  distanceMeasure: Distance,
+  observedMutations: Record<string, number>,
+): ReduxNode => {
   let potentialNode = node.parent;
   if (distanceMeasure==="div" && areNucleotideMutationsPresent(observedMutations)) {
     return findFirstBranchWithAMutation(node);
@@ -235,7 +252,9 @@ function areNucleotideMutationsPresent(observedMutations) {
  * we will "guess" this here. A future augur update will export this in a JSON key,
  * removing the need to guess.
  */
-export function guessAreMutationsPerSite(scale) {
+export function guessAreMutationsPerSite(
+  scale: d3.ScaleContinuousNumeric<number, number>,
+): boolean {
   const maxDivergence = max(scale.domain());
   return maxDivergence <= 5;
 }
@@ -243,19 +262,15 @@ export function guessAreMutationsPerSite(scale) {
 /**
  * Is the node a subtree root node? (implies that we have either exploded trees or
  * the dataset has multiple subtrees to display)
- * @param {ReduxTreeNode} n
- * @returns {bool}
  */
-const isSubtreeRoot = (n) => (n.parent.name === "__ROOT" && n.parentInfo.original);
+const isSubtreeRoot = (n: ReduxNode): boolean => (n.parent.name === "__ROOT" && n.parentInfo.original !== undefined);
 
 /**
  * Gets the parent node to be used for stem / branch calculation.
  * Most of the time this is the same as `d.n.parent` however it is not in the
  * case of the root nodes for subtrees (e.g. exploded trees).
- * @param {Node} n
- * @returns {Node}
  */
-export const stemParent = (n) => {
+export const stemParent = (n: ReduxNode): ReduxNode => {
   return isSubtreeRoot(n) ? n.parentInfo.original : n.parent;
 };
 
@@ -265,13 +280,13 @@ export const stemParent = (n) => {
  * This is not strictly the same as the `displayOrder` the scatterplot axis
  * renders increasing values going upwards (i.e. from the bottom to top of screen)
  * whereas the rectangular tree renders zero at the top and goes downwards
- * @param {Array<PhyloNode>} nodes
- * @returns {function} which takes a single argument of type <PhyloNode>
  */
-export const nodeOrdering = (nodes) => {
+export const nodeOrdering = (
+  nodes: PhyloNode[],
+): ((d: PhyloNode) => [number, number]) => {
   const maxVal = nodes.map((d) => d.displayOrder)
     .reduce((acc, val) => ((val ?? 0) > acc ? val : acc), 0);
-  return (d) => ([
+  return (d: PhyloNode) => ([
     maxVal - d.displayOrder,
     isSubtreeRoot(d.n) ? undefined : (maxVal - d.n.parent.shell.displayOrder)
   ]);

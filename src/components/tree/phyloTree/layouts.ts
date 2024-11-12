@@ -1,20 +1,23 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
-import { min, max } from "d3-array";
-import scaleLinear from "d3-scale/src/linear";
-import {point as scalePoint} from "d3-scale/src/band";
+import { scaleLinear, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
+import { Layout, ScatterVariables } from "../../../reducers/controls";
+import { ReduxNode } from "../../../reducers/tree/types";
+import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
 
 /**
  * assigns the attribute this.layout and calls the function that
  * calculates the x,y coordinates for the respective layouts
- * @param layout -- the layout to be used, has to be one of
- *                  ["rect", "radial", "unrooted", "clock", "scatter"]
  */
-export const setLayout = function setLayout(layout, scatterVariables) {
+export const setLayout = function setLayout(
+  this: PhyloTreeType,
+  layout?: Layout,
+  scatterVariables?: ScatterVariables,
+): void {
   // console.log("set layout");
   timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
@@ -52,9 +55,8 @@ export const setLayout = function setLayout(layout, scatterVariables) {
 
 /**
  * assignes x,y coordinates for a rectangular layout
- * @return {null}
  */
-export const rectangularLayout = function rectangularLayout() {
+export const rectangularLayout = function rectangularLayout(this: PhyloTreeType): void {
   this.nodes.forEach((d) => {
     d.y = d.displayOrder; // precomputed y-values
     d.x = d.depth;    // depth according to current distance
@@ -74,7 +76,7 @@ export const rectangularLayout = function rectangularLayout() {
  * assign x,y coordinates for nodes based upon user-selected variables
  * TODO: timeVsRootToTip is a specific instance of this
  */
-export const scatterplotLayout = function scatterplotLayout() {
+export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType): void {
   if (!this.scatterVariables) {
     console.error("Scatterplot called without variables");
     return;
@@ -84,7 +86,7 @@ export const scatterplotLayout = function scatterplotLayout() {
     nodeOrdering(this.nodes) :
     undefined;
 
-  this.nodes.forEach((d) => {
+  for (const d of this.nodes) {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
       d.x = getDivFromNode(d.n);
@@ -98,7 +100,7 @@ export const scatterplotLayout = function scatterplotLayout() {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
       if (this.scatterVariables.xTemporal) {
-        [d.x, d.px] = [numDate(d.x, true), numDate(d.px, true)]
+        [d.x, d.px] = [numDate(d.x), numDate(d.px)]
       }
     }
     // set y and parent  values
@@ -114,10 +116,10 @@ export const scatterplotLayout = function scatterplotLayout() {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
       if (this.scatterVariables.yTemporal) {
-        [d.y, d.py] = [numDate(d.y, true), numDate(d.py, true)]
+        [d.y, d.py] = [numDate(d.y), numDate(d.py)]
       }
     }
-  });
+  }
 
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -135,17 +137,18 @@ export const scatterplotLayout = function scatterplotLayout() {
 
 /**
  * Utility function for the unrooted tree layout. See `unrootedLayout` for details.
- * @param {PhyloNode} node
- * @param {number} totalLeafWeight
  */
-const unrootedPlaceSubtree = (node, totalLeafWeight) => {
+const unrootedPlaceSubtree = (
+  node: PhyloNode,
+  totalLeafWeight: number,
+): void => {
   const branchLength = node.depth - node.pDepth;
   node.x = node.px + branchLength * Math.cos(node.tau + node.w * 0.5);
   node.y = node.py + branchLength * Math.sin(node.tau + node.w * 0.5);
   let eta = node.tau; // eta is the cumulative angle for the wedges in the layout
   if (node.n.hasChildren) {
     for (let i = 0; i < node.n.children.length; i++) {
-      const ch = node.n.children[i].shell; // ch is a <PhyloNode>
+      const ch = node.n.children[i].shell;
       ch.w = 2 * Math.PI * leafWeight(ch.n) / totalLeafWeight;
       ch.tau = eta;
       eta += ch.w;
@@ -164,9 +167,8 @@ const unrootedPlaceSubtree = (node, totalLeafWeight) => {
 /**
  * calculates x,y coordinates for the unrooted layout. this is
  * done recursively via a the function unrootedPlaceSubtree
- * @return {null}
  */
-export const unrootedLayout = function unrootedLayout() {
+export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void {
   /* the angle of a branch (i.e. the line leading to the node) is `tau + 0.5*w`
     `tau` stores the previous angle which has been used
     `w` is a measurement of the angle occupied by the clade defined by this node
@@ -214,9 +216,8 @@ export const unrootedLayout = function unrootedLayout() {
  * calculates and assigns x,y coordinates for the radial layout.
  * in addition to x,y, this calculates the end-points of the radial
  * arcs and whether that arc is more than pi or not
- * @return {null}
  */
-export const radialLayout = function radialLayout() {
+export const radialLayout = function radialLayout(this: PhyloTreeType): void {
   const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
   const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
@@ -252,7 +253,10 @@ export const radialLayout = function radialLayout() {
  * calculate coordinates. Parent depth is assigned as well.
  * @sideEffect sets this.distance -> "div" or "num_date"
  */
-export const setDistance = function setDistance(distanceAttribute) {
+export const setDistance = function setDistance(
+  this: PhyloTreeType,
+  distanceAttribute?: Distance,
+): void {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
   if (distanceAttribute) {
@@ -292,9 +296,8 @@ export const setDistance = function setDistance(distanceAttribute) {
 /**
  * Initializes and sets the range of the scales (this.xScale, this.yScale)
  * which are used to map the x,y coordinates to the screen
- * @param {margins} -- object with "right, left, top, bottom" margins
  */
-export const setScales = function setScales() {
+export const setScales = function setScales(this: PhyloTreeType): void {
 
   if (this.layout==="scatter" && !this.scatterVariables.xContinuous) {
     this.xScale = scalePoint().round(false).align(0.5).padding(0.5);
@@ -313,7 +316,7 @@ export const setScales = function setScales() {
     // Force Square: TODO, harmonize with the map to screen
     const xExtend = width - this.margins.left - this.margins.right;
     const yExtend = height - this.margins.bottom - this.margins.top;
-    const minExtend = min([xExtend, yExtend]);
+    const minExtend = Math.min(xExtend, yExtend);
     const xSlack = xExtend - minExtend;
     const ySlack = yExtend - minExtend;
     this.xScale.range([0.5 * xSlack + this.margins.left, width - 0.5 * xSlack - this.margins.right]);
@@ -337,9 +340,8 @@ export const setScales = function setScales() {
 /**
 * this function sets the xScale, yScale domains and maps precalculated x,y
 * coordinates to their places on the screen
-* @return {null}
 */
-export const mapToScreen = function mapToScreen() {
+export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
 
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
@@ -419,7 +421,7 @@ export const mapToScreen = function mapToScreen() {
   /* Radial / Unrooted layouts need to be square since branch lengths
   depend on this */
   if (this.layout === "radial" || this.layout === "unrooted") {
-    const maxSpan = max([spanY, spanX]);
+    const maxSpan = Math.max(spanY, spanX);
     const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
     const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
     xDomain = [xDomain[0]-xSlack, xDomain[0]+maxSpan-xSlack];
@@ -475,11 +477,11 @@ export const mapToScreen = function mapToScreen() {
     if (this.scatterVariables.showBranches) {
       this.nodes.forEach((d) => {
         d.branch = d.xBase===hiddenXPosition || d.xTip===hiddenXPosition || d.yBase===hiddenYPosition || d.yTip===hiddenYPosition ?
-          [""] :
+          ["", ""] :
           [" M "+d.xBase.toString()+","+d.yBase.toString()+" L "+d.xTip.toString()+","+d.yTip.toString(), ""];
       });
     } else {
-      this.nodes.forEach((d) => {d.branch=[];});
+      this.nodes.forEach((d) => {d.branch=["", ""];});
     }
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => { // d is a <PhyloNode>
@@ -489,8 +491,8 @@ export const mapToScreen = function mapToScreen() {
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
       // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
       d.branch =[
-        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`],
-        [` M ${d.xTip},${stemRange[0]} L ${d.xTip},${stemRange[1]}`]
+        ` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`,
+        ` M ${d.xTip},${stemRange[0]} L ${d.xTip},${stemRange[1]}`
       ];
       if (this.params.confidence) {
         d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
@@ -506,11 +508,11 @@ export const mapToScreen = function mapToScreen() {
         " L "+d.xTip.toString()+" "+d.yTip.toString(), ""
       ];
       if (d.n.hasChildren) {
-        d.branch[1] =[" M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
+        d.branch[1] = " M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
         " A "+(this.xScale(d.depth)-this.xScale(offset)).toString()+" "+
         (this.yScale(d.depth)-this.yScale(offset)).toString()+
         " 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
-        " "+this.xScale(d.xCBarEnd).toString()+","+this.yScale(d.yCBarEnd).toString()];
+        " "+this.xScale(d.xCBarEnd).toString()+","+this.yScale(d.yCBarEnd).toString();
       }
     });
   }
@@ -519,7 +521,10 @@ export const mapToScreen = function mapToScreen() {
 
 const JITTER_MIN_STEP_SIZE = 50; // pixels
 
-function padCategoricalScales(domain, scale) {
+function padCategoricalScales(
+  domain: string[],
+  scale: d3.ScalePoint<string>,
+): d3.ScalePoint<string> {
   if (scale.step() > JITTER_MIN_STEP_SIZE) return scale.padding(0.5); // balanced padding when we can jitter
   if (domain.length<=4) return scale.padding(0.4);
   if (domain.length<=6) return scale.padding(0.3);
@@ -530,16 +535,20 @@ function padCategoricalScales(domain, scale) {
 /**
  * Add jitter to the already-computed node positions.
  */
-function jitter(axis, scale, nodes) {
+function jitter(
+  axis: "x" | "y",
+  scale: d3.ScalePoint<string>,
+  nodes: PhyloNode[],
+): void {
   const step = scale.step();
   if (scale.step() <= JITTER_MIN_STEP_SIZE) return;
-  const rand = []; // pre-compute a small set of pseudo random numbers for speed
+  const rand: number[] = []; // pre-compute a small set of pseudo random numbers for speed
   for (let i=1e2; i--;) {
     rand.push((Math.random()-0.5)*step*0.5); // occupy 50%
   }
   const [base, tip, randLen] = [`${axis}Base`, `${axis}Tip`, rand.length];
   let j = 0;
-  function recurse(phyloNode) {
+  function recurse(phyloNode: PhyloNode): void {
     phyloNode[base] = stemParent(phyloNode.n).shell[tip];
     phyloNode[tip] += rand[j++];
     if (j>=randLen) j=0;
@@ -550,7 +559,10 @@ function jitter(axis, scale, nodes) {
 }
 
 
-function getTipLabelPadding(params, inViewTerminalNodes) {
+function getTipLabelPadding(
+  params: Params,
+  inViewTerminalNodes: PhyloNode[],
+): number {
   let padBy = 0;
   if (inViewTerminalNodes.length < params.tipLabelBreakL1) {
 
@@ -571,6 +583,6 @@ function getTipLabelPadding(params, inViewTerminalNodes) {
   return padBy;
 }
 
-function leafWeight(node) {
+function leafWeight(node: ReduxNode): number {
   return node.tipCount + 0.15*(node.fullTipCount-node.tipCount);
 }
