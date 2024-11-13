@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.61.0 - 2024/11/14
+
+
 * Error boundaries added for all panels (tree, map etc) so that in the case of uncaught errors we'll now show an error message rather than crashing Auspice. Hopefully these are never observed in production! ([#1897](https://github.com/nextstrain/auspice/pull/1897))
 * Bugfix: Auspice would crash in some situations when the entropy panel was scrolled back into view (bug introduced in v2.60.0). ([#1898](https://github.com/nextstrain/auspice/pull/1898))
 
