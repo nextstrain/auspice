@@ -29,7 +29,7 @@ export const changeColorBy = (providedColorBy = undefined) => {
     dispatch(changeEntropyCdsSelection(colorBy));
 
     // Recompute streams 
-    const streams = partitionIntoStreams(controls.showStreamTrees, tree.nodes, tree.visibility, colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
+    const streams = partitionIntoStreams(controls.showStreamTrees, controls.streamTreeBranchLabel, tree.nodes, tree.visibility, colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
 
 
     dispatch({

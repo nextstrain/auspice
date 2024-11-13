@@ -222,6 +222,7 @@ export interface ChangeParams {
 
   showStreams?: boolean
   streams?: any // TODO XXX
+  streamTreeBranchLabel?: string
 }
 
 export interface PhyloTreeType {

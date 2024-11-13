@@ -45,6 +45,8 @@ export interface TreeComponentStateProps {
   tree: TreeState
   treeToo: TreeTooState
   showStreamTrees: boolean
+  streamTreeBranchLabel: string
+
 }
 
 export interface TreeComponentState {

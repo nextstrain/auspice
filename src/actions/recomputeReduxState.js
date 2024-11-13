@@ -24,6 +24,8 @@ import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, loadMeasurements } from "./measurements";
 import { partitionIntoStreams } from "../util/partitionIntoStreams.js";
+import { canShowStreamTrees, branchLabelsForStreamTrees } from "../components/controls/choose-stream-tree-branch-label";
+
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -995,7 +997,15 @@ export const createStateFromQueryOrJSONs = ({
   });
 
   /* STREAMS */
-  tree.streams = partitionIntoStreams(controls.showStreamTrees, tree.nodes, tree.visibility, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
+  const streamBranchLabels = branchLabelsForStreamTrees(tree.availableBranchLabels);
+  if (canShowStreamTrees(streamBranchLabels)) {
+    /* TMP: override default state for testing purposes */
+    controls.showStreamTrees = true; // toggle on to start with
+    controls.streamTreeBranchLabel = streamBranchLabels.includes('stream') ? 'stream' :
+      streamBranchLabels.includes('clade') ? 'clade' :
+      'none';
+  }
+  tree.streams = partitionIntoStreams(controls.showStreamTrees, controls.streamTreeBranchLabel, tree.nodes, tree.visibility, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
   console.log("tree.streams", tree.streams)
 
   /* calculate entropy in view */

@@ -80,7 +80,8 @@ const Tree = (
         nodeColorsVersion: action.version,
         streams: action.streams, // replace entire structure
       };
-    case types.TOGGLE_STREAM_TREE:
+    case types.TOGGLE_STREAM_TREE: /* fallthrough */
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
       return {...state, streams: action.streams};
     case types.TREE_TOO_DATA:
       return action.tree;

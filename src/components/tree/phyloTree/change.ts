@@ -325,6 +325,7 @@ export const change = function change(
     showAllBranchLabels = undefined,
     newTipLabelKey = undefined,
     showStreams = undefined,
+    streamTreeBranchLabel = undefined,
     /* arrays of data (the same length as nodes) */
     branchStroke = undefined,
     tipStroke = undefined,
@@ -407,16 +408,16 @@ export const change = function change(
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
-  if (showStreams!==undefined) {
-    console.log("CHANGE::showStreams", showStreams)
+  if (showStreams!==undefined || streamTreeBranchLabel!==undefined) {
     this.streams = streams;
     this.phyloStreams = undefined;
 
-    if (showStreams===false) {
-      // turn them off! - TODO - make this a function
-      this.groups.streams.selectAll(".stream").remove();
-      this.groups.streams.selectAll(".connector").remove();
-    } else {
+    if (Object.hasOwn(this.groups, 'streams')) {
+      this.groups.streams.selectAll('*').remove();
+      delete this.groups.streams;
+    }
+
+    if (showStreams===true) {
       this.streamLayout(); // recompute displayOrder values across pivots
       mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
       this.drawStreams(); // remove & redraw
@@ -424,8 +425,13 @@ export const change = function change(
     }
     // don't have good methods to remove tips etc (yet)
     for (const name of ['branchLabels', 'branchTee', 'branchStem', 'tips', 'tipLabels', 'vaccines']) {
-      this.groups[name].selectAll("*").remove();
+      if (Object.hasOwn(this.groups, name)) {
+        this.groups[name].selectAll("*").remove();
+      }
     }
+    setDisplayOrder({nodes: this.nodes, focus});
+    this.setLayout();
+    this.mapToScreen();
     this.drawBranches();
     this.updateTipLabels();
     this.drawTips();

@@ -1,33 +1,5 @@
 import { getTraitFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
-import { sum } from "d3-array";
-
-
-// Prototype - hardcode the CA of streams
-function _isFounderNode(node) {
-
-  if (node?.branch_attrs?.labels?.clade) return true;
-  return false;
-
-
-  const FOUNDERS = [
-    // ZIKA:
-    // "NODE_0000200", // 133, including below, so 40 of its own
-    // "NODE_0000241", // 93 tips
-    // "NODE_0000001"
-
-  
-    // FLU:
-    "NODE_0001834",
-    "NODE_0001220", // 1220
-    "NODE_0001102", // 80
-    "NODE_0000729", // 729, less 154 = 575
-    "NODE_0001261", // 154
-  ]
-  return FOUNDERS.includes(node.name);
-}
-
-
 
 /**
  * CAVEATS:
@@ -35,7 +7,7 @@ function _isFounderNode(node) {
  * - only works for categorical colorScal`e
  * - only works for temporal tree
  */
-export function partitionIntoStreams(enabled, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   
   const streams = {
     streams: [],
@@ -45,7 +17,7 @@ export function partitionIntoStreams(enabled, nodes, visibility, colorScale, abs
   if (!enabled) return streams;
 
   const {founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups} =
-    getFounderTree(nodes, _isFounderNode);
+    getFounderTree(nodes, branchLabel);
   streams.streamGroups = streamGroups;
 
   streams.streams = foundersPostorder.map((founderInfo) => { // TKTK
@@ -172,6 +144,7 @@ function groupNodesIntoIntervals(nodes, intervals) {
 }
 
 export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, categories) {
+  console.log("countsByCategory")
   return categories.map((category) => {
     return nodeIdxsByPivot.map((nodeIdxs) => {
       return nodeIdxs.filter(
@@ -191,14 +164,14 @@ export function streamConnectorVisibility() {
  * @param {object} rootNode redux tree node
  * @param {function} isFounderNode
  */
-function getFounderTree(treeNodes, isFounderNode) {
+function getFounderTree(treeNodes, branchLabel) {
   // Tree of nodes (in the main tree) which define stream trees
   const founderTree = {children: []};
   const nodesInStreamFounderTree = [];
 
   function traverse(node, streamParentNode=founderTree) {
     let newNode;
-    if (isFounderNode(node)) {
+    if (node?.branch_attrs?.labels?.[branchLabel]) {
       // add this as a child to the appropriate parent not in streamFounderTree
       newNode = {children: [], parent: streamParentNode, arrayIdx:node.arrayIdx, name: node.name}
       streamParentNode.children.push(newNode)

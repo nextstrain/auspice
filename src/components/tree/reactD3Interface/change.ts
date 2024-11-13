@@ -42,9 +42,9 @@ export const changePhyloTreeViaPropsComparison = (
 
   /* toggle on-off stream trees? 
      NOTE: currently this is all-or-nothing, but one day it'll be per-stream */
-  if (oldProps.showStreamTrees !== newProps.showStreamTrees) {
-    console.log("prop change!", oldProps.showStreamTrees, newProps.showStreamTrees)
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.streamTreeBranchLabel !== newProps.streamTreeBranchLabel) {
     args.showStreams = newProps.showStreamTrees;
+    args.streamTreeBranchLabel = newProps.streamTreeBranchLabel;
     args.streams = newTreeRedux.streams;
   }
 
