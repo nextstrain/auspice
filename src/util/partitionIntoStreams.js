@@ -1,4 +1,4 @@
-import { getTraitFromNode } from "./treeMiscHelpers"
+import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
 
 /**
@@ -7,7 +7,7 @@ import { NODE_VISIBLE } from "./globals";
  * - only works for categorical colorScal`e
  * - only works for temporal tree
  */
-export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, colorScale, absoluteDateMinNumeric, absoluteDateMaxNumeric, metric) {
   
   const streams = {
     streams: [],
@@ -61,11 +61,11 @@ export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, co
     // TODO XXX - the starting color needs to be modified if it is to match the branches!
     // See calculateStrokeColors, but this would need refactoring
     stream.startingColor = colorScale.scale(getTraitFromNode(nodes[founderInfo.idx], colorScale.colorBy))
-    const pivotData = calcPivots(nodesInStream, absoluteDateMinNumeric, absoluteDateMaxNumeric);
+    const pivotData = calcPivots(metric, nodesInStream, absoluteDateMinNumeric, absoluteDateMaxNumeric);
     stream.pivotIntervals = pivotData.intervals;
     stream.pivots = pivotData.pivots;
     // nodeIdxs are all nodes, visible and not visible
-    stream.nodeIdxs = groupNodesIntoIntervals(nodesInStream, pivotData.intervals); // indexed by pivot idx
+    stream.nodeIdxs = groupNodesIntoIntervals(nodesInStream, pivotData.intervals, metric); // indexed by pivot idx
     // stream.numNodes = nodesInStream.length;
     stream.maxNodesInInterval = Math.max(...stream.nodeIdxs.map((idxs) => idxs.length));
     stream.countsByCategory = countsByCategory(nodes, stream.nodeIdxs, visibility, colorScale.colorBy, stream.categories);
@@ -105,9 +105,13 @@ function observedCategories(nodes, colorScale) {
   return Array.from(values).sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b))
 }
 
-function calcPivots(nodes, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
-  const domain = nodes.reduce((acc, node) => {
-    const value = getTraitFromNode(node, "num_date"); // TODO XXX
+function calcPivots(metric, nodes, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
+  /**
+   * TODO XXX - pivot number always calculated using num_date - this helps ensure the number of pivots
+   * doesn't change when we change the metric. Obviously needs to be fixed.
+   */
+  let domain = nodes.reduce((acc, node) => {
+    const value = getTraitFromNode(node, 'num_date');
     if (acc[0] > value) acc[0] = value;
     if (acc[1] < value) acc[1] = value;
     return acc;
@@ -116,6 +120,16 @@ function calcPivots(nodes, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
   const domainFraction = (domain[1]-domain[0]) / (absoluteDateMaxNumeric - absoluteDateMinNumeric);
   const availablePivots = 50;
   const nPivots = Math.ceil(domainFraction * availablePivots);
+
+  if (metric==='div') {
+    domain = nodes.reduce((acc, node) => {
+      const value = getDivFromNode(node);
+      if (acc[0] > value) acc[0] = value;
+      if (acc[1] < value) acc[1] = value;
+      return acc;
+    }, [Infinity, -Infinity])
+  }
+
   const size = (domain[1]-domain[0])/(nPivots-1);
   const intervals = Array.from(Array(nPivots), undefined);
   intervals[0] = [domain[0], domain[0] + size/2];
@@ -129,11 +143,11 @@ function calcPivots(nodes, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
 }
 
 
-function groupNodesIntoIntervals(nodes, intervals) {
+function groupNodesIntoIntervals(nodes, intervals, metric) {
   const groups = Array.from(Array(intervals.length), () => [])
   // TODO XXX this is very crude
   for (const node of nodes) {
-    const value = getTraitFromNode(node, "num_date"); // TODO XXX
+    const value = metric==='num_date' ? getTraitFromNode(node, "num_date") : getDivFromNode(node);
     for (let i =0; i<intervals.length; i++) {
       if (value>intervals[i][0] && value<=intervals[i][1]) { // TODO - which side is open, which is closed?
         // TODO XXX - I use arrayIdx not the node itself as adding references to nodes like this

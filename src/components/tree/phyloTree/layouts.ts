@@ -169,7 +169,9 @@ export function streamLayout(this: PhyloTreeType): void {
         break
       }
     }
-    const startXVal = getTraitFromNode(this.nodes[stream.originatingNodeIdx].n, "num_date");
+    const startXVal = this.distance==='num_date' ?
+      getTraitFromNode(this.nodes[stream.originatingNodeIdx].n, 'num_date') :
+      getDivFromNode(this.nodes[stream.originatingNodeIdx].n);
     // connector start if parent not a stream
     if (stream.originatingStreamIdx===null) {
       // Increase the tee length of the parent node (a "normal" branch in the tree) so it matches the y-position of the (branch to the) stream

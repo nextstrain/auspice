@@ -355,6 +355,8 @@ export const change = function change(
     transitionTime = 0;
   }
 
+  if (streams) this.streams = streams;
+
   /* the logic of converting what react is telling us to change
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {

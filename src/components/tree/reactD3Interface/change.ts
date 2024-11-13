@@ -71,6 +71,7 @@ export const changePhyloTreeViaPropsComparison = (
   /* change from timetree to divergence tree */
   if (oldProps.distanceMeasure !== newProps.distanceMeasure) {
     args.newDistance = newProps.distanceMeasure;
+    args.streams = newTreeRedux.streams;
   }
 
   /* explode! */

@@ -1005,7 +1005,7 @@ export const createStateFromQueryOrJSONs = ({
       streamBranchLabels.includes('clade') ? 'clade' :
       'none';
   }
-  tree.streams = partitionIntoStreams(controls.showStreamTrees, controls.streamTreeBranchLabel, tree.nodes, tree.visibility, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric)
+  tree.streams = partitionIntoStreams(controls.showStreamTrees, controls.streamTreeBranchLabel, tree.nodes, tree.visibility, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric, controls.distanceMeasure)
   console.log("tree.streams", tree.streams)
 
   /* calculate entropy in view */

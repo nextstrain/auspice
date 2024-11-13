@@ -67,6 +67,11 @@ const Tree = (
 
       return Object.assign({}, state, newStates);
     }
+    case types.CHANGE_DISTANCE_MEASURE:
+      if (action.streams) {
+        return {...state, streams: action.streams};
+      }
+      return state;
     case types.UPDATE_TIP_RADII:
       return {
         ...state,
