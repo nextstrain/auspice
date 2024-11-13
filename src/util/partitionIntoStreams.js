@@ -51,6 +51,9 @@ export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, co
         stack.push(child)
       }
     }
+    if (nodesInStream.length===0) {
+      throw new Error("Stream constructed without any terminal tips. This is currently an unhandled error.")
+    }
     // categories may have zero counts associated with them (over all pivots) depending on visibility settings
     stream.categories = observedCategories(nodesInStream, colorScale);
     stream.categoryColors = stream.categories.map((value) => colorScale.scale(value))
