@@ -190,7 +190,7 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
 
 EntropyChart.prototype._setSelectedNodes = function _setSelectedNodes() {
   this.selectedNodes = [];
-  if (!this.selectedPositions.length) return;
+  if (!this.selectedPositions.length || !this.bars) return;
   if (this.aa) { /*     P  R  O  T  E  I  N  S    */
     for (const node of this.bars) {
       for (const position of this.selectedPositions) {
