@@ -24,6 +24,7 @@ export function partitionIntoStreams(enabled, branchLabel, nodes, visibility, co
     const stream = {};
     stream.founderIdx = founderInfo.idx; // index of the root node (not part of the stream as it's not a tip)
     stream.founderVisibility = visibility[stream.founderIdx]===NODE_VISIBLE;
+    stream.branchLabel = founderInfo.branchLabel;
 
     stream.originatingNodeIdx = founderInfo.originatingNodeIdx;
     stream.originatingStreamIdx = foundersPostorder.reduce((ret, v, i) => v.idx===founderInfo.originatingStreamFounderIdx ? i : ret, null)
@@ -147,7 +148,6 @@ function groupNodesIntoIntervals(nodes, intervals) {
 }
 
 export function countsByCategory(nodes, nodeIdxsByPivot, visibility, colorBy, categories) {
-  console.log("countsByCategory")
   return categories.map((category) => {
     return nodeIdxsByPivot.map((nodeIdxs) => {
       return nodeIdxs.filter(
@@ -176,7 +176,7 @@ function getFounderTree(treeNodes, branchLabel) {
     let newNode;
     if (node?.branch_attrs?.labels?.[branchLabel]) {
       // add this as a child to the appropriate parent not in streamFounderTree
-      newNode = {children: [], parent: streamParentNode, arrayIdx:node.arrayIdx, name: node.name}
+      newNode = {children: [], parent: streamParentNode, arrayIdx:node.arrayIdx, name: node.name, branchLabel: node.branch_attrs.labels[branchLabel]}
       streamParentNode.children.push(newNode)
       nodesInStreamFounderTree.push(newNode)
     }
@@ -213,6 +213,7 @@ function getFounderTree(treeNodes, branchLabel) {
     foundersPostorder.push({
       idx: node.arrayIdx,
       rootName: node.name,
+      branchLabel: node.branchLabel, 
       originatingNodeIdx: treeNodes[node.arrayIdx].parent.arrayIdx,
       originatingStreamFounderIdx: Object.hasOwn(node.parent, "arrayIdx") ? node.parent.arrayIdx : null,
       childStreamFounders: node?.children?.map((c) => c.arrayIdx) || [],

@@ -103,7 +103,7 @@ export function streamLayout(this: PhyloTreeType): void {
     const founderNode = this.nodes[this.streams.streams[streamGroup[0]].founderIdx];
     const streamGroupDisplayOrderRange = [_getDisplayOrder(founderNode.n, false), _getDisplayOrder(founderNode.n)]
     let floor = streamGroupDisplayOrderRange[1]; // range is [smallerNumber, biggerNumber]
-    const tipMultiplier = (streamGroupDisplayOrderRange[1]-streamGroupDisplayOrderRange[0]) / founderNode.n.tipCount; // includes any and all substreams
+    const tipMultiplier = (streamGroupDisplayOrderRange[1]-streamGroupDisplayOrderRange[0]) / founderNode.n.fullTipCount; // includes any and all substreams
     // console.log("STREAM GROUP", streamGroup, "nTips",founderNode.n.tipCount,  "streamGroupDisplayOrderRange", streamGroupDisplayOrderRange, tipMultiplier)
     for (const streamIdx of _orderStreamGroup(streamGroup)) {
       // start at the bottom of the available range
