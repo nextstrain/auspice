@@ -658,9 +658,9 @@ export function mapStreamsToScreen(streams, phyloStreams, xScale, yScale) {
     /* it's important we only set this up once, as DOM elements will bind to data within, so we need to mutate it */
     if (!phyloStream.ripples) {
       const _area = area()
-        .x((d) => d.x)
-        .y0((d) => d.y0)
-        .y1((d) => d.y1)
+        .x((d: any) => d.x) // TODO XXX fix types
+        .y0((d: any) => d.y0) // TODO XXX fix types
+        .y1((d: any) => d.y1) // TODO XXX fix types
         .curve(curveCatmullRom.alpha(0.5))
     
       phyloStream.ripples = phyloStream.displayOrderByCategory.map((displayOrderByPivot) => {

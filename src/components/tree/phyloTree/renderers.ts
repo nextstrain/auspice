@@ -119,7 +119,6 @@ export const render = function render(
   this.updateTipLabels();
   this.drawTips();
   this.drawStreams();
-  this.drawStreamConnectors();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.regression) this.drawRegression();
@@ -357,14 +356,9 @@ export function drawStreams(this: PhyloTreeType): void {
       .style("fill", "none")
       .style('visibility', 'visible')
       .style('cursor', 'pointer') // using a dashed line doesn't play nicely with onhover/onclick behaviour :(
-      .on("click", this.callbacks.onStreamConnectorClick);
+      .on("click", this.callbacks.onStreamConnectorClick as any); // TODO - fix type
   }
 }
-
-export function drawStreamConnectors() {
-  console.log("drawStreamConnectors is currently a no-op")
-}
-
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate

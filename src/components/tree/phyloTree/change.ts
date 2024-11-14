@@ -423,7 +423,6 @@ export const change = function change(
       this.streamLayout(); // recompute displayOrder values across pivots
       mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
       this.drawStreams(); // remove & redraw
-      this.drawStreamConnectors(); // remove & redraw
     }
     // don't have good methods to remove tips etc (yet)
     for (const name of ['branchLabels', 'branchTee', 'branchStem', 'tips', 'tipLabels', 'vaccines']) {
@@ -453,7 +452,6 @@ export const change = function change(
     this.streamLayout(); // recompute displayOrder values across pivots
     mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
     this.drawStreams(); // remove & redraw
-    this.drawStreamConnectors(); // remove & redraw
   }
   // recalculate existing regression if needed
   if (changeVisibility && this.regression) {

@@ -1006,7 +1006,8 @@ export const createStateFromQueryOrJSONs = ({
       'none';
   }
   tree.streams = partitionIntoStreams(controls.showStreamTrees, controls.streamTreeBranchLabel, tree.nodes, tree.visibility, controls.colorScale, controls.absoluteDateMinNumeric, controls.absoluteDateMaxNumeric, controls.distanceMeasure)
-  console.log("tree.streams", tree.streams)
+  // eslint-disable-next-line
+  console.log("tree.streams", tree.streams); // TODO - remove console log
 
   /* calculate entropy in view */
   if (entropy.loaded) {

@@ -467,10 +467,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
     case types.TOGGLE_STREAM_TREE:
-      console.log("Controls reducer. Show?", action.showStreamTrees, "Label (unchanged):", state.streamTreeBranchLabel);
       return {...state, showStreamTrees: action.showStreamTrees};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
-      console.log("Controls reducer. Show?", action.showStreamTrees, "Label", action.streamTreeBranchLabel);
       return {...state, showStreamTrees: action.showStreamTrees, streamTreeBranchLabel: action.streamTreeBranchLabel};
     case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {

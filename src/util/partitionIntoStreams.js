@@ -250,6 +250,6 @@ function getFounderTree(treeNodes, branchLabel) {
   })
 
 
-  console.log({founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups})
+  // console.log({founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups})
   return {founderTree, founderIndiciesToDescendantFounderIndicies, foundersPostorder, streamGroups};
 }

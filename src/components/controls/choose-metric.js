@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
-import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
 import { toggleStreamTree, changeDistanceMeasure } from "../../actions/streamTrees";

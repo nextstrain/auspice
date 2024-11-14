@@ -2,6 +2,7 @@ import { Selection } from "d3";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import { TreeComponent } from "../tree";
 
 import * as confidence from "./confidence";
 import * as grid from "./grid";
@@ -47,6 +48,7 @@ export interface Callbacks {
   onTipHover: NodeCallback
   onTipLeave: NodeCallback
   tipLabel: NodeCallback
+  onStreamConnectorClick: (this: TreeComponent, phyloStream: any) =>  void
 }
 
 // ---------- PhyloNode ---------- //
