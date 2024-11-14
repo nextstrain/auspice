@@ -1,5 +1,7 @@
 # Changelog
 
+* Bugfix: Restore shift-click behaviour for branches on the tree ([#1901](https://github.com/nextstrain/auspice/pull/1901))
+
 ## version 2.61.0 - 2024/11/14
 
 
