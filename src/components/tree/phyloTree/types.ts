@@ -35,7 +35,7 @@ export interface Regression {
 
 // ---------- Callbacks ---------- //
 
-type NodeCallback = (d: PhyloNode) => void
+type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900> 
 
 export interface Callbacks {
   onBranchClick: NodeCallback

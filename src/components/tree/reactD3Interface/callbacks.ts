@@ -61,7 +61,9 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
   if (this.props.narrativeMode) return;
 
   /* if a branch was clicked while holding the shift key, we instead display a node-clicked modal */
-  if (window.event instanceof KeyboardEvent && window.event.shiftKey) {
+  /* NOTE: window.event is deprecated, however the version of d3-selection we're using doesn't supply
+  the event as an argument */
+  if (window.event instanceof PointerEvent && window.event.shiftKey) {
     // no need to dispatch a filter action
     this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id})
     return;
