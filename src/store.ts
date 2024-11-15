@@ -54,4 +54,7 @@ if (process.env.NODE_ENV !== 'production' && module.hot) {
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
 
+/** A function to be handled by redux (thunk) */
+export type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void
+
 export default store;
