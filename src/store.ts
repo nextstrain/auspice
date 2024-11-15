@@ -44,7 +44,7 @@ const store = configureStore({
 if (process.env.NODE_ENV !== 'production' && module.hot) {
   // console.log("hot reducer reload");
   module.hot.accept('./reducers', () => {
-    const nextRootReducer = require('./reducers/index'); 
+    const nextRootReducer = require('./reducers/index');
     store.replaceReducer(nextRootReducer);
   });
 }

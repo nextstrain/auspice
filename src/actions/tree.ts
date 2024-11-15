@@ -277,7 +277,7 @@ export const applyFilter = (
    *  - "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
    */
   mode: "add" | "inactivate" | "remove" | "set",
-  
+
   /** the trait name of the filter ("authors", "country" etcetera) */
   trait: string | symbol,
 
