@@ -104,7 +104,7 @@ export const createYScale = () => {
  * The groups are sorted by the order of values in the provided groupByValueOrder.
  * @param {Array<Object>} measurements
  * @param {string} groupBy
- * @param {Array<string>} groupByValueOrder
+ * @param {Array<MeasurementsMetadata>} groupByValueOrder
  * @returns {Array<Array<string, Array>>}
  */
 export const groupMeasurements = (measurements, groupBy, groupByValueOrder) => {
