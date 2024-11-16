@@ -28,8 +28,8 @@ const DEBOUNCE_TIME = 200;
     nodes: state.tree.nodes,
     nodesSecondTree: state.treeToo?.nodes,
     totalStateCountsSecondTree: state.treeToo?.totalStateCounts,
-    measurementsFieldsMap: state.measurements.collectionToDisplay.fields,
-    measurementsFiltersMap: state.measurements.collectionToDisplay.filters,
+    measurementsFieldsMap: state.measurements.collectionToDisplay?.fields,
+    measurementsFiltersMap: state.measurements.collectionToDisplay?.filters,
     measurementsFilters: state.controls.measurementsFilters
   };
 })

@@ -1,6 +1,7 @@
 import { cloneDeep, pick } from "lodash";
+import { AppDispatch, ThunkFunction } from "../store";
 import { measurementIdSymbol } from "../util/globals";
-import { defaultMeasurementsControlState } from "../reducers/controls";
+import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { warningNotification } from "./notifications";
 import {
@@ -11,6 +12,42 @@ import {
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
+import {
+  Collection,
+  MeasurementMetadata,
+  MeasurementsDisplay,
+  MeasurementsJson,
+  MeasurementsState
+} from "../reducers/measurements/types";
+
+/**
+ * Temp object for groupings to keep track of values and their counts so that
+ * we can create a stable default order for grouping field values
+ */
+interface GroupingValues {
+  [key: string]: {
+    [key: string]: number
+  }
+}
+
+
+/* mf_<field> correspond to active measurements filters */
+const filterQueryPrefix = "mf_";
+type MeasurementsFilterQuery = `mf_${string}`
+type QueryBoolean = "show" | "hide"
+/* Measurements query parameters that are constructed and/or parsed here. */
+interface MeasurementsQuery {
+  m_collection?: string
+  m_display?: MeasurementsDisplay
+  m_groupBy?: string
+  m_overallMean?: QueryBoolean
+  m_threshold?: QueryBoolean
+  [key: MeasurementsFilterQuery]: string[]
+}
+/* Central Query type placeholder! */
+interface Query extends MeasurementsQuery {
+  [key: string]: unknown
+}
 
 /**
  * Find the collection within collections that has a key matching the provided
@@ -19,13 +56,12 @@ import {
  * If collectionKey is not provided, returns the default collection.
  * If no matches are found, returns the default collection.
  * If multiple matches are found, only returns the first matching collection.
- *
- * @param {Array<Object>} collections
- * @param {string} collectionKey
- * @param {string} defaultKey
- * @returns {Object}
  */
-const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
+const getCollectionToDisplay = (
+  collections: Collection[],
+  collectionKey: string,
+  defaultKey: string
+): Collection => {
   const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
   if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
@@ -39,11 +75,11 @@ const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
 /**
  * Map the controlKey to the default value in collectionDefaults
  * Checks if the collection default is a valid value for the control
- * @param {string} controlKey
- * @param {Object} collection
- * @returns {*}
  */
-function getCollectionDefaultControl(controlKey, collection) {
+function getCollectionDefaultControl(
+  controlKey: string,
+  collection: Collection
+): string | boolean | undefined {
   const collectionControlToDisplayDefaults = {
     measurementsGroupBy: 'group_by',
     measurementsDisplay: 'measurements_display',
@@ -106,10 +142,8 @@ function getCollectionDefaultControl(controlKey, collection) {
 /**
  * Returns the default control state for the provided collection
  * Returns teh default control state for the app if the collection is not loaded yet
- * @param {Object} collection
- * @returns {MeasurementsControlState}
  */
-function getCollectionDefaultControls(collection) {
+function getCollectionDefaultControls(collection: Collection): MeasurementsControlState {
   const defaultControls = {...defaultMeasurementsControlState};
   if (Object.keys(collection).length) {
     for (const [key, value] of Object.entries(defaultControls)) {
@@ -127,10 +161,11 @@ function getCollectionDefaultControls(collection) {
  * If no display defaults are provided, uses the current controls redux state.
  * If the current `measurementsGrouping` does not exist in the collection, then
  * defaults to the first grouping option.
- * @param {Object} collection
- * @returns {MeasurementsControlState}
  */
-const getCollectionDisplayControls = (controls, collection) => {
+const getCollectionDisplayControls = (
+  controls: ControlsState,
+  collection: Collection
+): MeasurementsControlState => {
   // Copy current control options for measurements
   const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
   // Checks the current group by is available as a grouping in collection
@@ -142,7 +177,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   // Verify that current filters are valid for the new collection
   newControls.measurementsFilters = Object.fromEntries(
     Object.entries(newControls.measurementsFilters)
-      .map(([field, valuesMap]) => {
+      .map(([field, valuesMap]): [string, Map<MeasurementMetadata, {active: boolean}>] => {
         // Clone nested Map to avoid changing redux state in place
         // Delete filter for values that do not exist within the field of the new collection
         const newValuesMap = new Map([...valuesMap].filter(([value]) => {
@@ -169,7 +204,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   return newControls;
 };
 
-const parseMeasurementsJSON = (json) => {
+const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
   // Avoid editing the original json values since they are cached for narratives
   const collections = cloneDeep(json["collections"]);
   if (!collections || collections.length === 0) {
@@ -211,7 +246,7 @@ const parseMeasurementsJSON = (json) => {
 
     // Create a temp object for groupings to keep track of values and their
     // counts so that we can create a stable default order for grouping field values
-    const groupingsValues = collection.groupings.reduce((tempObject, {key}) => {
+    const groupingsValues: GroupingValues = collection.groupings.reduce((tempObject, {key}) => {
       tempObject[key] = {};
       return tempObject;
     }, {});
@@ -277,7 +312,10 @@ const parseMeasurementsJSON = (json) => {
   }
 };
 
-export const loadMeasurements = (measurementsData, dispatch) => {
+export const loadMeasurements = (
+  measurementsData: MeasurementsJson | Error,
+  dispatch: AppDispatch
+): MeasurementsState => {
   let measurementState = getDefaultMeasurementsState();
   /* Just return default state there are no measurements data to load */
   if (!measurementsData) {
@@ -305,7 +343,9 @@ export const loadMeasurements = (measurementsData, dispatch) => {
   return measurementState;
 };
 
-export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
+export const changeMeasurementsCollection = (
+  newCollectionKey: string
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey, measurements.defaultCollectionKey);
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
@@ -325,7 +365,11 @@ export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, get
  * Tried to use lodash.cloneDeep(), but it did not work for the nested Map
  * - Jover, 19 January 2022
  */
-export const applyMeasurementFilter = (field, value, active) => (dispatch, getState) => {
+export const applyMeasurementFilter = (
+  field: string,
+  value: MeasurementMetadata,
+  active: boolean
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -338,7 +382,10 @@ export const applyMeasurementFilter = (field, value, active) => (dispatch, getSt
   });
 };
 
-export const removeSingleFilter = (field, value) => (dispatch, getState) => {
+export const removeSingleFilter = (
+  field: string,
+  value: MeasurementMetadata
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -357,7 +404,9 @@ export const removeSingleFilter = (field, value) => (dispatch, getState) => {
   });
 };
 
-export const removeAllFieldFilters = (field) => (dispatch, getState) => {
+export const removeAllFieldFilters = (
+  field: string
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   delete measurementsFilters[field];
@@ -369,7 +418,10 @@ export const removeAllFieldFilters = (field) => (dispatch, getState) => {
   });
 };
 
-export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => {
+export const toggleAllFieldFilters = (
+  field: string,
+  active: boolean
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -383,7 +435,7 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
   });
 };
 
-export const toggleOverallMean = () => (dispatch, getState) => {
+export const toggleOverallMean = (): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const controlKey = "measurementsShowOverallMean";
   const newControls = { [controlKey]: !controls[controlKey] };
@@ -395,7 +447,7 @@ export const toggleOverallMean = () => (dispatch, getState) => {
   });
 }
 
-export const toggleThreshold = () => (dispatch, getState) => {
+export const toggleThreshold = (): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const controlKey = "measurementsShowThreshold";
   const newControls = { [controlKey]: !controls[controlKey] };
@@ -407,7 +459,9 @@ export const toggleThreshold = () => (dispatch, getState) => {
   });
 };
 
-export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) => {
+export const changeMeasurementsDisplay = (
+  newDisplay: MeasurementsDisplay
+): ThunkFunction => (dispatch, getState) => {
   const { measurements } = getState();
   const controlKey = "measurementsDisplay";
   const newControls = { [controlKey]: newDisplay };
@@ -419,7 +473,9 @@ export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) =>
   });
 }
 
-export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) => {
+export const changeMeasurementsGroupBy = (
+  newGroupBy: string
+): ThunkFunction => (dispatch, getState) => {
   const { measurements } = getState();
   const controlKey = "measurementsGroupBy";
   const newControls = { [controlKey]: newGroupBy };
@@ -438,9 +494,10 @@ const controlToQueryParamMap = {
   measurementsShowThreshold: "m_threshold",
 };
 
-/* mf_<field> correspond to active measurements filters */
-const filterQueryPrefix = "mf_";
-export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
+export function removeInvalidMeasurementsFilterQuery(
+  query: Query,
+  newQueryParams: {[key: MeasurementsFilterQuery]: string}
+): Query {
   const newQuery = cloneDeep(query);
   // Remove measurements filter query params that are not included in the newQueryParams
   Object.keys(query)
@@ -449,7 +506,11 @@ export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
   return newQuery
 }
 
-function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
+function createMeasurementsQueryFromControls(
+  measurementControls: Partial<MeasurementsControlState>,
+  collection: Collection,
+  defaultCollectionKey: string
+): MeasurementsQuery {
   const newQuery = {
     m_collection: collection.key === defaultCollectionKey ? "" : collection.key
   };
@@ -505,11 +566,15 @@ function createMeasurementsQueryFromControls(measurementControls, collection, de
  *
  * In cases where the query param is invalid, the query param is removed from the
  * returned query object.
- * @param {Object} measurements
- * @param {Object} query
- * @returns {Object}
  */
-export const combineMeasurementsControlsAndQuery = (measurements, query) => {
+export const combineMeasurementsControlsAndQuery = (
+  measurements: MeasurementsState,
+  query: Query
+): {
+  collectionToDisplay: Collection,
+  collectionControls: MeasurementsControlState,
+  updatedQuery: Query
+} => {
   const updatedQuery = cloneDeep(query);
   const collectionKeys = measurements.collections.map((collection) => collection.key);
   // Remove m_collection query if it's invalid or the default collection key

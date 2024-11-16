@@ -13,6 +13,7 @@ import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 import { Distance } from "../components/tree/phyloTree/types";
+import { MeasurementMetadata, MeasurementsDisplay } from "./measurements/types";
 
 
 export interface ColorScale {
@@ -151,14 +152,15 @@ export interface BasicControlsState {
   zoomMin?: number
 }
 
+export interface MeasurementFilters {
+  [key: string]: Map<MeasurementMetadata, {active: boolean}>
+}
 export interface MeasurementsControlState {
   measurementsGroupBy: string | undefined,
-  measurementsDisplay: string | undefined,
+  measurementsDisplay: MeasurementsDisplay | undefined,
   measurementsShowOverallMean: boolean | undefined,
   measurementsShowThreshold: boolean | undefined,
-  measurementsFilters: {
-    [key: string]: Map<string, {active: boolean}>
-  }
+  measurementsFilters: MeasurementFilters
 }
 
 export interface ControlsState extends BasicControlsState, MeasurementsControlState {}
