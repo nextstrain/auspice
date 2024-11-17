@@ -64,8 +64,9 @@ EntropyChart.prototype.update = function update({
     this._setZoomBounds();
   }
 
+  if (showCounts!==undefined) this.showCounts = showCounts;
+
   if (newBars || selectedPositions!==undefined) {
-    if (showCounts!==undefined) this.showCounts = showCounts;
     if (newBars) {
       this.bars = newBars[0];
       this._updateOffsets();
@@ -75,6 +76,8 @@ EntropyChart.prototype.update = function update({
     if (selectedPositions !== undefined) {
       this.selectedPositions = selectedPositions;
     }
+    /* TODO XXX: there's a potential bug here if selectedCds is set but we don't enter this code block
+    due to the (newBars || selectedPositions!==undefined) conditional */
     if (selectedCds || selectedPositions !== undefined) {
       this._setZoomCoordinates(zoomMin, zoomMax, !!selectedCds);
     }
