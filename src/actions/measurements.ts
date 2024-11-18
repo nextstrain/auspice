@@ -621,7 +621,7 @@ export const combineMeasurementsControlsAndQuery = (
         break;
       case "m_groupBy":
         // Verify value is a valid grouping of collection
-        if (collectionGroupings.includes(queryValue)) {
+        if (typeof queryValue === "string" && collectionGroupings.includes(queryValue)) {
           newControlState = queryValue;
         }
         break;
