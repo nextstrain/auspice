@@ -74,11 +74,7 @@ const svgSetters = {
 };
 
 
-type SelectionOrTransition =
-   Selection<SVGGElement, PhyloNode, SVGSVGElement | null, unknown> |
-  Transition<SVGGElement, PhyloNode, SVGSVGElement | null, unknown>
-
-type UpdateCall = (selectionOrTransition: SelectionOrTransition) => void;
+type UpdateCall = (selection: Transition<SVGGElement, PhyloNode, SVGSVGElement | null, unknown>) => void;
 
 
 /** createUpdateCall
@@ -120,12 +116,15 @@ const genericSelectAndModify = (
   transitionTime: number,
 ): void => {
   // console.log("general svg update for", treeElem);
-  let selection: SelectionOrTransition = svg.selectAll<SVGGElement, PhyloNode>(treeElem)
-    .filter((d: PhyloNode) => d.update);
-  if (transitionTime) {
-    selection = selection.transition().duration(transitionTime);
+
+  svg.selectAll<SVGGElement, PhyloNode>(treeElem)
+    .filter((d) => d.update)
+    .transition().duration(transitionTime)
+    .call(updateCall);
+  if (!transitionTime) {
+    timerFlush();
   }
-  selection.call(updateCall);
+
 };
 
 /* use D3 to select and modify elements, such that a given element is only ever modified _once_
