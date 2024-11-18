@@ -1,7 +1,12 @@
 # Changelog
 
-## version 2.61.1 - 2024/11/14
 
+* Bugfix: Fix errors where the tree wouldn't correctly update certain properties ([#1907](https://github.com/nextstrain/auspice/pull/1907))
+* Bugfix: Fix incorrect parsing of root-node dates of 0-99 CE ([#1909](https://github.com/nextstrain/auspice/pull/1909))
+* Bugfix: Fix an out-of-sync bug in the Entropy panel where the tooltip text would remain "Shannon entropy" and not update to "Num changes observed" (the value was correct). ([#1906](https://github.com/nextstrain/auspice/pull/1906))
+
+
+## version 2.61.1 - 2024/11/14
 
 * Bugfix: Restore shift-click behaviour for branches on the tree ([#1901](https://github.com/nextstrain/auspice/pull/1901))
 
@@ -16,6 +21,7 @@
 
 ## version 2.60.0 - 2024/11/07
 
+> _Note: this release contains a few rather large bugs and we suggest you upgrade to 2.61.2 or later_
 
 * Performance improvement: We no longer attempt to animate actions on trees with over 4000 tips which results in more responsive interactions. ([#1880](https://github.com/nextstrain/auspice/pull/1880))
 * Performance improvement: We no longer recompute the entropy data (which can be expensive) when the entropy panel is toggled off or off-screen. ([#1879](https://github.com/nextstrain/auspice/pull/1879))
