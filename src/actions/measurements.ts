@@ -26,9 +26,7 @@ import {
  * we can create a stable default order for grouping field values
  */
 interface GroupingValues {
-  [key: string]: {
-    [key: string]: number
-  }
+  [key: string]: Map<MeasurementMetadata, number>
 }
 
 
@@ -261,7 +259,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Create a temp object for groupings to keep track of values and their
     // counts so that we can create a stable default order for grouping field values
     const groupingsValues: GroupingValues = jsonCollection.groupings.reduce((tempObject, {key}) => {
-      tempObject[key] = {};
+      tempObject[key] = new Map();
       return tempObject;
     }, {});
 
@@ -282,8 +280,8 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
 
         // Save grouping field values and counts
         if (field in groupingsValues) {
-          const previousValue = groupingsValues[field][fieldValue];
-          groupingsValues[field][fieldValue] = previousValue ? previousValue + 1 : 1;
+          const previousValue = groupingsValues[field].get(fieldValue);
+          groupingsValues[field].set(fieldValue, previousValue ? previousValue + 1 : 1);
         }
       });
 
@@ -298,7 +296,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
       jsonCollection.groupings.map(({key, order}) => {
-        const valuesByCount = Object.entries(groupingsValues[key])
+        const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
           // Filter out values that already exist in provided order from JSON
