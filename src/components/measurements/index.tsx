@@ -1,7 +1,7 @@
 import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
-import { NODE_VISIBLE } from "../../util/globals";
+import { measurementIdSymbol, NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundary";
@@ -213,7 +213,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
       const hoverTitle = colorByAttr !== null ? `Color by ${getColorByTitle(colorings, colorBy)} : ${colorByAttr}` : null;
       // Create a Map of data to save order of fields
       const newData = new Map();
-      if (dataType === "measurement") {
+      if (dataType === "measurement" && measurementIdSymbol in data) {
         // Handle single measurement data
         // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
         const displayFields = Object.keys(data).filter((field) => fields.has(field));
@@ -223,7 +223,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
         orderedFields.forEach((field) => {
           newData.set(fields.get(field).title, data[field]);
         });
-      } else if (dataType === "mean") {
+      } else if (dataType === "mean" && !(measurementIdSymbol in data)) {
         // Handle mean and standard deviation data
         newData.set("mean", data.mean.toFixed(2));
         newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
