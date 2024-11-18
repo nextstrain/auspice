@@ -1,4 +1,4 @@
-import { cloneDeep, pick } from "lodash";
+import { cloneDeep } from "lodash";
 import { AppDispatch, ThunkFunction } from "../store";
 import { measurementIdSymbol } from "../util/globals";
 import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
@@ -167,7 +167,12 @@ const getCollectionDisplayControls = (
   collection: Collection
 ): MeasurementsControlState => {
   // Copy current control options for measurements
-  const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
+  const newControls = cloneDeep(defaultMeasurementsControlState);
+  Object.entries(controls).forEach(([key, value]) => {
+    if (key in newControls) {
+      newControls[key] = cloneDeep(value);
+    }
+  })
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
