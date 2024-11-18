@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.61.2 - 2024/11/19
+
+
 
 * Bugfix: Fix errors where the tree wouldn't correctly update certain properties ([#1907](https://github.com/nextstrain/auspice/pull/1907))
 * Bugfix: Fix incorrect parsing of root-node dates of 0-99 CE ([#1909](https://github.com/nextstrain/auspice/pull/1909))
