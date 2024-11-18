@@ -70,6 +70,17 @@ export interface Collection {
   x_axis_label: string
 }
 
+export function isCollection(x: any): x is Collection {
+  return Boolean(
+    x.fields &&
+    x.filters &&
+    x.groupings &&
+    x.key &&
+    x.measurements &&
+    x.x_axis_label
+  );
+}
+
 export interface MeasurementsState {
   loaded: boolean
   error: string | undefined

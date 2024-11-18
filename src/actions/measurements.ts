@@ -14,6 +14,7 @@ import {
 } from "./types";
 import {
   Collection,
+  isCollection,
   MeasurementMetadata,
   MeasurementsDisplay,
   MeasurementsJson,
@@ -210,22 +211,30 @@ const getCollectionDisplayControls = (
 };
 
 const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
-  // Avoid editing the original json values since they are cached for narratives
-  const collections = cloneDeep(json["collections"]);
-  if (!collections || collections.length === 0) {
+  const jsonCollections = json["collections"];
+  if (!jsonCollections || jsonCollections.length === 0) {
     throw new Error("Measurements JSON does not have collections");
   }
 
-  collections.forEach((collection) => {
+  // Collection properties with the same type as JsonCollection properties.
+  const propertiesWithSameType = ["key", "x_axis_label", "display_defaults", "thresholds", "title"];
+
+  const collections = jsonCollections.map<Collection>((jsonCollection) => {
+    const collection: Partial<Collection> = {};
+    // Check for properties with the same type that can be directly copied
+    for (const collectionProp of propertiesWithSameType) {
+      if (collectionProp in jsonCollection) {
+        collection[collectionProp] = cloneDeep(jsonCollection[collectionProp]);
+      }
+    }
     /**
      * Keep backwards compatibility with single value threshold.
      * Make sure thresholds are an array of values so that we don't have to
      * check the data type in the D3 drawing process
      * `collection.thresholds` takes precedence over the deprecated `collection.threshold`
      */
-    if (typeof collection.threshold === "number") {
-      collection.thresholds = collection.thresholds || [collection.threshold];
-      delete collection.threshold;
+    if (typeof jsonCollection.threshold === "number") {
+      collection.thresholds = collection.thresholds || [jsonCollection.threshold];
     }
     /*
      * Create fields Map for easier access of titles and to keep ordering
@@ -233,7 +242,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
      * Then loop over measurements to add any remaining fields
      */
     collection.fields = new Map(
-      (collection.fields || [])
+      (jsonCollection.fields || [])
         .map(({key, title}) => [key, {title: title || key}])
     );
 
@@ -243,21 +252,21 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
      * Then loop over measurements to add values
      * If there are no JSON defined filters, then add all fields as filters
      */
-    const collectionFiltersArray = collection.filters;
+    const collectionFiltersArray = jsonCollection.filters;
     collection.filters = new Map(
-      (collection.filters || [])
+      (jsonCollection.filters || [])
         .map((filterField) => [filterField, {values: new Set()}])
     );
 
     // Create a temp object for groupings to keep track of values and their
     // counts so that we can create a stable default order for grouping field values
-    const groupingsValues: GroupingValues = collection.groupings.reduce((tempObject, {key}) => {
+    const groupingsValues: GroupingValues = jsonCollection.groupings.reduce((tempObject, {key}) => {
       tempObject[key] = {};
       return tempObject;
     }, {});
 
-    collection.measurements.forEach((measurement, index) => {
-      Object.entries(measurement).forEach(([field, fieldValue]) => {
+    collection.measurements = jsonCollection.measurements.map((jsonMeasurement, index) => {
+      Object.entries(jsonMeasurement).forEach(([field, fieldValue]) => {
         // Add remaining field titles
         if (!collection.fields.has(field)) {
           collection.fields.set(field, {title: field});
@@ -279,13 +288,16 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
       });
 
       // Add stable id for each measurement to help visualization
-      measurement[measurementIdSymbol] = index;
+      return {
+        ...cloneDeep(jsonMeasurement),
+        [measurementIdSymbol]: index
+      }
     });
 
     // Create groupings Map for easier access of sorted values and to keep groupings ordering
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
-      collection.groupings.map(({key, order}) => {
+      jsonCollection.groupings.map(({key, order}) => {
         const valuesByCount = Object.entries(groupingsValues[key])
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
@@ -300,6 +312,12 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
         ];
       })
     );
+
+    if (isCollection(collection)) {
+      return collection;
+    } else {
+      throw new Error("Could not parse a valid collection");
+    }
   });
 
   const collectionKeys = collections.map((collection) => collection.key);
