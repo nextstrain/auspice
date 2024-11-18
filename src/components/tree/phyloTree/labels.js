@@ -1,3 +1,4 @@
+import { timerFlush } from "d3-timer";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { numericToDateObject, prettifyDate } from "../../../util/dateHelpers";
 import { getTraitFromNode } from "../../../util/treeMiscHelpers";
@@ -107,16 +108,15 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
   );
   const labelSize = branchLabelSize(this.params.branchLabelKey);
   const fontWeight = branchLabelFontWeight(this.params.branchLabelKey);
-  let selection = this.groups.branchLabels
+  this.groups.branchLabels
     .selectAll(".branchLabel")
-  if (dt) {
-    selection = selection.transition().duration(dt);
-  }
-  selection.attr("x", (d) => d.xTip - 5)
+    .transition().duration(dt)
+    .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
     .style("font-weight", fontWeight)
     .style("font-size", labelSize);
+  if (!dt) timerFlush();
 };
 
 export const removeBranchLabels = function removeBranchLabels() {
