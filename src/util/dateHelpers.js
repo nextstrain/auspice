@@ -18,7 +18,9 @@ export const numericToDateObject = (numDate) => {
   const year = parseInt(numDate, 10);
   const nDaysInYear = isLeapYear(year) ? 366 : 365;
   const nDays = fracPart * nDaysInYear;
-  const date = new Date((new Date(year, 0, 1)).getTime() + nDays*24*60*60*1000);
+  const yearObj = new Date(year, 0, 1);
+  if (year<100) yearObj.setFullYear(year);
+  const date = new Date(yearObj.getTime() + nDays*24*60*60*1000);
   return date;
 };
 
@@ -130,8 +132,12 @@ export const getPreviousDate = (unit, date) => {
     case "DECADE":
       // decades start at "nice" numbers - i.e. multiples of 5 -- e.g. 2014 -> 2010, 2021 -> 2020
       return new Date(Math.floor((date.getFullYear())/5)*5, 0, 1, 12);
-    case "CENTURY":
-      return new Date(Math.floor((date.getFullYear())/100)*100, 0, 1, 12);
+    case "CENTURY": {
+      const year = Math.floor((date.getFullYear())/100)*100;
+      const ret = new Date(year, 0, 1, 12);
+      ret.setFullYear(year);
+      return ret
+    }
     default:
       console.error("Unknown unit for `advanceDateTo`:", unit);
       return dateClone;
