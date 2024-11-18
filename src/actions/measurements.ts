@@ -43,9 +43,13 @@ interface MeasurementsQuery {
   m_threshold?: QueryBoolean
   [key: MeasurementsFilterQuery]: string[]
 }
-/* Central Query type placeholder! */
+/**
+ * Central Query type placeholder!
+ * Expected to be the returned object from querystring.parse()
+ * https://nodejs.org/docs/latest-v22.x/api/querystring.html#querystringparsestr-sep-eq-options
+ */
 interface Query extends MeasurementsQuery {
-  [key: string]: unknown
+  [key: string]: string | string[]
 }
 
 /**
@@ -658,8 +662,11 @@ export const combineMeasurementsControlsAndQuery = (
     }
 
     // Remove and ignore query for invalid field values
+    let filterValues = updatedQuery[filterKey];
+    if (typeof filterValues === "string") {
+      filterValues = Array(filterValues);
+    }
     const collectionFieldValues = collectionToDisplay.filters.get(field).values;
-    const filterValues = Array.isArray(updatedQuery[filterKey]) ? updatedQuery[filterKey] : [updatedQuery[filterKey]];
     const validFilterValues = filterValues.filter((value) => collectionFieldValues.has(value));
     if (!validFilterValues.length) {
       delete updatedQuery[filterKey];
