@@ -16,6 +16,8 @@ import {
   Collection,
   isCollection,
   isMeasurement,
+  isMeasurementsDisplay,
+  measurementsDisplayValues,
   Measurement,
   MeasurementsDisplay,
   MeasurementsJson,
@@ -108,9 +110,8 @@ function getCollectionDefaultControl(
       break;
     }
     case 'measurementsDisplay': {
-      const expectedValues = ["mean", "raw"];
-      if (defaultControl !== undefined && !expectedValues.includes(defaultControl)) {
-        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
+      if (defaultControl !== undefined && !isMeasurementsDisplay(defaultControl)) {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${measurementsDisplayValues}`)
         defaultControl = undefined;
       }
       break;
@@ -643,7 +644,7 @@ export const combineMeasurementsControlsAndQuery = (
     let newControlState = undefined;
     switch(queryKey) {
       case "m_display":
-        if (queryValue === "mean" || queryValue === "raw") {
+        if (isMeasurementsDisplay(queryValue)) {
           newControlState = queryValue;
         }
         break;
