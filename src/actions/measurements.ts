@@ -323,7 +323,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
       jsonCollection.groupings.map(({key, order}) => {
-        const defaultOrder = order ? order.map(x => x.toString()) : [];
+        const defaultOrder = order ? order.map((x) => x.toString()) : [];
         const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)

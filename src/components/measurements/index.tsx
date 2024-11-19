@@ -54,7 +54,7 @@ function useDeepCompareMemo<T>(value: T): T {
     ref.current = value;
   }
   return ref.current;
-};
+}
 
 // Checks visibility against global NODE_VISIBLE
 const isVisible = (visibility: Visibility): boolean => visibility === NODE_VISIBLE;
