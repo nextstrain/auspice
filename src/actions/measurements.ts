@@ -15,7 +15,8 @@ import {
 import {
   Collection,
   isCollection,
-  MeasurementMetadata,
+  isMeasurement,
+  Measurement,
   MeasurementsDisplay,
   MeasurementsJson,
   MeasurementsState
@@ -26,7 +27,7 @@ import {
  * we can create a stable default order for grouping field values
  */
 interface GroupingValues {
-  [key: string]: Map<MeasurementMetadata, number>
+  [key: string]: Map<string, number>
 }
 
 
@@ -185,7 +186,7 @@ const getCollectionDisplayControls = (
   // Verify that current filters are valid for the new collection
   newControls.measurementsFilters = Object.fromEntries(
     Object.entries(newControls.measurementsFilters)
-      .map(([field, valuesMap]): [string, Map<MeasurementMetadata, {active: boolean}>] => {
+      .map(([field, valuesMap]): [string, Map<string, {active: boolean}>] => {
         // Clone nested Map to avoid changing redux state in place
         // Delete filter for values that do not exist within the field of the new collection
         const newValuesMap = new Map([...valuesMap].filter(([value]) => {
@@ -268,31 +269,49 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     }, {});
 
     collection.measurements = jsonCollection.measurements.map((jsonMeasurement, index) => {
+      const parsedMeasurement: Partial<Measurement> = {
+        [measurementIdSymbol]: index
+      }
       Object.entries(jsonMeasurement).forEach(([field, fieldValue]) => {
-        // Add remaining field titles
-        if (!collection.fields.has(field)) {
-          collection.fields.set(field, {title: field});
-        }
+        /**
+         * Convert all measurements metadata (except the `value`) to strings
+         * for proper matching with filter queries.
+         * This does mean the the `value` cannot be used as a field filter.
+         * We can revisit this decision when adding types to measurementsD3
+         * because converting `value` to string resulted in a lot of calculation errors
+         */
+        if (field === "value") {
+          parsedMeasurement[field] = Number(fieldValue);
+        } else {
+          const fieldValueString = fieldValue.toString();
+          parsedMeasurement[field] = fieldValueString;
 
-        // Only save the unique values if the field is in defined filters
-        // OR there are no JSON defined filters, so all fields are filters
-        if ((collection.filters.has(field)) || !collectionFiltersArray) {
-          const filterObject = collection.filters.get(field) || { values: new Set()};
-          filterObject.values.add(fieldValue);
-          collection.filters.set(field, filterObject);
-        }
+          // Add remaining field titles
+          if (!collection.fields.has(field)) {
+            collection.fields.set(field, {title: field});
+          }
 
-        // Save grouping field values and counts
-        if (field in groupingsValues) {
-          const previousValue = groupingsValues[field].get(fieldValue);
-          groupingsValues[field].set(fieldValue, previousValue ? previousValue + 1 : 1);
+          // Only save the unique values if the field is in defined filters
+          // OR there are no JSON defined filters, so all fields are filters
+          if ((collection.filters.has(field)) || !collectionFiltersArray) {
+            const filterObject = collection.filters.get(field) || { values: new Set()};
+            filterObject.values.add(fieldValueString);
+            collection.filters.set(field, filterObject);
+          }
+
+          // Save grouping field values and counts
+          if (field in groupingsValues) {
+            const previousValue = groupingsValues[field].get(fieldValueString);
+            groupingsValues[field].set(fieldValueString, previousValue ? previousValue + 1 : 1);
+          }
         }
       });
 
-      // Add stable id for each measurement to help visualization
-      return {
-        ...cloneDeep(jsonMeasurement),
-        [measurementIdSymbol]: index
+
+      if (isMeasurement(parsedMeasurement)) {
+        return parsedMeasurement;
+      } else {
+        throw new Error("Could not parse a valid measurement");
       }
     });
 
@@ -300,17 +319,19 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
       jsonCollection.groupings.map(({key, order}) => {
+        const defaultOrder = order ? order.map(x => x.toString()) : [];
         const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
           // Filter out values that already exist in provided order from JSON
-          .filter(([fieldValue]) => order ? !order.includes(fieldValue) : true)
+          .filter(([fieldValue]) => !defaultOrder.includes(fieldValue))
           // Create array of field values
           .map(([fieldValue]) => fieldValue);
+
         return [
           key,
           // Prioritize the provided values order then list values by count
-          {values: (order || []).concat(valuesByCount)}
+          {values: (defaultOrder).concat(valuesByCount)}
         ];
       })
     );
@@ -392,7 +413,7 @@ export const changeMeasurementsCollection = (
  */
 export const applyMeasurementFilter = (
   field: string,
-  value: MeasurementMetadata,
+  value: string,
   active: boolean
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
@@ -409,7 +430,7 @@ export const applyMeasurementFilter = (
 
 export const removeSingleFilter = (
   field: string,
-  value: MeasurementMetadata
+  value: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};

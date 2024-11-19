@@ -1,5 +1,9 @@
 import { measurementIdSymbol } from "../../util/globals";
 
+// -- Shared Measurements types -- //
+
+export type MeasurementsDisplay = 'raw' | 'mean'
+
 // -- Measurements JSON types -- //
 
 /**
@@ -7,13 +11,12 @@ import { measurementIdSymbol } from "../../util/globals";
  * Matching types allowed in Augur's measurements schema
  * <https://github.com/nextstrain/augur/blob/3f72c40897a80132099729d5d00a6718e76e0e9e/augur/data/schema-measurements.json#L152>
  */
-export type MeasurementMetadata = string | number | boolean
-export type MeasurementsDisplay = 'raw' | 'mean'
+type JsonMeasurementMetadata = string | number | boolean
 
 interface JsonMeasurement {
   readonly strain: string
   readonly value: number
-  readonly [key: string]: MeasurementMetadata
+  readonly [key: string]: JsonMeasurementMetadata
 }
 
 interface JsonCollectionDisplayDefaults {
@@ -30,7 +33,7 @@ interface JsonCollectionField {
 
 interface JsonCollectionGrouping {
   readonly key: string
-  readonly order?: MeasurementMetadata[]
+  readonly order?: JsonMeasurementMetadata[]
 }
 
 export interface JsonCollection {
@@ -53,16 +56,23 @@ export interface MeasurementsJson {
 
 // -- Measurements state types -- //
 
-export interface Measurement extends JsonMeasurement {
+export interface Measurement {
   [measurementIdSymbol]: number
+  strain: string
+  value: number
+  [key: string]: string | number
+}
+
+export function isMeasurement(x: any): x is Measurement {
+  return Boolean(x[measurementIdSymbol] !== undefined && x.strain && x.value !== undefined)
 }
 
 export interface Collection {
   // TODO: Convert this to MeasurementsControlState during parseMeasurementsJSON
   display_defaults?: JsonCollectionDisplayDefaults
   fields: Map<string, {title: string}>
-  filters: Map<string, {values: Set<MeasurementMetadata>}>
-  groupings: Map<string, {values: MeasurementMetadata[]}>
+  filters: Map<string, {values: Set<string>}>
+  groupings: Map<string, {values: string[]}>
   key: string
   measurements: Measurement[]
   thresholds?: number[]

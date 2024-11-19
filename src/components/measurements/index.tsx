@@ -28,7 +28,7 @@ import {
 import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
-import { Measurement, MeasurementMetadata } from "../../reducers/measurements/types";
+import { Measurement } from "../../reducers/measurements/types";
 
 interface TreeStrainVisibility {
   [strain: string]: Visibility
@@ -117,11 +117,11 @@ const filterMeasurements = (
   treeStrainVisibility: TreeStrainVisibility,
   filters: MeasurementFilters
 ): {
-  activeFilters: {string?: MeasurementMetadata[]}
+  activeFilters: {string?: string[]}
   filteredMeasurements: Measurement[]
 } => {
   // Find active filters to filter measurements
-  const activeFilters: {string?: MeasurementMetadata[]} = {};
+  const activeFilters: {string?: string[]} = {};
   Object.entries(filters).forEach(([field, valuesMap]) => {
     activeFilters[field] = activeFilters[field] || [];
     valuesMap.forEach(({active}, fieldValue) => {
@@ -137,7 +137,11 @@ const filterMeasurements = (
       if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
       // Then check that the measurement contains values for all active filters
       for (const [field, values] of Object.entries(activeFilters)) {
-        if (values.length > 0 && !values.includes(measurement[field])) return false;
+        const measurementValue = measurement[field];
+        if (values.length > 0 &&
+           ((typeof measurementValue === "string") && !values.includes(measurementValue))){
+          return false;
+        }
       }
       return true;
     })
