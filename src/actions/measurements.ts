@@ -34,7 +34,10 @@ interface GroupingValues {
 /* mf_<field> correspond to active measurements filters */
 const filterQueryPrefix = "mf_";
 type MeasurementsFilterQuery = `mf_${string}`
-type QueryBoolean = "show" | "hide"
+
+const queryBooleanValues = ["show", "hide"] as const;
+type QueryBoolean = (typeof queryBooleanValues)[number]
+export const isQueryBoolean = (x: any): x is QueryBoolean => queryBooleanValues.includes(x)
 /* Measurements query parameters that are constructed and/or parsed here. */
 interface MeasurementsQuery {
   m_collection?: string
@@ -651,13 +654,12 @@ export const combineMeasurementsControlsAndQuery = (
         }
         break;
       case "m_overallMean":
-        if (queryValue === "show" || queryValue === "hide") {
+        if (isQueryBoolean(queryValue)) {
           newControlState = queryValue === "show";
         }
         break;
       case "m_threshold":
-        if (collectionToDisplay.thresholds &&
-            (queryValue === "show" || queryValue === "hide")) {
+        if (collectionToDisplay.thresholds && isQueryBoolean(queryValue)) {
           newControlState = queryValue === "show";
         }
         break;
