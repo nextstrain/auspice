@@ -6,13 +6,13 @@ type JsonAnnotations = Record<string, JsonAnnotation>
 // '.' and '?' are GFF-valid options
 type Strand = '+' | '-' | '.' | '?';
 
-type JsonSegmentRange = {
+interface JsonSegmentRange {
   /** 1-based */
   start: number,
 
   /** 1-based closed (GFF) */
   end: number,
-};
+}
 
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
@@ -43,7 +43,7 @@ type RangeGenome = [number, number];
  */
 type RangeLocal = [number, number];
 
-type ChromosomeMetadata = {
+interface ChromosomeMetadata {
   strandsObserved: Set<Strand>,
   posStrandStackHeight: number,
   negStrandStackHeight: number,
