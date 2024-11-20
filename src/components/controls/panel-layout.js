@@ -10,7 +10,8 @@ import { SidebarButton } from "./styles";
 const ButtonText = styled.span`
   margin: 5px;
   position: relative;
-  top: -1px;
+  left: 4px;
+  top: -6px;
 `;
 
 const PanelsFullIcon = withTheme(icons.PanelsFull);
@@ -27,7 +28,6 @@ class PanelLayouts extends React.Component {
 
     return (
       <div style={{marginTop: 0, marginBottom: 10}}>
-        <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>
         <SidebarButton
           selected={this.props.panelLayout === "full"}
           onClick={() => {
@@ -35,10 +35,10 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
+          <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>
           <ButtonText>{t("sidebar:full")}</ButtonText>
         </SidebarButton>
 
-        <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
         <SidebarButton
           selected={this.props.panelLayout === "grid"}
           onClick={() => {
@@ -46,9 +46,9 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >
+          <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
           <ButtonText>{t("sidebar:grid")}</ButtonText>
         </SidebarButton>
-
       </div>
     );
   }
