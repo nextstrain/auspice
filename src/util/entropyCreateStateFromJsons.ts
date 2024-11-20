@@ -2,8 +2,11 @@ import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
+
 type Strand = '+' | '-' // other GFF-valid options are '.' and '?';
+
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
+
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
   the only ones read by Auspice */
@@ -22,11 +25,13 @@ or defines the range of the genome (chromosome) itself.
 Start is always less than or equal to end. 
 Start is 1-based, End is 1-based closed. I.e. GFF. */
 type RangeGenome = [number, number];
+
 /* Same as RangeGenome but now relative to the nucleotides which make up the CDS
 (i.e. after slippage, splicing etc). The first CDS segment's RangeLocal will always
 start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
 range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS */
 type RangeLocal = [number, number];
+
 type ChromosomeMetadata = {
   strandsObserved: Set<Strand>,
   posStrandStackHeight: number,
@@ -34,16 +39,19 @@ type ChromosomeMetadata = {
 }
 
 type GenomeAnnotation = Chromosome[];
+
 interface Chromosome {
   name: string;
   range: RangeGenome;
   genes: Gene[];
   metadata: ChromosomeMetadata
 }
+
 interface Gene {
   name: string;
   cds: CDS[];
 }
+
 interface CDS {
   length: number; /* length of the CDS in nucleotides. Will be a multiple of 3 */
   segments: CdsSegment[];
@@ -55,6 +63,7 @@ interface CDS {
   description?: string;
   stackPosition?: number;
 }
+
 interface CdsSegment {
   rangeLocal: RangeLocal;
   rangeGenome: RangeGenome;
