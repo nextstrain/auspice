@@ -167,7 +167,7 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
 };
 
 
-function validColor(color:(string|undefined)) {
+function validColor(color: string | undefined) {
   if (!color) return false;
   return color; // TODO XXX
 }
@@ -183,7 +183,12 @@ function* nextColorGenerator() {
 /**
  * Returns a CDS object parsed from the provided JsonAnnotation block
  */
-function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGenome: RangeGenome, defaultColor: (string|void)): CDS {
+function cdsFromAnnotation(
+  cdsName: string,
+  annotation: JsonAnnotation,
+  rangeGenome: RangeGenome,
+  defaultColor: string | void,
+): CDS {
   const invalidCds: CDS = {
     name: '__INVALID__',
     length: 0,
@@ -295,7 +300,13 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
  * positiveStrand: boolean
  * Returns a number in the set {0, 1, 2}
  */
-function _frame(start:number, end:number, phase: number, genomeLength:number, positiveStrand:boolean) {
+function _frame(
+  start: number,
+  end: number,
+  phase:  number,
+  genomeLength: number,
+  positiveStrand: boolean,
+) {
   return positiveStrand ?
     (start+phase-1)%3 :
     Math.abs((end-phase-genomeLength)%3);
@@ -308,7 +319,10 @@ function _frame(start:number, end:number, phase: number, genomeLength:number, po
  * refers to this being a stacking problem.) The stack position starts at 1.
  * Returns the maximum position observed.
  */
-function calculateStackPosition(genes: Gene[], strand: (Strand|null) = null):number {
+function calculateStackPosition(
+  genes: Gene[],
+  strand: Strand | null = null,
+): number {
   /* List of CDSs, sorted by their earliest occurrence in the genome (for any segment) */
   let cdss = genes.reduce((acc: CDS[], gene) => [...acc, ...gene.cds], []);
   if (strand) {
@@ -358,7 +372,7 @@ function calculateStackPosition(genes: Gene[], strand: (Strand|null) = null):num
  * Given an array of sorted integers, if there are any spaces (starting with 1)
  * then return the value which can fill that space. Returns 0 if no spaces.
  */
-function _emptySlots(values: number[]):number {
+function _emptySlots(values: number[]): number {
   if ((values[0] || 0) > 1) return 1;
   for (let i=1; i<values.length; i++) {
     /* intermediate variables because of https://github.com/microsoft/TypeScript/issues/46253 */
@@ -373,7 +387,10 @@ function _emptySlots(values: number[]):number {
  * between-segment space of an existing segment, then return the stackPosition
  * of that existing CDS. Otherwise return 0;
  */
-function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
+function _fitCdssTogether(
+  existing: CDS[],
+  newCds: CDS,
+): number {
   const a = Math.min(...newCds.segments.map((s) => s.rangeGenome[0]));
   const b = Math.max(...newCds.segments.map((s) => s.rangeGenome[1]));
   for (const cds of existing) {
@@ -408,7 +425,10 @@ function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
 
 
 /* Does a CDS wrap the origin? */
-function _isCdsWrapping(strand: Strand, segments: CdsSegment[]): boolean {
+function _isCdsWrapping(
+  strand: Strand,
+  segments: CdsSegment[],
+): boolean {
   const positive = strand==='+';
   // segments ordered to guarantee rangeLocal will always be greater (than the previous segment)
   let prevSegment;
