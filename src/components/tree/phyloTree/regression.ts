@@ -2,6 +2,7 @@ import { sum } from "d3-array";
 import { formatDivergence, guessAreMutationsPerSite} from "./helpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { PhyloNode, PhyloTreeType, Regression } from "./types";
+import { ScaleContinuousNumeric } from "d3-scale";
 
 
 /**
@@ -62,7 +63,7 @@ export function calculateRegression(this: PhyloTreeType) {
 export function makeRegressionText(
   regression: Regression,
   layout: string,
-  yScale: d3.ScaleContinuousNumeric<number, number>,
+  yScale: ScaleContinuousNumeric<number, number>,
 ): string {
   if (layout==="clock") {
     if (guessAreMutationsPerSite(yScale)) {

@@ -1,6 +1,6 @@
 /* eslint-disable no-multi-spaces */
 /* eslint-disable space-infix-ops */
-import { scaleLinear, scalePoint } from "d3-scale";
+import { scaleLinear, ScalePoint, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 import { stemParent, nodeOrdering } from "./helpers";
@@ -523,8 +523,8 @@ const JITTER_MIN_STEP_SIZE = 50; // pixels
 
 function padCategoricalScales(
   domain: string[],
-  scale: d3.ScalePoint<string>,
-): d3.ScalePoint<string> {
+  scale: ScalePoint<string>,
+): ScalePoint<string> {
   if (scale.step() > JITTER_MIN_STEP_SIZE) return scale.padding(0.5); // balanced padding when we can jitter
   if (domain.length<=4) return scale.padding(0.4);
   if (domain.length<=6) return scale.padding(0.3);
@@ -537,7 +537,7 @@ function padCategoricalScales(
  */
 function jitter(
   axis: "x" | "y",
-  scale: d3.ScalePoint<string>,
+  scale: ScalePoint<string>,
   nodes: PhyloNode[],
 ): void {
   const step = scale.step();

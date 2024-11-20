@@ -1,4 +1,4 @@
-import { Selection } from "d3";
+import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
