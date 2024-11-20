@@ -19,7 +19,7 @@ interface JsonAnnotation {
   end?: number
   start?: number
   segments?: JsonSegmentRange[]
-  strand: Strand
+  strand?: Strand
   gene?: string
   color?: string
   display_name?: string
@@ -224,7 +224,7 @@ function cdsFromAnnotation(
      * which are represented by augur as '?' and null, respectively. (null comes from `None` in python.)
      * In both cases it's not a good idea to make an assumption of strandedness, or to assume it's even a CDS. */
     console.error(`[Genome annotation]  ${cdsName} has strand ` + 
-      (Object.prototype.hasOwnProperty.call(annotation, "strand") ? String(annotation.strand) : '(missing)') +
+      (annotation.strand !== undefined ? annotation.strand : '(missing)') +
       ". This CDS will be ignored.");
     return invalidCds;
   }
