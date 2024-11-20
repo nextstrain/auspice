@@ -5,7 +5,13 @@ type JsonAnnotations = Record<string, JsonAnnotation>
 
 type Strand = '+' | '-' // other GFF-valid options are '.' and '?';
 
-type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
+type JsonSegmentRange = {
+  /** 1-based */
+  start: number,
+
+  /** 1-based closed (GFF) */
+  end: number,
+};
 
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
@@ -20,16 +26,20 @@ interface JsonAnnotation {
   description?: string;
 }
 
-/* Specifies the range of the each segment's corresponding position in the genome,
-or defines the range of the genome (chromosome) itself.
-Start is always less than or equal to end. 
-Start is 1-based, End is 1-based closed. I.e. GFF. */
+/**
+ * Specifies the range of the each segment's corresponding position in the genome,
+ * or defines the range of the genome (chromosome) itself.
+ * Start is always less than or equal to end. 
+ * Start is 1-based, End is 1-based closed. I.e. GFF.
+ */
 type RangeGenome = [number, number];
 
-/* Same as RangeGenome but now relative to the nucleotides which make up the CDS
-(i.e. after slippage, splicing etc). The first CDS segment's RangeLocal will always
-start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
-range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS */
+/**
+ * Same as RangeGenome but now relative to the nucleotides which make up the CDS
+ * (i.e. after slippage, splicing etc). The first CDS segment's RangeLocal will always
+ * start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
+ * range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS
+ */
 type RangeLocal = [number, number];
 
 type ChromosomeMetadata = {
@@ -53,7 +63,8 @@ interface Gene {
 }
 
 interface CDS {
-  length: number; /* length of the CDS in nucleotides. Will be a multiple of 3 */
+  /** length of the CDS in nucleotides. Will be a multiple of 3 */
+  length: number;
   segments: CdsSegment[];
   strand: Strand;
   color: string;
@@ -64,12 +75,22 @@ interface CDS {
   stackPosition?: number;
 }
 
+type Phase = 0 | 1 | 2
+
+type Frame = 0 | 1 | 2
+
 interface CdsSegment {
   rangeLocal: RangeLocal;
   rangeGenome: RangeGenome;
-  segmentNumber: number; /* 1-based */
-  phase: number; /* 0, 1 or 2. Indicates where the next codon begins relative to the 5' end of this segment */
-  frame: number; /* 0, 1 or 2. The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
+
+  /** 1-based */
+  segmentNumber: number;
+
+  /** Indicates where the next codon begins relative to the 5' end of this segment */
+  phase: Phase;
+
+  /** The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
+  frame: Frame;
 }
 
 /**
@@ -247,7 +268,7 @@ function cdsFromAnnotation(
       For -ve strand that's 3' to 5'. The rangeGenome within each segment is always 5' to 3'. */
       const segmentLength = segment.end - segment.start + 1; // in nucleotides
       /* phase is the number of nucs we need to add to the so-far-observed length to make it mod 3 */
-      const phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
+      const phase: Phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
 
       const s: CdsSegment = {
         segmentNumber: segmentNumber++,
@@ -293,23 +314,30 @@ function cdsFromAnnotation(
  * Calculates the (open reading) frame the provided segment is in.
  * For +ve strand this is calculated 5'->3', for -ve strand it's 3'->5'.
  * The frame is calculated once the CDS is back in phase.
- * start: 1 based, rangeGenome[0] of the segment
- * end: 1 based, rangeGenome[1] of the segment
- * start < end always
- * genomeLength: 1 based
- * positiveStrand: boolean
- * Returns a number in the set {0, 1, 2}
  */
 function _frame(
+  /** 1 based, rangeGenome[0] of the segment */
   start: number,
+
+  /**
+   * 1 based, rangeGenome[1] of the segment.
+   * start < end always
+   */
   end: number,
-  phase:  number,
+
+  phase: Phase,
+
+  /** 1 based */
   genomeLength: number,
   positiveStrand: boolean,
-) {
-  return positiveStrand ?
+): Frame {
+  /* TypeScript cannot infer the exact range of values from a modulo operation,
+   * so it is manually provided.
+   */
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return (positiveStrand ?
     (start+phase-1)%3 :
-    Math.abs((end-phase-genomeLength)%3);
+    Math.abs((end-phase-genomeLength)%3)) as 0 | 1 | 2;
 }
 
 /**
