@@ -8,9 +8,9 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarButton } from "./styles";
 
 const ButtonText = styled.span`
-  margin: 5px;
-  position: relative;
-  top: -1px;
+  margin-left: 10px;
+  padding-bottom: 15px;
+  vertical-align: middle;
 `;
 
 const PanelsFullIcon = withTheme(icons.PanelsFull);
@@ -26,8 +26,7 @@ class PanelLayouts extends React.Component {
     const { t } = this.props;
 
     return (
-      <div style={{marginTop: 0, marginBottom: 10}}>
-        <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>
+      <div style={{marginTop: 0, marginBottom: 10, marginLeft: -5}}>
         <SidebarButton
           selected={this.props.panelLayout === "full"}
           onClick={() => {
@@ -35,10 +34,10 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
+          <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>
           <ButtonText>{t("sidebar:full")}</ButtonText>
         </SidebarButton>
 
-        <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
         <SidebarButton
           selected={this.props.panelLayout === "grid"}
           onClick={() => {
@@ -46,9 +45,9 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >
+          <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
           <ButtonText>{t("sidebar:grid")}</ButtonText>
         </SidebarButton>
-
       </div>
     );
   }
