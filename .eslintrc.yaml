@@ -22,6 +22,7 @@ globals:
 rules:
   # Code quality rules
   eqeqeq: error
+  "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: 'never' }]
   "@typescript-eslint/no-empty-function": ["error", { "allow": ["arrowFunctions"] }]
   "@typescript-eslint/no-explicit-any": off # Allow explicit any to make incremental TypeScript adoption easier.
   # TODO: use strict ruleset which includes no-non-null-assertion.
