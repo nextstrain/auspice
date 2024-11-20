@@ -2,8 +2,7 @@ import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
-// enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
-type Strand = string;
+type Strand = '+' | '-' // other GFF-valid options are '.' and '?';
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
