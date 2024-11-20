@@ -3,27 +3,27 @@ import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
 
-type Strand = '+' | '-' // other GFF-valid options are '.' and '?';
+type Strand = '+' | '-' // other GFF-valid options are '.' and '?'
 
 interface JsonSegmentRange {
   /** 1-based */
-  start: number,
+  start: number
 
   /** 1-based closed (GFF) */
-  end: number,
+  end: number
 }
 
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
   the only ones read by Auspice */
-  end?: number;
-  start?: number;
-  segments?: JsonSegmentRange[];
-  strand: Strand;
-  gene?: string;
-  color?: string;
-  display_name?: string;
-  description?: string;
+  end?: number
+  start?: number
+  segments?: JsonSegmentRange[]
+  strand: Strand
+  gene?: string
+  color?: string
+  display_name?: string
+  description?: string
 }
 
 /**
@@ -32,7 +32,7 @@ interface JsonAnnotation {
  * Start is always less than or equal to end. 
  * Start is 1-based, End is 1-based closed. I.e. GFF.
  */
-type RangeGenome = [number, number];
+type RangeGenome = [number, number]
 
 /**
  * Same as RangeGenome but now relative to the nucleotides which make up the CDS
@@ -40,39 +40,39 @@ type RangeGenome = [number, number];
  * start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
  * range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS
  */
-type RangeLocal = [number, number];
+type RangeLocal = [number, number]
 
 interface ChromosomeMetadata {
-  strandsObserved: Set<Strand>,
-  posStrandStackHeight: number,
-  negStrandStackHeight: number,
+  strandsObserved: Set<Strand>
+  posStrandStackHeight: number
+  negStrandStackHeight: number
 }
 
-type GenomeAnnotation = Chromosome[];
+type GenomeAnnotation = Chromosome[]
 
 interface Chromosome {
-  name: string;
-  range: RangeGenome;
-  genes: Gene[];
+  name: string
+  range: RangeGenome
+  genes: Gene[]
   metadata: ChromosomeMetadata
 }
 
 interface Gene {
-  name: string;
-  cds: CDS[];
+  name: string
+  cds: CDS[]
 }
 
 interface CDS {
   /** length of the CDS in nucleotides. Will be a multiple of 3 */
-  length: number;
-  segments: CdsSegment[];
-  strand: Strand;
-  color: string;
-  name: string;
-  isWrapping: boolean;
-  displayName?: string;
-  description?: string;
-  stackPosition?: number;
+  length: number
+  segments: CdsSegment[]
+  strand: Strand
+  color: string
+  name: string
+  isWrapping: boolean
+  displayName?: string
+  description?: string
+  stackPosition?: number
 }
 
 type Phase = 0 | 1 | 2
@@ -80,17 +80,17 @@ type Phase = 0 | 1 | 2
 type Frame = 0 | 1 | 2
 
 interface CdsSegment {
-  rangeLocal: RangeLocal;
-  rangeGenome: RangeGenome;
+  rangeLocal: RangeLocal
+  rangeGenome: RangeGenome
 
   /** 1-based */
-  segmentNumber: number;
+  segmentNumber: number
 
   /** Indicates where the next codon begins relative to the 5' end of this segment */
-  phase: Phase;
+  phase: Phase
 
   /** The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
-  frame: Frame;
+  frame: Frame
 }
 
 /**
