@@ -459,7 +459,7 @@ function _isCdsWrapping(
 ): boolean {
   const positive = strand==='+';
   // segments ordered to guarantee rangeLocal will always be greater (than the previous segment)
-  let prevSegment;
+  let prevSegment: CdsSegment;
   for (const segment of segments) {
     if (prevSegment) {
       if (positive && prevSegment.rangeGenome[0] > segment.rangeGenome[0]) {
