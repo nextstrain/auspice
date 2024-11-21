@@ -103,7 +103,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
     .map(([annotationKey, annotation]) => {
       const geneName = annotation.gene || annotationKey;
       if (!(geneName in annotationsPerGene)) annotationsPerGene[geneName] = {};
-      const gene = annotationsPerGene[geneName] as JsonAnnotations;  // TODO - why do I need to cast?
+      const gene = annotationsPerGene[geneName];
       gene[annotationKey] = annotation;
     })
 
@@ -167,7 +167,7 @@ function validColor(color:(string|undefined)) {
 function* nextColorGenerator() {
   let i=0;
   while (true) {
-    yield genotypeColors[i++] as string;
+    yield genotypeColors[i++];
     if (i===genotypeColors.length) i=0;
   }
 }
