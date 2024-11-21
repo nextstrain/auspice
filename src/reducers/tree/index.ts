@@ -23,7 +23,8 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedClade: undefined
+    selectedClade: undefined,
+    streams: null, // TODO XXX
   };
 };
 
@@ -54,11 +55,23 @@ const Tree = (
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
       };
-      return {
-        ...state,
-        ...newStates,
-      };
+      if (action.countsByCategoryPerStream) {
+        newStates.streams = {
+          ...state.streams,
+          streams: state.streams.streams.map((stream, idx) => ({
+            ...stream, 
+            countsByCategory: action.countsByCategoryPerStream[idx]
+          }))
+        };
+      }
+
+      return Object.assign({}, state, newStates);
     }
+    case types.CHANGE_DISTANCE_MEASURE:
+      if (action.streams) {
+        return {...state, streams: action.streams};
+      }
+      return state;
     case types.UPDATE_TIP_RADII:
       return {
         ...state,
@@ -70,7 +83,11 @@ const Tree = (
         ...state,
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version,
+        streams: action.streams, // replace entire structure
       };
+    case types.TOGGLE_STREAM_TREE: /* fallthrough */
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      return {...state, streams: action.streams};
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA: {
