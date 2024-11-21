@@ -332,9 +332,24 @@ function _frame(
   genomeLength: number,
   positiveStrand: boolean,
 ): Frame {
-  return (positiveStrand ?
-    (start+phase-1)%3 :
-    Math.abs((end-phase-genomeLength)%3)) as Frame;
+  return positiveStrand ?
+    _mod3(start+phase-1) :
+    _mod3(end-phase-genomeLength);
+}
+
+/**
+ * Type-safe modulo operation. Return value is unsigned (i.e. non-negative).
+ */
+function _mod3(n: number): 0 | 1 | 2 {
+  if (!Number.isInteger(n)) {
+    throw new Error(`${n} is not an integer.`);
+  }
+
+  /* TypeScript cannot infer the exact range of values from a modulo operation,
+   * so it is manually provided.
+   */
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return (Math.abs(n) % 3) as 0 | 1 | 2
 }
 
 /**
