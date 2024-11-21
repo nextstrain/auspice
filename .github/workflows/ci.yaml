@@ -99,7 +99,7 @@ jobs:
 
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
-    needs: [build-and-smoke-test, unit-test, lint, check-lockfile]
+    needs: [build-and-smoke-test, unit-test, lint, type-check, check-lockfile]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
