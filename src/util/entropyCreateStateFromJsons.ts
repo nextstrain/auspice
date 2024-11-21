@@ -301,10 +301,10 @@ function cdsFromAnnotation(
     isWrapping: _isCdsWrapping(strand, segments),
     color: validColor(annotation.color) || defaultColor || '#000',
   }
-  if (typeof annotation.display_name === 'string') {
+  if (annotation.display_name !== undefined) {
     cds.displayName = annotation.display_name;
   }
-  if (typeof annotation.description === 'string') {
+  if (annotation.description !== undefined) {
     cds.description = annotation.description;
   }
   return cds
