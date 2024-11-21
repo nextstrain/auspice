@@ -56,14 +56,11 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [16, 18, 20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 18
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
