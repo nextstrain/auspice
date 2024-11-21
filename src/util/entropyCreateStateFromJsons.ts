@@ -2,66 +2,96 @@ import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
-// enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
-type Strand = string;
-type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
+
+// '.' and '?' are GFF-valid options
+type Strand = '+' | '-' | '.' | '?'
+
+interface JsonSegmentRange {
+  /** 1-based */
+  start: number
+
+  /** 1-based closed (GFF) */
+  end: number
+}
+
 interface JsonAnnotation {
   /* Other properties are commonly set in the JSON structure, but the following are
   the only ones read by Auspice */
-  end?: number;
-  start?: number;
-  segments?: JsonSegmentRange[];
-  strand: Strand;
-  gene?: string;
-  color?: string;
-  display_name?: string;
-  description?: string;
+  end?: number
+  start?: number
+  segments?: JsonSegmentRange[]
+  strand?: Strand
+  gene?: string
+  color?: string
+  display_name?: string
+  description?: string
 }
 
-/* Specifies the range of the each segment's corresponding position in the genome,
-or defines the range of the genome (chromosome) itself.
-Start is always less than or equal to end. 
-Start is 1-based, End is 1-based closed. I.e. GFF. */
-type RangeGenome = [number, number];
-/* Same as RangeGenome but now relative to the nucleotides which make up the CDS
-(i.e. after slippage, splicing etc). The first CDS segment's RangeLocal will always
-start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
-range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS */
-type RangeLocal = [number, number];
-type ChromosomeMetadata = {
-  strandsObserved: Set<Strand>,
-  posStrandStackHeight: number,
-  negStrandStackHeight: number,
+/**
+ * Specifies the range of the each segment's corresponding position in the genome,
+ * or defines the range of the genome (chromosome) itself.
+ * Start is always less than or equal to end. 
+ * Start is 1-based, End is 1-based closed. I.e. GFF.
+ */
+type RangeGenome = [number, number]
+
+/**
+ * Same as RangeGenome but now relative to the nucleotides which make up the CDS
+ * (i.e. after slippage, splicing etc). The first CDS segment's RangeLocal will always
+ * start at 1, and the end value (of the last segment) corresponds to the number of nt in the CDS:
+ * range_segLast[1] - range_seg1[0] + 1 = 3 * number_of_amino_acids_in_translated_CDS
+ */
+type RangeLocal = [number, number]
+
+interface ChromosomeMetadata {
+  strandsObserved: Set<Strand>
+  posStrandStackHeight: number
+  negStrandStackHeight: number
 }
 
-type GenomeAnnotation = Chromosome[];
+type GenomeAnnotation = Chromosome[]
+
 interface Chromosome {
-  name: string;
-  range: RangeGenome;
-  genes: Gene[];
+  name: string
+  range: RangeGenome
+  genes: Gene[]
   metadata: ChromosomeMetadata
 }
+
 interface Gene {
-  name: string;
-  cds: CDS[];
+  name: string
+  cds: CDS[]
 }
+
 interface CDS {
-  length: number; /* length of the CDS in nucleotides. Will be a multiple of 3 */
-  segments: CdsSegment[];
-  strand: Strand;
-  color: string;
-  name: string;
-  isWrapping: boolean;
-  displayName?: string;
-  description?: string;
-  stackPosition?: number;
+  /** length of the CDS in nucleotides. Will be a multiple of 3 */
+  length: number
+  segments: CdsSegment[]
+  strand: Strand
+  color: string
+  name: string
+  isWrapping: boolean
+  displayName?: string
+  description?: string
+  stackPosition?: number
 }
+
+type Phase = 0 | 1 | 2
+
+type Frame = 0 | 1 | 2
+
 interface CdsSegment {
-  rangeLocal: RangeLocal;
-  rangeGenome: RangeGenome;
-  segmentNumber: number; /* 1-based */
-  phase: number; /* 0, 1 or 2. Indicates where the next codon begins relative to the 5' end of this segment */
-  frame: number; /* 0, 1 or 2. The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
+  rangeLocal: RangeLocal
+  rangeGenome: RangeGenome
+
+  /** 1-based */
+  segmentNumber: number
+
+  /** Indicates where the next codon begins relative to the 5' end of this segment */
+  phase: Phase
+
+  /** The frame the codons are in, relative to the 5' end of the genome. It thus takes into account the phase */
+  frame: Frame
 }
 
 /**
@@ -159,7 +189,7 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
 };
 
 
-function validColor(color:(string|undefined)) {
+function validColor(color: string | undefined) {
   if (!color) return false;
   return color; // TODO XXX
 }
@@ -175,7 +205,12 @@ function* nextColorGenerator() {
 /**
  * Returns a CDS object parsed from the provided JsonAnnotation block
  */
-function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGenome: RangeGenome, defaultColor: (string|void)): CDS {
+function cdsFromAnnotation(
+  cdsName: string,
+  annotation: JsonAnnotation,
+  rangeGenome: RangeGenome,
+  defaultColor: string | void,
+): CDS {
   const invalidCds: CDS = {
     name: '__INVALID__',
     length: 0,
@@ -190,7 +225,7 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
      * which are represented by augur as '?' and null, respectively. (null comes from `None` in python.)
      * In both cases it's not a good idea to make an assumption of strandedness, or to assume it's even a CDS. */
     console.error(`[Genome annotation]  ${cdsName} has strand ` + 
-      (Object.prototype.hasOwnProperty.call(annotation, "strand") ? String(annotation.strand) : '(missing)') +
+      (annotation.strand !== undefined ? annotation.strand : '(missing)') +
       ". This CDS will be ignored.");
     return invalidCds;
   }
@@ -234,7 +269,7 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
       For -ve strand that's 3' to 5'. The rangeGenome within each segment is always 5' to 3'. */
       const segmentLength = segment.end - segment.start + 1; // in nucleotides
       /* phase is the number of nucs we need to add to the so-far-observed length to make it mod 3 */
-      const phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
+      const phase: Phase = length%3===0 ? 0 : (length%3===1 ? 2 : 1);
 
       const s: CdsSegment = {
         segmentNumber: segmentNumber++,
@@ -267,10 +302,10 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
     isWrapping: _isCdsWrapping(strand, segments),
     color: validColor(annotation.color) || defaultColor || '#000',
   }
-  if (typeof annotation.display_name === 'string') {
+  if (annotation.display_name !== undefined) {
     cds.displayName = annotation.display_name;
   }
-  if (typeof annotation.description === 'string') {
+  if (annotation.description !== undefined) {
     cds.description = annotation.description;
   }
   return cds
@@ -280,17 +315,41 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
  * Calculates the (open reading) frame the provided segment is in.
  * For +ve strand this is calculated 5'->3', for -ve strand it's 3'->5'.
  * The frame is calculated once the CDS is back in phase.
- * start: 1 based, rangeGenome[0] of the segment
- * end: 1 based, rangeGenome[1] of the segment
- * start < end always
- * genomeLength: 1 based
- * positiveStrand: boolean
- * Returns a number in the set {0, 1, 2}
  */
-function _frame(start:number, end:number, phase: number, genomeLength:number, positiveStrand:boolean) {
+function _frame(
+  /** 1 based, rangeGenome[0] of the segment */
+  start: number,
+
+  /**
+   * 1 based, rangeGenome[1] of the segment.
+   * start < end always
+   */
+  end: number,
+
+  phase: Phase,
+
+  /** 1 based */
+  genomeLength: number,
+  positiveStrand: boolean,
+): Frame {
   return positiveStrand ?
-    (start+phase-1)%3 :
-    Math.abs((end-phase-genomeLength)%3);
+    _mod3(start+phase-1) :
+    _mod3(end-phase-genomeLength);
+}
+
+/**
+ * Type-safe modulo operation. Return value is unsigned (i.e. non-negative).
+ */
+function _mod3(n: number): 0 | 1 | 2 {
+  if (!Number.isInteger(n)) {
+    throw new Error(`${n} is not an integer.`);
+  }
+
+  /* TypeScript cannot infer the exact range of values from a modulo operation,
+   * so it is manually provided.
+   */
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return (Math.abs(n) % 3) as 0 | 1 | 2
 }
 
 /**
@@ -300,7 +359,10 @@ function _frame(start:number, end:number, phase: number, genomeLength:number, po
  * refers to this being a stacking problem.) The stack position starts at 1.
  * Returns the maximum position observed.
  */
-function calculateStackPosition(genes: Gene[], strand: (Strand|null) = null):number {
+function calculateStackPosition(
+  genes: Gene[],
+  strand: Strand | null = null,
+): number {
   /* List of CDSs, sorted by their earliest occurrence in the genome (for any segment) */
   let cdss = genes.reduce((acc: CDS[], gene) => [...acc, ...gene.cds], []);
   if (strand) {
@@ -350,7 +412,7 @@ function calculateStackPosition(genes: Gene[], strand: (Strand|null) = null):num
  * Given an array of sorted integers, if there are any spaces (starting with 1)
  * then return the value which can fill that space. Returns 0 if no spaces.
  */
-function _emptySlots(values: number[]):number {
+function _emptySlots(values: number[]): number {
   if ((values[0] || 0) > 1) return 1;
   for (let i=1; i<values.length; i++) {
     /* intermediate variables because of https://github.com/microsoft/TypeScript/issues/46253 */
@@ -365,7 +427,10 @@ function _emptySlots(values: number[]):number {
  * between-segment space of an existing segment, then return the stackPosition
  * of that existing CDS. Otherwise return 0;
  */
-function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
+function _fitCdssTogether(
+  existing: CDS[],
+  newCds: CDS,
+): number {
   const a = Math.min(...newCds.segments.map((s) => s.rangeGenome[0]));
   const b = Math.max(...newCds.segments.map((s) => s.rangeGenome[1]));
   for (const cds of existing) {
@@ -400,10 +465,13 @@ function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
 
 
 /* Does a CDS wrap the origin? */
-function _isCdsWrapping(strand: Strand, segments: CdsSegment[]): boolean {
+function _isCdsWrapping(
+  strand: Strand,
+  segments: CdsSegment[],
+): boolean {
   const positive = strand==='+';
   // segments ordered to guarantee rangeLocal will always be greater (than the previous segment)
-  let prevSegment;
+  let prevSegment: CdsSegment;
   for (const segment of segments) {
     if (prevSegment) {
       if (positive && prevSegment.rangeGenome[0] > segment.rangeGenome[0]) {
