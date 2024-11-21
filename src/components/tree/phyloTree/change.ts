@@ -1,4 +1,5 @@
-import { Selection, Transition } from "d3";
+import { Selection } from "d3-selection";
+import { Transition } from "d3-transition";
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren, setDisplayOrder } from "./helpers";

@@ -4,7 +4,7 @@ import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType } from "./types";
-import { Selection } from "d3";
+import { Selection } from "d3-selection";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility } from "../../../reducers/tree/types";
 

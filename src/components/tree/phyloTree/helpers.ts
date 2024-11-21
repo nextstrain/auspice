@@ -5,6 +5,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { ReduxNode } from "../../../reducers/tree/types";
 import { Distance, PhyloNode } from "./types";
+import { ScaleContinuousNumeric } from "d3-scale";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -253,7 +254,7 @@ function areNucleotideMutationsPresent(observedMutations) {
  * removing the need to guess.
  */
 export function guessAreMutationsPerSite(
-  scale: d3.ScaleContinuousNumeric<number, number>,
+  scale: ScaleContinuousNumeric<number, number>,
 ): boolean {
   const maxDivergence = max(scale.domain());
   return maxDivergence <= 5;
