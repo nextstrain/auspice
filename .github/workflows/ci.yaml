@@ -8,20 +8,6 @@ on:
 name: ci
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node: [16, 18, 20, 22]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-      - run: node --version
-      # Build is implicit with the "prepare" life cycle script
-      - run: npm ci --loglevel verbose
-
   unit-test:
     runs-on: ubuntu-latest
     strategy:
@@ -39,7 +25,7 @@ jobs:
       - run: npm ci --loglevel verbose --ignore-scripts
       - run: npm test
 
-  smoke-test:
+  build-and-smoke-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -49,6 +35,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+      # Build is implicit with the "prepare" life cycle script
       - run: npm ci --loglevel verbose
       - run: npm run get-data
       - run: npx playwright install chromium
@@ -112,7 +99,7 @@ jobs:
 
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
-    needs: [build, unit-test, smoke-test, lint, check-lockfile]
+    needs: [build-and-smoke-test, unit-test, lint, check-lockfile]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
