@@ -28,7 +28,7 @@ const run = (args) => {
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
-  const customOutputPath = utils.customOutputPath(args.extend);
+  const customOutputPath = getCustomOutputPath(args.extend);
   const webpackConfig = generateWebpackConfig({extensionPath, devMode: false, customOutputPath, analyzeBundle: args.analyzeBundle});
   const compiler = webpack(webpackConfig);
 
@@ -60,6 +60,16 @@ const run = (args) => {
   });
 
 };
+
+/* Where should the built files be saved? (or sourced??)
+ * This may grow more complex over time
+ */
+function getCustomOutputPath(extensions) {
+  if (extensions && path.resolve(__dirname, "..") !== process.cwd()) {
+    return process.cwd();
+  }
+  return false;
+}
 
 module.exports = {
   addParser,
