@@ -14,14 +14,14 @@ import {
 } from "./types";
 import {
   Collection,
-  isCollection,
-  isMeasurement,
+  asCollection,
+  asMeasurement,
   isMeasurementsDisplay,
   measurementsDisplayValues,
   Measurement,
   MeasurementsDisplay,
   MeasurementsJson,
-  MeasurementsState
+  MeasurementsState,
 } from "../reducers/measurements/types";
 
 /**
@@ -311,12 +311,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
         }
       });
 
-
-      if (isMeasurement(parsedMeasurement)) {
-        return parsedMeasurement;
-      } else {
-        throw new Error("Could not parse a valid measurement");
-      }
+      return asMeasurement(parsedMeasurement);
     });
 
     // Create groupings Map for easier access of sorted values and to keep groupings ordering
@@ -340,11 +335,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
       })
     );
 
-    if (isCollection(collection)) {
-      return collection;
-    } else {
-      throw new Error("Could not parse a valid collection");
-    }
+    return asCollection(collection);
   });
 
   const collectionKeys = collections.map((collection) => collection.key);

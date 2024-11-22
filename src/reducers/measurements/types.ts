@@ -63,8 +63,16 @@ export interface Measurement {
   [key: string]: string | number
 }
 
-export function isMeasurement(x: any): x is Measurement {
-  return Boolean(x[measurementIdSymbol] !== undefined && x.strain && x.value !== undefined)
+export function asMeasurement(x: Partial<Measurement>): Measurement {
+  if (x[measurementIdSymbol] !== undefined && x.strain && x.value !== undefined) {
+    return {
+       ...x,
+       [measurementIdSymbol]: x[measurementIdSymbol],
+       strain: x.strain,
+       value: x.value,
+    }
+  }
+  throw new Error("Measurement is partial.");
 }
 
 export interface Collection {
@@ -80,15 +88,26 @@ export interface Collection {
   x_axis_label: string
 }
 
-export function isCollection(x: any): x is Collection {
-  return Boolean(
+export function asCollection(x: Partial<Collection>): Collection {
+  if (
     x.fields &&
     x.filters &&
     x.groupings &&
     x.key &&
     x.measurements &&
     x.x_axis_label
-  );
+  ){
+    return {
+      ...x,
+      fields: x.fields,
+      filters: x.filters,
+      groupings: x.groupings,
+      key: x.key,
+      measurements: x.measurements,
+      x_axis_label: x.x_axis_label,
+    }
+  }
+  throw new Error("Collection is partial.");
 }
 
 export interface MeasurementsState {
