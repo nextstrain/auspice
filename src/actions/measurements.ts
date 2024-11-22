@@ -226,7 +226,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
   // Collection properties with the same type as JsonCollection properties.
   const propertiesWithSameType = ["key", "x_axis_label", "display_defaults", "thresholds", "title"];
 
-  const collections = jsonCollections.map<Collection>((jsonCollection) => {
+  const collections = jsonCollections.map((jsonCollection): Collection => {
     const collection: Partial<Collection> = {};
     // Check for properties with the same type that can be directly copied
     for (const collectionProp of propertiesWithSameType) {
@@ -250,7 +250,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
      */
     collection.fields = new Map(
       (jsonCollection.fields || [])
-        .map(({key, title}) => [key, {title: title || key}])
+        .map(({key, title}): [string, {title: string}] => [key, {title: title || key}])
     );
 
     /**
@@ -262,7 +262,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     const collectionFiltersArray = jsonCollection.filters;
     collection.filters = new Map(
       (jsonCollection.filters || [])
-        .map((filterField) => [filterField, {values: new Set()}])
+        .map((filterField): [string, {values: Set<string>}] => [filterField, {values: new Set()}])
     );
 
     // Create a temp object for groupings to keep track of values and their
@@ -272,7 +272,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
       return tempObject;
     }, {});
 
-    collection.measurements = jsonCollection.measurements.map((jsonMeasurement, index) => {
+    collection.measurements = jsonCollection.measurements.map((jsonMeasurement, index): Measurement => {
       const parsedMeasurement: Partial<Measurement> = {
         [measurementIdSymbol]: index
       }
@@ -322,7 +322,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Create groupings Map for easier access of sorted values and to keep groupings ordering
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
-      jsonCollection.groupings.map(({key, order}) => {
+      jsonCollection.groupings.map(({key, order}): [string, {values: string[]}] => {
         const defaultOrder = order ? order.map((x) => x.toString()) : [];
         const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
