@@ -1,7 +1,7 @@
 import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
-import { measurementIdSymbol, NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
 import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundary";
@@ -28,8 +28,18 @@ import {
 import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
-import { Measurement } from "../../reducers/measurements/types";
+import { Measurement, isMeasurement } from "../../reducers/measurements/types";
 
+interface MeanAndStandardDeviation {
+  mean: number
+  standardDeviation: number | undefined
+}
+function isMeanAndStandardDeviation(x: any): x is MeanAndStandardDeviation {
+  return (
+    typeof x.mean === "number" &&
+    (typeof x.standardDeviation === "number" || x.standardDeviation === undefined)
+  )
+}
 interface TreeStrainVisibility {
   [strain: string]: Visibility
 }
@@ -205,8 +215,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   });
   // Cache handleHover function to avoid extra useEffect calls
   const handleHover = useCallback((
-    data: Measurement | { mean: number, standardDeviation: number },
-    dataType: "measurement" | "mean",
+    data: Measurement | MeanAndStandardDeviation,
     mouseX: number,
     mouseY: number,
     colorByAttr: string = null
@@ -217,7 +226,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
       const hoverTitle = colorByAttr !== null ? `Color by ${getColorByTitle(colorings, colorBy)} : ${colorByAttr}` : null;
       // Create a Map of data to save order of fields
       const newData = new Map();
-      if (dataType === "measurement" && measurementIdSymbol in data) {
+      if (isMeasurement(data)) {
         // Handle single measurement data
         // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
         const displayFields = Object.keys(data).filter((field) => fields.has(field));
@@ -227,13 +236,13 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
         orderedFields.forEach((field) => {
           newData.set(fields.get(field).title, data[field]);
         });
-      } else if (dataType === "mean" && !(measurementIdSymbol in data)) {
+      } else if (isMeanAndStandardDeviation(data)) {
         // Handle mean and standard deviation data
         newData.set("mean", data.mean.toFixed(2));
         newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
       } else {
         // Catch unknown data types
-        console.error(`"Unknown data type for hover panel: ${dataType}`);
+        console.error(`"Unknown data type for hover panel: ${JSON.stringify(data)}`);
         // Display provided data without extra ordering or parsing
         Object.entries(data).forEach(([key, value]) => newData.set(key, value));
       }

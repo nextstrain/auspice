@@ -75,6 +75,15 @@ export function asMeasurement(x: Partial<Measurement>): Measurement {
   throw new Error("Measurement is partial.");
 }
 
+export function isMeasurement(x: any): x is Measurement {
+  try {
+    asMeasurement(x);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export interface Collection {
   // TODO: Convert this to MeasurementsControlState during parseMeasurementsJSON
   display_defaults?: JsonCollectionDisplayDefaults
