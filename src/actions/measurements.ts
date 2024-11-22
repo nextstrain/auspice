@@ -37,8 +37,8 @@ interface GroupingValues {
 const filterQueryPrefix = "mf_";
 type MeasurementsFilterQuery = `mf_${string}`
 
-const queryBooleanValues = ["show", "hide"] as const;
-type QueryBoolean = (typeof queryBooleanValues)[number]
+type QueryBoolean = "show" | "hide"
+const queryBooleanValues: QueryBoolean[] = ["show", "hide"];
 export const isQueryBoolean = (x: any): x is QueryBoolean => queryBooleanValues.includes(x)
 /* Measurements query parameters that are constructed and/or parsed here. */
 interface MeasurementsQuery {

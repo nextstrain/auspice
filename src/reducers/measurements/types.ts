@@ -1,8 +1,8 @@
 import { measurementIdSymbol } from "../../util/globals";
 
 // -- Shared Measurements types -- //
-export const measurementsDisplayValues = ["raw", "mean"];
-export type MeasurementsDisplay = (typeof measurementsDisplayValues)[number]
+export type MeasurementsDisplay = "raw" | "mean"
+export const measurementsDisplayValues: MeasurementsDisplay[] = ["raw", "mean"];
 export const isMeasurementsDisplay = (x: any): x is MeasurementsDisplay => measurementsDisplayValues.includes(x);
 
 // -- Measurements JSON types -- //
