@@ -8,9 +8,10 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarButton } from "./styles";
 
 const ButtonText = styled.span`
-  margin-left: 10px;
-  padding-bottom: 15px;
-  vertical-align: middle;
+  margin: 5px;
+  position: relative;
+  left: 4px;
+  top: -6px;
 `;
 
 const PanelsFullIcon = withTheme(icons.PanelsFull);
@@ -26,7 +27,7 @@ class PanelLayouts extends React.Component {
     const { t } = this.props;
 
     return (
-      <div style={{marginTop: 0, marginBottom: 10, marginLeft: -5}}>
+      <div style={{marginTop: 0, marginBottom: 10}}>
         <SidebarButton
           selected={this.props.panelLayout === "full"}
           onClick={() => {
