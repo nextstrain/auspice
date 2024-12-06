@@ -1,5 +1,7 @@
 # Changelog
 
+* Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
+
 ## version 2.61.2 - 2024/11/19
 
 
