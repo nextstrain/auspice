@@ -9,9 +9,9 @@ import { MeasurementsState } from "./types";
 export const getDefaultMeasurementsState = (): MeasurementsState => ({
   error: undefined,
   loaded: false,
-  defaultCollectionKey: "",
-  collections: [],
-  collectionToDisplay: {}
+  defaultCollectionKey: undefined,
+  collections: undefined,
+  collectionToDisplay: undefined
 });
 
 const measurements = (
