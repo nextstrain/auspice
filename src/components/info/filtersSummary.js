@@ -42,7 +42,7 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     absoluteDateMax: state.controls.absoluteDateMax,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     measurementsFilters: state.controls.measurementsFilters,
-    measurementsFields: state.measurements.collectionToDisplay.fields
+    measurementsFields: state.measurements.collectionToDisplay?.fields
   };
 })
 class FiltersSummary extends React.Component {

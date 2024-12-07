@@ -1,6 +1,7 @@
-import { cloneDeep, pick } from "lodash";
+import { cloneDeep } from "lodash";
+import { AppDispatch, ThunkFunction } from "../store";
 import { measurementIdSymbol } from "../util/globals";
-import { defaultMeasurementsControlState } from "../reducers/controls";
+import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { warningNotification } from "./notifications";
 import {
@@ -11,6 +12,51 @@ import {
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
+import {
+  Collection,
+  asCollection,
+  asMeasurement,
+  isMeasurementsDisplay,
+  measurementsDisplayValues,
+  Measurement,
+  MeasurementsDisplay,
+  MeasurementsJson,
+  MeasurementsState,
+} from "../reducers/measurements/types";
+
+/**
+ * Temp object for groupings to keep track of values and their counts so that
+ * we can create a stable default order for grouping field values
+ */
+interface GroupingValues {
+  [key: string]: Map<string, number>
+}
+
+
+/* mf_<field> correspond to active measurements filters */
+const filterQueryPrefix = "mf_";
+type MeasurementsFilterQuery = `mf_${string}`
+
+type QueryBoolean = "show" | "hide"
+const queryBooleanValues: QueryBoolean[] = ["show", "hide"];
+export const isQueryBoolean = (x: any): x is QueryBoolean => queryBooleanValues.includes(x)
+/* Measurements query parameters that are constructed and/or parsed here. */
+interface MeasurementsQuery {
+  m_collection?: string
+  m_display?: MeasurementsDisplay
+  m_groupBy?: string
+  m_overallMean?: QueryBoolean
+  m_threshold?: QueryBoolean
+  [key: MeasurementsFilterQuery]: string[]
+}
+/**
+ * Central Query type placeholder!
+ * Expected to be the returned object from querystring.parse()
+ * https://nodejs.org/docs/latest-v22.x/api/querystring.html#querystringparsestr-sep-eq-options
+ */
+interface Query extends MeasurementsQuery {
+  [key: string]: string | string[]
+}
 
 /**
  * Find the collection within collections that has a key matching the provided
@@ -19,13 +65,12 @@ import {
  * If collectionKey is not provided, returns the default collection.
  * If no matches are found, returns the default collection.
  * If multiple matches are found, only returns the first matching collection.
- *
- * @param {Array<Object>} collections
- * @param {string} collectionKey
- * @param {string} defaultKey
- * @returns {Object}
  */
-const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
+const getCollectionToDisplay = (
+  collections: Collection[],
+  collectionKey: string,
+  defaultKey: string
+): Collection => {
   const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
   if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
@@ -39,11 +84,11 @@ const getCollectionToDisplay = (collections, collectionKey, defaultKey) => {
 /**
  * Map the controlKey to the default value in collectionDefaults
  * Checks if the collection default is a valid value for the control
- * @param {string} controlKey
- * @param {Object} collection
- * @returns {*}
  */
-function getCollectionDefaultControl(controlKey, collection) {
+function getCollectionDefaultControl(
+  controlKey: string,
+  collection: Collection
+): string | boolean | undefined {
   const collectionControlToDisplayDefaults = {
     measurementsGroupBy: 'group_by',
     measurementsDisplay: 'measurements_display',
@@ -65,9 +110,8 @@ function getCollectionDefaultControl(controlKey, collection) {
       break;
     }
     case 'measurementsDisplay': {
-      const expectedValues = ["mean", "raw"];
-      if (defaultControl !== undefined && !expectedValues.includes(defaultControl)) {
-        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${expectedValues}`)
+      if (defaultControl !== undefined && !isMeasurementsDisplay(defaultControl)) {
+        console.error(`Ignoring invalid ${displayDefaultKey} value ${defaultControl}, must be one of ${measurementsDisplayValues}`)
         defaultControl = undefined;
       }
       break;
@@ -106,10 +150,8 @@ function getCollectionDefaultControl(controlKey, collection) {
 /**
  * Returns the default control state for the provided collection
  * Returns teh default control state for the app if the collection is not loaded yet
- * @param {Object} collection
- * @returns {MeasurementsControlState}
  */
-function getCollectionDefaultControls(collection) {
+function getCollectionDefaultControls(collection: Collection): MeasurementsControlState {
   const defaultControls = {...defaultMeasurementsControlState};
   if (Object.keys(collection).length) {
     for (const [key, value] of Object.entries(defaultControls)) {
@@ -127,12 +169,18 @@ function getCollectionDefaultControls(collection) {
  * If no display defaults are provided, uses the current controls redux state.
  * If the current `measurementsGrouping` does not exist in the collection, then
  * defaults to the first grouping option.
- * @param {Object} collection
- * @returns {MeasurementsControlState}
  */
-const getCollectionDisplayControls = (controls, collection) => {
+const getCollectionDisplayControls = (
+  controls: ControlsState,
+  collection: Collection
+): MeasurementsControlState => {
   // Copy current control options for measurements
-  const newControls = cloneDeep(pick(controls, Object.keys(defaultMeasurementsControlState)));
+  const newControls = cloneDeep(defaultMeasurementsControlState);
+  Object.entries(controls).forEach(([key, value]) => {
+    if (key in newControls) {
+      newControls[key] = cloneDeep(value);
+    }
+  })
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
@@ -142,7 +190,7 @@ const getCollectionDisplayControls = (controls, collection) => {
   // Verify that current filters are valid for the new collection
   newControls.measurementsFilters = Object.fromEntries(
     Object.entries(newControls.measurementsFilters)
-      .map(([field, valuesMap]) => {
+      .map(([field, valuesMap]): [string, Map<string, {active: boolean}>] => {
         // Clone nested Map to avoid changing redux state in place
         // Delete filter for values that do not exist within the field of the new collection
         const newValuesMap = new Map([...valuesMap].filter(([value]) => {
@@ -169,23 +217,31 @@ const getCollectionDisplayControls = (controls, collection) => {
   return newControls;
 };
 
-const parseMeasurementsJSON = (json) => {
-  // Avoid editing the original json values since they are cached for narratives
-  const collections = cloneDeep(json["collections"]);
-  if (!collections || collections.length === 0) {
+const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
+  const jsonCollections = json["collections"];
+  if (!jsonCollections || jsonCollections.length === 0) {
     throw new Error("Measurements JSON does not have collections");
   }
 
-  collections.forEach((collection) => {
+  // Collection properties with the same type as JsonCollection properties.
+  const propertiesWithSameType = ["key", "x_axis_label", "display_defaults", "thresholds", "title"];
+
+  const collections = jsonCollections.map((jsonCollection): Collection => {
+    const collection: Partial<Collection> = {};
+    // Check for properties with the same type that can be directly copied
+    for (const collectionProp of propertiesWithSameType) {
+      if (collectionProp in jsonCollection) {
+        collection[collectionProp] = cloneDeep(jsonCollection[collectionProp]);
+      }
+    }
     /**
      * Keep backwards compatibility with single value threshold.
      * Make sure thresholds are an array of values so that we don't have to
      * check the data type in the D3 drawing process
      * `collection.thresholds` takes precedence over the deprecated `collection.threshold`
      */
-    if (typeof collection.threshold === "number") {
-      collection.thresholds = collection.thresholds || [collection.threshold];
-      delete collection.threshold;
+    if (typeof jsonCollection.threshold === "number") {
+      collection.thresholds = collection.thresholds || [jsonCollection.threshold];
     }
     /*
      * Create fields Map for easier access of titles and to keep ordering
@@ -193,8 +249,8 @@ const parseMeasurementsJSON = (json) => {
      * Then loop over measurements to add any remaining fields
      */
     collection.fields = new Map(
-      (collection.fields || [])
-        .map(({key, title}) => [key, {title: title || key}])
+      (jsonCollection.fields || [])
+        .map(({key, title}): [string, {title: string}] => [key, {title: title || key}])
     );
 
     /**
@@ -203,63 +259,83 @@ const parseMeasurementsJSON = (json) => {
      * Then loop over measurements to add values
      * If there are no JSON defined filters, then add all fields as filters
      */
-    const collectionFiltersArray = collection.filters;
+    const collectionFiltersArray = jsonCollection.filters;
     collection.filters = new Map(
-      (collection.filters || [])
-        .map((filterField) => [filterField, {values: new Set()}])
+      (jsonCollection.filters || [])
+        .map((filterField): [string, {values: Set<string>}] => [filterField, {values: new Set()}])
     );
 
     // Create a temp object for groupings to keep track of values and their
     // counts so that we can create a stable default order for grouping field values
-    const groupingsValues = collection.groupings.reduce((tempObject, {key}) => {
-      tempObject[key] = {};
+    const groupingsValues: GroupingValues = jsonCollection.groupings.reduce((tempObject, {key}) => {
+      tempObject[key] = new Map();
       return tempObject;
     }, {});
 
-    collection.measurements.forEach((measurement, index) => {
-      Object.entries(measurement).forEach(([field, fieldValue]) => {
-        // Add remaining field titles
-        if (!collection.fields.has(field)) {
-          collection.fields.set(field, {title: field});
-        }
+    collection.measurements = jsonCollection.measurements.map((jsonMeasurement, index): Measurement => {
+      const parsedMeasurement: Partial<Measurement> = {
+        [measurementIdSymbol]: index
+      }
+      Object.entries(jsonMeasurement).forEach(([field, fieldValue]) => {
+        /**
+         * Convert all measurements metadata (except the `value`) to strings
+         * for proper matching with filter queries.
+         * This does mean the the `value` cannot be used as a field filter.
+         * We can revisit this decision when adding types to measurementsD3
+         * because converting `value` to string resulted in a lot of calculation errors
+         */
+        if (field === "value") {
+          parsedMeasurement[field] = Number(fieldValue);
+        } else {
+          const fieldValueString = fieldValue.toString();
+          parsedMeasurement[field] = fieldValueString;
 
-        // Only save the unique values if the field is in defined filters
-        // OR there are no JSON defined filters, so all fields are filters
-        if ((collection.filters.has(field)) || !collectionFiltersArray) {
-          const filterObject = collection.filters.get(field) || { values: new Set()};
-          filterObject.values.add(fieldValue);
-          collection.filters.set(field, filterObject);
-        }
+          // Add remaining field titles
+          if (!collection.fields.has(field)) {
+            collection.fields.set(field, {title: field});
+          }
 
-        // Save grouping field values and counts
-        if (field in groupingsValues) {
-          const previousValue = groupingsValues[field][fieldValue];
-          groupingsValues[field][fieldValue] = previousValue ? previousValue + 1 : 1;
+          // Only save the unique values if the field is in defined filters
+          // OR there are no JSON defined filters, so all fields are filters
+          if ((collection.filters.has(field)) || !collectionFiltersArray) {
+            const filterObject = collection.filters.get(field) || { values: new Set()};
+            filterObject.values.add(fieldValueString);
+            collection.filters.set(field, filterObject);
+          }
+
+          // Save grouping field values and counts
+          if (field in groupingsValues) {
+            const previousValue = groupingsValues[field].get(fieldValueString);
+            groupingsValues[field].set(fieldValueString, previousValue ? previousValue + 1 : 1);
+          }
         }
       });
 
-      // Add stable id for each measurement to help visualization
-      measurement[measurementIdSymbol] = index;
+      return asMeasurement(parsedMeasurement);
     });
 
     // Create groupings Map for easier access of sorted values and to keep groupings ordering
     // Must be done after looping through measurements to build `groupingsValues` object
     collection.groupings = new Map(
-      collection.groupings.map(({key, order}) => {
-        const valuesByCount = Object.entries(groupingsValues[key])
+      jsonCollection.groupings.map(({key, order}): [string, {values: string[]}] => {
+        const defaultOrder = order ? order.map((x) => x.toString()) : [];
+        const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
           // Filter out values that already exist in provided order from JSON
-          .filter(([fieldValue]) => order ? !order.includes(fieldValue) : true)
+          .filter(([fieldValue]) => !defaultOrder.includes(fieldValue))
           // Create array of field values
           .map(([fieldValue]) => fieldValue);
+
         return [
           key,
           // Prioritize the provided values order then list values by count
-          {values: (order || []).concat(valuesByCount)}
+          {values: (defaultOrder).concat(valuesByCount)}
         ];
       })
     );
+
+    return asCollection(collection);
   });
 
   const collectionKeys = collections.map((collection) => collection.key);
@@ -277,7 +353,10 @@ const parseMeasurementsJSON = (json) => {
   }
 };
 
-export const loadMeasurements = (measurementsData, dispatch) => {
+export const loadMeasurements = (
+  measurementsData: MeasurementsJson | Error,
+  dispatch: AppDispatch
+): MeasurementsState => {
   let measurementState = getDefaultMeasurementsState();
   /* Just return default state there are no measurements data to load */
   if (!measurementsData) {
@@ -305,7 +384,9 @@ export const loadMeasurements = (measurementsData, dispatch) => {
   return measurementState;
 };
 
-export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, getState) => {
+export const changeMeasurementsCollection = (
+  newCollectionKey: string
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey, measurements.defaultCollectionKey);
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
@@ -325,7 +406,11 @@ export const changeMeasurementsCollection = (newCollectionKey) => (dispatch, get
  * Tried to use lodash.cloneDeep(), but it did not work for the nested Map
  * - Jover, 19 January 2022
  */
-export const applyMeasurementFilter = (field, value, active) => (dispatch, getState) => {
+export const applyMeasurementFilter = (
+  field: string,
+  value: string,
+  active: boolean
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -338,7 +423,10 @@ export const applyMeasurementFilter = (field, value, active) => (dispatch, getSt
   });
 };
 
-export const removeSingleFilter = (field, value) => (dispatch, getState) => {
+export const removeSingleFilter = (
+  field: string,
+  value: string
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -357,7 +445,9 @@ export const removeSingleFilter = (field, value) => (dispatch, getState) => {
   });
 };
 
-export const removeAllFieldFilters = (field) => (dispatch, getState) => {
+export const removeAllFieldFilters = (
+  field: string
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   delete measurementsFilters[field];
@@ -369,7 +459,10 @@ export const removeAllFieldFilters = (field) => (dispatch, getState) => {
   });
 };
 
-export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => {
+export const toggleAllFieldFilters = (
+  field: string,
+  active: boolean
+): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementsFilters = {...controls.measurementsFilters};
   measurementsFilters[field] = new Map(measurementsFilters[field]);
@@ -383,7 +476,7 @@ export const toggleAllFieldFilters = (field, active) => (dispatch, getState) => 
   });
 };
 
-export const toggleOverallMean = () => (dispatch, getState) => {
+export const toggleOverallMean = (): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const controlKey = "measurementsShowOverallMean";
   const newControls = { [controlKey]: !controls[controlKey] };
@@ -395,7 +488,7 @@ export const toggleOverallMean = () => (dispatch, getState) => {
   });
 }
 
-export const toggleThreshold = () => (dispatch, getState) => {
+export const toggleThreshold = (): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const controlKey = "measurementsShowThreshold";
   const newControls = { [controlKey]: !controls[controlKey] };
@@ -407,7 +500,9 @@ export const toggleThreshold = () => (dispatch, getState) => {
   });
 };
 
-export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) => {
+export const changeMeasurementsDisplay = (
+  newDisplay: MeasurementsDisplay
+): ThunkFunction => (dispatch, getState) => {
   const { measurements } = getState();
   const controlKey = "measurementsDisplay";
   const newControls = { [controlKey]: newDisplay };
@@ -419,7 +514,9 @@ export const changeMeasurementsDisplay = (newDisplay) => (dispatch, getState) =>
   });
 }
 
-export const changeMeasurementsGroupBy = (newGroupBy) => (dispatch, getState) => {
+export const changeMeasurementsGroupBy = (
+  newGroupBy: string
+): ThunkFunction => (dispatch, getState) => {
   const { measurements } = getState();
   const controlKey = "measurementsGroupBy";
   const newControls = { [controlKey]: newGroupBy };
@@ -438,9 +535,10 @@ const controlToQueryParamMap = {
   measurementsShowThreshold: "m_threshold",
 };
 
-/* mf_<field> correspond to active measurements filters */
-const filterQueryPrefix = "mf_";
-export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
+export function removeInvalidMeasurementsFilterQuery(
+  query: Query,
+  newQueryParams: {[key: MeasurementsFilterQuery]: string}
+): Query {
   const newQuery = cloneDeep(query);
   // Remove measurements filter query params that are not included in the newQueryParams
   Object.keys(query)
@@ -449,7 +547,11 @@ export function removeInvalidMeasurementsFilterQuery(query, newQueryParams) {
   return newQuery
 }
 
-function createMeasurementsQueryFromControls(measurementControls, collection, defaultCollectionKey) {
+function createMeasurementsQueryFromControls(
+  measurementControls: Partial<MeasurementsControlState>,
+  collection: Collection,
+  defaultCollectionKey: string
+): MeasurementsQuery {
   const newQuery = {
     m_collection: collection.key === defaultCollectionKey ? "" : collection.key
   };
@@ -505,11 +607,15 @@ function createMeasurementsQueryFromControls(measurementControls, collection, de
  *
  * In cases where the query param is invalid, the query param is removed from the
  * returned query object.
- * @param {Object} measurements
- * @param {Object} query
- * @returns {Object}
  */
-export const combineMeasurementsControlsAndQuery = (measurements, query) => {
+export const combineMeasurementsControlsAndQuery = (
+  measurements: MeasurementsState,
+  query: Query
+): {
+  collectionToDisplay: Collection,
+  collectionControls: MeasurementsControlState,
+  updatedQuery: Query
+} => {
   const updatedQuery = cloneDeep(query);
   const collectionKeys = measurements.collections.map((collection) => collection.key);
   // Remove m_collection query if it's invalid or the default collection key
@@ -529,24 +635,23 @@ export const combineMeasurementsControlsAndQuery = (measurements, query) => {
     let newControlState = undefined;
     switch(queryKey) {
       case "m_display":
-        if (queryValue === "mean" || queryValue === "raw") {
+        if (isMeasurementsDisplay(queryValue)) {
           newControlState = queryValue;
         }
         break;
       case "m_groupBy":
         // Verify value is a valid grouping of collection
-        if (collectionGroupings.includes(queryValue)) {
+        if (typeof queryValue === "string" && collectionGroupings.includes(queryValue)) {
           newControlState = queryValue;
         }
         break;
       case "m_overallMean":
-        if (queryValue === "show" || queryValue === "hide") {
+        if (isQueryBoolean(queryValue)) {
           newControlState = queryValue === "show";
         }
         break;
       case "m_threshold":
-        if (collectionToDisplay.thresholds &&
-            (queryValue === "show" || queryValue === "hide")) {
+        if (collectionToDisplay.thresholds && isQueryBoolean(queryValue)) {
           newControlState = queryValue === "show";
         }
         break;
@@ -572,8 +677,11 @@ export const combineMeasurementsControlsAndQuery = (measurements, query) => {
     }
 
     // Remove and ignore query for invalid field values
+    let filterValues = updatedQuery[filterKey];
+    if (typeof filterValues === "string") {
+      filterValues = Array(filterValues);
+    }
     const collectionFieldValues = collectionToDisplay.filters.get(field).values;
-    const filterValues = Array.isArray(updatedQuery[filterKey]) ? updatedQuery[filterKey] : [updatedQuery[filterKey]];
     const validFilterValues = filterValues.filter((value) => collectionFieldValues.has(value));
     if (!validFilterValues.length) {
       delete updatedQuery[filterKey];

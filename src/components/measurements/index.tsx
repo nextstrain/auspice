@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
@@ -8,7 +8,7 @@ import ErrorBoundary from "../../util/errorBoundary";
 import Flex from "../framework/flex";
 import Card from "../framework/card";
 import Legend from "../tree/legend/legend";
-import HoverPanel from "./hoverPanel";
+import HoverPanel, { HoverData } from "./hoverPanel";
 import {
   createXScale,
   createYScale,
@@ -25,24 +25,49 @@ import {
   layout,
   jitterRawMeansByColorBy
 } from "./measurementsD3";
+import { RootState } from "../../store";
+import { MeasurementFilters } from "../../reducers/controls";
+import { Visibility } from "../../reducers/tree/types";
+import { Measurement, isMeasurement } from "../../reducers/measurements/types";
+
+interface MeanAndStandardDeviation {
+  mean: number
+  standardDeviation: number | undefined
+}
+function isMeanAndStandardDeviation(x: any): x is MeanAndStandardDeviation {
+  return (
+    typeof x.mean === "number" &&
+    (typeof x.standardDeviation === "number" || x.standardDeviation === undefined)
+  )
+}
+interface TreeStrainVisibility {
+  [strain: string]: Visibility
+}
+interface TreeStrainProperties {
+  treeStrainVisibility: TreeStrainVisibility
+  treeStrainColors: {
+    [strain: string]: {
+      attribute: string
+      color: string
+    }
+  }
+}
 
 /**
  * A custom React Hook that returns a memoized value that will only change
  * if a deep comparison using lodash.isEqual determines the value is not
  * equivalent to the previous value.
- * @param {*} value
- * @returns {*}
  */
-const useDeepCompareMemo = (value) => {
-  const ref = useRef();
+function useDeepCompareMemo<T>(value: T): T {
+  const ref: MutableRefObject<T> = useRef();
   if (!isEqual(value, ref.current)) {
     ref.current = value;
   }
   return ref.current;
-};
+}
 
 // Checks visibility against global NODE_VISIBLE
-const isVisible = (visibility) => visibility === NODE_VISIBLE;
+const isVisible = (visibility: Visibility): boolean => visibility === NODE_VISIBLE;
 
 /**
  * A custom React Redux Selector that reduces the tree redux state to an object
@@ -52,13 +77,13 @@ const isVisible = (visibility) => visibility === NODE_VISIBLE;
  *
  * tree.visibility and tree.nodeColors need to be arrays that have the same
  * order as tree.nodes
- * @param {Object} state
- * @returns {Object<string,Object>}
  */
-const treeStrainPropertySelector = (state) => {
+const treeStrainPropertySelector = (
+  state: RootState
+): TreeStrainProperties => {
   const { tree, controls } = state;
   const { colorScale } = controls;
-  const intitialTreeStrainProperty = {
+  const initialTreeStrainProperty: TreeStrainProperties = {
     treeStrainVisibility: {},
     treeStrainColors: {}
   };
@@ -85,7 +110,7 @@ const treeStrainPropertySelector = (state) => {
 
     }
     return treeStrainProperty;
-  }, intitialTreeStrainProperty);
+  }, initialTreeStrainProperty);
 };
 
 /**
@@ -96,14 +121,17 @@ const treeStrainPropertySelector = (state) => {
  * treeStrainVisibility object for strain.
  *
  * Returns the active filters object and the filtered measurements
- * @param {Array<Object>} measurements
- * @param {Object<string,number>} treeStrainVisibility
- * @param {Object<string,Map>} filters
- * @returns {Object<Object, Array>}
  */
-const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
+const filterMeasurements = (
+  measurements: Measurement[],
+  treeStrainVisibility: TreeStrainVisibility,
+  filters: MeasurementFilters
+): {
+  activeFilters: {string?: string[]}
+  filteredMeasurements: Measurement[]
+} => {
   // Find active filters to filter measurements
-  const activeFilters = {};
+  const activeFilters: {string?: string[]} = {};
   Object.entries(filters).forEach(([field, valuesMap]) => {
     activeFilters[field] = activeFilters[field] || [];
     valuesMap.forEach(({active}, fieldValue) => {
@@ -119,7 +147,11 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
       if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
       // Then check that the measurement contains values for all active filters
       for (const [field, values] of Object.entries(activeFilters)) {
-        if (values.length > 0 && !values.includes(measurement[field])) return false;
+        const measurementValue = measurement[field];
+        if (values.length > 0 &&
+           ((typeof measurementValue === "string") && !values.includes(measurementValue))){
+          return false;
+        }
       }
       return true;
     })
@@ -128,25 +160,25 @@ const filterMeasurements = (measurements, treeStrainVisibility, filters) => {
 
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
-  const { treeStrainVisibility, treeStrainColors } = useSelector((state) => treeStrainPropertySelector(state), isEqual);
-  const legendValues = useSelector((state) => state.controls.colorScale.legendValues, isEqual);
-  const colorings = useSelector((state) => state.metadata.colorings);
-  const colorBy = useSelector((state) => state.controls.colorBy);
-  const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
-  const filters = useSelector((state) => state.controls.measurementsFilters);
-  const display = useSelector((state) => state.controls.measurementsDisplay);
-  const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
-  const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
-  const collection = useSelector((state) => state.measurements.collectionToDisplay, isEqual);
+  const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
+  const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues, isEqual);
+  const colorings = useSelector((state: RootState) => state.metadata.colorings);
+  const colorBy = useSelector((state: RootState) => state.controls.colorBy);
+  const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
+  const filters = useSelector((state: RootState) => state.controls.measurementsFilters);
+  const display = useSelector((state: RootState) => state.controls.measurementsDisplay);
+  const showOverallMean = useSelector((state: RootState) => state.controls.measurementsShowOverallMean);
+  const showThreshold = useSelector((state: RootState) => state.controls.measurementsShowThreshold);
+  const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay, isEqual);
   const { title, x_axis_label, thresholds, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
-  const svgContainerRef = useRef(null);
-  const d3Ref = useRef(null);
-  const d3XAxisRef = useRef(null);
+  const svgContainerRef: MutableRefObject<HTMLDivElement> = useRef(null);
+  const d3Ref: MutableRefObject<SVGSVGElement> = useRef(null);
+  const d3XAxisRef: MutableRefObject<SVGSVGElement> = useRef(null);
 
   // State for storing data for the HoverPanel
-  const [hoverData, setHoverData] = useState(null);
+  const [hoverData, setHoverData] = useState<HoverData>(null);
 
   // Filter and group measurements
   const {activeFilters, filteredMeasurements} = filterMeasurements(measurements, treeStrainVisibility, filters);
@@ -182,14 +214,19 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     groupedMeasurements
   });
   // Cache handleHover function to avoid extra useEffect calls
-  const handleHover = useCallback((data, dataType, mouseX, mouseY, colorByAttr=null) => {
+  const handleHover = useCallback((
+    data: Measurement | MeanAndStandardDeviation,
+    mouseX: number,
+    mouseY: number,
+    colorByAttr: string = null
+  ): void => {
     let newHoverData = null;
     if (data !== null) {
       // Set color-by attribute as title if provided
       const hoverTitle = colorByAttr !== null ? `Color by ${getColorByTitle(colorings, colorBy)} : ${colorByAttr}` : null;
       // Create a Map of data to save order of fields
       const newData = new Map();
-      if (dataType === "measurement") {
+      if (isMeasurement(data)) {
         // Handle single measurement data
         // Filter out internal auspice fields (i.e. measurementsJitter and measurementsId)
         const displayFields = Object.keys(data).filter((field) => fields.has(field));
@@ -199,13 +236,13 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
         orderedFields.forEach((field) => {
           newData.set(fields.get(field).title, data[field]);
         });
-      } else if (dataType === "mean") {
+      } else if (isMeanAndStandardDeviation(data)) {
         // Handle mean and standard deviation data
         newData.set("mean", data.mean.toFixed(2));
         newData.set("standard deviation", data.standardDeviation ? data.standardDeviation.toFixed(2) : "N/A");
       } else {
         // Catch unknown data types
-        console.error(`"Unknown data type for hover panel: ${dataType}`);
+        console.error(`"Unknown data type for hover panel: ${JSON.stringify(data)}`);
         // Display provided data without extra ordering or parsing
         Object.entries(data).forEach(([key, value]) => newData.set(key, value));
       }
@@ -255,7 +292,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     toggleDisplay(d3Ref.current, "threshold", showThreshold);
   }, [svgData, showThreshold]);
 
-  const getSVGContainerStyle = () => {
+  const getSVGContainerStyle = (): CSSProperties => {
     return {
       overflowY: "auto",
       position: "relative",
@@ -268,7 +305,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
    * Sticky x-axis with a set height to make sure the x-axis is always
    * at the bottom of the measurements panel
    */
-  const getStickyXAxisSVGStyle = () => {
+  const getStickyXAxisSVGStyle = (): CSSProperties => {
     return {
       width: "100%",
       height: layout.xAxisHeight,
@@ -282,7 +319,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
    * allow x-axis to fit in the bottom of the panel when scrolling all the way
    * to the bottom of the measurements SVG
    */
-  const getMainSVGStyle = () => {
+  const getMainSVGStyle = (): CSSProperties => {
     return {
       width: "100%",
       position: "relative",
@@ -320,9 +357,9 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
 };
 
 const Measurements = ({height, width, showLegend}) => {
-  const measurementsLoaded = useSelector((state) => state.measurements.loaded);
-  const measurementsError = useSelector((state) => state.measurements.error);
-  const showOnlyPanels = useSelector((state) => state.controls.showOnlyPanels);
+  const measurementsLoaded = useSelector((state: RootState) => state.measurements.loaded);
+  const measurementsError = useSelector((state: RootState) => state.measurements.error);
+  const showOnlyPanels = useSelector((state: RootState) => state.controls.showOnlyPanels);
 
   const [title, setTitle] = useState("Measurements");
 

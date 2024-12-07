@@ -1,11 +1,23 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { InfoLine } from "../tree/infoPanels/hover";
 
-const HoverPanel = ({hoverData}) => {
+export interface HoverData {
+  hoverTitle: string
+  mouseX: number
+  mouseY: number
+  containerId: string
+  data: Map<string, unknown>
+}
+
+const HoverPanel = ({
+  hoverData
+}: {
+  hoverData: HoverData
+}) => {
   if (hoverData === null) return null;
   const { hoverTitle, mouseX, mouseY, containerId, data } = hoverData;
-  const panelStyle = {
+  const panelStyle: CSSProperties = {
     position: "absolute",
     minWidth: 200,
     padding: "5px",

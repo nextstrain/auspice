@@ -453,7 +453,7 @@ export const addHoverPanelToMeasurementsAndMeans = (ref, handleHover, treeStrain
       }
 
       // sets hover data state to trigger the hover panel display
-      handleHover(d, dataType, clientX, clientY, colorByAttr);
+      handleHover(d, clientX, clientY, colorByAttr);
     })
     .on("mouseout.hoverPanel", () => handleHover(null));
 };

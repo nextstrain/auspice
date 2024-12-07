@@ -13,16 +13,13 @@ import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 import { PhyloNode } from "../components/tree/phyloTree/types";
 import { Metadata } from "../metadata";
-import { AppDispatch, RootState } from "../store";
+import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState } from "../reducers/tree/types";
 
 type RootIndex = number | undefined
 
 /** [root idx tree1, root idx tree2] */
 export type Root = [RootIndex, RootIndex]
-
-/** A function to be handled by redux (thunk) */
-type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void
 
 /**
  * Updates the `inView` property of nodes which depends on the currently selected
@@ -277,7 +274,7 @@ export const applyFilter = (
    *  - "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
    */
   mode: "add" | "inactivate" | "remove" | "set",
-  
+
   /** the trait name of the filter ("authors", "country" etcetera) */
   trait: string | symbol,
 

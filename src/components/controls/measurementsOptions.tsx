@@ -13,15 +13,22 @@ import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
 import CustomSelect from "./customSelect";
+import { Collection } from "../../reducers/measurements/types";
+import { RootState } from "../../store";
+
+interface SelectOption {
+  value: string
+  label: string
+}
 
 /**
  * React Redux selector function that takes the key and title for the
  * available collections to create the object expected for the Select library.
  * The label defaults to the key if a collection does not have a set title.
- * @param {Array<Object>} collections
- * @returns {Array<Object>}
  */
-const collectionOptionsSelector = (collections) => {
+const collectionOptionsSelector = (
+  collections: Collection[]
+): SelectOption[]  => {
   return collections.map((collection) => {
     return {
       value: collection.key,
@@ -32,15 +39,15 @@ const collectionOptionsSelector = (collections) => {
 
 const MeasurementsOptions = () => {
   const dispatch = useAppDispatch();
-  const collection = useSelector((state) => state.measurements.collectionToDisplay);
-  const collectionOptions = useSelector((state) => collectionOptionsSelector(state.measurements.collections), isEqual);
-  const groupBy = useSelector((state) => state.controls.measurementsGroupBy);
-  const display = useSelector((state) => state.controls.measurementsDisplay);
-  const showOverallMean = useSelector((state) => state.controls.measurementsShowOverallMean);
-  const showThreshold = useSelector((state) => state.controls.measurementsShowThreshold);
+  const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay);
+  const collectionOptions = useSelector((state: RootState) => collectionOptionsSelector(state.measurements.collections), isEqual);
+  const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
+  const display = useSelector((state: RootState) => state.controls.measurementsDisplay);
+  const showOverallMean = useSelector((state: RootState) => state.controls.measurementsShowOverallMean);
+  const showThreshold = useSelector((state: RootState) => state.controls.measurementsShowThreshold);
 
   // Create grouping options for the Select library
-  let groupingOptions = [];
+  let groupingOptions: SelectOption[] = [];
   if (collection.groupings) {
     groupingOptions = [...collection.groupings.keys()].map((grouping) => {
       return {
