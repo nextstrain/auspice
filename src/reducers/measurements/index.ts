@@ -23,11 +23,13 @@ const measurements = (
     case URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       return { ...action.measurements };
     case CHANGE_MEASUREMENTS_COLLECTION:
-      return {
-        ...state,
-        loaded: true,
-        collectionToDisplay: action.collectionToDisplay
-      };
+      if (state.loaded) {
+        return {
+          ...state,
+          collectionToDisplay: action.collectionToDisplay
+        };
+      }
+      return state;
     default:
       return state;
   }
