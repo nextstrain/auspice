@@ -45,6 +45,7 @@ export const renderTree = (
       onTipClick: callbacks.onTipClick.bind(that),
       onBranchHover: callbacks.onBranchHover.bind(that),
       onBranchClick: callbacks.onBranchClick.bind(that),
+      onStreamConnectorClick: callbacks.onStreamConnectorClick.bind(that),
       onBranchLeave: callbacks.onBranchLeave.bind(that),
       onTipLeave: callbacks.onTipLeave.bind(that),
       tipLabel: makeTipLabelFunc(props.tipLabelKey)
@@ -59,5 +60,6 @@ export const renderTree = (
     tipRadii: treeState.tipRadii,
     dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
     scatterVariables: props.scatterVariables,
+    streams: treeState.streams,
   });
 };

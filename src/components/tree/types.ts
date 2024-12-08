@@ -44,6 +44,9 @@ export interface TreeComponentStateProps {
   tipLabelKey: string | symbol
   tree: TreeState
   treeToo: TreeTooState
+  showStreamTrees: boolean
+  streamTreeBranchLabel: string
+
 }
 
 export interface TreeComponentState {

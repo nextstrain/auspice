@@ -135,6 +135,8 @@ export const drawBranchLabels = function drawBranchLabels(key) {
 
   if (!("branchLabels" in this.groups)) {
     this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels").attr("clip-path", "url(#treeClip)");
+  } else {
+    this.groups.branchLabels.selectAll("*").remove()
   }
   this.groups.branchLabels
     .selectAll(".branchLabel")
@@ -142,6 +144,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
       this.nodes.filter(
         (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key]
       )
+      .filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1)
     )
     .enter()
     .append("text")
