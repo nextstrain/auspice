@@ -44,7 +44,7 @@ const store = configureStore({
 if (process.env.NODE_ENV !== 'production' && module.hot) {
   // console.log("hot reducer reload");
   module.hot.accept('./reducers', () => {
-    const nextRootReducer = require('./reducers/index'); 
+    const nextRootReducer = require('./reducers/index');
     store.replaceReducer(nextRootReducer);
   });
 }
@@ -53,5 +53,8 @@ if (process.env.NODE_ENV !== 'production' && module.hot) {
 // This is more clearly defined in src/reducers/index.ts but exported here.
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch
+
+/** A function to be handled by redux (thunk) */
+export type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void
 
 export default store;
