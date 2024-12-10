@@ -12,7 +12,7 @@ import { sortedDomain } from "./sortedDomain";
 import { ColoringInfo, Legend, Metadata } from "../metadata";
 import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
 import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
-import { decodeColorByMeasurements, isColorByMeasurements, parseStrainMeasurementValues, setMeasurements } from "./measurements";
+import { createScaleForMeasurements, decodeColorByMeasurements, isColorByMeasurements, parseStrainMeasurementValues, setMeasurements } from "./measurements";
 import { MeasurementsState } from "../reducers/measurements/types";
 
 export const unknownColor = "#ADB1B3";
@@ -71,6 +71,11 @@ export const calcColorScale = (
     if (genotype) {
       scaleType = "categorical";
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
+      domain = [...legendValues];
+    } else if (measurementsGroupingValue) {
+      scaleType = "continuous";
+      continuous = true;
+      ({ colorScale, legendBounds, legendValues } = createScaleForMeasurements());
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
       scaleType = colorings[colorBy].type;

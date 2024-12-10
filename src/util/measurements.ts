@@ -1,3 +1,4 @@
+import { LegendBounds, LegendValues } from "../reducers/controls";
 import { Collection } from "../reducers/measurements/types";
 import { ReduxNode } from "../reducers/tree/types";
 
@@ -58,5 +59,18 @@ export function setMeasurements(
     if (node.name in strainAverageMeasurementValue) {
       node.node_attrs["measurementValue"] = strainAverageMeasurementValue[node.name];
     }
+  }
+}
+
+export function createScaleForMeasurements(
+): {
+  colorScale:  (val: any) => string,
+  legendBounds: LegendBounds,
+  legendValues: LegendValues,
+} {
+  return {
+    colorScale: () => "",
+    legendBounds: [],
+    legendValues: []
   }
 }
