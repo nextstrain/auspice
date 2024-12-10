@@ -51,11 +51,13 @@ export const calcColorScale = (
         setGenotype(treeToo.nodes, genotype.gene, genotype.positions, metadata.rootSequenceSecondTree);
       }
     }
-    const scaleType: ScaleType = genotype ? "categorical" : colorings[colorBy].type;
+    let scaleType: ScaleType;
     if (genotype) {
+      scaleType = "categorical";
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
+      scaleType = colorings[colorBy].type;
       if (scaleType === "temporal" || colorBy === "num_date") {
         ({continuous, colorScale, legendBounds, legendValues} =
           createTemporalScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
