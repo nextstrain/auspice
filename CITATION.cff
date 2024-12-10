@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+
+preferred-citation:
+  type: article
+  title: "Nextstrain: real-time tracking of pathogen evolution"
+  doi: "10.1093/bioinformatics/bty407"
+  journal: "Bioinformatics"
+  year: 2018
+  month: 5
+  volume: 34
+  issue: 23
+  start: 4121
+  end: 4123
+
+  authors:
+    - family-names: Hadfield
+      given-names:  James
+
+    - family-names: Megill
+      given-names:  Colin
+
+    - family-names: Bell
+      given-names:  Sidney M.
+
+    - family-names: Huddleston
+      given-names:  John
+
+    - family-names: Potter
+      given-names:  Barney
+
+    - family-names: Callender
+      given-names:  Charlton
+
+    - family-names: Sagulenko
+      given-names:  Pavel
+
+    - family-names: Bedford
+      given-names:  Trevor
+
+    - family-names: Neher
+      given-names:  Richard A.
