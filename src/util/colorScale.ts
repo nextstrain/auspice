@@ -12,6 +12,8 @@ import { sortedDomain } from "./sortedDomain";
 import { ColoringInfo, Legend, Metadata } from "../metadata";
 import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
 import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
+import { decodeColorByMeasurements, isColorByMeasurements, parseStrainMeasurementValues, setMeasurements } from "./measurements";
+import { MeasurementsState } from "../reducers/measurements/types";
 
 export const unknownColor = "#ADB1B3";
 
@@ -26,6 +28,7 @@ export const calcColorScale = (
   tree: TreeState,
   treeToo: TreeTooState,
   metadata: Metadata,
+  measurements: MeasurementsState,
 ): ColorScale => {
   try {
     if (colorBy === "none") {
@@ -51,6 +54,19 @@ export const calcColorScale = (
         setGenotype(treeToo.nodes, genotype.gene, genotype.positions, metadata.rootSequenceSecondTree);
       }
     }
+
+    let measurementsGroupingValue: string;
+    if (isColorByMeasurements(colorBy)) {
+      measurementsGroupingValue = decodeColorByMeasurements(colorBy);
+      const strainAverageMeasurementValue = parseStrainMeasurementValues(
+        measurements.collectionToDisplay,
+        controls.measurementsGroupBy,
+        measurementsGroupingValue
+      );
+      /* modifies nodes in place */
+      setMeasurements(tree.nodes, strainAverageMeasurementValue);
+    }
+
     let scaleType: ScaleType;
     if (genotype) {
       scaleType = "categorical";

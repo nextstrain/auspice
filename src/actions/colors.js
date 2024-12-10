@@ -10,7 +10,7 @@ import * as types from "./types";
 export const changeColorBy = (providedColorBy = undefined) => {
   return (dispatch, getState) => {
     timerStart("changeColorBy calculations");
-    const { controls, tree, treeToo, metadata, frequencies } = getState();
+    const { controls, tree, treeToo, metadata, frequencies, measurements } = getState();
 
     /* bail if all required params aren't (yet) available! */
     if (!(tree.nodes !== null && metadata.loaded)) {
@@ -19,7 +19,7 @@ export const changeColorBy = (providedColorBy = undefined) => {
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
-    const colorScale = calcColorScale(colorBy, controls, tree, treeToo, metadata);
+    const colorScale = calcColorScale(colorBy, controls, tree, treeToo, metadata, measurements);
     const nodeColors = calcNodeColor(tree, colorScale);
     const nodeColorsToo = treeToo.loaded ? calcNodeColor(treeToo, colorScale) : undefined;
 
