@@ -189,7 +189,7 @@ const drawStickyXAxis = (ref, containerHeight, svgHeight, xScale, x_axis_label) 
       .text(x_axis_label);
 };
 
-export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
+export const drawMeasurementsSVG = (ref, xAxisRef, svgData, handleClickOnGrouping) => {
   const {containerHeight, xScale, yScale, x_axis_label, thresholds, groupingOrderedValues, groupedMeasurements} = svgData;
 
   // Do not draw SVG if there are no measurements
@@ -251,6 +251,7 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
     subplot.append("g")
       .attr("class", classes.yAxis)
       .attr("transform", `translate(${layout.leftPadding}, 0)`)
+      .attr("cursor", "pointer")
       .call(
         axisLeft(yScale)
           .tickValues([yScale((layout.yMax - layout.yMin) / 2)])
@@ -273,7 +274,8 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
             }
             return null;
           });
-      });
+      })
+      .on("click", () => handleClickOnGrouping(groupingValue));
 
     // Add circles for each measurement
     // Note, "cy" is added later when jittering within color-by groups

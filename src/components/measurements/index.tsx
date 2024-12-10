@@ -1,5 +1,5 @@
 import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
@@ -29,6 +29,7 @@ import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
 import { Measurement, isMeasurement } from "../../reducers/measurements/types";
+import { applyMeasurementsColorBy } from "../../actions/measurements";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -159,6 +160,7 @@ const filterMeasurements = (
 };
 
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
+  const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
   // Convert legendValues to string to ensure that subsequent attribute matches work as intended
@@ -258,6 +260,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     setHoverData(newHoverData);
   }, [fields, colorings, colorBy]);
 
+  const handleClickOnGrouping = useCallback((grouping: string): void => {
+    dispatch(applyMeasurementsColorBy(grouping));
+  }, [dispatch]);
+
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
   }, [setPanelTitle, title, fields, groupBy]);
@@ -268,8 +274,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     // the scroll position on whitespace.
     svgContainerRef.current.scrollTop = 0;
     clearMeasurementsSVG(d3Ref.current, d3XAxisRef.current);
-    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData);
-  }, [svgData]);
+    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData, handleClickOnGrouping);
+  }, [svgData, handleClickOnGrouping]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
