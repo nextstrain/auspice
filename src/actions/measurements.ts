@@ -5,6 +5,7 @@ import { ControlsState, defaultMeasurementsControlState, MeasurementsControlStat
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { warningNotification } from "./notifications";
 import {
+  ADD_EXTRA_METADATA,
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
   CHANGE_MEASUREMENTS_DISPLAY,
@@ -23,6 +24,7 @@ import {
   MeasurementsJson,
   MeasurementsState,
 } from "../reducers/measurements/types";
+import { changeColorBy } from "./colors";
 
 /**
  * Temp object for groupings to keep track of values and their counts so that
@@ -526,6 +528,50 @@ export const changeMeasurementsGroupBy = (
     controls: newControls,
     queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
+}
+
+export const applyMeasurementsColorBy = (
+  groupingValue: string
+): ThunkFunction => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const measurementColorBy = `m-${groupingValue}`;
+
+  // TODO: filter out measurements by measurements filters
+  const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
+    .filter((m) => m[controls.measurementsGroupBy] === groupingValue)
+    .reduce((accum, m) => {
+      (accum[m.strain] = accum[m.strain] || []).push(m.value)
+      return accum
+    }, {});
+
+  const newNodeAttrs: {[strain: string]: {[measurementsColorBy: string]: {value: number}}} = {};
+  for (const [strain, measurements] of Object.entries(strainMeasurementValues)) {
+    const averageMeasurementValue = measurements.reduce((sum, value) => sum + value) / measurements.length;
+    newNodeAttrs[strain] = {
+      [measurementColorBy]: {
+        value: averageMeasurementValue
+      }
+    };
+  }
+
+  const sortedValues = measurements.collectionToDisplay.measurements
+    .map((m) => m.value)
+    .sort((a, b) => a - b);
+  // TODO: Use multiple anchors
+  const measurementsColorScale: [number, string][] = [
+    [sortedValues[0], "#511EA8"],
+    [sortedValues[sortedValues.length - 1], "#DC2F24"]
+  ];
+
+  const newColorings = {
+    [measurementColorBy]: {
+      title: `Measurements (${groupingValue})`,
+      type: "continuous",
+      scale: measurementsColorScale,
+    }
+  }
+  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
+  dispatch(changeColorBy(measurementColorBy));
 }
 
 const controlToQueryParamMap = {
