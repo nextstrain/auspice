@@ -1,6 +1,7 @@
+import { quantile } from "d3-array";
 import { cloneDeep } from "lodash";
 import { AppDispatch, ThunkFunction } from "../store";
-import { measurementIdSymbol } from "../util/globals";
+import { colors, measurementIdSymbol } from "../util/globals";
 import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { warningNotification } from "./notifications";
@@ -557,11 +558,13 @@ export const applyMeasurementsColorBy = (
   const sortedValues = measurements.collectionToDisplay.measurements
     .map((m) => m.value)
     .sort((a, b) => a - b);
-  // TODO: Use multiple anchors
-  const measurementsColorScale: [number, string][] = [
-    [sortedValues[0], "#511EA8"],
-    [sortedValues[sortedValues.length - 1], "#DC2F24"]
-  ];
+
+  // Matching the default coloring for continuous scales
+  const colorRange = colors[9];
+  const step = 1 / (colorRange.length - 1);
+  const measurementsColorScale: [number, string][] = colorRange.map((color, i) => {
+    return [quantile(sortedValues, (step * i)), color]
+  });
 
   const newColorings = {
     [measurementColorBy]: {
