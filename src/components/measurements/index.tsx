@@ -29,7 +29,7 @@ import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
 import { Measurement, isMeasurement } from "../../reducers/measurements/types";
-import { applyMeasurementColorBy } from "../../actions/measurements";
+import { applyMeasurementColorBy, getActiveMeasurementFilters } from "../../actions/measurements";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -132,14 +132,7 @@ const filterMeasurements = (
   filteredMeasurements: Measurement[]
 } => {
   // Find active filters to filter measurements
-  const activeFilters: {string?: string[]} = {};
-  Object.entries(filters).forEach(([field, valuesMap]) => {
-    activeFilters[field] = activeFilters[field] || [];
-    valuesMap.forEach(({active}, fieldValue) => {
-      // Save array of active values for the field filter
-      if (active) activeFilters[field].push(fieldValue);
-    });
-  });
+  const activeFilters = getActiveMeasurementFilters(filters);
 
   return {
     activeFilters,
