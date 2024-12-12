@@ -2,7 +2,7 @@ import { quantile } from "d3-array";
 import { cloneDeep } from "lodash";
 import { AppDispatch, ThunkFunction } from "../store";
 import { colors, measurementIdSymbol } from "../util/globals";
-import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState } from "../reducers/controls";
+import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState, MeasurementFilters } from "../reducers/controls";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { warningNotification } from "./notifications";
 import {
@@ -529,6 +529,35 @@ export const changeMeasurementsGroupBy = (
     controls: newControls,
     queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
+}
+
+export function getActiveMeasurementFilters(
+  filters: MeasurementFilters
+): {string?: string[]} {
+  // Find active filters to filter measurements
+  const activeFilters: {string?: string[]} = {};
+  Object.entries(filters).forEach(([field, valuesMap]) => {
+    activeFilters[field] = activeFilters[field] || [];
+    valuesMap.forEach(({active}, fieldValue) => {
+      // Save array of active values for the field filter
+      if (active) activeFilters[field].push(fieldValue);
+    });
+  });
+  return activeFilters;
+}
+
+export function matchesAllActiveFilters(
+  measurement: Measurement,
+  activeFilters: {string?: string[]}
+): boolean {
+  for (const [field, values] of Object.entries(activeFilters)) {
+    const measurementValue = measurement[field];
+    if (values.length > 0 &&
+       ((typeof measurementValue === "string") && !values.includes(measurementValue))){
+      return false;
+    }
+  }
+  return true;
 }
 
 export const applyMeasurementsColorBy = (

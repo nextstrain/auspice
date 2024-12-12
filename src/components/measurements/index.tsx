@@ -29,7 +29,7 @@ import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
 import { Measurement, isMeasurement } from "../../reducers/measurements/types";
-import { applyMeasurementsColorBy } from "../../actions/measurements";
+import { applyMeasurementsColorBy, getActiveMeasurementFilters, matchesAllActiveFilters } from "../../actions/measurements";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -132,14 +132,7 @@ const filterMeasurements = (
   filteredMeasurements: Measurement[]
 } => {
   // Find active filters to filter measurements
-  const activeFilters: {string?: string[]} = {};
-  Object.entries(filters).forEach(([field, valuesMap]) => {
-    activeFilters[field] = activeFilters[field] || [];
-    valuesMap.forEach(({active}, fieldValue) => {
-      // Save array of active values for the field filter
-      if (active) activeFilters[field].push(fieldValue);
-    });
-  });
+  const activeFilters = getActiveMeasurementFilters(filters);
 
   return {
     activeFilters,
@@ -147,14 +140,7 @@ const filterMeasurements = (
       // First check the strain is visible in the tree
       if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
       // Then check that the measurement contains values for all active filters
-      for (const [field, values] of Object.entries(activeFilters)) {
-        const measurementValue = measurement[field];
-        if (values.length > 0 &&
-           ((typeof measurementValue === "string") && !values.includes(measurementValue))){
-          return false;
-        }
-      }
-      return true;
+      return matchesAllActiveFilters(measurement, activeFilters);
     })
   };
 };
