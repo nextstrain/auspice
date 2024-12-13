@@ -566,9 +566,9 @@ export const applyMeasurementsColorBy = (
   const { controls, measurements } = getState();
   const measurementColorBy = `m-${groupingValue}`;
 
-  // TODO: filter out measurements by measurements filters
+  const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
   const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
-    .filter((m) => m[controls.measurementsGroupBy] === groupingValue)
+    .filter((m) => m[controls.measurementsGroupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
     .reduce((accum, m) => {
       (accum[m.strain] = accum[m.strain] || []).push(m.value)
       return accum
