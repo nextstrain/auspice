@@ -26,7 +26,8 @@ export const render = function render(
   tipFill,
   tipRadii,
   dateRange,
-  scatterVariables
+  scatterVariables,
+  streams,
 }: {
   /** the svg into which the tree is drawn */
   svg: Selection<SVGSVGElement | null, unknown, null, unknown>
@@ -74,6 +75,9 @@ export const render = function render(
 
   /** {x, y} properties to map nodes => scatterplot (only used if layout="scatter") */
   scatterVariables: ScatterVariables
+
+  /* stream tree information TODO XXX */
+  streams: any; // TODO XXX
 }) {
   timerStart("phyloTree render()");
   this.svg = svg;
@@ -84,6 +88,10 @@ export const render = function render(
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.dateRange = dateRange;
+  // As long as we keep redux.tree.streams the same object, and also streams.mask the same array,
+  // the following should be references and thus always in-sync.
+  // (of course we'll need to call the appropriate render functions on an update)
+  this.streams = streams; // TODO - supply as a arg? Must revisit
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -110,6 +118,7 @@ export const render = function render(
   this.drawBranches();
   this.updateTipLabels();
   this.drawTips();
+  this.drawStreams();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.regression) this.drawRegression();
@@ -158,7 +167,7 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
   }
   this.groups.tips
     .selectAll(".tip")
-    .data(this.nodes.filter((d) => !d.n.hasChildren))
+    .data(this.nodes.filter((d) => !d.n.hasChildren).filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("circle")
     .attr("class", "tip")
@@ -236,7 +245,10 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   } else {
     this.groups.branchTee
       .selectAll('.branch')
-      .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
+      .data(this.nodes
+        .filter((d) => d.n.hasChildren && d.displayOrder !== undefined)
+        .filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1)
+      )
       .enter()
       .append("path")
       .attr("class", "branch T")
@@ -268,7 +280,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   }
   this.groups.branchStem
     .selectAll('.branch')
-    .data(this.nodes.filter((d) => d.displayOrder !== undefined))
+    .data(this.nodes.filter((d) => d.displayOrder !== undefined).filter((d) => this.streams?.mask?.[d.n.arrayIdx]===1))
     .enter()
     .append("path")
     .attr("class", "branch S")
@@ -290,6 +302,63 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   timerEnd("drawBranches");
 };
 
+export function drawStreams(this: PhyloTreeType): void {
+
+  if (!this.phyloStreams) return;
+
+  /* initial set up - should only ever run once */
+  if (!("streams" in this.groups)) {
+    this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
+    // add a group to encapsulate each stream
+    this.groups.streams.selectAll('g')
+      .data(this.phyloStreams)
+      .enter()
+      .append("g")
+      .attr("id", (_d, i: number) => `stream${i}`);
+  }
+
+  /* if we call drawStreams() we're not trying to update, we want to remove all stream paths & redraw everything */
+  this.groups.streams.selectAll(".stream").remove();
+  this.groups.streams.selectAll(".connector").remove();
+
+  
+  for (const [streamIdx, stream] of this.phyloStreams.entries()) {
+    /**
+     * The element each selector gets ("d") is an element of stream.ripples, so
+     * d is an array with length=numPivots.
+     * Each of those elements, i.e. d[i], is an object with x, y0, y1 and a pointer to the
+     * area generator
+     */
+    this.groups.streams.select(`#stream${streamIdx}`)
+      .selectAll(`.stream`)
+      .data(stream.ripples)
+      .enter()
+      .append("path")
+      .attr("class", `stream`)
+      .attr("d", (d) => d[0].area(d))
+      .attr("fill", (_d, i:number) => this.streams.streams[streamIdx].categoryColors[i])
+  }
+  // P.S. To select an individual stream tree: this.groups.streams.select('#stream0').selectAll(`.stream`)
+
+
+
+  for (const [streamIdx, phyloStream] of this.phyloStreams.entries()) {
+    this.groups.streams.select(`#stream${streamIdx}`)
+      .selectAll(`.connector`)
+      .data([phyloStream])
+      .enter()
+      .append("path")
+      .attr("class", `connector`)
+      .attr("d", (d) => d.connectorPath)
+      .style("stroke-width", this.streams.streams[streamIdx].founderVisibility ? 2 : 1)
+      .style("stroke-dasharray", "5 2")
+      .style("stroke", () => this.streams.streams[streamIdx].startingColor)
+      .style("fill", "none")
+      .style('visibility', 'visible')
+      .style('cursor', 'pointer') // using a dashed line doesn't play nicely with onhover/onclick behaviour :(
+      .on("click", this.callbacks.onStreamConnectorClick as any); // TODO - fix type
+  }
+}
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate

@@ -37,12 +37,23 @@ export const changePhyloTreeViaPropsComparison = (
     args.branchStroke = calculateStrokeColors(newTreeRedux, true, newProps.colorByConfidence, newProps.colorBy);
     args.tipStroke = calculateStrokeColors(newTreeRedux, false, newProps.colorByConfidence, newProps.colorBy);
     args.fill = args.tipStroke.map(getBrighterColor);
+    args.streams = newTreeRedux.streams;
+  }
+
+  /* toggle on-off stream trees? 
+     NOTE: currently this is all-or-nothing, but one day it'll be per-stream */
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.streamTreeBranchLabel !== newProps.streamTreeBranchLabel) {
+    args.showStreams = newProps.showStreamTrees;
+    args.streamTreeBranchLabel = newProps.streamTreeBranchLabel;
+    args.streams = newTreeRedux.streams;
   }
 
   /* visibility */
+  // TODO XXX - under what circumstances is this conditional true vs (`dateRangeChange || filterChange`)?
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
     args.changeVisibility = true;
     args.visibility = newTreeRedux.visibility;
+    args.streams = newTreeRedux.streams; // or just reach in and do phylotree.streams = newTreeRedux.streams?
   }
 
   /* tip radii */
@@ -60,6 +71,7 @@ export const changePhyloTreeViaPropsComparison = (
   /* change from timetree to divergence tree */
   if (oldProps.distanceMeasure !== newProps.distanceMeasure) {
     args.newDistance = newProps.distanceMeasure;
+    args.streams = newTreeRedux.streams;
   }
 
   /* explode! */
@@ -124,6 +136,7 @@ export const changePhyloTreeViaPropsComparison = (
     if (newProps.layout === "unrooted") {
       args.updateLayout = true;
     }
+    args.streams = newTreeRedux.streams; // or just reach in and do phylotree.streams = newTreeRedux.streams?
   }
 
   if (oldProps.width !== newProps.width || oldProps.height !== newProps.height) {

@@ -2,6 +2,7 @@ import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import { TreeComponent } from "../tree";
 
 import * as confidence from "./confidence";
 import * as grid from "./grid";
@@ -25,7 +26,9 @@ export type TreeElement =
   ".tip" |
   ".tipLabel" |
   ".vaccineCross" |
-  ".vaccineDottedLine"
+  ".vaccineDottedLine" |
+  ".stream" |
+  ".connector"
 
 export interface Regression {
   intercept?: number
@@ -45,6 +48,7 @@ export interface Callbacks {
   onTipHover: NodeCallback
   onTipLeave: NodeCallback
   tipLabel: NodeCallback
+  onStreamConnectorClick: (this: TreeComponent, phyloStream: any) =>  void
 }
 
 // ---------- PhyloNode ---------- //
@@ -217,6 +221,10 @@ export interface ChangeParams {
   // other data //
   scatterVariables?: ScatterVariables
   performanceFlags?: PerformanceFlags
+
+  showStreams?: boolean
+  streams?: any // TODO XXX
+  streamTreeBranchLabel?: string
 }
 
 export interface PhyloTreeType {
@@ -246,6 +254,7 @@ export interface PhyloTreeType {
     regression?: Selection<SVGDefsElement, unknown, null, unknown>
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
+    streams?: Selection<SVGDefsElement, unknown, null, unknown>
   }
   hideGrid: typeof grid.hideGrid
   hideTemporalSlice: typeof grid.hideTemporalSlice
@@ -294,4 +303,11 @@ export interface PhyloTreeType {
   yScale: any
 
   zoomNode: PhyloNode
+
+  streams: {[key:string]: any}  // TODO XXX
+  mask: (1|0)[]
+  drawStreams: typeof renderers.drawStreams
+  phyloStreams: any[] // TODO XXX
+  streamLayout: typeof layouts.streamLayout
+
 }

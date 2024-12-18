@@ -9,6 +9,7 @@ import { getBranchVisibility, strokeForBranch } from "./renderers";
 import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 import { makeTipLabelFunc } from "./labels";
 import { ChangeParams, PhyloNode, PhyloTreeType, PropsForPhyloNodes, SVGProperty, TreeElement } from "./types";
+import { mapStreamsToScreen } from "./layouts";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -188,6 +189,24 @@ export const modifySVG = function modifySVG(
     if (this.regression) this.drawRegression();
   }
 
+  if (elemsToUpdate.has('.stream')) {
+    /** Generating this here rather than `createUpdateCall` as we often don't want to update paths (SVG 'd' properties) for tips/branches
+     * when we do want to update them for streams. Currently it's all-or-nothing within `createUpdateCall` - all paths are updated or none are.
+     */
+    const updateCall = (selection) => {
+      selection.attr("d", (d) => {
+        return d[0].area(d);
+      })
+    }
+    genericSelectAndModify(this.svg, ".stream", updateCall, transitionTime);
+    const connectorUpdateCall = (selection) => {
+      selection.attr("d", (d) => d.connectorPath);
+      // TODO -- update visibility? I.e. stroke width?
+    }
+    genericSelectAndModify(this.svg, ".connector", connectorUpdateCall, transitionTime);
+  }
+
+
   /* confidence intervals */
   if (extras.removeConfidences && this.confidencesInSVG) {
     this.removeConfidence(); /* do not use a transition time - it's too clunky (too many elements?) */
@@ -287,6 +306,7 @@ interface Extras {
 export const change = function change(
   this: PhyloTreeType,
   {
+    /* booleans for what should be changed */
     changeColorBy = false,
     changeVisibility = false,
     changeTipRadii = false,
@@ -297,21 +317,27 @@ export const change = function change(
     svgHasChangedDimensions = false,
     animationInProgress = false,
     changeNodeOrder = false,
-    focus = false,
+    /* change these things to provided value (unless undefined) */
     newDistance = undefined,
     newLayout = undefined,
-    updateLayout = undefined,
+    updateLayout = undefined, // todo - this seems identical to `newLayout`
     newBranchLabellingKey = undefined,
     showAllBranchLabels = undefined,
     newTipLabelKey = undefined,
+    showStreams = undefined,
+    streamTreeBranchLabel = undefined,
+    /* arrays of data (the same length as nodes) */
     branchStroke = undefined,
     tipStroke = undefined,
     fill = undefined,
     visibility = undefined,
     tipRadii = undefined,
     branchThickness = undefined,
+    /* other data */
+    focus = undefined,
+    streams = undefined, // PROTOTYPE
     scatterVariables = undefined,
-    performanceFlags = undefined,
+    performanceFlags = new Map(),
   }: ChangeParams
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -329,6 +355,8 @@ export const change = function change(
     transitionTime = 0;
   }
 
+  if (streams) this.streams = streams;
+
   /* the logic of converting what react is telling us to change
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
@@ -345,6 +373,13 @@ export const change = function change(
     elemsToUpdate.add(".tip").add(".tipLabel").add(".branchLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
     nodePropsToModify.visibility = visibility;
+
+    this.streams = streams;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    /* add stream SVG elements */
+    // this.drawStreams(); // this would tear it down and rebuild it (slow...)
+    elemsToUpdate.add('.stream')
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
@@ -363,6 +398,8 @@ export const change = function change(
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity")
       .add("visibility");
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    elemsToUpdate.add('.stream')
   }
 
   if (changeNodeOrder) {
@@ -373,9 +410,48 @@ export const change = function change(
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
+  if (showStreams!==undefined || streamTreeBranchLabel!==undefined) {
+    this.streams = streams;
+    this.phyloStreams = undefined;
+
+    if (Object.hasOwn(this.groups, 'streams')) {
+      this.groups.streams.selectAll('*').remove();
+      delete this.groups.streams;
+    }
+
+    if (showStreams===true) {
+      this.streamLayout(); // recompute displayOrder values across pivots
+      mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+      this.drawStreams(); // remove & redraw
+    }
+    // don't have good methods to remove tips etc (yet)
+    for (const name of ['branchLabels', 'branchTee', 'branchStem', 'tips', 'tipLabels', 'vaccines']) {
+      if (Object.hasOwn(this.groups, name)) {
+        this.groups[name].selectAll("*").remove();
+      }
+    }
+    setDisplayOrder({nodes: this.nodes, focus});
+    this.setLayout();
+    this.mapToScreen();
+    this.drawBranches();
+    this.updateTipLabels();
+    this.drawTips();
+    if (this.vaccines) this.drawVaccines();
+    if (this.regression) this.drawRegression();
+    return;
+  }
+
+
   // recalculate gradients here?
   if (changeColorBy) {
     this.updateColorBy();
+
+    /* PROTOTYPE STREAM TREES */
+    this.streams = streams;
+    this.phyloStreams = undefined;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    this.drawStreams(); // remove & redraw
   }
   // recalculate existing regression if needed
   if (changeVisibility && this.regression) {
@@ -394,6 +470,12 @@ export const change = function change(
       zoomIntoClade :
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
+
+    /* PROTOTYPE STREAM TREES */
+    this.streams = streams;
+    this.streamLayout(); // recompute displayOrder values across pivots
+    mapStreamsToScreen(this.streams, this.phyloStreams, this.xScale, this.yScale); // recompute pixels (unneeded for branches/tips)
+    elemsToUpdate.add('.stream')
   }
   if (svgHasChangedDimensions || changeNodeOrder) {
     this.nodes.forEach((d) => {d.update = true;});
