@@ -161,6 +161,7 @@ export interface MeasurementsControlState {
   measurementsShowOverallMean: boolean | undefined
   measurementsShowThreshold: boolean | undefined
   measurementsFilters: MeasurementFilters
+  measurementsColorGrouping: string | undefined
 }
 
 export interface ControlsState extends BasicControlsState, MeasurementsControlState {}
@@ -247,6 +248,7 @@ export const getDefaultControlsState = (): ControlsState => {
     measurementsDisplay: undefined,
     measurementsShowOverallMean: undefined,
     measurementsShowThreshold: undefined,
+    measurementsColorGrouping: undefined,
     measurementsFilters: {},
     performanceFlags: new Map(),
   };
@@ -266,7 +268,8 @@ export const defaultMeasurementsControlState: MeasurementsControlState = {
   measurementsDisplay: "mean",
   measurementsShowOverallMean: true,
   measurementsShowThreshold: true,
-  measurementsFilters: {}
+  measurementsFilters: {},
+  measurementsColorGrouping: undefined,
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
@@ -495,6 +498,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return state;
     }
     case types.CHANGE_MEASUREMENTS_COLLECTION: // fallthrough
+    case types.CHANGE_MEASUREMENTS_COLOR_GROUPING: // fallthrough
     case types.CHANGE_MEASUREMENTS_DISPLAY: // fallthrough
     case types.CHANGE_MEASUREMENTS_GROUP_BY: // fallthrough
     case types.TOGGLE_MEASUREMENTS_OVERALL_MEAN: // fallthrough

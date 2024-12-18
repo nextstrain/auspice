@@ -9,6 +9,7 @@ import {
   ADD_EXTRA_METADATA,
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
+  CHANGE_MEASUREMENTS_COLOR_GROUPING,
   CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
@@ -139,6 +140,7 @@ function getCollectionDefaultControl(
       }
       break;
     }
+    case 'measurementsColorGrouping': // fallthrough
     case 'measurementsFilters': {
       // eslint-disable-next-line no-console
       console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
@@ -601,6 +603,10 @@ export const applyMeasurementsColorBy = (
       type: "continuous",
       scale: measurementsColorScale,
     }
+  }
+
+  if (controls.measurementsColorGrouping !== groupingValue) {
+    dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
   }
   dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
   dispatch(changeColorBy(measurementColorBy));

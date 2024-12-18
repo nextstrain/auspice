@@ -153,6 +153,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map((v): string => v.toString()), isEqual);
   const colorings = useSelector((state: RootState) => state.metadata.colorings);
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
+  const colorGrouping = useSelector((state: RootState) => state.controls.measurementsColorGrouping);
   const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
   const filters = useSelector((state: RootState) => state.controls.measurementsFilters);
   const display = useSelector((state: RootState) => state.controls.measurementsDisplay);
@@ -247,8 +248,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   }, [fields, colorings, colorBy]);
 
   const handleClickOnGrouping = useCallback((grouping: string): void => {
-    dispatch(applyMeasurementsColorBy(grouping));
-  }, [dispatch]);
+    if (grouping !== colorGrouping) {
+      dispatch(applyMeasurementsColorBy(grouping));
+    }
+  }, [dispatch, colorGrouping]);
 
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
