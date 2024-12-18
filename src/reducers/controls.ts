@@ -156,10 +156,10 @@ export interface MeasurementFilters {
   [key: string]: Map<string, {active: boolean}>
 }
 export interface MeasurementsControlState {
-  measurementsGroupBy: string | undefined,
-  measurementsDisplay: MeasurementsDisplay | undefined,
-  measurementsShowOverallMean: boolean | undefined,
-  measurementsShowThreshold: boolean | undefined,
+  measurementsGroupBy: string | undefined
+  measurementsDisplay: MeasurementsDisplay | undefined
+  measurementsShowOverallMean: boolean | undefined
+  measurementsShowThreshold: boolean | undefined
   measurementsFilters: MeasurementFilters
 }
 
