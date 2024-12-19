@@ -64,6 +64,11 @@ interface Query extends MeasurementsQuery {
   [key: string]: string | string[]
 }
 
+function encodeMeasurementColorBy(groupingValue: string): string {
+  const measurementColoringPrefix = "m-";
+  return `${measurementColoringPrefix}${groupingValue}`;
+}
+
 /**
  * Find the collection within collections that has a key matching the provided
  * collectionKey. The default collection is defined by the provided defaultKey.
@@ -564,15 +569,10 @@ export function matchesAllActiveFilters(
   return true;
 }
 
-export const applyMeasurementsColorBy = (
+const addMeasurementsColorData = (
   groupingValue: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
-
-  function encodeMeasurementColorBy(groupingValue: string): string {
-    const measurementColoringPrefix = "m-";
-    return `${measurementColoringPrefix}${groupingValue}`;
-  }
   const measurementColorBy = encodeMeasurementColorBy(groupingValue);
 
   const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
@@ -612,6 +612,13 @@ export const applyMeasurementsColorBy = (
     }
   }
 
+  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
+}
+
+export const applyMeasurementsColorBy = (
+  groupingValue: string
+): ThunkFunction => (dispatch, getState) => {
+  const { controls } = getState();
   /**
    * Batching all dispatch actions together to prevent multiple renders
    * This is also _required_ to prevent error in calcColorScale during extra renders:
@@ -626,9 +633,9 @@ export const applyMeasurementsColorBy = (
     if (controls.measurementsColorGrouping !== groupingValue) {
       dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
     }
-    dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
-    dispatch(changeColorBy(measurementColorBy));
-  })
+    dispatch(addMeasurementsColorData(groupingValue));
+    dispatch(changeColorBy(encodeMeasurementColorBy(groupingValue)));
+  });
 }
 
 const controlToQueryParamMap = {
