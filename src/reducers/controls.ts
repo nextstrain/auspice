@@ -150,6 +150,9 @@ export interface BasicControlsState {
   tipLabelKey: string | symbol
   zoomMax?: number
   zoomMin?: number
+
+  showStreamTrees: boolean
+  streamTreeBranchLabel: string
 }
 
 export interface MeasurementFilters {
@@ -236,6 +239,8 @@ export const getDefaultControlsState = (): ControlsState => {
     tipLabelKey: defaults.tipLabelKey,
     showTreeToo: false,
     showTangle: false,
+    showStreamTrees: false,
+    streamTreeBranchLabel: 'none',
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
@@ -463,6 +468,10 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
+    case types.TOGGLE_STREAM_TREE:
+      return {...state, showStreamTrees: action.showStreamTrees};
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      return {...state, showStreamTrees: action.showStreamTrees, streamTreeBranchLabel: action.streamTreeBranchLabel};
     case types.ADD_EXTRA_METADATA: {
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);

@@ -2,6 +2,7 @@ import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE, ge
 import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { warningNotification } from "../actions/notifications";
+import { countsByCategory } from "./partitionIntoStreams";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
@@ -239,13 +240,23 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
   const visibility = calcVisibility(tree, controls, dates, inView, filtered);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
+
+  let countsByCategoryPerStream;
+  /* Prototype stream trees */
+  if (controls.showStreamTrees && tree.streams) {
+    countsByCategoryPerStream = tree.streams.streams.map((stream) => {
+      return countsByCategory(tree.nodes, stream.nodeIdxs, visibility, controls.colorScale.colorBy, stream.categories);
+    })
+  }
+
   /* re-calculate branchThickness (inline) */
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
     branchThickness: calcBranchThickness(tree.nodes, visibility),
     branchThicknessVersion: tree.branchThicknessVersion + 1,
-    idxOfFilteredRoot: idxOfFilteredRoot
+    idxOfFilteredRoot: idxOfFilteredRoot,
+    countsByCategoryPerStream
   };
 };
 
