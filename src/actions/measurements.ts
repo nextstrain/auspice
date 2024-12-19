@@ -62,6 +62,11 @@ interface Query extends MeasurementsQuery {
   [key: string]: string | string[]
 }
 
+const measurementColoringPrefix = "m-";
+function encodeMeasurementColorBy(groupingValue: string): string {
+  return `${measurementColoringPrefix}${groupingValue}`;
+}
+
 /**
  * Find the collection within collections that has a key matching the provided
  * collectionKey. The default collection is defined by the provided defaultKey.
@@ -216,6 +221,12 @@ const getCollectionDisplayControls = (
     // Skip values that are not undefined because this indicates they are URL params or existing controls
     if (value !== undefined) continue;
     newControls[key] = collectionDefaultControls[key]
+  }
+
+  // Remove the color grouping value if it is not included for the new group by
+  const groupingValues = collection.groupings.get(newControls.measurementsGroupBy).values || [];
+  if (newControls.measurementsColorGrouping !== undefined && !groupingValues.includes(newControls.measurementsColorGrouping)) {
+    newControls.measurementsColorGrouping = undefined;
   }
 
   return newControls;
@@ -402,6 +413,13 @@ export const changeMeasurementsCollection = (
     controls: newControls,
     queryParams
   });
+
+  if (newControls.measurementsColorGrouping !== undefined) {
+    dispatch(addMeasurementColorData(newControls.measurementsColorGrouping));
+  } else {
+    // TODO Remove measurement color data
+    console.log("measurementColorGrouping is undefined");
+  }
 };
 
 /*
@@ -561,11 +579,11 @@ export function matchesAllActiveFilters(
   return true;
 }
 
-export const applyMeasurementColorBy = (
+const addMeasurementColorData = (
   groupingValue: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
-  const measurementColorBy = `m-${groupingValue}`;
+  const measurementColorBy = encodeMeasurementColorBy(groupingValue);
 
   const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
   const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
@@ -605,9 +623,15 @@ export const applyMeasurementColorBy = (
     }
   }
 
-  dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
   dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
-  dispatch(changeColorBy(measurementColorBy))
+}
+
+export const applyMeasurementColorBy = (
+  groupingValue: string
+): ThunkFunction => (dispatch, _) => {
+  dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
+  dispatch(addMeasurementColorData(groupingValue))
+  dispatch(changeColorBy(encodeMeasurementColorBy(groupingValue)))
 }
 
 const controlToQueryParamMap = {
