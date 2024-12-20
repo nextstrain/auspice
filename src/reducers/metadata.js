@@ -32,6 +32,15 @@ const Metadata = (state = {
       }
       return Object.assign({}, state, {colorings, geoResolutions});
     }
+    case types.REMOVE_METADATA: {
+      const colorings = {...state.colorings};
+      action.nodeAttrsToRemove.forEach((colorBy) => {
+        if (colorBy in colorings) {
+          delete colorings[colorBy];
+        }
+      })
+      return {...state, colorings}
+    }
     case types.SET_AVAILABLE: {
       if (state.buildUrl) {
         return state; // do not use data from getAvailable to overwrite a buildUrl set from a dataset JSON

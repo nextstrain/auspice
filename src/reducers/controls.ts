@@ -482,6 +482,13 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return newState;
     }
+    case types.REMOVE_METADATA: {
+      const coloringsPresentOnTree = new Set(state.coloringsPresentOnTree);
+      action.nodeAttrsToRemove.forEach((colorBy: string): void => {
+        coloringsPresentOnTree.delete(colorBy);
+      })
+      return {...state, coloringsPresentOnTree};
+    }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       const colorScale = Object.assign({}, state.colorScale, { visibleLegendValues: action.visibleLegendValues });
       return Object.assign({}, state, { colorScale: colorScale });

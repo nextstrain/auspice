@@ -1,6 +1,6 @@
 import { AnyAction } from "@reduxjs/toolkit";
 import { countTraitsAcrossTree } from "../../util/treeCountingHelpers";
-import { addNodeAttrs } from "../../util/treeMiscHelpers";
+import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeState, TreeTooState } from "./types";
 
@@ -91,6 +91,23 @@ const Tree = (
         },
         nodeAttrKeys
       };
+    }
+    case types.REMOVE_METADATA: {
+      // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
+      const nodeAttrKeys = new Set(state.nodeAttrKeys);
+      const totalStateCounts = {...state.totalStateCounts};
+      action.nodeAttrsToRemove.forEach((attrKey: string): void => {
+        nodeAttrKeys.delete(attrKey);
+        if (attrKey in totalStateCounts) {
+          delete totalStateCounts[attrKey];
+        }
+      })
+      return {
+        ...state,
+        totalStateCounts,
+        nodeAttrKeys,
+      }
     }
     default:
       return state;

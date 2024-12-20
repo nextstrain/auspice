@@ -12,6 +12,7 @@ import {
   CHANGE_MEASUREMENTS_COLOR_GROUPING,
   CHANGE_MEASUREMENTS_DISPLAY,
   CHANGE_MEASUREMENTS_GROUP_BY,
+  REMOVE_METADATA,
   TOGGLE_MEASUREMENTS_OVERALL_MEAN,
   TOGGLE_MEASUREMENTS_THRESHOLD,
 } from "./types";
@@ -566,7 +567,12 @@ export const applyMeasurementsColorBy = (
   groupingValue: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
-  const measurementColorBy = `m-${groupingValue}`;
+
+  function encodeMeasurementColorBy(groupingValue: string): string {
+    const measurementColoringPrefix = "m-";
+    return `${measurementColoringPrefix}${groupingValue}`;
+  }
+  const measurementColorBy = encodeMeasurementColorBy(groupingValue);
 
   const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
   const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
@@ -605,6 +611,9 @@ export const applyMeasurementsColorBy = (
     }
   }
 
+  if (controls.measurementsColorGrouping !== undefined) {
+    dispatch({type: REMOVE_METADATA, nodeAttrsToRemove: [encodeMeasurementColorBy(controls.measurementsColorGrouping)]});
+  }
   if (controls.measurementsColorGrouping !== groupingValue) {
     dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
   }
