@@ -1,3 +1,4 @@
+import { batch } from "react-redux";
 import { quantile } from "d3-array";
 import { cloneDeep } from "lodash";
 import { AppDispatch, ThunkFunction } from "../store";
@@ -611,14 +612,23 @@ export const applyMeasurementsColorBy = (
     }
   }
 
-  if (controls.measurementsColorGrouping !== undefined) {
-    dispatch({type: REMOVE_METADATA, nodeAttrsToRemove: [encodeMeasurementColorBy(controls.measurementsColorGrouping)]});
-  }
-  if (controls.measurementsColorGrouping !== groupingValue) {
-    dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
-  }
-  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
-  dispatch(changeColorBy(measurementColorBy));
+  /**
+   * Batching all dispatch actions together to prevent multiple renders
+   * This is also _required_ to prevent error in calcColorScale during extra renders:
+   * 1. REMOVE_METADATA removes current measurements coloring from metadata.colorings
+   * 2. This triggers the componentDidUpdate in controls/color-by, which dispatches changeColorBy.
+   * 3. calcColorScale throws error because the current coloring is no longer valid as it was removed by REMOVE_METADATA in step 1.
+   */
+  batch(() => {
+    if (controls.measurementsColorGrouping !== undefined) {
+      dispatch({type: REMOVE_METADATA, nodeAttrsToRemove: [encodeMeasurementColorBy(controls.measurementsColorGrouping)]});
+    }
+    if (controls.measurementsColorGrouping !== groupingValue) {
+      dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
+    }
+    dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
+    dispatch(changeColorBy(measurementColorBy));
+  })
 }
 
 const controlToQueryParamMap = {
