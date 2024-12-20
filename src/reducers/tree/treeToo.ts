@@ -1,6 +1,6 @@
 import { AnyAction } from "@reduxjs/toolkit";
 import { getDefaultTreeState } from ".";
-import { addNodeAttrs } from "../../util/treeMiscHelpers";
+import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeTooState } from "./types";
 
@@ -70,6 +70,10 @@ const treeToo = (
     case types.ADD_EXTRA_METADATA:
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
       addNodeAttrs(state.nodes, action.newNodeAttrs);
+      return state;
+    case types.REMOVE_METADATA:
+      // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
       return state;
     default:
       return state;
