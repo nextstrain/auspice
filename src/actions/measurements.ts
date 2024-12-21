@@ -147,6 +147,7 @@ function getCollectionDefaultControl(
       }
       break;
     }
+    case 'measurementsColorGrouping': // fallthrough
     case 'measurementsFilters': {
       // eslint-disable-next-line no-console
       console.debug(`Skipping control key ${controlKey} because it does not have default controls`);
