@@ -64,9 +64,16 @@ interface Query extends MeasurementsQuery {
   [key: string]: string | string[]
 }
 
+const measurementColoringPrefix = "m-";
+function isMeasurementColorBy(colorBy: string): boolean {
+  return colorBy.startsWith(measurementColoringPrefix);
+}
 function encodeMeasurementColorBy(groupingValue: string): string {
-  const measurementColoringPrefix = "m-";
   return `${measurementColoringPrefix}${groupingValue}`;
+}
+function decodeMeasurementColorBy(colorBy: string): string {
+  const prefixPattern = new RegExp(`^${measurementColoringPrefix}`);
+  return colorBy.replace(prefixPattern, '');
 }
 
 /**
@@ -620,21 +627,24 @@ export function matchesAllActiveFilters(
   return true;
 }
 
-const addMeasurementsColorData = (
-  groupingValue: string
-): ThunkFunction => (dispatch, getState) => {
-  const { controls, measurements } = getState();
+function createMeasurementNodeAttrs(
+  filters: MeasurementFilters,
+  groupBy: string,
+  groupingValue: string,
+  collection: Collection,
+): {
+  [strain: string]: {[measurementsColorBy: string]: {value: number}}
+} {
   const measurementColorBy = encodeMeasurementColorBy(groupingValue);
-
-  const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
-  const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
-    .filter((m) => m[controls.measurementsGroupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
+  const activeMeasurementFilters = getActiveMeasurementFilters(filters);
+  const strainMeasurementValues: {[strain: string]: number[]} = collection.measurements
+    .filter((m) => m[groupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
     .reduce((accum, m) => {
       (accum[m.strain] = accum[m.strain] || []).push(m.value)
       return accum
     }, {});
 
-  const newNodeAttrs: {[strain: string]: {[measurementsColorBy: string]: {value: number}}} = {};
+  const newNodeAttrs = {};
   for (const [strain, measurements] of Object.entries(strainMeasurementValues)) {
     const averageMeasurementValue = measurements.reduce((sum, value) => sum + value) / measurements.length;
     newNodeAttrs[strain] = {
@@ -643,8 +653,21 @@ const addMeasurementsColorData = (
       }
     };
   }
+  return newNodeAttrs;
+}
 
-  const sortedValues = measurements.collectionToDisplay.measurements
+function createMeasurementsColoring (
+  groupingValue: string,
+  collection: Collection
+): {
+  [key: string]: {
+    title: string,
+    type: string,
+    scale: [number,string][]
+  }
+} {
+  const measurementColorBy = encodeMeasurementColorBy(groupingValue);
+  const sortedValues = collection.measurements
     .map((m) => m.value)
     .sort((a, b) => a - b);
 
@@ -655,13 +678,29 @@ const addMeasurementsColorData = (
     return [quantile(sortedValues, (step * i)), color]
   });
 
-  const newColorings = {
+  return {
     [measurementColorBy]: {
       title: `Measurements (${groupingValue})`,
       type: "continuous",
       scale: measurementsColorScale,
     }
   }
+}
+
+const addMeasurementsColorData = (
+  groupingValue: string
+): ThunkFunction => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const newNodeAttrs = createMeasurementNodeAttrs(
+    controls.measurementsFilters,
+    controls.measurementsGroupBy,
+    groupingValue,
+    measurements.collectionToDisplay,
+  );
+  const newColorings = createMeasurementsColoring(
+    groupingValue,
+    measurements.collectionToDisplay,
+  )
 
   dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
 }
@@ -804,7 +843,8 @@ export const combineMeasurementsControlsAndQuery = (
 ): {
   collectionToDisplay: Collection,
   collectionControls: MeasurementsControlState,
-  updatedQuery: Query
+  updatedQuery: Query,
+  updatedMetadata: { colorings?: {} } // TODO: replace with Partial<Metadata>
 } => {
   const updatedQuery = cloneDeep(query);
   const collectionKeys = measurements.collections.map((collection) => collection.key);
@@ -857,6 +897,24 @@ export const combineMeasurementsControlsAndQuery = (
     collectionControls[controlKey] = newControlState
   }
 
+  // Special handling of the coloring query since this is _not_ a measurement specific query
+  const updatedMetadata = {};
+  if (typeof(updatedQuery.c) === 'string' && isMeasurementColorBy(updatedQuery.c)) {
+    const colorGrouping = decodeMeasurementColorBy(updatedQuery.c);
+    const groupingValues = collectionToDisplay.groupings.get(collectionControls.measurementsGroupBy).values || [];
+    // If the color grouping value is invalid, then remove the coloring query
+    // otherwise save the colorGrouping to be able to add measurements metadata and color scale
+    if (!groupingValues.includes(colorGrouping)) {
+      updatedQuery.c = undefined;
+    } else {
+      collectionControls['measurementsColorGrouping'] = colorGrouping;
+
+      // Replicating the state changes applied for `ADD_EXTRA_METADATA`
+      collectionControls['coloringsPresentOnTree'] = updatedQuery.c;
+      updatedMetadata['colorings'] =
+    }
+  }
+
   // Special handling of the filter query since these can be arbitrary query keys `mf_*`
   for (const filterKey of Object.keys(updatedQuery).filter((c) => c.startsWith(filterQueryPrefix))) {
     // Remove and ignore query for invalid fields
@@ -891,6 +949,7 @@ export const combineMeasurementsControlsAndQuery = (
   return {
     collectionToDisplay,
     collectionControls,
-    updatedQuery
+    updatedQuery,
+    updatedMetadata,
   }
 }
