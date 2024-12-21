@@ -428,6 +428,37 @@ export const changeMeasurementsCollection = (
   });
 };
 
+function updateMeasurementsFilters(
+  newFilters: MeasurementFilters,
+  controls: ControlsState,
+  measurements: MeasurementsState,
+  dispatch: AppDispatch
+): void {
+  const newControls: Partial<MeasurementsControlState> = {
+    measurementsFilters: newFilters,
+  }
+  batch(() => {
+    dispatch({
+      type: APPLY_MEASUREMENTS_FILTER,
+      controls: newControls,
+      queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
+    });
+
+    /**
+     * Filtering does _not_ affect the measurementsColorGrouping value, but
+     * the measurements metadata does need to be updated to reflect the
+     * filtered measurements
+     */
+    updateMeasurementsColorData(
+      controls.measurementsColorGrouping,
+      controls.measurementsColorGrouping,
+      controls.colorBy,
+      controls.defaults.colorBy,
+      dispatch
+    );
+  });
+}
+
 /*
  * The filter actions below will create a copy of `controls.measurementsFilters`
  * then clone the nested Map to avoid changing the redux state in place.
@@ -444,11 +475,7 @@ export const applyMeasurementFilter = (
   measurementsFilters[field] = new Map(measurementsFilters[field]);
   measurementsFilters[field].set(value, {active});
 
-  dispatch({
-    type: APPLY_MEASUREMENTS_FILTER,
-    controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
-  });
+  updateMeasurementsFilters(measurementsFilters, controls, measurements, dispatch);
 };
 
 export const removeSingleFilter = (
@@ -466,11 +493,7 @@ export const removeSingleFilter = (
     delete measurementsFilters[field];
   }
 
-  dispatch({
-    type: APPLY_MEASUREMENTS_FILTER,
-    controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
-  });
+  updateMeasurementsFilters(measurementsFilters, controls, measurements, dispatch);
 };
 
 export const removeAllFieldFilters = (
@@ -480,11 +503,7 @@ export const removeAllFieldFilters = (
   const measurementsFilters = {...controls.measurementsFilters};
   delete measurementsFilters[field];
 
-  dispatch({
-    type: APPLY_MEASUREMENTS_FILTER,
-    controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
-  });
+  updateMeasurementsFilters(measurementsFilters, controls, measurements, dispatch);
 };
 
 export const toggleAllFieldFilters = (
@@ -497,11 +516,7 @@ export const toggleAllFieldFilters = (
   for (const fieldValue of measurementsFilters[field].keys()) {
     measurementsFilters[field].set(fieldValue, {active});
   }
-  dispatch({
-    type: APPLY_MEASUREMENTS_FILTER,
-    controls: { measurementsFilters },
-    queryParams: createMeasurementsQueryFromControls({measurementsFilters}, measurements.collectionToDisplay, measurements.defaultCollectionKey)
-  });
+  updateMeasurementsFilters(measurementsFilters, controls, measurements, dispatch);
 };
 
 export const toggleOverallMean = (): ThunkFunction => (dispatch, getState) => {
