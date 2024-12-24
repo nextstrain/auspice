@@ -5,7 +5,7 @@ import { AppDispatch, ThunkFunction } from "../store";
 import { colors, measurementIdSymbol } from "../util/globals";
 import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState, MeasurementFilters } from "../reducers/controls";
 import { getDefaultMeasurementsState } from "../reducers/measurements";
-import { warningNotification } from "./notifications";
+import { infoNotification, warningNotification } from "./notifications";
 import {
   ADD_EXTRA_METADATA,
   APPLY_MEASUREMENTS_FILTER,
@@ -226,6 +226,12 @@ const getCollectionDisplayControls = (
     newControls[key] = collectionDefaultControls[key]
   }
 
+  // Remove the color grouping value if it is not included for the new group by
+  const groupingValues = collection.groupings.get(newControls.measurementsGroupBy).values || [];
+  if (newControls.measurementsColorGrouping !== undefined && !groupingValues.includes(newControls.measurementsColorGrouping)) {
+    newControls.measurementsColorGrouping = undefined;
+  }
+
   return newControls;
 };
 
@@ -404,11 +410,22 @@ export const changeMeasurementsCollection = (
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
   const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, measurements.defaultCollectionKey);
 
-  dispatch({
-    type: CHANGE_MEASUREMENTS_COLLECTION,
-    collectionToDisplay,
-    controls: newControls,
-    queryParams
+  batch(() => {
+    dispatch({
+      type: CHANGE_MEASUREMENTS_COLLECTION,
+      collectionToDisplay,
+      controls: newControls,
+      queryParams
+    });
+
+    /* After the collection has been updated, update the measurement coloring data if needed */
+    updateMeasurementsColorData(
+      newControls.measurementsColorGrouping,
+      controls.measurementsColorGrouping,
+      controls.colorBy,
+      controls.defaults.colorBy,
+      dispatch
+    );
   });
 };
 
@@ -613,6 +630,35 @@ const addMeasurementsColorData = (
   }
 
   dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
+}
+
+function updateMeasurementsColorData(
+  newColorGrouping: string,
+  oldColorGrouping: string,
+  currentColorBy: string,
+  defaultColorBy: string,
+  dispatch: AppDispatch,
+): void {
+  /* Remove the measurement metadata and coloring for the old grouping */
+  if (oldColorGrouping !== undefined) {
+    /* Fallback to the default coloring because the measurements coloring is no longer valid */
+    if (newColorGrouping !== oldColorGrouping &&
+        currentColorBy === encodeMeasurementColorBy(oldColorGrouping)) {
+      dispatch(infoNotification({
+        message: "Measurement coloring is no longer valid",
+        details: "Falling back to the default color-by"
+      }));
+      dispatch(changeColorBy(defaultColorBy));
+    }
+    dispatch({
+      type: REMOVE_METADATA,
+      nodeAttrsToRemove: [encodeMeasurementColorBy(oldColorGrouping)],
+    })
+  }
+  /* If there is a valid new color grouping, then add the measurement metadata and coloring */
+  if (newColorGrouping !== undefined) {
+    dispatch(addMeasurementsColorData(newColorGrouping));
+  }
 }
 
 export const applyMeasurementsColorBy = (
