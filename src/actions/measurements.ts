@@ -73,9 +73,16 @@ interface MeasurementsNodeAttrs {
   }
 }
 
+const measurementColoringPrefix = "m-";
+function isMeasurementColorBy(colorBy: string): boolean {
+  return colorBy.startsWith(measurementColoringPrefix);
+}
 function encodeMeasurementColorBy(groupingValue: string): string {
-  const measurementColoringPrefix = "m-";
   return `${measurementColoringPrefix}${groupingValue}`;
+}
+function decodeMeasurementColorBy(colorBy: string): string {
+  const prefixPattern = new RegExp(`^${measurementColoringPrefix}`);
+  return colorBy.replace(prefixPattern, '');
 }
 
 /**
@@ -829,7 +836,12 @@ export const combineMeasurementsControlsAndQuery = (
 ): {
   collectionToDisplay: Collection,
   collectionControls: MeasurementsControlState,
-  updatedQuery: Query
+  updatedQuery: Query,
+  newColoringData: undefined | {
+    coloringsPresentOnTree: string[],
+    colorings: Colorings,
+    nodeAttrs: MeasurementsNodeAttrs,
+  },
 } => {
   const updatedQuery = cloneDeep(query);
   const collectionKeys = measurements.collections.map((collection) => collection.key);
@@ -911,11 +923,35 @@ export const combineMeasurementsControlsAndQuery = (
       measurementsFilters[field].set(value, {active: true});
     }
     collectionControls.measurementsFilters = measurementsFilters;
+  }
 
+  // Special handling of the coloring query since this is _not_ a measurement specific query
+  // This must be after handling of filters so that the color data takes filters into account
+  let newColoringData = undefined;
+  if (typeof(updatedQuery.c) === 'string' && isMeasurementColorBy(updatedQuery.c)) {
+    const colorGrouping = decodeMeasurementColorBy(updatedQuery.c);
+    const groupingValues = collectionToDisplay.groupings.get(collectionControls.measurementsGroupBy).values || [];
+    // If the color grouping value is invalid, then remove the coloring query
+    // otherwise create the node attrs and coloring data needed for the measurements color-by
+    if (!groupingValues.includes(colorGrouping)) {
+      updatedQuery.c = undefined;
+    } else {
+      collectionControls['measurementsColorGrouping'] = colorGrouping;
+      newColoringData = {
+        coloringsPresentOnTree: [updatedQuery.c],
+        ...createMeasurementsColoringData(
+          collectionControls.measurementsFilters,
+          collectionControls.measurementsGroupBy,
+          colorGrouping,
+          collectionToDisplay
+        ),
+      }
+    }
   }
   return {
     collectionToDisplay,
     collectionControls,
-    updatedQuery
+    updatedQuery,
+    newColoringData,
   }
 }

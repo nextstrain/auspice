@@ -18,7 +18,7 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../uti
 import { applyInViewNodesToTree } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
@@ -917,10 +917,37 @@ export const createStateFromQueryOrJSONs = ({
 
   /* Special handling of measurements controls and query params */
   if (measurements.loaded) {
-    const { collectionToDisplay, collectionControls, updatedQuery} = combineMeasurementsControlsAndQuery(measurements, query);
+    const {
+      collectionToDisplay,
+      collectionControls,
+      updatedQuery,
+      newColoringData,
+    } = combineMeasurementsControlsAndQuery(measurements, query);
     measurements.collectionToDisplay = collectionToDisplay;
     controls = {...controls, ...collectionControls};
     query = updatedQuery;
+
+    // Similar to the state changes applied for `ADD_EXTRA_METADATA`
+    if (newColoringData !== undefined) {
+      // Update controls
+      newColoringData.coloringsPresentOnTree.forEach((coloring) => controls.coloringsPresentOnTree.add(coloring));
+      // Update metadata
+      metadata.colorings = {...metadata.colorings, ...newColoringData.colorings};
+      // Update tree
+      addNodeAttrs(tree.nodes, newColoringData.nodeAttrs);
+      Object.keys(newColoringData.colorings).forEach((attr) => tree.nodeAttrKeys.add(attr));
+      const nonContinuousColorings = Object.keys(newColoringData.colorings).filter((coloring) => {
+        return newColoringData.colorings[coloring].type !== "continuous"
+      });
+      tree.totalStateCounts = {
+        ...tree.totalStateCounts,
+        ...countTraitsAcrossTree(tree.nodes, nonContinuousColorings, false, true)
+      };
+      // Update treeToo if exists
+      if (treeToo && treeToo.loaded) {
+        addNodeAttrs(treeToo.nodes, newColoringData.nodeAttrs);
+      }
+    }
   } else {
     // Hide measurements panel if loading failed
     controls.panelsToDisplay = controls.panelsToDisplay.filter((panel) => panel !== "measurements");
