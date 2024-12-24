@@ -1,6 +1,7 @@
 import { batch } from "react-redux";
 import { quantile } from "d3-array";
 import { cloneDeep } from "lodash";
+import { Colorings } from "../metadata";
 import { AppDispatch, ThunkFunction } from "../store";
 import { colors, measurementIdSymbol } from "../util/globals";
 import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState, MeasurementFilters } from "../reducers/controls";
@@ -62,6 +63,14 @@ interface MeasurementsQuery {
  */
 interface Query extends MeasurementsQuery {
   [key: string]: string | string[]
+}
+
+interface MeasurementsNodeAttrs {
+  [strain: string]: {
+    [measurementsColorBy: string]: {
+      value: number
+    }
+  }
 }
 
 function encodeMeasurementColorBy(groupingValue: string): string {
@@ -618,31 +627,34 @@ export function matchesAllActiveFilters(
   return true;
 }
 
-const addMeasurementsColorData = (
-  groupingValue: string
-): ThunkFunction => (dispatch, getState) => {
-  const { controls, measurements } = getState();
+function createMeasurementsColoringData(
+  filters: MeasurementFilters,
+  groupBy: string,
+  groupingValue: string,
+  collection: Collection,
+): {
+  nodeAttrs: MeasurementsNodeAttrs,
+  colorings: Colorings,
+} {
   const measurementColorBy = encodeMeasurementColorBy(groupingValue);
-
-  const activeMeasurementFilters = getActiveMeasurementFilters(controls.measurementsFilters);
-  const strainMeasurementValues: {[strain: string]: number[]} = measurements.collectionToDisplay.measurements
-    .filter((m) => m[controls.measurementsGroupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
+  const activeMeasurementFilters = getActiveMeasurementFilters(filters);
+  const strainMeasurementValues: {[strain: string]: number[]} = collection.measurements
+    .filter((m) => m[groupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
     .reduce((accum, m) => {
       (accum[m.strain] = accum[m.strain] || []).push(m.value)
       return accum
     }, {});
 
-  const newNodeAttrs: {[strain: string]: {[measurementsColorBy: string]: {value: number}}} = {};
+  const nodeAttrs: MeasurementsNodeAttrs = {};
   for (const [strain, measurements] of Object.entries(strainMeasurementValues)) {
     const averageMeasurementValue = measurements.reduce((sum, value) => sum + value) / measurements.length;
-    newNodeAttrs[strain] = {
+    nodeAttrs[strain] = {
       [measurementColorBy]: {
         value: averageMeasurementValue
       }
     };
   }
-
-  const sortedValues = measurements.collectionToDisplay.measurements
+  const sortedValues = collection.measurements
     .map((m) => m.value)
     .sort((a, b) => a - b);
 
@@ -653,15 +665,30 @@ const addMeasurementsColorData = (
     return [quantile(sortedValues, (step * i)), color]
   });
 
-  const newColorings = {
-    [measurementColorBy]: {
-      title: `Measurements (${groupingValue})`,
-      type: "continuous",
-      scale: measurementsColorScale,
+  return {
+    nodeAttrs,
+    colorings: {
+      [measurementColorBy]: {
+        title: `Measurements (${groupingValue})`,
+        type: "continuous",
+        scale: measurementsColorScale,
+      }
     }
-  }
+  };
+}
 
-  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs, newColorings});
+const addMeasurementsColorData = (
+  groupingValue: string
+): ThunkFunction => (dispatch, getState) => {
+  const { controls, measurements } = getState();
+  const { nodeAttrs, colorings } = createMeasurementsColoringData(
+    controls.measurementsFilters,
+    controls.measurementsGroupBy,
+    groupingValue,
+    measurements.collectionToDisplay,
+  );
+
+  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs: nodeAttrs, newColorings: colorings});
 }
 
 function updateMeasurementsColorData(
