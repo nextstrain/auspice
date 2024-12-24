@@ -546,15 +546,32 @@ export const changeMeasurementsDisplay = (
 export const changeMeasurementsGroupBy = (
   newGroupBy: string
 ): ThunkFunction => (dispatch, getState) => {
-  const { measurements } = getState();
-  const controlKey = "measurementsGroupBy";
-  const newControls = { [controlKey]: newGroupBy };
+  const { controls, measurements } = getState();
+  const groupingValues = measurements.collectionToDisplay.groupings.get(newGroupBy).values || [];
+  const newControls: Partial<MeasurementsControlState> = {
+    /* If the measurementsColorGrouping is no longer valid, then set to undefined */
+    measurementsColorGrouping: groupingValues.includes(controls.measurementsColorGrouping)
+      ? controls.measurementsColorGrouping
+      : undefined,
+    measurementsGroupBy: newGroupBy
+  };
 
-  dispatch({
-    type: CHANGE_MEASUREMENTS_GROUP_BY,
-    controls: newControls,
-    queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
-  });
+  batch(() => {
+    dispatch({
+      type: CHANGE_MEASUREMENTS_GROUP_BY,
+      controls: newControls,
+      queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
+    });
+
+    /* After the group by has been updated, update the measurement coloring data if needed */
+    updateMeasurementsColorData(
+      newControls.measurementsColorGrouping,
+      controls.measurementsColorGrouping,
+      controls.colorBy,
+      controls.defaults.colorBy,
+      dispatch
+    );
+  })
 }
 
 export function getActiveMeasurementFilters(
