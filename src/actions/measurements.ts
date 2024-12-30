@@ -74,7 +74,7 @@ interface MeasurementsNodeAttrs {
 }
 
 const measurementColoringPrefix = "m-";
-function isMeasurementColorBy(colorBy: string): boolean {
+export function isMeasurementColorBy(colorBy: string): boolean {
   return colorBy.startsWith(measurementColoringPrefix);
 }
 function encodeMeasurementColorBy(groupingValue: string): string {

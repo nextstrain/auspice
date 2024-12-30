@@ -39,6 +39,7 @@ layout['overallMeanYValue'] = layout.subplotHeight / 2;
 const classes = {
   xAxis: "measurementXAxis",
   yAxis: "measurementYAxis",
+  groupingValue: "measurementGroupingValue",
   yAxisColorByLabel: "measurementYAxisColorByLabel",
   threshold: "measurementThreshold",
   subplot: "measurementSubplot",
@@ -265,6 +266,7 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData, handleClickOnGroupin
         // but there're always limits of the available space so punting that for now.
         //    -Jover, 20 September 2022
         g.selectAll('text')
+          .attr("class", classes.groupingValue)
           .attr("transform", (_, i, element) => {
             const textWidth = select(element[i]).node().getBoundingClientRect().width;
             // Subtract the twice the y-axis tick size to give some padding around the text
@@ -468,7 +470,7 @@ export const addColorByAttrToGroupingLabel = (ref, treeStrainColors) => {
   svg.selectAll(`.${classes.yAxis}`).select(".tick")
     .each((_, i, elements) => {
       const groupingLabel = select(elements[i]);
-      const groupingValue = groupingLabel.text();
+      const groupingValue = groupingLabel.select(`.${classes.groupingValue}`).text();
       const groupingValueColorBy = treeStrainColors[groupingValue];
       if (groupingValueColorBy) {
         // Get the current label width to add colored line and text relative to the width
@@ -492,3 +494,38 @@ export const addColorByAttrToGroupingLabel = (ref, treeStrainColors) => {
       }
     });
 };
+
+const colorGroupingCrosshairId = "measurementsColorGroupingCrosshair";
+export const removeColorGroupingCrosshair = (ref) => {
+  const svg = select(ref);
+  svg.select(`#${colorGroupingCrosshairId}`).remove();
+};
+
+export const addGroupingValueCrosshair = (ref, groupingValue) => {
+  // Remove previous color grouping crosshair
+  removeColorGroupingCrosshair(ref);
+
+  const svg = select(ref);
+  svg.selectAll(`.${classes.yAxis}`).select(".tick")
+    .each((_, i, elements) => {
+      const groupingLabel = select(elements[i]);
+      const currentGroupingValue = groupingLabel.select(`.${classes.groupingValue}`).text()
+      if (groupingValue === currentGroupingValue){
+        const {width} = groupingLabel.node().getBoundingClientRect();
+        groupingLabel.append("svg")
+          .attr("id", colorGroupingCrosshairId)
+          .attr("stroke", "currentColor")
+          .attr("fill", "currentColor")
+          .attr("strokeWidth", "0")
+          .attr("viewBox", "0 0 256 256")
+          .attr("height", layout.yAxisColorByLineHeight * 2)
+          .attr("width", layout.yAxisColorByLineHeight * 2)
+          .attr("x", -width - (layout.yAxisColorByLineHeight * 2))
+          .attr("y", -layout.yAxisColorByLineHeight)
+          .append("path")
+            // path copied from react-icons/pi/PiCrosshairSimpleBold
+            .attr("d", "M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm12,191.13V184a12,12,0,0,0-24,0v27.13A84.18,84.18,0,0,1,44.87,140H72a12,12,0,0,0,0-24H44.87A84.18,84.18,0,0,1,116,44.87V72a12,12,0,0,0,24,0V44.87A84.18,84.18,0,0,1,211.13,116H184a12,12,0,0,0,0,24h27.13A84.18,84.18,0,0,1,140,211.13Z" )
+
+      }
+    });
+}

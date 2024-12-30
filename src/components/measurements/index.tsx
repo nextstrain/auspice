@@ -23,13 +23,20 @@ import {
   addHoverPanelToMeasurementsAndMeans,
   addColorByAttrToGroupingLabel,
   layout,
-  jitterRawMeansByColorBy
+  jitterRawMeansByColorBy,
+  addGroupingValueCrosshair,
+  removeColorGroupingCrosshair,
 } from "./measurementsD3";
 import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
 import { Measurement, isMeasurement } from "../../reducers/measurements/types";
-import { applyMeasurementsColorBy, getActiveMeasurementFilters, matchesAllActiveFilters } from "../../actions/measurements";
+import {
+  applyMeasurementsColorBy,
+  isMeasurementColorBy,
+  getActiveMeasurementFilters,
+  matchesAllActiveFilters
+} from "../../actions/measurements";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -287,6 +294,14 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   useEffect(() => {
     toggleDisplay(d3Ref.current, "threshold", showThreshold);
   }, [svgData, showThreshold]);
+
+  useEffect(() => {
+    if(isMeasurementColorBy(colorBy)) {
+      addGroupingValueCrosshair(d3Ref.current, colorGrouping);
+    } else {
+      removeColorGroupingCrosshair(d3Ref.current);
+    }
+  }, [svgData, colorBy, colorGrouping])
 
   const getSVGContainerStyle = (): CSSProperties => {
     return {
