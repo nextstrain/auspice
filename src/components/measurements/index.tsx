@@ -255,10 +255,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   }, [fields, colorings, colorBy]);
 
   const handleClickOnGrouping = useCallback((grouping: string): void => {
-    if (grouping !== colorGrouping) {
+    if (grouping !== colorGrouping || !isMeasurementColorBy(colorBy)) {
       dispatch(applyMeasurementsColorBy(grouping));
     }
-  }, [dispatch, colorGrouping]);
+  }, [dispatch, colorGrouping, colorBy]);
 
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
