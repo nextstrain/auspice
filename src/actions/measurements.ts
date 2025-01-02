@@ -80,7 +80,7 @@ export function isMeasurementColorBy(colorBy: string): boolean {
 function encodeMeasurementColorBy(groupingValue: string): string {
   return `${measurementColoringPrefix}${groupingValue}`;
 }
-function decodeMeasurementColorBy(colorBy: string): string {
+export function decodeMeasurementColorBy(colorBy: string): string {
   const prefixPattern = new RegExp(`^${measurementColoringPrefix}`);
   return colorBy.replace(prefixPattern, '');
 }

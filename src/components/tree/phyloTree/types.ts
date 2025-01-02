@@ -232,6 +232,7 @@ export interface PhyloTreeType {
   drawBranchLabels: typeof labels.drawBranchLabels
   drawBranches: typeof renderers.drawBranches
   drawConfidence: typeof confidence.drawConfidence
+  drawMeasurementsColoringCrosshair: typeof renderers.drawMeasurementsColoringCrosshair
   drawRegression: typeof renderers.drawRegression
   drawSingleCI: typeof confidence.drawSingleCI
   drawTips: typeof renderers.drawTips
@@ -243,6 +244,7 @@ export interface PhyloTreeType {
     branchTee?: Selection<SVGDefsElement, unknown, null, unknown>
     clipPath?: Selection<SVGDefsElement, unknown, null, unknown>
     confidenceIntervals?: Selection<SVGDefsElement, unknown, null, unknown>
+    measurementsColoringCrosshair?: Selection<SVGDefsElement, unknown, null, unknown>
     regression?: Selection<SVGDefsElement, unknown, null, unknown>
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
@@ -258,6 +260,7 @@ export interface PhyloTreeType {
     right: number
     top: number
   }
+  measurementsColorGrouping: string | undefined
   modifySVG: typeof modifySVG
   modifySVGInStages: typeof modifySVGInStages
   nodes: PhyloNode[]
