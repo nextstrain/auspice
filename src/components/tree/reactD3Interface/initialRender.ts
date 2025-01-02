@@ -53,7 +53,7 @@ export const renderTree = (
     visibility: treeState.visibility,
     drawConfidence: props.temporalConfidence.on,
     vaccines: treeState.vaccines,
-    branchStroke: calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy), 
+    branchStroke: calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy),
     tipStroke: tipStrokeColors,
     tipFill: tipStrokeColors.map(getBrighterColor),
     tipRadii: treeState.tipRadii,

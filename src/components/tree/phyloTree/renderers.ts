@@ -408,7 +408,7 @@ const handleBranchHoverColor = (
   if (!tel.empty()) { // Some displays don't have S & T parts of the branch
     tel.style("stroke", c2);
   }
-  
+
   /* If we reinstate gradient stem colours this section must be updated; see the
   commit which added this comment for the previous implementation */
   const sel = d.that.svg.select("#"+getDomId("branchS", d.n.name));

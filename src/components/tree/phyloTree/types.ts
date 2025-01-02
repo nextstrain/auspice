@@ -14,7 +14,7 @@ import * as renderers from "./renderers";
 
 export type Distance = "num_date" | "div"
 
-export type TreeElement = 
+export type TreeElement =
   ".branch.S" |
   ".branch.T" |
   ".branch" |
@@ -35,7 +35,7 @@ export interface Regression {
 
 // ---------- Callbacks ---------- //
 
-type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900> 
+type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900>
 
 export interface Callbacks {
   onBranchClick: NodeCallback
