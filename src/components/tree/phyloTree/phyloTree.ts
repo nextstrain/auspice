@@ -64,6 +64,7 @@ PhyloTree.prototype.drawTips = renderers.drawTips;
 PhyloTree.prototype.drawBranches = renderers.drawBranches;
 PhyloTree.prototype.drawVaccines = renderers.drawVaccines;
 PhyloTree.prototype.drawMeasurementsColoringCrosshair = renderers.drawMeasurementsColoringCrosshair;
+PhyloTree.prototype.removeMeasurementsColoringCrosshair = renderers.removeMeasurementsColoringCrosshair;
 PhyloTree.prototype.drawRegression = renderers.drawRegression;
 PhyloTree.prototype.removeRegression = renderers.removeRegression;
 PhyloTree.prototype.updateColorBy = renderers.updateColorBy;

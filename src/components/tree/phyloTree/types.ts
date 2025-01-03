@@ -205,6 +205,7 @@ export interface ChangeParams {
   newBranchLabellingKey?: string
   showAllBranchLabels?: boolean
   newTipLabelKey?: string | symbol
+  newMeasurementsColorGrouping?: string | undefined
 
   // arrays of data (the same length as nodes) //
   branchStroke?: string[]
@@ -270,6 +271,7 @@ export interface PhyloTreeType {
   regression?: Regression
   removeBranchLabels: typeof labels.removeBranchLabels
   removeConfidence: typeof confidence.removeConfidence
+  removeMeasurementsColoringCrosshair: typeof renderers.removeMeasurementsColoringCrosshair
   removeRegression: typeof renderers.removeRegression
   removeTipLabels: typeof labels.removeTipLabels
   render: typeof renderers.render

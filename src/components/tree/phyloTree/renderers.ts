@@ -151,12 +151,18 @@ export const drawVaccines = function drawVaccines(this: PhyloTreeType): void {
     .on("click", this.callbacks.onTipClick);
 };
 
+export const removeMeasurementsColoringCrosshair = function removeMeasurementsColoringCrosshair(this: PhyloTreeType): void {
+  if ("measurementsColoringCrosshair" in this.groups) {
+    this.groups.measurementsColoringCrosshair.selectAll("*").remove();
+  }
+}
+
 /**
  * Adds crosshair to tip matching the measurements coloring group
  */
 export const drawMeasurementsColoringCrosshair = function drawMeasurementsColoringCrosshair(this: PhyloTreeType): void {
   if ("measurementsColoringCrosshair" in this.groups) {
-    this.groups.measurementsColoringCrosshair.selectAll("*").remove();
+    this.removeMeasurementsColoringCrosshair();
   } else {
     this.groups.measurementsColoringCrosshair = this.svg.append("g").attr("id", "measurementsColoringCrosshairId");
   }

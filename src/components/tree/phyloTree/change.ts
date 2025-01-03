@@ -217,7 +217,11 @@ export const modifySVG = function modifySVG(
     this.updateBranchLabels(transitionTime);
   }
 
-  if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
+  if (this.measurementsColorGrouping) {
+    this.drawMeasurementsColoringCrosshair();
+  } else {
+    this.removeMeasurementsColoringCrosshair();
+  }
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
@@ -244,7 +248,11 @@ export const modifySVGInStages = function modifySVGInStages(
     this.updateTipLabels();
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
-    if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
+    if (this.measurementsColorGrouping) {
+      this.drawMeasurementsColoringCrosshair();
+    } else {
+      this.removeMeasurementsColoringCrosshair();
+    }
     this.showTemporalSlice();
     if (this.regression) this.drawRegression();
     if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(extras.newBranchLabellingKey || this.params.branchLabelKey);
@@ -315,6 +323,7 @@ export const change = function change(
     branchThickness = undefined,
     scatterVariables = undefined,
     performanceFlags = undefined,
+    newMeasurementsColorGrouping = undefined,
   }: ChangeParams
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -379,6 +388,7 @@ export const change = function change(
   // recalculate gradients here?
   if (changeColorBy) {
     this.updateColorBy();
+    this.measurementsColorGrouping = newMeasurementsColorGrouping;
   }
   // recalculate existing regression if needed
   if (changeVisibility && this.regression) {
