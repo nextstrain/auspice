@@ -77,7 +77,7 @@ const measurementColoringPrefix = "m-";
 export function isMeasurementColorBy(colorBy: string): boolean {
   return colorBy.startsWith(measurementColoringPrefix);
 }
-function encodeMeasurementColorBy(groupingValue: string): string {
+export function encodeMeasurementColorBy(groupingValue: string): string {
   return `${measurementColoringPrefix}${groupingValue}`;
 }
 export function decodeMeasurementColorBy(colorBy: string): string {
