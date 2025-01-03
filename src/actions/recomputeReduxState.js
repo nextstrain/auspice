@@ -916,6 +916,7 @@ export const createStateFromQueryOrJSONs = ({
   controls = modifyStateViaURLQuery(controls, query);
 
   /* Special handling of measurements controls and query params */
+  let newMeasurementsColoringData = false;
   if (measurements.loaded) {
     const {
       collectionToDisplay,
@@ -929,6 +930,7 @@ export const createStateFromQueryOrJSONs = ({
 
     // Similar to the state changes applied for `ADD_EXTRA_METADATA`
     if (newColoringData !== undefined) {
+      newMeasurementsColoringData = true;
       // Update controls
       newColoringData.coloringsPresentOnTree.forEach((coloring) => controls.coloringsPresentOnTree.add(coloring));
       // Update metadata
@@ -974,7 +976,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (json || controls.colorBy !== oldState.controls.colorBy) {
+  if (json || controls.colorBy !== oldState.controls.colorBy || newMeasurementsColoringData) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
