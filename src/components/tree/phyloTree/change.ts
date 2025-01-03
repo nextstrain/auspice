@@ -216,6 +216,8 @@ export const modifySVG = function modifySVG(
   } else if (elemsToUpdate.has('.branchLabel')) {
     this.updateBranchLabels(transitionTime);
   }
+
+  if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
@@ -242,6 +244,7 @@ export const modifySVGInStages = function modifySVGInStages(
     this.updateTipLabels();
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
+    if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
     this.showTemporalSlice();
     if (this.regression) this.drawRegression();
     if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(extras.newBranchLabellingKey || this.params.branchLabelKey);
