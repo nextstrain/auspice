@@ -3,8 +3,7 @@ import { defaultEntropyState } from "../reducers/entropy";
 
 type JsonAnnotations = Record<string, JsonAnnotation>
 
-// '.' and '?' are GFF-valid options
-type Strand = '+' | '-' | '.' | '?'
+type Strand = '+' | '-' // other GFF-valid options are '.' and '?'
 
 interface JsonSegmentRange {
   /** 1-based */
