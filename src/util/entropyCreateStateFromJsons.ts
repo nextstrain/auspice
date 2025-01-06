@@ -349,13 +349,11 @@ function _frame(
  */
 function calculateStackPosition(
   genes: Gene[],
-  strand: Strand | null = null,
+  strand: Strand,
 ): number {
   /* List of CDSs, sorted by their earliest occurrence in the genome (for any segment) */
   let cdss = genes.reduce((acc: CDS[], gene) => [...acc, ...gene.cds], []);
-  if (strand) {
-    cdss = cdss.filter((cds) => cds.strand===strand);
-  }
+  cdss = cdss.filter((cds) => cds.strand===strand);
   cdss.sort((a, b) =>
     Math.min(...a.segments.map((s) => s.rangeGenome[0])) < Math.min(...b.segments.map((s) => s.rangeGenome[0])) ?
       -1 : 1
