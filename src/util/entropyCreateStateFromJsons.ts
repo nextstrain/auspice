@@ -349,17 +349,16 @@ function _frame(
  */
 function calculateStackPosition(
   genes: Gene[],
-  strand: Strand | null = null,
+  strand: Strand,
 ): number {
   /* List of CDSs, sorted by their earliest occurrence in the genome (for any segment) */
-  let cdss = genes.reduce((acc: CDS[], gene) => [...acc, ...gene.cds], []);
-  if (strand) {
-    cdss = cdss.filter((cds) => cds.strand===strand);
-  }
-  cdss.sort((a, b) =>
-    Math.min(...a.segments.map((s) => s.rangeGenome[0])) < Math.min(...b.segments.map((s) => s.rangeGenome[0])) ?
-      -1 : 1
-  );
+  const cdss = genes
+    .reduce((acc: CDS[], gene) => [...acc, ...gene.cds], [])
+    .filter((cds) => cds.strand===strand)
+    .sort((a, b) =>
+      Math.min(...a.segments.map((s) => s.rangeGenome[0])) < Math.min(...b.segments.map((s) => s.rangeGenome[0])) ?
+        -1 : 1
+    );
   let stack: CDS[] = []; // current CDSs in stack
   for (const newCds of cdss) {
     /* remove any CDS from the stack which has ended (completely) before this one starts */
