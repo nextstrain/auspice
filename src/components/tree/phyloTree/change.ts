@@ -250,8 +250,6 @@ export const modifySVGInStages = function modifySVGInStages(
     if (this.vaccines) this.drawVaccines();
     if (this.measurementsColorGrouping) {
       this.drawMeasurementsColoringCrosshair();
-    } else {
-      this.removeMeasurementsColoringCrosshair();
     }
     this.showTemporalSlice();
     if (this.regression) this.drawRegression();
@@ -277,6 +275,7 @@ export const modifySVGInStages = function modifySVGInStages(
     .on("start", () => inProgress++)
     .on("end", step2);
   this.hideTemporalSlice();
+  this.removeMeasurementsColoringCrosshair();
   if (!transitionTimeFadeOut) timerFlush();
 };
 
