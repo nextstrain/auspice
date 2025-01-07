@@ -259,6 +259,11 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData, handleClickOnGroupin
           .tickSize(layout.yAxisTickSize)
           .tickFormat(groupingValue))
       .call((g) => {
+        // Add tooltip to hint at color by measurements feature
+        g.selectAll('.tick')
+          .append("title")
+            .text("Click to color by an average of all measurement values per test strain in this group");
+
         g.attr("font-family", null);
         // If necessary, scale down the text to fit in the available space for the y-Axis labels
         // This does mean that if the text is extremely long, it can be unreadable.
