@@ -73,6 +73,14 @@ interface MeasurementsNodeAttrs {
   }
 }
 
+/**
+ * Using the `m-` prefix to lower chances of generated measurements coloring
+ * from clashing with an existing coloring on the tree (similar to how genotype
+ * coloring is prefixed by `gt-`). This is paired with encode/decode functions
+ * to ensure we have centralized methods for encoding and decoding the
+ * measurements coloring in case we need to expand this in the future
+ * (e.g. allow multiple groupingValues).
+ */
 const measurementColoringPrefix = "m-";
 export function isMeasurementColorBy(colorBy: string): boolean {
   return colorBy.startsWith(measurementColoringPrefix);
