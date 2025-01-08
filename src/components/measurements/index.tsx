@@ -37,6 +37,7 @@ import {
   getActiveMeasurementFilters,
   matchesAllActiveFilters
 } from "../../actions/measurements";
+import { changeColorBy } from "../../actions/colors";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -160,6 +161,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map((v): string => v.toString()), isEqual);
   const colorings = useSelector((state: RootState) => state.metadata.colorings);
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
+  const defaultColorBy = useSelector((state: RootState) => state.controls.defaults.colorBy);
   const colorGrouping = useSelector((state: RootState) => state.controls.measurementsColorGrouping);
   const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
   const filters = useSelector((state: RootState) => state.controls.measurementsFilters);
@@ -254,9 +256,25 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     setHoverData(newHoverData);
   }, [fields, colorings, colorBy]);
 
+  /**
+   * Ref to save previous non-measurements coloring for toggling back to previous
+   * coloring when clicking on the same measurements grouping twice.
+   * Uses the default color by if the color is a measurements color on first
+   * load, i.e. the color is set by the URL param `c=m-<grouping>`
+   */
+  const prevNonMeasurementColorBy: MutableRefObject<string> = useRef(isMeasurementColorBy(colorBy) ? defaultColorBy : colorBy);
+  useEffect(() => {
+    if (!isMeasurementColorBy(colorBy)) {
+      prevNonMeasurementColorBy.current = colorBy;
+    }
+  }, [colorBy]);
+
   const handleClickOnGrouping = useCallback((grouping: string): void => {
     if (grouping !== colorGrouping || !isMeasurementColorBy(colorBy)) {
       dispatch(applyMeasurementsColorBy(grouping));
+    } else if (grouping === colorGrouping && isMeasurementColorBy(colorBy)) {
+      // Clicking on the same grouping twice will toggle back to the previous non-measurements coloring
+      dispatch(changeColorBy(prevNonMeasurementColorBy.current));
     }
   }, [dispatch, colorGrouping, colorBy]);
 
