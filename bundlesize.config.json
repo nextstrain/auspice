@@ -10,7 +10,7 @@
     },
     {
       "path": "./dist/auspice.?(chunk.)core-vendors.bundle.*.js",
-      "maxSize": "220 kB"
+      "maxSize": "240 kB"
     },
     {
       "path": "./dist/auspice.?(chunk.)other-vendors.bundle.*.js",

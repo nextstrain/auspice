@@ -83,6 +83,7 @@
     "linspace": "^1.0.0",
     "lodash": "^4.17.21",
     "lodash-webpack-plugin": "^0.11.6",
+    "luxon": "^3.5.0",
     "marked": "^4.0.10",
     "mousetrap": "^1.6.2",
     "null-loader": "^4.0.0",
