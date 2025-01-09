@@ -1,7 +1,7 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
-type JsonAnnotations = Record<string, JsonAnnotation>
+type GenomeAnnotations = Record<string, GenomeAnnotation>
 
 type Strand = '+' | '-' // other GFF-valid options are '.' and '?'
 
@@ -13,9 +13,7 @@ interface JsonSegmentRange {
   end: number
 }
 
-interface JsonAnnotation {
-  /* Other properties are commonly set in the JSON structure, but the following are
-  the only ones read by Auspice */
+interface GenomeAnnotation {
   end?: number
   start?: number
   segments?: JsonSegmentRange[]
@@ -24,6 +22,29 @@ interface JsonAnnotation {
   color?: string
   display_name?: string
   description?: string
+
+  // Other properties are commonly set, but not read by Auspice.
+  [key: string]: unknown
+}
+
+interface UnknownJsonObject {
+  [key: string]: unknown
+}
+
+function isValidGenomeAnnotations(x: UnknownJsonObject): x is GenomeAnnotations {
+  let isValid = true;
+
+  for (const key of Object.keys(x)) {
+    const value = x[key];
+    if (
+      false // FIXME: check if `value` conforms to interface GenomeAnnotation
+    ) {
+      console.error(`Invalid genome annotation: ${JSON.stringify(value)}`);
+      isValid = false;
+    }
+  }
+
+  return isValid;
 }
 
 /**
@@ -47,8 +68,6 @@ interface ChromosomeMetadata {
   posStrandStackHeight: number
   negStrandStackHeight: number
 }
-
-type GenomeAnnotation = Chromosome[]
 
 interface Chromosome {
   name: string
@@ -112,7 +131,7 @@ interface CdsSegment {
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
  */
-export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
+export const genomeMap = (annotations: GenomeAnnotations): Chromosome[] => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
@@ -126,7 +145,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
 
   /* Group by genes -- most JSONs will not include this information, so it'll essentially be
   one CDS per gene, but that's just fine! */
-  const annotationsPerGene: Record<string,JsonAnnotations> = {};
+  const annotationsPerGene: Record<string,GenomeAnnotations> = {};
   Object.entries(annotations)
     .filter(([name,]) => name!=='nuc')
     .map(([annotationKey, annotation]) => {
@@ -170,8 +189,8 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
   return [chromosome];
 }
 
-export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
-  if (genomeAnnotations) {
+export const entropyCreateState = (genomeAnnotations: UnknownJsonObject) => {
+  if (isValidGenomeAnnotations(genomeAnnotations)) {
     try {
       return {
         showCounts: false,
@@ -206,7 +225,7 @@ function* nextColorGenerator() {
  */
 function cdsFromAnnotation(
   cdsName: string,
-  annotation: JsonAnnotation,
+  annotation: GenomeAnnotation,
   rangeGenome: RangeGenome,
   defaultColor: string | void,
 ): CDS {
