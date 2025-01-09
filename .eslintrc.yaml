@@ -6,6 +6,7 @@ extends:
   - plugin:react-hooks/recommended
 
 plugins:
+  - "@stylistic"
   - "@typescript-eslint"
   - react
   - react-hooks
@@ -22,6 +23,7 @@ globals:
 rules:
   # Code quality rules
   eqeqeq: error
+  "@stylistic/semi": error
   "@typescript-eslint/consistent-type-assertions": ["error", { assertionStyle: 'never' }]
   "@typescript-eslint/no-empty-function": ["error", { "allow": ["arrowFunctions"] }]
   "@typescript-eslint/no-explicit-any": off # Allow explicit any to make incremental TypeScript adoption easier.

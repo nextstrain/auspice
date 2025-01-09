@@ -117,6 +117,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.2",
+    "@stylistic/eslint-plugin": "^2.12.1",
     "@types/d3-array": "^2.2.0",
     "@types/d3-axis": "^1.0.6",
     "@types/d3-brush": "^1.0.4",
