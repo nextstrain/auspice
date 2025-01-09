@@ -65,10 +65,18 @@ interface Query extends MeasurementsQuery {
   [key: string]: string | string[]
 }
 
+
+const hasMeasurementColorAttr = "_hasMeasurementColor";
+const hasMeasurementColorValue = "true";
 interface MeasurementsNodeAttrs {
   [strain: string]: {
-    [measurementsColorBy: string]: {
-      value: number
+    [key: string]: {
+      // number for the average measurements value
+      // 'true' for the presence of measurements coloring
+      value: number | typeof hasMeasurementColorValue
+    }
+    [hasMeasurementColorAttr]: {
+      value: typeof hasMeasurementColorValue
     }
   }
 }
@@ -666,6 +674,9 @@ function createMeasurementsColoringData(
     nodeAttrs[strain] = {
       [measurementColorBy]: {
         value: averageMeasurementValue
+      },
+      [hasMeasurementColorAttr]: {
+        value: hasMeasurementColorValue
       }
     };
   }
@@ -687,6 +698,10 @@ function createMeasurementsColoringData(
         title: `Measurements (${groupingValue})`,
         type: "continuous",
         scale: measurementsColorScale,
+      },
+      [hasMeasurementColorAttr]: {
+        title: `Has measurements for ${groupingValue}`,
+        type: "boolean",
       }
     }
   };
@@ -726,7 +741,7 @@ function updateMeasurementsColorData(
     }
     dispatch({
       type: REMOVE_METADATA,
-      nodeAttrsToRemove: [encodeMeasurementColorBy(oldColorGrouping)],
+      nodeAttrsToRemove: [hasMeasurementColorAttr, encodeMeasurementColorBy(oldColorGrouping)],
     })
   }
   /* If there is a valid new color grouping, then add the measurement metadata and coloring */
@@ -748,7 +763,7 @@ export const applyMeasurementsColorBy = (
    */
   batch(() => {
     if (controls.measurementsColorGrouping !== undefined) {
-      dispatch({type: REMOVE_METADATA, nodeAttrsToRemove: [encodeMeasurementColorBy(controls.measurementsColorGrouping)]});
+      dispatch({type: REMOVE_METADATA, nodeAttrsToRemove: [hasMeasurementColorAttr, encodeMeasurementColorBy(controls.measurementsColorGrouping)]});
     }
     if (controls.measurementsColorGrouping !== groupingValue) {
       dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
