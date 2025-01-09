@@ -1,30 +1,15 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
-type JsonAnnotations = Record<string, JsonAnnotation>
+/**
+ * Object used for user-provided JSON.
+ * Stricter than simply `object` which implicitly types values as `any`.
+ */
+interface UnknownJsonObject {
+  [key: string]: unknown
+}
 
 type Strand = '+' | '-' // other GFF-valid options are '.' and '?'
-
-interface JsonSegmentRange {
-  /** 1-based */
-  start: number
-
-  /** 1-based closed (GFF) */
-  end: number
-}
-
-interface JsonAnnotation {
-  /* Other properties are commonly set in the JSON structure, but the following are
-  the only ones read by Auspice */
-  end?: number
-  start?: number
-  segments?: JsonSegmentRange[]
-  strand?: Strand
-  gene?: string
-  color?: string
-  display_name?: string
-  description?: string
-}
 
 /**
  * Specifies the range of the each segment's corresponding position in the genome,
@@ -110,27 +95,58 @@ interface CdsSegment {
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
  */
-export const genomeMap = (annotations: JsonAnnotations): Chromosome[] => {
+export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
     .map(([, annotation]) => annotation)[0];
-  if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
-  if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
-  if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positive strand." +
-    "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
+
+  if (!nucAnnotation) {
+    throw new Error("Genome annotation missing 'nuc' definition");
+  }
+  if (typeof nucAnnotation !== 'object') {
+    throw new Error("Genome annotation for 'nuc' is not a JSON object.");
+  }
+  if (!('start' in nucAnnotation) || !('end' in nucAnnotation)) {
+    throw new Error("Genome annotation for 'nuc' missing start or end");
+  }
+  if (typeof nucAnnotation.start !== 'number' || typeof nucAnnotation.end !== 'number') {
+    throw new Error("Genome annotation for 'nuc.start' or 'nuc.end' is not a number.");
+  }
+  if ('strand' in nucAnnotation && nucAnnotation.strand === '-') {
+    throw new Error("Auspice can only display genomes represented as positive strand." +
+      "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
+  }
+
   const rangeGenome: RangeGenome =  [nucAnnotation.start, nucAnnotation.end];
 
 
   /* Group by genes -- most JSONs will not include this information, so it'll essentially be
   one CDS per gene, but that's just fine! */
-  const annotationsPerGene: Record<string,JsonAnnotations> = {};
+  const annotationsPerGene: Record<string,Record<string, UnknownJsonObject>> = {};
   Object.entries(annotations)
     .filter(([name,]) => name!=='nuc')
     .map(([annotationKey, annotation]) => {
-      const geneName = annotation.gene || annotationKey;
+
+      if (typeof annotation !== 'object') {
+        throw new Error(`Genome annotation for '${annotationKey}' is not a JSON object.`);
+      }
+
+      let geneName = annotationKey;
+
+      if ('gene' in annotation) {
+        if (typeof annotation.gene !== 'string') {
+          throw new Error(`Genome annotation '${annotationKey}.gene' is not a string.`);
+        }
+        geneName = annotation.gene;
+      }
+
       if (!(geneName in annotationsPerGene)) annotationsPerGene[geneName] = {};
-      annotationsPerGene[geneName][annotationKey] = annotation;
+
+      /* Assertion is safe: see docstring of UnknownJsonObject
+       */
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      annotationsPerGene[geneName][annotationKey] = annotation as UnknownJsonObject;
     })
 
   const nextColor = nextColorGenerator();
@@ -167,7 +183,7 @@ export const genomeMap = (annotations: JsonAnnotations): Chromosome[] => {
   return [chromosome];
 }
 
-export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
+export const entropyCreateState = (genomeAnnotations: UnknownJsonObject) => {
   if (genomeAnnotations) {
     try {
       return {
@@ -185,8 +201,8 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
 };
 
 
-function validColor(color: string | undefined) {
-  if (!color) return false;
+function validColor(color: string | undefined | unknown) {
+  if (typeof color !== "string") return false;
   return color; // TODO XXX
 }
 
@@ -203,7 +219,7 @@ function* nextColorGenerator() {
  */
 function cdsFromAnnotation(
   cdsName: string,
-  annotation: JsonAnnotation,
+  annotation: UnknownJsonObject,
   rangeGenome: RangeGenome,
   defaultColor: string | void,
 ): CDS {
@@ -230,6 +246,12 @@ function cdsFromAnnotation(
   let length = 0;  // rangeLocal length
   const segments: CdsSegment[] = [];
   if (annotation.start && annotation.end) {
+
+    if (typeof annotation.start !== 'number' || typeof annotation.end !== 'number') {
+      console.error(`[Genome annotation] ${cdsName} start (${annotation.start}) and/or end (${annotation.end}) is not a number.`);
+      return invalidCds;
+    }
+
     /* The simplest case is where a JSON annotation block defines a
     contiguous CDS, however it may be a wrapping CDS (i.e. cds end > genome
     end */
@@ -248,8 +270,12 @@ function cdsFromAnnotation(
         {start: annotation.start, end: rangeGenome[1]},
         {start: 1, end: annotation.end-rangeGenome[1]}
       ]
-      /* -ve strand segments are 3' -> 5', so segment[0] is at the start of the genome */
-      if (!positive) annotation.segments.reverse();
+      // TypeScript is unable to infer that annotation.segments is an array,
+      // hence the explicit type guard.
+      if (Array.isArray(annotation.segments)){
+        /* -ve strand segments are 3' -> 5', so segment[0] is at the start of the genome */
+        if (!positive) annotation.segments.reverse();
+      }
     }
   }
 
@@ -298,10 +324,10 @@ function cdsFromAnnotation(
     isWrapping: _isCdsWrapping(strand, segments),
     color: validColor(annotation.color) || defaultColor || '#000',
   }
-  if (annotation.display_name !== undefined) {
+  if (typeof annotation.display_name === 'string') {
     cds.displayName = annotation.display_name;
   }
-  if (annotation.description !== undefined) {
+  if (typeof annotation.description === 'string') {
     cds.description = annotation.description;
   }
   return cds
