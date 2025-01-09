@@ -30,6 +30,7 @@ import {
   MeasurementsState,
 } from "../reducers/measurements/types";
 import { changeColorBy } from "./colors";
+import { applyFilter, updateVisibleTipsAndBranchThicknesses } from "./tree";
 
 /**
  * Temp object for groupings to keep track of values and their counts so that
@@ -738,6 +739,7 @@ function updateMeasurementsColorData(
         details: "Falling back to the default color-by"
       }));
       dispatch(changeColorBy(defaultColorBy));
+      dispatch(applyFilter("remove", hasMeasurementColorAttr, [hasMeasurementColorValue]));
     }
     dispatch({
       type: REMOVE_METADATA,
@@ -747,6 +749,7 @@ function updateMeasurementsColorData(
   /* If there is a valid new color grouping, then add the measurement metadata and coloring */
   if (newColorGrouping !== undefined) {
     dispatch(addMeasurementsColorData(newColorGrouping));
+    dispatch(updateVisibleTipsAndBranchThicknesses());
   }
 }
 
@@ -770,6 +773,7 @@ export const applyMeasurementsColorBy = (
     }
     dispatch(addMeasurementsColorData(groupingValue));
     dispatch(changeColorBy(encodeMeasurementColorBy(groupingValue)));
+    dispatch(applyFilter("add", hasMeasurementColorAttr, [hasMeasurementColorValue]))
   });
 }
 
