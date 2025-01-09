@@ -25,7 +25,7 @@ type Props = {
 
   /** Update options visibility. */
   setOptionsAreVisible: React.Dispatch<React.SetStateAction<boolean>>
-}
+};
 
 /**
  * A header used by all panel controls, containing an interactive title.
@@ -34,7 +34,7 @@ export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions,
   const dispatch = useAppDispatch();
 
   function togglePanelVisibility() {
-    dispatch(togglePanelDisplay(panel))
+    dispatch(togglePanelDisplay(panel));
   }
 
   function toggleOptionsVisibility() {

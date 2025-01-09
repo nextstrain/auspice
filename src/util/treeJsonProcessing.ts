@@ -40,7 +40,7 @@ const processNodes = (nodes: ReduxNode[]): {
 
     for (const [attrKey, attrValue] of Object.entries(d.node_attrs || {})) {
       if (typeof attrValue === 'object' && 'value' in attrValue) {
-        nodeAttrKeys.add(attrKey)
+        nodeAttrKeys.add(attrKey);
       }
     }
 

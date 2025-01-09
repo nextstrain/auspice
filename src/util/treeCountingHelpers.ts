@@ -56,7 +56,7 @@ export const gatherTraitNames = (
   const ignore = new Set([
     'num_date',
     ...Object.entries(colorings).filter(([_, info]) => info.type==='continuous').map(([name, _]) => name),
-  ])
+  ]);
   const names = new Set<string>();
   for (const node of nodes) {
     if (node.hasChildren) continue;
@@ -68,8 +68,8 @@ export const gatherTraitNames = (
       }
     }
   }
-  return [...names]
-}
+  return [...names];
+};
 
 /**
  * for each node, calculate the number of subtending tips which are visible

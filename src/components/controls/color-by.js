@@ -52,7 +52,7 @@ class ColorBy extends React.Component {
     colorings: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired,
     genomeMap: PropTypes.array,
-  }
+  };
 
   // Applies the given state to the immutable blank state and replaces the
   // current state with the result.
@@ -139,7 +139,7 @@ class ColorBy extends React.Component {
     const options = [
       // Nuc is first option, especially helpful when there are many many genes/CDSs
       {value: nucleotide_gene, label: "nucleotide"}
-    ]
+    ];
     this.props.genomeMap[0].genes.forEach((gene) => {
       /**
        * A lot of the code in this file refers to "gene(s)", however the actual dropdown
@@ -148,9 +148,9 @@ class ColorBy extends React.Component {
        * complex dropdown UI which exposes the associated gene for a CDS.
        */
       gene.cds.forEach((cds) => {
-        options.push({value: cds.name, label: cds.name})
-      })
-    })
+        options.push({value: cds.name, label: cds.name});
+      });
+    });
     return options;
   }
 

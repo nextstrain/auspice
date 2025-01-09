@@ -308,13 +308,13 @@ Dataset.prototype.fetchSidecars = async function fetchSidecars() {
 
   if (mainJson.meta.panels && mainJson.meta.panels.includes("frequencies") && !this.tipFrequencies) {
     this.tipFrequencies = fetchJSON(this.apiCalls.tipFrequencies)
-      .catch((reason) => Promise.resolve(reason))
+      .catch((reason) => Promise.resolve(reason));
   }
 
   if (!mainJson.root_sequence && !this.rootSequence) {
     // Note that the browser may log a GET error if the above 404s
     this.rootSequence = fetchJSON(this.apiCalls.rootSequence)
-      .catch((reason) => Promise.resolve(reason))
+      .catch((reason) => Promise.resolve(reason));
   }
 };
 Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
@@ -327,11 +327,11 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
     this.tipFrequencies
       .then((data) => {
         if (data instanceof Error) throw data;
-        return data
+        return data;
       })
       .then((data) => dispatch(loadFrequencies(data)))
       .catch((reason) => {
-        console.error(reason)
+        console.error(reason);
         const message = `Failed to ${reason instanceof FetchError ? 'fetch' : 'parse'} tip frequencies`;
         dispatch(warningNotification({message}));
       });
@@ -339,18 +339,18 @@ Dataset.prototype.loadSidecars = function loadSidecars(dispatch) {
   if (this.rootSequence) {
     this.rootSequence.then((data) => {
       if (data instanceof Error) throw data;
-      return data
+      return data;
     }).then((data) => {
       dispatch({type: types.SET_ROOT_SEQUENCE, data});
       dispatch(updateColorByWithRootSequenceData());
     }).catch((reason) => {
       if (reason instanceof FetchError) {
         // no console error message as root sequence sidecars are often not present
-        return
+        return;
       }
       console.error(reason);
       dispatch(warningNotification({message: "Failed to parse root sequence JSON"}));
-    })
+    });
   }
 };
 Dataset.prototype.fetchAvailable = async function fetchAvailable() {

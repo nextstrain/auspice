@@ -396,7 +396,7 @@ const HoverInfoPanel = ({
   tipLabelKey,
   t
 }) => {
-  if (!selectedNode) return null
+  if (!selectedNode) return null;
   const node = selectedNode.node.n; // want the redux node, not the phylo node
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
   return (

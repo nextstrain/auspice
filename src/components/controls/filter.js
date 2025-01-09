@@ -71,11 +71,11 @@ class FilterData extends React.Component {
     const unorderedTraitNames = [
       ...Object.keys(this.props.totalStateCounts),
       ...Object.keys(this.props.totalStateCountsSecondTree),
-    ]
+    ];
     const traitNames = [
       ...coloringKeys.filter((name) => unorderedTraitNames.includes(name)),
       ...unorderedTraitNames.filter((name) => !coloringKeys.includes(name))
-    ]
+    ];
     for (const traitName of traitNames) {
       const traitData = new Set([
         ...(this.props.totalStateCounts[traitName]?.keys() || []),
@@ -151,14 +151,14 @@ class FilterData extends React.Component {
       });
     }
     return options;
-  }
+  };
   selectionMade = (sel) => {
     // Process measurement filters separately than tree filters
     if (sel._type === "measurements") {
       return this.props.dispatch(applyMeasurementFilter(sel.value[0], sel.value[1], true));
     }
     return this.props.dispatch(applyFilter("add", sel.value[0], [sel.value[1]]));
-  }
+  };
   summariseFilters = () => {
     const filterNames = Reflect.ownKeys(this.props.activeFilters)
       .filter((filterName) => this.props.activeFilters[filterName].length > 0);
@@ -173,7 +173,7 @@ class FilterData extends React.Component {
         inactivate: () => {this.props.dispatch(applyFilter("inactivate", filterName, this.props.activeFilters[filterName].map((f) => f.value)));}
       };
     });
-  }
+  };
   summariseMeasurementsFilters = () => {
     if (this.props.measurementsFieldsMap === undefined) return [];
     return Object.entries(this.props.measurementsFilters).map(([field, valuesMap]) => {
@@ -186,7 +186,7 @@ class FilterData extends React.Component {
         badgeTitle: `${activeFiltersCount} x ${this.props.measurementsFieldsMap.get(field).title}`
       };
     });
-  }
+  };
   render() {
     // options only need to be calculated a single time per render, and by adding a debounce
     // to `loadOptions` we don't slow things down by comparing queries to a large number of options

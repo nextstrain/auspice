@@ -66,7 +66,7 @@ class Map extends React.Component {
     treeVersion: PropTypes.number.isRequired,
     treeLoaded: PropTypes.bool.isRequired,
     colorScaleVersion: PropTypes.number.isRequired
-  }
+  };
   constructor(props) {
     super(props);
     this.state = {

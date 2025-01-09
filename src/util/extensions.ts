@@ -2,7 +2,7 @@
 // See docs/customise-client/api.rst.
 type Extensions = {
   [key: string]: any
-}
+};
 
 const registry = (() => {
   if (!process.env.EXTENSION_DATA) {

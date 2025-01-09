@@ -1,7 +1,7 @@
 import { measurementIdSymbol } from "../../util/globals";
 
 // -- Shared Measurements types -- //
-export type MeasurementsDisplay = "raw" | "mean"
+export type MeasurementsDisplay = "raw" | "mean";
 export const measurementsDisplayValues: MeasurementsDisplay[] = ["raw", "mean"];
 export const isMeasurementsDisplay = (x: any): x is MeasurementsDisplay => measurementsDisplayValues.includes(x);
 
@@ -11,7 +11,7 @@ export const isMeasurementsDisplay = (x: any): x is MeasurementsDisplay => measu
  * Matching types allowed in Augur's measurements schema
  * <https://github.com/nextstrain/augur/blob/3f72c40897a80132099729d5d00a6718e76e0e9e/augur/data/schema-measurements.json#L152>
  */
-type JsonMeasurementMetadata = string | number | boolean
+type JsonMeasurementMetadata = string | number | boolean;
 
 interface JsonMeasurement {
   readonly strain: string
@@ -70,7 +70,7 @@ export function asMeasurement(x: Partial<Measurement>): Measurement {
        [measurementIdSymbol]: x[measurementIdSymbol],
        strain: x.strain,
        value: x.value,
-    }
+    };
   }
   throw new Error("Measurement is partial.");
 }
@@ -114,7 +114,7 @@ export function asCollection(x: Partial<Collection>): Collection {
       key: x.key,
       measurements: x.measurements,
       x_axis_label: x.x_axis_label,
-    }
+    };
   }
   throw new Error("Collection is partial.");
 }

@@ -200,7 +200,7 @@ class MobileNarrativeDisplay extends React.Component {
     >
       {props.children}
     </MobileBannerBottom>
-  )
+  );
 
   PreviousButton = (props) => (
     <MobileBannerTop height={this.state.bannerHeight}
@@ -208,7 +208,7 @@ class MobileNarrativeDisplay extends React.Component {
     >
       {props.children}
     </MobileBannerTop>
-  )
+  );
 
   renderProgress() {
     return (

@@ -155,7 +155,7 @@ export function getCds(genomeMap) {
   let cds = [];
   genomeMap[0].genes.forEach((gene) => {
     cds = cds.concat(gene.cds);
-  })
+  });
   return cds;
 }
 
@@ -187,7 +187,7 @@ export function getCdsRangeLocalFromRangeGenome(cds, rangeGenome) {
   // segA is the segment closest to genome position 1. segB is closest to the end.
   const [segA, segB] = positive ?
     [segments[0], segments[segments.length-1]] :
-    [segments[segments.length-1], segments[0]]
+    [segments[segments.length-1], segments[0]];
 
   let [cdsLocalStart, cdsLocalEnd] = [1, cds.length];
 
@@ -292,7 +292,7 @@ export function getNucCoordinatesFromAaPos(cds, aaPos) {
       /* sanity check the phase */
       if (segment.phase!==(3-nucCoordinates.length)) {
         console.error(`Internal Error -- phase mismatch for CDS ${cds.name} when mapping codon ${aaPos}`);
-        nucCoordinates.push("Internal Error!")
+        nucCoordinates.push("Internal Error!");
         break;
       }
       /* grab the necessary nucleotides -- at most there'll be two needed */
@@ -337,11 +337,11 @@ export function nucleotideToAaPosition(genomeMap, nucPos) {
           segment.rangeGenome[1] - nucPos;
         const nucLocal = segment.rangeLocal[0]+delta;
         const aaLocal = Math.ceil(nucLocal/3);
-        matches.push({cds, nucLocal, aaLocal})
+        matches.push({cds, nucLocal, aaLocal});
         /* Don't return here - we want to check future segments as segments can
         be overlapping */
       }
     }
-  })
+  });
   return matches;
 }

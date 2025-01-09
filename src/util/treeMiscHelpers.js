@@ -279,7 +279,7 @@ export const sortByGeneOrder = (genomeMap) => {
   const cdsPos = genomeMap[0].genes.map((gene) =>
     gene.cds.map((cds) => [cds.name, cds.segments[0].rangeGenome[cds.strand==='+' ? 0 : 1]])
   ).flat();
-  cdsPos.sort((a, b) => a[1]>b[1] ? 1 : -1)
+  cdsPos.sort((a, b) => a[1]>b[1] ? 1 : -1);
   const order = {};
   cdsPos.forEach(([name,], idx) => {order[name] = idx+1;});
   order.nuc=0; // Nuc is always first

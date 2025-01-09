@@ -39,7 +39,7 @@ function tree1() {
     ]
   }).nodes;
 
-  const visibility = nodes.map(() => NODE_VISIBLE)
+  const visibility = nodes.map(() => NODE_VISIBLE);
 
   const genomeMap = [
     {
@@ -70,7 +70,7 @@ function tree1() {
         }
       ]
     }
-  ]
+  ];
 
   return {nodes, visibility, genomeMap};
 }
@@ -84,14 +84,14 @@ test("Basic mutation counts", () => {
   expect(counts).toStrictEqual([{x:5,y:4}, {x:10,y:1}, {x:15,y:1}]);
 
   [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS1'), true);
-  let result = [{codon:1,y:1}]
+  let result = [{codon:1,y:1}];
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(result);
 
   [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS2'), true);
-  result = [{codon:4,y:3}]
+  result = [{codon:4,y:3}];
   expect(max).toBe(getMax(result));
-  expect(noFill(counts)).toStrictEqual(result)
+  expect(noFill(counts)).toStrictEqual(result);
 });
 
 test("Visibility mask + counts", () => {
@@ -103,7 +103,7 @@ test("Visibility mask + counts", () => {
   const [counts, max] = calcEntropyInView(nodes, visibility, nucleotide_gene, true);
   expect(max).toBe(3);
   expect(counts).toStrictEqual([{x:5,y:3}, {x:10,y:1}, {x:15,y:1}]);
-})
+});
 
 test("Basic entropy calculations", () => {
   const {nodes, visibility, genomeMap} = tree1();
@@ -112,7 +112,7 @@ test("Basic entropy calculations", () => {
   let result = [
     {x:5,  y:entropy(1,2)},     // T,G,G
     {x:10, y:entropy(1,2)},     // T,A,A
-    {x:15, y:entropy(1,2)}]     // A,A,T
+    {x:15, y:entropy(1,2)}];     // A,A,T
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
@@ -144,7 +144,7 @@ test("Visibility mask + entropy", () => {
 
 
   [counts, max] = calcEntropyInView(nodes, visibility, getCdsByName(genomeMap, 'CDS1'), false);
-  result = [{codon:1,y:entropy(1)}]  // B
+  result = [{codon:1,y:entropy(1)}];  // B
   expect(max).toBe(getMax(result));
   expect(noFill(counts)).toStrictEqual(stringifyY(result));
 
@@ -159,7 +159,7 @@ function noFill(data) {
   return data.map((d) => {
     delete d.fill; // currently calculated based on gene order, but we'll remove this concept shortly
     return d;
-  })
+  });
 }
 
 function entropy(...observations) {
@@ -168,7 +168,7 @@ function entropy(...observations) {
   observations.forEach((obs) => {
     s-=obs/total * Math.log(obs/total);
   });
-  return s
+  return s;
 }
 
 function stringifyY(data) {
@@ -177,5 +177,5 @@ function stringifyY(data) {
 }
 
 function getMax(data) {
-  return data.reduce((acc, cv) => cv.y>acc?cv.y:acc, 0)
+  return data.reduce((acc, cv) => cv.y>acc?cv.y:acc, 0);
 }

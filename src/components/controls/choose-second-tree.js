@@ -31,7 +31,7 @@ class ChooseSecondTree extends React.Component {
         .filter((dataset) => dataset.request === displayedDataset)
         .flatMap((dataset) => dataset.secondTreeOptions)
         .filter((opt) => !!opt) // .secondTreeOptions is not required
-    )]
+    )];
 
     // Don't display the sidebar UI if we're just going to display an empty dropdown!
     if (!options.length) return null;

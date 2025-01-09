@@ -100,10 +100,10 @@ class Entropy extends React.Component {
     defaultColorBy: PropTypes.string.isRequired,
     selectedCds: PropTypes.any.isRequired,
     selectedPositions: PropTypes.array.isRequired,
-  }
+  };
   /* CALLBACKS */
   onHover(hovered) {
-    this.setState({hovered})
+    this.setState({hovered});
   }
   onLeave() {
     this.setState({hovered: false});
@@ -146,7 +146,7 @@ class Entropy extends React.Component {
               this.state.chart.update({
                 zoomMin: this.state.chart.zoomBounds[0],
                 zoomMax: this.state.chart.zoomBounds[1],
-              })
+              });
             } else {
               this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
             }
@@ -204,7 +204,7 @@ class Entropy extends React.Component {
     if (onScreen===this.props.onScreen) return; // can happen when component initially rendered
     // if gone off screen or come back on screen with the bars still valid then we don't need to recalculate entropy data
     if (!onScreen || this.props.bars) {
-      return this.props.dispatch({type: ENTROPY_ONSCREEN_CHANGE, onScreen})
+      return this.props.dispatch({type: ENTROPY_ONSCREEN_CHANGE, onScreen});
     }
     // else if back on screen and the bars are invalid then we need to regenerate them
     this.props.dispatch((dispatch, getState) => {
@@ -217,7 +217,7 @@ class Entropy extends React.Component {
     if (this.props.loaded) {
       this.setUp(this.props); 
       const observer = new IntersectionObserver(this.visibilityOnScreenChange.bind(this), {threshold: 0.0});
-      observer.observe(this.d3entropy)
+      observer.observe(this.d3entropy);
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -252,7 +252,7 @@ class Entropy extends React.Component {
         updateParams.showCounts = nextProps.showCounts;
       }
       if (!isEqual(this.props.selectedPositions, nextProps.selectedPositions)) {
-        updateParams.selectedPositions = nextProps.selectedPositions
+        updateParams.selectedPositions = nextProps.selectedPositions;
       }
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
@@ -272,9 +272,9 @@ class Entropy extends React.Component {
   title() {
     if (this.props.width<500) return "Diversity";
     if (this.props.selectedCds===nucleotide_gene) {
-      return "Nucleotide diversity of genome"
+      return "Nucleotide diversity of genome";
     }
-    return `Amino acid diversity of CDS ${this.props.selectedCds.name}`
+    return `Amino acid diversity of CDS ${this.props.selectedCds.name}`;
   }
 
   render() {

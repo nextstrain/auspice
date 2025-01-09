@@ -12,7 +12,7 @@ type Props = {
 
   /** Element that contains panel-specific options. */
   options?: JSX.Element
-}
+};
 
 /**
  * A controls section for panel-specific customization.
@@ -21,15 +21,15 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
 
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
 
-  const panelIsVisible = panelsToDisplay.includes(panel)
+  const panelIsVisible = panelsToDisplay.includes(panel);
 
   // Initially, panel visibility determines options visibility.
   const [optionsAreVisible, setOptionsAreVisible] = React.useState(panelIsVisible);
 
   // Subsequent panel visibility updates also determines options visibility.
   React.useEffect(() => {
-    setOptionsAreVisible(panelIsVisible)
-  }, [panelIsVisible])
+    setOptionsAreVisible(panelIsVisible);
+  }, [panelIsVisible]);
 
   return (
     <PanelSectionContainer>

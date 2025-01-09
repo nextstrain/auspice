@@ -1,7 +1,7 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
-type JsonAnnotations = Record<string, JsonAnnotation>
+type JsonAnnotations = Record<string, JsonAnnotation>;
 // enum Strand {'+', '-'} // other GFF-valid options are '.' and '?'
 type Strand = string;
 type JsonSegmentRange = {start: number, end: number}; // Start is 1-based, End is 1-based closed (GFF)
@@ -32,7 +32,7 @@ type ChromosomeMetadata = {
   strandsObserved: Set<Strand>,
   posStrandStackHeight: number,
   negStrandStackHeight: number,
-}
+};
 
 type GenomeAnnotation = Chromosome[];
 interface Chromosome {
@@ -88,8 +88,8 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
     .map(([, annotation]) => annotation)[0];
-  if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
-  if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
+  if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition");
+  if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end");
   if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positive strand." +
     "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
   const rangeGenome: RangeGenome =  [nucAnnotation.start, nucAnnotation.end];
@@ -105,7 +105,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
       if (!(geneName in annotationsPerGene)) annotationsPerGene[geneName] = {};
       const gene = annotationsPerGene[geneName];
       gene[annotationKey] = annotation;
-    })
+    });
 
   const nextColor = nextColorGenerator();
 
@@ -116,7 +116,7 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
       const gene: Gene = {
         name: geneName,
         cds: []
-      }
+      };
       const defaultColor = nextColor.next().value; // default colours are per-gene (not per-CDS)
 
       gene.cds = Object.entries(cdsAnnotations)
@@ -124,22 +124,22 @@ export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
         .filter((cds) => cds.name!=='__INVALID__');
       gene.cds.forEach((cds) => strandsObserved.add(cds.strand));
       return gene;
-    })
+    });
 
   const metadata: ChromosomeMetadata = {
     strandsObserved,
     posStrandStackHeight: calculateStackPosition(genes, '+'),
     negStrandStackHeight: calculateStackPosition(genes, '-'),
-  }
+  };
 
   const chromosome: Chromosome = {
     name: 'source',
     range: rangeGenome,
     genes,
     metadata
-  }
+  };
   return [chromosome];
-}
+};
 
 export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
   if (genomeAnnotations) {
@@ -151,7 +151,7 @@ export const entropyCreateState = (genomeAnnotations: JsonAnnotations) => {
       };
     } catch (e) {
       if (e instanceof Error) console.error(e.message);
-      console.error("Genotype colorings and the entropy panel will not be available.")
+      console.error("Genotype colorings and the entropy panel will not be available.");
       // fallthrough
     }
   }
@@ -183,7 +183,7 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
     strand: '+',
     isWrapping: false,
     color: '#000',
-  }
+  };
   const strand = annotation.strand;
   if (!(strand==='+' || strand==='-')) {
     /** GFF allows for strands '?' (features whose strandedness is relevant, but unknown) and '.' (features that are not stranded),
@@ -210,13 +210,13 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
         rangeGenome: [annotation.start, annotation.end],
         phase: 0,
         frame: _frame(annotation.start, annotation.end, 0, rangeGenome[1], positive),
-      })
+      });
     } else {
       /* We turn this into the equivalent JsonSegments to minimise code duplication */
       annotation.segments = [
         {start: annotation.start, end: rangeGenome[1]},
         {start: 1, end: annotation.end-rangeGenome[1]}
-      ]
+      ];
       /* -ve strand segments are 3' -> 5', so segment[0] is at the start of the genome */
       if (!positive) annotation.segments.reverse();
     }
@@ -266,14 +266,14 @@ function cdsFromAnnotation(cdsName: string, annotation: JsonAnnotation, rangeGen
     strand,
     isWrapping: _isCdsWrapping(strand, segments),
     color: validColor(annotation.color) || defaultColor || '#000',
-  }
+  };
   if (typeof annotation.display_name === 'string') {
     cds.displayName = annotation.display_name;
   }
   if (typeof annotation.description === 'string') {
     cds.description = annotation.description;
   }
-  return cds
+  return cds;
 }
 
 /**
@@ -370,8 +370,8 @@ function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
   const b = Math.max(...newCds.segments.map((s) => s.rangeGenome[1]));
   for (const cds of existing) {
     if (cds.segments.length===1) continue;
-    const segments = [...cds.segments]
-    segments.sort((a, b) => a.rangeGenome[0]<b.rangeGenome[1] ? -1 : 1)
+    const segments = [...cds.segments];
+    segments.sort((a, b) => a.rangeGenome[0]<b.rangeGenome[1] ? -1 : 1);
     for (let i = 0; i<segments.length-1; i++) {
       const end = segments[i]?.rangeGenome[1] || 0;
       const nextStart = segments[i+1]?.rangeGenome[0] || 0;
@@ -385,10 +385,10 @@ function _fitCdssTogether(existing: CDS[], newCds: CDS):number {
           if (spaceTaken) return; // saves time
           el.segments.forEach((s) => {
             if (s.rangeGenome[1]>=a && s.rangeGenome[0]<=b) {
-              spaceTaken = true
+              spaceTaken = true;
             }
-          })
-        })
+          });
+        });
         if (!spaceTaken) {
           return stackPosition;
         }

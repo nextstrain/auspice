@@ -3,7 +3,7 @@ import dataset from './data/test_complex-genome-annotation.json';
 import { getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
   nucleotideToAaPosition} from "../src/util/entropy";
 
-const genome = genomeMap(dataset.meta.genome_annotations)
+const genome = genomeMap(dataset.meta.genome_annotations);
 const chromosome = genome[0];
 
 test("Chromosome coordinates", () => {
@@ -12,7 +12,7 @@ test("Chromosome coordinates", () => {
 });
 
 test("+ve strand CDS with a single segment", () => {
-  const cds = getCds('pos-single')
+  const cds = getCds('pos-single');
   const length = 2*3; // expect CDS is 2 AA long, which is 2*3 nucleotides
   /* Test certain properties -- we don't care about colour, display name for these tests */
   expect(cds).toEqual(expect.objectContaining({
@@ -21,7 +21,7 @@ test("+ve strand CDS with a single segment", () => {
     segments: [
       {rangeGenome: [23, 28], rangeLocal: [1, length], phase: 0, frame: 1, segmentNumber: 1}
     ]
-  }))
+  }));
 });
 
 test("-ve strand CDS with a single segment", () => {
@@ -33,11 +33,11 @@ test("-ve strand CDS with a single segment", () => {
     segments: [
       {rangeGenome: [72, 80], rangeLocal: [1, length], phase: 0, frame: 2, segmentNumber: 1}
     ]
-  }))
+  }));
 });
 
 test("+ve strand CDS which wraps the origin", () => {
-  const cds = getCds('pos-wrapping')
+  const cds = getCds('pos-wrapping');
   const length = 6*3;
   expect(cds).toEqual(expect.objectContaining({
     length, strand: '+',
@@ -46,11 +46,11 @@ test("+ve strand CDS which wraps the origin", () => {
       {rangeGenome: [93, 100], rangeLocal: [1, 8],      phase: 0, frame: 2, segmentNumber: 1},
       {rangeGenome: [1, 10],   rangeLocal: [9, length], phase: 1, frame: 1, segmentNumber: 2},
     ]
-  }))
+  }));
 });
 
 test("-ve strand CDS which wraps the origin", () => {
-  const cds = getCds('neg-wrapping')
+  const cds = getCds('neg-wrapping');
   const length = 6*3;
   expect(cds).toEqual(expect.objectContaining({
     length, strand: '-',
@@ -61,11 +61,11 @@ test("-ve strand CDS which wraps the origin", () => {
       {rangeGenome: [1, 8],    rangeLocal: [1, 8],      phase: 0, frame: 2, segmentNumber: 1},
       {rangeGenome: [91, 100], rangeLocal: [9, length], phase: 1, frame: 1, segmentNumber: 2},
     ]
-  }))
+  }));
 });
 
 test("+ve strand CDS with multiple (non-wrapping) segments", () => {
-  const cds = getCds('pos-multi')
+  const cds = getCds('pos-multi');
   const length = 7*3;
   expect(cds).toEqual(expect.objectContaining({
     length, strand: '+',
@@ -76,12 +76,12 @@ test("+ve strand CDS with multiple (non-wrapping) segments", () => {
       {rangeGenome: [36, 43], rangeLocal: [7, 14],      phase: 0, frame: 2, segmentNumber: 2}, // 2 2/3 amino acids
       {rangeGenome: [63, 69], rangeLocal: [15, length], phase: 1, frame: 0, segmentNumber: 3}  // 1/3 + 2 amino acids
     ]
-  }))
+  }));
 });
 
 
 test("-ve strand CDS with multiple (non-wrapping) segments", () => {
-  const cds = getCds('neg-multi')
+  const cds = getCds('neg-multi');
   const length = 8*3;
   expect(cds).toEqual(expect.objectContaining({
     length, strand: '-',
@@ -95,7 +95,7 @@ test("-ve strand CDS with multiple (non-wrapping) segments", () => {
       {rangeGenome: [46, 53], rangeLocal: [9, 16],      phase: 1, frame: 0, segmentNumber: 2}, // 1/3 + 2 + 1/3  amino acids
       {rangeGenome: [12, 19], rangeLocal: [17, length], phase: 2, frame: 2, segmentNumber: 3}  // 2/3 + 2 amino acids
     ]
-  }))
+  }));
 });
 
 const aaToNuc = {
@@ -118,7 +118,7 @@ const aaToNuc = {
   'neg-wrapping': [
     [1, [8,7,6]], [3, [2,1,100]], [6, [93,92,91]]
   ]
-}
+};
 
 describe('AA positions mapped to nucleotide positions on the genome', () => {
   for (const [name, data] of Object.entries(aaToNuc)) {
@@ -127,10 +127,10 @@ describe('AA positions mapped to nucleotide positions on the genome', () => {
       data.forEach(([aaPos, nucPosns]) => {
         const res = getNucCoordinatesFromAaPos(cds, aaPos);
         expect(res.nucCoordinates).toStrictEqual(nucPosns);
-      })
-    })
+      });
+    });
   }
-})
+});
 
 const genomeZoomToCdsLocalZoom = {
   'pos-single': [
@@ -223,7 +223,7 @@ const genomeZoomToCdsLocalZoom = {
     // are either side of the origin
     // [[91, 99],                [[10, 18],      true]],
   ],
-}
+};
 
 describe('Genome zoom bounds mapped to cds local coordinates', () => {
   for (const [name, data] of Object.entries(genomeZoomToCdsLocalZoom)) {
@@ -232,10 +232,10 @@ describe('Genome zoom bounds mapped to cds local coordinates', () => {
       data.forEach(([genomeZoomBounds, expectedResult]) => {
         expect(getCdsRangeLocalFromRangeGenome(cds, genomeZoomBounds))
           .toStrictEqual(expectedResult);
-      })
-    })
+      });
+    });
   }
-})
+});
 
 
 /**
@@ -259,7 +259,7 @@ const nucleotideToAaPositionData = [
   // Pos 53 appears in 2 segments of the neg-multi CDS, both in the same codon
   [53, [{cds: getCds('neg-multi'),    nucLocal: 8,  aaLocal: 3},
         {cds: getCds('neg-multi'),    nucLocal: 9, aaLocal: 3}]],
-]
+];
 
 
 test("Single nucleotide positions are correctly mapped to amino acid positions", () => {
@@ -277,7 +277,7 @@ function getCds(name) {
   if (genes.length!==1) throw new Error("Multiple (or no!) matching genes");
   if (genes[0].cds.length!==1) throw new Error("Multiple (or no!) matching CDSs");
   const cds = genes[0].cds[0];
-  expect(cds.name).toBe(name)
+  expect(cds.name).toBe(name);
   return cds;
 }
 

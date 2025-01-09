@@ -100,7 +100,7 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
       if (this.scatterVariables.xTemporal) {
-        [d.x, d.px] = [numDate(d.x), numDate(d.px)]
+        [d.x, d.px] = [numDate(d.x), numDate(d.px)];
       }
     }
     // set y and parent  values
@@ -116,7 +116,7 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
       if (this.scatterVariables.yTemporal) {
-        [d.y, d.py] = [numDate(d.y), numDate(d.py)]
+        [d.y, d.py] = [numDate(d.y), numDate(d.py)];
       }
     }
   }

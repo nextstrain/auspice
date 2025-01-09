@@ -39,7 +39,7 @@ const store = configureStore({
       serializableCheck: false,
     }).concat(middleware),
   devTools: process.env.NODE_ENV !== 'production',
-})
+});
 
 if (process.env.NODE_ENV !== 'production' && module.hot) {
   // console.log("hot reducer reload");
@@ -51,10 +51,10 @@ if (process.env.NODE_ENV !== 'production' && module.hot) {
 
 // Infer types from the store.
 // This is more clearly defined in src/reducers/index.ts but exported here.
-export type RootState = ReturnType<typeof store.getState>
-export type AppDispatch = typeof store.dispatch
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
 /** A function to be handled by redux (thunk) */
-export type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void
+export type ThunkFunction = (dispatch: AppDispatch, getState: () => RootState) => void;
 
 export default store;

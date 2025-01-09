@@ -136,7 +136,7 @@ export const setDisplayOrder = ({
         previousWasVisible = node.visibility === NODE_VISIBLE;
 
         return y;
-      }
+      };
     })();
   }
 

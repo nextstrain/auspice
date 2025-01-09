@@ -36,20 +36,20 @@ export interface Genotype {
   aa: boolean
 }
 
-export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
+export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter";
 
 export type LegendBounds = {
   [key: string | number]: [number, number]
-}
+};
 
 /** A map of legendValues to a value for display in the legend. */
-export type LegendLabels = Map<unknown, unknown>
+export type LegendLabels = Map<unknown, unknown>;
 
 /** An array of values to display in the legend. */
 // TODO: I think this should be number[] | string[] but that requires adding type guards
-export type LegendValues = any[]
+export type LegendValues = any[];
 
-export type PerformanceFlags = Map<string, boolean>
+export type PerformanceFlags = Map<string, boolean>;
 
 export interface SelectedNode {
   existingFilterState: "active" | "inactive" | null
@@ -59,7 +59,7 @@ export interface SelectedNode {
   treeId: string
 }
 
-export type ScaleType = "ordinal" | "categorical" | "continuous" | "temporal" | "boolean"
+export type ScaleType = "ordinal" | "categorical" | "continuous" | "temporal" | "boolean";
 
 export interface ScatterVariables {
   showBranches?: boolean
@@ -323,7 +323,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, updatesToState);
     }
     case types.TOGGLE_FOCUS: {
-      return {...state, focus: !state.focus}
+      return {...state, focus: !state.focus};
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };
@@ -411,7 +411,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return {...state, selectedNode};
     }
     case types.DESELECT_NODE: {
-      return {...state, selectedNode: null}
+      return {...state, selectedNode: null};
     }
     case types.APPLY_FILTER: {
       // values arrive as array
@@ -419,13 +419,13 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       if (action.values.length) { // set the filters to the new values
         filters[action.trait] = action.values;
       } else {                    // remove if no active+inactive filters
-        delete filters[action.trait]
+        delete filters[action.trait];
       }
 
       /* In the situation where a node-selected modal is active + we have
       removed or inactivated the corresponding filter, then we want to remove
       the modal */
-      let selectedNode = state.selectedNode
+      let selectedNode = state.selectedNode;
       if (selectedNode) {
         const filterInfo = filters?.[strainSymbol]?.find((f)=>f.value===selectedNode.name);
         if (!filterInfo || !filterInfo.active) {

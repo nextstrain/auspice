@@ -13,7 +13,7 @@ export type Tooltip = JSX.Element;
 type Props = {
   title: Title
   tooltip?: Tooltip
-}
+};
 
 /**
  * A title and tooltip to be shown in a control header.

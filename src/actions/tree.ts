@@ -16,10 +16,10 @@ import { Metadata } from "../metadata";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState } from "../reducers/tree/types";
 
-type RootIndex = number | undefined
+type RootIndex = number | undefined;
 
 /** [root idx tree1, root idx tree2] */
-export type Root = [RootIndex, RootIndex]
+export type Root = [RootIndex, RootIndex];
 
 /**
  * Updates the `inView` property of nodes which depends on the currently selected

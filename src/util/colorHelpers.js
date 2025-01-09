@@ -97,7 +97,7 @@ const tipOpacityFunction = branchOpacityFunction
  */
 export const calculateStrokeColors = (tree, branch, confidence, colorBy) => {
   if (confidence === true) {
-    return tree.nodeColors.map(branch ? _confidenceBranchColor : _confidenceTipColor)
+    return tree.nodeColors.map(branch ? _confidenceBranchColor : _confidenceTipColor);
   }
   return branch ? tree.nodeColors.map(_defaultBranchColor) : tree.nodeColors;
 
@@ -115,7 +115,7 @@ export const calculateStrokeColors = (tree, branch, confidence, colorBy) => {
   }
 
   function _defaultBranchColor(col) {
-    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString()
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   }
 };
 

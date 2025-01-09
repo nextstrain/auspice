@@ -53,7 +53,7 @@ class Notifications extends React.Component {
     stack: PropTypes.array.isRequired,
     dispatch: PropTypes.func.isRequired,
     pageWidth: PropTypes.number.isRequired
-  }
+  };
   closeIcon(d) {
     return (
       <div onClick={() => { this.removeNotificationCallback(d.id); }}

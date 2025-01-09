@@ -8,15 +8,15 @@ import { numericToCalendar } from "../../../util/dateHelpers";
  * Future enhancement: we could examine the coloring metadata (if available) and format the value accordingly
  */
 export function nodeDisplayName(t, node, tipLabelKey, branch) {
-  let tipLabel = getTraitFromNode(node, tipLabelKey)
-  if (tipLabelKey==='num_date' && tipLabel) tipLabel = numericToCalendar(tipLabel)
+  let tipLabel = getTraitFromNode(node, tipLabelKey);
+  if (tipLabelKey==='num_date' && tipLabel) tipLabel = numericToCalendar(tipLabel);
   const terminal = !node.hasChildren;
 
   if (branch) {
     if (terminal) {
-      return tipLabel ? t("Branch leading to {{tipLabel}}", {tipLabel}) : t("Terminal branch") // hover + click
+      return tipLabel ? t("Branch leading to {{tipLabel}}", {tipLabel}) : t("Terminal branch"); // hover + click
     }
-    return t("Internal branch")  // branch click only
+    return t("Internal branch");  // branch click only
   }
   /* TIP */
   return tipLabel;

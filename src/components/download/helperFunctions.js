@@ -633,7 +633,7 @@ export const auspiceJSON = (dispatch, datasetNames) => {
   const filenames = [];
   if (!datasetNames.some(Boolean)) {
     console.error(`Unable to fetch empty dataset names: ${JSON.stringify(datasetNames)}`);
-    return dispatch(errorNotification({message: "Unable to download Auspice JSON (see console for more info)"}))
+    return dispatch(errorNotification({message: "Unable to download Auspice JSON (see console for more info)"}));
   }
   for (const datasetName of datasetNames) {
     if (!datasetName) continue; // e.g. no 2nd tree

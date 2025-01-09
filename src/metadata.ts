@@ -1,15 +1,15 @@
-import { ScaleType } from "./reducers/controls"
+import { ScaleType } from "./reducers/controls";
 
 export type Metadata = {
   rootSequence?: unknown
   rootSequenceSecondTree?: unknown
   identicalGenomeMapAcrossBothTrees?: boolean
   colorings: Colorings
-}
+};
 
 export type Colorings = {
   [key: string]: ColoringInfo
-}
+};
 
 export type ColoringInfo = {
   title: string
@@ -19,7 +19,7 @@ export type ColoringInfo = {
   scale: [string, string][]
 
   legend?: Legend
-}
+};
 
 export type Legend = {
   /**
@@ -33,4 +33,4 @@ export type Legend = {
 
   /** Custom legendBounds. Only considered for continuous scales. */
   bounds?: [number, number]
-}[]
+}[];

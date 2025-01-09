@@ -63,21 +63,21 @@ export const calendarToNumeric = (calDate, ambiguity=false) => {
   const [numYear, numMonth, numDay] = fields.map((d) => parseInt(d, 10));
   
   if (calDate.includes("X")) {
-    if (!ambiguity) return undefined
+    if (!ambiguity) return undefined;
     if (year.includes("X")) return undefined;
     if (month.includes("X")) {
-      if (isNaN(numYear) || month!=="XX" || day!=="XX") return undefined
+      if (isNaN(numYear) || month!=="XX" || day!=="XX") return undefined;
       return numYear + 0.5;
     }
     /* at this point 'day' includes 'X' */
-    if (isNaN(numYear) || isNaN(numMonth) || day!=='XX') return undefined
+    if (isNaN(numYear) || isNaN(numMonth) || day!=='XX') return undefined;
     const range = [
       _yearMonthDayToNumeric(numYear, numMonth, 1),
       _yearMonthDayToNumeric(numMonth===12?numYear+1:numYear, numMonth===12?1:numMonth+1, 1)
-    ]
-    return range[0] + (range[1]-range[0])/2
+    ];
+    return range[0] + (range[1]-range[0])/2;
   }
-  return _yearMonthDayToNumeric(numYear, numMonth, numDay)
+  return _yearMonthDayToNumeric(numYear, numMonth, numDay);
 };
 
 function _yearMonthDayToNumeric(year,month,day) {
@@ -136,7 +136,7 @@ export const getPreviousDate = (unit, date) => {
       const year = Math.floor((date.getFullYear())/100)*100;
       const ret = new Date(year, 0, 1, 12);
       ret.setFullYear(year);
-      return ret
+      return ret;
     }
     default:
       console.error("Unknown unit for `advanceDateTo`:", unit);

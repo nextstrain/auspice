@@ -12,7 +12,7 @@ import * as renderers from "./renderers";
 
 // ---------- Basics ---------- //
 
-export type Distance = "num_date" | "div"
+export type Distance = "num_date" | "div";
 
 export type TreeElement = 
   ".branch.S" |
@@ -25,7 +25,7 @@ export type TreeElement =
   ".tip" |
   ".tipLabel" |
   ".vaccineCross" |
-  ".vaccineDottedLine"
+  ".vaccineDottedLine";
 
 export interface Regression {
   intercept?: number
@@ -35,7 +35,7 @@ export interface Regression {
 
 // ---------- Callbacks ---------- //
 
-type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900> 
+type NodeCallback = (d: PhyloNode) => void; // See <https://github.com/nextstrain/auspice/issues/1900> 
 
 export interface Callbacks {
   onBranchClick: NodeCallback
@@ -76,7 +76,7 @@ interface SVG {
   y?: any
 }
 
-export type SVGProperty = keyof SVG
+export type SVGProperty = keyof SVG;
 
 export interface PhyloNode extends SVG {
   angle?: number

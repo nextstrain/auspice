@@ -123,7 +123,7 @@ const modifyStateViaURLQuery = (state, query) => {
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
     const filterName = filterKey.replace('f_', '');
     const filterValues = query[filterKey] ? query[filterKey].split(',') : [];
-    state.filters[filterName] = filterValues.map((value) => ({value, active: true}))
+    state.filters[filterName] = filterValues.map((value) => ({value, active: true}));
   }
   if (query.s) {
     const filterValues = query.s ? query.s.split(',') : [];
@@ -150,8 +150,8 @@ const modifyStateViaURLQuery = (state, query) => {
         !_validDate(_dmaxNum, state.absoluteDateMinNumeric, state.absoluteDateMaxNumeric) ||
         _dminNum >= _dmaxNum
       ) {
-        console.error("Invalid 'animate' URL query (invalid date range)")
-        delete query.animate
+        console.error("Invalid 'animate' URL query (invalid date range)");
+        delete query.animate;
       } else {
         window.NEXTSTRAIN.animationStartPoint = _dminNum;
         window.NEXTSTRAIN.animationEndPoint = _dmaxNum;
@@ -325,14 +325,14 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
       metadata.colorings.gt = {
         title: "Genotype",
         type: "categorical"
-      }
+      };
     }
   } else {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
     if (Object.keys(metadata.colorings).includes('gt')) {
       console.error("Genotype coloring ('gt') was specified as an option in the JSON, however the data does not support this: " +
-      "check that 'metadata.genome_annotations' is correct and that mutations have been assigned to 'branch_attrs' on the tree.")
+      "check that 'metadata.genome_annotations' is correct and that mutations have been assigned to 'branch_attrs' on the tree.");
       delete metadata.colorings.gt;
     }
   }
@@ -500,7 +500,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     if (!genomeMap) {
       fallBackToDefaultColorBy();
     } else {
-      const decoded = decodeColorByGenotype(state.colorBy, genomeMap)
+      const decoded = decodeColorByGenotype(state.colorBy, genomeMap);
       if (!decoded) { // note that a console.error printed by decodeColorByGenotype in this case
         fallBackToDefaultColorBy();
       } else {
@@ -508,9 +508,9 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
         if (state.colorBy!==encoded) {
           /* color-by is partially valid - i.e. some positions are invalid (note that position ordering is unchanged) */
           console.error(`Genotype color-by ${state.colorBy} contains at lease one invalid position. ` +
-          `Color-by has been changed to ${encoded}.`)
+          `Color-by has been changed to ${encoded}.`);
           query.c = encoded;
-          state.colorBy = encoded
+          state.colorBy = encoded;
         }
       }
     }
@@ -613,13 +613,13 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     if (!state.filters[traitName].length) {
       delete state.filters[traitName];
       delete query[_queryKey(traitName)];
-      continue
+      continue;
     }
     /* delete filter names (e.g. country, region) which aren't observed on the tree */
     if (!Object.keys(tree.totalStateCounts).includes(traitName) && traitName!==strainSymbol && traitName!==genotypeSymbol) {
       delete state.filters[traitName];
       delete query[_queryKey(traitName)];
-      continue
+      continue;
     }
     /* delete filter values (e.g. USA, Oceania) which aren't valid, i.e. observed on the tree */
     const traitValues = state.filters[traitName].map((f) => f.value);
@@ -824,12 +824,12 @@ function updateMetadataStateViaSecondTree(metadata, json, genomeMap) {
           if (indexOrKey==='metadata') return true;
           return undefined; // use lodash's default comparison
         }
-      )
+      );
     } catch (e) {
       if (e instanceof Error) console.error(e.message);
     }
     if (!metadata.identicalGenomeMapAcrossBothTrees) {
-      console.warn("Heads up! The two trees have different genome_annotations and thus genotype colorings will only be applied to the LHS tree")
+      console.warn("Heads up! The two trees have different genome_annotations and thus genotype colorings will only be applied to the LHS tree");
     }
   }
 
@@ -978,7 +978,7 @@ export const createStateFromQueryOrJSONs = ({
   tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
 
   if (treeToo && treeToo.loaded) {
-    treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
+    treeToo = updateSecondTree(tree, treeToo, controls, dispatch);
   }
 
   /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */
@@ -1003,7 +1003,7 @@ export const createStateFromQueryOrJSONs = ({
       const cds = getCdsFromGenotype(gt?.gene, entropy.genomeMap);
       if (cds) {
         entropy.selectedCds = cds;
-        entropy.selectedPositions = gt?.positions || []
+        entropy.selectedPositions = gt?.positions || [];
       }
     }
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, entropy.selectedCds, entropy.showCounts);
@@ -1056,7 +1056,7 @@ export const createTreeTooState = ({
 
   const tree = Object.assign({}, oldState.tree);
   tree.name = originalTreeUrl;
-  let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl)
+  let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl);
 
   /* recompute the controls state now that we have new data */
   const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata.colorings);
@@ -1082,7 +1082,7 @@ function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTre
   castIncorrectTypes(metadata, treeToo);
   treeToo.debug = "RIGHT";
   treeToo.name = secondTreeName;
-  updateMetadataStateViaSecondTree({...metadata}, secondTreeDataset, genomeMap)
+  updateMetadataStateViaSecondTree({...metadata}, secondTreeDataset, genomeMap);
 
   const secondTreeColorings = convertColoringsListToDict(secondTreeDataset.meta?.colorings || []);
   const stateCountAttrs = gatherTraitNames(treeToo.nodes, secondTreeColorings);
@@ -1091,7 +1091,7 @@ function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTre
   /* TODO: calc & display num tips in 2nd tree */
   // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
 
-  return {treeToo, metadata}
+  return {treeToo, metadata};
 }
 
 /**

@@ -123,7 +123,7 @@ export const getCdsFromGenotype = (name, genomeMap) => {
     }
   }
   return null;
-}
+};
  
 /**
  * Returns the length of the genome (in nucleotides, if cdsName='nuc')

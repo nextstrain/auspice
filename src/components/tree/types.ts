@@ -1,4 +1,4 @@
-import { WithTranslation } from "react-i18next"
+import { WithTranslation } from "react-i18next";
 import { ColorScale, Layout, PerformanceFlags, ScatterVariables, SelectedNode, TemporalConfidence } from "../../reducers/controls";
 import { TreeState, TreeTooState } from "../../reducers/tree/types";
 import { AppDispatch } from "../../store";

@@ -65,7 +65,7 @@ class Main extends React.Component {
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
-  }
+  };
   UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
       this.setState({showSpinner: false});

@@ -62,7 +62,7 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
  * @returns {ReduxThunk}
  */
 export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
-  const action = {type: types.CHANGE_ENTROPY_CDS_SELECTION}
+  const action = {type: types.CHANGE_ENTROPY_CDS_SELECTION};
   const entropy = getState().entropy;
 
   // no-op if the entropy data isn't present
@@ -70,7 +70,7 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
 
   if (arg === nucleotide_gene) {
     if (entropy.selectedCds === nucleotide_gene) {
-      return
+      return;
     }
     action.selectedCds = arg;
     action.selectedPositions = [];
@@ -79,9 +79,9 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
       action.selectedCds = entropy.selectedCds;
       action.selectedPositions = [];
     } else {
-      const gt = decodeColorByGenotype(arg)
+      const gt = decodeColorByGenotype(arg);
       if (!gt) {
-        console.error("Error decoding genotype colorBy for entropy recalc.")
+        console.error("Error decoding genotype colorBy for entropy recalc.");
         return;
       }
       const cds = getCdsFromGenotype(gt.gene, entropy.genomeMap);

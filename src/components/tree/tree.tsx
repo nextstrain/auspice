@@ -54,14 +54,14 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
       root: [0, 0]
     }));
-  }
+  };
 
   /* pressing the escape key should dismiss an info modal (if one exists) */
   handlekeydownEvent = (event: KeyboardEvent) => {
     if (event.key==="Escape" && this.props.selectedNode) {
       this.clearSelectedNode(this.props.selectedNode);
     }
-  }
+  };
 
   setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>) {
     /* this.setState(newState) will be run sometime after this returns */
@@ -214,7 +214,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
       root[1] = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
     }
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
-  }
+  };
 
   override render() {
     const { t } = this.props;

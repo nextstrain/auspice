@@ -5,7 +5,7 @@ import { AnnotatedTitle, Title, Tooltip } from "./annotatedTitle";
 type Props = {
   title: Title
   tooltip?: Tooltip
-}
+};
 
 /**
  * A header used by all non-panel controls, containing an informative title.

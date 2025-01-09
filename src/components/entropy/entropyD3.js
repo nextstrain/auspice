@@ -40,7 +40,7 @@ EntropyChart.prototype.render = function render(props) {
   this._createGroups();
   this._setScales(props.maxYVal);
   this._setZoomBounds();
-  this._setZoomCoordinates(props.zoomMin, props.zoomMax)
+  this._setZoomCoordinates(props.zoomMin, props.zoomMax);
   this._drawAxes();
   this._setUpZoomBrush();
   this._drawNavCds();
@@ -59,7 +59,7 @@ EntropyChart.prototype.update = function update({
 }) {
   if (selectedCds) {
     this.selectedCds = selectedCds;
-    this._setUpZoomBrushWrapping()
+    this._setUpZoomBrushWrapping();
     this.aa = this.selectedCds !== 'nuc';
     this._setZoomBounds();
   }
@@ -97,7 +97,7 @@ EntropyChart.prototype.update = function update({
     this._setZoomCoordinates(zoomMin, zoomMax, false);
     this._groups.navBrush.call(this.brush.move, () => this.zoomCoordinates.map(this.scales.xNav));
   }
-}
+};
 
 /* "PRIVATE" PROTOTYPES */
 
@@ -108,7 +108,7 @@ EntropyChart.prototype._setZoomBounds = function _setZoomBounds() {
   } else {
     this.zoomBounds = [0, this.genomeMap[0].range[1]];
   }
-}
+};
 
 /**
  * Given the selectedCds + selectedPositions we want to choose the appropriate zoom
@@ -171,12 +171,12 @@ EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overri
         this.zoomCoordinates = [
           segments[segments.length-1].rangeGenome[1],
           segments[0].rangeGenome[0]
-        ]
+        ];
       } else {
         this.zoomCoordinates = [
           segments[0].rangeGenome[1],
           segments[segments.length-1].rangeGenome[0]
-        ]
+        ];
       }
       /* gmin (overrideMin), gmax (overrideMax) are backwards with wrapping genes,
       although if you think of them as gmin<gmax always then it is consistent */
@@ -233,7 +233,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .attr("y", 0)
         .attr("width", (d) => {
           return this.scales.xMain(Math.min(d.rangeLocal[1]+0.5, inViewNucB)) -
-          this.scales.xMain(Math.max(d.rangeLocal[0]-0.5, inViewNucA))
+          this.scales.xMain(Math.max(d.rangeLocal[0]-0.5, inViewNucA));
         })
         .attr("height", this.offsets.mainCdsRectHeight)
         .style("fill", this.selectedCds.color)
@@ -241,7 +241,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
         .style("stroke-width", 2)
         .style('opacity', 1) // Segments _can't_ overlap when viewing an individual CDS
         .on("mouseover", (d) => {
-          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
+          this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)});
         })
         .on("mouseout", (d) => {
           this.callbacks.onLeave(d);
@@ -293,7 +293,7 @@ EntropyChart.prototype._drawMainCds = function _drawMainCds() {
       .style("fill", (d) => d.cds.color)
       .style('opacity', 0.7)
       .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
-        this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
+        this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)});
       })
       .on("mouseout", this.callbacks.onLeave)
       .on("click", this.callbacks.onCdsClick)
@@ -330,10 +330,10 @@ function textIfSpaceAllows(text, width, pxPerChar) {
 function _cdsPath(d, offsets) {
   const h = offsets.mainCdsRectHeight;
   let w = Math.floor(d.rangePx[1] - d.rangePx[0]); // width of CDS (pixels)
-  let x = Math.round(d.rangePx[0])
+  let x = Math.round(d.rangePx[0]);
   if (w<20) {
     /* no directional arrow - space is too limited */
-    return `M ${x},${d.yPx} h ${w} v ${h} h -${w} Z`
+    return `M ${x},${d.yPx} h ${w} v ${h} h -${w} Z`;
   }
   const w2 = Math.floor(Math.min(w/4, 10)); // width of arrow head
   w-=w2;
@@ -342,7 +342,7 @@ function _cdsPath(d, offsets) {
     return `M ${x},${d.yPx} h ${w} l ${w2},${h2} l -${w2},${h2} h -${w} Z`;
   }
   // start at top-right and go around the arrow anticlockwise
-  x = Math.round(d.rangePx[1])
+  x = Math.round(d.rangePx[1]);
   return `M ${x},${d.yPx} h -${w} l -${w2},${h2} l ${w2},${h2} h ${w} Z`;
 }
 
@@ -372,7 +372,7 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
         this.offsets.navCdsNegativeY1Delta + // start below axis labels & move downwards
           (s.cds.stackPosition-1) * this.offsets.navCdsRectHeight,
       ...s
-    }))
+    }));
 
   this._groups.navCds.selectAll(".cdsNav")
     .data(cdsSegments)
@@ -386,12 +386,12 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
       .style("fill", (d) => d.cds.color)
       .style('fill-opacity', (d) => {
         if (this.selectedCds===nucleotide_gene) return 1;
-        return d.cds.name===this.selectedCds.name ? 1 : 0.3
+        return d.cds.name===this.selectedCds.name ? 1 : 0.3;
       })
       .style('stroke', '#fff')
       .style('stroke-width', 1)
       .on("mouseover", (d) => { // note that the last-rendered CDS (rect) captures
-        this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)})
+        this.callbacks.onHover({d3event, tooltip: this._cdsTooltip(d)});
       })
       .on("mouseout", (d) => {
         this.callbacks.onLeave(d);
@@ -428,7 +428,7 @@ EntropyChart.prototype._drawNavCds = function _drawNavCds() {
  * @returns 
  */
 EntropyChart.prototype._cdsSegments = function _cdsSegments({range=undefined, selected=false}) {
-  const cdsSegments = []
+  const cdsSegments = [];
   this.genomeMap[0] // Auspice only (currently) considers the first genome
     .genes.forEach((gene) => {
       gene.cds.forEach((cds) => {
@@ -441,11 +441,11 @@ EntropyChart.prototype._cdsSegments = function _cdsSegments({range=undefined, se
           s.cds = cds;   // this is a pointer to the redux data - don't modify it!
           s.gene = gene; // this is a pointer to the redux data - don't modify it!
           cdsSegments.push(s);
-        })
-      })
-    })
+        });
+      });
+    });
   return cdsSegments;
-}
+};
 
 /* clearSelectedBar works on SVG id tags, not on this.selected */
 EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
@@ -476,7 +476,7 @@ EntropyChart.prototype._drawLoadingState = function _drawLoadingState() {
     .attr("y", 0)
     .attr("width", () => this.scales.xMain.range()[1])
     .attr("height", () => this.scales.y.range()[0])
-    .attr("fill-opacity", 0.1)
+    .attr("fill-opacity", 0.1);
   this._groups.mainBars
     .append("text")
     .attr("y", () => this.scales.y.range()[0]/2)
@@ -487,8 +487,8 @@ EntropyChart.prototype._drawLoadingState = function _drawLoadingState() {
     .style("fill", darkGrey)
     .style("font-size", '5rem')
     .style("font-weight", 200)
-    .text('data loading')
-}
+    .text('data loading');
+};
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype._drawBars = function _drawBars() {
@@ -530,7 +530,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       this.callbacks.onHover({
         d3event,
         tooltip: this.aa ? this._mainTooltipAa(d) : this._mainTooltipNuc(d),
-      })
+      });
     })
     .on("mouseout", (d) => {
       this.callbacks.onLeave(d);
@@ -609,7 +609,7 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
     .style("fill", darkGrey)
     .style("font-size", '12px')
     .text('AA pos')
-    .style("visibility", this.aa ? "visible": "hidden")
+    .style("visibility", this.aa ? "visible": "hidden");
 
   this._groups.mainYAxis.call(this.axes.y);
   this._groups.mainXAxis.call(this.axes.xMain);
@@ -638,12 +638,12 @@ EntropyChart.prototype._updateMainScaleAndAxis = function _updateMainScaleAndAxi
   }
 
   this._groups.mainXAxis.select(".axisLabel")
-    .style("visibility", this.aa ? "visible": "hidden")
+    .style("visibility", this.aa ? "visible": "hidden");
 
   this.scales.y
     .domain([0, yMax])
     .range([this.offsets.heightMainBars, 0]);
-  this._groups.mainYAxis.call(this.axes.y)
+  this._groups.mainYAxis.call(this.axes.y);
   /* requires redraw of bars */
 };
 
@@ -750,7 +750,7 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
   individual CDS */
   this.offsets.xMainInternalPad = 20;
   if (this.aa) {
-    this.offsets.x1Narrow = this.offsets.x1 + this.offsets.xMainInternalPad
+    this.offsets.x1Narrow = this.offsets.x1 + this.offsets.xMainInternalPad;
     this.offsets.widthNarrow = this.offsets.width - 2*this.offsets.xMainInternalPad;
   } else {
     this.offsets.x1Narrow = this.offsets.x1;
@@ -765,7 +765,7 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
  */
 EntropyChart.prototype._updateOffsets = function _updateOffsets() {
   if (this.aa) {
-    this.offsets.x1Narrow = this.offsets.x1 + this.offsets.xMainInternalPad
+    this.offsets.x1Narrow = this.offsets.x1 + this.offsets.xMainInternalPad;
     this.offsets.widthNarrow = this.offsets.width - 2*this.offsets.xMainInternalPad;
     this.offsets.mainCdsY1 = this.offsets.mainAxisY1 - 
       this.offsets.tinySpace - // space above axis line before any CDS appears
@@ -782,7 +782,7 @@ EntropyChart.prototype._updateOffsets = function _updateOffsets() {
   this.offsets.heightMainBars = this.offsets.mainCdsY1 - 
     this.offsets.mainY1 - 
     this.offsets.tinySpace; // space between topmost CDS + bars starting 
-}
+};
 
 /**
  * Creates & renders the brush (the grey shaded area which we can drag to move the zoom window)
@@ -830,8 +830,8 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
     .attr("transform", (d) => {
       return d.type === "e" ? // end (2nd) handle
         `translate(${this.scales.xNav(this.zoomCoordinates[1])},${this.offsets.brushHeight})` :
-        `translate(${this.scales.xNav(this.zoomCoordinates[0])},${this.offsets.brushHeight})`
-    })
+        `translate(${this.scales.xNav(this.zoomCoordinates[0])},${this.offsets.brushHeight})`;
+    });
 
     this._setUpZoomBrushWrapping();
 
@@ -874,7 +874,7 @@ EntropyChart.prototype._setUpZoomBrushWrapping = function _setUpZoomBrushWrappin
 
   // hide the actual brush selection (as we want to view the inverted selection)
   this._groups.navBrush.select(".selection").attr("fill-opacity", 0);
-}
+};
 
 
 /**
@@ -917,7 +917,7 @@ EntropyChart.prototype._brushChanged = function _brushChanged(final=false) {
     }
   }
     
-  this.axes.xMain = this.axes.xMain.scale(this.scales.xMain)
+  this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
   this._groups.mainXAxis.call(this.axes.xMain);
   this._drawBars();
   this._drawMainCds();
@@ -935,7 +935,7 @@ EntropyChart.prototype._brushChanged = function _brushChanged(final=false) {
     this._navBrushWrappingSelection
       .attr("x", (d, i) => i===0 ? 0 : this.scales.xNav(this.zoomCoordinates[1]))
       .attr("width", (d, i) => i===0 ? this.scales.xNav(this.zoomCoordinates[0]) : 
-        this.offsets.width - this.scales.xNav(this.zoomCoordinates[1]))
+        this.offsets.width - this.scales.xNav(this.zoomCoordinates[1]));
   }
 };
 
@@ -1012,7 +1012,7 @@ EntropyChart.prototype._setUpMousewheelZooming = function _setUpMousewheelZoomin
 
 /* prepare graph elements to be drawn in */
 EntropyChart.prototype._createGroups = function _createGroups() {
-  this._groups = {}
+  this._groups = {};
   this._groups.mainBars = this.svg.append("g")
     .attr("id", "mainBars")
     .attr("clip-path", "url(#clip)")
@@ -1035,19 +1035,19 @@ EntropyChart.prototype._createGroups = function _createGroups() {
     
   this._groups.mainYAxis = this.svg.append("g")
     .attr("id", "entropyYAxis") // NOTE - id is referred to by tooltip
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.mainY1 + ")")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.mainY1 + ")");
 
   this._groups.mainXAxis = this.svg.append("g")
     .attr("id", "mainXAxis")
-    .attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainAxisY1 + ")")
+    .attr("transform", "translate(" + this.offsets.x1Narrow + "," + this.offsets.mainAxisY1 + ")");
 
   this._groups.navXAxis = this.svg.append("g")
     .attr("id", "navXAxis")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.navAxisY1 + ")")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.navAxisY1 + ")");
 
 
   this._groups.mainClip = this.svg.append("g")
-    .attr("id", "mainClip")
+    .attr("id", "mainClip");
 
   this._groups.mainClip.append("clipPath")
     /** The coordinates here get translated by element where we apply the clipping.
@@ -1062,7 +1062,7 @@ EntropyChart.prototype._createGroups = function _createGroups() {
       .attr("y", 0)
       .attr("width", this.offsets.widthNarrow)
       .attr("height", this.offsets.heightMainBars);
-}
+};
   
 
 
@@ -1097,9 +1097,9 @@ EntropyChart.prototype._mainTooltipAa = function _mainTooltipAa(d) {
         </div>
       </div>
     );
-  }
-  return _render.bind(this)
-}
+  };
+  return _render.bind(this);
+};
 
 EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
   const _render = function _render(t) {
@@ -1126,11 +1126,11 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
             ))}
           </tbody>
         </table>
-      </div>)
+      </div>);
     } else {
       overlaps = (<div>
         {t("No overlapping CDSs")}
-      </div>)
+      </div>);
     }
 
     return (
@@ -1149,9 +1149,9 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
         </div>
       </div>
     );
-  }
-  return _render.bind(this)
-}
+  };
+  return _render.bind(this);
+};
 
 
 EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
@@ -1193,10 +1193,10 @@ EntropyChart.prototype._cdsTooltip = function _cdsTooltip(d) {
             {t("Click to view this CDS in isolation")}
           </div>)}
       </div>
-    )
-  }
-  return _render.bind(this)
-}
+    );
+  };
+  return _render.bind(this);
+};
 
 function _cdsSegmentLength(segmentRangeNuc) {
   const numNucs = segmentRangeNuc[1]-segmentRangeNuc[0] + 1;
@@ -1205,7 +1205,7 @@ function _cdsSegmentLength(segmentRangeNuc) {
   if (hanging) {
     ret += hanging===1 ? " ⅓" : " ⅔";
   }
-  return ret + " amino acids"
+  return ret + " amino acids";
 }
 
 export default EntropyChart;

@@ -5,9 +5,9 @@ export const defaultEntropyState = () => {
   const startingState = {
     loaded: false,
     showCounts: false,
-  }
+  };
   return {...startingState};
-}
+};
 
 const Entropy = (state = defaultEntropyState(), action) => {
   switch (action.type) {
@@ -24,12 +24,12 @@ const Entropy = (state = defaultEntropyState(), action) => {
       });
     case types.TOGGLE_PANEL_DISPLAY:
       if (action.entropyData) {
-        return {...state, bars: action.entropyData, maxYVal: action.entropyMaxYVal}
+        return {...state, bars: action.entropyData, maxYVal: action.entropyMaxYVal};
       }
       return state;
     case types.ENTROPY_ONSCREEN_CHANGE:
       if (action.entropyData) {
-        return {...state, onScreen: action.onScreen, bars: action.entropyData, maxYVal: action.entropyMaxYVal}
+        return {...state, onScreen: action.onScreen, bars: action.entropyData, maxYVal: action.entropyMaxYVal};
       }
       return {...state, onScreen: action.onScreen};
     case types.ENTROPY_COUNTS_TOGGLE:

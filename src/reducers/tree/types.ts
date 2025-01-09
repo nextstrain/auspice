@@ -5,7 +5,7 @@ import { PhyloNode } from "../../components/tree/phyloTree/types";
  * Maps mutation strings (in format gene:fromPosTo, e.g. 'nuc:A123T')
  * to their occurrence count in the tree
  */
-export type Mutations = Record<string, number>
+export type Mutations = Record<string, number>;
 
 export interface ReduxNode {
   /** the index of the node in the nodes array. set so that we can access visibility / nodeColors if needed */
@@ -49,7 +49,7 @@ export interface ReduxNode {
  * Keys: the traits
  * Values: a Map of trait values to count
  */
-export type TraitCounts = Record<string, Map<string, number>>
+export type TraitCounts = Record<string, Map<string, number>>;
 
 export interface TreeState {
   availableBranchLabels: string[]
@@ -83,4 +83,4 @@ export interface TreeTooState extends TreeState {
   tangleTipLookup?: unknown[][]
 }
 
-export type Visibility = typeof NODE_NOT_VISIBLE | typeof NODE_VISIBLE_TO_MAP_ONLY | typeof NODE_VISIBLE
+export type Visibility = typeof NODE_NOT_VISIBLE | typeof NODE_VISIBLE_TO_MAP_ONLY | typeof NODE_VISIBLE;

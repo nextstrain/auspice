@@ -66,7 +66,7 @@ class ChooseLayout extends React.Component {
   static propTypes = {
     layout: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
-  }
+  };
   renderScatterplotAxesSelector() {
     const options = collectAvailableScatterVariables(this.props.colorings, this.props.colorBy);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];

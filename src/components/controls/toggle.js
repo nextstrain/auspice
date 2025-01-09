@@ -7,7 +7,7 @@ const ToggleContainer = styled.div`
   // Same as ToggleBackground, necessary for panel toggles.
   height: 21px;
   position: relative;
-`
+`;
 
 const ToggleBackground = styled.label`
   position: relative;
@@ -36,7 +36,7 @@ const ExperimentalIcon = styled.span`
   position: absolute;
   left: -12px;
   top: 6px;
-`
+`;
 
 const Slider = styled.div`
   & {

@@ -65,7 +65,7 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
   the event as an argument */
   if (window.event instanceof PointerEvent && window.event.shiftKey) {
     // no need to dispatch a filter action
-    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id})
+    this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: true, treeId: d.that.id});
     return;
   }
 

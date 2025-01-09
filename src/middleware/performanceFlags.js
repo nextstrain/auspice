@@ -14,7 +14,7 @@ export const performanceFlags = (_store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START: {
       modifiedAction = {...action};
-      modifiedAction.controls.performanceFlags = calculate(action)
+      modifiedAction.controls.performanceFlags = calculate(action);
     }
   }
   return next(modifiedAction || action); // send action to other middleware / reducers

@@ -46,7 +46,7 @@ const InfoPanel = ({d3event, width, height, children}) => {
     <div style={styles.container}>
       {children}
     </div>
-  )
+  );
 };
 
 export default InfoPanel;

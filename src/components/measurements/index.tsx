@@ -38,7 +38,7 @@ function isMeanAndStandardDeviation(x: any): x is MeanAndStandardDeviation {
   return (
     typeof x.mean === "number" &&
     (typeof x.standardDeviation === "number" || x.standardDeviation === undefined)
-  )
+  );
 }
 interface TreeStrainVisibility {
   [strain: string]: Visibility
