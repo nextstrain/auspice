@@ -130,8 +130,7 @@ export const genomeMap = (annotations: JsonAnnotations): Chromosome[] => {
     .map(([annotationKey, annotation]) => {
       const geneName = annotation.gene || annotationKey;
       if (!(geneName in annotationsPerGene)) annotationsPerGene[geneName] = {};
-      const gene = annotationsPerGene[geneName];
-      gene[annotationKey] = annotation;
+      annotationsPerGene[geneName][annotationKey] = annotation;
     })
 
   const nextColor = nextColorGenerator();
