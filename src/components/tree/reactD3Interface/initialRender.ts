@@ -39,7 +39,8 @@ export const renderTree = (
       showAllBranchLabels: props.showAllBranchLabels,
       orientation: main ? [1, 1] : [-1, 1],
       tipLabels: true,
-      showTipLabels: true
+      showTipLabels: true,
+      showStreamTrees: props.showStreamTrees,
     },
     callbacks: {
       onTipHover: callbacks.onTipHover.bind(that),
@@ -48,6 +49,8 @@ export const renderTree = (
       onBranchClick: callbacks.onBranchClick.bind(that),
       onBranchLeave: callbacks.onBranchLeave.bind(that),
       onTipLeave: callbacks.onTipLeave.bind(that),
+      onStreamHover: callbacks.onStreamHover.bind(that),
+      onStreamLeave: callbacks.onStreamLeave.bind(that),
       tipLabel: makeTipLabelFunc(props.tipLabelKey)
     },
     branchThickness: treeState.branchThickness, /* guaranteed to be in redux by now */
@@ -61,5 +64,6 @@ export const renderTree = (
     dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
     scatterVariables: props.scatterVariables,
     measurementsColorGrouping: isMeasurementColorBy(props.colorBy) ? decodeMeasurementColorBy(props.colorBy) : undefined,
+    streams: props.tree.streams,
   });
 };

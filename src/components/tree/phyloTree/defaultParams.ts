@@ -13,6 +13,7 @@ export const createDefaultParams = (): Params => ({
   minorTicks: 4,
   orientation: [1, 1],
   showGrid: true,
+  showStreamTrees: false,
   fillSelected: "#A73",
   radiusSelected: 5,
   branchStroke: "#AAA",

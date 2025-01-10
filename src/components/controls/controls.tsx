@@ -20,6 +20,7 @@ import AnimationOptions from "./animation-options";
 import { PanelSection } from "./panelSection";
 import ToggleFocus from "./toggle-focus";
 import ToggleTangle from "./toggle-tangle";
+import { ChooseStreamTrees } from "./choose-stream-trees";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
@@ -67,6 +68,7 @@ function Controls() {
           options={<>
             <ChooseLayout />
             <ChooseMetric />
+            <ChooseStreamTrees />
             <ToggleFocus tooltip={ToggleFocusInfo} />
             <ChooseBranchLabelling />
             <ChooseTipLabel />

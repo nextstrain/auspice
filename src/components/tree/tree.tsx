@@ -6,7 +6,7 @@ import { SelectedNode } from "../../reducers/controls";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
-import { getParentBeyondPolytomy } from "./phyloTree/helpers";
+import { getParentBeyondPolytomy, getParentStream } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
@@ -217,9 +217,14 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     // Zoom out of main tree if index of root node is not 0
     if (this.props.tree.idxOfInViewRootNode !== 0) {
       const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
-      root[0] = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
+      if (this.props.showStreamTrees && rootNode.inStream && !!this.props.tree.streams[rootNode.streamName].parentStreamName) {
+        root[0] = getParentStream(rootNode).arrayIdx;
+      } else {
+        root[0] = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
+      }
     }
     // Also zoom out of second tree if index of root node is not 0
+    // (don't have to consider stream trees as they're not possible for the second tree)
     if (this.props.treeToo.idxOfInViewRootNode !== 0) {
       const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
       root[1] = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
