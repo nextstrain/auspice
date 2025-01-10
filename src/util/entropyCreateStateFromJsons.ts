@@ -48,8 +48,6 @@ interface ChromosomeMetadata {
   negStrandStackHeight: number
 }
 
-type GenomeAnnotation = Chromosome[]
-
 interface Chromosome {
   name: string
   range: RangeGenome
@@ -112,7 +110,7 @@ interface CdsSegment {
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
  */
-export const genomeMap = (annotations: JsonAnnotations): GenomeAnnotation => {
+export const genomeMap = (annotations: JsonAnnotations): Chromosome[] => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
