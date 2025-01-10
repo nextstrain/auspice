@@ -1,8 +1,6 @@
 import { genotypeColors } from "./globals";
 import { defaultEntropyState } from "../reducers/entropy";
 
-type GenomeAnnotations = Record<string, GenomeAnnotation>
-
 type Strand = '+' | '-' // other GFF-valid options are '.' and '?'
 
 interface JsonSegmentRange {
@@ -115,24 +113,52 @@ interface CdsSegment {
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
  */
-export const genomeMap = (annotations: GenomeAnnotations): Chromosome[] => {
+export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
     .map(([, annotation]) => annotation)[0];
-  if (!nucAnnotation) throw new Error("Genome annotation missing 'nuc' definition")
-  if (!nucAnnotation.start || !nucAnnotation.end) throw new Error("Genome annotation for 'nuc' missing start or end")
-  if (nucAnnotation.strand==='-') throw new Error("Auspice can only display genomes represented as positive strand." +
-    "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
+
+  if (!nucAnnotation) {
+    throw new Error("Genome annotation missing 'nuc' definition");
+  }
+  if (typeof nucAnnotation !== 'object') {
+    throw new Error("Genome annotation for 'nuc' is not a JSON object.");
+  }
+  if (!('start' in nucAnnotation) || !('end' in nucAnnotation)) {
+    throw new Error("Genome annotation for 'nuc' missing start or end");
+  }
+  if (typeof nucAnnotation.start !== 'number' || typeof nucAnnotation.end !== 'number') {
+    throw new Error("Genome annotation for 'nuc.start' or 'nuc.end' is not a number.");
+  }
+  if (!('strand' in nucAnnotation)) {
+    throw new Error("Genome annotation for 'nuc' missing strand");
+  }
+  if (nucAnnotation.strand === '-') {
+    throw new Error("Auspice can only display genomes represented as positive strand." +
+      "Note that -ve strand RNA viruses are typically annotated as 5' → 3'.");
+  }
+
   const rangeGenome: RangeGenome =  [nucAnnotation.start, nucAnnotation.end];
 
 
   /* Group by genes -- most JSONs will not include this information, so it'll essentially be
   one CDS per gene, but that's just fine! */
-  const annotationsPerGene: Record<string,GenomeAnnotations> = {};
+  const annotationsPerGene: Record<string,unknown> = {};
   Object.entries(annotations)
     .filter(([name,]) => name!=='nuc')
     .map(([annotationKey, annotation]) => {
+
+      if (typeof annotation !== 'object') {
+        throw new Error(`Genome annotation for '${annotationKey}' is not a JSON object.`);
+      }
+      if (!('gene' in annotation)) {
+        throw new Error(`Genome annotation for '${annotationKey}' missing gene.`);
+      }
+      if (typeof annotation.gene !== 'string') {
+        throw new Error(`Genome annotation '${annotationKey}.gene' is not a string.`);
+      }
+
       const geneName = annotation.gene || annotationKey;
       if (!(geneName in annotationsPerGene)) annotationsPerGene[geneName] = {};
       const gene = annotationsPerGene[geneName];
