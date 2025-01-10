@@ -31,22 +31,6 @@ interface UnknownJsonObject {
   [key: string]: unknown
 }
 
-function isValidGenomeAnnotations(x: UnknownJsonObject): x is GenomeAnnotations {
-  let isValid = true;
-
-  for (const key of Object.keys(x)) {
-    const value = x[key];
-    if (
-      false // FIXME: check if `value` conforms to interface GenomeAnnotation
-    ) {
-      console.error(`Invalid genome annotation: ${JSON.stringify(value)}`);
-      isValid = false;
-    }
-  }
-
-  return isValid;
-}
-
 /**
  * Specifies the range of the each segment's corresponding position in the genome,
  * or defines the range of the genome (chromosome) itself.
@@ -190,7 +174,7 @@ export const genomeMap = (annotations: GenomeAnnotations): Chromosome[] => {
 }
 
 export const entropyCreateState = (genomeAnnotations: UnknownJsonObject) => {
-  if (isValidGenomeAnnotations(genomeAnnotations)) {
+  if (genomeAnnotations) {
     try {
       return {
         showCounts: false,
