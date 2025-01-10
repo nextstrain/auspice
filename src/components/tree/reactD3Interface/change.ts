@@ -70,6 +70,18 @@ export const changePhyloTreeViaPropsComparison = (
     args.focus = newProps.focus;
   }
 
+  /**
+   * Stream-tree related
+   * NOTE: there are two ways to update phylotree data - set `args.<property>` and
+   * have `phyloTree/change.ts` or just reach in and update it here. Historically
+   * we've used both but we should standardise this usage.
+   */
+  phylotree.streams = newProps.tree.streams;
+  phylotree.params.showStreamTrees = newProps.showStreamTrees;
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.tree.streams !== newProps.tree.streams) {
+    args.streamDefinitionChange = true;
+  }
+
   /* enable/disable focus */
   if (oldProps.focus !== newProps.focus) {
     args.focus = newProps.focus;
