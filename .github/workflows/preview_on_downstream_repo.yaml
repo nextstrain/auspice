@@ -71,7 +71,7 @@ jobs:
           pr_url=$(gh pr list --head "$branch" --json url | jq -r '.[0].url')
 
           if [ "$pr_url" = "null" ]; then
-            pr_url="$(gh pr create --title "$title" --body "$body" --draft)"
+            pr_url="$(gh pr create --head "$branch" --title "$title" --body "$body" --draft)"
             echo "Pull request created: $pr_url" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "Pull request updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
