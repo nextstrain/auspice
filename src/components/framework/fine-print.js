@@ -161,7 +161,9 @@ export function getCustomFinePrint() {
   return (
     <Suspense fallback={<></>}>
       <Flex className='finePrint'>
-        <MarkdownDisplay mdstring={markdown} />
+        <MarkdownDisplay
+          mdstring={markdown}
+          placeholder="This dataset contained a fine print message to be displayed here, however it wasn't correctly formatted." />
       </Flex>
     </Suspense>
   );

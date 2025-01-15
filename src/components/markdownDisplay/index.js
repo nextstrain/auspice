@@ -1,7 +1,7 @@
 import React from "react";
 import { parseMarkdown } from "../../util/parseMarkdown";
 
-export default function MarkdownDisplay({ mdstring, ...props }) {
+export default function MarkdownDisplay({ mdstring, placeholder, ...props }) {
   try {
     return (
       <div
@@ -23,7 +23,7 @@ export default function MarkdownDisplay({ mdstring, ...props }) {
       console.error(`There was an error parsing the provided text as Markdown or raw text. Error: ${error}`);
       return (
         <div {...props}>
-          <p>There was an error parsing the Markdown.  See the JS console.</p>
+          <p>{placeholder}</p>
         </div>
       );
     }

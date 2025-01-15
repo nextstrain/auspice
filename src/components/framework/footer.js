@@ -163,7 +163,10 @@ export const getAcknowledgments = (metadata, dispatch) => {
   if (metadata.description) {
     return (
       <Suspense fallback={<div />}>
-        <MarkdownDisplay className="acknowledgments" mdstring={metadata.description} />
+        <MarkdownDisplay
+          className="acknowledgments"
+          mdstring={metadata.description}
+          placeholder="This dataset contained acknowledgements to be displayed here, however it wasn't correctly formatted." />
       </Suspense>
     );
   }
