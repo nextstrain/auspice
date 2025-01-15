@@ -63,7 +63,7 @@ ALLOWED_ATTR.push("z", "zoomAndPan");
 export const parseMarkdown = (mdString) => {
   const sanitizer = dompurify.sanitize;
   const sanitizerConfig = {ALLOWED_TAGS, ALLOWED_ATTR, KEEP_CONTENT: false, ALLOW_DATA_ATTR: false};
-  const rawDescription = marked(mdString);
-  const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
-  return cleanDescription;
+  const rawHtml = marked(mdString);
+  const html = sanitizer(rawHtml, sanitizerConfig);
+  return html;
 };

@@ -2,17 +2,17 @@ import React from "react";
 import { parseMarkdown } from "../../util/parseMarkdown";
 
 export default function MarkdownDisplay({ mdstring, ...props }) {
-  let cleanDescription;
+  let html;
   try {
-    cleanDescription = parseMarkdown(mdstring);
+    html = parseMarkdown(mdstring);
   } catch (error) {
     console.error(`Error parsing Markdown: ${error}`);
-    cleanDescription = '<p>There was an error parsing the Markdown.  See the JS console.</p>';
+    html = '<p>There was an error parsing the Markdown.  See the JS console.</p>';
   }
   return (
     <div
       {...props}
-      dangerouslySetInnerHTML={{ __html: cleanDescription }}
+      dangerouslySetInnerHTML={{ __html: html }}
     />
   );
 }
