@@ -1,5 +1,6 @@
 # Changelog
 
+* Dataset authors can display a warning banner at the top of the page by setting `.meta.warning` in the main dataset JSON. The warning can be plain text or markdown format. This can be incorporated into Nextstrain workflows using `augur export v2 --warning`, available as of Augur version X.X.X.
 * Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
 
 ## version 2.61.2 - 2024/11/19
