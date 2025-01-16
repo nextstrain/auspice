@@ -108,7 +108,10 @@ const MainDisplayMarkdown = ({ narrativeBlock, width, mobile }) => {
   return (
     <Container width={width} mobile={mobile}>
       <Suspense>
-        <MarkdownDisplay dir="auto" mdstring={narrativeBlock.mainDisplayMarkdown} />
+        <MarkdownDisplay
+          dir="auto"
+          mdstring={narrativeBlock.mainDisplayMarkdown}
+          placeholder="Narrative content should be displayed here, however it wasn't correctly formatted." />
       </Suspense>
     </Container>
   );

@@ -743,6 +743,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.description) {
     metadata.description = json.meta.description;
   }
+  if (json.meta.warning) {
+    metadata.warning = json.meta.warning;
+  }
   if (json.version) {
     metadata.version = json.version;
   }

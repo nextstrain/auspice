@@ -4,6 +4,7 @@ import { withTranslation } from 'react-i18next';
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import Byline from "./byline";
+import Warning from "./warning";
 import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
 
@@ -46,6 +47,10 @@ class Info extends React.Component {
 
           <div width={this.props.width} style={styles.byline}>
             <Byline/>
+          </div>
+
+          <div width={this.props.width}>
+            <Warning />
           </div>
 
           <div width={this.props.width} style={styles.n}>
