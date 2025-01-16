@@ -1,6 +1,6 @@
 import { AnyAction } from "@reduxjs/toolkit";
 import { countTraitsAcrossTree } from "../../util/treeCountingHelpers";
-import { addNodeAttrs } from "../../util/treeMiscHelpers";
+import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeState, TreeTooState } from "./types";
 
@@ -79,15 +79,35 @@ const Tree = (
       // add the new nodeAttrKeys to ensure tip labels get updated
       const nodeAttrKeys = new Set(state.nodeAttrKeys);
       Object.keys(action.newColorings).forEach((attr) => nodeAttrKeys.add(attr));
-      // add the new colorings to totalStateCounts so that they can function as filters
+      // add the new non-continuous colorings to totalStateCounts so that they can function as filters
+      const nonContinuousColorings = Object.keys(action.newColorings).filter((coloring: string) => {
+        return action.newColorings[coloring].type !== "continuous"
+      });
       return {
         ...state,
         totalStateCounts: {
           ...state.totalStateCounts,
-          ...countTraitsAcrossTree(state.nodes, Object.keys(action.newColorings), false, true)
+          ...countTraitsAcrossTree(state.nodes, nonContinuousColorings, false, true)
         },
         nodeAttrKeys
       };
+    }
+    case types.REMOVE_METADATA: {
+      // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
+      const nodeAttrKeys = new Set(state.nodeAttrKeys);
+      const totalStateCounts = {...state.totalStateCounts};
+      action.nodeAttrsToRemove.forEach((attrKey: string): void => {
+        nodeAttrKeys.delete(attrKey);
+        if (attrKey in totalStateCounts) {
+          delete totalStateCounts[attrKey];
+        }
+      })
+      return {
+        ...state,
+        totalStateCounts,
+        nodeAttrKeys,
+      }
     }
     default:
       return state;

@@ -1,3 +1,4 @@
+import { decodeMeasurementColorBy, isMeasurementColorBy } from "../../../actions/measurements";
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import { ChangeParams, PhyloTreeType } from "../phyloTree/types";
 import { TreeComponentProps, TreeComponentState } from "../types";
@@ -37,6 +38,7 @@ export const changePhyloTreeViaPropsComparison = (
     args.branchStroke = calculateStrokeColors(newTreeRedux, true, newProps.colorByConfidence, newProps.colorBy);
     args.tipStroke = calculateStrokeColors(newTreeRedux, false, newProps.colorByConfidence, newProps.colorBy);
     args.fill = args.tipStroke.map(getBrighterColor);
+    args.newMeasurementsColorGrouping = isMeasurementColorBy(newProps.colorBy) ? decodeMeasurementColorBy(newProps.colorBy) : undefined;
   }
 
   /* visibility */

@@ -18,11 +18,11 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../uti
 import { applyInViewNodesToTree } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, collectGenotypeStates } from "../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
-import { combineMeasurementsControlsAndQuery, loadMeasurements } from "./measurements";
+import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -919,11 +919,65 @@ export const createStateFromQueryOrJSONs = ({
   controls = modifyStateViaURLQuery(controls, query);
 
   /* Special handling of measurements controls and query params */
+  let newMeasurementsColoringData = false;
   if (measurements.loaded) {
-    const { collectionToDisplay, collectionControls, updatedQuery} = combineMeasurementsControlsAndQuery(measurements, query);
+    const {
+      collectionToDisplay,
+      collectionControls,
+      updatedQuery,
+      newColoringData,
+    } = combineMeasurementsControlsAndQuery(measurements, query);
     measurements.collectionToDisplay = collectionToDisplay;
     controls = {...controls, ...collectionControls};
     query = updatedQuery;
+
+    /**
+     * Similar to state changes applied for `REMOVE_METADATA`
+     * Remove the old measurements coloring data before adding the new data,
+     * which is necessary for changing measurements coloring in narratives
+     */
+    if (oldState?.controls?.measurementsColorGrouping !== undefined) {
+      const colorByToRemove = encodeMeasurementColorBy(oldState.controls.measurementsColorGrouping);
+      // Update controls
+      controls.coloringsPresentOnTree.delete(colorByToRemove);
+      // Update metadata
+      if (colorByToRemove in metadata.colorings) {
+        delete metadata.colorings[colorByToRemove];
+      }
+      // Update tree
+      removeNodeAttrs(tree.nodes, [colorByToRemove]);
+      tree.nodeAttrKeys.delete(colorByToRemove);
+      if (colorByToRemove in tree.totalStateCounts) {
+        delete tree.totalStateCounts[colorByToRemove];
+      }
+      // Update treeToo if exists
+      if (treeToo && treeToo.loaded) {
+        removeNodeAttrs(treeToo.nodes, [colorByToRemove]);
+      }
+    }
+
+    // Similar to the state changes applied for `ADD_EXTRA_METADATA`
+    if (newColoringData !== undefined) {
+      newMeasurementsColoringData = true;
+      // Update controls
+      newColoringData.coloringsPresentOnTree.forEach((coloring) => controls.coloringsPresentOnTree.add(coloring));
+      // Update metadata
+      metadata.colorings = {...metadata.colorings, ...newColoringData.colorings};
+      // Update tree
+      addNodeAttrs(tree.nodes, newColoringData.nodeAttrs);
+      Object.keys(newColoringData.colorings).forEach((attr) => tree.nodeAttrKeys.add(attr));
+      const nonContinuousColorings = Object.keys(newColoringData.colorings).filter((coloring) => {
+        return newColoringData.colorings[coloring].type !== "continuous"
+      });
+      tree.totalStateCounts = {
+        ...tree.totalStateCounts,
+        ...countTraitsAcrossTree(tree.nodes, nonContinuousColorings, false, true)
+      };
+      // Update treeToo if exists
+      if (treeToo && treeToo.loaded) {
+        addNodeAttrs(treeToo.nodes, newColoringData.nodeAttrs);
+      }
+    }
   } else {
     // Hide measurements panel if loading failed
     controls.panelsToDisplay = controls.panelsToDisplay.filter((panel) => panel !== "measurements");
@@ -950,7 +1004,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (json || controls.colorBy !== oldState.controls.colorBy) {
+  if (json || controls.colorBy !== oldState.controls.colorBy || newMeasurementsColoringData) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;

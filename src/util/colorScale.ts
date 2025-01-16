@@ -136,7 +136,7 @@ export const calcColorScale = (
 
 export function createNonContinuousScaleFromProvidedScaleMap(
   colorBy: string,
-  providedScale: [string, string][],
+  providedScale: [string | number, string][],
   t1nodes: ReduxNode[],
   t2nodes: ReduxNode[] | undefined,
 ): {
@@ -150,7 +150,7 @@ export function createNonContinuousScaleFromProvidedScaleMap(
   }
   /* The providedScale may have duplicate names (not ideal, but it happens). In this case we should
   filter out duplicates (taking the first of the duplicates is fine) & print a console warning */
-  const colorMap = new Map<string, string>();
+  const colorMap = new Map<string | number, string>();
   for (const [name, colorHex] of providedScale) {
     if (colorMap.has(name)) {
       console.warn(`User provided color scale contained a duplicate entry for ${colorBy}→${name} which is ignored.`);
