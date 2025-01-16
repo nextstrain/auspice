@@ -115,6 +115,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       idxOfFilteredRoot: data.idxOfFilteredRoot,
       cladeName: cladeSelected,
       selectedClade: cladeSelected,
+      countsByCategoryPerStream: data.countsByCategoryPerStream,
     };
 
     if (controls.showTreeToo) {
@@ -132,6 +133,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
       dispatchObj.idxOfFilteredRootToo = dataToo.idxOfFilteredRoot;
+      dispatchObj.countsByCategoryPerStream = dataToo.countsByCategoryPerStream;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
 
@@ -191,6 +193,7 @@ export const changeDateFilter = ({
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
+      countsByCategoryPerStream: data.countsByCategoryPerStream,
     };
     if (controls.showTreeToo) {
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
@@ -199,6 +202,7 @@ export const changeDateFilter = ({
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
+      dispatchObj.countsByCategoryPerStream = dataToo.countsByCategoryPerStream;
     }
 
     /* Changes in visibility require a recomputation of which legend items we wish to display */

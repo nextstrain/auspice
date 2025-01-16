@@ -29,6 +29,7 @@ import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
+import ChooseBranchLabellingForStreamTrees from "./choose-stream-tree-branch-label";
 
 function Controls() {
   const { t } = useTranslation();
@@ -68,6 +69,7 @@ function Controls() {
             <ChooseLayout />
             <ChooseMetric />
             <ToggleFocus tooltip={ToggleFocusInfo} />
+            <ChooseBranchLabellingForStreamTrees />
             <ChooseBranchLabelling />
             <ChooseTipLabel />
             <ChooseSecondTree />

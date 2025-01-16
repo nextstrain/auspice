@@ -1,11 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
-import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
+import { toggleStreamTree, changeDistanceMeasure } from "../../actions/streamTrees";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
+import { canShowStreamTrees, branchLabelsForStreamTrees } from "./choose-stream-tree-branch-label";
 
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
 @connect((state) => {
@@ -14,7 +15,10 @@ import Toggle from "./toggle";
     layout: state.controls.layout,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    temporalConfidence: state.controls.temporalConfidence
+    temporalConfidence: state.controls.temporalConfidence,
+    showStreamTrees: state.controls.showStreamTrees,
+    availableBranchLabels: state.tree.availableBranchLabels,
+    streamTreeBranchLabel: state.controls.streamTreeBranchLabel,
   };
 })
 class ChooseMetric extends React.Component {
@@ -34,7 +38,7 @@ class ChooseMetric extends React.Component {
           selected={this.props.distanceMeasure === "num_date"}
           onClick={() => {
             analyticsControlsEvent("tree-metric-temporal");
-            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
+            this.props.dispatch(changeDistanceMeasure('num_date'))
           }}
         >
           {t("sidebar:time")}
@@ -44,7 +48,7 @@ class ChooseMetric extends React.Component {
           selected={this.props.distanceMeasure === "div"}
           onClick={() => {
             analyticsControlsEvent("tree-metric-temporal");
-            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
+            this.props.dispatch(changeDistanceMeasure('div'))
           }}
         >
           {t("sidebar:divergence")}
@@ -61,6 +65,18 @@ class ChooseMetric extends React.Component {
               />
             </div>
           )
+        }
+
+        { canShowStreamTrees(branchLabelsForStreamTrees(this.props.availableBranchLabels)) && this.props.streamTreeBranchLabel!=='none' && 
+          <div style={{margin: 5}}>
+            <Toggle
+              display
+              isExperimental
+              on={this.props.showStreamTrees}
+              callback={() => this.props.dispatch(toggleStreamTree())}
+              label={t("sidebar:Show stream trees")}
+            />
+          </div>
         }
       </div>
     );

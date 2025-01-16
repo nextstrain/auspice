@@ -21,6 +21,8 @@ const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwn
   distanceMeasure: state.controls.distanceMeasure,
   explodeAttr: state.controls.explodeAttr,
   focus: state.controls.focus,
+  showStreamTrees: state.controls.showStreamTrees,
+  streamTreeBranchLabel: state.controls.streamTreeBranchLabel,
   colorScale: state.controls.colorScale,
   colorings: state.metadata.colorings,
   genomeMap: state.entropy.genomeMap,
