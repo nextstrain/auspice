@@ -112,12 +112,6 @@ the content, the padding and border, but not the margin.
   font-size: 94%; /* same as <a>*/
 }
 
-strong {
-  background-color: white;
-  color: var(--medGrey);
-  font-size: 94%; /* same as <a>*/
-}
-
 .static.container {
   padding-left: 25px;
   padding-right: 25px;
