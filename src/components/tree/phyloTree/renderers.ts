@@ -28,8 +28,8 @@ export const render = function render(
   dateRange,
   scatterVariables
 }: {
-  /** the svg into which the tree is drawn */
-  svg: Selection<SVGSVGElement | null, unknown, null, unknown>
+  /** the SVG element into which the tree is drawn */
+  svg: Selection<SVGGElement | null, unknown, null, unknown>
 
   /** the layout to be used, e.g. "rect" */
   layout: Layout

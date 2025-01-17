@@ -195,12 +195,13 @@ export const drawMeasurementsSVG = (ref, xAxisRef, svgData) => {
   // Do not draw SVG if there are no measurements
   if (groupedMeasurements && groupedMeasurements.length === 0) return;
 
-  const svg = select(ref);
-
   // The number of groups is the number of subplots, which determines the final SVG height
   const totalSubplotHeight = (layout.subplotHeight * groupedMeasurements.length);
   const svgHeight = totalSubplotHeight + layout.topPadding;
-  svg.attr("height", svgHeight);
+  /* TODO: remove intermediate <g>s once the 1Password extension interference is resolved
+   * <https://github.com/nextstrain/auspice/issues/1919>
+   */
+  const svg = select(ref).attr("height", svgHeight).append("g").append("g").append("g").append("g");
 
   // x-axis is in a different SVG element to allow sticky positioning
   drawStickyXAxis(xAxisRef, containerHeight, svgHeight, xScale, x_axis_label);

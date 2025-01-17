@@ -27,8 +27,8 @@ const rhsTreeId = "RIGHT";
 export class TreeComponent extends React.Component<TreeComponentProps, TreeComponentState> {
 
   domRefs: {
-    mainTree: SVGSVGElement | null;
-    secondTree: SVGSVGElement | null;
+    mainTree: SVGGElement | null;
+    secondTree: SVGGElement | null;
   };
   tangleRef?: Tangle;
   clearSelectedNode: (node: SelectedNode) => void;
@@ -186,12 +186,23 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }) {
     return (
       <svg
-        id={mainTree ? "MainTree" : "SecondTree"}
+        id="d3treeParent"
         style={{pointerEvents: "auto", cursor: "default", userSelect: "none"}}
         width={width}
         height={height}
-        ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
-      />
+      >
+        {/* TODO: remove intermediate <g>s once the 1Password extension interference is resolved
+          * <https://github.com/nextstrain/auspice/issues/1919>
+          */}
+        <g><g><g><g>
+          <g
+            id={mainTree ? "MainTree" : "SecondTree"}
+            width={width}
+            height={height}
+            ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
+          />
+        </g></g></g></g>
+      </svg>
     );
   }
 

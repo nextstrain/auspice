@@ -278,7 +278,7 @@ export interface PhyloTreeType {
   setScales: typeof layouts.setScales
   showTemporalSlice: typeof grid.showTemporalSlice
   strainToNode: Record<string, PhyloNode>
-  svg: Selection<SVGSVGElement | null, unknown, null, unknown>
+  svg: Selection<SVGGElement | null, unknown, null, unknown>
   timeLastRenderRequested?: number
   unrootedLayout: typeof layouts.unrootedLayout
   updateBranchLabels: typeof labels.updateBranchLabels
