@@ -75,7 +75,7 @@ const svgSetters = {
 };
 
 
-type UpdateCall = (selection: Transition<SVGGElement, PhyloNode, SVGSVGElement | null, unknown>) => void;
+type UpdateCall = (selection: Transition<SVGGElement, PhyloNode, SVGGElement | null, unknown>) => void;
 
 
 /** createUpdateCall
@@ -111,7 +111,7 @@ function createUpdateCall(
 }
 
 const genericSelectAndModify = (
-  svg: Selection<SVGSVGElement | null, unknown, null, unknown>,
+  svg: Selection<SVGGElement | null, unknown, null, unknown>,
   treeElem: TreeElement,
   updateCall: UpdateCall,
   transitionTime: number,

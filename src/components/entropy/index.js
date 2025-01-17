@@ -290,7 +290,9 @@ class Entropy extends React.Component {
           width={this.props.width}
           height={this.props.height}
         >
-          <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
+          <g><g><g><g>
+            <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
+          </g></g></g></g>
         </svg>
         {this.resetLayout(styles)}
         {this.entropyCountSwitch(styles)}

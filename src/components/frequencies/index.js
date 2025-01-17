@@ -126,7 +126,9 @@ class Frequencies extends React.Component {
             overflow: "visible"
           }}
         >
-          <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
+          <g><g><g><g>
+            <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
+          </g></g></g></g>
         </svg>
       </Card>
     );
