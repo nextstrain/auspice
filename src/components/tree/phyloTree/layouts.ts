@@ -310,6 +310,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
     this.yScale = scaleLinear();
   }
 
+  // TODO: access these from d3treeParent so they don't have to be set twice
   const width = parseInt(this.svg.attr("width"), 10);
   const height = parseInt(this.svg.attr("height"), 10);
   if (this.layout === "radial" || this.layout === "unrooted") {
