@@ -133,6 +133,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "style-loader",
     "@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
+    "luxon",
     "leaflet",
     "redux",
     "leaflet(-gesture-handling)?",

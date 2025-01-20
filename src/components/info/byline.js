@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import { DateTime } from "luxon";
 import { headerFont } from "../../globalStyles";
 
 /**
@@ -11,7 +12,8 @@ import { headerFont } from "../../globalStyles";
  */
 @connect((state) => {
   return {
-    metadata: state.metadata
+    metadata: state.metadata,
+    language: state.general.language
   };
 })
 class Byline extends React.Component {
@@ -22,7 +24,7 @@ class Byline extends React.Component {
         {renderAvatar(t, this.props.metadata)}
         {renderBuildInfo(t, this.props.metadata)}
         {renderMaintainers(t, this.props.metadata)}
-        {renderDataUpdated(t, this.props.metadata)}
+        {renderDataUpdated(t, this.props.metadata, this.props.language)}
         {renderDataProvenance(t, this.props.metadata)}
       </>
     );
@@ -106,11 +108,16 @@ function renderMaintainers(t, metadata) {
  * Returns a React component detailing the date the data was last updated.
  * Renders a <span> containing "Data updated X", where X derives from `metadata.updated`
  */
-function renderDataUpdated(t, metadata) {
-  if (metadata.updated) {
+function renderDataUpdated(t, metadata, language) {
+  const date = DateTime.fromISO(metadata.updated);
+  if (date.isValid) {
+    // This is splitting translation on a English-based boundary, so it might
+    // not be proper grammar for all languages. Hopefully it still gets the
+    // point across.
+    const relativeDate = date > DateTime.now().minus({ weeks: 1 }) ? t("in the last week") : date.toRelativeCalendar({ locale: language });
     return (
       <span>
-        {`${t("Data updated")} ${metadata.updated}. `}
+        {`${t("Data updated")} ${relativeDate} (${metadata.updated}). `}
       </span>
     );
   }
