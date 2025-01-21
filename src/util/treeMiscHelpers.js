@@ -320,9 +320,7 @@ export const removeNodeAttrs = (nodes, attrsToRemove) => {
     if(!node.node_attrs) return;
 
     attrsToRemove.forEach((attrName) => {
-      if(attrName in node.node_attrs){
-        delete node.node_attrs[attrName];
-      }
+      delete node.node_attrs[attrName];
     })
   })
 }
