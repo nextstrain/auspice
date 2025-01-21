@@ -158,7 +158,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
   // Convert legendValues to string to ensure that subsequent attribute matches work as intended
-  const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map((v): string => v.toString()), isEqual);
+  const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map(String), isEqual);
   const colorings = useSelector((state: RootState) => state.metadata.colorings);
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
   const defaultColorBy = useSelector((state: RootState) => state.controls.defaults.colorBy);
