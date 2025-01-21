@@ -1,6 +1,7 @@
 import { select } from "d3-selection";
 import 'd3-transition';
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
+import { decodeMeasurementColorBy, isMeasurementColorBy } from "../../../actions/measurements";
 import * as callbacks from "./callbacks";
 import { makeTipLabelFunc } from "../phyloTree/labels";
 import { PhyloTreeType } from "../phyloTree/types";
@@ -53,11 +54,12 @@ export const renderTree = (
     visibility: treeState.visibility,
     drawConfidence: props.temporalConfidence.on,
     vaccines: treeState.vaccines,
-    branchStroke: calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy), 
+    branchStroke: calculateStrokeColors(treeState, true, props.colorByConfidence, props.colorBy),
     tipStroke: tipStrokeColors,
     tipFill: tipStrokeColors.map(getBrighterColor),
     tipRadii: treeState.tipRadii,
     dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
     scatterVariables: props.scatterVariables,
+    measurementsColorGrouping: isMeasurementColorBy(props.colorBy) ? decodeMeasurementColorBy(props.colorBy) : undefined,
   });
 };

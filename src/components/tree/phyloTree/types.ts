@@ -14,7 +14,7 @@ import * as renderers from "./renderers";
 
 export type Distance = "num_date" | "div"
 
-export type TreeElement = 
+export type TreeElement =
   ".branch.S" |
   ".branch.T" |
   ".branch" |
@@ -35,7 +35,7 @@ export interface Regression {
 
 // ---------- Callbacks ---------- //
 
-type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900> 
+type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900>
 
 export interface Callbacks {
   onBranchClick: NodeCallback
@@ -205,6 +205,7 @@ export interface ChangeParams {
   newBranchLabellingKey?: string
   showAllBranchLabels?: boolean
   newTipLabelKey?: string | symbol
+  newMeasurementsColorGrouping?: string | undefined
 
   // arrays of data (the same length as nodes) //
   branchStroke?: string[]
@@ -232,6 +233,7 @@ export interface PhyloTreeType {
   drawBranchLabels: typeof labels.drawBranchLabels
   drawBranches: typeof renderers.drawBranches
   drawConfidence: typeof confidence.drawConfidence
+  drawMeasurementsColoringCrosshair: typeof renderers.drawMeasurementsColoringCrosshair
   drawRegression: typeof renderers.drawRegression
   drawSingleCI: typeof confidence.drawSingleCI
   drawTips: typeof renderers.drawTips
@@ -243,6 +245,7 @@ export interface PhyloTreeType {
     branchTee?: Selection<SVGDefsElement, unknown, null, unknown>
     clipPath?: Selection<SVGDefsElement, unknown, null, unknown>
     confidenceIntervals?: Selection<SVGDefsElement, unknown, null, unknown>
+    measurementsColoringCrosshair?: Selection<SVGDefsElement, unknown, null, unknown>
     regression?: Selection<SVGDefsElement, unknown, null, unknown>
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
@@ -258,6 +261,7 @@ export interface PhyloTreeType {
     right: number
     top: number
   }
+  measurementsColorGrouping: string | undefined
   modifySVG: typeof modifySVG
   modifySVGInStages: typeof modifySVGInStages
   nodes: PhyloNode[]
@@ -267,6 +271,7 @@ export interface PhyloTreeType {
   regression?: Regression
   removeBranchLabels: typeof labels.removeBranchLabels
   removeConfidence: typeof confidence.removeConfidence
+  removeMeasurementsColoringCrosshair: typeof renderers.removeMeasurementsColoringCrosshair
   removeRegression: typeof renderers.removeRegression
   removeTipLabels: typeof labels.removeTipLabels
   render: typeof renderers.render

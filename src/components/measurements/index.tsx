@@ -1,5 +1,5 @@
 import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
 import { getColorByTitle, getTipColorAttribute } from "../../util/colorHelpers";
@@ -23,12 +23,21 @@ import {
   addHoverPanelToMeasurementsAndMeans,
   addColorByAttrToGroupingLabel,
   layout,
-  jitterRawMeansByColorBy
+  jitterRawMeansByColorBy,
+  addGroupingValueCrosshair,
+  removeColorGroupingCrosshair,
 } from "./measurementsD3";
 import { RootState } from "../../store";
 import { MeasurementFilters } from "../../reducers/controls";
 import { Visibility } from "../../reducers/tree/types";
 import { Measurement, isMeasurement } from "../../reducers/measurements/types";
+import {
+  applyMeasurementsColorBy,
+  isMeasurementColorBy,
+  getActiveMeasurementFilters,
+  matchesAllActiveFilters
+} from "../../actions/measurements";
+import { changeColorBy } from "../../actions/colors";
 
 interface MeanAndStandardDeviation {
   mean: number
@@ -131,14 +140,7 @@ const filterMeasurements = (
   filteredMeasurements: Measurement[]
 } => {
   // Find active filters to filter measurements
-  const activeFilters: {string?: string[]} = {};
-  Object.entries(filters).forEach(([field, valuesMap]) => {
-    activeFilters[field] = activeFilters[field] || [];
-    valuesMap.forEach(({active}, fieldValue) => {
-      // Save array of active values for the field filter
-      if (active) activeFilters[field].push(fieldValue);
-    });
-  });
+  const activeFilters = getActiveMeasurementFilters(filters);
 
   return {
     activeFilters,
@@ -146,24 +148,21 @@ const filterMeasurements = (
       // First check the strain is visible in the tree
       if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
       // Then check that the measurement contains values for all active filters
-      for (const [field, values] of Object.entries(activeFilters)) {
-        const measurementValue = measurement[field];
-        if (values.length > 0 &&
-           ((typeof measurementValue === "string") && !values.includes(measurementValue))){
-          return false;
-        }
-      }
-      return true;
+      return matchesAllActiveFilters(measurement, activeFilters);
     })
   };
 };
 
 const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
+  const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
-  const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues, isEqual);
+  // Convert legendValues to string to ensure that subsequent attribute matches work as intended
+  const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map(String), isEqual);
   const colorings = useSelector((state: RootState) => state.metadata.colorings);
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
+  const defaultColorBy = useSelector((state: RootState) => state.controls.defaults.colorBy);
+  const colorGrouping = useSelector((state: RootState) => state.controls.measurementsColorGrouping);
   const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
   const filters = useSelector((state: RootState) => state.controls.measurementsFilters);
   const display = useSelector((state: RootState) => state.controls.measurementsDisplay);
@@ -257,6 +256,28 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     setHoverData(newHoverData);
   }, [fields, colorings, colorBy]);
 
+  /**
+   * Ref to save previous non-measurements coloring for toggling back to previous
+   * coloring when clicking on the same measurements grouping twice.
+   * Uses the default color by if the color is a measurements color on first
+   * load, i.e. the color is set by the URL param `c=m-<grouping>`
+   */
+  const prevNonMeasurementColorBy: MutableRefObject<string> = useRef(isMeasurementColorBy(colorBy) ? defaultColorBy : colorBy);
+  useEffect(() => {
+    if (!isMeasurementColorBy(colorBy)) {
+      prevNonMeasurementColorBy.current = colorBy;
+    }
+  }, [colorBy]);
+
+  const handleClickOnGrouping = useCallback((grouping: string): void => {
+    if (grouping !== colorGrouping || !isMeasurementColorBy(colorBy)) {
+      dispatch(applyMeasurementsColorBy(grouping));
+    } else if (grouping === colorGrouping && isMeasurementColorBy(colorBy)) {
+      // Clicking on the same grouping twice will toggle back to the previous non-measurements coloring
+      dispatch(changeColorBy(prevNonMeasurementColorBy.current));
+    }
+  }, [dispatch, colorGrouping, colorBy]);
+
   useEffect(() => {
     setPanelTitle(`${title || "Measurements"} (grouped by ${fields.get(groupBy).title})`);
   }, [setPanelTitle, title, fields, groupBy]);
@@ -267,8 +288,8 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
     // the scroll position on whitespace.
     svgContainerRef.current.scrollTop = 0;
     clearMeasurementsSVG(d3Ref.current, d3XAxisRef.current);
-    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData);
-  }, [svgData]);
+    drawMeasurementsSVG(d3Ref.current, d3XAxisRef.current, svgData, handleClickOnGrouping);
+  }, [svgData, handleClickOnGrouping]);
 
   // Color the SVG & redraw color-by means when SVG is re-drawn or when colors have changed
   useEffect(() => {
@@ -291,6 +312,14 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   useEffect(() => {
     toggleDisplay(d3Ref.current, "threshold", showThreshold);
   }, [svgData, showThreshold]);
+
+  useEffect(() => {
+    if(isMeasurementColorBy(colorBy)) {
+      addGroupingValueCrosshair(d3Ref.current, colorGrouping);
+    } else {
+      removeColorGroupingCrosshair(d3Ref.current);
+    }
+  }, [svgData, colorBy, colorGrouping])
 
   const getSVGContainerStyle = (): CSSProperties => {
     return {

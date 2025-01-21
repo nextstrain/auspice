@@ -26,7 +26,8 @@ export const render = function render(
   tipFill,
   tipRadii,
   dateRange,
-  scatterVariables
+  scatterVariables,
+  measurementsColorGrouping,
 }: {
   /** the svg into which the tree is drawn */
   svg: Selection<SVGSVGElement | null, unknown, null, unknown>
@@ -74,6 +75,8 @@ export const render = function render(
 
   /** {x, y} properties to map nodes => scatterplot (only used if layout="scatter") */
   scatterVariables: ScatterVariables
+
+  measurementsColorGrouping: string | undefined
 }) {
   timerStart("phyloTree render()");
   this.svg = svg;
@@ -83,6 +86,7 @@ export const render = function render(
   };
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
+  this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
 
   /* set nodes stroke / fill */
@@ -112,6 +116,7 @@ export const render = function render(
   this.drawTips();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
+  if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
   if (this.regression) this.drawRegression();
   this.confidencesInSVG = false;
   if (drawConfidence) this.drawConfidence();
@@ -146,6 +151,51 @@ export const drawVaccines = function drawVaccines(this: PhyloTreeType): void {
     .on("click", this.callbacks.onTipClick);
 };
 
+export const removeMeasurementsColoringCrosshair = function removeMeasurementsColoringCrosshair(this: PhyloTreeType): void {
+  if ("measurementsColoringCrosshair" in this.groups) {
+    this.groups.measurementsColoringCrosshair.selectAll("*").remove();
+  }
+}
+
+/**
+ * Adds crosshair to tip matching the measurements coloring group
+ */
+export const drawMeasurementsColoringCrosshair = function drawMeasurementsColoringCrosshair(this: PhyloTreeType): void {
+  if ("measurementsColoringCrosshair" in this.groups) {
+    this.removeMeasurementsColoringCrosshair();
+  } else {
+    this.groups.measurementsColoringCrosshair = this.svg.append("g").attr("id", "measurementsColoringCrosshairId");
+  }
+
+  const matchingStrains = this.nodes.filter((d) => !d.n.hasChildren && d.n.name === this.measurementsColorGrouping);
+  if (matchingStrains.length === 1) {
+    this.groups.measurementsColoringCrosshair
+      .selectAll(".crosshair")
+      .data(matchingStrains)
+      .enter()
+      .append("svg")
+        .attr("stroke", "currentColor")
+        .attr("fill", "currentColor")
+        .attr("strokeWidth", "0")
+        .attr("viewBox", "0 0 256 256")
+        .attr("height", (d) => d.r * 5)
+        .attr("width", (d) => d.r * 5)
+        .attr("x", (d) => d.xTip - (d.r * 5 / 2))
+        .attr("y", (d) => d.yTip - (d.r * 5 / 2))
+        .style("cursor", "pointer")
+        .style("pointer-events", "auto")
+        .on("mouseover", this.callbacks.onTipHover)
+        .on("mouseout", this.callbacks.onTipLeave)
+        .on("click", this.callbacks.onTipClick)
+        .append("path")
+          // path copied from react-icons/pi/PiCrosshairSimpleBold
+          .attr("d", "M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm12,191.13V184a12,12,0,0,0-24,0v27.13A84.18,84.18,0,0,1,44.87,140H72a12,12,0,0,0,0-24H44.87A84.18,84.18,0,0,1,116,44.87V72a12,12,0,0,0,24,0V44.87A84.18,84.18,0,0,1,211.13,116H184a12,12,0,0,0,0,24h27.13A84.18,84.18,0,0,1,140,211.13Z");
+  } else if (matchingStrains.length === 0) {
+    console.warn(`Measurements coloring group ${this.measurementsColorGrouping} doesn't match any tip names`);
+  } else {
+    console.warn(`Measurements coloring group ${this.measurementsColorGrouping} matches multiple tips`);
+  }
+}
 
 /**
  * adds all the tip circles to the svg, they have class tip
@@ -408,7 +458,7 @@ const handleBranchHoverColor = (
   if (!tel.empty()) { // Some displays don't have S & T parts of the branch
     tel.style("stroke", c2);
   }
-  
+
   /* If we reinstate gradient stem colours this section must be updated; see the
   commit which added this comment for the previous implementation */
   const sel = d.that.svg.select("#"+getDomId("branchS", d.n.name));

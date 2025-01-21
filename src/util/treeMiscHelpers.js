@@ -309,3 +309,18 @@ export const addNodeAttrs = (nodes, newAttrs) => {
     }
   });
 };
+
+/**
+ * Remove attrs from the `nodes` data structure.
+ * @param {Array} nodes
+ * @param {Array} attrsToRemove
+ */
+export const removeNodeAttrs = (nodes, attrsToRemove) => {
+  nodes.forEach((node) => {
+    if(!node.node_attrs) return;
+
+    attrsToRemove.forEach((attrName) => {
+      delete node.node_attrs[attrName];
+    })
+  })
+}

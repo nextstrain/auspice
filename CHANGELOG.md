@@ -1,5 +1,10 @@
 # Changelog
 
+* Added a new color tree by measurements feature.
+Clicking on a group in the measurements panel will add a new coloring to the tree,
+where the colors represent an average of the measurement values for the matching
+test strain within the selected measurements group.
+For full details, please see [#1924](https://github.com/nextstrain/auspice/pull/1924).
 * Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
 
 ## version 2.61.2 - 2024/11/19
