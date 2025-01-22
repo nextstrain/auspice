@@ -1,15 +1,32 @@
 # Changelog
 
 * Added a new color tree by measurements feature.
-Clicking on a group in the measurements panel will add a new coloring to the tree,
-where the colors represent an average of the measurement values for the matching
-test strain within the selected measurements group.
-For full details, please see [#1924](https://github.com/nextstrain/auspice/pull/1924).
+  Clicking on a group in the measurements panel will add a new coloring to the tree,
+  where the colors represent an average of the measurement values for the matching
+  test strain within the selected measurements group.
+  For full details, please see [#1924](https://github.com/nextstrain/auspice/pull/1924).
 * Dataset authors can display a warning banner at the top of the page by setting `.meta.warning` in the main dataset JSON.
   The warning can be plain text or markdown format.
   This can be incorporated into Nextstrain workflows using `augur export v2 --warning`, available as of Augur version 27.2.0.
   ([#1927](https://github.com/nextstrain/auspice/issues/1927))
 * Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
+
+_Internal changes._
+
+* Added a "Cite this repository" button on the GitHub repo.
+  ([#1921](https://github.com/nextstrain/auspice/pull/1921))
+* Kept dependencies up to date.
+  ([#1443](https://github.com/nextstrain/auspice/pull/1443),
+   [#1923](https://github.com/nextstrain/auspice/pull/1923))
+* Improved TypeScript usage.
+  ([#1910](https://github.com/nextstrain/auspice/pull/1910),
+   [#1913](https://github.com/nextstrain/auspice/pull/1913),
+   [#1914](https://github.com/nextstrain/auspice/pull/1914),
+   [#1915](https://github.com/nextstrain/auspice/pull/1915))
+* Improved GitHub Actions usage.
+  ([#1916](https://github.com/nextstrain/auspice/pull/1916),
+   [#1920](https://github.com/nextstrain/auspice/pull/1920),
+   [#1929](https://github.com/nextstrain/auspice/pull/1929))
 
 ## version 2.61.2 - 2024/11/19
 
