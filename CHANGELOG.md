@@ -13,6 +13,7 @@
   This can be incorporated into Nextstrain workflows using `augur export v2 --warning`, available as of Augur version 27.2.0.
   ([#1927](https://github.com/nextstrain/auspice/issues/1927))
 * Bugfix: Clicking on the icons for FULL and GRID layout now changes the layout, just like clicking on the text ([#1911](https://github.com/nextstrain/auspice/issues/1911))
+* The [1Password browser extension](https://support.1password.com/getting-started-browser/), since roughly late November 2024, has interfered with Auspice views, notably when rendering many visual elements which is often the case with a large number of samples and/or genome size. The 1Password developer team is continuing to investigate the issue. In the meantime, we have applied a workaround to mitigate the effects of the issue on Auspice. ([#1919](https://github.com/nextstrain/auspice/issues/1919))
 
 _Internal changes._
 
