@@ -1,10 +1,10 @@
 # Changelog
 
 * Added a new color tree by measurements feature.
-Clicking on a group in the measurements panel will add a new coloring to the tree,
-where the colors represent an average of the measurement values for the matching
-test strain within the selected measurements group.
-For full details, please see [#1924](https://github.com/nextstrain/auspice/pull/1924).
+  Clicking on a group in the measurements panel will add a new coloring to the tree,
+  where the colors represent an average of the measurement values for the matching
+  test strain within the selected measurements group.
+  For full details, please see [#1924](https://github.com/nextstrain/auspice/pull/1924).
 * Dataset authors can display a warning banner at the top of the page by setting `.meta.warning` in the main dataset JSON.
   The warning can be plain text or markdown format.
   This can be incorporated into Nextstrain workflows using `augur export v2 --warning`, available as of Augur version 27.2.0.
