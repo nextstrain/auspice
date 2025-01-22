@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.62.0 - 2025/01/21
+
+
 * Added a new color tree by measurements feature.
   Clicking on a group in the measurements panel will add a new coloring to the tree,
   where the colors represent an average of the measurement values for the matching
