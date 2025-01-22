@@ -176,7 +176,10 @@ class Map extends React.Component {
       this.state.responsive &&
       !this.state.d3DOMNode
     ) {
-      const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions");
+      /* TODO: remove intermediate <g>s once the 1Password extension interference is resolved
+       * <https://github.com/nextstrain/auspice/issues/1919>
+       */
+      const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions").append("g").append("g").append("g").append("g");
       this.setState({d3DOMNode});
     }
   }

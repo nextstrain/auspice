@@ -126,7 +126,12 @@ class Frequencies extends React.Component {
             overflow: "visible"
           }}
         >
-          <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
+          {/* TODO: remove intermediate <g>s once the 1Password extension interference is resolved
+            * <https://github.com/nextstrain/auspice/issues/1919>
+            */}
+          <g><g><g><g>
+            <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
+          </g></g></g></g>
         </svg>
       </Card>
     );
