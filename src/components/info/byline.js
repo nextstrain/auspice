@@ -40,8 +40,7 @@ const AvatarImg = styled.img`
  */
 function renderAvatar(t, metadata) {
   const { buildAvatar, buildUrl } = metadata;
-  // If buildAvatar is present, return the avatar image
-  if (buildAvatar) {
+  if (typeof buildAvatar === 'string') {
     return <AvatarImg alt="avatar" width="28" src={buildAvatar} />;
   }
 
