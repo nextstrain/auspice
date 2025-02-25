@@ -39,9 +39,13 @@ const AvatarImg = styled.img`
  * which is a GitHub repo. The avatar image is fetched from GitHub (by the client).
  */
 function renderAvatar(t, metadata) {
-  const repo = metadata.buildUrl;
-  if (typeof repo === 'string') {
-    const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
+  const { buildAvatar, buildUrl } = metadata;
+  if (typeof buildAvatar === 'string') {
+    return <AvatarImg alt="avatar" width="28" src={buildAvatar} />;
+  }
+
+  if (typeof buildUrl === 'string') {
+    const match = buildUrl.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
     if (match) {
       return (
         <AvatarImg alt="avatar" width="28" src={`https://github.com/${match[3]}.png?size=200`}/>

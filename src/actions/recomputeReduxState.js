@@ -755,6 +755,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.build_url) {
     metadata.buildUrl = json.meta.build_url;
   }
+  if (json.meta.build_avatar) {
+    metadata.buildAvatar = json.meta.build_avatar;
+  }
   if (json.meta.data_provenance) {
     metadata.dataProvenance = json.meta.data_provenance;
   }
