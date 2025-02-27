@@ -26,6 +26,7 @@ const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwn
   genomeMap: state.entropy.genomeMap,
   showTreeToo: state.controls.showTreeToo,
   showTangle: state.controls.showTangle,
+  showStreamTrees: state.controls.showStreamTrees,
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel,
   canRenderBranchLabels: state.controls.canRenderBranchLabels,

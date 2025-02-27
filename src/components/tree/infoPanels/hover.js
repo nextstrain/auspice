@@ -316,7 +316,7 @@ const AttributionInfo = ({node}) => {
   return renderElements;
 };
 
-const Container = ({node, panelDims, children}) => {
+const Container = ({node, panelDims, children, xy=undefined}) => {
 
   const xOffset = 10;
   const yOffset = 10;
@@ -334,11 +334,17 @@ const Container = ({node, panelDims, children}) => {
     width = 280;
   }
 
-  /* this adjusts the x-axis for the right tree in dual tree view */
-  const xPos = node.shell.that.params.orientation[0] === -1 ?
-    panelDims.width / 2 + panelDims.spaceBetweenTrees + node.shell.xTip :
-    node.shell.xTip;
-  const yPos = node.shell.yTip;
+  let xPos,yPos;
+  if (xy) {
+    [xPos,yPos] = xy;
+  } else {
+    /* this adjusts the x-axis for the right tree in dual tree view */
+    xPos = node.shell.that.params.orientation[0] === -1 ?
+      panelDims.width / 2 + panelDims.spaceBetweenTrees + node.shell.xTip :
+      node.shell.xTip;
+    yPos = node.shell.yTip;
+  }
+
   const styles = {
     container: {
       position: "absolute",
@@ -384,6 +390,67 @@ const Comment = ({children}) => (
   </div>
 );
 
+/**
+ * Information to show when hovering over an individual ribbon within a stream
+ */
+function StreamRibbonInfo({node, streamDetails}) {
+
+  const counts = node.streamNodeCounts;
+  const countsSummary = counts.total === counts.visible ?
+    `${counts.total} tips (all visible)` :
+    `${counts.visible} visible tips (out of ${counts.total})`;
+
+  return (
+    <>
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Stream name: ${node.streamName}`}
+      </div>
+      <InfoLine name="Category (ripple):" value={node.streamCategories[streamDetails.categoryIndex].name}/>
+      <InfoLine name="Stream summarises" value={countsSummary}/>
+    </>
+  );
+}
+
+/**
+ * Information to show when hovering over the connector (branch) to a stream
+ */
+
+function StreamConnectorInfo({node}) {
+  /* Work out how many streams descend from this one */
+  const streams = node.shell.that.streams;
+  let nDescendentStreams = 0; // don't include this stream!
+  const stack = [...streams[node.streamName].streamChildren];
+  while (stack.length) {
+    const streamName = stack.pop();
+    nDescendentStreams++;
+    for (const childName of streams[streamName].streamChildren) stack.push(childName);
+  }
+
+  const totalTipCounts = node.fullTipCount === node.tipCount ?
+    `${node.tipCount} tips (all visible)` :
+    `${node.tipCount} visible tips (out of ${node.fullTipCount})`;
+
+  const counts = node.streamNodeCounts;
+  const thisStreamCounts = counts.total === counts.visible ?
+    `${counts.total} tips (all visible)` :
+    `${counts.visible} visible tips (out of ${counts.total})`;
+
+  return (
+    <>
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Connection to stream name: ${node.streamName}`}
+      </div>
+      <InfoLine name={`Stream ${node.streamName} comprises`} value={thisStreamCounts}/>
+      {nDescendentStreams > 0 ?
+        <>
+          <InfoLine name="Further streams originate from this one" value={`(n=${nDescendentStreams})`}/>
+          <InfoLine name="All streams (together) summarise" value={totalTipCounts}/>
+        </> :
+        <InfoLine name="No further streams originate from this one" value=""/>}
+    </>
+  );
+}
+
 const HoverInfoPanel = ({
   selectedNode,
   colorBy,
@@ -399,6 +466,17 @@ const HoverInfoPanel = ({
   if (!selectedNode) return null
   const node = selectedNode.node.n; // want the redux node, not the phylo node
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
+  if (selectedNode.streamDetails) {
+    return (
+      <Container node={node} panelDims={panelDims} xy={[selectedNode.streamDetails.x, selectedNode.streamDetails.y]}>
+        {selectedNode.isBranch ? 
+          <StreamConnectorInfo node={node}/> :
+          <StreamRibbonInfo node={node}  streamDetails={selectedNode.streamDetails}/>}
+      </Container>
+    );
+  }
+
   return (
     <Container node={node} panelDims={panelDims}>
       {selectedNode.isBranch===false ? (

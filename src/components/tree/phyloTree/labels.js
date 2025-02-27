@@ -14,7 +14,8 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const xPad = this.params.tipLabelPadX;
   const yPad = this.params.tipLabelPadY;
 
-  const inViewTips = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
+  const inViewTips = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
+    .filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   const inViewVisibleTips = inViewTips.filter((d) => d.visibility === NODE_VISIBLE);
 
@@ -136,13 +137,13 @@ export const drawBranchLabels = function drawBranchLabels(key) {
   if (!("branchLabels" in this.groups)) {
     this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels").attr("clip-path", "url(#treeClip)");
   }
+
+  const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
+    .filter((d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key]);
+
   this.groups.branchLabels
     .selectAll(".branchLabel")
-    .data(
-      this.nodes.filter(
-        (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key]
-      )
-    )
+    .data(nodes)
     .enter()
     .append("text")
     .attr("class", "branchLabel")

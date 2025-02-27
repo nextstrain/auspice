@@ -1,9 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
-import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { toggleTemporalConfidence } from "../../actions/tree";
+import { toggleTemporalConfidence, changeDistanceMeasure } from "../../actions/tree";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
 
@@ -34,7 +33,7 @@ class ChooseMetric extends React.Component {
           selected={this.props.distanceMeasure === "num_date"}
           onClick={() => {
             analyticsControlsEvent("tree-metric-temporal");
-            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
+            this.props.dispatch(changeDistanceMeasure("num_date"));
           }}
         >
           {t("sidebar:time")}
@@ -44,7 +43,7 @@ class ChooseMetric extends React.Component {
           selected={this.props.distanceMeasure === "div"}
           onClick={() => {
             analyticsControlsEvent("tree-metric-temporal");
-            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
+            this.props.dispatch(changeDistanceMeasure("div"));
           }}
         >
           {t("sidebar:divergence")}

@@ -7,15 +7,21 @@ import { PhyloNode } from "../../components/tree/phyloTree/types";
  */
 export type Mutations = Record<string, number>
 
+/** An index in the overall `nodes` array */
+export type NodeIdx = number;
+
+export type StreamDimensions = Array<Array<number>>
+
+
 export interface ReduxNode {
   /** the index of the node in the nodes array. set so that we can access visibility / nodeColors if needed */
-  arrayIdx?: number
+  arrayIdx?: NodeIdx
 
   branch_attrs?: {
     mutations?: {
       [gene: string]: string[]
     }
-    labels?: Record<string, unknown>
+    labels?: Record<string, string>
   }
   children?: ReduxNode[]
   currentGt?: string
@@ -42,6 +48,30 @@ export interface ReduxNode {
   /** the number of visible tips */
   tipCount?: number
 
+  /** Is the node part of a (currently active) stream tree? */
+  inStream?: boolean
+
+  /** Name of the stream (represents a branch label value for this node) */
+  streamName?: string
+
+  /** the pivots for the stream originating from this node */
+  streamPivots?: Array<number>
+
+  /** the categories for the stream originating from this node */
+  streamCategories?: Array<{
+    name: string
+    color: string
+    nodes: NodeIdx[]
+  }>
+
+  /** the dimensions (KDE-weights per category per pivot) for the stream originating from this node */
+  streamDimensions?: StreamDimensions
+
+  /** the maximum weight observed in streamDimensions when summing across categories */
+  streamMaxHeight?: number
+
+  streamNodeCounts?: {total: number; visible: number}
+
   unexplodedChildren?: ReduxNode[]
 }
 
@@ -50,6 +80,15 @@ export interface ReduxNode {
  * Values: a Map of trait values to count
  */
 export type TraitCounts = Record<string, Map<string, number>>
+
+export interface StreamSummary {
+  name: string;
+  startNode: number;
+  members: number[];
+  streamChildren: string[];
+  connectedStreamsLadderised?: string[]; // only if parentStreamName=false
+  parentStreamName: string|false;
+}
 
 export interface TreeState {
   availableBranchLabels: string[]
@@ -77,6 +116,9 @@ export interface TreeState {
   version: number
   visibility: Visibility[] | null
   visibilityVersion: number
+  
+  /** A map of available streams to summary information about the stream */
+  streams: Record<string, StreamSummary>
 }
 
 export interface TreeTooState extends TreeState {
