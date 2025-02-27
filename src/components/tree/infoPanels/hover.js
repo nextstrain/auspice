@@ -8,7 +8,7 @@ import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
 import { isValueValid, strainSymbol } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
-import { nodeDisplayName } from "./helpers";
+import { nodeDisplayName, dateInfo } from "./helpers";
 
 export const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -37,30 +37,27 @@ export const InfoLine = ({name, value, padBelow=false}) => {
  * A React component to display information about the branch's time & divergence (where applicable)
  * @param  {Object} props
  * @param  {Object} props.node branch node currently highlighted
+ * @param  {boolean} props.isTerminal
  */
-const BranchLength = ({node, t}) => {
+const BranchLength = ({node, t, isTerminal}) => {
   const elements = []; // elements to render
   const divergence = getDivFromNode(node);
-  const numDate = getTraitFromNode(node, "num_date");
 
   if (divergence) {
     elements.push(<InfoLine name={t("Divergence")+":"} value={formatDivergence(divergence)} key="div"/>);
   }
 
-  if (numDate !== undefined) {
-    const date = numericToCalendar(numDate);
-    const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
-    if (numDateConfidence && numDateConfidence[0] !== numDateConfidence[1]) {
-      elements.push(<InfoLine name={t("Inferred Date")+":"} value={date} key="inferredDate"/>);
-      const dateRange = [numericToCalendar(numDateConfidence[0]), numericToCalendar(numDateConfidence[1])];
-      if (dateRange[0] !== dateRange[1]) {
-        elements.push(<InfoLine name={t("Date Confidence Interval")+":"} value={`(${dateRange[0]}, ${dateRange[1]})`} key="dateConf"/>);
-      }
-    } else {
-      elements.push(<InfoLine name={t("Date")+":"} value={date} key="date"/>);
+  const {date, dateRange, inferred, ambiguousDate} = dateInfo(node, isTerminal);
+  if (date) {
+    const dateDescription = inferred ? 'Inferred Date' : 'Date';
+    elements.push(<InfoLine name={t(dateDescription)+":"} value={date} key="date"/>);
+    if (inferred && dateRange) {
+      elements.push(<InfoLine name={t("Date Confidence Interval")+":"} value={`(${dateRange.join(', ')})`} key="dateConf"/>);
+    }
+    if (ambiguousDate) {
+      elements.push(<InfoLine name={t("Provided Date")+":"} value={ambiguousDate} key="date"/>);
     }
   }
-
   return elements;
 };
 
@@ -409,7 +406,7 @@ const HoverInfoPanel = ({
           {tipLabelKey!==strainSymbol && <InfoLine name="Node name:" value={node.name}/>}
           <VaccineInfo node={node} t={t}/>
           <TipMutations node={node} t={t}/>
-          <BranchLength node={node} t={t}/>
+          <BranchLength node={node} t={t} isTerminal={true}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
           <Comment>{t("Click on tip to display more info")}</Comment>
@@ -418,7 +415,7 @@ const HoverInfoPanel = ({
         <>
           <BranchDescendants node={node} t={t} tipLabelKey={tipLabelKey}/>
           <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} t={t}/>
-          <BranchLength node={node} t={t}/>
+          <BranchLength node={node} t={t} isTerminal={false}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>
             {idxOfInViewRootNode === node.arrayIdx ? t('Click to zoom out to parent clade') : t('Click to zoom into clade')}

@@ -6,7 +6,7 @@ import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode,
   getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
 import { MutationTable } from "./MutationTable";
 import { lhsTreeId} from "../tree";
-import { nodeDisplayName } from "./helpers";
+import { nodeDisplayName, dateInfo } from "./helpers";
 
 export const styles = {
   container: {
@@ -174,20 +174,22 @@ const StrainName = ({children}) => (
 );
 
 const SampleDate = ({isTerminal, node, t}) => {
-  const date = getTraitFromNode(node, "num_date");
+  const {date, dateRange, inferred, ambiguousDate} = dateInfo(node, isTerminal);
   if (!date) return null;
 
-  const dateUncertainty = getTraitFromNode(node, "num_date", {confidence: true});
-  if (date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1]) {
-    return (
-      <>
-        {item(t(isTerminal ? "Inferred collection date" : "Inferred date"), numericToCalendar(date))}
-        {item(t("Date Confidence Interval"), `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
-      </>
-    );
-  }
-  /* internal nodes are always inferred, regardless of whether uncertainty bounds are present */
-  return item(t(isTerminal ? "Collection date" : "Inferred date"), numericToCalendar(date));
+  const dateDescription = isTerminal ?
+    (inferred ? "Inferred collection date" : "Collection date") :
+    "Inferred date"; // hardcoded assumption that internal nodes are inferred
+
+  return (
+    <>
+      {item(t(dateDescription), date)}
+      {inferred && dateRange &&
+        item(t("Date Confidence Interval"), `(${dateRange.join(', ')})`)}
+      {ambiguousDate && 
+        item(t("Provided date"), ambiguousDate)}
+    </>
+  )
 };
 
 const getTraitsToDisplay = (node) => {
