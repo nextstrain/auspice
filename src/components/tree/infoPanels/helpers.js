@@ -21,3 +21,27 @@ export function nodeDisplayName(t, node, tipLabelKey, branch) {
   /* TIP */
   return tipLabel;
 }
+
+export function dateInfo(node, isTerminal) {
+  const num_date = getTraitFromNode(node, "num_date");
+  if (!num_date) return {};
+    
+  // Decide if the date is inferred and, if so, attempt to get the underlying ambiguous date (for tips)
+  let inferred, ambiguousDate;
+  const dateUncertainty = getTraitFromNode(node, "num_date", {confidence: true});
+  if (!isTerminal) {
+    inferred=true;
+  } else if (Object.hasOwn(node.node_attrs.num_date, "inferred")) {
+    inferred = node.node_attrs.num_date.inferred;
+    ambiguousDate = getTraitFromNode(node, "num_date", {raw: true});
+  } else {
+    inferred = dateUncertainty && dateUncertainty[0] !== dateUncertainty[1];
+  }
+
+  const dateRange = dateUncertainty ?
+    [numericToCalendar(dateUncertainty[0]), numericToCalendar(dateUncertainty[1])] :
+    undefined;
+  const date = numericToCalendar(num_date);
+
+  return {date, dateRange, inferred, ambiguousDate};
+}
