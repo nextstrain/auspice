@@ -40,6 +40,7 @@ export interface TreeComponentStateProps {
   showOnlyPanels: boolean
   showTangle: boolean
   showTreeToo: boolean
+  showStreamTrees: boolean
   temporalConfidence: TemporalConfidence
   tipLabelKey: string | symbol
   tree: TreeState
@@ -50,6 +51,7 @@ export interface TreeComponentState {
   hoveredNode: {
     node: PhyloNode
     isBranch: boolean
+    streamDetails?: {x: number; y: number; categoryIndex: number;}
   } | null
   tree: PhyloTreeType | null
   treeToo: PhyloTreeType | null

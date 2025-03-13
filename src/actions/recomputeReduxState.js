@@ -23,6 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
+import { processStreams, labelStreamMembership } from "../util/treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -459,6 +460,19 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.defaults.selectedBranchLabel = "clade";
     state.selectedBranchLabel = "clade";
   }
+
+  const candidateStreamBranchLabels = [
+    "stream_label",
+    "stream",
+    // "clade",
+  ];
+  for (const key of candidateStreamBranchLabels) {
+    if (tree.availableBranchLabels.includes(key)) {
+      state.streamTreeBranchLabel = key;
+      state.showStreamTrees = true; // TODO XXX - remove - here for dev purposes only
+    }
+  }
+
 
   state.temporalConfidence = {exists: num_date_confidence, display: num_date_confidence, on: false};
 
@@ -1036,6 +1050,17 @@ export const createStateFromQueryOrJSONs = ({
 
   /* if query.label is undefined then we intend to zoom to the root */
   tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
+
+  /* scan the tree and identify / label streams for the currently chosen
+  Note this happens irrespective of `showStreamTrees`, but we could defer this
+  to improve first load time */
+  if (controls.streamTreeBranchLabel!=='none') {
+    tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
+  }
+
+  if (controls.showStreamTrees && !!Object.keys(tree.streams).length) {
+    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
+  }
 
   if (treeToo && treeToo.loaded) {
     treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
