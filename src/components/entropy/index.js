@@ -147,9 +147,8 @@ class Entropy extends React.Component {
                 zoomMin: this.state.chart.zoomBounds[0],
                 zoomMax: this.state.chart.zoomBounds[1],
               })
-            } else {
-              this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
             }
+            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
           }}
         >
           <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
