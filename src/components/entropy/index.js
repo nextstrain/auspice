@@ -72,11 +72,6 @@ const getStyles = (width) => {
     loaded: state.entropy.loaded,
     onScreen: state.entropy.onScreen,
     colorBy: state.controls.colorBy,
-    /**
-     * Note that zoomMin & zoomMax only represent the state when changed by a URL
-     * i.e. on dataset load or narrative page change. As such, they fall out-of-sync
-     * as soon as any user-zooming is performed.
-     */
     zoomMin: state.controls.zoomMin,
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
@@ -131,10 +126,7 @@ class Entropy extends React.Component {
     const viewingGenome = this.props.selectedCds===nucleotide_gene;
     /**
      * The intention for this button is to be inactive when viewing the genome &
-     * fully zoomed out, however zoom actions do not trigger redux state changes
-     * which would be necessary for this (see comment in @connect decorator
-     * above). Once we fix that it is simple to conditionally inactivate this
-     * button.
+     * fully zoomed out.
      */
     return (
       <div style={{...tabGroup, ...styles.resetLayout}}>
