@@ -129,23 +129,21 @@ class Entropy extends React.Component {
      * fully zoomed out.
      */
     return (
-      <div style={{...tabGroup, ...styles.resetLayout}}>
-        <button
-          key={1}
-          style={tabGroupMember}
-          onClick={() => {
-            if (viewingGenome) {
-              this.state.chart.update({
-                zoomMin: this.state.chart.zoomBounds[0],
-                zoomMax: this.state.chart.zoomBounds[1],
-              })
-            }
-            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
-          }}
-        >
-          <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
-        </button>
-      </div>
+      <button
+        key={1}
+        style={{...tabSingle, ...styles.resetLayout}}
+        onClick={() => {
+          if (viewingGenome) {
+            this.state.chart.update({
+              zoomMin: this.state.chart.zoomBounds[0],
+              zoomMax: this.state.chart.zoomBounds[1],
+            })
+          }
+          this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+        }}
+      >
+        <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
+      </button>
     );
   }
   entropyCountSwitch(styles) {
