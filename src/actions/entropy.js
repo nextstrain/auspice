@@ -69,9 +69,6 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
   if (!entropy.loaded) return;
 
   if (arg === nucleotide_gene) {
-    if (entropy.selectedCds === nucleotide_gene) {
-      return
-    }
     action.selectedCds = arg;
     action.selectedPositions = [];
   } else if (typeof arg === 'string') {
