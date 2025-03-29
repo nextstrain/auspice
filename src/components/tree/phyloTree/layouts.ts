@@ -8,6 +8,7 @@ import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { getBranchVisibility } from "./renderers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -366,7 +367,12 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  let nodesInDomain = this.nodes.filter((d) =>
+    d.inView &&
+    d.y !== undefined &&
+    d.x !== undefined &&
+    getBranchVisibility(d) === "visible"
+  );
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
@@ -395,7 +401,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       spanX = minimumXAxisSpan;
     }
     /* In rectangular mode, if the tree has been zoomed, leave some room to display the (clade's) root branch */
-    if (this.layout==="rect" && this.zoomNode.n.arrayIdx!==0) {
+    if (this.layout==="rect" && (this.zoomNode.n.arrayIdx!==0 || getBranchVisibility(this.zoomNode) === "hidden")) {
       minX -= (maxX-minX)/20; // 5%
     }
     xDomain = [minX, maxX];
