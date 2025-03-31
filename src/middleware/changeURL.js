@@ -186,7 +186,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      query.label = action.cladeName ? action.cladeName : undefined;
+      query.label = action.urlQueryLabel;
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:

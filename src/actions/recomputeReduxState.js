@@ -719,10 +719,8 @@ const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsSt
   if (zoomSelected) {
     const [labelName, labelValue] = zoomSelected.split(":");
     const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
-    oldState.selectedClade = zoomSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
   } else {
-    oldState.selectedClade = undefined;
     newIdxRoot = applyInViewNodesToTree(0, oldState);
   }
 

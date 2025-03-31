@@ -4,9 +4,9 @@ import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave, LabelDatum, nonHoveredRippleOpacity } from "../phyloTree/renderers";
 import { PhyloNode } from "../phyloTree/types";
+import { ReduxNode, TreeState} from "../../../reducers/tree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
-import { ReduxNode } from "../../../reducers/tree/types";
 import { TreeComponent } from "../tree";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 
@@ -85,7 +85,7 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
       const parentStreamNode = d.that.nodes[parentStreamIndex].n;``
       return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
         root: [parentStreamIndex, undefined],
-        cladeSelected: generateSelectedClade(parentStreamNode, this.props.tree.availableBranchLabels)
+        urlQueryLabel: computeUrlQueryLabel(parentStreamNode, this.props.tree.availableBranchLabels)
       }));
     }
   }
@@ -98,37 +98,35 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
   const root: Root = LHSTree ? [arrayIdxToZoomTo, undefined] : [undefined, arrayIdxToZoomTo];
   /* clade selected (as used in the URL query) is only designed to work for the main tree, not the RHS tree */
   const newZoomNode = zoomBackwards ? d.that.nodes[arrayIdxToZoomTo].n : d.n;
-  const cladeSelected = LHSTree ? generateSelectedClade(newZoomNode, this.props.tree.availableBranchLabels) : undefined;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
+  const urlQueryLabel = LHSTree ? computeUrlQueryLabel(newZoomNode, this.props.tree.availableBranchLabels) : undefined;
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, urlQueryLabel}));
 };
 
 /**
- * For a given node *n* return a string which can uniquely identify this node which we'll use
- * in the URL query
+ * Scan the branch labels associated with the node *n* and if an appropriate one
+ * exists then we want to set this as the branch label query. Branches with
+ * multiple labels will be used in the order specified by *availableBranchLabels*
+ * (i.e. the order of the drop-down on the menu)
  */
-function generateSelectedClade(n: ReduxNode, availableBranchLabels: string[]): string|undefined {
-  let cladeSelected: string | undefined;
-  // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
-  // (The order of the drop-down on the menu)
-  // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
-  let legalBranchLabels: string[] | undefined;
-  // Check has some branch labels, and remove 'aa' ones.
-  if (n.branch_attrs &&
-    n.branch_attrs.labels !== undefined) {
-    legalBranchLabels = Object.keys(n.branch_attrs.labels).filter((label) => label !== "aa");
+function computeUrlQueryLabel(
+  n: ReduxNode,
+  availableBranchLabels: TreeState["availableBranchLabels"]
+): string | undefined {
+  let urlQueryLabel: string | undefined;
+  if (n.branch_attrs && n.branch_attrs.labels !== undefined) {
+    const legalBranchLabels: string[] = Object.keys(n.branch_attrs.labels)
+      // don't use AA mutations as zoom labels currently (the URL is ugly and there will be too many non-unique labels)
+      .filter((label) => label !== "aa")
+      // sort the possible branch labels by the order of those available on the tree
+      .sort((a, b) => availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b));
+    if (legalBranchLabels.length) {
+      const key = legalBranchLabels[0]; // use the first one (if multiple)
+      urlQueryLabel = `${key}:${n.branch_attrs.labels[key]}`;
+    }
   }
-  // If has some, then could be clade label - but sort first
-  if (legalBranchLabels && legalBranchLabels.length) {
-    // sort the possible branch labels by the order of those available on the tree
-    legalBranchLabels.sort((a, b) =>
-      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
-    );
-    // then use the first!
-    const key = legalBranchLabels[0];
-    cladeSelected = `${key}:${n.branch_attrs.labels[key]}`;
-  }
-  return cladeSelected;
+  return urlQueryLabel;
 }
+
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: PhyloNode): void {
