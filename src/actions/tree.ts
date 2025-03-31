@@ -76,7 +76,6 @@ export const applyInViewNodesToTree = (
  */
 export const updateVisibleTipsAndBranchThicknesses = ({
   root = [undefined, undefined],
-  urlQueryLabel = undefined,
 }: {
   /**
    * Change the in-view part of the tree.
@@ -84,11 +83,6 @@ export const updateVisibleTipsAndBranchThicknesses = ({
    * [0, 0]: reset. [undefined, undefined]: do nothing
    */
   root?: Root
-
-  /**
-   * URL query label (i.e. `?label=${urlQueryLabel}`)
-   */
-  urlQueryLabel?: string
 } = {}
 ): ThunkFunction => {
   return (dispatch, getState) => {
@@ -112,7 +106,6 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: rootIdxTree1,
       idxOfFilteredRoot: data.idxOfFilteredRoot,
-      urlQueryLabel,
     };
 
     if (controls.showTreeToo) {
