@@ -23,11 +23,12 @@ export const strainNameToIdx = (nodes, name) => {
 
 /**
  * Find the node with the given label name & value
- * NOTE: if there are multiple nodes with the same label then the first encountered is returned
+ * NOTE: if there are multiple nodes with the same label then `null` is returned
+ * 
  * @param {Array} nodes tree nodes (flat)
  * @param {string} labelName label name
  * @param {string} labelValue label value
- * @returns {int} the index of the matching node (0 if no match found)
+ * @returns {int|null} the index of the matching node (0 if no match found)
  */
 export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
   let i;
@@ -46,7 +47,7 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
           message: "Specified Zoom Label Found Multiple Times!",
           details: "Multiple nodes in the tree are labelled '"+labelName+" "+labelValue+"' - no zoom performed"
         }));
-        return 0;
+        return null;
       }
     }
   }
@@ -56,6 +57,7 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
       message: "Specified Zoom Label Value Not Found!",
       details: "The label '"+labelName+"' value '"+labelValue+"' was not found in the tree - no zoom performed"
     }));
+    return null;
   }
   return found;
 };
