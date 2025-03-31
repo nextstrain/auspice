@@ -4,7 +4,6 @@ import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave, LabelDatum, nonHoveredRippleOpacity } from "../phyloTree/renderers";
 import { PhyloNode } from "../phyloTree/types";
-import { ReduxNode, TreeState} from "../../../reducers/tree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
 import { TreeComponent } from "../tree";
@@ -82,10 +81,8 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     const parentStreamName = this.props.tree.streams[d.n.streamName].parentStreamName;
     if (parentStreamName) { // if this is false we are zooming back into the "normal" tree, so use the non-stream-tree code path
       const parentStreamIndex = this.props.tree.streams[parentStreamName].startNode
-      const parentStreamNode = d.that.nodes[parentStreamIndex].n;``
       return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
         root: [parentStreamIndex, undefined],
-        urlQueryLabel: computeUrlQueryLabel(parentStreamNode, this.props.tree.availableBranchLabels)
       }));
     }
   }
@@ -97,35 +94,8 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     d.n.arrayIdx; 
   const root: Root = LHSTree ? [arrayIdxToZoomTo, undefined] : [undefined, arrayIdxToZoomTo];
   /* clade selected (as used in the URL query) is only designed to work for the main tree, not the RHS tree */
-  const newZoomNode = zoomBackwards ? d.that.nodes[arrayIdxToZoomTo].n : d.n;
-  const urlQueryLabel = LHSTree ? computeUrlQueryLabel(newZoomNode, this.props.tree.availableBranchLabels) : undefined;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, urlQueryLabel}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
 };
-
-/**
- * Scan the branch labels associated with the node *n* and if an appropriate one
- * exists then we want to set this as the branch label query. Branches with
- * multiple labels will be used in the order specified by *availableBranchLabels*
- * (i.e. the order of the drop-down on the menu)
- */
-function computeUrlQueryLabel(
-  n: ReduxNode,
-  availableBranchLabels: TreeState["availableBranchLabels"]
-): string | undefined {
-  let urlQueryLabel: string | undefined;
-  if (n.branch_attrs && n.branch_attrs.labels !== undefined) {
-    const legalBranchLabels: string[] = Object.keys(n.branch_attrs.labels)
-      // don't use AA mutations as zoom labels currently (the URL is ugly and there will be too many non-unique labels)
-      .filter((label) => label !== "aa")
-      // sort the possible branch labels by the order of those available on the tree
-      .sort((a, b) => availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b));
-    if (legalBranchLabels.length) {
-      const key = legalBranchLabels[0]; // use the first one (if multiple)
-      urlQueryLabel = `${key}:${n.branch_attrs.labels[key]}`;
-    }
-  }
-  return urlQueryLabel;
-}
 
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
