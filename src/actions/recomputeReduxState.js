@@ -615,6 +615,28 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     state.tipLabelKey = state.defaults.tipLabelKey;
   }
 
+  /* URL query label defines a <branchLabel>:<value> pair
+  NOTE: We're not checking here whether the <value> is on the tree, simply the <branchLabel>
+  */
+  if (query.label) {
+    try {
+      const labelName = parseLabel(query.label)[0];
+      if (!tree.availableBranchLabels.includes(labelName)) {
+        console.error(`URL query label name ${labelName} doesn't exist`);
+        delete query.label;
+      }
+    } catch (err) {
+      console.error(`URL query label was incorrectly formatted: ${err.toString()}`)
+      delete query.label;
+    }
+  }
+  if (query.clade) { // deprecated syntax
+    if (!query.label) {
+      query.label = `clade:${query.clade}`;
+    }
+    delete query.clade;
+  }  
+
   /* temporalConfidence */
   if (
     shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout) &&
@@ -713,16 +735,20 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, zoomSelected, controlsState, dispatch) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, query, controlsState, dispatch) => {
   /* calculate the index of the (in-view) root note, which depends on any selected zoom */
   let newIdxRoot = oldState.idxOfInViewRootNode;
-  if (zoomSelected) {
-    const [labelName, labelValue] = zoomSelected.split(":");
-    const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
-    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
-  } else {
-    newIdxRoot = applyInViewNodesToTree(0, oldState);
+  let cladeSelectedIdx = 0; // default to tree root
+  if (query.label) {
+    const [labelName, labelValue] = parseLabel(query.label)
+    const idx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
+    if (idx === null) {
+      delete query.label;
+    } else {
+      cladeSelectedIdx = idx;
+    }
   }
+  newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
 
   /* calculate new branch thicknesses & visibility, as this depends on the root note */
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
@@ -1045,26 +1071,9 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
-  /* parse the query.label / query.clade */
-  if (query.clade) {
-    if (!query.label && query.clade !== "root") {
-      query.label = `clade:${query.clade}`;
-    }
-    delete query.clade;
-  }
-  if (query.label) {
-    if (!query.label.includes(":")) {
-      console.error("Defined a label without ':' separator.");
-      delete query.label;
-    }
-    if (!tree.availableBranchLabels.includes(query.label.split(":")[0])) {
-      console.error(`Label name ${query.label.split(":")[0]} doesn't exist`);
-      delete query.label;
-    }
-  }
 
   /* if query.label is undefined then we intend to zoom to the root */
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
+  tree = modifyTreeStateVisAndBranchThickness(tree, query, controls, dispatch);
 
   /** ------------------- STREAMTREE SETUP -------------------
    * scan the tree and identify / label streams for the currently chosen label.
@@ -1203,7 +1212,7 @@ function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTre
 function updateSecondTree(tree, treeToo, controls, dispatch) {
   treeToo.nodeColorsVersion = tree.nodeColorsVersion;
   treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, undefined, controls, dispatch);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, {}, controls, dispatch);
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
 
   /* modify controls */
@@ -1216,4 +1225,18 @@ function updateSecondTree(tree, treeToo, controls, dispatch) {
   controls.panelLayout = "full";
 
   return treeToo;
+}
+
+function parseLabel(labelString) {
+  const parts = labelString.split(":")
+  if (parts.length===1) {
+    throw new Error("No ':' separator found in label")
+  }
+  if (parts.length>2) {
+    throw new Error("Only one ':' separator may be used in label")
+  }
+  if (parts[0].length===0 || parts[1].length===0) {
+    throw new Error("Label name or key was empty")
+  }
+  return parts
 }
