@@ -3,6 +3,7 @@ import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 import { PhyloNode } from "../phyloTree/types";
+import { ReduxNode, TreeState} from "../../../reducers/tree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
 import { TreeComponent } from "../tree";
@@ -70,27 +71,7 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
   }
 
   const root: Root = [undefined, undefined];
-  let cladeSelected: string | undefined;
-  // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
-  // (The order of the drop-down on the menu)
-  // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
-  let legalBranchLabels: string[] | undefined;
-  // Check has some branch labels, and remove 'aa' ones.
-  if (d.n.branch_attrs &&
-    d.n.branch_attrs.labels !== undefined) {
-    legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
-  }
-  // If has some, then could be clade label - but sort first
-  if (legalBranchLabels && legalBranchLabels.length) {
-    const availableBranchLabels = this.props.tree.availableBranchLabels;
-    // sort the possible branch labels by the order of those available on the tree
-    legalBranchLabels.sort((a, b) =>
-      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
-    );
-    // then use the first!
-    const key = legalBranchLabels[0];
-    cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
-  }
+
   /* Clicking on a branch means we want to zoom into the clade defined by that branch
   _except_ when it's the "in-view" root branch, in which case we want to zoom out */
   const observedMutations = d.that.params.orientation[0] === 1 ? this.props.tree.observedMutations : this.props.treeToo.observedMutations;
@@ -99,8 +80,39 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     d.n.arrayIdx;
   if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
   else root[1] = arrayIdxToZoomTo;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+    root,
+    urlQueryLabel: computeUrlQueryLabel(d.n, this.props.tree.availableBranchLabels)
+  }));
+
 };
+
+
+/**
+ * Scan the branch labels associated with the node *n* and if an appropriate one
+ * exists then we want to set this as the branch label query. Branches with
+ * multiple labels will be used in the order specified by *availableBranchLabels*
+ * (i.e. the order of the drop-down on the menu)
+ */
+function computeUrlQueryLabel(
+  n: ReduxNode,
+  availableBranchLabels: TreeState["availableBranchLabels"]
+): string | undefined {
+  let urlQueryLabel: string | undefined;
+  if (n.branch_attrs && n.branch_attrs.labels !== undefined) {
+    const legalBranchLabels: string[] = Object.keys(n.branch_attrs.labels)
+      // don't use AA mutations as zoom labels currently (the URL is ugly and there will be too many non-unique labels)
+      .filter((label) => label !== "aa")
+      // sort the possible branch labels by the order of those available on the tree
+      .sort((a, b) => availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b));
+    if (legalBranchLabels.length) {
+      const key = legalBranchLabels[0]; // use the first one (if multiple)
+      urlQueryLabel = `${key}:${n.branch_attrs.labels[key]}`;
+    }
+  }
+  return urlQueryLabel;
+}
+
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: PhyloNode): void {
