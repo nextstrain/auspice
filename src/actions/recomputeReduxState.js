@@ -635,7 +635,19 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
       query.label = `clade:${query.clade}`;
     }
     delete query.clade;
-  }  
+  }
+  if (metadata.displayDefaults.label) {
+    try {
+      const labelName = parseLabel(metadata.displayDefaults.label)[0];
+      if (!tree.availableBranchLabels.includes(labelName)) {
+        console.error(`Display default label name ${labelName} doesn't exist`);
+        delete metadata.displayDefaults.label;
+      }
+    } catch (err) {
+      console.error(`Display default label was incorrectly formatted: ${err.toString()}`)
+      delete metadata.displayDefaults.label;
+    }
+  }
 
   /* temporalConfidence */
   if (
@@ -735,7 +747,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, query, controlsState, dispatch) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, displayDefaults, query, controlsState, dispatch) => {
   /* calculate the index of the (in-view) root note, which depends on any selected zoom */
   let newIdxRoot = oldState.idxOfInViewRootNode;
   let cladeSelectedIdx = 0; // default to tree root
@@ -744,6 +756,14 @@ const modifyTreeStateVisAndBranchThickness = (oldState, query, controlsState, di
     const idx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     if (idx === null) {
       delete query.label;
+    } else {
+      cladeSelectedIdx = idx;
+    }
+  } else if (displayDefaults.label) {
+    const [labelName, labelValue] = parseLabel(displayDefaults.label)
+    const idx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
+    if (idx === null) {
+      delete displayDefaults.label;
     } else {
       cladeSelectedIdx = idx;
     }
@@ -840,7 +860,8 @@ const createMetadataStateFromJSON = (json) => {
       sidebar: "sidebar",
       panels: "panels",
       stream_label: "streamLabel",
-      transmission_lines: "showTransmissionLines"
+      transmission_lines: "showTransmissionLines",
+      label: "label",
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
       if (Object.prototype.hasOwnProperty.call(json.meta.display_defaults, jsonKey)) {
@@ -1073,7 +1094,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* if query.label is undefined then we intend to zoom to the root */
-  tree = modifyTreeStateVisAndBranchThickness(tree, query, controls, dispatch);
+  tree = modifyTreeStateVisAndBranchThickness(tree, metadata.displayDefaults, query, controls, dispatch);
 
   /** ------------------- STREAMTREE SETUP -------------------
    * scan the tree and identify / label streams for the currently chosen label.
@@ -1212,7 +1233,7 @@ function instantiateSecondTree(secondTreeDataset, metadata, genomeMap, secondTre
 function updateSecondTree(tree, treeToo, controls, dispatch) {
   treeToo.nodeColorsVersion = tree.nodeColorsVersion;
   treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, {}, controls, dispatch);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, {}, {}, controls, dispatch);
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
 
   /* modify controls */

@@ -51,6 +51,8 @@ These are exported as the (optional) property of the dataset JSON ``meta.display
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``language``              | Language to display Auspice in                                        | "ja"                                               |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
+| ``label``                 | Labelled branch that tree starts zoomed to                            | "Sublineage:J" or "clade:2a.3a"                    |
++---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 
 Note that ``meta.display_defaults.panels`` (optional) differs from ``meta.panels`` (required), where the latter lists the possible panels that auspice may display for the dataset. See the `JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__ for more details.
 
