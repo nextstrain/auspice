@@ -8,7 +8,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { isEqual } from 'lodash';
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
-import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
+import { tabGroup, tabGroupMember, tabGroupMemberSelected, tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
 import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
@@ -21,46 +21,6 @@ import { StyledTooltip } from "../controls/styles";
 import "../../css/entropy.css";
 
 
-const getStyles = (width) => {
-  return {
-    switchContainer: {
-      position: "absolute",
-      marginTop: -5,
-      paddingLeft: width - 100
-    },
-    switchContainerWide: {
-      position: "absolute",
-      marginTop: -25,
-      paddingLeft: width - 185
-    },
-    switchTitle: {
-      margin: 5,
-      position: "relative",
-      top: -1
-    },
-    resetLayout: {
-      position: "absolute",
-      right: 190,
-      top: 0,
-      zIndex: 100
-    },
-    entropyCountSwitch: {
-      position: "absolute",
-      right: 50,
-      top: 0,
-      zIndex: 100
-    },
-    helpIcon: {
-      position: "absolute",
-      right: 25,
-      top: 3,
-      fontSize: '16px', // controls icon size
-      cursor: 'help',
-      color: '#888'
-    }
-  };
-};
-
 @connect((state) => {
   return {
     selectedCds: state.entropy.selectedCds,
@@ -72,11 +32,6 @@ const getStyles = (width) => {
     loaded: state.entropy.loaded,
     onScreen: state.entropy.onScreen,
     colorBy: state.controls.colorBy,
-    /**
-     * Note that zoomMin & zoomMax only represent the state when changed by a URL
-     * i.e. on dataset load or narrative page change. As such, they fall out-of-sync
-     * as soon as any user-zooming is performed.
-     */
     zoomMin: state.controls.zoomMin,
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
@@ -131,29 +86,27 @@ class Entropy extends React.Component {
     const viewingGenome = this.props.selectedCds===nucleotide_gene;
     /**
      * The intention for this button is to be inactive when viewing the genome &
-     * fully zoomed out, however zoom actions do not trigger redux state changes
-     * which would be necessary for this (see comment in @connect decorator
-     * above). Once we fix that it is simple to conditionally inactivate this
-     * button.
+     * fully zoomed out.
      */
     return (
-      <div style={{...tabGroup, ...styles.resetLayout}}>
-        <button
-          key={1}
-          style={tabGroupMember}
-          onClick={() => {
-            if (viewingGenome) {
-              this.state.chart.update({
-                zoomMin: this.state.chart.zoomBounds[0],
-                zoomMax: this.state.chart.zoomBounds[1],
-              })
-            }
-            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
-          }}
-        >
-          <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
-        </button>
-      </div>
+      <button
+        key={1}
+        style={{...tabSingle, ...styles.resetLayout}}
+        onClick={() => {
+          if (!this.isZoomed()) {
+            return;
+          }
+          if (viewingGenome) {
+            this.state.chart.update({
+              zoomMin: this.state.chart.zoomBounds[0],
+              zoomMax: this.state.chart.zoomBounds[1],
+            })
+          }
+          this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
+        }}
+      >
+        <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
+      </button>
     );
   }
   entropyCountSwitch(styles) {
@@ -276,8 +229,60 @@ class Entropy extends React.Component {
     return `Amino acid diversity of CDS ${this.props.selectedCds.name}`
   }
 
+  getStyles() {
+    const zoomed = this.isZoomed();
+
+    return {
+      switchContainer: {
+        position: "absolute",
+        marginTop: -5,
+        paddingLeft: this.props.width - 100
+      },
+      switchContainerWide: {
+        position: "absolute",
+        marginTop: -25,
+        paddingLeft: this.props.width - 185
+      },
+      switchTitle: {
+        margin: 5,
+        position: "relative",
+        top: -1
+      },
+      resetLayout: {
+        position: "absolute",
+        right: 190,
+        top: 0,
+        zIndex: 100,
+        cursor: zoomed ? "pointer" : "auto",
+        color: zoomed ? darkGrey : lightGrey
+      },
+      entropyCountSwitch: {
+        position: "absolute",
+        right: 50,
+        top: 0,
+        zIndex: 100
+      },
+      helpIcon: {
+        position: "absolute",
+        right: 25,
+        top: 3,
+        fontSize: '16px', // controls icon size
+        cursor: 'help',
+        color: '#888'
+      }
+    };
+  }
+
+  isZoomed() {
+    return (
+      (this.props.selectedCds !== nucleotide_gene) ||
+      (this.state.chart.zoomBounds && this.props.zoomMin !== this.state.chart.zoomBounds[0]) ||
+      (this.state.chart.zoomBounds && this.props.zoomMax !== this.state.chart.zoomBounds[1])
+    );
+  }
+
   render() {
-    const styles = getStyles(this.props.width);
+    const styles = this.getStyles();
     return (
       <Card infocard={this.props.showOnlyPanels} title={this.title()}>
         <InfoPanel d3event={this.state.hovered.d3event} width={this.props.width} height={this.props.height}>
