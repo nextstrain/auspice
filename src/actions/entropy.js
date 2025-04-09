@@ -69,6 +69,10 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
   if (!entropy.loaded) return;
 
   if (arg === nucleotide_gene) {
+    // FIXME: these new values aren't reflected in UNSAFE_componentWillReceiveProps
+    action.zoomMin = 0;
+    action.zoomMax = entropy.genomeMap[0].range[1];
+
     action.selectedCds = arg;
     action.selectedPositions = [];
   } else if (typeof arg === 'string') {
@@ -101,8 +105,12 @@ export const changeEntropyCdsSelection = (arg) => (dispatch, getState) => {
     action.bars = data;
     action.maxYVal = maxYVal;
   } else if (isEqual(action.selectedPositions, entropy.selectedPositions)) {
-    return;
+    // FIXME: need to dispatch with zoomMin/zoomMax change, this will do for testing purposes
+    // return;
   }
+
+  console.log(`[changeEntropyCdsSelection] dispatch actions:`)
+  console.log(action)
 
   dispatch(action);
 };
