@@ -220,7 +220,11 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
  */
 export const radialLayout = function radialLayout(this: PhyloTreeType): void {
   const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
-  const offset = this.nodes[0].depth;
+  const visibleDepths = this.nodes
+    .filter((d) => getBranchVisibility(d) === "visible")
+    .map((d) => d.depth);
+  const offset = Math.min(...visibleDepths);
+  // FIXME: adjust axis bounds and labels
   this.nodes.forEach((d) => {
     const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / maxDisplayOrder;
     const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / maxDisplayOrder;
