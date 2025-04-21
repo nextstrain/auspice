@@ -38,7 +38,6 @@ function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
   return (
     <Toggle
       display
-      isExperimental={true}
       on={focus}
       callback={() => dispatch({ type: TOGGLE_FOCUS })}
       label={label}

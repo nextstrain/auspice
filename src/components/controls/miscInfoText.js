@@ -66,8 +66,8 @@ export const ExplodeTreeInfo = (
 );
 
 export const ToggleFocusInfo = (
-  <>This functionality is experimental and should be treated with caution!
-    <br/>When focusing on selected nodes, nodes that do not match the
+  <>
+    When focusing on selected nodes, nodes that do not match the
     filter will occupy less vertical space on the tree. Only applicable to
     rectangular and radial layouts.
   </>
