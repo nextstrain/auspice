@@ -1,5 +1,7 @@
 # Changelog
 
+* Removed the experimental markers from "Focus on Selected" and "Explode Tree By" options. These seem to be working well. ([#1954](https://github.com/nextstrain/auspice/issues/1954))
+
 ## version 2.62.0 - 2025/01/21
 
 
