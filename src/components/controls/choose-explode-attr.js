@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
-import { ImLab } from "react-icons/im";
 import { FaInfoCircle } from "react-icons/fa";
 import { explodeTree } from "../../actions/tree";
 import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
@@ -40,8 +39,7 @@ class ChooseExplodeAttr extends React.Component {
     return (
       <div style={{paddingTop: 10}}>
         <SidebarSubtitleFlex data-tip data-for="explode_tree">
-          <span style={{ position: "relative" }}>
-            <ImLab style={{ position: "absolute", left: "-14px", top: "2px", fontSize: "10px" }}/>
+          <span>
             {t("sidebar:Explode Tree By")}
           </span>
           {tooltip && !this.props.mobileDisplay && (
