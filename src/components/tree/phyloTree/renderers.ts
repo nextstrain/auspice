@@ -556,7 +556,7 @@ export function drawStreams(this: PhyloTreeType): void {
     .data(streamsToDraw, (d) => String(d))
     .join(
       (enter) => {
-        console.log("[entire stream // enter]", enter);
+        // console.log("[entire stream // enter]", enter);
         // return enter.append('g').attr('id', (d)=>{console.log(`\t${d}`); return `stream${d}`}).each((d) => console.log("EACH?", d))
         const selection = enter.append('g')
           .attr('id', (name) => `stream${name}`)
@@ -564,21 +564,21 @@ export function drawStreams(this: PhyloTreeType): void {
         selection.append("g").attr("class", "connector");
         selection.append("g").attr("class", "ripples");
         selection.append("g").attr("class", "label");
-        selection.each((d) => console.log("Stream enter:", d))
+        // selection.each((d) => console.log("Stream enter:", d))
         return selection
       },
       (update) => {
-        console.log("[entire stream // update]", update);
+        // console.log("[entire stream // update]", update);
         // TODO -- I don't think we need to re-set the ID here? i.e. unnecessary
         update.attr('id', (name) => `stream${name}`)
-        update.each((d) => console.log("Stream update:", d))
+        // update.each((d) => console.log("Stream update:", d))
         return update;
       },
       (exit) => {
-        console.log("[entire stream // exit]", exit);
+        // console.log("[entire stream // exit]", exit);
         return exit
           .call((selection) => selection.transition('500')
-            .each((d) => console.log("Stream exit:", d))
+            // .each((d) => console.log("Stream exit:", d))
             .style('opacity', 0)
             .remove()
           )
@@ -609,7 +609,7 @@ export function drawStreams(this: PhyloTreeType): void {
   }
 
   for (const name of streamsToDraw) {
-    console.log("rendering connectors, ripples (paths) for stream", name);
+    // console.log("rendering connectors, ripples (paths) for stream", name);
     const node = this.nodes[this.streams[name].startNode];
 
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
@@ -636,6 +636,7 @@ export function drawStreams(this: PhyloTreeType): void {
           return update.call(
             (selection) => selection.transition("500")
               .attr("d", (d) => connector(d))
+              .style("stroke", (d) => d.branchStroke)
               .attr("stroke-width", (d) => d['stroke-width'])
           );
         },
