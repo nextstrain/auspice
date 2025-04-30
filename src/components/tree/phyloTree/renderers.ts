@@ -530,37 +530,55 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
 
 
 export function drawStreams(this: PhyloTreeType): void {
-  console.groupCollapsed('drawStreams')
-
-  /* initial set up - should only ever run once */
-  if (!("streams" in this.groups)) {
-    // console.log("initial setup of this.groups.streams")
-    this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
-  }
+  // console.groupCollapsed('drawStreams')
+  console.group('drawStreams')
 
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
   console.log("streamsToDraw:", streamsToDraw)
 
-  this.groups.streams.selectAll('g')
-    // .data(streamsToDraw, (d) => {console.log(`key fn ${d}`); return String(d);})
+  /* initial set up - runs when streams are turned on / removed */
+  if (streamsToDraw.length && !("streams" in this.groups)) {
+    console.log("initial setup of this.groups.streams")
+    this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
+  } else if (!streamsToDraw.length && "streams" in this.groups) {
+    console.log("removing streams (SVG + this.groups reference)")
+    this.groups.streams.selectAll("*").remove();
+    delete this.groups.streams;
+    return
+  }
+
+  /** For each stream, construct a SVG group to house the stream, and within each group create
+   * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update
+   * individual elements.
+   */
+  this.groups.streams.selectAll('.streamGroup')
     .data(streamsToDraw, (d) => String(d))
     .join(
       (enter) => {
-        // console.log("[entire stream // enter]", enter);
+        console.log("[entire stream // enter]", enter);
         // return enter.append('g').attr('id', (d)=>{console.log(`\t${d}`); return `stream${d}`}).each((d) => console.log("EACH?", d))
-        return enter.append('g').attr('id', (name) => `stream${name}`);
+        const selection = enter.append('g')
+          .attr('id', (name) => `stream${name}`)
+          .attr('class', `streamGroup`);
+        selection.append("g").attr("class", "connector");
+        selection.append("g").attr("class", "ripples");
+        selection.append("g").attr("class", "label");
+        selection.each((d) => console.log("Stream enter:", d))
+        return selection
       },
       (update) => {
-        // console.log("[entire stream // update] NO-OP", update);
+        console.log("[entire stream // update]", update);
+        // TODO -- I don't think we need to re-set the ID here? i.e. unnecessary
         update.attr('id', (name) => `stream${name}`)
+        update.each((d) => console.log("Stream update:", d))
         return update;
       },
       (exit) => {
-        // console.log("[entire stream // exit]", exit);
+        console.log("[entire stream // exit]", exit);
         return exit
           .call((selection) => selection.transition('500')
-            // .each((d) => console.log("EACH?", d))
+            .each((d) => console.log("Stream exit:", d))
             .style('opacity', 0)
             .remove()
           )
@@ -573,7 +591,6 @@ export function drawStreams(this: PhyloTreeType): void {
     .y1((d) => d.y1);
 
   const connector = (node: PhyloNode): string => { // a.k.a. branch
-
     // don't draw connectors to empty streams!
     if (node.n.streamNodeCounts.visible===0) return "";
 
@@ -591,20 +608,19 @@ export function drawStreams(this: PhyloTreeType): void {
     return `M${node.n.parent.shell.xTip},${y1}H${x1}`;
   }
 
-  /* If one were a d3 guru one could probably add the following stuff above, but I'm not so there you go */
   for (const name of streamsToDraw) {
     console.log("rendering connectors, ripples (paths) for stream", name);
     const node = this.nodes[this.streams[name].startNode];
 
-    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`)
-      .selectAll(`.connector`)
+    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
+      .selectAll(`.connectorPath`)
       .data([node], (_d) => "CONNECTOR") // `data` not `datum` so we can use `join`
       .join(
         (enter) => {
           // console.log(`\t[connector ${name} // enter]`, enter);
           return enter
             .append("path")
-            .attr("class", `connector`)
+            .attr("class", `connectorPath`)
             .attr("d", (d) => connector(d)) // fat-arrow to avoid d3 rebinding `this`
             .attr("stroke-width", (d) => d['stroke-width'])
             .style("stroke", (d) => d.branchStroke)
@@ -629,8 +645,8 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
-    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`)
-      .selectAll(`.stream`)
+    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
+      .selectAll(`.ripple`)
       .data(node.streamRipples, (d: Ripple) => String(d.key))
       .join(
         (enter) => {
@@ -638,7 +654,7 @@ export function drawStreams(this: PhyloTreeType): void {
           // console.log(`\t[stream ${name} // enter]`, enter);
           return enter
             .append("path")
-            .attr("class", `stream`)
+            .attr("class", `ripple`)
             .attr("d", (d) => areaGenerator(d))
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
             .on("mouseover", (_d, i, paths) => this.callbacks.onStreamHover(node, i, paths, false)) // tsc isn't detecting the `bind(this: TreeComponent)` in `initialRender.ts`
@@ -657,8 +673,8 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
-    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`)
-      .selectAll(`.streamLabel`)
+    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.label`)
+      .selectAll(`.labelText`)
       .data(_positionLabel(node), (_d) => "LABEL") // `data` not `datum` so we can use `join`
       .join(
         (enter) => {
@@ -666,7 +682,7 @@ export function drawStreams(this: PhyloTreeType): void {
           // console.log(`\t[stream ${name} // enter]`, enter);
           return enter
             .append("text")
-            .attr("class", `streamLabel`)
+            .attr("class", `labelText`)
             .attr("x", (d) => d.x)
             .attr("y", (d) => d.y)
             .attr("text-anchor", "middle")
