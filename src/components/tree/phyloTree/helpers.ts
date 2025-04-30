@@ -86,6 +86,7 @@ export const setDisplayOrderRecursively = (
           console.log(`${streamName} Stream display order`, n.shell.displayOrderRange)
         }
         continue // don't continue traversing below this node
+        // TODO XXX - should we clear the display orders below this node for clarity?
       }
       yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter, streams);
     }
