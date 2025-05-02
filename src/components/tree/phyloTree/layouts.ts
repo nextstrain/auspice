@@ -7,6 +7,7 @@ import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
+import { getBranchVisibility } from "./renderers";
 import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
 
 /**
@@ -219,7 +220,11 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
  */
 export const radialLayout = function radialLayout(this: PhyloTreeType): void {
   const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
-  const offset = this.nodes[0].depth;
+  const visibleDepths = this.nodes
+    .filter((d) => getBranchVisibility(d) === "visible")
+    .map((d) => d.depth);
+  const offset = Math.min(...visibleDepths);
+  // FIXME: adjust axis bounds and labels
   this.nodes.forEach((d) => {
     const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / maxDisplayOrder;
     const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / maxDisplayOrder;
@@ -360,7 +365,12 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  let nodesInDomain = this.nodes.filter((d) =>
+    d.inView &&
+    d.y !== undefined &&
+    d.x !== undefined &&
+    getBranchVisibility(d) === "visible"
+  );
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
@@ -389,7 +399,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       spanX = minimumXAxisSpan;
     }
     /* In rectangular mode, if the tree has been zoomed, leave some room to display the (clade's) root branch */
-    if (this.layout==="rect" && this.zoomNode.n.arrayIdx!==0) {
+    if (this.layout==="rect" && (this.zoomNode.n.arrayIdx!==0 || getBranchVisibility(this.zoomNode) === "hidden")) {
       minX -= (maxX-minX)/20; // 5%
     }
     xDomain = [minX, maxX];
