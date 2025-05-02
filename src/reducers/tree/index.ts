@@ -23,7 +23,6 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedClade: undefined
   };
 };
 
@@ -51,8 +50,6 @@ const Tree = (
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         idxOfFilteredRoot: action.idxOfFilteredRoot,
-        cladeName: action.cladeName,
-        selectedClade: action.cladeName,
       };
       return {
         ...state,
