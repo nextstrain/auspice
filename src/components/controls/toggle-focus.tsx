@@ -21,7 +21,7 @@ function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
 
   const label = (
     <div style={{ display: "flex", alignItems: "center" }}>
-      <span style={{ marginRight: "5px" }}>Focus on Selected</span>
+      <span style={{ marginRight: "5px" }}>Focus on selected</span>
       {tooltip && !mobileDisplay && (
         <>
           <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-focus">
