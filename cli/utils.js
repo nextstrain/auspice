@@ -73,16 +73,6 @@ const readFilePromise = (fileName) => {
   });
 };
 
-/* Where should the built files be saved? (or sourced??)
- * This may grow more complex over time
- */
-const customOutputPath = (extensions) => {
-  if (extensions && path.resolve(__dirname, "..") !== process.cwd()) {
-    return process.cwd();
-  }
-  return false;
-};
-
 /* write an index.html file to the current working directory
  * Optionally set the hrefs for local files to relative links (needed for github pages)
  */
@@ -108,7 +98,6 @@ module.exports = {
   warn,
   error,
   resolveLocalDirectory,
-  customOutputPath,
   readFilePromise,
   exportIndexDotHtml
 };
