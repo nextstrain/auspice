@@ -81,6 +81,7 @@ export interface ReduxNode {
  */
 export type TraitCounts = Record<string, Map<string, number>>
 
+
 export interface StreamSummary {
   name: string;
   startNode: number;
@@ -88,7 +89,12 @@ export interface StreamSummary {
   streamChildren: string[];
   connectedStreamsLadderised?: string[]; // only if parentStreamName=false
   parentStreamName: string|false;
+  domains: Record<'num_date'|'div', [number, number]>;
 }
+
+
+export const sigma = Symbol("sigma");
+export type Streams = Record<string, StreamSummary> & {[sigma]?: number};
 
 export interface TreeState {
   availableBranchLabels: string[]
@@ -116,9 +122,9 @@ export interface TreeState {
   version: number
   visibility: Visibility[] | null
   visibilityVersion: number
-  
+
   /** A map of available streams to summary information about the stream */
-  streams: Record<string, StreamSummary>
+  streams: Streams
 }
 
 export interface TreeTooState extends TreeState {

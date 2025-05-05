@@ -77,6 +77,8 @@ export const setDisplayOrderRecursively = (
         const spaceAround = 1;
 
         for (const streamName of streams[child.streamName].connectedStreamsLadderised) {
+          // here we could set a scalar on the per-stream weight-space to display-order-space
+          // or do it earlier when we define weight-space?
           const n = _findDownstreamNode(child, streams[streamName].startNode);
           const totalStreamHeight = spaceAround * 2 + n.streamMaxHeight;
           const displayOrderMidpoint = yCounter + totalStreamHeight/2;

@@ -1059,7 +1059,8 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   if (controls.showStreamTrees && !!Object.keys(tree.streams).length) {
-    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
+    // TODO - remove query
+    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {}, query)
   }
 
   if (treeToo && treeToo.loaded) {
