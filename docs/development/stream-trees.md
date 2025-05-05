@@ -18,7 +18,7 @@
     
     This is also where we ladderise the stream, `connectedStreamsLadderised`
 
-2. `processStreams` - For each stream (see step (1)) we compute pivots, partition the stream nodes into categories (via color-by, each category will be rendered as a "ribbon"), and compute the stream dimensions. The stream dimensions involve using a KDE for each terminal node in the stream, evaluating it across the pivots, then summing the results. Note: these dimensions are not in pixel space.
+2. `processStreams` - For each stream (see step (1)) we compute pivots, partition the stream nodes into categories (via color-by, each category will be rendered as a "ribbon"), and compute the stream dimensions. The stream dimensions involve using a KDE for each terminal node in the stream, evaluating it across the pivots, then summing the results. Note: these dimensions are not in pixel space, but if you visualised them each stream would be directly comparable in terms of shape and scale to the eventual rendering in pixel space.
 
 
     This step is called on (i) page load, (ii) change in branch-label, (iii) toggle stream tree, (iv) tree visibility updates, (v) tree distance metric change.
@@ -38,3 +38,17 @@
     3d. `mapToScreen` → `mapStreamsToScreen` Computes `streamRipples` which are in pixel-space, based on `displayOrderStream` and `streamPivots`. The structure of `streamRipples` is a 3d matrix, `streamRipples[categoryIdx][pivotIdx]={x, y0, y1}` with an additional property of `streamRipples[categoryIdx].key = <ripple name>`
 
     3e. `drawStreams` - d3 code to render `streamRipples`, stream labels, and connectors (the branches joining streams to streams)
+
+### KDE calculations
+
+Streams are a Kernel Density Estimate (KDE) with a gaussian kernel to smooth out the contribution of each sampled sequence. Each kernel represents a sample with the kernel centered on the sampling date or divergence value and with a constant standard deviation
+
+We calculate a underlying array of pivots spanning all tips (i.e. covering all streams) and extended slightly either side (so, e.g., the earliest sampled tip is centered at the leftmost pivot). The standard deviation ($\sigma$) of each kernel is a proportion of this pivot span and is thus the same across all kernels and streams. For each stream we use a restricted list of pivots ignoring all pivots $p$ where $p \leq t-3\sigma$, where $t$ is the minimum tip in the stream, and similarly for the maximum; this is entirely for computational efficiency.
+
+These gaussians are summed together to form the KDE  form a Kernel Density Estimate (KDE) $\hat{f}(x) = \sum_{i=1}^{n} w \times \mathcal{N}(\mu,\,\sigma^{2})$ where $\mu$ is the tip sampling date/divergence and $\sigma$ is a constant across all streams. The PDF of the gaussian is evaluated at each of the pivots. 
+
+NOTE: The pivots could be recalculated relative to the domain in view, i.e. when zooming in we calculate more pivots etc, but for the moment this remains constant.
+
+The weighting parameter $w$ scales each gaussian proportional to the number of tips in the stream ($m$). We use a negative exponential $w=\exp(\frac{-(m-4)}{4})+1$. This improves the interpretability of streams as even streams with a single tip are visible on screen, but reduces our ability to directly compare streams against one another.
+
+DEV: You can use `?stream_no_w` to set $w=1$ (i.e. remove it). You can use `?stream_sigma=x` to set a custom sigma value.
