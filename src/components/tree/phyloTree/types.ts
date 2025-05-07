@@ -127,7 +127,7 @@ export interface PhyloNode extends SVG {
   yCross?: number
   yTip?: number
 
-  displayOrderStream?: [number,number][][]
+  rippleDisplayOrders?: [number,number][][]
 
   streamRipples?: Ripple[]
 }

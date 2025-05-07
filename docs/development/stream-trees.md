@@ -27,15 +27,15 @@
 
 3. Rendering - The stream information is transformed to pixel space and rendered. This code is all within PhyloTree. Not all of these steps need to be called on each update, and not all are explicitly about streams.
 
-    3a. `setDisplayOrder` - sets `displayOrder` and `displayOrderRange` for the origin node of the stream. The former is the midpoint of the stream, the latter is the range the stream occupies. Nodes _within_ a stream are not assigned displayOrders.
-
+    3a. `setDisplayOrder` - sets `displayOrder` and `displayOrderRange` for the origin node of the stream. The former is the midpoint of the stream, the latter is the range the stream occupies. Also computes `rippleDisplayOrders` (on the stream start node) by converting the already set `streamDimensions` (sum of KDE weights) to an array of ripples in display-order space.
+    
     NOTE: The order streams are processed here is related to the ladderisation of streams!
 
     3b. `setDistance` - unused for streams, but (I think?) we still set `depth`, `pDepth` on each node within a stream anyways.
 
-    3c. `setLayout` → `streamDisplayOrders` For each stream convert the already set `streamDimensions` (sum of KDE weights) to an array of ripples in display-order space. Set as `displayOrderStream` on the stream start node.
+    3c. `setLayout`
 
-    3d. `mapToScreen` → `mapStreamsToScreen` Computes `streamRipples` which are in pixel-space, based on `displayOrderStream` and `streamPivots`. The structure of `streamRipples` is a 3d matrix, `streamRipples[categoryIdx][pivotIdx]={x, y0, y1}` with an additional property of `streamRipples[categoryIdx].key = <ripple name>`
+    3d. `mapToScreen` → `mapStreamsToScreen` Computes `streamRipples` which are in pixel-space, based on `rippleDisplayOrders` and `streamPivots`. The structure of `streamRipples` is a 3d matrix, `streamRipples[categoryIdx][pivotIdx]={x, y0, y1}` with an additional property of `streamRipples[categoryIdx].key = <ripple name>`
 
     3e. `drawStreams` - d3 code to render `streamRipples`, stream labels, and connectors (the branches joining streams to streams)
 
