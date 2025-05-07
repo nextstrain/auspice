@@ -85,7 +85,7 @@ export const setDisplayOrderRecursively = (
           n.shell.displayOrder = displayOrderMidpoint;
           n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
           yCounter += totalStreamHeight;
-          console.log(`${streamName} Stream display order`, n.shell.displayOrderRange)
+          console.log(`${streamName} Stream display order`,  n.shell.displayOrder, n.shell.displayOrderRange, totalStreamHeight)
         }
         continue // don't continue traversing below this node
         // TODO XXX - should we clear the display orders below this node for clarity?
@@ -126,13 +126,16 @@ function _getSpaceBetweenSubtrees(
                      as the final max yCount = numTips + numSubtrees*numTips/20 */
 }
 
-/** setDisplayOrder
- * given nodes, this fn sets <phyloNode>.displayOrder for each node
- * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
- * Nodes must have parent child links established (via createChildrenAndParents)
- * PhyloTree can subsequently use this information. Accessed by prototypes
- * rectangularLayout, radialLayout, createChildrenAndParents
- * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
+/**
+ * Sets the `displayOrder` and `displayOrderRange` for each node by traversing the (ladderized) tree.
+ * For internal nodes the range represents the range of the children display orders.
+ * 
+ * For streams we set these properties on the stream start node. The values correspond to the
+ * midpoint of the stream and the range of the stream at its maximum (i.e. at some pivot).
+ * We then (separately) compute the display orders for each ripple (at each pivot) via
+ * `rippleDisplayOrders()`.
+ * 
+ * Nodes must have parent child links established (via createChildrenAndParents) before running this.
  */
 export const setDisplayOrder = ({
   nodes,
@@ -195,6 +198,19 @@ export const setDisplayOrder = ({
   nodes[0].displayOrderRange = [undefined, undefined];
   console.groupEnd()
   timerEnd("setDisplayOrder");
+
+  /**
+   * The above didn't compute the display orders for the ripples themselves (just the overall stream dimensions)
+   * so do this now
+   */
+  if (nodes[0].that.params.showStreamTrees) {
+    if (!streams) {
+      console.error("setDisplayOrder bug - streams toggled on but no stream data")
+    } else {
+      setRippleDisplayOrders(nodes, streams)
+    }
+  }
+
 };
 
 
@@ -368,17 +384,22 @@ function _setDisplayOrderToUndefined(node: PhyloNode):void {
 }
 
 /**
- * For each stream convert the already set `streamDimensions` (sum of KDE weights) to
- * a array of ripples in "display-order space".
+ * Sets `rippleDisplayOrders` on the start node of each stream by converting `streamDimensions`
+ * (KDE-weights independently for each ribbon) into stacked coordinates in displayOrder space
+ * each representing a ripple. The set of ripples are centred around the (previously set)
+ * `displayOrder` (stream midpoint).
+ * 
+ * NOTE: This function depends on the (stream start node's) `displayOrder` being up to date
+ * (via `setDisplayOrder`)
  */
-export function streamDisplayOrders(nodes: PhyloNode[], streams: Record<string,StreamSummary>): void {
-  console.groupCollapsed("streamDisplayOrders");
+export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Record<string,StreamSummary>): void {
+  console.groupCollapsed("rippleDisplayOrders");
 
   for (const stream of Object.values(streams)) {
     const startingNode = nodes[stream.startNode];
 
     /* Convert KDE weights to ribbons which start at display order zero */
-    const displayOrderStream = startingNode.n.streamDimensions
+    const rippleDisplayOrders = startingNode.n.streamDimensions
       .reduce((acc: [number,number][][], weightsAcrossPivot, categoryIdx) => {
         acc.push(
           weightsAcrossPivot.map((weight,  pivotIdx) => {
@@ -393,20 +414,20 @@ export function streamDisplayOrders(nodes: PhyloNode[], streams: Record<string,S
     const displayOrderMidpoint = startingNode.displayOrder;
     console.log("Stream", stream.name, "midpoint display order:", displayOrderMidpoint);
     // console.log("\tstream dimensions (weights)", startingNode.n.streamDimensions)
-    // console.log("\tdisplay order stream", displayOrderStream)
+    // console.log("\trippleDisplayOrders", rippleDisplayOrders)
+
     /* Center the ribbons */
     for (let pivotIdx=0; pivotIdx<startingNode.n.streamPivots.length; pivotIdx++) {
-      if (!displayOrderStream.length) continue;
-      const range = [displayOrderStream.at(0).at(pivotIdx).at(0), displayOrderStream.at(-1).at(pivotIdx).at(1)];
+      if (!rippleDisplayOrders.length) continue;
+      const range = [rippleDisplayOrders.at(0).at(pivotIdx).at(0), rippleDisplayOrders.at(-1).at(pivotIdx).at(1)];
       const shift = displayOrderMidpoint - (range[0] + (range[1]-range[0])/2);
-      for (const displayOrderAcrossPivots of displayOrderStream) {
+      for (const displayOrderAcrossPivots of rippleDisplayOrders) {
         displayOrderAcrossPivots[pivotIdx][0]+=shift;
         displayOrderAcrossPivots[pivotIdx][1]+=shift;
       }
     }
-  
-    startingNode.displayOrderStream = displayOrderStream;
 
+    startingNode.rippleDisplayOrders = rippleDisplayOrders;
   }
 
   console.groupEnd();

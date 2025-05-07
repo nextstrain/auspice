@@ -530,8 +530,7 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
 
 
 export function drawStreams(this: PhyloTreeType): void {
-  // console.groupCollapsed('drawStreams')
-  console.group('drawStreams')
+  console.groupCollapsed('drawStreams')
 
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
@@ -545,8 +544,9 @@ export function drawStreams(this: PhyloTreeType): void {
     console.log("removing streams (SVG + this.groups reference)")
     this.groups.streams.selectAll("*").remove();
     delete this.groups.streams;
-    return
   }
+
+  if (!streamsToDraw.length) return;
 
   /** For each stream, construct a SVG group to house the stream, and within each group create
    * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update

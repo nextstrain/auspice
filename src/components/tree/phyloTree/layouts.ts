@@ -3,7 +3,7 @@
 import { scaleLinear, ScalePoint, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
-import { stemParent, nodeOrdering, streamDisplayOrders } from "./helpers";
+import { stemParent, nodeOrdering, rippleDisplayOrders } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
@@ -39,12 +39,6 @@ export const setLayout = function setLayout(
   if (this.layout === "clock") {
     this.scatterVariables.x="num_date";
     this.scatterVariables.y="div";
-  }
-
-  if (this.params.showStreamTrees) {
-    streamDisplayOrders(this.nodes, this.streams)
-  } else {
-    // do we have to delete things?
   }
 
   if (this.layout === "rect") {
@@ -350,7 +344,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
 */
 export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
-
+  console.group("mapToScreen")
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
@@ -457,6 +451,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
     }
   }
 
+  console.log("set yDomain,", yDomain)
   this.xScale.domain(xDomain);
   this.yScale.domain(yDomain);
 
@@ -541,15 +536,21 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       }
     });
   }
-
+  console.groupEnd()
   /* map any streams to pixel space */
   if (this.params.showStreamTrees) {
     this.mapStreamsToScreen()
   }
 };
 
-
+/**
+ * Maps the pivot space (x) and displayOrderSpace (y) into pixel space for each stream.
+ * 
+ * Creates `node.streamRipples` on the start node of each stream by transforming the node's `rippleDisplayOrders`
+ * and `streamPivots` by the d3 scales.
+ */
 export function mapStreamsToScreen(this: PhyloTreeType): void {
+
   
   console.groupCollapsed("mapStreamsToScreen")
 
@@ -559,7 +560,7 @@ export function mapStreamsToScreen(this: PhyloTreeType): void {
   for (const stream of Object.values(this.streams)) {
     console.log("mapping stream", stream.name);
     const node = this.nodes[stream.startNode];
-    node.streamRipples = node.displayOrderStream.map((displayOrderByPivot, categoryIdx) => {
+    node.streamRipples = node.rippleDisplayOrders.map((displayOrderByPivot, categoryIdx) => {
       const datum: Ripple = Object.assign(
         [], 
         displayOrderByPivot.map(([min,max], pivotIdx) => {

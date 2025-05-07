@@ -2,7 +2,7 @@ import { Selection } from "d3-selection";
 import { Transition } from "d3-transition";
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren, setDisplayOrder, streamDisplayOrders } from "./helpers";
+import { applyToChildren, setDisplayOrder, setRippleDisplayOrders } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
@@ -431,10 +431,13 @@ export const change = function change(
    */
 
   /** display order calculations */
-  if (updateLayout || changeNodeOrder || streamDefinitionChange) {
+  if (newDistance || updateLayout || changeNodeOrder || streamDefinitionChange) {
     setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && this.streams});
-  } else if ((changeColorBy || changeVisibility) && this.params.showStreamTrees) {
-    streamDisplayOrders(this.nodes, this.streams)
+  } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
+    // rippleDisplayOrders are typically called by setDisplayOrder however for ∆{colorBy,visibility} we don't want to pay
+    // the price of recomputing the display orders for the entire tree, we just need to recompute the
+    // display-order-dimensions of the ripples
+    setRippleDisplayOrders(this.nodes, this.streams)
   }
 
   /** set distance (temporal vs div) */
@@ -459,7 +462,9 @@ export const change = function change(
     showConfidences
   ) {
     this.mapToScreen();
-  } else if (changeColorBy || changeVisibility) {
+  } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
+    // mapStreamsToScreen is typically called by mapToScreen however for ∆{colorBy,visibility} we don't want to pay
+    // the price of the entire mapToScreen function but we do need to recompute the pixel-dimensions of the ripples!
     this.mapStreamsToScreen(); // updates the pixel coordinates
   }
 

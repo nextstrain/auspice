@@ -112,8 +112,7 @@ export function processStreams(
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
   query = false // TODO REMOVE XXX
 ):void {
-  // console.groupCollapsed("processStreams")
-  console.group("processStreams")
+  console.groupCollapsed("processStreams")
   console.log(`color: ${colorScale.colorBy} metric: ${metric} skipPivots: ${skipPivots} skipCategories: ${skipCategories}`)
 
   // TODO XXX remove query (dev purposes only)
@@ -143,22 +142,9 @@ export function processStreams(
     }
   }
 
-
-  // const totalNumberOfStreams = Object.keys(streams).length;
-  // TSC can't work out intersection types properly - this will not iterate over symbols
-  // but then we can't assert. Come on!
   for (const stream of Object.values(streams)) {
     const startNode = nodes[stream.startNode];
     const nodesThisStream = _pick(nodes, stream.members)
-
-    /**
-     * Pivots often don't need to be recalculated
-     */
-    // if (!skipPivots) {
-    //   startNode.streamPivots = calcPivots(totalNumberOfStreams, startNode, nodesThisStream, metric);
-    // }
-    // startNode.streamPivots = pivots; // TODO XXX - restrict via 3*\mu
-    // startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], streams[sigma]);
 
     /**
      * Categories only need to be recalculated when the colouring changes (or upon stream creation)
@@ -169,17 +155,23 @@ export function processStreams(
 
     /**
      * When a stream is being instantiated for the first time we need to compute the max height.
-     * Importantly this considers all candidate nodes to be visible.
+     * Importantly this considers all candidate nodes to be visible. We also need to recalculate this
+     * when the pivots have changed (because values in weight space are evaluated at pivots)
      */
     let dimensions: StreamDimensions;
     let everythingIsVisibleAnyway = false;
     let streamNodeCountsTotal: number;
     let streamNodeCountsVisible: number;
 
-    if (!Object.hasOwn(startNode, "streamMaxHeight")) {
+    if (!Object.hasOwn(startNode, "streamMaxHeight") || !skipPivots) {
       ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, query, streams[sigma]));
       startNode.streamMaxHeight = dimensions.length ? computeStreamMaxHeight(dimensions) : 0;
-
+      /**
+       * NOTE: the heights of these (i.e. in KDE weight space) can be huge if we have finely spaced pivots such that the PDFs are evaluated a large number
+       * of times. We must perform some normalization of this when we go to display order space, otherwise our typical approach to spacing tips (tips
+       * separated by 1 unit of display order space) means tips are right on top of each other if the display order space occupied by streams is very large.
+       * (by large, I've seen examples of 10e6...)
+       */
       const visibilityValues = new Set(visibility);
       if (visibilityValues.size===1 && visibilityValues.has(NODE_VISIBLE)) {
         everythingIsVisibleAnyway = true;
@@ -196,7 +188,7 @@ export function processStreams(
     startNode.streamDimensions = dimensions;
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
 
-    console.log(`Stream ${stream.name}, ${nodesThisStream.length} tips, domain: ${stream.domains[metric]}. nPivots: ${startNode.streamPivots.length}, num ribbons (cats): ${startNode.streamCategories.length}, max height (kde weight): ${startNode.streamMaxHeight}. Start node:`, startNode)
+    // console.log(`Stream ${stream.name}, ${nodesThisStream.length} tips, domain: ${stream.domains[metric]}. nPivots: ${startNode.streamPivots.length}, num ribbons (cats): ${startNode.streamCategories.length}, max height (kde weight): ${startNode.streamMaxHeight}. Start node:`, startNode)
   }
 
   console.groupEnd()
@@ -313,7 +305,7 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
   // per-stream weight (to increase weights of small streams)
   const w = Object.hasOwn(query, 'stream_no_w') ? 1 : Math.exp(-(n-4)/4)+1;
 
-  console.log(`computeStreamDimensions n=${nodes.length}, sigma=${sigma}, w=${w}`);
+  // console.log(`computeStreamDimensions n=${nodes.length}, sigma=${sigma}, w=${w}`);
 
   const dimensions = categories.map((categoryInfo) => {
     const mass = pivots.map(() => 0);
