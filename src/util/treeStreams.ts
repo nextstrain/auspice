@@ -14,10 +14,9 @@ import queryString from "query-string";
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
 */
 export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<string, StreamSummary> {
-  console.groupCollapsed("labelStreamMembership")
+  console.group("labelStreamMembership")
   console.log(`Branch label: ${branchLabelKey}`)
   const streams: Record<string, StreamSummary> = {};
-  const connectedStreamStartNodes: Record<string,ReduxNode> = {};
 
   const stack: [ReduxNode, false|string][] = tree.children.map((subtreeRootNode) => [subtreeRootNode, false]);
 
@@ -25,7 +24,7 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<s
     const [node, parentStreamMembership] = stack.pop();
     let newStreamMembership = node?.branch_attrs?.labels?.[branchLabelKey];
 
-    if (newStreamMembership && !(newStreamMembership in streams)) {
+    if (newStreamMembership && newStreamMembership in streams) {
       console.error(`Stream label ${newStreamMembership} seen more than once. Ignoring all but the first.`)
       newStreamMembership = undefined;
     }
@@ -59,8 +58,6 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<s
       if (parentStreamMembership) {
         if (!(parentStreamMembership in streams)) throw new Error("labelStreamMembership fatal error II");
         streams[parentStreamMembership].streamChildren.push(newStreamMembership);
-      } else {
-        connectedStreamStartNodes[newStreamMembership] = node;
       }
     }
 
@@ -82,11 +79,6 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<s
     for (const child of node.children || []) {
       stack.push([child, currentStreamMembership])
     }
-  }
-
-  /* ladderise all descendant streams from each of the start points (non-nested streams) */
-  for (const streamRoot of Object.values(connectedStreamStartNodes)) {
-    ladderiseConnectedStreams(streams, streamRoot);
   }
 
   console.log("streams", streams)
@@ -144,6 +136,15 @@ export function processStreams(
      * fudge factor here (can be improved).
      */
     streams[weightToDisplayOrderScaleFactor] =  1 / pdf.factory(0, streams[sigma])(0) * 5;
+
+    /** we want to ladderize each time we change metric, which is also when we need to recalculate pivots */
+    Object.values(streams)
+      .filter((s) => s.parentStreamName===false) // filter to the streams which represent the start of connected series of streams
+      .forEach((stream) => {
+        // TODO - change the word ladderised, it's not correct!
+        stream.renderingOrder = calcRenderingOrder(stream.name, streams, nodes, metric);
+      })
+
   }
 
   for (const stream of Object.values(streams)) {
@@ -340,41 +341,96 @@ function computeStreamMaxHeight(dimensions: StreamDimensions): number {
     .reduce((maxValue, cv) => cv > maxValue ? cv : maxValue, 0)
 }
 
-function ladderiseConnectedStreams(streams: Record<string,StreamSummary>, root: ReduxNode):void {
-  // const streamOrigins = Object.keys(streams).filter((streamName) => streams[streamName].parentStreamName===false);
-  console.log("Ladderizing streams descendant from stream", root.streamName, "(start node name:", root.name);
+/**
+ * Given a set of connected streams (with `rootName` representing the initial stream) we return a list
+ * of stream names which can be rendered in order such that there are no crossings (i.e. stream connector lines
+ * don't go "through" other streams). Using a toy example of stream R which has 2 child streams {A,B}
+ * we want to render this as
+ * 
+ *                 ┌ AAAAAAAAAAAAAAAAAA
+ *                 │         ┌ BBBBBBBBBBBBBB
+ *                 │         │
+ * ─────────── RRRRRRRRRRRRRRRRRRRRRRRRRR
+ * 
+ * Where we want A to be drawn above B (i.e. smaller display order) based on the numeric date of the branch leaving R.
+ * This approach continues to further child streams (e.g. child streams of A).  We construct this via a tree
+ * structure (where nodes represent streams) and return a list of nodes ordered by a post-order traversal,
+ * i.e. [A,B,R]. These streams can then be assigned display orders in a simple incremental fashion.
+ * 
+ * For divergence trees we do the same but using divergence values. Note that this often results in a different
+ * return value! E.g. B might branch off before A in divergence space.
+ */
+function calcRenderingOrder(rootName: string, streams: Record<string, StreamSummary>, nodes: ReduxNode[], metric: 'num_date'|'div'): string[] {
 
-  /** Essentially duplicate a bare-bones display order calculation to allow us to work out the
-   * median (mean?) of the stream in a typical rectangular layout (so we can ladderise them)
-   */
-  const nodeIdxLadderPoisition: Map<number,number> = new Map();
-  const streamNames = []; /* all connected streams, including the start stream */
-  function _recurse(node: ReduxNode, yCounter: number):number {
-    if (node.streamName in streams) streamNames.push(node.streamName)
-    if (node?.children?.length) {
-      for (let i = node.children.length - 1; i >= 0; i--) {
-        yCounter = _recurse(node.children[i], yCounter);
-      }
-    } else {
-      nodeIdxLadderPoisition.set(node.arrayIdx, yCounter++);
-    }
-    return yCounter;
+  interface Node {
+    name: string,
+    children: Node[],
+    parent: false|Node,
+    seen: boolean
   }
-  _recurse(root, 0);
-  // const streamMedianPosition: Record<string,number> = {};
+  const treeOfStreams: Node = {name: rootName, parent: false, children: [], seen: false}
+  const stack = [treeOfStreams];
 
-  const ladderisedStreams = streamNames
-    .map((streamName) => {
-      const yVals = streams[streamName].members
-        .map((arrayIdx) => nodeIdxLadderPoisition.get(arrayIdx))
-        .sort();
-      return [streamName, yVals.at(Math.floor(yVals.length/2))]
-    })
-    .sort((a, b) => a[1]-b[1])
-    .map(([streamName,]) => streamName);
+  let _counter = 100000
+  while (stack.length && _counter>0) {
+    _counter--
+    const element = stack.pop();
+    element.children = streams[element.name].streamChildren
+    .map((name) => [
+      name,
+      metric==='div' ? getDivFromNode(nodes[streams[name].startNode].parent) : getTraitFromNode(nodes[streams[name].startNode].parent, 'num_date')
+    ])
+      .sort((a, b) => a[1]<b[1] ? -1 : a[1]>b[1] ? 1 : 0)
+      .map(([name]) => ({name, parent: element, children: [], seen: false}))
+    for (const el of element.children) {
+      stack.push(el);
+    }
+  }
 
-  streams[root.streamName].connectedStreamsLadderised = ladderisedStreams;
+  function _topmostTerminal(n: Node): Node {
+    while (n.children.length) {
+      n = n.children[0];
+    }
+    return n;
+  }
+
+  const postOrderStartNode = _topmostTerminal(treeOfStreams)
+
+  // console.log("\n\n\n")
+  // console.log("root", rootName)
+  // console.log("treeOfStreams", treeOfStreams)
+  // console.log("postOrderStartNode", postOrderStartNode,)
+
+  const postOrder = [postOrderStartNode]
+
+  _counter=100000
+  while (true && _counter>0) {
+    _counter--
+
+    const currentNode = postOrder.at(-1);
+    currentNode.seen=true;
+    // console.log("\tCURRENT:", currentNode.name, "(seen:", currentNode.seen)
+    if (currentNode.parent===false) break; // We've reached the root!
+    const nextSibling = currentNode.parent.children.filter((c) => !c.seen)[0];
+    if (nextSibling) {
+      const topmost = _topmostTerminal(nextSibling)
+      // console.log(`\t\tSibling: ${nextSibling.name}, topmost: ${topmost.name} (seen:: ${nextSibling.seen}, ${topmost.seen}`);
+      postOrder.push(topmost);
+      continue;
+    }
+    // console.log(`\t\tNo siblings, take parent ${currentNode.parent.name}`)
+    // else no siblings, take parent!
+    postOrder.push(currentNode.parent);
+  }
+  // console.log("FINITO>>>>>>")
+
+  console.log("postOrder names", postOrder.map((el) => el.name));
+
+  return  postOrder.map((el) => el.name);
 }
+
+
+
 
 
 function _pick<T>(arr:T[], idxs: number[]):T[] {
