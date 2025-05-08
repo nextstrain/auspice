@@ -404,6 +404,9 @@ function StreamRibbonInfo({node, streamDetails}) {
       </div>
       <InfoLine name="Category (ripple):" value={node.streamCategories[streamDetails.categoryIndex].name}/>
       <InfoLine name="Stream summarises" value={countsSummary}/>
+      <div>
+        Click to zoom into stream
+      </div>
     </>
   );
 }
