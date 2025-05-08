@@ -147,7 +147,7 @@ export const setDisplayOrder = ({
   streams: false|Streams,
 }): void => {
   timerStart("setDisplayOrder");
-  console.group("setDisplayOrder")
+  console.groupCollapsed("setDisplayOrder")
   console.log("\nsetDisplayOrder streams:", streams)
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = focus ? nodes[0].n.tipCount : nodes[0].n.fullTipCount;

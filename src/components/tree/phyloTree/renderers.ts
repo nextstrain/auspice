@@ -4,7 +4,7 @@ import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
-import { Selection } from "d3-selection";
+import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, StreamSummary } from "../../../reducers/tree/types";
@@ -530,7 +530,7 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
 
 
 export function drawStreams(this: PhyloTreeType): void {
-  console.groupCollapsed('drawStreams')
+  console.group('drawStreams')
 
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
@@ -590,54 +590,100 @@ export function drawStreams(this: PhyloTreeType): void {
     .y0((d) => d.y0)
     .y1((d) => d.y1);
 
-  const connector = (node: PhyloNode): string => { // a.k.a. branch
+  /**
+   * Joiner lines connect the parent stream or parent branch to the start of this stream
+   * (where start is defined by the occurrence of the first pivot, which is some amount to the left
+   * of the first tip in the stream).
+   * Backbone lines sit behind the stream itself spanning the pivot range. They help with the appearance
+   * of streams in regions where the KDE drops to zero
+   */
+  const connectorPath = (node: PhyloNode, lineType: 'joiner'|'backbone'): string => { // a.k.a. branch
     // don't draw connectors to empty streams!
     if (node.n.streamNodeCounts.visible===0) return "";
 
+    console.log(node.n.streamName, node)
+
+    const y = this.yScale(node.displayOrder);
+
+    if (lineType==='backbone') {
+      const xStreamStart = node.streamRipples.at(0).at(0).x; // first category, first pivot
+      const xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      return `M${xStreamStart},${y}H${xStreamEnd}`;
+    }
+
+    // If the stream start node is hidden (as set via the JSON) then don't show a connector!
+    // Note - there are strange states this gets us to. For instance, imagine stream1 -> stream2,
+    // if we hide the connector to stream1 then we may still render the connector to stream2 which
+    // will now start in empty space...
+    if (getBranchVisibility(node)==='hidden') {
+      return "";
+    }
+
     const x1 = node.streamRipples[0][0].x; // first category, first pivot
-    const y1 = this.yScale(node.displayOrder);
 
     const parentStreamName = this.streams[node.n.streamName].parentStreamName;
     if (parentStreamName) { // draw a kinked connector
-      const x0 = node.xTip; // represents the div/time of the stream-defining branch
-      const y0 = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
-      return `M${x0},${y0}L${x0},${y1}L${x1},${y1}`;
+      let x0 = node.xBase; // represents the div/time of the stream-defining branch
+      /**
+       * Potential bug...
+       * Imagine a stream of node -> {tips}. We draw the vertical branch to the stream at the node position
+       * however the stream itself is based on pivots which span the tips AND some multiple of sigma
+       * (the kernel std-dev) either side of the tips span. It can transpire that the initial pivot is
+       * now before the node (i.e. x1 < x0)
+      */
+      if (x1<=x0) x0=x1;
+      const yParent = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
+      return `M${x0},${yParent}L${x0},${y}L${x1},${y}`;
     }
 
-    // no parent stream - horizontal line from the parent node ("normal branch")
-    return `M${node.n.parent.shell.xTip},${y1}H${x1}`;
+    // no parent stream - horizontal line from the parent node.
+    // (The parent node, unless hidden, will have been rendered as a normal branch which includes the 'tee' part which
+    // this line will touch)
+    return `M${node.xBase},${y}H${x1}`;
   }
 
   for (const name of streamsToDraw) {
     // console.log("rendering connectors, ripples (paths) for stream", name);
     const node = this.nodes[this.streams[name].startNode];
-
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
       .selectAll(`.connectorPath`)
-      .data([node], (_d) => "CONNECTOR") // `data` not `datum` so we can use `join`
+      .data([node, node], (_d, i) => i===0?'joiner':'backbone')
       .join(
         (enter) => {
           // console.log(`\t[connector ${name} // enter]`, enter);
           return enter
             .append("path")
             .attr("class", `connectorPath`)
-            .attr("d", (d) => connector(d)) // fat-arrow to avoid d3 rebinding `this`
-            .attr("stroke-width", (d) => d['stroke-width'])
-            .style("stroke", (d) => d.branchStroke)
+            .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid d3 rebinding `this`
+            .attr("stroke-width", this.params.branchStrokeWidth)
+            .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
             .attr("fill", 'None')
-            .style("cursor", "pointer")
-            .style("pointer-events", "auto")
-            .on("mouseover", (_d, i, paths) => this.callbacks.onStreamHover(node, i, paths, true)) // tsc isn't detecting the `bind(this: TreeComponent)` in `initialRender.ts`
-            .on("mouseout",  (_d, i, paths) => this.callbacks.onStreamLeave(node, i, paths, true)) // tsc isn't detecting the `bind(this: TreeComponent)` in `initialRender.ts`
-            .on("click", this.callbacks.onBranchClick);
+            .each(function(d, i) { // attach events to the joiner line (but not the backbone)
+              if (i!==0) return;
+              const callbacks = d.that.callbacks; // `d.that` is a pointer to the phylotree object
+              select(this)
+                .style("cursor", "pointer")
+                .style("pointer-events", "auto")
+                // Within `initialRender.ts` we bind `this` of the callbacks to `TreeComponent`, but tsc doesn't pick this up
+                // and complains about a type-incompatibility of `this`. TODO XXX
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                .on("mouseover", (_d, i, paths) => callbacks.onStreamHover(node, i, paths, true))
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                .on("mouseout",  (_d, i, paths) => callbacks.onStreamLeave(node, i, paths, true))
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                .on("click", callbacks.onBranchClick)
+            })
         },
         (update) => {
           // console.log(`\t[connector ${name} // update]`, update);
           return update.call(
             (selection) => selection.transition("500")
-              .attr("d", (d) => connector(d))
-              .style("stroke", (d) => d.branchStroke)
-              .attr("stroke-width", (d) => d['stroke-width'])
+              .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
+              .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+              .attr("stroke-width", this.params.branchStrokeWidth)
           );
         },
         (exit) => {
@@ -646,8 +692,15 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
+    // I can't figure out the tsc error here (tsc shows it on the `.select(...)` line, while 
+    // vs-code shows it on the `.data(...)` line, but it's the same error)
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
       .selectAll(`.ripple`)
+      // see above
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
       .data(node.streamRipples, (d: Ripple) => String(d.key))
       .join(
         (enter) => {
@@ -658,8 +711,16 @@ export function drawStreams(this: PhyloTreeType): void {
             .attr("class", `ripple`)
             .attr("d", (d) => areaGenerator(d))
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
-            .on("mouseover", (_d, i, paths) => this.callbacks.onStreamHover(node, i, paths, false)) // tsc isn't detecting the `bind(this: TreeComponent)` in `initialRender.ts`
-            .on("mouseout",  (_d, i, paths) => this.callbacks.onStreamLeave(node, i, paths, false)) // tsc isn't detecting the `bind(this: TreeComponent)` in `initialRender.ts`
+            // see comment above
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            .on("mouseover", (_d, i, paths) => this.callbacks.onStreamHover(node, i, paths, false))
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            .on("mouseout",  (_d, i, paths) => this.callbacks.onStreamLeave(node, i, paths, false))
+            .style("cursor", "pointer")
+            .style("pointer-events", "auto")
+            .on("click", () => this.callbacks.onBranchClick(node))
         },
         (update) => {
           // console.log(`\t[stream ${name} // update]`, update);
