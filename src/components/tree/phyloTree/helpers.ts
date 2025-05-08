@@ -39,56 +39,78 @@ export const applyToChildren = (
   }
 };
 
+/**
+ * Traverse through a set of connected streams (which originate from the `streamStartNode`),
+ * each time calculating the total display order space each stream occupies. (Note:
+ * the actual transform of ribbons into display order space is not done here.)
+ * Returns the `yCounter` incremented by the space needed for the stream(s).
+ */
+function traverseConnectedStreams(
+  yCounter: number,
+  /**
+   * streamStartNode
+   * Node representing the start of a (possibly connected) stream, but not a
+   * stream which is the child of another stream
+   */
+  streamStartNode: ReduxNode,
+  streamInfo:StreamInfo
+): number {
+  if (!(streamStartNode.streamName in streamInfo.streams)) {
+    console.error(`BUG! - found (old?) stream name ${streamStartNode.streamName} on nodes but no longer in (new?) 'streams'`);
+    return yCounter;
+  }
+
+  _setDisplayOrderToUndefined(streamStartNode.shell); // stops phylotree rendering errors. to revisit. TODO XXX
+
+  for (const streamName of streamInfo.streams[streamStartNode.streamName].connectedStreamsLadderised) {
+    yCounter = setDisplayOrdersForStream(yCounter, streamName, streamInfo)
+  }
+
+  return yCounter;
+}
+
+/**
+ * Calculates the (maximum) display order occupied by this stream and places this above
+ * (in display order terms) the provided `yCounter`. Two properties are set on the stream
+ * start node: `displayOrder` (the midpoint of the stream) and `displayOrderRange`.
+ */
+function setDisplayOrdersForStream(yCounter: number, streamName: string, streamInfo: StreamInfo): number {
+  const spaceAround = 1; // 1 display order unit
+  const n = streamInfo.startNodes[streamName];
+  const totalStreamHeight = spaceAround * 2 + n.streamMaxHeight*streamInfo.streams[weightToDisplayOrderScaleFactor];
+  const displayOrderMidpoint = yCounter + totalStreamHeight/2;
+  n.shell.displayOrder = displayOrderMidpoint;
+  n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
+  yCounter += totalStreamHeight;
+  console.log(`${streamName} Stream display order`,  n.shell.displayOrder, n.shell.displayOrderRange, totalStreamHeight)
+  return yCounter;
+}
+
+
 /** setDisplayOrderRecursively
- * Calculates the display order of all nodes, which corresponds to the vertical position
- * of nodes in a rectangular tree.
- * If `yCounter` is undefined then we wish to hide the node and all descendants of it
+ * Postorder traversal to calculate the display order of nodes
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * Returns the current yCounter after assignment to the tree originating from `node`
  */
 export const setDisplayOrderRecursively = (
   node: PhyloNode,
   incrementer: (node: PhyloNode) => number,
-  yCounter: undefined|number,
+  yCounter: number,
   streamInfo: false|StreamInfo
-): number | undefined => {
-  const children = node.n.children; // (redux) tree node
+): number => {
+  const children = node.n.children;
   const showStreamTrees = !!streamInfo;
 
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      /**
-       * If, in a pre-order traversal, we encounter a node which is in a stream then
-       * we stop recursion down this subtree and instead store the total display order space
-       * this stream (and any descendant streams) occupy. The actual displayOrder calculations
-       * of the stream are deferred until later as they change with visibility changes.
-       */
       const child = children[i];
-      if (showStreamTrees && child.streamName) {
-        if (!(child.streamName in streamInfo.streams)) {
-          console.error("BUG! - found (old) stream name on nodes but no longer in (new) 'streams'");
-          continue;
-        }
-
-        _setDisplayOrderToUndefined(child.shell); // stops phylotree rendering errors. to revisit. TODO XXX
-        const spaceAround = 1;
-
-        for (const streamName of streamInfo.streams[child.streamName].connectedStreamsLadderised) {
-          const n = streamInfo.startNodes[streamName];
-          const totalStreamHeight = spaceAround * 2 + n.streamMaxHeight*streamInfo.streams[weightToDisplayOrderScaleFactor];
-          const displayOrderMidpoint = yCounter + totalStreamHeight/2;
-          n.shell.displayOrder = displayOrderMidpoint;
-          n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
-          yCounter += totalStreamHeight;
-          console.log(`${streamName} Stream display order`,  n.shell.displayOrder, n.shell.displayOrderRange, totalStreamHeight)
-        }
-        continue // don't continue traversing below this node
-        // TODO XXX - should we clear the display orders below this node for clarity?
-      }
-      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter, streamInfo);
+      yCounter = (showStreamTrees && child.streamName) ?
+        traverseConnectedStreams(yCounter, child, streamInfo) :
+        setDisplayOrderRecursively(children[i].shell, incrementer, yCounter, streamInfo);
     }
   } else {
-    if (node.n.fullTipCount !== 0 && yCounter !== undefined) {
+    // terminal node
+    if (node.n.fullTipCount !== 0) {
       yCounter += incrementer(node);
     }
     node.displayOrder = yCounter;
@@ -204,7 +226,11 @@ export const setDisplayOrder = ({
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
-      setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined, streamInfo);
+      _setDisplayOrderToUndefined(nodes[subtree.arrayIdx])
+      // setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined, streamInfo);
+    } else if (!!streamInfo && subtree.streamName) {
+      /* Special case where the entire (sub)tree is a series of connected streams */
+      yCounter = traverseConnectedStreams(yCounter, subtree, streamInfo) + spaceBetweenSubtrees;
     } else {
       yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter, streamInfo);
       yCounter+=spaceBetweenSubtrees;

@@ -12,8 +12,6 @@ import queryString from "query-string";
 * Returns
 *  "streams": each key -> object
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
-* ToDo
-*   - parse in streamLabel / don't hardcode here
 */
 export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<string, StreamSummary> {
   console.groupCollapsed("labelStreamMembership")
@@ -21,21 +19,16 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<s
   const streams: Record<string, StreamSummary> = {};
   const connectedStreamStartNodes: Record<string,ReduxNode> = {};
 
-  /**
-   * We should be able to traverse the tree from the root node (or at least
-   * the subtree root nodes), however `setDisplayOrder` can not currently
-   * deal with subtree root nodes which are stream origins - i.e. the JSON
-   * tree(s) can't have a branch label used as a stream on the root.
-   */
-  // const stack: [ReduxNode, false|string][] = [[tree, false]];
-  const stack: [ReduxNode, false|string][] = tree.children
-    .map((subtreeRootNode) => subtreeRootNode.children)
-    .flat()
-    .map((node) => [node, false]);
+  const stack: [ReduxNode, false|string][] = tree.children.map((subtreeRootNode) => [subtreeRootNode, false]);
 
   while (stack.length) {
     const [node, parentStreamMembership] = stack.pop();
-    const newStreamMembership = node?.branch_attrs?.labels?.[branchLabelKey];
+    let newStreamMembership = node?.branch_attrs?.labels?.[branchLabelKey];
+
+    if (newStreamMembership && !(newStreamMembership in streams)) {
+      console.error(`Stream label ${newStreamMembership} seen more than once. Ignoring all but the first.`)
+      newStreamMembership = undefined;
+    }
 
     /* clear any previous stream-related information using `streamName` as a sentinel value */
     // note that node.inStream (which is on every node) is re-set later in this loop
@@ -49,8 +42,6 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<s
 
     if (newStreamMembership) {
       console.log("Stream start", newStreamMembership, ", from node", node.name, parentStreamMembership ? ` nested within ${parentStreamMembership}` : ' (new start!)');
-      
-      if (newStreamMembership in streams) throw new Error("labelStreamMembership fatal error I");
 
       streams[newStreamMembership] = {
         name: newStreamMembership,
@@ -203,7 +194,7 @@ export function processStreams(
 
     // console.log(`Stream ${stream.name}, ${nodesThisStream.length} tips, domain: ${stream.domains[metric]}. nPivots: ${startNode.streamPivots.length}, num ribbons (cats): ${startNode.streamCategories.length}, max height (kde weight): ${startNode.streamMaxHeight}. Start node:`, startNode)
   }
-
+  console.log(streams);
   console.groupEnd()
 }
 
