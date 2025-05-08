@@ -87,7 +87,12 @@ export interface StreamSummary {
   startNode: number;
   members: number[];
   streamChildren: string[];
-  connectedStreamsLadderised?: string[]; // only if parentStreamName=false
+  /**
+   * Order to render the connected series of streams (which originate from this stream, i.e. this property
+   * only exists if parentStreamName=false) such that the connectors don't cross other streams.
+   * Each element is the name of a stream (e.g. renderingOrder.at(-1) will be this stream's name)
+   */
+  renderingOrder?: string[];
   parentStreamName: string|false;
   domains: Record<'num_date'|'div', [number, number]>;
 }

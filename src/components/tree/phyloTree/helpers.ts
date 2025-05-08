@@ -62,7 +62,7 @@ function traverseConnectedStreams(
 
   _setDisplayOrderToUndefined(streamStartNode.shell); // stops phylotree rendering errors. to revisit. TODO XXX
 
-  for (const streamName of streamInfo.streams[streamStartNode.streamName].connectedStreamsLadderised) {
+  for (const streamName of streamInfo.streams[streamStartNode.streamName].renderingOrder) {
     yCounter = setDisplayOrdersForStream(yCounter, streamName, streamInfo)
   }
 

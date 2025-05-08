@@ -15,11 +15,10 @@
 1. `labelStreamMembership` - traverses the tree, clearing any previous stream information and setting stream information on the root nodes of new streams. New streams are identified based on branch labels, so this function is called upon load and stream-branch-label UI. The stream information includes:
     * `node.instream`
     * streams[streamName] = {name, startNode, members, streamChildren, parentStreamName}
-    
-    This is also where we ladderise the stream, `connectedStreamsLadderised`
 
-2. `processStreams` - For each stream (see step (1)) we compute pivots, partition the stream nodes into categories (via color-by, each category will be rendered as a "ribbon"), and compute the stream dimensions. The stream dimensions involve using a KDE for each terminal node in the stream, evaluating it across the pivots, then summing the results. Note: these dimensions are not in pixel space, but if you visualised them each stream would be directly comparable in terms of shape and scale to the eventual rendering in pixel space.
+2. `processStreams` - For each stream (see step (1)) we compute pivots, partition the stream nodes into categories (via color-by, each category will be rendered as a "ribbon"), and compute the stream dimensions. The stream dimensions involve using a KDE for each terminal node in the stream, evaluating it across the pivots, then summing the results. Note: these dimensions are not in pixel space, but if you visualised them each individual stream would be directly comparable in terms of shape and scale to the eventual rendering in pixel space.
 
+    This is the stage we also calculate the order in which streams should be drawn so that the stream connectors (branches) don't cross other streams. The resultant location of streams can be quite far from their locations in a rectangular tree, and these can also change when we change the tree metric (temporal - divergence). See `calcRenderingOrder` for more details. 
 
     This step is called on (i) page load, (ii) change in branch-label, (iii) toggle stream tree, (iv) tree visibility updates, (v) tree distance metric change.
 

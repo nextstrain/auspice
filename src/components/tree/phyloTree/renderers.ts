@@ -631,7 +631,12 @@ export function drawStreams(this: PhyloTreeType): void {
        * (the kernel std-dev) either side of the tips span. It can transpire that the initial pivot is
        * now before the node (i.e. x1 < x0)
       */
-      if (x1<=x0) x0=x1;
+      if (x1<=x0) {
+        console.log(`${node.n.streamName} - Moving connector back because pivots go back further`)
+        // TODO - THIS IS CRITICAL FOR CROSSING ALGO - need to truncate pivot calculations
+      }
+
+      // if (x1<=x0) x0=x1;
       const yParent = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
       return `M${x0},${yParent}L${x0},${y}L${x1},${y}`;
     }
