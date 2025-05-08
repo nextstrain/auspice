@@ -1,4 +1,5 @@
-import { ReduxNode, StreamDimensions, StreamSummary, Visibility, Streams, sigma } from "../reducers/tree/types";
+import { ReduxNode, StreamDimensions, StreamSummary, Visibility, 
+  Streams, sigma, weightToDisplayOrderScaleFactor } from "../reducers/tree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
@@ -140,6 +141,18 @@ export function processStreams(
       const startNode = nodes[stream.startNode];
       startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], streams[sigma]);
     }
+
+    /**
+     * We define a scale factor here which is applied later on when we convert kde-weight space into display-order space.
+     * This is needed because the display order (for non-stream tips) is 1 unit = 1 tip. Since kernel PDF values can be huge
+     * (or tiny, depending on STDEV) the kde-weight space can be very large and thus streams take up all the display order space
+     * and normal tips are all squashed together.
+     * 
+     * The scale factor is the PDF evaluated at x=0, i.e. the max height of an individual kernel in display order space will be
+     * equivalent to what a single tip would have occupied. Because kernels aren't all stacked on top of each other we add a
+     * fudge factor here (can be improved).
+     */
+    streams[weightToDisplayOrderScaleFactor] =  1 / pdf.factory(0, streams[sigma])(0) * 5;
   }
 
   for (const stream of Object.values(streams)) {

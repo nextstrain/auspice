@@ -52,3 +52,5 @@ NOTE: The pivots could be recalculated relative to the domain in view, i.e. when
 The weighting parameter $w$ scales each gaussian proportional to the number of tips in the stream ($m$). We use a negative exponential $w=\exp(\frac{-(m-4)}{4})+1$. This improves the interpretability of streams as even streams with a single tip are visible on screen, but reduces our ability to directly compare streams against one another.
 
 DEV: You can use `?stream_no_w` to set $w=1$ (i.e. remove it). You can use `?stream_sigma=x` to set a custom sigma value.
+
+When we map the KDE values to display orders (within `setDisplayOrder`) we need to scale the values such that they don't dominate (or be dominated by) the display orders assigned to non-stream tips, where 1 display order unit corresponds to 1 tip. We evaluate gaussian PDF at $x=0$ and scale by this such that the (max) height of a single kernel roughly corresponds to 1 display order unit.

@@ -94,7 +94,17 @@ export interface StreamSummary {
 
 
 export const sigma = Symbol("sigma");
-export type Streams = Record<string, StreamSummary> & {[sigma]?: number};
+export const weightToDisplayOrderScaleFactor = Symbol("weightToDisplayOrderScaleFactor");
+export type Streams = Record<string, StreamSummary> & {
+  /**
+   * Gaussian kernel sigma (std dev)
+   */
+  [sigma]?: number
+  /**
+   * Scale factor to use when mapping kernel-weight space to display-order space
+   */
+  [weightToDisplayOrderScaleFactor]?: number
+}
 
 export interface TreeState {
   availableBranchLabels: string[]
