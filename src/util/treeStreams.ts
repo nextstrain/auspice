@@ -139,7 +139,7 @@ export function processStreams(
     // Each stream sees a filtered version of these pivots
     for (const stream of Object.values(streams)) {
       const startNode = nodes[stream.startNode];
-      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], streams[sigma]);
+      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], streams[sigma], 3, query);
     }
 
     /**
@@ -405,8 +405,12 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
   }
 }
 
-function restrictPivots(pivots: number[], domain:[number,number], sigma:number, cutoff:number=3): number[] {
+function restrictPivots(pivots: number[], domain:[number,number], sigma:number, cutoff:number, query): number[] {
   const min = domain[0] - sigma*cutoff;
-  const max = domain[1] + sigma*cutoff;
+  // const max = domain[1] + sigma*cutoff;
+
+  // TODO - experimental (probably want to slightly improve final pivot returned
+  const max = Object.hasOwn(query, 'stream_pivot_truncation') ? domain[1] : domain[1] + sigma*cutoff;
+
   return pivots.filter((value) => value>=min && value<=max);
 }
