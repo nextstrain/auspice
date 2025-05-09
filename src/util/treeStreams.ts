@@ -106,12 +106,13 @@ export function processStreams(
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
    */
   if (!skipPivots) {
+    // entire domain spanning all streams
     const domain = (Object.values(streams)).reduce((dd, stream) => {
       if (dd[0] > stream.domains[metric][0]) dd[0] = stream.domains[metric][0];
       if (dd[1] < stream.domains[metric][1]) dd[1] = stream.domains[metric][1];
         return dd;
     }, [Infinity, -Infinity]);
-    const nPivots = 500 ; // entire domain
+    const nPivots = 500 ; // which will represent the entire domain
     const nExtend = 2;
     // use (nPivots-2*nExtend) to span the domain into pieces (of a constant size), then extend the domain either side by nExtend pieces
     const size = Math.abs(domain[1] - domain[0])/(nPivots-1-2*nExtend);
@@ -122,7 +123,8 @@ export function processStreams(
     // Each stream sees a filtered version of these pivots
     for (const stream of Object.values(streams)) {
       const startNode = nodes[stream.startNode];
-      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], streams[sigma], 3, query);
+      const parentPosition: number = metric==='div' ? getDivFromNode(startNode.parent) : getTraitFromNode(startNode.parent, 'num_date');
+      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], parentPosition, streams[sigma], 5, query);
     }
 
     /**
@@ -200,46 +202,6 @@ export function processStreams(
 }
 
 
-
-/**
- * NOTE: KDE weights are undercounted if any measurable weight is assigned to values beyond the pivots calculated
- * here... TODO XXX
- * 
- * NOTE: We should know the maximum observed date/div in the tree and ensure our pivots don't exceed it, but if
- * you don't add pivots beyond the last node in the stream it's a hard stop...
- * 
- * NOTE: We should make the number of pivots depend on the zoom level / number of streams in view...
- */
-// function calcPivots(totalNumberOfStreams: number, streamStartNode: ReduxNode, contributingNodes: ReduxNode[], metric: "num_date"|"div" ): number[] {
-//   const startValue = metric==='div' ? getDivFromNode(streamStartNode) : getTraitFromNode(streamStartNode, 'num_date');
-
-//   if (contributingNodes.length===0) { /* stream with no terminal nodes */
-//     return [startValue];
-//   }
-
-//   const nPivots = totalNumberOfStreams > 100 ? 10 : 50;
-
-//   const domain = contributingNodes.reduce((acc, node) => {
-//     const value = metric==='div' ? getDivFromNode(node) : getTraitFromNode(node, 'num_date');
-//     if (acc[0] > value) acc[0] = value;
-//     if (acc[1] < value) acc[1] = value;
-//     return acc;
-//   }, [Infinity, -Infinity])
-
-//   // extend the span on the left side by going half way to the origin node
-
-//   domain[0] -= Math.abs(domain[0]-startValue)/2
-//   // extend the span on the right by 5% of the (new) span
-//   domain[1] += Math.abs(domain[1] - domain[0])/20;
-//   // if we have zero span then we need to add some arbritrary span
-//   // TODO - this needs some understanding of the div/num_date in the tree overall
-//   if (domain[0]===domain[1]) domain[1] += metric==='div' ? 1/20 : 1;
-
-//   const size = Math.abs(domain[1] - domain[0])/(nPivots-1);
-//   const pivots = Array.from(Array(nPivots), (_, i) => domain[0] + i*size);
-//   return pivots;
-// }
-
 /**
  * Collect all possible categories - "ribbons within a stream(tree)" - by looping
  * over all nodes in the stream. The order here reflects the order of ripples in the streamtree.
@@ -280,34 +242,19 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
 /**
  * Returns a matrix of data intended for visualisation by d3 as a stream graph
  * The outer dimensions correspond to categories, i.e. the ribbons of a stream
- * The inner dimensions correspond to pivots.
- * 
- * Each visible node for a given category is represented by a gaussian centered
- * on the node's num_date or divergence value, and the probability mass is computed
- * for each pivot and summed together for all nodes. This is a KDE where the kernel
- * is a normal/gaussian.
- * 
- * The kernels (one for each tip) have a sigma (standard deviation) proportional to
- * span of the pivots  (TODO - SHOULD THIS BE CONSTANT?) and mu (mean) is the tips
- * sampling date/div (i.e. it's centered over this point). We then scale each gaussian
- * such that the maximum value it can have is 1; this is needed otherwise a tight kernel
- * (because small sigma) will have a very large maximum value and this would dominate
- * KDE 
- * 
+ * The inner dimensions correspond to pivots. These dimensions are a KDE
+ * with each tip represented by a gaussian centered on the tip with some
+ * constant std-dev.
+ *
+ * See stream-trees.md for more explanation
  */
 function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, categories: ReduxNode['streamCategories'], visibility: true|Visibility[], query, _sigma:number):
   {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number} {
   let [streamNodeCountsTotal, streamNodeCountsVisible] = [0,0];
-  // const span = Math.abs(pivots.at(-1) - pivots[0]);
-
-  /* See stream-trees.md for explanation of parameters */
-  // const sigma = span/10; // sigma is some proportion of the pivot span
-  // const sigma = query['stream_sigma'] || span/10
   const sigma = query['stream_sigma'] || _sigma
 
-  const n = nodes.length;
-
   // per-stream weight (to increase weights of small streams)
+  const n = nodes.length;
   const w = Object.hasOwn(query, 'stream_no_w') ? 1 : Math.exp(-(n-4)/4)+1;
 
   // console.log(`computeStreamDimensions n=${nodes.length}, sigma=${sigma}, w=${w}`);
@@ -430,9 +377,6 @@ function calcRenderingOrder(rootName: string, streams: Record<string, StreamSumm
 }
 
 
-
-
-
 function _pick<T>(arr:T[], idxs: number[]):T[] {
   return idxs.map((idx) => arr[idx])
 }
@@ -452,8 +396,20 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
   }
 }
 
-function restrictPivots(pivots: number[], domain:[number,number], sigma:number, cutoff:number, query): number[] {
-  const min = domain[0] - sigma*cutoff;
+/**
+ * Given the dataset's pivot array, restrict this to a subset of pivots which are applicable for this stream.
+ * 
+ * While it's obvious that the pivots should span the stream's tips (i.e. the domain) it's a little more
+ * ambiguous about how far to extend it either side. The more we extend it the more we get smooth ends to the
+ * KDE however there are downsides.
+ * Extending too far to the left is problematic if the pivot list ends up going over the connector branch position
+ * (e.g. the pivots go back further in time than the parent node date).
+ * Extending too far to the right can make it look like every stream has gradually died out.
+ */
+function restrictPivots(pivots: number[], domain:[number,number], parentPosition: number, sigma:number, cutoff:number, query): number[] {
+  let min = domain[0] - sigma*cutoff;
+  if (min<parentPosition) min=parentPosition; // stops pivots (and therefore streams) going to the left of the connecting branch
+
   // const max = domain[1] + sigma*cutoff;
 
   // TODO - experimental (probably want to slightly improve final pivot returned
