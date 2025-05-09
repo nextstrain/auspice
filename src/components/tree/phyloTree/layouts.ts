@@ -344,7 +344,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
 */
 export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
-  console.group("mapToScreen")
+  console.groupCollapsed("mapToScreen")
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */

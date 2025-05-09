@@ -10,13 +10,15 @@ export function toggleStreamTree() {
     const {controls, tree} = getState();
     const showStreamTrees = !controls.showStreamTrees; // new state
     
-    if (showStreamTrees===false) {
+    if (showStreamTrees===false) { /* turn off stream trees */
       dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees});
       return;
     }
 
-    if (controls.streamTreeBranchLabel==='none') {
-      // toggle switched on without an already set branch label
+    if (controls.streamTreeBranchLabel===null) {
+      // changing stream branch label will automatically toggle on streamtree view
+      // Note: availableStreamLabelKeys can be set in the JSON, so this allows the author to define a default
+      // stream tree key while not starting with stream trees displayed
       dispatch(changeStreamTreeBranchLabel(availableStreamTreeBranchLabels(tree.availableBranchLabels)[0]));
       return;
     }
@@ -52,16 +54,8 @@ export function changeStreamTreeBranchLabel(newLabel) {
     }
 
     const streams = labelStreamMembership(tree.nodes[0], newLabel);
+    processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
-    const showStreamTrees = newLabel!=='none';
-    if (showStreamTrees && !!Object.keys(streams).length) {
-      processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
-    }
-    dispatch({
-      type: CHANGE_STREAM_TREE_BRANCH_LABEL,
-      streams,
-      showStreamTrees,
-      streamTreeBranchLabel: newLabel
-    })
+    dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
   }
 }

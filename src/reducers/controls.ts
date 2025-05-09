@@ -144,7 +144,7 @@ export interface BasicControlsState {
   showOnlyPanels: boolean
   showTangle: boolean
   showStreamTrees: boolean
-  streamTreeBranchLabel: string
+  streamTreeBranchLabel: string | null
   showTransmissionLines: boolean
   showTreeToo: boolean
   sidebarOpen: boolean
@@ -240,7 +240,7 @@ export const getDefaultControlsState = (): ControlsState => {
     showTreeToo: false,
     showTangle: false,
     showStreamTrees: false,
-    streamTreeBranchLabel: "none",
+    streamTreeBranchLabel: null,
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
@@ -469,7 +469,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.TOGGLE_STREAM_TREE:
       return {...state, showStreamTrees: action.showStreamTrees};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
-      return {...state, showStreamTrees: action.showStreamTrees, streamTreeBranchLabel: action.streamTreeBranchLabel};
+      return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true};
     case types.TOGGLE_SIDEBAR:
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:

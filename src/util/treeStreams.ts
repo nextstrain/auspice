@@ -14,7 +14,7 @@ import queryString from "query-string";
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
 */
 export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Record<string, StreamSummary> {
-  console.group("labelStreamMembership")
+  console.groupCollapsed("labelStreamMembership")
   console.log(`Branch label: ${branchLabelKey}`)
   const streams: Record<string, StreamSummary> = {};
 
