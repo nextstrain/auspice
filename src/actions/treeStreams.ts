@@ -1,6 +1,5 @@
 import { TOGGLE_STREAM_TREE, CHANGE_STREAM_TREE_BRANCH_LABEL } from "./types";
 import { processStreams, labelStreamMembership, isNodeWithinAnotherStream } from "../util/treeStreams";
-import { availableStreamTreeBranchLabels } from "../components/controls/choose-stream-trees";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
 import { warningNotification } from "./notifications";
@@ -16,10 +15,10 @@ export function toggleStreamTree() {
     }
 
     if (controls.streamTreeBranchLabel===null) {
-      // changing stream branch label will automatically toggle on streamtree view
+      // toggle switched on without an already set branch label.
       // Note: availableStreamLabelKeys can be set in the JSON, so this allows the author to define a default
       // stream tree key while not starting with stream trees displayed
-      dispatch(changeStreamTreeBranchLabel(availableStreamTreeBranchLabels(tree.availableBranchLabels)[0]));
+      dispatch(changeStreamTreeBranchLabel(controls.availableStreamLabelKeys[0]));
       return;
     }
 
