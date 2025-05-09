@@ -15,7 +15,7 @@ export function toggleStreamTree() {
       return;
     }
 
-    if (controls.streamTreeBranchLabel==='none') {
+    if (controls.streamTreeBranchLabel===null) {
       // toggle switched on without an already set branch label
       dispatch(changeStreamTreeBranchLabel(availableStreamTreeBranchLabels(tree.availableBranchLabels)[0]));
       return;
@@ -52,16 +52,8 @@ export function changeStreamTreeBranchLabel(newLabel) {
     }
 
     const streams = labelStreamMembership(tree.nodes[0], newLabel);
+    processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
-    const showStreamTrees = newLabel!=='none';
-    if (showStreamTrees && !!Object.keys(streams).length) {
-      processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
-    }
-    dispatch({
-      type: CHANGE_STREAM_TREE_BRANCH_LABEL,
-      streams,
-      showStreamTrees,
-      streamTreeBranchLabel: newLabel
-    })
+    dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
   }
 }

@@ -31,7 +31,6 @@ export const ChooseStreamTrees = () => {
   if (explodedTree) unavailable.push("Viewing exploded tree");
 
   const selectOptions = [
-    {value: 'none', label: 'NONE (remove streams)'},
     ...availableBranchLabels.map((x) => ({value: x, label: x}))
   ];
 
