@@ -41,7 +41,7 @@ const ExperimentalIcon = styled.span`
 const Slider = styled.div`
   & {
     position: absolute;
-    cursor: pointer;
+    cursor: ${(props) => props.disabled ? 'not-allowed;' : 'pointer'};
     top: 0;
     left: 0;
     right: 0;
@@ -83,7 +83,7 @@ const Input = styled.input`
 `;
 
 
-const Toggle = ({display, isExperimental = false, on, callback, label, style={}}) => {
+const Toggle = ({display, isExperimental = false, on, callback, label, style={}, disabled = false}) => {
   if (!display) return null;
 
   return (
@@ -94,8 +94,8 @@ const Toggle = ({display, isExperimental = false, on, callback, label, style={}}
         </ExperimentalIcon>
       }
       <ToggleBackground>
-        <Input type="checkbox" checked={on} onChange={callback}/>
-        <Slider/>
+        <Input type="checkbox" checked={on} onChange={disabled ? () => {} : callback}/>
+        <Slider disabled={disabled}/>
         {label === "" ? null : (
           <ToggleSubtitle>
             {label}

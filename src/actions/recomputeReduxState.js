@@ -23,6 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
+import { processStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -207,6 +208,17 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.scatterX) state.scatterVariables.x = query.scatterX;
   if (query.scatterY) state.scatterVariables.y = query.scatterY;
 
+  if (query.streamLabel) {
+    if (state.availableStreamLabelKeys.includes(query.streamLabel)) {
+      state.showStreamTrees = true;
+      state.streamTreeBranchLabel = query.streamLabel;
+    } else {
+      console.error(`Invalid query-defined streamLabel '${query.streamLabel}'`)
+      delete query.streamLabel;
+    }
+  }
+
+
   return state;
   function _validDate(dateNum, absoluteDateMinNumeric, absoluteDateMaxNumeric) {
     return !(dateNum===undefined || dateNum > absoluteDateMaxNumeric || dateNum < absoluteDateMinNumeric);
@@ -264,8 +276,8 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state.filtersInFooter = [];
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", "tipLabelKey", 'sidebar', "showTransmissionLines", "normalizeFrequencies"];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',      'string',  "boolean"              , "boolean"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", "tipLabelKey", 'sidebar', "showTransmissionLines", "normalizeFrequencies", "streamLabel"];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string',      'string',  "boolean"              , "boolean"             , 'string'     ];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (Object.hasOwnProperty.call(metadata.displayDefaults, keysToCheckFor[i])) {
@@ -361,7 +373,7 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   return state;
 };
 
-const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
+const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -402,8 +414,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
    */
 
   let coloringsToCheck = [];
-  if (colorings) {
-    coloringsToCheck = Object.keys(colorings);
+  if (metadata.colorings) {
+    coloringsToCheck = Object.keys(metadata.colorings);
   }
   let [aaMuts, nucMuts] = [false, false];
   let num_date_confidence = false; /* flag. Is confidence defined anywhere on the tree? */
@@ -458,6 +470,16 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   if (tree.availableBranchLabels.indexOf("clade") !== -1) {
     state.defaults.selectedBranchLabel = "clade";
     state.selectedBranchLabel = "clade";
+  }
+
+  state.availableStreamLabelKeys = availableStreamLabelKeys(tree.availableBranchLabels, metadata.streamLabels);
+  if (metadata.displayDefaults.streamLabel) {
+    if (state.availableStreamLabelKeys.includes(metadata.displayDefaults.streamLabel)) {
+      state.showStreamTrees = true;
+      state.streamTreeBranchLabel = metadata.displayDefaults.streamLabel;
+    } else {
+      console.warn(`The JSON-specified stream label display default '${metadata.displayDefaults.streamLabel}' is not a valid label`);
+    }
   }
 
   state.temporalConfidence = {exists: num_date_confidence, display: num_date_confidence, on: false};
@@ -767,6 +789,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.panels) {
     metadata.panels = json.meta.panels;
   }
+  if (json.meta.stream_labels) {
+    metadata.streamLabels = json.meta.stream_labels;
+  }
   if (json.root_sequence) {
     /* A dataset may set the root sequence inline (i.e. within the main dataset JSON), which
     we capture here. Alternatively it may be a sidecar JSON file */
@@ -785,6 +810,7 @@ const createMetadataStateFromJSON = (json) => {
       language: "language",
       sidebar: "sidebar",
       panels: "panels",
+      stream_label: "streamLabel",
       transmission_lines: "showTransmissionLines"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
@@ -890,7 +916,7 @@ export const createStateFromQueryOrJSONs = ({
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
@@ -1037,6 +1063,18 @@ export const createStateFromQueryOrJSONs = ({
   /* if query.label is undefined then we intend to zoom to the root */
   tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
 
+  /* scan the tree and identify / label streams for the currently chosen
+  Note this happens irrespective of `showStreamTrees`, but we could defer this
+  to improve first load time */
+  if (controls.streamTreeBranchLabel!=='none') {
+    tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
+  }
+
+  if (controls.showStreamTrees && !!Object.keys(tree.streams).length) {
+    // TODO - remove query
+    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {}, query)
+  }
+
   if (treeToo && treeToo.loaded) {
     treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
   }
@@ -1119,7 +1157,7 @@ export const createTreeTooState = ({
   let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl)
 
   /* recompute the controls state now that we have new data */
-  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata.colorings);
+  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata);
   /* recalculate the color scale with updated tree data */
   controls.colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
   controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);

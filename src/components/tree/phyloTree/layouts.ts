@@ -7,7 +7,8 @@ import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
-import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
+import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { getBranchVisibility } from "./renderers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -344,7 +345,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
 */
 export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
-
+  console.group("mapToScreen")
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
@@ -360,7 +361,12 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  let nodesInDomain = this.nodes.filter((d) =>
+    d.inView &&
+    d.y !== undefined &&
+    d.x !== undefined &&
+    getBranchVisibility(d) === "visible"
+  );
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
@@ -376,7 +382,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       if (d.x > maxX) maxX = d.x;
     });
     /* fixes state of 0 length domain */
-    if (minX === maxX) {
+    if (minX === maxX && !(this.params.showStreamTrees && nodesInDomain[0].n.streamName)) {
       minX -= 0.005;
       maxX += 0.005;
     }
@@ -389,7 +395,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       spanX = minimumXAxisSpan;
     }
     /* In rectangular mode, if the tree has been zoomed, leave some room to display the (clade's) root branch */
-    if (this.layout==="rect" && this.zoomNode.n.arrayIdx!==0) {
+    if (this.layout==="rect" && (this.zoomNode.n.arrayIdx!==0 || getBranchVisibility(this.zoomNode) === "hidden")) {
       minX -= (maxX-minX)/20; // 5%
     }
     xDomain = [minX, maxX];
@@ -433,6 +439,25 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
     yDomain.reverse();
   }
 
+  /**
+   * The above approach doesn't include nodes which are in streams and so
+   * streams may currently be outside the x/y domains
+   */
+  if (this.params.showStreamTrees) {
+    for (const stream of Object.values(this.streams)) {
+      const node = this.nodes[stream.startNode];
+      if (!node.inView) continue;
+
+      const pivots = node.n.streamPivots;
+      if (pivots.at(0) < xDomain[0]) xDomain[0] = pivots.at(0);
+      if (pivots.at(-1) > xDomain[1]) xDomain[1] = pivots.at(-1);
+
+      if (node.displayOrderRange[0] < yDomain[0]) yDomain[0] = node.displayOrderRange[0];
+      if (node.displayOrderRange[1] > yDomain[1]) yDomain[1] = node.displayOrderRange[1];
+    }
+  }
+
+  console.log("set yDomain,", yDomain)
   this.xScale.domain(xDomain);
   this.yScale.domain(yDomain);
 
@@ -517,8 +542,48 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       }
     });
   }
-  timerEnd("mapToScreen");
+  console.groupEnd()
+  /* map any streams to pixel space */
+  if (this.params.showStreamTrees) {
+    this.mapStreamsToScreen()
+  }
 };
+
+/**
+ * Maps the pivot space (x) and displayOrderSpace (y) into pixel space for each stream.
+ * 
+ * Creates `node.streamRipples` on the start node of each stream by transforming the node's `rippleDisplayOrders`
+ * and `streamPivots` by the d3 scales.
+ */
+export function mapStreamsToScreen(this: PhyloTreeType): void {
+
+  
+  console.groupCollapsed("mapStreamsToScreen")
+
+  console.log("x-scale domain is", this.xScale.domain().join(" <-> "), "range:", this.xScale.range().join(" <-> "))
+  console.log("y-scale domain is", this.yScale.domain().join(" <-> "), "range:", this.yScale.range().join(" <-> "))
+
+  for (const stream of Object.values(this.streams)) {
+    console.log("mapping stream", stream.name);
+    const node = this.nodes[stream.startNode];
+    node.streamRipples = node.rippleDisplayOrders.map((displayOrderByPivot, categoryIdx) => {
+      const datum: Ripple = Object.assign(
+        [], 
+        displayOrderByPivot.map(([min,max], pivotIdx) => {
+          return {
+            x: this.xScale(node.n.streamPivots[pivotIdx]),
+            y0: this.yScale(min),
+            y1: this.yScale(max),
+          }
+        }),
+        {key: node.n.streamCategories[categoryIdx].name}  // aka the name of the ripple
+      );
+      return datum;
+    });
+    console.log("streamRipples", node.streamRipples)
+  }
+  console.groupEnd();
+}
 
 const JITTER_MIN_STEP_SIZE = 50; // pixels
 
