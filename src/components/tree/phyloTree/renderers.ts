@@ -601,8 +601,6 @@ export function drawStreams(this: PhyloTreeType): void {
     // don't draw connectors to empty streams!
     if (node.n.streamNodeCounts.visible===0) return "";
 
-    console.log(node.n.streamName, node)
-
     const y = this.yScale(node.displayOrder);
 
     if (lineType==='backbone') {
@@ -623,20 +621,8 @@ export function drawStreams(this: PhyloTreeType): void {
 
     const parentStreamName = this.streams[node.n.streamName].parentStreamName;
     if (parentStreamName) { // draw a kinked connector
-      let x0 = node.xBase; // represents the div/time of the stream-defining branch
-      /**
-       * Potential bug...
-       * Imagine a stream of node -> {tips}. We draw the vertical branch to the stream at the node position
-       * however the stream itself is based on pivots which span the tips AND some multiple of sigma
-       * (the kernel std-dev) either side of the tips span. It can transpire that the initial pivot is
-       * now before the node (i.e. x1 < x0)
-      */
-      if (x1<=x0) {
-        console.log(`${node.n.streamName} - Moving connector back because pivots go back further`)
-        // TODO - THIS IS CRITICAL FOR CROSSING ALGO - need to truncate pivot calculations
-      }
-
-      // if (x1<=x0) x0=x1;
+      const x0 = node.xBase; // represents the div/time of the stream-defining branch
+      // NOTE: We guarantee that the the pivots do not extend beyond x0 (i.e. to the LHS)
       const yParent = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
       return `M${x0},${yParent}L${x0},${y}L${x1},${y}`;
     }
