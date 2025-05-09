@@ -234,6 +234,13 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.TOGGLE_MEASUREMENTS_THRESHOLD: // fallthrough
       query = {...query, ...action.queryParams};
       break;
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      query.streamLabel = state.metadata?.displayDefaults?.streamLabel === action.streamTreeBranchLabel ?
+        undefined : action.streamTreeBranchLabel;
+      break;
+    case types.TOGGLE_STREAM_TREE:
+      query.streamLabel = action.showStreamTrees ? state.controls.streamTreeBranchLabel : undefined;
+      break;
     default:
       break;
   }

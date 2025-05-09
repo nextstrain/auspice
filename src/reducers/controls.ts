@@ -145,6 +145,7 @@ export interface BasicControlsState {
   showTangle: boolean
   showStreamTrees: boolean
   streamTreeBranchLabel: string | null
+  availableStreamLabelKeys: string[]
   showTransmissionLines: boolean
   showTreeToo: boolean
   sidebarOpen: boolean
@@ -241,6 +242,7 @@ export const getDefaultControlsState = (): ControlsState => {
     showTangle: false,
     showStreamTrees: false,
     streamTreeBranchLabel: null,
+    availableStreamLabelKeys: [],
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
