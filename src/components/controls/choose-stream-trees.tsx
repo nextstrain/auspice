@@ -18,7 +18,7 @@ export const ChooseStreamTrees = () => {
   const focusOn = useSelector((state: RootState) => state.controls.focus);
   const rectangular = useSelector((state: RootState) => state.controls.layout === "rect");
   const explodedTree = useSelector((state: RootState) => !!state.controls.explodeAttr);
-  const availableBranchLabels = useSelector((state: RootState) => availableStreamTreeBranchLabels(state.tree.availableBranchLabels));
+  const availableBranchLabels = useSelector((state: RootState) => state.controls.availableStreamLabelKeys);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
@@ -120,8 +120,4 @@ function Label(
       </StyledTooltip>
     </div>
   )
-}
-
-export function availableStreamTreeBranchLabels(availableBranchLabels) {
-  return availableBranchLabels.filter((l) => l!=='aa' && l!=='none');
 }

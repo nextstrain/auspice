@@ -234,6 +234,21 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.TOGGLE_MEASUREMENTS_THRESHOLD: // fallthrough
       query = {...query, ...action.queryParams};
       break;
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL: {
+      const displayDefault = state.metadata?.displayDefaults?.streamLabel;
+      const newLabel = action.streamTreeBranchLabel
+      query.streamLabel = newLabel===displayDefault ? undefined : newLabel;
+      break;
+    }
+    case types.TOGGLE_STREAM_TREE: {
+      const displayDefault = state.metadata?.displayDefaults?.streamLabel;
+      if (action.showStreamTrees) { // toggling on
+        query.streamLabel = displayDefault===state.controls.streamTreeBranchLabel ? undefined : state.controls.streamTreeBranchLabel;
+      } else { // toggling off
+        query.streamLabel = displayDefault ? 'none' : undefined;
+      }
+      break;
+    }
     default:
       break;
   }

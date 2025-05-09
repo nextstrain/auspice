@@ -419,3 +419,30 @@ function restrictPivots(pivots: number[], domain:[number,number], parentPosition
   const max = domain[1] + sigma*cutoff;
   return pivots.filter((value) => value>=min && value<=max);
 }
+
+
+export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDefinedStreamLabels: undefined|string[]): string[] {
+
+  if (jsonDefinedStreamLabels) {
+    const labels = jsonDefinedStreamLabels.filter((l) => availableBranchLabels.includes(l));
+    if (labels.length!==jsonDefinedStreamLabels.length) {
+      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " + 
+        jsonDefinedStreamLabels.filter((l) => labels.includes(l)).join(", "));
+    }
+    return labels;
+  }
+
+  // Use a hardcoded list to sort labels which are present so certain ones come first
+  const preset = ['stream', 'streams', 'stream_label'];
+
+  // we may want to do something here to exclude certain branch labels, e.g. ones which are repeated many times on the tree
+  return ([...availableBranchLabels])
+    .sort((a, b) => {
+      const [ai, bi] = [preset.indexOf(a), preset.indexOf(b)];
+      if (ai===-1 && bi!==-1) return 1;
+      if (ai!==-1 && bi===-1) return -1;
+      return ai -bi;
+    })
+    .filter((l) => l!=='aa' && l!=='none');
+}
+
