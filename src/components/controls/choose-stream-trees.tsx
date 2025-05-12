@@ -9,6 +9,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
+import { SidebarSubtitle } from "./styles";
 
 export const ChooseStreamTrees = () => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
@@ -33,6 +34,14 @@ export const ChooseStreamTrees = () => {
   const selectOptions = [
     ...availableBranchLabels.map((x) => ({value: x, label: x}))
   ];
+
+  if (unavailable.length) {
+    return (
+      <SidebarSubtitle>
+        <Label t={t} toggleOn={streamTreesToggledOn} unavailable={unavailable}/>
+      </SidebarSubtitle>
+    )
+  }
 
   return (
     <div>
