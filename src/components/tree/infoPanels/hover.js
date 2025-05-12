@@ -5,7 +5,7 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
   getFullAuthorInfoFromNode, getTipChanges, getBranchMutations } from "../../../util/treeMiscHelpers";
-import { isValueValid, strainSymbol } from "../../../util/globals";
+import { isValueValid, strainSymbol, NODE_VISIBLE } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
 import { nodeDisplayName, dateInfo } from "./helpers";
@@ -391,20 +391,34 @@ const Comment = ({children}) => (
  * Information to show when hovering over an individual ribbon within a stream
  */
 function StreamRibbonInfo({node, streamDetails}) {
+  const streamCounts = node.streamNodeCounts; /* for entire stream */
+  const streamCountsSummary = streamCounts.total === streamCounts.visible ?
+  `${streamCounts.total} (all visible)` :
+  `${streamCounts.visible}/${streamCounts.total}`;
+  
+  const category = node.streamCategories[streamDetails.categoryIndex].name;
+  const rippleNodeIdxs = node.streamCategories.filter((s) => s.name===category).at(0).nodes;
+  const nVisible = rippleNodeIdxs.filter((idx) => node.shell.that.nodes[idx].visibility===NODE_VISIBLE).length;
 
-  const counts = node.streamNodeCounts;
-  const countsSummary = counts.total === counts.visible ?
-    `${counts.total} tips (all visible)` :
-    `${counts.visible} visible tips (out of ${counts.total})`;
+  const rippleCountsSummary = nVisible===rippleNodeIdxs.length ?
+    `${nVisible} (all visible)` :
+    `${nVisible}/${rippleNodeIdxs.length}`;
 
   return (
     <>
       <div style={infoPanelStyles.tooltipHeading}>
         {`Stream name: ${node.streamName}`}
       </div>
-      <InfoLine name="Category (ripple):" value={node.streamCategories[streamDetails.categoryIndex].name}/>
-      <InfoLine name="Stream summarises" value={countsSummary}/>
-      <div>
+
+      <InfoLine name="Visible tips (entire stream):" value={streamCountsSummary}/>
+
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Category: ${category ?? '(missing data)'}`}
+      </div>
+
+      <InfoLine name="Visible tips (this category):" value={rippleCountsSummary}/>
+
+      <div style={{paddingTop: '5px'}}>
         Click to zoom into stream
       </div>
     </>

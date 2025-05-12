@@ -14,8 +14,9 @@ export function toggleStreamTree() {
       return;
     }
 
-    if (controls.streamTreeBranchLabel===null) {
-      // toggle switched on without an already set branch label.
+    if (controls.streamTreeBranchLabel===null || Object.keys(tree.streams).length===0) {
+      // toggle switched on without an already set branch label (or there was a default but we
+      // started with ?streamLabel=none so we didn't compute any streams)
       // Note: availableStreamLabelKeys can be set in the JSON, so this allows the author to define a default
       // stream tree key while not starting with stream trees displayed
       dispatch(changeStreamTreeBranchLabel(controls.availableStreamLabelKeys[0]));

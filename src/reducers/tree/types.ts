@@ -59,7 +59,7 @@ export interface ReduxNode {
 
   /** the categories for the stream originating from this node */
   streamCategories?: Array<{
-    name: string
+    name: string|undefined
     color: string
     nodes: NodeIdx[]
   }>

@@ -1071,7 +1071,7 @@ export const createStateFromQueryOrJSONs = ({
   /* scan the tree and identify / label streams for the currently chosen
   Note this happens irrespective of `showStreamTrees`, but we could defer this
   to improve first load time */
-  if (controls.streamTreeBranchLabel!=='none') {
+  if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
   }
 

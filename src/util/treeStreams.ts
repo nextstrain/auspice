@@ -96,7 +96,7 @@ export function processStreams(
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
   query = false // TODO REMOVE XXX
 ):void {
-  console.groupCollapsed("processStreams")
+  console.group("processStreams")
   console.log(`color: ${colorScale.colorBy} metric: ${metric} skipPivots: ${skipPivots} skipCategories: ${skipCategories}`)
 
   // TODO XXX remove query (dev purposes only)
@@ -105,7 +105,7 @@ export function processStreams(
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
    */
-  if (!skipPivots) {
+  if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(s, 'streamPivots'))) {
     // entire domain spanning all streams
     const domain = (Object.values(streams)).reduce((dd, stream) => {
       if (dd[0] > stream.domains[metric][0]) dd[0] = stream.domains[metric][0];
@@ -213,8 +213,13 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     /* NOTE: plenty of speed-ups here if it's a bottleneck */
     const categories = Object.entries(colorScale.legendBounds)
       .map(([name, bounds], i) => [name, bounds[0], bounds[1], colorScale.scale(colorScale.legendValues[i]), []])
+    const undefinedNodes: number[] = [];
     for (const n of nodes) {
       const v = getTraitFromNode(n, colorBy);
+      if (v===undefined) {
+        undefinedNodes.push(n.arrayIdx);
+        continue;
+      }
       for (const c of categories) {
         if (v <= c[2] && v >= c[1]) {
           c[4].push(n.arrayIdx)
@@ -222,13 +227,19 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
         }
       }
     }
-    return categories
+    const streamCategories = categories
       .filter((c) => c[4].length>0)
-      .map((c) => ({name: c[0], color: c[3], nodes: c[4]}));
+      .map((c) => ({name: c[0], color: c[3], nodes: c[4]})); 
+
+    if (undefinedNodes.length) {
+      streamCategories.push({name: undefined, color: colorScale.scale(undefined), nodes: undefinedNodes});
+    }
+
+    return streamCategories;
   }
 
-  const getter: (n: ReduxNode) => [number, string] = colorScale.genotype ? (n) => [n.arrayIdx, n.currentGt] : (n) => [n.arrayIdx, getTraitFromNode(n, colorBy)];
-  const nodesAndCategories: [number, string][] = nodes.map(getter);
+  const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n) => [n.arrayIdx, n.currentGt] : (n) => [n.arrayIdx, getTraitFromNode(n, colorBy)];
+  const nodesAndCategories: [number, string|undefined][] = nodes.map(getter);
   const orderedCategories = Array.from(new Set(nodesAndCategories.map((el) => el[1])))
     .sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b));
   return orderedCategories.map((name) => ({
