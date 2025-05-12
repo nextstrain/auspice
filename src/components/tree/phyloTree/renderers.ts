@@ -546,7 +546,10 @@ export function drawStreams(this: PhyloTreeType): void {
     delete this.groups.streams;
   }
 
-  if (!streamsToDraw.length) return;
+  if (!streamsToDraw.length) {
+    console.groupEnd() 
+    return;
+  }
 
   /** For each stream, construct a SVG group to house the stream, and within each group create
    * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update

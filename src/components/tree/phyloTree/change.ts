@@ -491,6 +491,7 @@ export const change = function change(
     this.drawBranchLabels(this.params.branchLabelKey);
     if (this.vaccines) this.drawVaccines();
     if (this.regression) this.drawRegression();
+    if (this.confidencesInSVG) this.removeConfidence(); 
     this.drawStreams(); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
