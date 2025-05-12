@@ -280,6 +280,7 @@ export interface PhyloTreeType {
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
     streams?: Selection<SVGDefsElement, unknown, null, unknown>
+    streamsLabels?: Selection<SVGDefsElement, unknown, null, unknown>
   }
   hideGrid: typeof grid.hideGrid
   hideTemporalSlice: typeof grid.hideTemporalSlice

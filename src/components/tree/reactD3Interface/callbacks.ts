@@ -158,6 +158,14 @@ export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryInde
       }
     })
   }
+
+  /* Ensure the label is visible & enlarged */
+  const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "visible")
+    selection.attr("font-size", 16)
+  }
+
   this.setState({hoveredNode: {
     node,
     isBranch,
@@ -179,5 +187,12 @@ export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryInde
       }
     })
   }
+
+  /* Ensure the label goes back to its previous state */
+  const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "hidden")
+  }
+
   this.setState({hoveredNode: null});
 }

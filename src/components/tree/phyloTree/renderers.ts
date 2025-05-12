@@ -530,20 +530,24 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
 
 
 export function drawStreams(this: PhyloTreeType): void {
-  console.groupCollapsed('drawStreams')
+  console.group('drawStreams')
 
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
   console.log("streamsToDraw:", streamsToDraw)
 
-  /* initial set up - runs when streams are turned on / removed */
+  /* initial set up - runs when streams are turned on / removed
+     NOTE: we use 2 top-level groups here so that the labels are always drawn on top of any connectors / ribbons */
   if (streamsToDraw.length && !("streams" in this.groups)) {
     console.log("initial setup of this.groups.streams")
     this.groups.streams = this.svg.append("g").attr("id", "streams"); // .attr("clip-path", "url(#treeClip)");
+    this.groups.streamsLabels = this.svg.append("g").attr("id", "stream-labels");
   } else if (!streamsToDraw.length && "streams" in this.groups) {
     console.log("removing streams (SVG + this.groups reference)")
     this.groups.streams.selectAll("*").remove();
+    this.groups.streamsLabels.selectAll("*").remove();
     delete this.groups.streams;
+    delete this.groups.streamsLabels;
   }
 
   if (!streamsToDraw.length) {
@@ -566,7 +570,7 @@ export function drawStreams(this: PhyloTreeType): void {
           .attr('class', `streamGroup`);
         selection.append("g").attr("class", "connector");
         selection.append("g").attr("class", "ripples");
-        selection.append("g").attr("class", "label");
+        // selection.append("g").attr("class", "label");
         // selection.each((d) => console.log("Stream enter:", d))
         return selection
       },
@@ -728,10 +732,38 @@ export function drawStreams(this: PhyloTreeType): void {
           return exit.remove();
         },
       );
+  }
 
-    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.label`)
-      .selectAll(`.labelText`)
-      .data(_positionLabel(node), (_d) => "LABEL") // `data` not `datum` so we can use `join`
+ 
+  const labelData = streamsToDraw
+    .map((streamName) => {
+      const phyloNode = this.nodes[this.streams[streamName].startNode];
+      if (phyloNode.n.streamNodeCounts.visible===0) {
+        return null;
+      }
+      /* Text anchor -- if there's enough of the joiner branch in-view then we want to use 'end',
+         which stops the label overlapping the stream.  TODO XXX */
+      const textAnchor = this.zoomNode.n.name===phyloNode.n.name ? 'start' : 'middle';
+      const streamMaxPixels = _tallestPivot(phyloNode)[1];
+      const minFontSize = 10, maxFontSize = 24;
+      const fontSize = Math.floor(Math.max(minFontSize, Math.min(streamMaxPixels/2, maxFontSize)));
+      const visibility = fontSize===minFontSize ? 'hidden' : 'visible';
+      // console.log(streamName, streamMaxPixels, fontSize)
+      return {
+        phyloNode,
+        streamName,
+        x: phyloNode.streamRipples.at(0).at(0).x, // The start of the stream / end of the joiner connector
+        y: this.yScale(phyloNode.displayOrder),
+        textAnchor,
+        fontSize,
+        visibility,
+      }
+    })
+    .filter((d) => !!d); // remove labels for non-rendered streams
+
+  /* LABELS */
+  this.groups.streamsLabels.selectAll(`.labelText`)
+      .data(labelData, (d) => String(d.streamName))
       .join(
         (enter) => {
           // each datum here is an element of streamRipples, i.e. an array of pivots for a specific 
@@ -739,13 +771,14 @@ export function drawStreams(this: PhyloTreeType): void {
           return enter
             .append("text")
             .attr("class", `labelText`)
+            .attr('id', (d) => `label${d.streamName}`)
             .attr("x", (d) => d.x)
             .attr("y", (d) => d.y)
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "middle")
-            .attr("font-size", (d) => d.fontsize)
-            .text((d) => d.text)
-            .attr("visibility", (d) => d.visibility)
+            .attr("text-anchor", (d) => d.textAnchor)
+            .attr("dominant-baseline", "ideographic")
+            .attr("font-size", (d) => d.fontSize)
+            .attr('visibility', (d) => d.visibility)
+            .text((d) => d.phyloNode.n.streamName)
             .style("pointer-events", "none");
         },
         (update) => {
@@ -753,8 +786,9 @@ export function drawStreams(this: PhyloTreeType): void {
             (selection) => selection
               .attr("x", (d) => d.x)
               .attr("y", (d) => d.y)
-              .attr("font-size", (d) => d.fontsize)
-              .attr("visibility", (d) => d.visibility)
+              .attr("text-anchor", (d) => d.textAnchor)
+              .attr('visibility', (d) => d.visibility)
+              .attr("font-size", (d) => d.fontSize)
           );
         },
         (exit) => {
@@ -762,30 +796,16 @@ export function drawStreams(this: PhyloTreeType): void {
           return exit.remove();
         },
       );
-  }
+
 
   console.groupEnd();
 }
 
-
-function _positionLabel(node: PhyloNode): Array<Record<string,any>> {
-  const ripples = node.streamRipples;
-  if (ripples.length===0) return []; // stream with no terminal nodes
-
-  // find the pivot with the largest height (in pixels)
-  const [idx, height] = ripples[0].reduce(([i, maxH], pivotData, pivotIdx) => {
-    const h = ripples.at(-1)[pivotIdx].y1 - pivotData.y0;
+function _tallestPivot(node: PhyloNode): [number, number] {
+  return node.streamRipples[0].reduce(([i, maxH], pivotData, pivotIdx) => {
+    const h = node.streamRipples.at(-1)[pivotIdx].y1 - pivotData.y0;
     if (pivotIdx===0) return [0,h];
     if (h>maxH) return [pivotIdx, h];
     return [i, maxH];
   }, [undefined, undefined]);
-
-  return [{
-    text: node.n.streamName,
-    pivotIdx: idx,
-    fontsize: `${Math.min(20, Math.floor(height*0.8))}px`,
-    visibility: height > 20 ? "visible" : "hidden",
-    x: ripples.at(0)[idx].x,
-    y: ripples.at(0)[idx].y0 +  height/2,
-  }];
 }
