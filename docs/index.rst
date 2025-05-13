@@ -97,6 +97,14 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
 
    releases/index
 
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Development notes
+   :hidden:
+
+   development/stream-trees
+   development/stream-trees-rst
 
 .. toctree::
    :maxdepth: 1
