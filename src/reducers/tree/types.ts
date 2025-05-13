@@ -99,6 +99,7 @@ export interface StreamSummary {
 
 
 export const sigma = Symbol("sigma");
+export const colorBySymbol = Symbol("colorBy");
 export const weightToDisplayOrderScaleFactor = Symbol("weightToDisplayOrderScaleFactor");
 export type Streams = Record<string, StreamSummary> & {
   /**
@@ -109,6 +110,10 @@ export type Streams = Record<string, StreamSummary> & {
    * Scale factor to use when mapping kernel-weight space to display-order space
    */
   [weightToDisplayOrderScaleFactor]?: number
+  /**
+   * the color-by used to generate ribbons
+   */
+  [colorBySymbol]?: string
 }
 
 export interface TreeState {

@@ -1,5 +1,5 @@
 import { ReduxNode, StreamDimensions, StreamSummary, Visibility, 
-  Streams, sigma, weightToDisplayOrderScaleFactor } from "../reducers/tree/types";
+  Streams, sigma, weightToDisplayOrderScaleFactor, colorBySymbol } from "../reducers/tree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
@@ -138,6 +138,7 @@ export function processStreams(
      * fudge factor here (can be improved).
      */
     streams[weightToDisplayOrderScaleFactor] =  1 / pdf.factory(0, streams[sigma])(0) * 5;
+    streams[colorBySymbol] = colorScale.colorBy;
 
     /** we want to ladderize each time we change metric, which is also when we need to recalculate pivots */
     Object.values(streams)

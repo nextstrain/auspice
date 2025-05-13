@@ -1,6 +1,6 @@
 import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility, StreamSummary } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, Streams } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
 
@@ -327,7 +327,7 @@ export interface PhyloTreeType {
 
   showStreamTrees: boolean;
 
-  streams?: Record<string,StreamSummary>
+  streams?: Streams
 
   // TODO: This should be `d3.ScalePoint<string> | d3.ScaleContinuousNumeric<number, number>`, conditional on layout
   xScale: any

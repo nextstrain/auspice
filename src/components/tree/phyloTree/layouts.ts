@@ -6,7 +6,7 @@ import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers"
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode } from "../../../reducers/tree/types";
+import { ReduxNode, colorBySymbol } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
 
 /**
@@ -549,9 +549,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
  * Creates `node.streamRipples` on the start node of each stream by transforming the node's `rippleDisplayOrders`
  * and `streamPivots` by the d3 scales.
  */
-export function mapStreamsToScreen(this: PhyloTreeType): void {
-
-  
+export function mapStreamsToScreen(this: PhyloTreeType): void {  
   console.groupCollapsed("mapStreamsToScreen")
 
   console.log("x-scale domain is", this.xScale.domain().join(" <-> "), "range:", this.xScale.range().join(" <-> "))
@@ -570,7 +568,8 @@ export function mapStreamsToScreen(this: PhyloTreeType): void {
             y1: this.yScale(max),
           }
         }),
-        {key: node.n.streamCategories[categoryIdx].name}  // aka the name of the ripple
+        /* we define a key for d3 to use which allows ribbons to morph as needed and be created/destroyed as needed */
+        {key: node.n.streamCategories[categoryIdx].name+"_"+this.streams[colorBySymbol]}  // aka the name of the ripple
       );
       return datum;
     });
