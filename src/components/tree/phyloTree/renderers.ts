@@ -530,7 +530,7 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
 
 
 export function drawStreams(this: PhyloTreeType): void {
-  console.group('drawStreams')
+  console.groupCollapsed('drawStreams')
 
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];

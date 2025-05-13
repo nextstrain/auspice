@@ -96,7 +96,7 @@ export function processStreams(
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
   query = false // TODO REMOVE XXX
 ):void {
-  console.group("processStreams")
+  console.groupCollapsed("processStreams")
   console.log(`color: ${colorScale.colorBy} metric: ${metric} skipPivots: ${skipPivots} skipCategories: ${skipCategories}`)
 
   // TODO XXX remove query (dev purposes only)
