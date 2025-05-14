@@ -88,6 +88,14 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
    server/api
    server/authentication
 
+.. toctree::
+   :maxdepth: 1
+   :titlesonly:
+   :caption: Development Details
+   :hidden:
+
+   development/streamtrees
+
 
 .. toctree::
    :maxdepth: 1

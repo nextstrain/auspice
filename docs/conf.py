@@ -67,6 +67,16 @@ intersphinx_mapping = {
     'docs.nextstrain.org': ('https://docs.nextstrain.org/en/latest/', None),
 }
 
+# -- Math rendering <https://github.com/hagenw/sphinxcontrib-katex>  ---------
+
+extensions.append('sphinxcontrib.katex')
+
+# Pre-render math (avoids the browser loading the JS library, at the expense
+# of a more complex build
+katex_prerender = True
+
+# We could change the default CDN link & store within our /assets if wanted
+katex_css_path = 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css'
 
 # -- Linkchecking ------------------------------------------------------------
 

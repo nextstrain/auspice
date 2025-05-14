@@ -1,3 +1,4 @@
+import { select, event as d3event } from "d3-selection";
 import { updateVisibleTipsAndBranchThicknesses, applyFilter, Root } from "../../../actions/tree";
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
@@ -6,6 +7,7 @@ import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
 import { TreeComponent } from "../tree";
+import { getEmphasizedColor } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -142,3 +144,63 @@ export const clearSelectedNode = function clearSelectedNode(this: TreeComponent,
   }
   this.props.dispatch({type: DESELECT_NODE});
 };
+
+export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean): void {
+  /** For each ripple (SVGPathElement) _not_ hovered, lower the opacity so that we focus attention on the hovered ribbon */
+  if (isBranch) {
+    select(paths[0]).style("stroke", getEmphasizedColor(node.branchStroke))
+  } else {
+    paths.forEach((path, i) => {
+      if (i===categoryIndex) {
+        select(path).attr("fill", getEmphasizedColor(node.n.streamCategories[categoryIndex].color))
+      } else {
+        select(path).style('opacity', 0.7)
+      }
+    })
+  }
+
+  /* Ensure the label is visible & enlarged */
+  const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  // The type of `selection` is Selection<SelectedElementType, DatumType, ParentElementType, ParentDatumType>
+  // Which is currently inferred as Selection<BaseType, unknown, null, unknown>
+  // thus we get a type error as 'visibility' does not exist on type 'unknown'
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "visible")
+    selection.attr("font-size", 16)
+  }
+
+  this.setState({hoveredNode: {
+    node,
+    isBranch,
+    streamDetails: {x: d3event.layerX, y: d3event.layerY, categoryIndex}
+  }});
+}
+
+export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch): void {
+  if (isBranch) {
+    /* return branch colour back to normal */
+    select(paths[0]).style("stroke", node.branchStroke)
+  } else {
+    /** ensure each ripple's opacity is reset back to 1  */
+    paths.forEach((path, i) => {
+      if (i===categoryIndex) {
+        select(path).attr("fill", node.n.streamCategories[categoryIndex].color)
+      } else {
+        select(path).style('opacity', 1)
+      }
+    })
+  }
+
+  /* Ensure the label goes back to its previous state */
+  const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  // See comment within `onStreamHover`
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "hidden")
+  }
+
+  this.setState({hoveredNode: null});
+}
