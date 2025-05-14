@@ -139,7 +139,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "i18next",
     "styled-components",
     "stylis",
-    "@emotion"
+    "@emotion",
+    "@stdlib",
   ]; // <= needs some review from somebody with more knowledge of the whole codebase to decide what goes in
 
   /**
