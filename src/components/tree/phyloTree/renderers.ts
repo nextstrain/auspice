@@ -659,19 +659,19 @@ export function drawStreams(this: PhyloTreeType): void {
             .each(function(d, i) { // attach events to the joiner line (but not the backbone)
               if (i!==0) return;
               const callbacks = d.that.callbacks; // `d.that` is a pointer to the phylotree object
-              select(this)
+              select<SVGPathElement, PhyloNode>(this)
                 .style("cursor", "pointer")
                 .style("pointer-events", "auto")
-                // Within `initialRender.ts` we bind `this` of the callbacks to `TreeComponent`, but tsc doesn't pick this up
-                // and complains about a type-incompatibility of `this`. TODO XXX
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                .on("mouseover", (_d, i, paths) => callbacks.onStreamHover(node, i, paths, true))
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
-                .on("mouseout",  (_d, i, paths) => callbacks.onStreamLeave(node, i, paths, true))
-                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                // @ts-ignore
+                .on("mouseover", function (_d, i, paths) {
+                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                  (callbacks.onStreamHover as OmitThisParameter<typeof callbacks.onStreamHover>)(node, i, Array.from(paths), true)
+                })
+                .on("mouseout",  function (_d, i, paths) {
+                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                  (callbacks.onStreamLeave as OmitThisParameter<typeof callbacks.onStreamLeave>)(node, i, Array.from(paths), true)
+                })
                 .on("click", callbacks.onBranchClick)
             })
         },
@@ -690,32 +690,27 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
-    // I can't figure out the tsc error here (tsc shows it on the `.select(...)` line, while 
-    // vs-code shows it on the `.data(...)` line, but it's the same error)
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
-      .selectAll(`.ripple`)
-      // see above
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      .data(node.streamRipples, (d: Ripple) => String(d.key))
+      .selectAll<SVGPathElement, Ripple>(`.ripple`)
+      .data(node.streamRipples, (d) => String(d.key))
       .join(
         (enter) => {
-          // each datum here is an element of streamRipples, i.e. an array of pivots for a specific 
           // console.log(`\t[stream ${name} // enter]`, enter);
           return enter
             .append("path")
             .attr("class", `ripple`)
             .attr("d", (d) => areaGenerator(d))
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
-            // see comment above
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .on("mouseover", (_d, i, paths) => this.callbacks.onStreamHover(node, i, paths, false))
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            .on("mouseout",  (_d, i, paths) => this.callbacks.onStreamLeave(node, i, paths, false))
+            .on("mouseover", (_d, i, paths) => {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (this.callbacks.onStreamHover as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
+            })
+            .on("mouseout",  (_d, i, paths) => {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (this.callbacks.onStreamLeave as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
+            })
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
             .on("click", () => this.callbacks.onBranchClick(node))
@@ -734,9 +729,18 @@ export function drawStreams(this: PhyloTreeType): void {
       );
   }
 
+  interface LabelDatum {
+    phyloNode: PhyloNode;
+    streamName: string|undefined;
+    x: number;
+    y: number;
+    textAnchor: string;
+    fontSize: number;
+    visibility: string;
+  }
  
-  const labelData = streamsToDraw
-    .map((streamName) => {
+  const labelData: LabelDatum[] = streamsToDraw
+    .map((streamName): LabelDatum|null => {
       const phyloNode = this.nodes[this.streams[streamName].startNode];
       if (phyloNode.n.streamNodeCounts.visible===0) {
         return null;
@@ -762,7 +766,8 @@ export function drawStreams(this: PhyloTreeType): void {
     .filter((d) => !!d); // remove labels for non-rendered streams
 
   /* LABELS */
-  this.groups.streamsLabels.selectAll(`.labelText`)
+  this.groups.streamsLabels
+      .selectAll<SVGTextElement, LabelDatum>(`.labelText`)
       .data(labelData, (d) => String(d.streamName))
       .join(
         (enter) => {
@@ -796,7 +801,6 @@ export function drawStreams(this: PhyloTreeType): void {
           return exit.remove();
         },
       );
-
 
   console.groupEnd();
 }

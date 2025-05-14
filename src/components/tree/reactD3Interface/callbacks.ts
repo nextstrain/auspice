@@ -161,6 +161,11 @@ export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryInde
 
   /* Ensure the label is visible & enlarged */
   const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  // The type of `selection` is Selection<SelectedElementType, DatumType, ParentElementType, ParentDatumType>
+  // Which is currently inferred as Selection<BaseType, unknown, null, unknown>
+  // thus we get a type error as 'visibility' does not exist on type 'unknown'
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   if (selection.data()?.at(0)?.visibility==='hidden') {
     selection.attr("visibility", "visible")
     selection.attr("font-size", 16)
@@ -190,6 +195,9 @@ export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryInde
 
   /* Ensure the label goes back to its previous state */
   const selection = node.that.groups.streamsLabels.select(`#${CSS.escape(`label${node.n.streamName}`)}`);
+  // See comment within `onStreamHover`
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   if (selection.data()?.at(0)?.visibility==='hidden') {
     selection.attr("visibility", "hidden")
   }
