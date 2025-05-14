@@ -37,6 +37,7 @@ class Language extends React.Component {
     const languages = [
       {value: "de", label: "Deutsch"},
       {value: "en", label: "English"},
+      {value: "zh", label: "中文"},
       {value: "es", label: "Español"},
       {value: "ru", label: "Русский"},
       {value: "lt", label: "Lietuvių"},
