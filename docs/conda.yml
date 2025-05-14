@@ -1,10 +1,12 @@
 name: auspice-docs
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - make
   - recommonmark
   - sphinx
+  - nodejs # server-side math rendering
   - pip
   - pip:
     - nextstrain-sphinx-theme>=2022.5

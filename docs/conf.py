@@ -68,21 +68,15 @@ intersphinx_mapping = {
 }
 
 # -- Math rendering <https://github.com/hagenw/sphinxcontrib-katex>  ---------
+
 extensions.append('sphinxcontrib.katex')
 
-# If katex_prerender is set to True the equations will be pre-rendered on the
-# server and loading of the page in the browser will be faster. On your server
-# you must have a katex executable installed and in your PATH as described in
-# the Installation section.
-katex_prerender = False
+# Pre-render math (avoids the browser loading the JS library, at the expense
+# of a more complex build
+katex_prerender = True
 
-# Following are defaults
+# We could change the default CDN link & store within our /assets if wanted
 katex_css_path = 'https://cdn.jsdelivr.net/npm/katex@0.16.10/dist/katex.min.css'
-katex_js_path = 'katex.min.js'
-katex_autorender_path = 'auto-render.min.js'
-katex_inline = [r'\(', r'\)']
-katex_display = [r'\[', r'\]']
-katex_options = ''
 
 # -- Linkchecking ------------------------------------------------------------
 
