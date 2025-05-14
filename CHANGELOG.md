@@ -1,6 +1,7 @@
 # Changelog
 
 * Removed the experimental markers from "Focus on selected" and "Explode Tree By" options. These seem to be working well. ([#1954](https://github.com/nextstrain/auspice/issues/1954))
+* Added Chinese language support. ([#1959](https://github.com/nextstrain/auspice/pull/1959))
 
 ## version 2.62.0 - 2025/01/21
 
