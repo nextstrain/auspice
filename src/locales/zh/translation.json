@@ -2,7 +2,7 @@
   "__Header//Byline__": "########################################",
   "Maintained by": "维护者",
   "using data from": "数据来源",
-  "Built with <Link>{{text}}</Link>": "构建工具 <Link>{{text}}</Link>",
+  "Built with <Link>{{text}}</Link>": "基于<Link>{{text}}</Link>构建",
 
 
   "__Header//Info__": "########################################",
