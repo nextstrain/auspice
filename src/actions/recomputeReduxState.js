@@ -66,6 +66,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
+  if (query.focus === "selected") {
+    state["focus"] = true;
+  }
   if (query.ci === undefined) {
     state["temporalConfidence"]["on"] = false;
   } else {
