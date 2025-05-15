@@ -81,6 +81,13 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
+    case types.TOGGLE_FOCUS:
+      if ("focus" in query) {
+        query.focus = undefined;
+      } else {
+        query.focus = "selected";
+      }
+      break;
     case types.TOGGLE_TEMPORAL_CONF:
       if ("ci" in query) {
         query.ci = undefined;
