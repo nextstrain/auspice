@@ -2,7 +2,7 @@
   "__Header//Byline__": "########################################",
   "Maintained by": "Prižiūrima",
   "using data from": "naudojantis duomenimis iš",
-  "Built with": "Sukurta iš",
+  "Built with <Link>{{text}}</Link>": "Sukurta iš <Link>{{text}}</Link>",
 
 
   "__Header//Info__": "########################################",

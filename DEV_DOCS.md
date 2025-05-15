@@ -158,7 +158,7 @@ The currently available languages are displayed via a drop-down at the bottom of
 
   1) Add the language to the `getlanguageOptions` function in [this file](https://github.com/nextstrain/auspice/blob/master/src/components/controls/language.js#L24)
   2) If this is a new language, copy the folder (and the JSONs within it) `src/locales/en` and name it to match the language code for the new translation -- e.g. for Spanish this would be `src/locales/es`
-  3) For each key-value in the JSONs, translate the english phrase to the new locale. (Do not modify the strings within `{{...}}` sections.)
+  3) For each key-value in the JSONs, translate the english phrase to the new locale. (Do not modify the parts formatted as `{{...}}` or `<...>...</...>`.)
 
 For example, a spanish translation would change the English:
 

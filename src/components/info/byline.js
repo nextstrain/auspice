@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from 'react-i18next';
+import { withTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 import { headerFont } from "../../globalStyles";
 
@@ -66,11 +66,15 @@ function renderBuildInfo(t, metadata) {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {t("Built with")}
-            {" "}
-            <Link url={repo}>
-              {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
-            </Link>
+            <Trans
+              i18nKey="Built with <Link>{{text}}</Link>"
+              values={{
+                text: repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")
+              }}
+              components={{
+                Link: <Link url={repo} />,
+              }}
+            />
             {". "}
           </span>
         );
