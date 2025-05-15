@@ -2,6 +2,7 @@
 
 * Removed the experimental markers from "Focus on selected" and "Explode Tree By" options. These seem to be working well. ([#1954](https://github.com/nextstrain/auspice/issues/1954))
 * Added Chinese language support. ([#1959](https://github.com/nextstrain/auspice/pull/1959))
+* Added flexibility to the way the "Built with …" sentence can be translated. ([#1964](https://github.com/nextstrain/auspice/pull/1964))
 
 ## version 2.62.0 - 2025/01/21
 
