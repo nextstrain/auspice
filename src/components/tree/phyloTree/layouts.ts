@@ -188,11 +188,16 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
     d.px = undefined;
     d.py = undefined;
   });
+
+  // FIXME: this doesn't seem to have any affect...
+  const visibleNodes = this.nodes.filter((d) => getBranchVisibility(d) === "visible");
+  const offset = Math.min(...visibleNodes.map((d) => d.depth));
+
   for (let i = 0; i < children.length; i++) {
     const d = children[i].shell; // <PhyloNode>
     d.w = 2.0 * Math.PI * leafWeight(d.n) / totalLeafWeight; // angle occupied by entire subtree
     if (d.w>0) { // i.e. subtree has tips which should be drawn
-      const distFromOrigin = d.depth - this.nodes[0].depth;
+      const distFromOrigin = d.depth - offset;
       d.px = distFromOrigin * Math.cos(eta + d.w * 0.5);
       d.py = distFromOrigin * Math.sin(eta + d.w * 0.5);
       d.tau = eta;
