@@ -23,11 +23,12 @@ export const strainNameToIdx = (nodes, name) => {
 
 /**
  * Find the node with the given label name & value
- * NOTE: if there are multiple nodes with the same label then the first encountered is returned
+ * NOTE: if there are multiple nodes with the same label then `null` is returned
+ * 
  * @param {Array} nodes tree nodes (flat)
  * @param {string} labelName label name
  * @param {string} labelValue label value
- * @returns {int} the index of the matching node (0 if no match found)
+ * @returns {int|null} the index of the matching node (0 if no match found)
  */
 export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
   let i;
@@ -46,7 +47,7 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
           message: "Specified Zoom Label Found Multiple Times!",
           details: "Multiple nodes in the tree are labelled '"+labelName+" "+labelValue+"' - no zoom performed"
         }));
-        return 0;
+        return null;
       }
     }
   }
@@ -56,9 +57,37 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
       message: "Specified Zoom Label Value Not Found!",
       details: "The label '"+labelName+"' value '"+labelValue+"' was not found in the tree - no zoom performed"
     }));
+    return null;
   }
   return found;
 };
+
+
+
+/**
+ * Scan the branch labels associated with the node *n* and if an appropriate one
+ * exists then we want to set this as the branch label query. Branches with
+ * multiple labels will be used in the order specified by *availableBranchLabels*
+ * (i.e. the order of the drop-down on the menu)
+ */
+export function urlQueryLabel(
+  n,
+  availableBranchLabels
+) {
+  if (n.branch_attrs && n.branch_attrs.labels !== undefined) {
+    const legalBranchLabels = Object.keys(n.branch_attrs.labels)
+      // don't use AA mutations as zoom labels currently (the URL is ugly and there will be too many non-unique labels)
+      .filter((label) => label !== "aa")
+      // sort the possible branch labels by the order of those available on the tree
+      .sort((a, b) => availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b));
+    if (legalBranchLabels.length) {
+      const key = legalBranchLabels[0]; // use the first one (if multiple)
+      return `${key}:${n.branch_attrs.labels[key]}`;
+    }
+  }
+  return undefined
+}
+
 
 /** calcBranchThickness **
 * returns an array of node (branch) thicknesses based on the tipCount at each node

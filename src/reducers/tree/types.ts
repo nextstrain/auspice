@@ -55,7 +55,6 @@ export interface TreeState {
   availableBranchLabels: string[]
   branchThickness: number[] | null
   branchThicknessVersion: number
-  cladeName?: string
   idxOfFilteredRoot?: number
   idxOfInViewRootNode: number
   loaded: boolean
@@ -65,7 +64,6 @@ export interface TreeState {
   nodeColorsVersion: number
   nodes: ReduxNode[] | null
   observedMutations: Mutations
-  selectedClade?: string
   tipRadii: number[] | null
   tipRadiiVersion: number
   totalStateCounts: TraitCounts

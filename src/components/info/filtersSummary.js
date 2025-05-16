@@ -35,7 +35,6 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     totalStateCounts: state.tree.totalStateCounts,
     totalStateCountsSecondTree: state.treeToo?.totalStateCounts,
     visibility: state.tree.visibility,
-    selectedClade: state.tree.selectedClade,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,

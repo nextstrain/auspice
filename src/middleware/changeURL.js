@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
+import { urlQueryLabel } from "../util/treeVisibilityHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
@@ -186,7 +187,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
-      query.label = action.cladeName ? action.cladeName : undefined;
+      // NOTE: `idxOfInViewRootNode` refers to the left tree only (if 2 trees displayed)
+      query.label = urlQueryLabel(state.tree.nodes[action.idxOfInViewRootNode], state.tree.availableBranchLabels)
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
