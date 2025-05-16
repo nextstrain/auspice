@@ -7,6 +7,7 @@ import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
+import { getBranchVisibility } from "./renderers";
 import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
 
 /**
@@ -187,11 +188,16 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
     d.px = undefined;
     d.py = undefined;
   });
+
+  // FIXME: this doesn't seem to have any affect...
+  const visibleNodes = this.nodes.filter((d) => getBranchVisibility(d) === "visible");
+  const offset = Math.min(...visibleNodes.map((d) => d.depth));
+
   for (let i = 0; i < children.length; i++) {
     const d = children[i].shell; // <PhyloNode>
     d.w = 2.0 * Math.PI * leafWeight(d.n) / totalLeafWeight; // angle occupied by entire subtree
     if (d.w>0) { // i.e. subtree has tips which should be drawn
-      const distFromOrigin = d.depth - this.nodes[0].depth;
+      const distFromOrigin = d.depth - offset;
       d.px = distFromOrigin * Math.cos(eta + d.w * 0.5);
       d.py = distFromOrigin * Math.sin(eta + d.w * 0.5);
       d.tau = eta;
@@ -219,7 +225,9 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
  */
 export const radialLayout = function radialLayout(this: PhyloTreeType): void {
   const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
-  const offset = this.nodes[0].depth;
+  const visibleNodes = this.nodes.filter((d) => getBranchVisibility(d) === "visible");
+  const offset = Math.min(...visibleNodes.map((d) => d.depth));
+  // FIXME: adjust curve of branch T?
   this.nodes.forEach((d) => {
     const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / maxDisplayOrder;
     const angleCBar2 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[1] / maxDisplayOrder;
@@ -360,7 +368,12 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  let nodesInDomain = this.nodes.filter((d) =>
+    d.inView &&
+    d.y !== undefined &&
+    d.x !== undefined &&
+    getBranchVisibility(d) === "visible"
+  );
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
@@ -389,7 +402,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       spanX = minimumXAxisSpan;
     }
     /* In rectangular mode, if the tree has been zoomed, leave some room to display the (clade's) root branch */
-    if (this.layout==="rect" && this.zoomNode.n.arrayIdx!==0) {
+    if (this.layout==="rect" && (this.zoomNode.n.arrayIdx!==0 || getBranchVisibility(this.zoomNode) === "hidden")) {
       minX -= (maxX-minX)/20; // 5%
     }
     xDomain = [minX, maxX];

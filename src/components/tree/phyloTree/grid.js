@@ -5,6 +5,7 @@ import { easeLinear } from "d3-ease";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { animationInterpolationDuration } from "../../../util/globals";
 import { guessAreMutationsPerSite } from "./helpers";
+import { getBranchVisibility } from "./renderers";
 import { numericToDateObject, calendarToNumeric, getPreviousDate, getNextDate, dateToString, prettifyDate } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
@@ -223,13 +224,15 @@ export const addGrid = function addGrid() {
   if (layout==="unrooted") return;
   timerStart("addGrid");
 
+  const visibleNodes = this.nodes.filter((d) => getBranchVisibility(d) === "visible");
+
   /* [xmin, xmax] is the domain of the x-axis (rectangular & clock layouts) or polar-axis (radial layouts)
      [ymin, ymax] for rectangular layouts is [1, n] where n is the number of tips (in the view)
                       clock layouts is [min_divergence_in_view, max_divergence_in_view]
                       radial layouts is the radial domain (negative means "left of north") measured in radians */
   const ymin = min(this.yScale.domain());
   const ymax = max(this.yScale.domain());
-  const xmin = layout==="radial" ? this.nodes[0].depth : this.xScale.domain()[0];
+  const xmin = layout==="radial" ? Math.min(...visibleNodes.map((d) => d.depth)) : this.xScale.domain()[0];
   const xmax = layout==="radial" ?
     xmin + max([this.xScale.domain()[1], this.yScale.domain()[1], -this.xScale.domain()[0], -this.yScale.domain()[0]]) :
     this.xScale.domain()[1];
