@@ -5,6 +5,7 @@ import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/rendere
 import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
+import { ReduxNode } from "../../../reducers/tree/types";
 import { TreeComponent } from "../tree";
 
 /* Callbacks used by the tips / branches when hovered / selected */
@@ -69,38 +70,48 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     return;
   }
 
-  const root: Root = [undefined, undefined];
+  const LHSTree = d.that.params.orientation[0] === 1;
+  const zoomBackwards = getIdxOfInViewRootNode(d.n) === d.n.arrayIdx;
+
+  /* Clicking on a branch means we want to zoom into the clade defined by that branch
+  _except_ when it's the "in-view" root branch, in which case we want to zoom out */
+  const arrayIdxToZoomTo = zoomBackwards ?
+    getParentBeyondPolytomy(d.n, this.props.distanceMeasure, LHSTree ? this.props.tree.observedMutations : this.props.treeToo.observedMutations).arrayIdx :
+    d.n.arrayIdx; 
+  const root: Root = LHSTree ? [arrayIdxToZoomTo, undefined] : [undefined, arrayIdxToZoomTo];
+  /* clade selected (as used in the URL query) is only designed to work for the main tree, not the RHS tree */
+  const newZoomNode = zoomBackwards ? d.that.nodes[arrayIdxToZoomTo].n : d.n;
+  const cladeSelected = LHSTree ? generateSelectedClade(newZoomNode, this.props.tree.availableBranchLabels) : undefined;
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
+};
+
+/**
+ * For a given node *n* return a string which can uniquely identify this node which we'll use
+ * in the URL query
+ */
+function generateSelectedClade(n: ReduxNode, availableBranchLabels: string[]): string|undefined {
   let cladeSelected: string | undefined;
   // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
   // (The order of the drop-down on the menu)
   // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
   let legalBranchLabels: string[] | undefined;
   // Check has some branch labels, and remove 'aa' ones.
-  if (d.n.branch_attrs &&
-    d.n.branch_attrs.labels !== undefined) {
-    legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
+  if (n.branch_attrs &&
+    n.branch_attrs.labels !== undefined) {
+    legalBranchLabels = Object.keys(n.branch_attrs.labels).filter((label) => label !== "aa");
   }
   // If has some, then could be clade label - but sort first
   if (legalBranchLabels && legalBranchLabels.length) {
-    const availableBranchLabels = this.props.tree.availableBranchLabels;
     // sort the possible branch labels by the order of those available on the tree
     legalBranchLabels.sort((a, b) =>
       availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
     );
     // then use the first!
     const key = legalBranchLabels[0];
-    cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
+    cladeSelected = `${key}:${n.branch_attrs.labels[key]}`;
   }
-  /* Clicking on a branch means we want to zoom into the clade defined by that branch
-  _except_ when it's the "in-view" root branch, in which case we want to zoom out */
-  const observedMutations = d.that.params.orientation[0] === 1 ? this.props.tree.observedMutations : this.props.treeToo.observedMutations;
-  const arrayIdxToZoomTo = (getIdxOfInViewRootNode(d.n) === d.n.arrayIdx) ?
-    getParentBeyondPolytomy(d.n, this.props.distanceMeasure, observedMutations).arrayIdx :
-    d.n.arrayIdx;
-  if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
-  else root[1] = arrayIdxToZoomTo;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
-};
+  return cladeSelected;
+}
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: PhyloNode): void {
