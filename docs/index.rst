@@ -64,6 +64,7 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
    advanced-functionality/second-trees
    advanced-functionality/view-settings
    advanced-functionality/drag-drop-csv-tsv
+   advanced-functionality/streamtrees
    advanced-functionality/misc
 
 
