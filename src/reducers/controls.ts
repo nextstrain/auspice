@@ -75,8 +75,17 @@ export interface ScatterVariables {
 }
 
 export interface TemporalConfidence {
+  /**
+   * Does the dataset include confidence values?
+   */
   exists: boolean
+  /**
+   * Whether to display the toggle in the sidebar
+   */
   display: boolean
+  /**
+   * Whether the confidence intervals are displayed (i.e. the toggle is on/off)
+   */
   on: boolean
 }
 
@@ -143,6 +152,8 @@ export interface BasicControlsState {
   showAllBranchLabels: boolean
   showOnlyPanels: boolean
   showTangle: boolean
+  showStreamTrees: boolean
+  streamTreeBranchLabel: string | null
   showTransmissionLines: boolean
   showTreeToo: boolean
   sidebarOpen: boolean
@@ -237,6 +248,8 @@ export const getDefaultControlsState = (): ControlsState => {
     tipLabelKey: defaults.tipLabelKey,
     showTreeToo: false,
     showTangle: false,
+    showStreamTrees: false,
+    streamTreeBranchLabel: null,
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
@@ -462,6 +475,12 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         return Object.assign({}, state, { showTangle: !state.showTangle });
       }
       return state;
+    case types.TOGGLE_STREAM_TREE:
+      return {...state, showStreamTrees: action.showStreamTrees,
+        temporalConfidence: {exists: state.temporalConfidence.exists, on: false, display: !action.showStreamTrees}};
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true,
+        temporalConfidence: {exists: state.temporalConfidence.exists, on: false, display: false}};
     case types.TOGGLE_SIDEBAR:
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
