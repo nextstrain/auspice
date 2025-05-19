@@ -3,10 +3,11 @@ import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId, setDisplayOrder } from "./helpers";
 import { makeRegressionText } from "./regression";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
-import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType } from "./types";
-import { Selection } from "d3-selection";
+import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { select, Selection } from "d3-selection";
+import { area } from "d3-shape";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, StreamSummary } from "../../../reducers/tree/types";
 
 export const render = function render(
   this: PhyloTreeType,
@@ -28,6 +29,7 @@ export const render = function render(
   dateRange,
   scatterVariables,
   measurementsColorGrouping,
+  streams,
 }: {
   /** the SVG element into which the tree is drawn */
   svg: Selection<SVGGElement | null, unknown, null, unknown>
@@ -77,6 +79,8 @@ export const render = function render(
   scatterVariables: ScatterVariables
 
   measurementsColorGrouping: string | undefined
+
+  streams: Record<string, StreamSummary>
 }) {
   timerStart("phyloTree render()");
   this.svg = svg;
@@ -88,6 +92,7 @@ export const render = function render(
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
+  this.streams = streams;
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -100,7 +105,7 @@ export const render = function render(
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder({nodes: this.nodes, focus});
+  setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && streams});
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();
@@ -114,6 +119,7 @@ export const render = function render(
   this.drawBranches();
   this.updateTipLabels();
   this.drawTips();
+  this.drawStreams();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.measurementsColorGrouping) this.drawMeasurementsColoringCrosshair();
@@ -129,14 +135,18 @@ export const render = function render(
  * adds crosses to the vaccines
  */
 export const drawVaccines = function drawVaccines(this: PhyloTreeType): void {
-  if (!this.vaccines || !this.vaccines.length) return;
+  let vaccineData = this.vaccines || [];
+  if (this.params.showStreamTrees) { /* Filter out vaccines which are within a rendered streamtree */
+    vaccineData = vaccineData.filter((d) => !d.n.inStream);
+  }
+  if (!vaccineData.length) return;
 
   if (!("vaccines" in this.groups)) {
     this.groups.vaccines = this.svg.append("g").attr("id", "vaccines");
   }
   this.groups.vaccines
     .selectAll(".vaccineCross")
-    .data(this.vaccines)
+    .data(vaccineData)
     .enter()
     .append("path")
     .attr("class", "vaccineCross")
@@ -206,9 +216,13 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
   if (!("tips" in this.groups)) {
     this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
   }
+
+  const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
+    .filter((d) => !d.n.hasChildren);
+
   this.groups.tips
     .selectAll(".tip")
-    .data(this.nodes.filter((d) => !d.n.hasChildren))
+    .data(nodes)
     .enter()
     .append("circle")
     .attr("class", "tip")
@@ -276,6 +290,10 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   timerStart("drawBranches");
   const params = this.params;
 
+  const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
+  .filter((d) => d.displayOrder !== undefined);
+
+
   /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
   Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
   if (!("branchTee" in this.groups)) {
@@ -286,7 +304,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   } else {
     this.groups.branchTee
       .selectAll('.branch')
-      .data(this.nodes.filter((d) => d.n.hasChildren && d.displayOrder !== undefined))
+      .data(nodes.filter((d) => d.n.hasChildren)) // only want internal nodes for the tee
       .enter()
       .append("path")
       .attr("class", "branch T")
@@ -318,7 +336,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   }
   this.groups.branchStem
     .selectAll('.branch')
-    .data(this.nodes.filter((d) => d.displayOrder !== undefined))
+    .data(nodes)
     .enter()
     .append("path")
     .attr("class", "branch S")
@@ -511,3 +529,272 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
   }
 
 };
+
+export interface LabelDatum {
+  phyloNode: PhyloNode;
+  streamName: string|undefined;
+  x: number;
+  y: number;
+  textAnchor: string;
+  fontSize: number;
+  visibility: string;
+}
+
+export function drawStreams(this: PhyloTreeType): void {
+  console.groupCollapsed('drawStreams')
+
+  /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
+  const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
+  console.log("streamsToDraw:", streamsToDraw)
+
+  /* initial set up - runs when streams are turned on / removed
+     NOTE: we use 2 top-level groups here so that the labels are always drawn on top of any connectors / ribbons */
+  if (streamsToDraw.length && !("streams" in this.groups)) {
+    console.log("initial setup of this.groups.streams")
+    this.groups.streams = this.svg.append("g").attr("id", "streams");
+    this.groups.streamsLabels = this.svg.append("g").attr("id", "stream-labels");
+  } else if (!streamsToDraw.length && "streams" in this.groups) {
+    console.log("removing streams (SVG + this.groups reference)")
+    this.groups.streams.selectAll("*").remove();
+    this.groups.streamsLabels.selectAll("*").remove();
+    delete this.groups.streams;
+    delete this.groups.streamsLabels;
+  }
+
+  if (!streamsToDraw.length) {
+    console.groupEnd() 
+    return;
+  }
+
+  /** For each stream, construct a SVG group to house the stream, and within each group create
+   * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update
+   * individual elements.
+   */
+  this.groups.streams.selectAll('.streamGroup')
+    .data(streamsToDraw, (d) => String(d))
+    .join(
+      (enter) => {
+        const selection = enter.append('g')
+          .attr('id', (name) => `stream${name}`)
+          .attr('class', `streamGroup`);
+        selection.append("g").attr("class", "connector");
+        selection.append("g").attr("class", "ripples");
+        return selection
+      },
+      undefined, // no update method needed
+      (exit) => {
+        // console.log("[entire stream // exit]", exit);
+        return exit
+          .call((selection) => selection.transition('500')
+            .style('opacity', 0)
+            .remove()
+          )
+      },
+    );
+
+  const areaGenerator: (param: Ripple) => string = area<Ripple[0]>()
+    .x((d) => d.x)
+    .y0((d) => d.y0)
+    .y1((d) => d.y1);
+
+  /**
+   * Joiner lines connect the parent stream or parent branch to the start of this stream
+   * (where start is defined by the occurrence of the first pivot, which is some amount to the left
+   * of the first tip in the stream).
+   * Backbone lines sit behind the stream itself spanning the pivot range. They help with the appearance
+   * of streams in regions where the KDE drops to zero
+   */
+  const connectorPath = (node: PhyloNode, lineType: 'joiner'|'backbone'): string => { // a.k.a. branch
+    // don't draw connectors to empty streams!
+    if (node.n.streamNodeCounts.visible===0) return "";
+
+    const y = this.yScale(node.displayOrder);
+
+    if (lineType==='backbone') {
+      const xStreamStart = node.streamRipples.at(0).at(0).x; // first category, first pivot
+      const xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      return `M${xStreamStart},${y}H${xStreamEnd}`;
+    }
+
+    // If the stream start node is hidden (as set via the JSON) then don't show a connector!
+    // Note - there are strange states this gets us to. For instance, imagine stream1 -> stream2,
+    // if we hide the connector to stream1 then we may still render the connector to stream2 which
+    // will now start in empty space...
+    if (getBranchVisibility(node)==='hidden') {
+      return "";
+    }
+
+    const x1 = node.streamRipples[0][0].x; // first category, first pivot
+
+    const parentStreamName = this.streams[node.n.streamName].parentStreamName;
+    if (parentStreamName) { // draw a kinked connector
+      const x0 = node.xBase; // represents the div/time of the stream-defining branch
+      // NOTE: We guarantee that the the pivots do not extend beyond x0 (i.e. to the LHS)
+      const yParent = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
+      return `M${x0},${yParent}L${x0},${y}L${x1},${y}`;
+    }
+
+    // no parent stream - horizontal line from the parent node.
+    // (The parent node, unless hidden, will have been rendered as a normal branch which includes the 'tee' part which
+    // this line will touch)
+    return `M${node.xBase},${y}H${x1}`;
+  }
+
+  for (const name of streamsToDraw) {
+    // console.log("rendering connectors, ripples (paths) for stream", name);
+    const node = this.nodes[this.streams[name].startNode];
+    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
+      .selectAll(`.connectorPath`)
+      .data([node, node], (_d, i) => i===0?'joiner':'backbone')
+      .join(
+        (enter) => {
+          return enter
+            .append("path")
+            .attr("class", `connectorPath`)
+            .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid d3 rebinding `this`
+            .attr("stroke-width", this.params.branchStrokeWidth)
+            .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+            .attr("fill", 'None')
+            .each(function(d, i) { // attach events to the joiner line (but not the backbone)
+              if (i!==0) return;
+              const callbacks = d.that.callbacks; // `d.that` is a pointer to the phylotree object
+              select<SVGPathElement, PhyloNode>(this)
+                .style("cursor", "pointer")
+                .style("pointer-events", "auto")
+                .on("mouseover", function (_d, i, paths) {
+                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                  (callbacks.onStreamHover as OmitThisParameter<typeof callbacks.onStreamHover>)(node, i, Array.from(paths), true)
+                })
+                .on("mouseout",  function (_d, i, paths) {
+                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+                  (callbacks.onStreamLeave as OmitThisParameter<typeof callbacks.onStreamLeave>)(node, i, Array.from(paths), true)
+                })
+                .on("click", callbacks.onBranchClick)
+            })
+        },
+        (update) => {
+          return update.call(
+            (selection) => selection.transition("500")
+              .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
+              .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+              .attr("stroke-width", this.params.branchStrokeWidth)
+          );
+        },
+        (exit) => {
+          return exit.remove();
+        },
+      );
+
+    this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
+      .selectAll<SVGPathElement, Ripple>(`.ripple`)
+      .data(node.streamRipples, (d) => String(d.key))
+      .join(
+        (enter) => {
+          // console.log(`\t[stream ${name} // enter]`, enter);
+          return enter
+            .append("path")
+            .attr("class", `ripple`)
+            .attr("d", (d) => areaGenerator(d))
+            .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
+            .on("mouseover", (_d, i, paths) => {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (this.callbacks.onStreamHover as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
+            })
+            .on("mouseout",  (_d, i, paths) => {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (this.callbacks.onStreamLeave as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
+            })
+            .style("cursor", "pointer")
+            .style("pointer-events", "auto")
+            .on("click", () => this.callbacks.onBranchClick(node))
+        },
+        (update) => {
+          return update.call(
+            (selection) => selection.transition("500")
+              .attr("d", (d) => areaGenerator(d))
+          );
+        },
+        (exit) => {
+          return exit.remove();
+        },
+      );
+  }
+
+  const labelData: LabelDatum[] = streamsToDraw
+    .map((streamName): LabelDatum|null => {
+      const phyloNode = this.nodes[this.streams[streamName].startNode];
+      if (phyloNode.n.streamNodeCounts.visible===0) {
+        return null;
+      }
+      /* Text anchor -- if there's enough of the joiner branch in-view then we want to use 'end',
+         which stops the label overlapping the stream.  TODO XXX */
+      const textAnchor = this.zoomNode.n.name===phyloNode.n.name ? 'start' : 'middle';
+      const streamMaxPixels = _tallestPivot(phyloNode)[1];
+      const minFontSize = 10, maxFontSize = 24;
+      const fontSize = Math.floor(Math.max(minFontSize, Math.min(streamMaxPixels/2, maxFontSize)));
+      const visibility = fontSize===minFontSize ? 'hidden' : 'visible';
+      // console.log(streamName, streamMaxPixels, fontSize)
+      return {
+        phyloNode,
+        streamName,
+        x: phyloNode.streamRipples.at(0).at(0).x, // The start of the stream / end of the joiner connector
+        y: this.yScale(phyloNode.displayOrder),
+        textAnchor,
+        fontSize,
+        visibility,
+      }
+    })
+    .filter((d) => !!d); // remove labels for non-rendered streams
+
+  /* LABELS */
+  this.groups.streamsLabels
+      .selectAll<SVGTextElement, LabelDatum>(`.labelText`)
+      .data(labelData, (d) => String(d.streamName))
+      .join(
+        (enter) => {
+          // each datum here is an element of streamRipples, i.e. an array of pivots for a specific 
+          // console.log(`\t[stream ${name} // enter]`, enter);
+          return enter
+            .append("text")
+            .attr("class", `labelText`)
+            .attr('id', (d) => `label${d.streamName}`)
+            .attr("x", (d) => d.x)
+            .attr("y", (d) => d.y)
+            .attr("text-anchor", (d) => d.textAnchor)
+            .attr("dominant-baseline", "ideographic")
+            .attr("font-size", (d) => d.fontSize)
+            .attr('visibility', (d) => d.visibility)
+            .text((d) => d.phyloNode.n.streamName)
+            .style("pointer-events", "none");
+        },
+        (update) => {
+          return update.call(
+            (selection) => selection
+              .attr("x", (d) => d.x)
+              .attr("y", (d) => d.y)
+              .attr("text-anchor", (d) => d.textAnchor)
+              .attr('visibility', (d) => d.visibility)
+              .attr("font-size", (d) => d.fontSize)
+          );
+        },
+        (exit) => {
+          // console.log(`\t[stream ${name} // exit]`, exit);
+          return exit.remove();
+        },
+      );
+
+  console.groupEnd();
+}
+
+function _tallestPivot(node: PhyloNode): [number, number] {
+  return node.streamRipples[0].reduce(([i, maxH], pivotData, pivotIdx) => {
+    const h = node.streamRipples.at(-1)[pivotIdx].y1 - pivotData.y0;
+    if (pivotIdx===0) return [0,h];
+    if (h>maxH) return [pivotIdx, h];
+    return [i, maxH];
+  }, [undefined, undefined]);
+}

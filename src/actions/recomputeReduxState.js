@@ -23,6 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
+import { processStreams, labelStreamMembership } from "../util/treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -460,6 +461,19 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.selectedBranchLabel = "clade";
   }
 
+  const candidateStreamBranchLabels = [
+    "stream_label",
+    "stream",
+    // "clade",
+  ];
+  for (const key of candidateStreamBranchLabels) {
+    if (tree.availableBranchLabels.includes(key)) {
+      state.streamTreeBranchLabel = key;
+      state.showStreamTrees = true; // TODO XXX - remove - here for dev purposes only
+    }
+  }
+
+
   state.temporalConfidence = {exists: num_date_confidence, display: num_date_confidence, on: false};
 
   return state;
@@ -592,7 +606,10 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   }
 
   /* temporalConfidence */
-  if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
+  if (
+    shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout) &&
+    !state.showStreamTrees // stream trees on => we toggle CIs off
+  ) {
     state.temporalConfidence.display = true;
   } else {
     state.temporalConfidence.display = false;
@@ -1036,6 +1053,19 @@ export const createStateFromQueryOrJSONs = ({
 
   /* if query.label is undefined then we intend to zoom to the root */
   tree = modifyTreeStateVisAndBranchThickness(tree, query.label, controls, dispatch);
+
+  /** ------------------- STREAMTREE SETUP -------------------
+   * scan the tree and identify / label streams for the currently chosen label.
+   * Note: currently we don't support LHS/RHS trees + streamtrees, but this should
+   * be feasible to implement if desired.
+   */
+  if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
+  if (controls.showStreamTrees) {
+    tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
+    if (Object.keys(tree.streams).length) {
+      processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})
+    }
+  }
 
   if (treeToo && treeToo.loaded) {
     treeToo = updateSecondTree(tree, treeToo, controls, dispatch)

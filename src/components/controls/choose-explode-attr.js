@@ -15,7 +15,8 @@ import CustomSelect from "./customSelect";
   selected: state.controls.explodeAttr,
   available: state.metadata.colorings,
   showThisUI: !state.controls.showTreeToo,
-  mobileDisplay: state.general.mobileDisplay
+  mobileDisplay: state.general.mobileDisplay,
+  showStreamTrees: state.controls.showStreamTrees,
 }))
 class ChooseExplodeAttr extends React.Component {
   constructor(props) {
@@ -34,6 +35,10 @@ class ChooseExplodeAttr extends React.Component {
   }
   render() {
     if (!this.props.showThisUI) return null;
+    // Don't display the sidebar UI if we're showing stream trees
+    // (we could follow the UI example of the stream tree toggle & indicate _why_)
+    if (this.props.showStreamTrees) return null;
+
     const { t, tooltip } = this.props;
     const selectOptions = this.gatherAttrs();
     return (

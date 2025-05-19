@@ -23,7 +23,8 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedClade: undefined
+    selectedClade: undefined,
+    streams: {},
   };
 };
 
@@ -71,6 +72,8 @@ const Tree = (
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version,
       };
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      return {...state, streams: action.streams}
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA: {

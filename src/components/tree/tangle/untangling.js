@@ -78,7 +78,7 @@ export const untangleTreeToo = (phylotree1, phylotree2) => {
   // const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
   // console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
-  // TODO: check the value of focus
-  setDisplayOrder({nodes: phylotree2.nodes, focus: false});
+  // TODO: check the value of streams
+  setDisplayOrder({nodes: phylotree2.nodes, focus: false, streams: false});
   // console.timeEnd("untangle");
 };

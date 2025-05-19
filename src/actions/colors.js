@@ -4,6 +4,7 @@ import { calcColorScale } from "../util/colorScale";
 import { timerStart, timerEnd } from "../util/perf";
 import { changeEntropyCdsSelection } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
+import { processStreams } from "../util/treeStreams";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string */
@@ -26,6 +27,10 @@ export const changeColorBy = (providedColorBy = undefined) => {
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */
 
     dispatch(changeEntropyCdsSelection(colorBy));
+
+    if (Object.keys(tree.streams).length) {
+      processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, colorScale, {skipPivots: true})
+    }
 
     dispatch({
       type: types.NEW_COLORS,

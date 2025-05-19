@@ -1,7 +1,8 @@
 import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, Streams } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import { TreeComponent } from "../tree";
 
 import * as confidence from "./confidence";
 import * as grid from "./grid";
@@ -44,6 +45,8 @@ export interface Callbacks {
   onTipClick: NodeCallback
   onTipHover: NodeCallback
   onTipLeave: NodeCallback
+  onStreamHover: (this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean) => void  
+  onStreamLeave: (this: TreeComponent, _node: PhyloNode, _categoryIndex: number, paths: SVGPathElement[], isBranch: boolean) => void
   tipLabel: NodeCallback
 }
 
@@ -123,7 +126,27 @@ export interface PhyloNode extends SVG {
   yCBarStart?: number
   yCross?: number
   yTip?: number
+
+  rippleDisplayOrders?: [number,number][][]
+
+  streamRipples?: Ripple[]
 }
+
+export type Ripple = (
+  {
+    /** x value (pixel space) of the current ripple (part of a stream tree) */
+    x: number
+
+    /** y0 value (pixel space) of the current ripple (part of a stream tree) */
+    y0: number
+
+    /** y1 value (pixel space) of the current ripple (part of a stream tree) */
+    y1: number
+  }[] & {
+    /** Unique key intended for use in d3 selections to link incoming data to existing selection */
+    key: string
+  }
+)
 
 /**
  * Properties can be any property on PhyloNode but as an array for multiple nodes.
@@ -165,6 +188,7 @@ export interface Params {
   showAllBranchLabels?: boolean
   showGrid: boolean
   showTipLabels?: boolean
+  showStreamTrees: boolean
   tickLabelFill: string
   tickLabelSize: number
   tipFill: string
@@ -197,6 +221,11 @@ export interface ChangeParams {
   animationInProgress?: boolean
   changeNodeOrder?: boolean
   focus?: boolean
+
+  /**
+   * Streams are either toggled on/off or the partitioning (branch label) has changed
+   */
+  streamDefinitionChange?: true
 
   // change these things to provided value (unless undefined) //
   newDistance?: Distance
@@ -238,6 +267,7 @@ export interface PhyloTreeType {
   drawSingleCI: typeof confidence.drawSingleCI
   drawTips: typeof renderers.drawTips
   drawVaccines: typeof renderers.drawVaccines
+  drawStreams: typeof renderers.drawStreams
   grid: boolean
   groups: {
     branchGradientDefs?: Selection<SVGDefsElement, unknown, null, unknown>
@@ -249,12 +279,15 @@ export interface PhyloTreeType {
     regression?: Selection<SVGDefsElement, unknown, null, unknown>
     tips?: Selection<SVGDefsElement, unknown, null, unknown>
     vaccines?: Selection<SVGDefsElement, unknown, null, unknown>
+    streams?: Selection<SVGDefsElement, unknown, null, unknown>
+    streamsLabels?: Selection<SVGDefsElement, unknown, null, unknown>
   }
   hideGrid: typeof grid.hideGrid
   hideTemporalSlice: typeof grid.hideTemporalSlice
   id: string
   layout: Layout
   mapToScreen: typeof layouts.mapToScreen
+  mapStreamsToScreen: typeof layouts.mapStreamsToScreen
   margins: {
     bottom: number
     left: number
@@ -291,6 +324,10 @@ export interface PhyloTreeType {
   updateTipLabels: typeof labels.updateTipLabels
   vaccines?: PhyloNode[]
   visibility: Visibility[]
+
+  showStreamTrees: boolean;
+
+  streams?: Streams
 
   // TODO: This should be `d3.ScalePoint<string> | d3.ScaleContinuousNumeric<number, number>`, conditional on layout
   xScale: any

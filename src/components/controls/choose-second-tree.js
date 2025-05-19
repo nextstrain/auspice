@@ -11,6 +11,7 @@ import CustomSelect from "./customSelect";
 @connect((state) => {
   return {
     available: state.controls.available,
+    showStreamTrees: state.controls.showStreamTrees,
     treeName: state.tree.name,
     showTreeToo: state.controls.showTreeToo /* this is the name of the second tree if one is selected */
   };
@@ -35,6 +36,9 @@ class ChooseSecondTree extends React.Component {
 
     // Don't display the sidebar UI if we're just going to display an empty dropdown!
     if (!options.length) return null;
+    // Don't display the sidebar UI if we're showing stream trees
+    // (we could follow the UI example of the stream tree toggle & indicate _why_)
+    if (this.props.showStreamTrees) return null;
 
     if (this.props.showTreeToo) options.unshift("REMOVE");
 

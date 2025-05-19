@@ -1,12 +1,14 @@
+import { Selection, select, event as d3event } from "d3-selection";
 import { updateVisibleTipsAndBranchThicknesses, applyFilter, Root } from "../../../actions/tree";
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
-import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
+import { branchStrokeForHover, branchStrokeForLeave, LabelDatum } from "../phyloTree/renderers";
 import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
 import { TreeComponent } from "../tree";
+import { getEmphasizedColor } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -72,6 +74,21 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
 
   const LHSTree = d.that.params.orientation[0] === 1;
   const zoomBackwards = getIdxOfInViewRootNode(d.n) === d.n.arrayIdx;
+
+  /** Handle the case where we are clicking on the in-view root which is also a stream, i.e.
+   * we want to zoom back to the parent stream
+   */
+  if (zoomBackwards && this.props.showStreamTrees) { // Note: streamtrees only (currently) work for single trees
+    const parentStreamName = this.props.tree.streams[d.n.streamName].parentStreamName;
+    if (parentStreamName) { // if this is false we are zooming back into the "normal" tree, so use the non-stream-tree code path
+      const parentStreamIndex = this.props.tree.streams[parentStreamName].startNode
+      const parentStreamNode = d.that.nodes[parentStreamIndex].n;``
+      return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+        root: [parentStreamIndex, undefined],
+        cladeSelected: generateSelectedClade(parentStreamNode, this.props.tree.availableBranchLabels)
+      }));
+    }
+  }
 
   /* Clicking on a branch means we want to zoom into the clade defined by that branch
   _except_ when it's the "in-view" root branch, in which case we want to zoom out */
@@ -153,3 +170,64 @@ export const clearSelectedNode = function clearSelectedNode(this: TreeComponent,
   }
   this.props.dispatch({type: DESELECT_NODE});
 };
+
+export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean): void {
+  /** For each ripple (SVGPathElement) _not_ hovered, lower the opacity so that we focus attention on the hovered ribbon */
+  if (isBranch) {
+    select(paths[0]).style("stroke", getEmphasizedColor(node.branchStroke))
+  } else {
+    paths.forEach((path, i) => {
+      if (i===categoryIndex) {
+        select(path).attr("fill", getEmphasizedColor(node.n.streamCategories[categoryIndex].color))
+      } else {
+        select(path).style('opacity', 0.3)
+      }
+    })
+  }
+
+  /* Ensure the label is visible & enlarged */
+  const selection = selectStreamLabel(node);
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "visible")
+    selection.attr("font-size", 16)
+  }
+
+  this.setState({hoveredNode: {
+    node,
+    isBranch,
+    streamDetails: {x: d3event.layerX, y: d3event.layerY, categoryIndex}
+  }});
+}
+
+export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch): void {
+  if (isBranch) {
+    /* return branch colour back to normal */
+    select(paths[0]).style("stroke", node.branchStroke)
+  } else {
+    /** ensure each ripple's opacity is reset back to 1  */
+    paths.forEach((path, i) => {
+      if (i===categoryIndex) {
+        select(path).attr("fill", node.n.streamCategories[categoryIndex].color)
+      } else {
+        select(path).style('opacity', 1)
+      }
+    })
+  }
+
+  /* Ensure the label goes back to its previous state */
+  const selection = selectStreamLabel(node);
+  if (selection.data()?.at(0)?.visibility==='hidden') {
+    selection.attr("visibility", "hidden")
+  }
+
+  this.setState({hoveredNode: null});
+}
+
+
+function selectStreamLabel(node: PhyloNode) {
+  // When `groups.streamsLabels` is created we haven't bound any data so it's datum type is `unknown`
+  // We subsequently bind `LabelDatum` elements, but we can't change the underlying type without an assertion
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return node.that.groups.streamsLabels
+    .select(`#${CSS.escape(`label${node.n.streamName}`)}`) as Selection<SVGTextElement, LabelDatum, null, unknown>;
+}

@@ -2,7 +2,7 @@ import { Selection } from "d3-selection";
 import { Transition } from "d3-transition";
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren, setDisplayOrder } from "./helpers";
+import { applyToChildren, setDisplayOrder, setRippleDisplayOrders } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
@@ -314,6 +314,7 @@ export const change = function change(
     newBranchLabellingKey = undefined,
     showAllBranchLabels = undefined,
     newTipLabelKey = undefined,
+    streamDefinitionChange = undefined,
     branchStroke = undefined,
     tipStroke = undefined,
     fill = undefined,
@@ -327,6 +328,8 @@ export const change = function change(
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
+  console.groupCollapsed("phyloTree::change")
+  console.log("streamDefinitionChange", streamDefinitionChange, "phyloTree.params.showStreamTrees: ", this.params.showStreamTrees)
   const elemsToUpdate = new Set<TreeElement>(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify: PropsForPhyloNodes = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set<SVGProperty>(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
@@ -376,9 +379,21 @@ export const change = function change(
       .add("visibility");
   }
 
-  if (changeNodeOrder) {
-    setDisplayOrder({nodes: this.nodes, focus});
-    this.setDistance();
+
+  /* show confidences - set this param which actually adds the svg paths for
+    confidence intervals when mapToScreen() gets called below */
+    if (showConfidences) this.params.confidence = true;
+    /* keep the state of phylotree in sync with redux (more complex than it should be) */
+    if (showAllBranchLabels!==undefined) {
+      this.params.showAllBranchLabels=showAllBranchLabels;
+      elemsToUpdate.add('.branchLabel');
+    }
+
+
+  /* tip label key change -> update callback used */
+  if (newTipLabelKey) {
+    this.callbacks.tipLabel = makeTipLabelFunc(newTipLabelKey);
+    elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
   }
 
   /* change the requested properties on the nodes */
@@ -411,24 +426,30 @@ export const change = function change(
     this.nodes.forEach((d) => {d.update = true;});
   }
 
-  /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
-  /* distance */
-  if (newDistance || updateLayout) this.setDistance(newDistance);
-  /* focus */
-  if (updateLayout) setDisplayOrder({nodes: this.nodes, focus});
-  /* layout (must run after distance and focus) */
-  if (newDistance || newLayout || updateLayout || changeNodeOrder) {
+  /** PHYLOTREE METHODS
+   * Note the order here is (often) critical! This order reflects the order in the initial tree render cycle
+   */
+
+  /** display order calculations */
+  if (newDistance || updateLayout || changeNodeOrder || streamDefinitionChange) {
+    setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && this.streams});
+  } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
+    // rippleDisplayOrders are typically called by setDisplayOrder however for ∆{colorBy,visibility} we don't want to pay
+    // the price of recomputing the display orders for the entire tree, we just need to recompute the
+    // display-order-dimensions of the ripples
+    setRippleDisplayOrders(this.nodes, this.streams)
+  }
+
+  /** set distance (temporal vs div) */
+  if (newDistance || updateLayout) {
+    this.setDistance(newDistance);
+  }
+
+  if (newDistance || newLayout || updateLayout || changeNodeOrder || streamDefinitionChange) {
     this.setLayout(newLayout || this.layout, scatterVariables);
   }
-  /* show confidences - set this param which actually adds the svg paths for
-     confidence intervals when mapToScreen() gets called below */
-  if (showConfidences) this.params.confidence = true;
-  /* keep the state of phylotree in sync with redux (more complex than it should be) */
-  if (showAllBranchLabels!==undefined) {
-    this.params.showAllBranchLabels=showAllBranchLabels;
-    elemsToUpdate.add('.branchLabel');
-  }
-  /* mapToScreen */
+
+  /** mapToScreen (recomputes scales and maps transforms values into pixel space) */
   if (
     svgPropsToUpdate.has("stroke-width") ||
     newDistance ||
@@ -437,24 +458,56 @@ export const change = function change(
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||
+    streamDefinitionChange ||
     showConfidences
   ) {
     this.mapToScreen();
-  }
-  /* tip label key change -> update callback used */
-  if (newTipLabelKey) {
-    this.callbacks.tipLabel = makeTipLabelFunc(newTipLabelKey);
-    elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
+  } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
+    // mapStreamsToScreen is typically called by mapToScreen however for ∆{colorBy,visibility} we don't want to pay
+    // the price of the entire mapToScreen function but we do need to recompute the pixel-dimensions of the ripples!
+    this.mapStreamsToScreen(); // updates the pixel coordinates
   }
 
-  const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
-  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
-  extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
-  if (useModifySVGInStages) {
-    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
+  /** Finally modify the SVG now that all the recalculations are complete
+   * Most of the time we use modifySVGInStages / modifySVG which update specific attrs
+   * Other times 
+   */
+
+  if (streamDefinitionChange) {
+    /**
+     * Currently we draw branches, tips etc by filtering the nodes array to include/exclude
+     * nodes in stream trees. Out d3 usage is not set up to track keys so updating the selection
+     * as data enters/exits is not yet possible. The (unfortunate) result is that we tear everything
+     * down and redraw it if the streams are either toggled off or the branch label defining them
+     * changes.
+     */
+    for (const name of ['branchLabels', 'branchTee', 'branchStem', 'tips', 'tipLabels', 'vaccines']) {
+      this.groups?.[name]?.selectAll("*")?.remove();
+    }
+    this.addGrid();
+    this.drawBranches();
+    this.updateTipLabels();
+    this.drawTips();
+    this.drawBranchLabels(this.params.branchLabelKey);
+    if (this.vaccines) this.drawVaccines();
+    if (this.regression) this.drawRegression();
+    if (this.confidencesInSVG) this.removeConfidence(); 
+    this.drawStreams(); // removes streams, as appropriate
   } else {
-    this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
+    const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
+    extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
+    extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
+    if (useModifySVGInStages) {
+      this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);
+    } else {
+      this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
+    }
+    if (this.params.showStreamTrees || changeColorBy) {
+      this.drawStreams(); // removes streams, as appropriate
+    }
   }
+
   this.timeLastRenderRequested = Date.now();
   timerEnd("phylotree.change()");
+  console.groupEnd();
 };
