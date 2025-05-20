@@ -5,10 +5,11 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
   getFullAuthorInfoFromNode, getTipChanges, getBranchMutations } from "../../../util/treeMiscHelpers";
-import { isValueValid, strainSymbol } from "../../../util/globals";
+import { isValueValid, strainSymbol, NODE_VISIBLE } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
 import { nodeDisplayName, dateInfo } from "./helpers";
+import { streamLabelSymbol } from "../../../reducers/tree/types";
 
 export const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -313,7 +314,7 @@ const AttributionInfo = ({node}) => {
   return renderElements;
 };
 
-const Container = ({node, panelDims, children}) => {
+const Container = ({node, panelDims, children, xy=undefined}) => {
 
   const xOffset = 10;
   const yOffset = 10;
@@ -331,11 +332,17 @@ const Container = ({node, panelDims, children}) => {
     width = 280;
   }
 
-  /* this adjusts the x-axis for the right tree in dual tree view */
-  const xPos = node.shell.that.params.orientation[0] === -1 ?
-    panelDims.width / 2 + panelDims.spaceBetweenTrees + node.shell.xTip :
-    node.shell.xTip;
-  const yPos = node.shell.yTip;
+  let xPos,yPos;
+  if (xy) {
+    [xPos,yPos] = xy;
+  } else {
+    /* this adjusts the x-axis for the right tree in dual tree view */
+    xPos = node.shell.that.params.orientation[0] === -1 ?
+      panelDims.width / 2 + panelDims.spaceBetweenTrees + node.shell.xTip :
+      node.shell.xTip;
+    yPos = node.shell.yTip;
+  }
+
   const styles = {
     container: {
       position: "absolute",
@@ -381,6 +388,86 @@ const Comment = ({children}) => (
   </div>
 );
 
+/**
+ * Information to show when hovering over an individual ribbon within a stream
+ */
+function StreamRibbonInfo({node, streamDetails, colorBy}) {
+  const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
+  const streamLabel = node.shell.that.streams[streamLabelSymbol];
+  const streamCounts = node.streamNodeCounts; /* for entire stream */
+  const streamCountsSummary = streamCounts.total === streamCounts.visible ?
+  `${streamCounts.total} (all visible)` :
+  `${streamCounts.visible}/${streamCounts.total}`;
+  
+  const category = node.streamCategories[streamDetails.categoryIndex].name;
+  const rippleNodeIdxs = node.streamCategories.filter((s) => s.name===category).at(0).nodes;
+  const nVisible = rippleNodeIdxs.filter((idx) => node.shell.that.nodes[idx].visibility===NODE_VISIBLE).length;
+
+  const rippleCountsSummary = nVisible===rippleNodeIdxs.length ?
+    `${nVisible} (all visible)` :
+    `${nVisible}/${rippleNodeIdxs.length}`;
+
+  return (
+    <>
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Streamtree for ${streamLabel} ${node.streamName}`}
+      </div>
+
+      <InfoLine name="Visible tips (entire streamtree):" value={streamCountsSummary}/>
+
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Ripple (${colorBy}): ${category ?? '(missing data)'}`}
+      </div>
+
+      <InfoLine name="Visible tips (this category):" value={rippleCountsSummary}/>
+
+      <div style={{paddingTop: '5px'}}>
+        {idxOfInViewRootNode===node.arrayIdx ? 'Click to zoom out' : 'Click to zoom into stream'}
+      </div>
+    </>
+  );
+}
+
+/**
+ * Information to show when hovering over the connector (branch) to a stream
+ */
+function StreamConnectorInfo({node}) {
+  /* Work out how many streams descend from this one */
+  const streams = node.shell.that.streams;
+  let nDescendentStreams = 0; // don't include this stream!
+  const stack = [...streams[node.streamName].streamChildren];
+  while (stack.length) {
+    const streamName = stack.pop();
+    nDescendentStreams++;
+    for (const childName of streams[streamName].streamChildren) stack.push(childName);
+  }
+
+  const totalTipCounts = node.fullTipCount === node.tipCount ?
+    `${node.tipCount} tips (all visible)` :
+    `${node.tipCount} visible tips (out of ${node.fullTipCount})`;
+
+  const counts = node.streamNodeCounts;
+  const thisStreamCounts = counts.total === counts.visible ?
+    `${counts.total} tips (all visible)` :
+    `${counts.visible} visible tips (out of ${counts.total})`;
+
+  return (
+    <>
+      <div style={infoPanelStyles.tooltipHeading}>
+        {`Connection to stream name: ${node.streamName}`}
+      </div>
+      <InfoLine name={`Stream ${node.streamName} comprises`} value={thisStreamCounts}/>
+      {nDescendentStreams > 0 ?
+        <>
+          <InfoLine name="Further streams originate from this one" value={`(n=${nDescendentStreams})`}/>
+          <InfoLine name="All streams (together) summarise" value={totalTipCounts}/>
+        </> :
+        <InfoLine name="No further streams originate from this one" value=""/>}
+    </>
+  );
+}
+
 const HoverInfoPanel = ({
   selectedNode,
   colorBy,
@@ -396,6 +483,17 @@ const HoverInfoPanel = ({
   if (!selectedNode) return null
   const node = selectedNode.node.n; // want the redux node, not the phylo node
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
+  if (selectedNode.streamDetails) {
+    return (
+      <Container node={node} panelDims={panelDims} xy={[selectedNode.streamDetails.x, selectedNode.streamDetails.y]}>
+        {selectedNode.isBranch ? 
+          <StreamConnectorInfo node={node}/> :
+          <StreamRibbonInfo node={node} streamDetails={selectedNode.streamDetails} colorBy={colorBy}/>}
+      </Container>
+    );
+  }
+
   return (
     <Container node={node} panelDims={panelDims}>
       {selectedNode.isBranch===false ? (

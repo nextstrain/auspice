@@ -1,5 +1,6 @@
 import { CHANGE_LAYOUT } from "./types";
 import { validateScatterVariables, addScatterAxisInfo} from "../util/scatterplotHelpers";
+import { toggleStreamTree } from "./treeStreams";
 
 /**
  * Redux Thunk to change a layout, including aspects of the scatterplot / clock layouts.
@@ -8,6 +9,11 @@ export const changeLayout = ({layout, showBranches, showRegression, x, xLabel, y
   return (dispatch, getState) => {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) return;
     const { controls, tree, metadata } = getState();
+
+    if (controls.showStreamTrees) {
+      // Note that these multiple dispatches prevent the nice d3 layout change
+      dispatch(toggleStreamTree());
+    }
 
     if (layout==="rect" || layout==="unrooted" || layout==="radial") {
       dispatch({type: CHANGE_LAYOUT, layout, scatterVariables: controls.scatterVariables, canRenderBranchLabels: true});
