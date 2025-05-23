@@ -49,9 +49,15 @@ const treeToo = (
           branchThicknessVersion: action.branchThicknessVersionToo,
           idxOfInViewRootNode: action.idxOfInViewRootNodeToo,
           idxOfFilteredRoot: action.idxOfFilteredRootToo,
+          focusNodes: action.focusNodesTreeToo,
         };
       }
       return state;
+    case types.SET_FOCUS:
+      return {
+        ...state,
+        focusNodes: action.focusNodesTreeToo || undefined,
+      }
     case types.UPDATE_TIP_RADII:
       return {
         ...state,

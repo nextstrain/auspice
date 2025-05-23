@@ -211,4 +211,3 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
 }
 
 export default withTranslation()(TreeComponent);
-

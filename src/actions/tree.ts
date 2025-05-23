@@ -14,8 +14,9 @@ import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 import { PhyloNode } from "../components/tree/phyloTree/types";
 import { Metadata } from "../metadata";
 import { ThunkFunction } from "../store";
-import { ReduxNode, TreeState } from "../reducers/tree/types";
+import { ReduxNode, TreeState, FocusNodes } from "../reducers/tree/types";
 import { processStreams } from "../util/treeStreams";
+import { NODE_VISIBLE } from "../util/globals";
 
 type RootIndex = number | undefined
 
@@ -107,6 +108,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: rootIdxTree1,
       idxOfFilteredRoot: data.idxOfFilteredRoot,
+      focusNodes: data.focusNodes,
     };
 
     if (controls.showTreeToo) {
@@ -124,6 +126,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
       dispatchObj.idxOfFilteredRootToo = dataToo.idxOfFilteredRoot;
+      dispatchObj.focusNodesTreeToo = dataToo.focusNodes;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
 
@@ -189,6 +192,7 @@ export const changeDateFilter = ({
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       idxOfFilteredRoot: tree.idxOfFilteredRoot,
+      focusNodes: data.focusNodes,
     };
     if (controls.showTreeToo) {
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
@@ -199,6 +203,7 @@ export const changeDateFilter = ({
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = treeToo.idxOfInViewRootNode;
       dispatchObj.idxOfFilteredRootToo = treeToo.idxOfFilteredRoot;
+      dispatchObj.focusNodesTreeToo = dataToo.focusNodes;
     }
 
     /* Changes in visibility require a recomputation of which legend items we wish to display */
@@ -510,4 +515,29 @@ export function changeDistanceMeasure(metric: "num_date"|"div"): ThunkFunction {
     }
     dispatch({type: types.CHANGE_DISTANCE_MEASURE, data: metric})
   }
+}
+
+/**
+ * The "focus" zoom mode limits the nodes displayed in order to zoom the
+ * temporal/divergence axis (x-axis for rectangular trees). This function
+ * returns the nodes which are focused "on", as well as the root nodes for the
+ * focused subtree(s).
+ *
+ * Note that this approach differs from the typical approach auspice uses to
+ * show subtrees: in all other modes we show a single subtree and thus nodes
+ * on screen are defined by the `inView` property, root node via
+ * `idxOfInViewRootNode` etc. Focus doesn't conform to this design as nodes
+ * marked as `inView` may be off-screen in this mode. We should spend some
+ * time thinking about how to unify these concepts in the future.
+ */
+export function getFocusedNodes(nodes: ReduxNode[], visibility: any[]): FocusNodes {
+
+  let focusNodes = nodes.filter((_n, i) => visibility[i] === NODE_VISIBLE).map((n) => n.arrayIdx)
+  if (focusNodes.length===0) {
+    focusNodes = nodes.filter((n) => n.shell.inView).map((n) => n.arrayIdx);
+  }
+  const focusNodesSet = new Set(focusNodes);
+  const focusRoots = focusNodes.filter((idx) => !focusNodesSet.has(nodes[idx].parent.arrayIdx));
+
+  return {nodes: focusNodes, roots: focusRoots}
 }

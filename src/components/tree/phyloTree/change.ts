@@ -307,6 +307,7 @@ export const change = function change(
     svgHasChangedDimensions = false,
     animationInProgress = false,
     changeNodeOrder = false,
+    focusChange = false,
     newDistance = undefined,
     newLayout = undefined,
     updateLayout = undefined,
@@ -375,7 +376,7 @@ export const change = function change(
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -427,7 +428,7 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder) {
+  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
@@ -464,6 +465,7 @@ export const change = function change(
     zoomIntoClade ||
     svgHasChangedDimensions ||
     streamDefinitionChange ||
+    changeVisibility ||
     showConfidences
   ) {
     this.mapToScreen();
@@ -471,6 +473,15 @@ export const change = function change(
     // mapStreamsToScreen is typically called by mapToScreen however for ∆{colorBy,visibility} we don't want to pay
     // the price of the entire mapToScreen function but we do need to recompute the pixel-dimensions of the ripples!
     this.mapStreamsToScreen(); // updates the pixel coordinates
+  }
+
+  if (focusChange) {
+    // temporal slices must come after `mapToScreen` (as that sets the scales)
+    if (this.focus==='selected') {
+      this.hideTemporalSlice()
+    } else {
+      this.showTemporalSlice()
+    }
   }
 
   /** Finally modify the SVG now that all the recalculations are complete

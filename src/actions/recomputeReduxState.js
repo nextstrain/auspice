@@ -15,7 +15,7 @@ import { entropyCreateState, genomeMap as createGenomeMap } from "../util/entrop
 import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
-import { applyInViewNodesToTree } from "../actions/tree";
+import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
@@ -1121,6 +1121,7 @@ export const createStateFromQueryOrJSONs = ({
   /* if query.label is undefined then we intend to zoom to the root */
   tree = modifyTreeStateVisAndBranchThickness(tree, metadata.displayDefaults, query, controls, dispatch);
 
+
   /** ------------------- STREAMTREE SETUP -------------------
    * scan the tree and identify / label streams for the currently chosen label.
    * Note: currently we don't support LHS/RHS trees + streamtrees, but this should
@@ -1136,6 +1137,13 @@ export const createStateFromQueryOrJSONs = ({
 
   if (treeToo && treeToo.loaded) {
     treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
+  }
+
+  if (controls.focus) {
+    tree.focusNodes = getFocusedNodes(tree.nodes, tree.visibility);
+    if (treeToo?.loaded) {
+      treeToo.focusNodes = getFocusedNodes(treeToo.nodes, treeToo.visibility);
+    }
   }
 
   /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */

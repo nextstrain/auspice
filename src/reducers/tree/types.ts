@@ -10,6 +10,13 @@ export type Mutations = Record<string, number>
 /** An index in the overall `nodes` array */
 export type NodeIdx = number;
 
+/** Nodes focused "on" (when focus mode selected) */
+export type FocusNodes = {
+  nodes: number[];
+  roots: number[];
+}
+
+
 interface ReduxNodeBase {
   /** the index of the node in the nodes array. set so that we can access visibility / nodeColors if needed */
   arrayIdx?: NodeIdx
@@ -155,6 +162,8 @@ export interface TreeState {
 
   /** A map of available streams to summary information about the stream */
   streams: Streams
+
+  focusNodes?: FocusNodes
 }
 
 export interface TreeTooState extends TreeState {

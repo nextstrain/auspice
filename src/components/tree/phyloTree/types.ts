@@ -1,6 +1,6 @@
 import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility, Streams, TreeState } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, Streams, TreeState, FocusNodes } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
 
@@ -220,6 +220,7 @@ export interface ChangeParams {
   svgHasChangedDimensions?: boolean
   animationInProgress?: boolean
   changeNodeOrder?: boolean
+  focusChange?: boolean
 
   /**
    * Streams are either toggled on/off or the partitioning (branch label) has changed
@@ -340,4 +341,7 @@ export interface PhyloTreeType {
 
   /* focus should stay in sync with "Focus on selected" toggle state */
   focus: null|"selected"
+
+  /* (indexes of) focus nodes stay in sync with Redux */
+  focusNodes?: FocusNodes
 }

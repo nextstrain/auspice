@@ -2,6 +2,7 @@ import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE, ge
 import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { warningNotification } from "../actions/notifications";
+import { getFocusedNodes } from "../actions/tree";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
@@ -269,12 +270,15 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates) => {
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
   /* re-calculate branchThickness (inline) */
+
+  const focusNodes = controls.focus ? getFocusedNodes(tree.nodes, visibility) : undefined;
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
     branchThickness: calcBranchThickness(tree.nodes, visibility),
     branchThicknessVersion: tree.branchThicknessVersion + 1,
-    idxOfFilteredRoot: idxOfFilteredRoot
+    idxOfFilteredRoot: idxOfFilteredRoot,
+    focusNodes
   };
 };
 

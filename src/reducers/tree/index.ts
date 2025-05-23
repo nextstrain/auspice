@@ -52,12 +52,18 @@ const Tree = (
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         idxOfFilteredRoot: action.idxOfFilteredRoot,
+        focusNodes: action.focusNodes,
       };
       return {
         ...state,
         ...newStates,
       };
     }
+    case types.SET_FOCUS:
+      return {
+        ...state,
+        focusNodes: action.focusNodes || undefined,
+      }
     case types.UPDATE_TIP_RADII:
       return {
         ...state,
