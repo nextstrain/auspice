@@ -367,7 +367,7 @@ export const change = function change(
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -407,7 +407,7 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder) {
+  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
@@ -437,6 +437,7 @@ export const change = function change(
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||
+    changeVisibility ||
     showConfidences
   ) {
     this.mapToScreen();

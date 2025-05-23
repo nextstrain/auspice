@@ -8,6 +8,7 @@ import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType } from "./types";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -360,9 +361,25 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
-  // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
-  // then we don't consider internal nodes for the domain calc
+  /* ------------------------------------------------------------------
+   * New: limit the axis domains to nodes Auspice will actually render.
+   * ------------------------------------------------------------------ */
+  const visibleNodes = this.nodes.filter(
+    (d) => d.visibility === NODE_VISIBLE && d.x !== undefined && d.y !== undefined
+  );
+
+  /*  Fallback: if nothing is currently visible (e.g. the time-slider is
+      before the earliest sample), fall back to the original “inView” rule
+      so the scales never become undefined. */
+  let nodesInDomain = visibleNodes.length > 0
+    ? visibleNodes
+    : this.nodes.filter((d) => d.inView && d.y !== undefined && d.x !== undefined);
+
+  /* Scatter-plot nuance (unchanged) */
+  if (this.layout === "scatter" && this.scatterVariables.showBranches === false) {
+    nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
+  }
+
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
     nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
