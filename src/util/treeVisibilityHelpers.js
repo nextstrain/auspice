@@ -108,7 +108,7 @@ const calcBranchThickness = (nodes, visibility) => {
     if (visibility[idx] === NODE_VISIBLE) {
       return freqScale((d.tipCount + 5) / (maxTipCount + 5));
     }
-    return 0.5;
+    return 0.0;
   });
 };
 
