@@ -228,8 +228,6 @@ class Legend extends React.Component {
           onClick={() => this.toggleLegend()}
           style={{cursor: "pointer", textAlign: "right" }}
         >
-          {this.legendTitle()}
-          {this.legendChevron()}
         </g>
       </svg>
     );

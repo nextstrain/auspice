@@ -390,7 +390,7 @@ export const addGrid = function addGrid() {
   this.svg.selectAll(".axisText").remove();
   let yAxisLabel, xAxisLabel; // not all views define axes labels. `undefined` => don't draw.
   if (layout==="clock") {
-    xAxisLabel = "Date";
+    xAxisLabel = "";
     yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
   } else if (layout==="scatter") {
     xAxisLabel = this.scatterVariables.xLabel;
@@ -398,7 +398,7 @@ export const addGrid = function addGrid() {
     yAxisLabel = this.scatterVariables.yLabel;
     if (yAxisLabel==="div") yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
   } else if (layout==="rect") {
-    xAxisLabel = this.distance === "num_date" ? "Date" :
+    xAxisLabel = this.distance === "num_date" ? "" :
       guessAreMutationsPerSite(this.xScale) ? "Divergence" : "Mutations";
   }
   if (xAxisLabel) {
