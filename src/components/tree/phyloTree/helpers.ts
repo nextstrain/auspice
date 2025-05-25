@@ -86,7 +86,6 @@ function setDisplayOrdersForStream(yCounter: number, streamName: string, streamI
   n.shell.displayOrder = displayOrderMidpoint;
   n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
   yCounter += totalStreamHeight;
-  console.log(`${streamName} Stream display order`,  n.shell.displayOrder, n.shell.displayOrderRange, totalStreamHeight)
   return yCounter;
 }
 
@@ -118,7 +117,6 @@ export const setDisplayOrderRecursively = (
       yCounter += incrementer(node);
     }
     node.displayOrder = yCounter;
-    // console.log(node.n.name, node.displayOrder)
     node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
@@ -173,8 +171,6 @@ export const setDisplayOrder = ({
   streams: false|Streams,
 }): void => {
   timerStart("setDisplayOrder");
-  console.groupCollapsed("setDisplayOrder")
-  console.log("\nsetDisplayOrder streams:", streams)
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = focus ? nodes[0].n.tipCount : nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
@@ -225,8 +221,6 @@ export const setDisplayOrder = ({
     }
   }
 
-  console.log("streamInfo", streamInfo)
-
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
@@ -256,7 +250,6 @@ export const setDisplayOrder = ({
   }
 
   timerEnd("setDisplayOrder");
-  console.groupEnd()
 };
 
 
@@ -426,8 +419,6 @@ function _setDisplayOrderToUndefined(node: PhyloNode):void {
  * (via `setDisplayOrder`)
  */
 export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams): void {
-  console.groupCollapsed("setRippleDisplayOrders");
-
   for (const stream of Object.values(streams)) {
     const startingNode = nodes[stream.startNode];
 
@@ -445,9 +436,6 @@ export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams): vo
       }, []);
 
     const displayOrderMidpoint = startingNode.displayOrder;
-    console.log("Stream", stream.name, "midpoint display order:", displayOrderMidpoint);
-    // console.log("\tstream dimensions (weights)", startingNode.n.streamDimensions)
-    // console.log("\trippleDisplayOrders", rippleDisplayOrders)
 
     /* Center the ribbons */
     for (let pivotIdx=0; pivotIdx<startingNode.n.streamPivots.length; pivotIdx++) {
@@ -462,6 +450,4 @@ export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams): vo
 
     startingNode.rippleDisplayOrders = rippleDisplayOrders;
   }
-
-  console.groupEnd();
 }

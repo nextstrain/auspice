@@ -329,8 +329,6 @@ export const change = function change(
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
-  console.groupCollapsed("phyloTree::change")
-  console.log("streamDefinitionChange", streamDefinitionChange, "phyloTree.params.showStreamTrees: ", this.params.showStreamTrees)
   const elemsToUpdate = new Set<TreeElement>(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify: PropsForPhyloNodes = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set<SVGProperty>(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
@@ -517,5 +515,4 @@ export const change = function change(
 
   this.timeLastRenderRequested = Date.now();
   timerEnd("phylotree.change()");
-  console.groupEnd();
 };

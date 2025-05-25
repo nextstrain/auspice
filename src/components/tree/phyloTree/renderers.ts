@@ -541,20 +541,15 @@ export interface LabelDatum {
 }
 
 export function drawStreams(this: PhyloTreeType): void {
-  console.groupCollapsed('drawStreams')
-
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
-  console.log("streamsToDraw:", streamsToDraw)
 
   /* initial set up - runs when streams are turned on / removed
      NOTE: we use 2 top-level groups here so that the labels are always drawn on top of any connectors / ribbons */
   if (streamsToDraw.length && !("streams" in this.groups)) {
-    console.log("initial setup of this.groups.streams")
     this.groups.streams = this.svg.append("g").attr("id", "streams");
     this.groups.streamsLabels = this.svg.append("g").attr("id", "stream-labels");
   } else if (!streamsToDraw.length && "streams" in this.groups) {
-    console.log("removing streams (SVG + this.groups reference)")
     this.groups.streams.selectAll("*").remove();
     this.groups.streamsLabels.selectAll("*").remove();
     delete this.groups.streams;
@@ -562,7 +557,6 @@ export function drawStreams(this: PhyloTreeType): void {
   }
 
   if (!streamsToDraw.length) {
-    console.groupEnd() 
     return;
   }
 
@@ -583,7 +577,6 @@ export function drawStreams(this: PhyloTreeType): void {
       },
       undefined, // no update method needed
       (exit) => {
-        // console.log("[entire stream // exit]", exit);
         return exit
           .call((selection) => selection.transition('500')
             .style('opacity', 0)
@@ -641,7 +634,6 @@ export function drawStreams(this: PhyloTreeType): void {
   }
 
   for (const name of streamsToDraw) {
-    // console.log("rendering connectors, ripples (paths) for stream", name);
     const node = this.nodes[this.streams[name].startNode];
     const callbacks = this.callbacks;
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
@@ -688,7 +680,6 @@ export function drawStreams(this: PhyloTreeType): void {
       .data(node.streamRipples, (d) => String(d.key))
       .join(
         (enter) => {
-          // console.log(`\t[stream ${name} // enter]`, enter);
           return enter
             .append("path")
             .attr("class", `ripple`)
@@ -733,7 +724,6 @@ export function drawStreams(this: PhyloTreeType): void {
       const minFontSize = 10, maxFontSize = 24;
       const fontSize = Math.floor(Math.max(minFontSize, Math.min(streamMaxPixels/2, maxFontSize)));
       const visibility = fontSize===minFontSize ? 'hidden' : 'visible';
-      // console.log(streamName, streamMaxPixels, fontSize)
       return {
         phyloNode,
         streamName,
@@ -752,8 +742,6 @@ export function drawStreams(this: PhyloTreeType): void {
       .data(labelData, (d) => String(d.streamName))
       .join(
         (enter) => {
-          // each datum here is an element of streamRipples, i.e. an array of pivots for a specific 
-          // console.log(`\t[stream ${name} // enter]`, enter);
           return enter
             .append("text")
             .attr("class", `labelText`)
@@ -778,12 +766,9 @@ export function drawStreams(this: PhyloTreeType): void {
           );
         },
         (exit) => {
-          // console.log(`\t[stream ${name} // exit]`, exit);
           return exit.remove();
         },
       );
-
-  console.groupEnd();
 }
 
 function _tallestPivot(node: PhyloNode): [number, number] {

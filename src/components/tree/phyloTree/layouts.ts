@@ -344,7 +344,6 @@ export const setScales = function setScales(this: PhyloTreeType): void {
 */
 export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
-  console.groupCollapsed("mapToScreen")
   const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
@@ -451,7 +450,6 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
     }
   }
 
-  console.log("set yDomain,", yDomain)
   this.xScale.domain(xDomain);
   this.yScale.domain(yDomain);
 
@@ -536,7 +534,6 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
       }
     });
   }
-  console.groupEnd()
   /* map any streams to pixel space */
   if (this.params.showStreamTrees) {
     this.mapStreamsToScreen()
@@ -549,14 +546,8 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
  * Creates `node.streamRipples` on the start node of each stream by transforming the node's `rippleDisplayOrders`
  * and `streamPivots` by the d3 scales.
  */
-export function mapStreamsToScreen(this: PhyloTreeType): void {  
-  console.groupCollapsed("mapStreamsToScreen")
-
-  console.log("x-scale domain is", this.xScale.domain().join(" <-> "), "range:", this.xScale.range().join(" <-> "))
-  console.log("y-scale domain is", this.yScale.domain().join(" <-> "), "range:", this.yScale.range().join(" <-> "))
-
+export function mapStreamsToScreen(this: PhyloTreeType): void {
   for (const stream of Object.values(this.streams)) {
-    console.log("mapping stream", stream.name);
     const node = this.nodes[stream.startNode];
     node.streamRipples = node.rippleDisplayOrders.map((displayOrderByPivot, categoryIdx) => {
       const datum: Ripple = Object.assign(
@@ -573,9 +564,7 @@ export function mapStreamsToScreen(this: PhyloTreeType): void {
       );
       return datum;
     });
-    console.log("streamRipples", node.streamRipples)
   }
-  console.groupEnd();
 }
 
 const JITTER_MIN_STEP_SIZE = 50; // pixels

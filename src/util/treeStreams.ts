@@ -13,8 +13,6 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
 */
 export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams {
-  console.groupCollapsed("labelStreamMembership")
-  console.log(`Branch label: ${branchLabelKey}`)
   const streams: Streams = {};
   streams[streamLabelSymbol] = branchLabelKey;
 
@@ -40,8 +38,6 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
     }
 
     if (newStreamMembership) {
-      console.log("Stream start", newStreamMembership, ", from node", node.name, parentStreamMembership ? ` nested within ${parentStreamMembership}` : ' (new start!)');
-
       streams[newStreamMembership] = {
         name: newStreamMembership,
         startNode: node.arrayIdx,
@@ -80,8 +76,6 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
     }
   }
 
-  console.log("streams", streams)
-  console.groupEnd();
   return streams;
 }
 
@@ -94,9 +88,6 @@ export function processStreams(
   colorScale,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
 ):void {
-  console.groupCollapsed("processStreams")
-  console.log(`color: ${colorScale.colorBy} metric: ${metric} skipPivots: ${skipPivots} skipCategories: ${skipCategories}`)
-
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
    */
@@ -118,7 +109,7 @@ export function processStreams(
      * the density of tips across the pivots etc.
      */
     streams[sigma] = (pivots.at(-1)-pivots.at(0))/nPivots*5;
-    console.log("Entire domain (considering all streams):", domain, "sigma", streams[sigma])
+
     // Each stream sees a filtered version of these pivots
     for (const stream of Object.values(streams)) {
       const startNode = nodes[stream.startNode];
@@ -194,8 +185,6 @@ export function processStreams(
     startNode.streamDimensions = dimensions;
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
   }
-  console.log(streams);
-  console.groupEnd()
 }
 
 
@@ -377,8 +366,6 @@ function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode
     // else no siblings, take parent!
     postOrder.push(currentNode.parent);
   }
-
-  console.log("postOrder names", postOrder.map((el) => el.name));
 
   return  postOrder.map((el) => el.name);
 }
