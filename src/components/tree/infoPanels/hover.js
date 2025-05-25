@@ -432,7 +432,7 @@ function StreamRibbonInfo({node, streamDetails, colorBy}) {
 /**
  * Information to show when hovering over the connector (branch) to a stream
  */
-function StreamConnectorInfo({node}) {
+function StreamConnectorInfo({node, lineType}) {
   /* Work out how many streams descend from this one */
   const streams = node.shell.that.streams;
   let nDescendentStreams = 0; // don't include this stream!
@@ -452,10 +452,14 @@ function StreamConnectorInfo({node}) {
     `${counts.total} tips (all visible)` :
     `${counts.visible} visible tips (out of ${counts.total})`;
 
+  const title = lineType==='joiner' ?
+    `Connection to stream: ${node.streamName}` :
+    `Stream: ${node.streamName}`;
+
   return (
     <>
       <div style={infoPanelStyles.tooltipHeading}>
-        {`Connection to stream name: ${node.streamName}`}
+        {title}
       </div>
       <InfoLine name={`Stream ${node.streamName} comprises`} value={thisStreamCounts}/>
       {nDescendentStreams > 0 ?
@@ -488,7 +492,7 @@ const HoverInfoPanel = ({
     return (
       <Container node={node} panelDims={panelDims} xy={[selectedNode.streamDetails.x, selectedNode.streamDetails.y]}>
         {selectedNode.isBranch ? 
-          <StreamConnectorInfo node={node}/> :
+          <StreamConnectorInfo node={node} lineType={['joiner', 'backbone'][selectedNode.streamDetails.categoryIndex]}/> :
           <StreamRibbonInfo node={node} streamDetails={selectedNode.streamDetails} colorBy={colorBy}/>}
       </Container>
     );

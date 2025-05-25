@@ -643,6 +643,7 @@ export function drawStreams(this: PhyloTreeType): void {
   for (const name of streamsToDraw) {
     // console.log("rendering connectors, ripples (paths) for stream", name);
     const node = this.nodes[this.streams[name].startNode];
+    const callbacks = this.callbacks;
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
       .selectAll(`.connectorPath`)
       .data([node, node], (_d, i) => i===0?'joiner':'backbone')
@@ -655,24 +656,19 @@ export function drawStreams(this: PhyloTreeType): void {
             .attr("stroke-width", this.params.branchStrokeWidth)
             .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
             .attr("fill", 'None')
-            .each(function(d, i) { // attach events to the joiner line (but not the backbone)
-              if (i!==0) return;
-              const callbacks = d.that.callbacks; // `d.that` is a pointer to the phylotree object
-              select<SVGPathElement, PhyloNode>(this)
-                .style("cursor", "pointer")
-                .style("pointer-events", "auto")
-                .on("mouseover", function (_d, i, paths) {
-                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
-                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                  (callbacks.onStreamHover as OmitThisParameter<typeof callbacks.onStreamHover>)(node, i, Array.from(paths), true)
-                })
-                .on("mouseout",  function (_d, i, paths) {
-                  /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
-                  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-                  (callbacks.onStreamLeave as OmitThisParameter<typeof callbacks.onStreamLeave>)(node, i, Array.from(paths), true)
-                })
-                .on("click", callbacks.onBranchClick)
+            .style("cursor", "pointer")
+            .style("pointer-events", "auto")
+            .on("mouseover", function (_d, i, paths) {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (callbacks.onStreamHover as OmitThisParameter<typeof callbacks.onStreamHover>)(node, i, Array.from(paths), true)
             })
+            .on("mouseout",  function (_d, i, paths) {
+              /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              (callbacks.onStreamLeave as OmitThisParameter<typeof callbacks.onStreamLeave>)(node, i, Array.from(paths), true)
+            })
+            .on("click", callbacks.onBranchClick)
         },
         (update) => {
           return update.call(
