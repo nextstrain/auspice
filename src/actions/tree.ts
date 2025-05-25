@@ -246,7 +246,7 @@ export const updateTipRadii = (
     /** the strain to highlight (always tree 1) */
     tipSelectedIdx?: number | false,
 
-    /** value of the attr. if scale is continuous a bound will be used. */
+    /** value of the attr. if scale is continuous a bound will be used. Boolean attrs are strings, e.g. 'False' */
     selectedLegendItem?: string | number | false,
 
     /** a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to */
@@ -257,7 +257,9 @@ export const updateTipRadii = (
     const { controls, tree, treeToo } = getState();
     const colorScale = controls.colorScale;
     const d: AnyAction = {
-      type: types.UPDATE_TIP_RADII, version: tree.tipRadiiVersion + 1
+      type: types.UPDATE_TIP_RADII,
+      version: tree.tipRadiiVersion + 1,
+      hoveredLegendSwatch: selectedLegendItem,
     };
     const tt = controls.showTreeToo;
     if (tipSelectedIdx) {

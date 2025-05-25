@@ -2,7 +2,7 @@ import { Selection, select, event as d3event } from "d3-selection";
 import { updateVisibleTipsAndBranchThicknesses, applyFilter, Root } from "../../../actions/tree";
 import { NODE_VISIBLE, strainSymbol } from "../../../util/globals";
 import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
-import { branchStrokeForHover, branchStrokeForLeave, LabelDatum } from "../phyloTree/renderers";
+import { branchStrokeForHover, branchStrokeForLeave, LabelDatum, nonHoveredRippleOpacity } from "../phyloTree/renderers";
 import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
@@ -180,7 +180,7 @@ export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryInde
       if (i===categoryIndex) {
         select(path).attr("fill", getEmphasizedColor(node.n.streamCategories[categoryIndex].color))
       } else {
-        select(path).style('opacity', 0.3)
+        select(path).style('opacity', nonHoveredRippleOpacity)
       }
     })
   }

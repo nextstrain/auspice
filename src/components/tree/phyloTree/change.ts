@@ -320,6 +320,7 @@ export const change = function change(
     fill = undefined,
     visibility = undefined,
     tipRadii = undefined,
+    hoveredLegendSwatch = undefined,
     branchThickness = undefined,
     scatterVariables = undefined,
     performanceFlags = undefined,
@@ -364,6 +365,13 @@ export const change = function change(
     elemsToUpdate.add(".tip");
     svgPropsToUpdate.add("r");
     nodePropsToModify.r = tipRadii;
+
+    if (this.params.showStreamTrees) {
+      /* note: this won't play nicely with other changes to the streamtrees, but we rely on the knowledge that
+      tip radii changes are via mouse-over events _only_ and so there won't be any other SVG changes requested */
+      this.highlightStreamtreeRipples(hoveredLegendSwatch)
+    }
+
   }
   if (changeBranchThickness) {
     elemsToUpdate.add(".branch").add(".conf");

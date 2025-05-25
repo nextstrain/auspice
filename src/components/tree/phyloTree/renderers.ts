@@ -7,7 +7,7 @@ import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from ".
 import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility, StreamSummary } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, StreamSummary, TreeState } from "../../../reducers/tree/types";
 
 export const render = function render(
   this: PhyloTreeType,
@@ -797,4 +797,37 @@ function _tallestPivot(node: PhyloNode): [number, number] {
     if (h>maxH) return [pivotIdx, h];
     return [i, maxH];
   }, [undefined, undefined]);
+}
+
+export const nonHoveredRippleOpacity = 0.3;
+
+/**
+ * Highlight stream ripples matching the *attr*. This is done by dropping the opacity
+ * of non-matching ripples, which matches the behaviour when we hover over ripples themselves.
+ * 
+ * but we could explore other approaches more similar to the frequency panel where we instead
+ * darken the ripple we wish to highlight
+ */
+export function highlightStreamtreeRipples(this: PhyloTreeType, attr: TreeState['hoveredLegendSwatch']): void {
+  const g = this.groups?.streams
+  if (!g) return null;
+
+  if (attr===false) {
+    g.selectAll<SVGPathElement, Ripple>(".ripple")
+      .style('opacity', 1);
+    return;
+  }
+
+  /**
+   * The Ripple data structure doesn't describe the underlying data but it does
+   * include a key which is the "<attribute value>_<color by name>" which we can
+   * match legend swatches on
+   */
+  const attr_ = attr + '_';
+  g.selectAll<SVGPathElement, Ripple>(".ripple")
+    .each(function (d) {
+      if (!d.key.startsWith(attr_)) {
+        select(this).style('opacity', nonHoveredRippleOpacity)
+      }
+    })
 }

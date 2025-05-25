@@ -1,6 +1,6 @@
 import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility, Streams } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, Streams, TreeState } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
 
@@ -235,6 +235,7 @@ export interface ChangeParams {
   showAllBranchLabels?: boolean
   newTipLabelKey?: string | symbol
   newMeasurementsColorGrouping?: string | undefined
+  hoveredLegendSwatch?: TreeState['hoveredLegendSwatch']
 
   // arrays of data (the same length as nodes) //
   branchStroke?: string[]
@@ -268,6 +269,7 @@ export interface PhyloTreeType {
   drawTips: typeof renderers.drawTips
   drawVaccines: typeof renderers.drawVaccines
   drawStreams: typeof renderers.drawStreams
+  highlightStreamtreeRipples: typeof renderers.highlightStreamtreeRipples
   grid: boolean
   groups: {
     branchGradientDefs?: Selection<SVGDefsElement, unknown, null, unknown>

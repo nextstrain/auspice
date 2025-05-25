@@ -51,6 +51,7 @@ export const changePhyloTreeViaPropsComparison = (
   if (!!newTreeRedux.tipRadiiVersion && oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion) {
     args.changeTipRadii = true;
     args.tipRadii = newTreeRedux.tipRadii;
+    args.hoveredLegendSwatch = newTreeRedux.hoveredLegendSwatch;
   }
 
   /* branch thickness (stroke-width) */

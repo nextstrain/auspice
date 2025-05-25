@@ -69,6 +69,7 @@ PhyloTree.prototype.drawRegression = renderers.drawRegression;
 PhyloTree.prototype.removeRegression = renderers.removeRegression;
 PhyloTree.prototype.updateColorBy = renderers.updateColorBy;
 PhyloTree.prototype.drawStreams = renderers.drawStreams;
+PhyloTree.prototype.highlightStreamtreeRipples = renderers.highlightStreamtreeRipples;
 
 /* C A L C U L A T E    G E O M E T R I E S  E T C   ( M O D I F I E S    N O D E S ,    N O T    S V G ) */
 PhyloTree.prototype.setDistance = layouts.setDistance;

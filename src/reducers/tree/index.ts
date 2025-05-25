@@ -15,6 +15,7 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     nodeColorsVersion: 0,
     tipRadii: null,
     tipRadiiVersion: 0,
+    hoveredLegendSwatch: false,
     branchThickness: null,
     branchThicknessVersion: 0,
     vaccines: false,
@@ -65,6 +66,7 @@ const Tree = (
         ...state,
         tipRadii: action.data,
         tipRadiiVersion: action.version,
+        hoveredLegendSwatch: action.hoveredLegendSwatch,
       };
     case types.NEW_COLORS:
       return {

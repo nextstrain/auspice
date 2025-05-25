@@ -144,6 +144,7 @@ export interface TreeState {
   selectedClade?: string
   tipRadii: number[] | null
   tipRadiiVersion: number
+  hoveredLegendSwatch: string|number|false
   totalStateCounts: TraitCounts
   vaccines: ReduxNode[] | false
   /**
