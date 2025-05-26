@@ -22,7 +22,7 @@ And then run ``auspice`` via:
 
 .. code:: bash
 
-   auspice view --datasetDir datasets
+   auspice view datasets
 
 This will allow you to run Auspice locally (i.e. from your computer) and view the dataset which is behind `nextstrain.org/zika <https://nextstrain.org/zika>`__. :ref:`See below <introduction-obtaining-a-set-of-input-files>` for how to download all of the data available on `nextstrain.org <https://nextstrain.org>`__.
 
@@ -31,15 +31,9 @@ To analyse your own data, please see the tutorials on the `nextstrain docs <http
 ``auspice view``
 ----------------
 
-This is the main command we'll run Auspice with, as it makes Auspice available in a web browser for you. There are two common arguments used:
+This is the main command we'll run Auspice with, as it makes Auspice available in a web browser for you.
 
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| argument name       | data supplied            | description                                                                                             |
-+=====================+==========================+=========================================================================================================+
-| datasetDir          | PATH                     | Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers.            |
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| narrativeDir        | PATH                     | Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers. |
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
+Provide one or more pats to search for datasets (JSON) or narratives (markdown) files in: ``auspice view PATH [PATH ...]`` (see above for how to obtain a dataset JSON to start with).
 
 For more complicated setups, where you define your own server handlers, see :ref:`supplying custom handlers to the Auspice server <server-api-supplying-custom-handlers>`.
 
