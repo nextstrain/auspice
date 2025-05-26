@@ -5,7 +5,7 @@ const webpack = require("webpack");
 const webpackDevMiddleware = require("webpack-dev-middleware");
 const webpackHotMiddleware = require("webpack-hot-middleware");
 const utils = require("./utils");
-const { loadAndAddHandlers, serveRelativeFilepaths } = require("./view");
+const view = require("./view");
 const version = require('../src/version').version;
 const chalk = require('chalk');
 const generateWebpackConfig = require("../webpack.config.js").default;
@@ -21,8 +21,7 @@ const addParser = (parser) => {
   subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose progress messages in the terminal."});
   subparser.addArgument('--extend', {action: "store", metavar: "JSON", help: "Client customisations to be applied. See documentation for more details. Note that hot reloading does not currently work for these customisations."});
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
-  subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
-  subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  view.addDatasetNarrativePathArgs(subparser)
   subparser.addArgument('--includeTiming', {action: "storeTrue", help: "Do not strip timing functions. With these included the browser console will print timing measurements for a number of functions."});
 
   /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
@@ -31,6 +30,8 @@ const addParser = (parser) => {
 
 
 const run = (args) => {
+  const dataPaths = view.processPathArguments(args)
+
   /* Basic server set up */
   const app = express();
   app.set('port', process.env.PORT || 4000);
@@ -69,9 +70,11 @@ const run = (args) => {
 
   let handlerMsg = "";
   if (args.gh_pages) {
-    handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
+    handlerMsg = view.serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
+  } else if (args.handlers) {
+    handlerMsg = view.customRouteHandlers(app, path.resolve(args.handlers));
   } else {
-    handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
+    handlerMsg = view.defaultRouteHandlers({app, dataPaths});
   }
 
   app.get("*", (req, res) => res.redirect("/"));
