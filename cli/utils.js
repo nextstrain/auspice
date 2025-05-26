@@ -45,18 +45,12 @@ const getCurrentDirectoriesFor = (type) => {
   return cleanUpPathname(cwd);
 };
 
-const resolveLocalDirectory = (providedPath, isNarratives) => {
-  let localPath;
-  if (providedPath) {
-    localPath = cleanUpPathname(providedPath);
-  } else if (isNpmGlobalInstall()) {
-    localPath = getCurrentDirectoriesFor(isNarratives ? "narratives" : "data");
-  } else {
-    // fallback to the auspice source directory
-    localPath = path.join(path.resolve(__dirname), "..", isNarratives ? "narratives" : "data");
-  }
-  return localPath;
-};
+
+const defaultDataPaths = ({narrative=false} = {}) => {
+  return isNpmGlobalInstall() ?
+    [getCurrentDirectoriesFor(narrative ? "narratives" : "data")] :
+    [path.join(path.resolve(__dirname), "..", narrative ? "narratives" : "data")];
+}
 
 const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
@@ -97,7 +91,8 @@ module.exports = {
   log,
   warn,
   error,
-  resolveLocalDirectory,
   readFilePromise,
-  exportIndexDotHtml
+  exportIndexDotHtml,
+  cleanUpPathname,
+  defaultDataPaths
 };
