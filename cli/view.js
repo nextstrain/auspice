@@ -24,8 +24,8 @@ const addParser = (parser) => {
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
   subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
   subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  subparser.addArgument('--customBuildOnly', {action: "storeTrue", help: "Error if a custom build is not found."});
   /* there are some options which we deliberately do not document via `--help`. */
-  subparser.addArgument('--customBuild', {action: "storeTrue", help: SUPPRESS}); /* see printed warning in the code below */
   subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS}); /* related to the "static-site-generation" or "github-pages" */
 };
 
@@ -75,27 +75,38 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
     `Looking for datasets in ${datasetsPath}\nLooking for narratives in ${narrativesPath}`;
 };
 
-const getAuspiceBuild = () => {
+const getAuspiceBuild = (customBuildOnly) => {
   const cwd = path.resolve(process.cwd());
   const sourceDir = path.resolve(__dirname, "..");
-  if (
-    cwd !== sourceDir &&
-    fs.existsSync(path.join(cwd, "index.html")) &&
-    fs.existsSync(path.join(cwd, "dist")) &&
-    fs.readdirSync(path.join(cwd, "dist")).filter((fn) => fn.match(/^auspice.main.bundle.[a-z0-9]+.js$/)).length === 1
-  ) {
-    return {
-      message: "Serving the auspice build which exists in this directory.",
-      baseDir: cwd,
-      distDir: path.join(cwd, "dist")
-    };
+
+  // Default to current working directory.
+  let baseDir = cwd;
+  if (!hasAuspiceBuild(cwd)) {
+    if (cwd === sourceDir || customBuildOnly) {
+      utils.error(`Auspice build files not found under ${cwd}. Did you run \`auspice build\` in this directory?`);
+      process.exit(1);
+    }
+    if (!hasAuspiceBuild(sourceDir)) {
+      utils.error(`Auspice build files not found under ${cwd} or ${sourceDir}. Did you run \`auspice build\` in either directory?`);
+      process.exit(1);
+    }
+    utils.log(`Auspice build files not found under ${cwd}. Using build files under ${sourceDir}.`)
+    baseDir = sourceDir;
   }
   return {
-    message: `Serving auspice version ${version}`,
-    baseDir: sourceDir,
-    distDir: path.join(sourceDir, "dist")
+    message: `Serving the Auspice build in ${baseDir} (version ${version}).`,
+    baseDir,
+    distDir: path.join(baseDir, "dist")
   };
 };
+
+function hasAuspiceBuild(directory) {
+  return (
+    fs.existsSync(path.join(directory, "dist")) &&
+    fs.existsSync(path.join(directory, "dist/index.html")) &&
+    fs.readdirSync(path.join(directory, "dist")).filter((fn) => fn.match(/^auspice\.main\.bundle\.[a-z0-9]+\.js$/)).length === 1
+  )
+}
 
 const run = (args) => {
   /* Basic server set up */
@@ -105,13 +116,9 @@ const run = (args) => {
   app.use(compression());
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
 
-  if (args.customBuild) {
-    utils.warn("--customBuild is no longer used and will be removed in a future version. We now serve a custom auspice build if one exists in the directory `auspice view` is run from");
-  }
-
-  const auspiceBuild = getAuspiceBuild();
-  utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
-  utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
+  const auspiceBuild = getAuspiceBuild(args.customBuildOnly);
+  utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
+  utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {maxAge: '30d'}));
 
