@@ -2,7 +2,7 @@
   "__Header//Byline__": "########################################",
   "Maintained by": "Maintained by",
   "using data from": "using data from",
-  "Built with": "Built with",
+  "Built with <Link>{{text}}</Link>": "Built with <Link>{{text}}</Link>",
 
 
   "__Header//Info__": "########################################",
