@@ -15,6 +15,7 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     nodeColorsVersion: 0,
     tipRadii: null,
     tipRadiiVersion: 0,
+    hoveredLegendSwatch: false,
     branchThickness: null,
     branchThicknessVersion: 0,
     vaccines: false,
@@ -23,7 +24,8 @@ export const getDefaultTreeState = (): TreeState | TreeTooState => {
     totalStateCounts: {},
     observedMutations: {},
     availableBranchLabels: [],
-    selectedClade: undefined
+    selectedClade: undefined,
+    streams: {},
   };
 };
 
@@ -64,6 +66,7 @@ const Tree = (
         ...state,
         tipRadii: action.data,
         tipRadiiVersion: action.version,
+        hoveredLegendSwatch: action.hoveredLegendSwatch,
       };
     case types.NEW_COLORS:
       return {
@@ -71,6 +74,8 @@ const Tree = (
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version,
       };
+    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+      return {...state, streams: action.streams}
     case types.TREE_TOO_DATA:
       return action.tree;
     case types.ADD_EXTRA_METADATA: {

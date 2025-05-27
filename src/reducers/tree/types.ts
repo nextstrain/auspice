@@ -7,15 +7,18 @@ import { PhyloNode } from "../../components/tree/phyloTree/types";
  */
 export type Mutations = Record<string, number>
 
-export interface ReduxNode {
+/** An index in the overall `nodes` array */
+export type NodeIdx = number;
+
+interface ReduxNodeBase {
   /** the index of the node in the nodes array. set so that we can access visibility / nodeColors if needed */
-  arrayIdx?: number
+  arrayIdx?: NodeIdx
 
   branch_attrs?: {
     mutations?: {
       [gene: string]: string[]
     }
-    labels?: Record<string, unknown>
+    labels?: Record<string, string>
   }
   children?: ReduxNode[]
   currentGt?: string
@@ -42,14 +45,87 @@ export interface ReduxNode {
   /** the number of visible tips */
   tipCount?: number
 
-  unexplodedChildren?: ReduxNode[]
+  /** Is the node part of a (currently active) stream tree? */
+  inStream?: boolean
 }
+
+export type StreamDimensions = Array<Array<number>>
+
+interface StreamStartNode {
+    /** Name of the stream (represents a branch label value for this node) */
+  streamName: string
+
+  /** the pivots for the stream originating from this node */
+  streamPivots: Array<number>
+
+  /** the categories for the stream originating from this node */
+  streamCategories: Array<{
+    name: string|undefined
+    color: string
+    nodes: NodeIdx[]
+  }>
+
+  /** the dimensions (KDE-weights per category per pivot) for the stream originating from this node */
+  streamDimensions: StreamDimensions
+
+  /** the maximum weight observed in streamDimensions when summing across categories */
+  streamMaxHeight: number
+
+  streamNodeCounts: {total: number; visible: number}
+
+  unexplodedChildren: ReduxNode[]
+}
+
+/** Helper type for creating type intersections */
+type AllOrNone<T> = T | { [K in keyof T]?: never };
+
+export type ReduxNode = ReduxNodeBase & AllOrNone<StreamStartNode>;
 
 /**
  * Keys: the traits
  * Values: a Map of trait values to count
  */
 export type TraitCounts = Record<string, Map<string, number>>
+
+
+export interface StreamSummary {
+  name: string;
+  startNode: number;
+  members: number[];
+  streamChildren: string[];
+  /**
+   * Order to render the connected series of streams (which originate from this stream, i.e. this property
+   * only exists if parentStreamName=false) such that the connectors don't cross other streams.
+   * Each element is the name of a stream (e.g. renderingOrder.at(-1) will be this stream's name)
+   */
+  renderingOrder?: string[];
+  parentStreamName: string|false;
+  domains: Record<'num_date'|'div', [number, number]>;
+}
+
+
+export const sigma = Symbol("sigma");
+export const colorBySymbol = Symbol("colorBy");
+export const weightToDisplayOrderScaleFactor = Symbol("weightToDisplayOrderScaleFactor");
+export const streamLabelSymbol = Symbol("streamLabel");
+export type Streams = Record<string, StreamSummary> & {
+  /**
+   * Gaussian kernel sigma (std dev)
+   */
+  [sigma]?: number
+  /**
+   * Scale factor to use when mapping kernel-weight space to display-order space
+   */
+  [weightToDisplayOrderScaleFactor]?: number
+  /**
+   * the color-by used to generate ribbons
+   */
+  [colorBySymbol]?: string
+  /**
+   * the branch label key used to define streams
+   */
+  [streamLabelSymbol]?: string
+}
 
 export interface TreeState {
   availableBranchLabels: string[]
@@ -68,6 +144,7 @@ export interface TreeState {
   selectedClade?: string
   tipRadii: number[] | null
   tipRadiiVersion: number
+  hoveredLegendSwatch: string|number|false
   totalStateCounts: TraitCounts
   vaccines: ReduxNode[] | false
   /**
@@ -77,6 +154,9 @@ export interface TreeState {
   version: number
   visibility: Visibility[] | null
   visibilityVersion: number
+
+  /** A map of available streams to summary information about the stream */
+  streams: Streams
 }
 
 export interface TreeTooState extends TreeState {

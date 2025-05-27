@@ -3,7 +3,7 @@ import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { ReduxNode } from "../../../reducers/tree/types";
+import { ReduxNode, weightToDisplayOrderScaleFactor, Streams } from "../../../reducers/tree/types";
 import { Distance, PhyloNode } from "./types";
 import { ScaleContinuousNumeric } from "d3-scale";
 
@@ -39,25 +39,81 @@ export const applyToChildren = (
   }
 };
 
+/**
+ * Traverse through a set of connected streams (which originate from the `streamStartNode`),
+ * each time calculating the total display order space each stream occupies. (Note:
+ * the actual transform of ribbons into display order space is not done here.)
+ * Returns the `yCounter` incremented by the space needed for the stream(s).
+ */
+function traverseConnectedStreams(
+  yCounter: number,
+  /**
+   * streamStartNode
+   * Node representing the start of a (possibly connected) stream, but not a
+   * stream which is the child of another stream
+   */
+  streamStartNode: ReduxNode,
+  streamInfo:StreamInfo
+): number {
+  if (!(streamStartNode.streamName in streamInfo.streams)) {
+    console.error(`BUG! - found (old?) stream name ${streamStartNode.streamName} on nodes but no longer in (new?) 'streams'`);
+    return yCounter;
+  }
+
+  /** Setting displayorders to undefined allows us to skip rendering, however a more performant
+   * solution would be to skip the computation of all unneeded properties for nodes in streamtrees
+   * whilst also skipping rendering. Leaving this as a future performance improvement.
+   */
+  _setDisplayOrderToUndefined(streamStartNode.shell);
+
+  for (const streamName of streamInfo.streams[streamStartNode.streamName].renderingOrder) {
+    yCounter = setDisplayOrdersForStream(yCounter, streamName, streamInfo)
+  }
+
+  return yCounter;
+}
+
+/**
+ * Calculates the (maximum) display order occupied by this stream and places this above
+ * (in display order terms) the provided `yCounter`. Two properties are set on the stream
+ * start node: `displayOrder` (the midpoint of the stream) and `displayOrderRange`.
+ */
+function setDisplayOrdersForStream(yCounter: number, streamName: string, streamInfo: StreamInfo): number {
+  const spaceAround = 1; // 1 display order unit
+  const n = streamInfo.startNodes[streamName];
+  const totalStreamHeight = spaceAround * 2 + n.streamMaxHeight*streamInfo.streams[weightToDisplayOrderScaleFactor];
+  const displayOrderMidpoint = yCounter + totalStreamHeight/2;
+  n.shell.displayOrder = displayOrderMidpoint;
+  n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
+  yCounter += totalStreamHeight;
+  return yCounter;
+}
+
+
 /** setDisplayOrderRecursively
- * Calculates the display order of all nodes, which corresponds to the vertical position
- * of nodes in a rectangular tree.
- * If `yCounter` is undefined then we wish to hide the node and all descendants of it
+ * Postorder traversal to calculate the display order of nodes
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * Returns the current yCounter after assignment to the tree originating from `node`
  */
 export const setDisplayOrderRecursively = (
   node: PhyloNode,
   incrementer: (node: PhyloNode) => number,
-  yCounter?: number,
-): number | undefined => {
-  const children = node.n.children; // (redux) tree node
+  yCounter: number,
+  streamInfo: false|StreamInfo
+): number => {
+  const children = node.n.children;
+  const showStreamTrees = !!streamInfo;
+
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter);
+      const child = children[i];
+      yCounter = (showStreamTrees && child.streamName) ?
+        traverseConnectedStreams(yCounter, child, streamInfo) :
+        setDisplayOrderRecursively(children[i].shell, incrementer, yCounter, streamInfo);
     }
   } else {
-    if (node.n.fullTipCount !== 0 && yCounter !== undefined) {
+    // terminal node
+    if (node.n.fullTipCount !== 0) {
       yCounter += incrementer(node);
     }
     node.displayOrder = yCounter;
@@ -89,23 +145,32 @@ function _getSpaceBetweenSubtrees(
                      as the final max yCount = numTips + numSubtrees*numTips/20 */
 }
 
-/** setDisplayOrder
- * given nodes, this fn sets <phyloNode>.displayOrder for each node
- * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
- * Nodes must have parent child links established (via createChildrenAndParents)
- * PhyloTree can subsequently use this information. Accessed by prototypes
- * rectangularLayout, radialLayout, createChildrenAndParents
- * side effects: <phyloNode>.displayOrder (i.e. in the redux node) and <phyloNode>.displayOrderRange
+interface StreamInfo {
+  streams: Streams,
+  startNodes: Record<string, ReduxNode>,
+}
+
+/**
+ * Sets the `displayOrder` and `displayOrderRange` for each node by traversing the (ladderized) tree.
+ * For internal nodes the range represents the range of the children display orders.
+ * 
+ * For streams we set these properties on the stream start node. The values correspond to the
+ * midpoint of the stream and the range of the stream at its maximum (i.e. at some pivot).
+ * We then (separately) compute the display orders for each ripple (at each pivot) via
+ * `rippleDisplayOrders()`.
+ * 
+ * Nodes must have parent child links established (via createChildrenAndParents) before running this.
  */
 export const setDisplayOrder = ({
   nodes,
   focus,
+  streams,
 }: {
   nodes: PhyloNode[]
   focus: boolean
+  streams: false|Streams,
 }): void => {
   timerStart("setDisplayOrder");
-
   const numSubtrees = nodes[0].n.children.filter((n) => n.fullTipCount!==0).length;
   const numTips = focus ? nodes[0].n.tipCount : nodes[0].n.fullTipCount;
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
@@ -141,18 +206,48 @@ export const setDisplayOrder = ({
   }
 
   let yCounter = 0;
+
+  let streamInfo: StreamInfo|false = false;
+  if (nodes[0].that.params.showStreamTrees) {
+    if (streams===false) {
+      console.error("collectStreamInfo. Attempting to show streams but no stream data defined")
+    } else {
+      streamInfo = {
+        streams,
+        startNodes: Object.fromEntries(Object.entries(streams)
+          .map(([streamName, stream]) => [streamName, nodes[stream.startNode].n])
+        )
+      }
+    }
+  }
+
   /* iterate through each subtree, and add padding between each */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
-      setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, undefined);
+      _setDisplayOrderToUndefined(nodes[subtree.arrayIdx]) // see note above in `traverseConnectedStreams`
+    } else if (!!streamInfo && subtree.streamName) {
+      /* Special case where the entire (sub)tree is a series of connected streams */
+      yCounter = traverseConnectedStreams(yCounter, subtree, streamInfo) + spaceBetweenSubtrees;
     } else {
-      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter);
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter, streamInfo);
       yCounter+=spaceBetweenSubtrees;
     }
   }
   /* note that nodes[0] is a dummy node holding each subtree */
   nodes[0].displayOrder = undefined;
   nodes[0].displayOrderRange = [undefined, undefined];
+
+  /**
+   * The above didn't compute the display orders for the ripples themselves (just the overall stream dimensions)
+   * so do this now
+   */
+  if (nodes[0].that.params.showStreamTrees) {
+    if (!streams) {
+      console.error("setDisplayOrder bug - streams toggled on but no stream data")
+    } else {
+      setRippleDisplayOrders(nodes, streams)
+    }
+  }
 
   timerEnd("setDisplayOrder");
 };
@@ -236,6 +331,15 @@ export const getParentBeyondPolytomy = (
   return potentialNode;
 };
 
+export function getParentStream(node: ReduxNode): ReduxNode {
+  let n = node.parent;
+  while (true) { // eslint-disable-line no-constant-condition
+    if (n.streamName) return n;
+    if (n.parent===n) throw new Error("getParentStream failed to find parent stream before reaching the tree root");
+    n = n.parent;
+  }
+}
+
 function areNucleotideMutationsPresent(observedMutations) {
   const mutList = Object.keys(observedMutations);
   for (let idx=mutList.length-1; idx>=0; idx--) { // start at end, as nucs come last in the key-insertion order
@@ -292,3 +396,58 @@ export const nodeOrdering = (
     isSubtreeRoot(d.n) ? undefined : (maxVal - d.n.parent.shell.displayOrder)
   ]);
 };
+
+/**
+ * Sets the `displayOrder` and `displayOrderRange` to undefined for this *node*
+ * and all descendants.
+ */
+function _setDisplayOrderToUndefined(node: PhyloNode):void {
+  node.displayOrder = undefined;
+  node.displayOrderRange = [undefined, undefined];
+  for (const child of node.n.children || []) {
+    _setDisplayOrderToUndefined(child.shell)
+  }
+}
+
+/**
+ * Sets `rippleDisplayOrders` on the start node of each stream by converting `streamDimensions`
+ * (KDE-weights independently for each ribbon) into stacked coordinates in displayOrder space
+ * each representing a ripple. The set of ripples are centred around the (previously set)
+ * `displayOrder` (stream midpoint).
+ * 
+ * NOTE: This function depends on the (stream start node's) `displayOrder` being up to date
+ * (via `setDisplayOrder`)
+ */
+export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams): void {
+  for (const stream of Object.values(streams)) {
+    const startingNode = nodes[stream.startNode];
+
+    /* Convert KDE weights to ribbons which start at display order zero */
+    const rippleDisplayOrders = startingNode.n.streamDimensions
+      .reduce((acc: [number,number][][], weightsAcrossPivot, categoryIdx) => {
+        acc.push(
+          weightsAcrossPivot.map((weight,  pivotIdx) => {
+            const base: number = categoryIdx===0 ? 0 : acc[categoryIdx-1][pivotIdx][1];
+            // We don't need to scale `weight` as it's already ~normalised to display-order units
+            return [base, base + weight*streams[weightToDisplayOrderScaleFactor]];
+          })
+        );
+        return acc;
+      }, []);
+
+    const displayOrderMidpoint = startingNode.displayOrder;
+
+    /* Center the ribbons */
+    for (let pivotIdx=0; pivotIdx<startingNode.n.streamPivots.length; pivotIdx++) {
+      if (!rippleDisplayOrders.length) continue;
+      const range = [rippleDisplayOrders.at(0).at(pivotIdx).at(0), rippleDisplayOrders.at(-1).at(pivotIdx).at(1)];
+      const shift = displayOrderMidpoint - (range[0] + (range[1]-range[0])/2);
+      for (const displayOrderAcrossPivots of rippleDisplayOrders) {
+        displayOrderAcrossPivots[pivotIdx][0]+=shift;
+        displayOrderAcrossPivots[pivotIdx][1]+=shift;
+      }
+    }
+
+    startingNode.rippleDisplayOrders = rippleDisplayOrders;
+  }
+}

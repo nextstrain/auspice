@@ -58,6 +58,7 @@ const ScatterSelectContainer = styled.div`
     scatterVariables: state.controls.scatterVariables,
     colorings: state.metadata.colorings,
     colorBy: state.controls.colorBy,
+    showStreamTrees: state.controls.showStreamTrees,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
@@ -129,6 +130,11 @@ class ChooseLayout extends React.Component {
   render() {
     const { t } = this.props;
     if (this.props.showTreeToo) return null;
+
+    /* The initial implementation of streamtrees only works for rectangular trees,
+    so disable the ability to change tree layout when we're viewing them for now */
+    if (this.props.showStreamTrees) return null;
+
     const selected = this.props.layout;
     return (
       <div style={{marginBottom: 15}}>

@@ -1,5 +1,7 @@
 # Changelog
 
+* **Streamtrees** are a new visualisation option for displaying phylogenetic trees. They require datasets with labels on internal nodes which we essentially use to partition the nodes of the tree and render each partition as a streamgraph. Such visualisations are useful for conveying relationships between parts of the tree as well as improving performance for very large trees. See the [added documentation](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/streamtrees.html) for more details. ([#1902](https://github.com/nextstrain/auspice/issues/1902))
+
 * Removed the experimental markers from "Focus on selected" and "Explode Tree By" options. These seem to be working well. ([#1954](https://github.com/nextstrain/auspice/issues/1954))
 * Added Chinese language support. ([#1959](https://github.com/nextstrain/auspice/pull/1959))
 * Added flexibility to the way the "Built with …" sentence can be translated. ([#1964](https://github.com/nextstrain/auspice/pull/1964))

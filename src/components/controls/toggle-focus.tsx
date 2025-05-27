@@ -8,16 +8,17 @@ import { Layout } from "../../reducers/controls";
 import { AppDispatch, RootState } from "../../store";
 
 
-function ToggleFocus({ tooltip, focus, layout, dispatch, mobileDisplay }: {
+function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, mobileDisplay,  }: {
   tooltip: React.ReactElement;
   focus: boolean;
   layout: Layout;
+  streamTreesToggledOn: boolean;
   dispatch: AppDispatch;
   mobileDisplay: boolean;
 }) {
   // Focus functionality is only available to layouts that have the concept of a unitless y-axis
   const validLayouts = new Set(["rect", "radial"]);
-  if (!validLayouts.has(layout)) return <></>;
+  if (!validLayouts.has(layout) || streamTreesToggledOn) return <></>;
 
   const label = (
     <div style={{ display: "flex", alignItems: "center" }}>
@@ -50,4 +51,5 @@ export default connect((state: RootState) => ({
   focus: state.controls.focus,
   layout: state.controls.layout,
   mobileDisplay: state.general.mobileDisplay,
+  streamTreesToggledOn: state.controls.showStreamTrees,
 }))(ToggleFocus);

@@ -51,6 +51,7 @@ export const changePhyloTreeViaPropsComparison = (
   if (!!newTreeRedux.tipRadiiVersion && oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion) {
     args.changeTipRadii = true;
     args.tipRadii = newTreeRedux.tipRadii;
+    args.hoveredLegendSwatch = newTreeRedux.hoveredLegendSwatch;
   }
 
   /* branch thickness (stroke-width) */
@@ -68,6 +69,18 @@ export const changePhyloTreeViaPropsComparison = (
   if (oldProps.explodeAttr !== newProps.explodeAttr) {
     args.changeNodeOrder = true;
     args.focus = newProps.focus;
+  }
+
+  /**
+   * Stream-tree related
+   * NOTE: there are two ways to update phylotree data - set `args.<property>` and
+   * have `phyloTree/change.ts` or just reach in and update it here. Historically
+   * we've used both but we should standardise this usage.
+   */
+  phylotree.streams = newProps.tree.streams;
+  phylotree.params.showStreamTrees = newProps.showStreamTrees;
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.tree.streams !== newProps.tree.streams) {
+    args.streamDefinitionChange = true;
   }
 
   /* enable/disable focus */

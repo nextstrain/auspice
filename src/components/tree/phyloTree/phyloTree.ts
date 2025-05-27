@@ -68,6 +68,8 @@ PhyloTree.prototype.removeMeasurementsColoringCrosshair = renderers.removeMeasur
 PhyloTree.prototype.drawRegression = renderers.drawRegression;
 PhyloTree.prototype.removeRegression = renderers.removeRegression;
 PhyloTree.prototype.updateColorBy = renderers.updateColorBy;
+PhyloTree.prototype.drawStreams = renderers.drawStreams;
+PhyloTree.prototype.highlightStreamtreeRipples = renderers.highlightStreamtreeRipples;
 
 /* C A L C U L A T E    G E O M E T R I E S  E T C   ( M O D I F I E S    N O D E S ,    N O T    S V G ) */
 PhyloTree.prototype.setDistance = layouts.setDistance;
@@ -78,6 +80,7 @@ PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
 PhyloTree.prototype.setScales = layouts.setScales;
 PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
+PhyloTree.prototype.mapStreamsToScreen = layouts.mapStreamsToScreen;
 PhyloTree.prototype.calculateRegression = regression.calculateRegression;
 
 /* C O N F I D E N C E    I N T E R V A L S */
