@@ -19,6 +19,9 @@ Auspice has some hardcoded defaults, largely for historical reasons. Each of the
 -  Default branch labelling is "clade", if available.
 -  Default tip labelling is the sample / strain name (``node.name``)
 
+
+.. _dataset-configurable-defaults:
+
 Dataset (JSON) configurable defaults
 ------------------------------------
 
@@ -59,6 +62,9 @@ Note that ``meta.display_defaults.panels`` (optional) differs from ``meta.panels
 **See this in action:**
 
 For instance, go to `nextstrain.org/flu/seasonal/h3n2/ha/2y <https://nextstrain.org/flu/seasonal/h3n2/ha/2y>`__ and you'll see how the colouring is "Clade" -- this has been set via the ``display_defaults`` in the JSON.
+
+
+.. _url-query-options:
 
 URL query options
 -----------------
