@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "多样性",
+  "Reset Layout": "重置布局",
   "entropy": "熵值",
   "events": "事件",
   "Codon {{codon}} in protein {{protein}}": "蛋白质{{protein}}的第{{codon}}个密码子",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "系统发育树",
-  "Reset Layout": "重置布局",
   "Click on tip to display more info": "点击分支末端显示详细信息",
   "Click to zoom into clade": "点击放大进化枝",
   "Click to zoom out to parent clade": "点击缩回父进化枝",

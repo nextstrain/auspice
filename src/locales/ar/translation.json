@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "التنوع",
+  "Reset Layout": "إعادة تعيين التصميم",
   "entropy": "الانتروبيا",
   "events": "الأحداث",
   "Codon {{codon}} in protein {{protein}}": "شيفرة جينية {{codon}} في البروتين {{protein}}",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "شجرة تطور السلالات",
-  "Reset Layout": "إعادة تعيين التصميم",
   "Click on tip to display more info": "انقر على النصيحة لعرض المزيد من المعلومات",
   "Click to zoom into clade": "انقر لتكبير الفرع الحيوي",
   "Click to zoom out to parent clade": "انقر لتكبير سلف الفرع الحيوي ",

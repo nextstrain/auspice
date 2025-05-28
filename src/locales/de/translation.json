@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "Diversität",
+  "Reset Layout": "Ansicht zurücksetzen",
   "entropy": "Entropie",
   "events": "Ereignisse",
   "Codon {{codon}} in protein {{protein}}": "Kodon {{codon}} in Protein {{protein}}",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Phylogenese",
-  "Reset Layout": "Ansicht zurücksetzen",
   "Click on tip to display more info": "Klicken, um mehr Informationen anzuzeigen",
   "Click to zoom into clade": "Klicken, um in die Klade einzuzoomen",
   "Branch leading to": "Ast führt zu",

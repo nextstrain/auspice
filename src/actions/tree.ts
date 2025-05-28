@@ -77,7 +77,6 @@ export const applyInViewNodesToTree = (
  */
 export const updateVisibleTipsAndBranchThicknesses = ({
   root = [undefined, undefined],
-  cladeSelected = undefined,
 }: {
   /**
    * Change the in-view part of the tree.
@@ -85,17 +84,11 @@ export const updateVisibleTipsAndBranchThicknesses = ({
    * [0, 0]: reset. [undefined, undefined]: do nothing
    */
   root?: Root
-
-  cladeSelected?: string
 } = {}
 ): ThunkFunction => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
-    if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
-      /* if not resetting tree to root, maintain previous selectedClade if one exists */
-      cladeSelected = tree.selectedClade;
-    }
-
+  
     if (!tree.nodes) {return;}
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
@@ -114,8 +107,6 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: rootIdxTree1,
       idxOfFilteredRoot: data.idxOfFilteredRoot,
-      cladeName: cladeSelected,
-      selectedClade: cladeSelected,
     };
 
     if (controls.showTreeToo) {

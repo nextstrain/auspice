@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "Разновидность",
+  "Reset Layout": "Сбросить Чертеж",
   "entropy": "энтропия",
   "events": "события",
   "Codon {{codon}} in protein {{protein}}": "Кодон {{codon}} в белке {{protein}}",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Филогенез",
-  "Reset Layout": "Сбросить Чертеж",
   "Click on tip to display more info": "Нажмите на подсказку чтобы посмотреть детали",
   "Click to zoom into clade": "Нажмите чтобы приблизить филогенетическую ветвь",
   "Branch leading to": "Ветвь ведущая к",

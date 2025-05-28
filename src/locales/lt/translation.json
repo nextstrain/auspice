@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "Įvairovė",
+  "Reset Layout": "Atstatyti Išdėstymą",
   "entropy": "entropija",
   "events": "įvykiai",
   "Codon {{codon}} in protein {{protein}}": "Kodonas {{codon}} iš {{protein}} baltymo",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Filogenetinis medis",
-  "Reset Layout": "Atstatyti Išdėstymą",
   "Click on tip to display more info": "Norėdami pamatyti daugiau informacijos paspauskite ant galiuko",
   "Click to zoom into clade": "Paspauskite pritraukti visą monofiletinę grupę",
   "Click to zoom out to parent clade": "Paspauskite pritraukti motininę monofiletinę grupę",

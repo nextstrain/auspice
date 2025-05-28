@@ -6,7 +6,6 @@ import { branchStrokeForHover, branchStrokeForLeave, LabelDatum, nonHoveredRippl
 import { PhyloNode } from "../phyloTree/types";
 import { SELECT_NODE, DESELECT_NODE } from "../../../actions/types";
 import { SelectedNode } from "../../../reducers/controls";
-import { ReduxNode } from "../../../reducers/tree/types";
 import { TreeComponent } from "../tree";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 
@@ -82,10 +81,8 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     const parentStreamName = this.props.tree.streams[d.n.streamName].parentStreamName;
     if (parentStreamName) { // if this is false we are zooming back into the "normal" tree, so use the non-stream-tree code path
       const parentStreamIndex = this.props.tree.streams[parentStreamName].startNode
-      const parentStreamNode = d.that.nodes[parentStreamIndex].n;``
       return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
         root: [parentStreamIndex, undefined],
-        cladeSelected: generateSelectedClade(parentStreamNode, this.props.tree.availableBranchLabels)
       }));
     }
   }
@@ -97,38 +94,9 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
     d.n.arrayIdx; 
   const root: Root = LHSTree ? [arrayIdxToZoomTo, undefined] : [undefined, arrayIdxToZoomTo];
   /* clade selected (as used in the URL query) is only designed to work for the main tree, not the RHS tree */
-  const newZoomNode = zoomBackwards ? d.that.nodes[arrayIdxToZoomTo].n : d.n;
-  const cladeSelected = LHSTree ? generateSelectedClade(newZoomNode, this.props.tree.availableBranchLabels) : undefined;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
 };
 
-/**
- * For a given node *n* return a string which can uniquely identify this node which we'll use
- * in the URL query
- */
-function generateSelectedClade(n: ReduxNode, availableBranchLabels: string[]): string|undefined {
-  let cladeSelected: string | undefined;
-  // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
-  // (The order of the drop-down on the menu)
-  // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
-  let legalBranchLabels: string[] | undefined;
-  // Check has some branch labels, and remove 'aa' ones.
-  if (n.branch_attrs &&
-    n.branch_attrs.labels !== undefined) {
-    legalBranchLabels = Object.keys(n.branch_attrs.labels).filter((label) => label !== "aa");
-  }
-  // If has some, then could be clade label - but sort first
-  if (legalBranchLabels && legalBranchLabels.length) {
-    // sort the possible branch labels by the order of those available on the tree
-    legalBranchLabels.sort((a, b) =>
-      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
-    );
-    // then use the first!
-    const key = legalBranchLabels[0];
-    cladeSelected = `${key}:${n.branch_attrs.labels[key]}`;
-  }
-  return cladeSelected;
-}
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: PhyloNode): void {

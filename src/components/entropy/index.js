@@ -152,7 +152,7 @@ class Entropy extends React.Component {
             }
           }}
         >
-          <span style={styles.switchTitle}> {'RESET LAYOUT'} </span>
+          <span style={styles.switchTitle}> {this.props.t('Reset Layout')} </span>
         </button>
       </div>
     );
