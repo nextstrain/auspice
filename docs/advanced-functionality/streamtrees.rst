@@ -7,10 +7,10 @@ Streamtrees
 Overview
 --------
 
-Streamtrees are a novel visualisation approach to describe phylogenetic trees by rendering clades (mono- or para-phyletic) as a streamgraph.
+:term:`Streamtrees <streamtree>` are a novel visualisation approach to describe phylogenetic trees by rendering clades (mono- or para-phyletic) as a streamgraph.
 They help with two distinct problems with phylogenetic trees:
 
-1. Large trees (i.e. those with more than a few thousand tips) are both hard to interpret and computationally expensive, as the number of pixels available for each tip becomes miniscule. There have been a number of innovative approaches to address this such as `Taxonium's <https://taxonium.org>`__ progressive zoom where the number of nodes rendered changes according to the zoom level. Streamtrees replace a clade of :math:`n` tips (:math:`\sim 2n` nodes) with streamtree with one ribbon (stream) per color-by category, which is both computationally easier to display and easier to interpret as :math:`n` becomes large.
+1. Large trees (i.e. those with more than a few thousand tips) are both hard to interpret and computationally expensive, as the number of pixels available for each tip becomes miniscule. There have been a number of innovative approaches to address this such as `Taxonium's <https://taxonium.org>`__ progressive zoom where the number of nodes rendered changes according to the zoom level. Streamtrees replace a clade of :math:`n` tips (:math:`\sim 2n` nodes) with streamtree with one :term:`ribbon` (:term:`stream`) per color-by category, which is both computationally easier to display and easier to interpret as :math:`n` becomes large.
 
 2. Seeing the big themes in trees is often hindered by all branches given the same visual importance. For instance, seeing geographic jumps in a tree (where geographic ancestry has been inferred) may be difficult for many. Streamtrees may be created to partition the tree based on such jumps and the resulting visual separation of streams is often easier to interpret.
 
@@ -71,7 +71,7 @@ Summary of main steps
 
 2. ``processStreams`` - computes a number of details about each stream, and may be called in a partial fashion in order to skip recomputations as needed. Each stream-start node will have the properties of the type ``StreamStartNode`` added to it via this function.
 
-   * Pivots for the entire dataset are calculated and a subset of pivots is assigned to each stream.
+   * :term:`Pivots` for the entire dataset are calculated and a subset of pivots is assigned to each stream.
    * The rendering order for each set of connected streams is computed such that we avoid crossings of branches and streams; see the ``calcRenderingOrder`` function for more details.
    * Tips in each stream are partitioned via the current color scale
    * Each partition of tips is turned into a ribbon (in weight-space) by evaluating a kernel for each tip across the pivots in the stream and summing the weights. See "KDE calculations" below for more.
