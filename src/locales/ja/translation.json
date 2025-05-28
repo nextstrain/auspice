@@ -25,6 +25,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "多様性",
+  "Reset Layout": "レイアウトをリセット",
   "entropy": "エントロピー",
   "events": "イベント",
   "Codon {{codon}} in protein {{protein}}": "タンパク質 {{protein}} に含まれるコドン {{codon}}",
@@ -52,7 +53,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "発生系統",
-  "Reset Layout": "レイアウトをリセット",
   "Click on tip to display more info": "詳細を表示するには吹き出しをクリック",
   "Click to zoom into clade": "クリックして分岐群へズーム",
   "Click to zoom out to parent clade": "親の分岐群にズームアウトするにはクリック",

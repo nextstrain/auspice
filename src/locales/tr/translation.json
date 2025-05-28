@@ -24,6 +24,7 @@
 
   "__Entropy Panel__": "########################################",
   "Diversity": "Çeşitlilik",
+  "Reset Layout": "Görünümü Sıfırla",
   "entropy": "entropi",
   "events": "olaylar",
   "Codon {{codon}} in protein {{protein}}": "{{protein}} proteinindeki {{codon}} kodon",
@@ -51,7 +52,6 @@
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Filogeni",
-  "Reset Layout": "Görünümü Sıfırla",
   "Click on tip to display more info": "Daha çok bilgi göstermek için uca tıklayın",
   "Click to zoom into clade": "Dala yaklaşmak için tıklayın",
   "Click to zoom out to parent clade": "Ata dalına uzaklaşmak için tıklayın",
