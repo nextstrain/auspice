@@ -42,11 +42,11 @@ At the moment streamtrees are only available in rectangular tree views.
 Terminology
 -----------
 
-* **streamtree** A `streamgraph <https://en.wikipedia.org/wiki/Streamgraph>`__ (a type of stacked area graph which is symmetrical around the horizontal axis) which represents a monophyletic or paraphyloetic set of nodes in the tree. The branch leading to the streamtree represents the (internal) node the defining branch label was on, but the streamtree itself only represents terminal nodes (tips). A dataset will typically be displayed as multiple streatrees, although using a singular streamtree is also possible.
+* **streamtree** A `streamgraph <https://en.wikipedia.org/wiki/Streamgraph>`__ (a type of stacked area graph which is symmetrical around the horizontal axis) which represents a monophyletic or paraphyletic set of nodes in the tree. The branch leading to the streamtree represents the (internal) node the defining branch label was on, but the streamtree itself only represents terminal nodes (tips). A dataset will typically be displayed as multiple streamtrees, although using a singular streamtree is also possible.
 
 * **ribbon** A streamtree is partitioned into "categories" (via color-by metadata) and each category is drawn as a ribbon. For certain color-bys the entire streamtree may be a single ribbon. In *Figure 1* each ribbon represents tips from a specific geographic region.
 
-* **stream** May refer to a streamtree or a ribbbon (context dependent).
+* **stream** May refer to a streamtree or a ribbon (context dependent).
 
 * **pivots** A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only use a subset of them.
 
@@ -104,13 +104,13 @@ This step is called on:
 KDE calculations
 ~~~~~~~~~~~~~~~~
 
-Streams are a Kernel Density Estimate (KDE) with a gaussian kernel to smooth out the contribution of each sampled sequence. Each kernel represents a sample with the kernel centered on the sampling date or divergence value and with a constant standard deviation
+Streams are a Kernel Density Estimate (KDE) with a Gaussian kernel to smooth out the contribution of each sampled sequence. Each kernel represents a sample with the kernel centered on the sampling date or divergence value and with a constant standard deviation
 
 We calculate a underlying array of pivots spanning all tips (i.e. covering all streams) and extended slightly either side (so, e.g., the earliest sampled tip is not centered at the leftmost pivot). The standard deviation, :math:`\sigma`, of each kernel is a proportion of this pivot span and is thus the same across all kernels and streams. For each stream we use a subset of this list of pivots such that the pivots span the time range :math:`(t_{min} - 3\sigma, t_{max} + 3\sigma)`, where :math:`t_{min}, t_{max}` are the minimum and maximum tips in the stream according to divergence values or sampling dates, as appropriate. If :math:`t_{min} - 3\sigma < t_{stream\ start}` then we set the minimum pivot to :math:`t_{stream\ start}` so that streams don't extend leftwards of the branch connecting to the stream.
 
 
-These gaussians are summed together to form the KDE :math:`\hat{f}(x) = \sum_{i=1}^{n} w \times \mathcal{N}(\mu,\,\sigma^{2})` where :math:`\mu` is the tip sampling date/divergence, :math:`\sigma` is a constant across all streams, and :math:`w` is a per-stream weight defined below. The PDF of the gaussian is evaluated at each of the stream's pivots. 
+These Gaussians are summed together to form the KDE :math:`\hat{f}(x) = \sum_{i=1}^{n} w \times \mathcal{N}(\mu,\,\sigma^{2})` where :math:`\mu` is the tip sampling date/divergence, :math:`\sigma` is a constant across all streams, and :math:`w` is a per-stream weight defined below. The PDF of the Gaussian is evaluated at each of the stream's pivots. 
 
-The weighting parameter :math:`w` scales each gaussian proportional to the number of tips in the stream (:math:`m`) via a negative exponential :math:`w=\exp(\frac{-(m-4)}{4})+1`. This improves the interpretability of streams by increasing the rendering size of small streams (especially streams with a single tip), but we lose the ability to directly compare streams against one another.
+The weighting parameter :math:`w` scales each Gaussian proportional to the number of tips in the stream (:math:`m`) via a negative exponential :math:`w=\exp(\frac{-(m-4)}{4})+1`. This improves the interpretability of streams by increasing the rendering size of small streams (especially streams with a single tip), but we lose the ability to directly compare streams against one another.
 
 .. |summary| image:: ../assets/streamtrees_summary.png
