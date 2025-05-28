@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [16, 18, 20, 22]
+        node: [20, 22]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
@@ -60,7 +60,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
@@ -73,7 +73,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
       - run: npm ci --loglevel verbose
       - run: npx --yes bundlesize
 
@@ -86,7 +86,7 @@ jobs:
         with:
           # Node.js version doesn't matter; npm version is more important when
           # it comes to lockfiles.
-          node-version: 18
+          node-version: 20
       - run: npm install -g npm@8
       - run: npm install --ignore-scripts
       - run: |
@@ -105,7 +105,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           registry-url: https://registry.npmjs.org/
       - run: node --version
       - run: npm ci --loglevel verbose
