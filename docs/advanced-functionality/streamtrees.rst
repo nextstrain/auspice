@@ -42,13 +42,19 @@ At the moment streamtrees are only available in rectangular tree views.
 Terminology
 -----------
 
-* **streamtree** A `streamgraph <https://en.wikipedia.org/wiki/Streamgraph>`__ (a type of stacked area graph which is symmetrical around the horizontal axis) which represents a monophyletic or paraphyletic set of nodes in the tree. The branch leading to the streamtree represents the (internal) node the defining branch label was on, but the streamtree itself only represents terminal nodes (tips). A dataset will typically be displayed as multiple streamtrees, although using a singular streamtree is also possible.
+.. glossary::
 
-* **ribbon** A streamtree is partitioned into "categories" (via color-by metadata) and each category is drawn as a ribbon. For certain color-bys the entire streamtree may be a single ribbon. In *Figure 1* each ribbon represents tips from a specific geographic region.
+   streamtree
+       A `streamgraph <https://en.wikipedia.org/wiki/Streamgraph>`__ (a type of stacked area graph which is symmetrical around the horizontal axis) which represents a monophyletic or paraphyletic set of nodes in the tree. The branch leading to the streamtree represents the (internal) node the defining branch label was on, but the streamtree itself only represents terminal nodes (tips). A dataset will typically be displayed as multiple streamtrees, although using a singular streamtree is also possible.
 
-* **stream** May refer to a streamtree or a ribbon (context dependent).
+   ribbon
+       A streamtree is partitioned into "categories" (via color-by metadata) and each category is drawn as a ribbon. For certain color-bys the entire streamtree may be a single ribbon. In *Figure 1* each ribbon represents tips from a specific geographic region.
 
-* **pivots** A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only use a subset of them.
+   stream
+       May refer to a streamtree or a ribbon (context dependent).
+
+   pivots
+       A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only use a subset of them.
 
 
 Implementation details
