@@ -305,7 +305,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
               style={{...tabSingle, ...styles.resetTreeButton}}
               onClick={this.redrawTree}
             >
-              {t("Reset Layout")}
+              {t("Zoom to Root")}
             </button>
           </div>
         )}
