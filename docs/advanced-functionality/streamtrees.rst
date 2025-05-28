@@ -14,7 +14,7 @@ They help with two distinct problems with phylogenetic trees:
 
 2. Seeing the big themes in trees is often hindered by all branches given the same visual importance. For instance, seeing geographic jumps in a tree (where geographic ancestry has been inferred) may be difficult for many. Streamtrees may be created to partition the tree based on such jumps and the resulting visual separation of streams is often easier to interpret.
 
-While streamtrees are currently implemented using a standard Auspice phylogenetic tree structure, it is conceivable to instead use a list of samples partitioned by metadata (e.g. nextclade-assigned lineages) and thus avoid the cost of inferring a tree. 
+While streamtrees are currently implemented using a standard Auspice phylogenetic tree structure, it is conceivable to instead use a list of samples partitioned by metadata (e.g. nextclade-assigned lineages) and thus avoid the cost of inferring a tree.
 
 |summary| *Figure 1. Streamtrees summarising all available (17k) Dengue virus genomes, with streamtrees conveying the genotype relationships and individual streams representing sample geography. The dataset remains performant and interactive despite large dataset sizes and we can switch to a more typical tree rendering as needed.*
 
@@ -109,7 +109,7 @@ Streams are a Kernel Density Estimate (KDE) with a Gaussian kernel to smooth out
 We calculate a underlying array of pivots spanning all tips (i.e. covering all streams) and extended slightly either side (so, e.g., the earliest sampled tip is not centered at the leftmost pivot). The standard deviation, :math:`\sigma`, of each kernel is a proportion of this pivot span and is thus the same across all kernels and streams. For each stream we use a subset of this list of pivots such that the pivots span the time range :math:`(t_{min} - 3\sigma, t_{max} + 3\sigma)`, where :math:`t_{min}, t_{max}` are the minimum and maximum tips in the stream according to divergence values or sampling dates, as appropriate. If :math:`t_{min} - 3\sigma < t_{stream\ start}` then we set the minimum pivot to :math:`t_{stream\ start}` so that streams don't extend leftwards of the branch connecting to the stream.
 
 
-These Gaussians are summed together to form the KDE :math:`\hat{f}(x) = \sum_{i=1}^{n} w \times \mathcal{N}(\mu,\,\sigma^{2})` where :math:`\mu` is the tip sampling date/divergence, :math:`\sigma` is a constant across all streams, and :math:`w` is a per-stream weight defined below. The PDF of the Gaussian is evaluated at each of the stream's pivots. 
+These Gaussians are summed together to form the KDE :math:`\hat{f}(x) = \sum_{i=1}^{n} w \times \mathcal{N}(\mu,\,\sigma^{2})` where :math:`\mu` is the tip sampling date/divergence, :math:`\sigma` is a constant across all streams, and :math:`w` is a per-stream weight defined below. The PDF of the Gaussian is evaluated at each of the stream's pivots.
 
 The weighting parameter :math:`w` scales each Gaussian proportional to the number of tips in the stream (:math:`m`) via a negative exponential :math:`w=\exp(\frac{-(m-4)}{4})+1`. This improves the interpretability of streams by increasing the rendering size of small streams (especially streams with a single tip), but we lose the ability to directly compare streams against one another.
 
