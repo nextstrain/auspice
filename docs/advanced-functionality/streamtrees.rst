@@ -80,7 +80,7 @@ Summary of main steps
 
 3. Rendering - the streamtree ribbons (in weight-space) are first transformed into display-order space and then to pixel space for rendering.
 
-    .. note::  This code is all within PhyloTree. Not all of these steps need to be called on each update, and not all are explicitly about streams.
+    .. note::  This code is all within ``PhyloTree``. Not all of these steps need to be called on each update, and not all are explicitly about streams.
 
     * ``setDisplayOrder``, ``setRippleDisplayOrders`` - sets ``displayOrder`` and ``displayOrderRange`` for the origin node of the stream. The former is the midpoint of the stream, the latter is the range the stream occupies. Also computes ``rippleDisplayOrders`` (on the stream start node) by converting the already set ``streamDimensions`` (sum of KDE weights) to an array of ripples in display-order space. The transform of weight-space to display-order space not only shifts the values (so that ultimately streams appear in different places on screen) but also scales them such that they don't dominate the display-orders set for normally-rendered tips; see ``weightToDisplayOrderScaleFactor`` for more.
 
