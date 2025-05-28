@@ -51,7 +51,6 @@ Terminology
 * **pivots** A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only use a subset of them.
 
 
-
 Implementation details
 ----------------------
 
@@ -60,28 +59,24 @@ Summary of main steps
 ~~~~~~~~~~~~~~~~~~~~~
 
 1. ``labelStreamMembership`` - traverses the tree, clearing any previous stream information and setting stream information on the root nodes of new streams.
-New streams are identified based on branch labels, so this function is called when streams are first toggled on (which may be when the dataset loads) as well as when the UI changes the stream branch label.
+   New streams are identified based on branch labels, so this function is called when streams are first toggled on (which may be when the dataset loads) as well as when the UI changes the stream branch label.
 
-This creates the mapping of stream name (via the branch label attached to the stream-start node) to an object describing various properties of the stream; see the type ``StreamSummary`` for more. Furthermore every node in the tree has the boolean property ``node.inStream`` set.
-
+   This creates the mapping of stream name (via the branch label attached to the stream-start node) to an object describing various properties of the stream; see the type ``StreamSummary`` for more. Furthermore every node in the tree has the boolean property ``node.inStream`` set.
 
 2. ``processStreams`` - computes a number of details about each stream, and may be called in a partial fashion in order to skip recomputations as needed. Each stream-start node will have the properties of the type ``StreamStartNode`` added to it via this function.
 
+   * Pivots for the entire dataset are calculated and a subset of pivots is assigned to each stream.
+   * The rendering order for each set of connected streams is computed such that we avoid crossings of branches and streams; see the ``calcRenderingOrder`` function for more details.
+   * Tips in each stream are partitioned via the current color scale
+   * Each partition of tips is turned into a ribbon (in weight-space) by evaluating a kernel for each tip across the pivots in the stream and summing the weights. See "KDE calculations" below for more.
 
-    * Pivots for the entire dataset are calculated and a subset of pivots is assigned to each stream.
-    * The rendering order for each set of connected streams is computed such that we avoid crossings of branches and streams; see the ``calcRenderingOrder`` function for more details.
-    * Tips in each stream are partitioned via the current color scale
-    * Each partition of tips is turned into a ribbon (in weight-space) by evaluating a kernel for each tip across the pivots in the stream and summing the weights. See "KDE calculations" below for more.
+   This step is called on:
 
-
-
-This step is called on:
-
-        - page load
-        - change in branch-label
-        - toggle stream tree
-        - tree visibility updates
-        - tree distance metric change
+   * page load
+   * change in branch-label
+   * toggle stream tree
+   * tree visibility updates
+   * tree distance metric change
 
 3. Rendering - the streamtree ribbons (in weight-space) are first transformed into display-order space and then to pixel space for rendering.
 
@@ -94,7 +89,6 @@ This step is called on:
     * ``setLayout`` - not required for streams
 
     * ``mapToScreen``, ``mapStreamsToScreen`` - Computes ``streamRipples`` which are in pixel-space, based on ``rippleDisplayOrders`` and ``streamPivots``. The structure of ``streamRipples`` is a 3d matrix: ``streamRipples[categoryIdx][pivotIdx] = {x, y0, y1}``
-
 
     * ``drawStreams`` - d3 code to render ``streamRipples``, stream labels, and connectors (the branches joining streams to streams)
 
