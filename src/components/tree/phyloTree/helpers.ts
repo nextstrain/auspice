@@ -4,6 +4,7 @@ import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../uti
 import { NODE_VISIBLE } from "../../../util/globals";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { ReduxNode, weightToDisplayOrderScaleFactor, Streams } from "../../../reducers/tree/types";
+import { Focus } from "../../../reducers/controls";
 import { Distance, PhyloNode } from "./types";
 import { ScaleContinuousNumeric } from "d3-scale";
 
@@ -167,7 +168,7 @@ export const setDisplayOrder = ({
   streams,
 }: {
   nodes: PhyloNode[]
-  focus: boolean
+  focus: Focus
   streams: false|Streams,
 }): void => {
   timerStart("setDisplayOrder");
@@ -178,7 +179,7 @@ export const setDisplayOrder = ({
   // No focus: 1 unit per node
   let incrementer = (_node) => 1;
 
-  if (focus) {
+  if (focus === "selected") {
     const nVisible = nodes[0].n.tipCount;
     const nTotal = nodes[0].n.fullTipCount;
 

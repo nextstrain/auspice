@@ -1,5 +1,5 @@
 import { Selection } from "d3-selection";
-import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
+import { Focus, Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, Streams, TreeState } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
@@ -220,7 +220,7 @@ export interface ChangeParams {
   svgHasChangedDimensions?: boolean
   animationInProgress?: boolean
   changeNodeOrder?: boolean
-  focus?: boolean
+  focus?: Focus
 
   /**
    * Streams are either toggled on/off or the partitioning (branch label) has changed

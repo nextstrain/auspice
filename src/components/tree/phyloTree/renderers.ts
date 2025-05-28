@@ -6,7 +6,7 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
 import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
-import { Layout, ScatterVariables } from "../../../reducers/controls";
+import { Focus, Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, StreamSummary, TreeState } from "../../../reducers/tree/types";
 
 export const render = function render(
@@ -40,8 +40,8 @@ export const render = function render(
   /** the property used as branch length, e.g. div or num_date */
   distance: Distance
 
-  /** whether to focus on filtered nodes */
-  focus: boolean
+  /** how to focus on nodes */
+  focus: Focus
 
   /** an object that contains options that will be added to this.params */
   parameters: Partial<Params>
