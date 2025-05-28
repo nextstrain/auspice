@@ -54,7 +54,7 @@ Terminology
        May refer to a streamtree or a ribbon (context dependent).
 
    pivots
-       A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only use a subset of them.
+       A grid of times or divergences (depending on the tree metric in use) which are used to evaluate the kernels associated with each tip. A consistent grid is used across streamtrees, although each streamtree typically only uses a subset of them.
 
 
 Implementation details
