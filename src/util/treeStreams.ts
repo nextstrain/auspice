@@ -1,5 +1,7 @@
 import { ReduxNode, StreamDimensions, Visibility, Streams, sigma, weightToDisplayOrderScaleFactor,
   colorBySymbol, streamLabelSymbol } from "../reducers/tree/types";
+import { ColorScale } from "../reducers/controls";
+import { Distance } from "../components/tree/phyloTree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
@@ -12,7 +14,10 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
 *  "streams": each key -> object
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
 */
-export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams {
+export function labelStreamMembership(
+  tree: ReduxNode,
+  branchLabelKey: string,
+): Streams {
   const streams: Streams = {};
   streams[streamLabelSymbol] = branchLabelKey;
 
@@ -84,9 +89,15 @@ export function processStreams(
   streams: Streams,
   nodes: ReduxNode[],
   visibility: Visibility[],
-  metric: "num_date"|"div",
-  colorScale,
-  { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
+  metric: Distance,
+  colorScale: ColorScale,
+  {
+    skipPivots=false,
+    skipCategories=false,
+  }: {
+    skipPivots?: boolean,
+    skipCategories?: boolean,
+  } = {},
 ):void {
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
@@ -192,7 +203,10 @@ export function processStreams(
  * Collect all possible categories - "ribbons within a stream(tree)" - by looping
  * over all nodes in the stream. The order here reflects the order of ripples in the streamtree.
  */
-function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['streamCategories'] {
+function observedCategories(
+  nodes: ReduxNode[],
+  colorScale: ColorScale,
+): ReduxNode['streamCategories'] {
   const colorBy: string = colorScale.colorBy;
 
   if (colorScale.continuous) {
@@ -258,8 +272,18 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
  *
  * See stream-trees.md for more explanation
  */
-function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, categories: ReduxNode['streamCategories'], visibility: true|Visibility[], sigma:number):
-  {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number} {
+function computeStreamDimensions(
+  nodes: ReduxNode[],
+  pivots: number[],
+  metric: Distance,
+  categories: ReduxNode['streamCategories'],
+  visibility: true | Visibility[],
+  sigma: number,
+): {
+  dimensions: StreamDimensions,
+  streamNodeCountsTotal: number,
+  streamNodeCountsVisible: number,
+} {
   let [streamNodeCountsTotal, streamNodeCountsVisible] = [0,0];
 
   // per-stream weight (to increase weights of small streams)
@@ -313,12 +337,17 @@ function computeStreamMaxHeight(dimensions: StreamDimensions): number {
  * For divergence trees we do the same but using divergence values. Note that this often results in a different
  * return value! E.g. B might branch off before A in divergence space.
  */
-function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode[], metric: 'num_date'|'div'): string[] {
+function calcRenderingOrder(
+  rootName: string,
+  streams: Streams,
+  nodes: ReduxNode[],
+  metric: Distance,
+): string[] {
 
   interface Node {
     name: string,
     children: Node[],
-    parent: false|Node,
+    parent: false | Node,
     seen: boolean
   }
   const treeOfStreams: Node = {name: rootName, parent: false, children: [], seen: false}
@@ -379,7 +408,10 @@ function _sum(arr: number[]): number {
   return arr.reduce((acc, cv) => acc+cv, 0)
 }
 
-export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: string): boolean {
+export function isNodeWithinAnotherStream(
+  node: ReduxNode,
+  branchLabelKey: string,
+): boolean {
   // if the current node is a stream start then it's not _within_ another stream, for this definition of _within_
   if (node?.branch_attrs?.labels?.[branchLabelKey]) return false;
   let n = node.parent;
@@ -400,7 +432,13 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
  * (e.g. the pivots go back further in time than the parent node date).
  * Extending too far to the right can make it look like every stream has gradually died out.
  */
-function restrictPivots(pivots: number[], domain:[number,number], parentPosition: number, sigma:number, cutoff:number): number[] {
+function restrictPivots(
+  pivots: number[],
+  domain: [number,number],
+  parentPosition: number,
+  sigma: number,
+  cutoff: number,
+): number[] {
   let min = domain[0] - sigma*cutoff;
   if (min<parentPosition) min=parentPosition; // stops pivots (and therefore streams) going to the left of the connecting branch
   const max = domain[1] + sigma*cutoff;
@@ -408,7 +446,10 @@ function restrictPivots(pivots: number[], domain:[number,number], parentPosition
 }
 
 
-export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDefinedStreamLabels: undefined|string[]): string[] {
+export function availableStreamLabelKeys(
+  availableBranchLabels: string[],
+  jsonDefinedStreamLabels: undefined | string[],
+): string[] {
 
   if (jsonDefinedStreamLabels) {
     const labels = jsonDefinedStreamLabels.filter((l) => availableBranchLabels.includes(l));

@@ -3,8 +3,9 @@ import { processStreams, labelStreamMembership, isNodeWithinAnotherStream } from
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
 import { warningNotification } from "./notifications";
+import { ThunkFunction } from "../store";
 
-export function toggleStreamTree() {
+export function toggleStreamTree(): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
     const showStreamTrees = !controls.showStreamTrees; // new state
@@ -44,7 +45,7 @@ export function toggleStreamTree() {
 } 
 
 
-export function changeStreamTreeBranchLabel(newLabel) {
+export function changeStreamTreeBranchLabel(newLabel: string): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
 
