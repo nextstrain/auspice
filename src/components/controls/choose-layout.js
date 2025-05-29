@@ -58,8 +58,8 @@ const ScatterSelectContainer = styled.div`
     scatterVariables: state.controls.scatterVariables,
     colorings: state.metadata.colorings,
     colorBy: state.controls.colorBy,
-    showStreamTrees: state.controls.showStreamTrees,
     showTreeToo: state.controls.showTreeToo,
+    streamTreesToggledOn: state.controls.showStreamTrees,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
 })
@@ -131,10 +131,6 @@ class ChooseLayout extends React.Component {
     const { t } = this.props;
     if (this.props.showTreeToo) return null;
 
-    /* The initial implementation of streamtrees only works for rectangular trees,
-    so disable the ability to change tree layout when we're viewing them for now */
-    if (this.props.showStreamTrees) return null;
-
     const selected = this.props.layout;
     return (
       <div style={{marginBottom: 15}}>
@@ -142,44 +138,56 @@ class ChooseLayout extends React.Component {
           {t("sidebar:Layout")}
         </SidebarSubtitle>
         <RowContainer>
-          <RectangularTreeIcon width={25} selected={selected === "rect"}/>
-          <SidebarButton
-            selected={selected === "rect"}
-            onClick={() => this.props.dispatch(changeLayout({layout: "rect"}))}
-          >
-            {t("sidebar:rectangular")}
-          </SidebarButton>
+          <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>
+            <RectangularTreeIcon width={25} selected={selected === "rect"}/>
+            <SidebarButton
+              selected={selected === "rect"}
+              onClick={() => this.props.dispatch(changeLayout({layout: "rect"}))}
+              disabled={this.props.streamTreesToggledOn}
+            >
+              {t("sidebar:rectangular")}
+            </SidebarButton>
+          </div>
         </RowContainer>
         <RowContainer>
-          <RadialTreeIcon width={25} selected={selected === "radial"}/>
-          <SidebarButton
-            selected={selected === "radial"}
-            onClick={() => this.props.dispatch(changeLayout({layout: "radial"}))}
-          >
-            {t("sidebar:radial")}
-          </SidebarButton>
+          <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>
+            <RadialTreeIcon width={25} selected={selected === "radial"}/>
+            <SidebarButton
+              selected={selected === "radial"}
+              onClick={() => this.props.dispatch(changeLayout({layout: "radial"}))}
+              disabled={this.props.streamTreesToggledOn}
+            >
+              {t("sidebar:radial")}
+            </SidebarButton>
+          </div>
         </RowContainer>
         <RowContainer>
-          <UnrootedTreeIcon width={25} selected={selected === "unrooted"}/>
-          <SidebarButton
-            selected={selected === "unrooted"}
-            onClick={() => this.props.dispatch(changeLayout({layout: "unrooted"}))}
-          >
-            {t("sidebar:unrooted")}
-          </SidebarButton>
+          <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>
+            <UnrootedTreeIcon width={25} selected={selected === "unrooted"}/>
+            <SidebarButton
+              selected={selected === "unrooted"}
+              onClick={() => this.props.dispatch(changeLayout({layout: "unrooted"}))}
+              disabled={this.props.streamTreesToggledOn}
+            >
+              {t("sidebar:unrooted")}
+            </SidebarButton>
+          </div>
         </RowContainer>
         { /* Show clock view only if both time and divergence are defined for the tree */ }
         {
           this.props.branchLengthsToDisplay === "divAndDate" ?
             (
               <RowContainer>
-                <ClockIcon width={25} selected={selected === "clock"}/>
-                <SidebarButton
-                  selected={selected === "clock"}
-                  onClick={() => this.props.dispatch(changeLayout({layout: "clock"}))}
-                >
-                  {t("sidebar:clock")}
-                </SidebarButton>
+                <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>
+                  <ClockIcon width={25} selected={selected === "clock"}/>
+                  <SidebarButton
+                    selected={selected === "clock"}
+                    onClick={() => this.props.dispatch(changeLayout({layout: "clock"}))}
+                    disabled={this.props.streamTreesToggledOn}
+                  >
+                    {t("sidebar:clock")}
+                  </SidebarButton>
+                </div>
                 {selected==="clock" && this.renderBranchToggle()}
                 {selected==="clock" && this.renderRegressionToggle()}
               </RowContainer>
@@ -188,13 +196,16 @@ class ChooseLayout extends React.Component {
         }
         { /* Scatterplot view -- when selected this shows x & y dropdown selectors etc */ }
         <RowContainer>
-          <ScatterIcon width={25} selected={selected === "scatter"}/>
-          <SidebarButton
-            selected={selected === "scatter"}
-            onClick={() => this.props.dispatch(changeLayout({layout: "scatter"}))}
-          >
-            {t("sidebar:scatter")}
-          </SidebarButton>
+          <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>
+            <ScatterIcon width={25} selected={selected === "scatter"}/>
+            <SidebarButton
+              selected={selected === "scatter"}
+              onClick={() => this.props.dispatch(changeLayout({layout: "scatter"}))}
+              disabled={this.props.streamTreesToggledOn}
+            >
+              {t("sidebar:scatter")}
+            </SidebarButton>
+          </div>
           {selected==="scatter" && this.renderScatterplotAxesSelector()}
           {selected==="scatter" && this.renderBranchToggle()}
           {selected==="scatter" && this.renderRegressionToggle()}
@@ -206,4 +217,3 @@ class ChooseLayout extends React.Component {
 
 const WithTranslation = withTranslation()(ChooseLayout);
 export default WithTranslation;
-

@@ -73,7 +73,7 @@ export const SidebarButton = styled.button`
   background-color: inherit;
   margin: 5px 5px 10px 5px;
   border-radius: 2px;
-  cursor: pointer;
+  cursor: ${(props) => props.disabled ? 'not-allowed' : 'pointer'}!important;
   padding: 2px;
   font-family: ${(props) => props.theme["font-family"]};
   color: ${(props) => props.selected ? props.theme.selectedColor : props.theme.unselectedColor};

@@ -19,9 +19,9 @@ export function ToggleFocus(): JSX.Element {
 
   // Focus functionality is only available to layouts that have the concept of a unitless y-axis
   const validLayouts = new Set(["rect", "radial"]);
-  if (!validLayouts.has(layout) || streamTreesToggledOn) return <></>;
+  const disabled = !validLayouts.has(layout) || streamTreesToggledOn;
 
-  const text = t("sidebar:Focus on selected");
+  const text = disabled ? t("sidebar:Focus on selected unavailable") : t("sidebar:Focus on selected");
   const label = (
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>{text}</span>
@@ -43,7 +43,8 @@ export function ToggleFocus(): JSX.Element {
   return (
     <Toggle
       display
-      on={focus === "selected"}
+      on={focus === "selected" && !disabled}
+      disabled={disabled}
       callback={(): void => {
         const valueAfterToggling = focus === "selected" ? null : "selected";
 
