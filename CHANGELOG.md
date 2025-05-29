@@ -6,6 +6,7 @@
 * Datasets can define `display_defaults.label` to specify the starting zoom level of a tree, similarly to the `?label=...` URL query. ([#1952](https://github.com/nextstrain/auspice/pull/1952))
 * The tree's "Reset Layout" button has been renamed "Zoom to Root". ([#1952](https://github.com/nextstrain/auspice/pull/1952))
 * Removed the experimental markers from "Focus on selected" and "Explode Tree By" options. These seem to be working well. ([#1954](https://github.com/nextstrain/auspice/issues/1954))
+* Toggling "Focus on selected" now updates the URL parameter `focus=selected`. URLs with this parameter can be shared to enable focus on initial page load. ([#1955](https://github.com/nextstrain/auspice/issues/1955))
 * Added Chinese language support. ([#1959](https://github.com/nextstrain/auspice/pull/1959))
 * Added flexibility to the way the "Built with …" sentence can be translated. ([#1964](https://github.com/nextstrain/auspice/pull/1964))
 * Dropped support for Node.JS versions 16 & 18 and their corresponding NPM versions (7 & 8). ([#1975](https://github.com/nextstrain/auspice/pull/1975))

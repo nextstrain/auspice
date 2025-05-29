@@ -67,6 +67,13 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
+
+  if (query.focus && query.focus !== "selected") {
+    console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
+    delete query.focus;
+  }
+  state["focus"] = query.focus === undefined ? null : query.focus;
+
   if (query.ci === undefined) {
     state["temporalConfidence"]["on"] = false;
   } else {

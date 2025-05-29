@@ -89,10 +89,10 @@ export const changePhyloTreeViaPropsComparison = (
     args.updateLayout = true;
   }
   /* re-focus on changes */
-  else if (oldProps.focus === true &&
-           newProps.focus === true &&
+  else if (oldProps.focus === "selected" &&
+           newProps.focus === "selected" &&
            (zoomChange || dateRangeChange || filterChange)) {
-    args.focus = true;
+    args.focus = "selected";
     args.updateLayout = true;
   }
 

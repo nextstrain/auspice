@@ -3,14 +3,14 @@ import { connect } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
 import Toggle from "./toggle";
 import { SidebarIconContainer, StyledTooltip } from "./styles";
-import { TOGGLE_FOCUS } from "../../actions/types";
-import { Layout } from "../../reducers/controls";
+import { SET_FOCUS } from "../../actions/types";
+import { Layout, Focus } from "../../reducers/controls";
 import { AppDispatch, RootState } from "../../store";
 
 
 function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, mobileDisplay,  }: {
   tooltip: React.ReactElement;
-  focus: boolean;
+  focus: Focus;
   layout: Layout;
   streamTreesToggledOn: boolean;
   dispatch: AppDispatch;
@@ -39,8 +39,15 @@ function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, m
   return (
     <Toggle
       display
-      on={focus}
-      callback={() => dispatch({ type: TOGGLE_FOCUS })}
+      on={focus === "selected"}
+      callback={() => {
+        const valueAfterToggling = focus === "selected" ? null : "selected";
+
+        return dispatch({
+          type: SET_FOCUS,
+          focus: valueAfterToggling,
+        });
+      }}
       label={label}
       style={{ paddingBottom: "10px" }}
     />

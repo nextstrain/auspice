@@ -1,5 +1,5 @@
 import { WithTranslation } from "react-i18next"
-import { ColorScale, Layout, PerformanceFlags, ScatterVariables, SelectedNode, TemporalConfidence } from "../../reducers/controls";
+import { ColorScale, Focus, Layout, PerformanceFlags, ScatterVariables, SelectedNode, TemporalConfidence } from "../../reducers/controls";
 import { TreeState, TreeTooState } from "../../reducers/tree/types";
 import { AppDispatch } from "../../store";
 import { Distance, PhyloNode, PhyloTreeType } from "./phyloTree/types";
@@ -26,7 +26,7 @@ export interface TreeComponentStateProps {
   distanceMeasure: Distance
   explodeAttr: string
   filters: Record<string, Array<{ value: string, active: boolean }>>
-  focus: boolean
+  focus: Focus
   genomeMap: unknown
   layout: Layout
   narrativeMode: boolean

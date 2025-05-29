@@ -38,6 +38,8 @@ export interface Genotype {
 
 export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
 
+export type Focus = "selected" | null
+
 export type LegendBounds = {
   [key: string | number]: [number, number]
 }
@@ -92,7 +94,7 @@ export interface TemporalConfidence {
 interface Defaults {
   distanceMeasure: Distance
   layout: Layout
-  focus: boolean
+  focus: Focus
   geoResolution: string
   filters: Record<string, unknown>
   filtersInFooter: string[]
@@ -132,7 +134,7 @@ export interface BasicControlsState {
   explodeAttr?: string
   filters: Record<string | symbol, Array<{ value: string, active: boolean }>>
   filtersInFooter: string[]
-  focus: boolean
+  focus: Focus
   geoResolution: string
   layout: Layout
   mapAnimationCumulative: boolean
@@ -340,8 +342,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return Object.assign({}, state, updatesToState);
     }
-    case types.TOGGLE_FOCUS: {
-      return {...state, focus: !state.focus}
+    case types.SET_FOCUS: {
+      return {...state, focus: action.focus}
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };
