@@ -13,6 +13,7 @@ import Toggle from "./toggle";
     layout: state.controls.layout,
     showTreeToo: state.controls.showTreeToo,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    streamTreesToggledOn: state.controls.showStreamTrees,
     temporalConfidence: state.controls.temporalConfidence
   };
 })
@@ -53,7 +54,7 @@ class ChooseMetric extends React.Component {
           null : (
             <div style={{marginBottom: 8}}>
               <Toggle
-                display={this.props.temporalConfidence.display}
+                display={this.props.temporalConfidence.display && !this.props.streamTreesToggledOn}
                 on={this.props.temporalConfidence.on}
                 callback={() => this.props.dispatch(toggleTemporalConfidence())}
                 label={t("sidebar:Show confidence intervals")}

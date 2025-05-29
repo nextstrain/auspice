@@ -658,8 +658,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
 
   /* temporalConfidence */
   if (
-    shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout) &&
-    !state.showStreamTrees // stream trees on => we toggle CIs off
+    shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)
   ) {
     state.temporalConfidence.display = true;
   } else {

@@ -480,11 +480,9 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       }
       return state;
     case types.TOGGLE_STREAM_TREE:
-      return {...state, showStreamTrees: action.showStreamTrees,
-        temporalConfidence: {exists: state.temporalConfidence.exists, on: false, display: !action.showStreamTrees}};
+      return {...state, showStreamTrees: action.showStreamTrees};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
-      return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true,
-        temporalConfidence: {exists: state.temporalConfidence.exists, on: false, display: false}};
+      return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true};
     case types.TOGGLE_SIDEBAR:
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
