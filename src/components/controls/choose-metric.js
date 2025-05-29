@@ -24,6 +24,9 @@ class ChooseMetric extends React.Component {
     if (this.props.layout==="scatter" || this.props.layout==="clock") return null;
     /* this used to be added to the first SidebarSubtitle
     const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {}; */
+
+    const temporalConfidenceDisabled = this.props.streamTreesToggledOn;
+    const temporalConfidenceLabel = temporalConfidenceDisabled ? t("sidebar:Confidence intervals disabled") : t("sidebar:Show confidence intervals")
     return (
       <div style={{marginBottom: 0}}>
         <SidebarSubtitle>
@@ -54,10 +57,11 @@ class ChooseMetric extends React.Component {
           null : (
             <div style={{marginBottom: 8}}>
               <Toggle
-                display={this.props.temporalConfidence.display && !this.props.streamTreesToggledOn}
+                display={this.props.temporalConfidence.display}
                 on={this.props.temporalConfidence.on}
+                disabled={temporalConfidenceDisabled}
                 callback={() => this.props.dispatch(toggleTemporalConfidence())}
-                label={t("sidebar:Show confidence intervals")}
+                label={temporalConfidenceLabel}
               />
             </div>
           )
