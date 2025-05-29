@@ -1,6 +1,5 @@
 name: auspice-docs
 channels:
-  - defaults
   - conda-forge
 dependencies:
   - make
