@@ -40,7 +40,7 @@ export const ChooseStreamTrees = (): JSX.Element => {
 
   return (
     <div>
-      <div style={{marginLeft: 0, marginTop: 15, marginBottom: streamTreesToggledOn ? 10 : 15}}>
+      <div style={{marginBottom: 8 }}>
         <Toggle
           display
           isExperimental

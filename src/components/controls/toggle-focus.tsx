@@ -53,7 +53,7 @@ export function ToggleFocus(): JSX.Element {
         });
       }}
       label={label}
-      style={{ paddingBottom: "10px" }}
+      style={{ marginBottom: 8 }}
     />
   );
 }
