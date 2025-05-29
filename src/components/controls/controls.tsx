@@ -67,8 +67,8 @@ function Controls(): JSX.Element {
           options={<>
             <ChooseLayout />
             <ChooseMetric />
-            <ChooseStreamTrees />
             <ToggleFocus />
+            <ChooseStreamTrees />
             <ChooseBranchLabelling />
             <ChooseTipLabel />
             <ChooseSecondTree />
