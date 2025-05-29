@@ -82,8 +82,8 @@ function Label(
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>
         {unavailable.length ? 
-          t("sidebar:Stream trees unavailable") :
-          t("sidebar:Show stream trees")}
+          t("sidebar:Streamtrees unavailable") :
+          t("sidebar:Show streamtrees")}
       </span>
       <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-stream-trees">
         <FaInfoCircle />
