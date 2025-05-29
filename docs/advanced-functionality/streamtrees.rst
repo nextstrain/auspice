@@ -24,7 +24,7 @@ Dataset requirements
 
 Streamtrees are created by using (internal) branch labels to partition the data, with all nodes below each label being displayed as streamtrees, one per label. A dataset can be displayed with "normal" nodes as well as streamtrees if the label does not appear on the root node. Multiple labels can be defined for a tree and a drop-down allows us to change the label in use.
 
-You may use the :ref:`display default <dataset-configurable-defaults>` ``stream_labels`` or :ref:`URL query <url-query-options>` ``streamLabel`` to start with streamtrees displayed using a specific label. Similarly you may set the (optional) JSON value ``.meta.stream_labels: string[]`` to limit the branch labels that are considered for streamtrees.
+You may use the :ref:`display default <dataset-configurable-defaults>` ``stream_label`` or :ref:`URL query <url-query-options>` ``streamLabel`` to start with streamtrees displayed using a specific label. Similarly you may set the (optional) JSON value ``.meta.stream_labels: string[]`` to limit the branch labels that are considered for streamtrees.
 
 Note: It is possible to create datasets which have labels for which there are no associated tips (as all descendent tips get assigned to other labels). Rendering of streamtrees is not perfect with such datasets as we don't render the internal-only streamtree and thus there's a visual break between connected streamtrees.
 
