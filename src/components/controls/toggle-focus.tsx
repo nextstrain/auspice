@@ -40,10 +40,10 @@ function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, m
     <Toggle
       display
       on={focus === "selected"}
-      callback={() => {
+      callback={(): void => {
         const valueAfterToggling = focus === "selected" ? null : "selected";
 
-        return dispatch({
+        dispatch({
           type: SET_FOCUS,
           focus: valueAfterToggling,
         });
