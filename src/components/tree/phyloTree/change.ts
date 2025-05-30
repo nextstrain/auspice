@@ -41,34 +41,34 @@ const updateNodesWithNewData = (
 const svgSetters = {
   attrs: {
     ".tip": {
-      r: (d: PhyloNode) => d.r,
-      cx: (d: PhyloNode) => d.xTip,
-      cy: (d: PhyloNode) => d.yTip
+      r: (d: PhyloNode): number => d.r,
+      cx: (d: PhyloNode): number => d.xTip,
+      cy: (d: PhyloNode): number => d.yTip
     },
     ".branch": {
     },
     ".vaccineCross": {
-      d: (d: PhyloNode) => d.vaccineCross
+      d: (d: PhyloNode): string => d.vaccineCross
     },
     ".conf": {
-      d: (d: PhyloNode) => d.confLine
+      d: (d: PhyloNode): string => d.confLine
     }
   },
   styles: {
     ".tip": {
-      fill: (d: PhyloNode) => d.fill,
-      stroke: (d: PhyloNode) => d.tipStroke,
-      visibility: (d: PhyloNode) => d.visibility === NODE_VISIBLE ? "visible" : "hidden"
+      fill: (d: PhyloNode): string => d.fill,
+      stroke: (d: PhyloNode): string => d.tipStroke,
+      visibility: (d: PhyloNode): "visible" | "hidden" => d.visibility === NODE_VISIBLE ? "visible" : "hidden"
     },
     ".conf": {
-      stroke: (d: PhyloNode) => d.branchStroke,
+      stroke: (d: PhyloNode): string => d.branchStroke,
       "stroke-width": calcConfidenceWidth
     },
     // only allow stroke to be set on individual branches
     ".branch": {
-      "stroke-width": (d: PhyloNode) => d["stroke-width"] + "px", // style - as per drawBranches()
-      stroke: (d: PhyloNode) => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
-      cursor: (d: PhyloNode) => d.visibility === NODE_VISIBLE ? "pointer" : "default",
+      "stroke-width": (d: PhyloNode): string => d["stroke-width"] + "px", // style - as per drawBranches()
+      stroke: (d: PhyloNode): string => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
+      cursor: (d: PhyloNode): "pointer" | "default" => d.visibility === NODE_VISIBLE ? "pointer" : "default",
       visibility: getBranchVisibility
     }
   }
@@ -151,12 +151,12 @@ export const modifySVG = function modifySVG(
     ST.forEach((x, STidx) => {
       if (elemsToUpdate.has(`.branch${x}`)) {
         if (applyBranchPropsAlso) {
-          updateCall = (selection) => {
+          updateCall = (selection): void => {
             createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
             selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
           };
         } else {
-          updateCall = (selection) => {
+          updateCall = (selection): void => {
             selection.attr("d", (d) => d.branch[STidx]);
           };
         }
@@ -241,7 +241,7 @@ export const modifySVGInStages = function modifySVGInStages(
   this.hideGrid();
   let inProgress = 0; /* counter of transitions currently in progress */
 
-  const step3 = () => {
+  const step3 = (): void => {
     this.drawBranches();
     if (this.params.showGrid) this.addGrid();
     this.svg.selectAll(".tip").remove();
@@ -257,7 +257,7 @@ export const modifySVGInStages = function modifySVGInStages(
   };
 
   /* STEP 2: move tips */
-  const step2 = () => {
+  const step2 = (): void => {
     if (!--inProgress) { /* decrement counter. When hits 0 run block */
       this.setClipMask();
       const updateTips = createUpdateCall(".tip", svgPropsToUpdate);

@@ -11,7 +11,7 @@ import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
 import { SidebarSubtitle } from "./styles";
 
-export const ChooseStreamTrees = () => {
+export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
   const streamTreeBranchLabel = useSelector((state: RootState) => state.controls.streamTreeBranchLabel);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
@@ -51,7 +51,7 @@ export const ChooseStreamTrees = () => {
           isExperimental
           on={streamTreesToggledOn}
           disabled={unavailable.length>0}
-          callback={() => dispatch(toggleStreamTree())}
+          callback={(): void => dispatch(toggleStreamTree())}
           label={<Label t={t} toggleOn={streamTreesToggledOn} unavailable={unavailable}/>}
         />
       </div>
@@ -70,7 +70,7 @@ export const ChooseStreamTrees = () => {
               isClearable={false}
               isSearchable={false}
               isMulti={false}
-              onChange={(value) => dispatch(changeStreamTreeBranchLabel(value.value))}
+              onChange={(value): void => dispatch(changeStreamTreeBranchLabel(value.value))}
             />
           </div>
         </div>
@@ -82,7 +82,7 @@ export const ChooseStreamTrees = () => {
 
 function Label(
   {t, toggleOn, unavailable}: {t, toggleOn: boolean, unavailable: string[]}
-) {
+): JSX.Element {
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>

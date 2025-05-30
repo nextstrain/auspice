@@ -19,7 +19,7 @@ type Props = {
  * A title and tooltip to be shown in a control header.
  * The tooltip is not shown on mobile.
  */
-export const AnnotatedTitle = ({title, tooltip=undefined}: Props) => {
+export const AnnotatedTitle = ({title, tooltip=undefined}: Props): JSX.Element => {
   const mobile = useSelector((state: RootState) => state.general.mobileDisplay);
 
   return (
@@ -29,7 +29,7 @@ export const AnnotatedTitle = ({title, tooltip=undefined}: Props) => {
         <>
           <HeaderIconContainer data-tip data-for={title}
             // Don't allow any parent onClick callbacks to run.
-            onClick={(event) => event.stopPropagation()}>
+            onClick={(event): void => event.stopPropagation()}>
             <FaInfoCircle/>
           </HeaderIconContainer>
           <StyledTooltip place="bottom" type="dark" effect="solid" id={title}>

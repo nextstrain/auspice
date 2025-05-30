@@ -81,7 +81,7 @@ export const render = function render(
   measurementsColorGrouping: string | undefined
 
   streams: Record<string, StreamSummary>
-}) {
+}): void {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = {
@@ -420,7 +420,7 @@ cause the branches to not appear, we're falling back to the previous solution wh
 doesn't use gradients. Calls to `updateColorBy` are therefore unnecessary.
                                                                 James, April 4 2020. */
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-export const updateColorBy = function updateColorBy() {};
+export const updateColorBy = function updateColorBy(): void {};
 // export const updateColorBy = function updateColorBy() {
 //   // console.log("updating colorBy")
 //   this.nodes.forEach((d) => {
@@ -485,12 +485,12 @@ const handleBranchHoverColor = (
   }
 };
 
-export const branchStrokeForLeave = function branchStrokeForLeave(d: PhyloNode) {
+export const branchStrokeForLeave = function branchStrokeForLeave(d: PhyloNode): void {
   if (!d) { return; }
   handleBranchHoverColor(d, d.n.parent.shell.branchStroke, d.branchStroke);
 };
 
-export const branchStrokeForHover = function branchStrokeForHover(d: PhyloNode) {
+export const branchStrokeForHover = function branchStrokeForHover(d: PhyloNode): void {
   if (!d) { return; }
   handleBranchHoverColor(d, getEmphasizedColor(d.n.parent.shell.branchStroke), getEmphasizedColor(d.branchStroke));
 };

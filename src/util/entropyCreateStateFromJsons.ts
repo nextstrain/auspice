@@ -183,7 +183,7 @@ export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
   return [chromosome];
 }
 
-export const entropyCreateState = (genomeAnnotations: UnknownJsonObject) => {
+export const entropyCreateState = (genomeAnnotations: UnknownJsonObject): unknown => {
   if (genomeAnnotations) {
     try {
       return {
@@ -201,12 +201,12 @@ export const entropyCreateState = (genomeAnnotations: UnknownJsonObject) => {
 };
 
 
-function validColor(color: string | undefined | unknown) {
+function validColor(color: string | undefined | unknown): false | string {
   if (typeof color !== "string") return false;
   return color; // TODO XXX
 }
 
-function* nextColorGenerator() {
+function* nextColorGenerator(): Generator<string> {
   let i=0;
   while (true) {
     yield genotypeColors[i++];

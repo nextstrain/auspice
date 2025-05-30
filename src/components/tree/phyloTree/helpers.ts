@@ -177,7 +177,7 @@ export const setDisplayOrder = ({
   const spaceBetweenSubtrees = _getSpaceBetweenSubtrees(numSubtrees, numTips);
 
   // No focus: 1 unit per node
-  let incrementer = (_node) => 1;
+  let incrementer = (_node): number => 1;
 
   if (focus === "selected") {
     const nVisible = nodes[0].n.tipCount;
@@ -192,7 +192,7 @@ export const setDisplayOrder = ({
     const yPerFocused = (yProportionFocused * nTotal) / nVisible;
     const yPerUnfocused = ((1 - yProportionFocused) * nTotal) / (nTotal - nVisible);
 
-    incrementer = (() => {
+    incrementer = ((): ((_node) => number) => {
       let previousWasVisible = false;
       return (node) => {
         // Focus if the current node is visible or if the previous node was visible (for symmetric padding)
@@ -341,7 +341,7 @@ export function getParentStream(node: ReduxNode): ReduxNode {
   }
 }
 
-function areNucleotideMutationsPresent(observedMutations) {
+function areNucleotideMutationsPresent(observedMutations): boolean {
   const mutList = Object.keys(observedMutations);
   for (let idx=mutList.length-1; idx>=0; idx--) { // start at end, as nucs come last in the key-insertion order
     if (mutList[idx].startsWith("nuc:")) {

@@ -31,7 +31,7 @@ import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
 
-function Controls() {
+function Controls(): JSX.Element {
   const { t } = useTranslation();
 
   const panelsAvailable = useSelector((state: RootState) => state.controls.panelsAvailable);

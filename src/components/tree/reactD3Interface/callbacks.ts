@@ -192,7 +192,7 @@ export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryInde
 }
 
 
-function selectStreamLabel(node: PhyloNode) {
+function selectStreamLabel(node: PhyloNode): Selection<SVGTextElement, LabelDatum, null, unknown> {
   // When `groups.streamsLabels` is created we haven't bound any data so it's datum type is `unknown`
   // We subsequently bind `LabelDatum` elements, but we can't change the underlying type without an assertion
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

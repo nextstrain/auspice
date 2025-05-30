@@ -50,20 +50,20 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     this.clearSelectedNode = callbacks.clearSelectedNode.bind(this);
   }
 
-  redrawTree = () => {
+  redrawTree = (): void => {
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
       root: [0, 0]
     }));
   }
 
   /* pressing the escape key should dismiss an info modal (if one exists) */
-  handlekeydownEvent = (event: KeyboardEvent) => {
+  handlekeydownEvent = (event: KeyboardEvent): void => {
     if (event.key==="Escape" && this.props.selectedNode) {
       this.clearSelectedNode(this.props.selectedNode);
     }
   }
 
-  setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>) {
+  setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>): void {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
     newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
@@ -73,7 +73,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     renderTree(this, false, newState.treeToo, props);
   }
 
-  override componentDidMount() {
+  override componentDidMount(): void {
     document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
@@ -87,7 +87,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     }
   }
 
-  override componentDidUpdate(prevProps: TreeComponentProps) {
+  override componentDidUpdate(prevProps: TreeComponentProps): void {
     let newState: Partial<TreeComponentState> = {};
     let rightTreeUpdated = false;
 
@@ -124,7 +124,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     if (Object.keys(newState).length) this.setState<never>(newState);
   }
 
-  override componentWillUnmount() {
+  override componentWillUnmount(): void {
     document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
@@ -183,7 +183,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     width: number
     height: number
     mainTree: boolean
-  }) {
+  }): JSX.Element {
     return (
       <svg
         id="d3treeParent"
@@ -199,20 +199,20 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
             id={mainTree ? "MainTree" : "SecondTree"}
             width={width}
             height={height}
-            ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
+            ref={(c): void => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
           />
         </g></g></g></g>
       </svg>
     );
   }
 
-  zoomToSelected = () => {
+  zoomToSelected = (): void => {
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
       root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
     }));
   };
 
-  zoomBack = () => {
+  zoomBack = (): void => {
     const root: Root = [undefined, undefined];
     // Zoom out of main tree if index of root node is not 0
     if (this.props.tree.idxOfInViewRootNode !== 0) {
@@ -232,7 +232,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
   }
 
-  override render() {
+  override render(): JSX.Element {
     const { t } = this.props;
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
@@ -266,7 +266,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
-            ref={(r) => {this.tangleRef = r;}}
+            ref={(r): void => {this.tangleRef = r;}}
             width={this.props.width}
             height={this.props.height}
             lookup={this.props.treeToo.tangleTipLookup}

@@ -15,7 +15,7 @@ function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, m
   streamTreesToggledOn: boolean;
   dispatch: AppDispatch;
   mobileDisplay: boolean;
-}) {
+}): JSX.Element {
   // Focus functionality is only available to layouts that have the concept of a unitless y-axis
   const validLayouts = new Set(["rect", "radial"]);
   if (!validLayouts.has(layout) || streamTreesToggledOn) return <></>;

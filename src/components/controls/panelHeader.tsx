@@ -30,14 +30,14 @@ type Props = {
 /**
  * A header used by all panel controls, containing an interactive title.
  */
-export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions, optionsAreVisible, setOptionsAreVisible }: Props) => {
+export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions, optionsAreVisible, setOptionsAreVisible }: Props): JSX.Element => {
   const dispatch = useAppDispatch();
 
-  function togglePanelVisibility() {
+  function togglePanelVisibility(): void {
     dispatch(togglePanelDisplay(panel))
   }
 
-  function toggleOptionsVisibility() {
+  function toggleOptionsVisibility(): void {
     setOptionsAreVisible(!optionsAreVisible);
   }
 
@@ -57,7 +57,7 @@ export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions,
       </span>
       <span
         // Don't allow the parent click handler to do anything here.
-        onClick={(event) => event.stopPropagation()}>
+        onClick={(event): void => event.stopPropagation()}>
         <Toggle
           display={true}
           on={panelIsVisible}

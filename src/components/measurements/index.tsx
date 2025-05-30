@@ -153,7 +153,7 @@ const filterMeasurements = (
   };
 };
 
-const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
+const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Element => {
   const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
@@ -385,14 +385,14 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}) => {
   );
 };
 
-const Measurements = ({height, width, showLegend}) => {
+const Measurements = ({height, width, showLegend}): JSX.Element => {
   const measurementsLoaded = useSelector((state: RootState) => state.measurements.loaded);
   const measurementsError = useSelector((state: RootState) => state.measurements.error);
   const showOnlyPanels = useSelector((state: RootState) => state.controls.showOnlyPanels);
 
   const [title, setTitle] = useState("Measurements");
 
-  const getCardTitleStyle = () => {
+  const getCardTitleStyle = (): CSSProperties => {
     /**
      * Additional styles of Card title forces it to be in one line and display
      * ellipsis if the title is too long to prevent the long title from pushing
