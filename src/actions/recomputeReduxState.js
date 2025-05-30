@@ -24,7 +24,6 @@ import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
 import { processedStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
-import { updateStreams } from "./treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
