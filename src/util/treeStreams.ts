@@ -80,14 +80,15 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 }
 
 
-export function processStreams(
-  streams: Streams,
+export function processedStreams(
+  oldStreams: Streams,
   nodes: ReduxNode[],
   visibility: Visibility[],
   metric: "num_date"|"div",
   colorScale,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
-):void {
+): Streams {
+  const streams: Streams = structuredClone(oldStreams);
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
    */
@@ -185,6 +186,8 @@ export function processStreams(
     startNode.streamDimensions = dimensions;
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
   }
+
+  return streams;
 }
 
 

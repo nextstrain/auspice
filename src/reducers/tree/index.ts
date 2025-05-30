@@ -71,7 +71,7 @@ const Tree = (
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version,
       };
-    case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
+    case types.UPDATE_STREAMS:
       return {...state, streams: action.streams}
     case types.TREE_TOO_DATA:
       return action.tree;

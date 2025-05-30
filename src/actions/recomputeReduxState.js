@@ -23,7 +23,8 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
-import { processStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
+import { processedStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
+import { updateStreams } from "./treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -1111,7 +1112,7 @@ export const createStateFromQueryOrJSONs = ({
   if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
-      processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})
+      tree.streams = processedStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})
     }
   }
 

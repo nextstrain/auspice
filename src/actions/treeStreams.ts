@@ -1,9 +1,11 @@
-import { TOGGLE_STREAM_TREE, CHANGE_STREAM_TREE_BRANCH_LABEL } from "./types";
-import { processStreams, labelStreamMembership, isNodeWithinAnotherStream } from "../util/treeStreams";
+import { AnyAction } from "@reduxjs/toolkit";
+import { TOGGLE_STREAM_TREE, CHANGE_STREAM_TREE_BRANCH_LABEL, UPDATE_STREAMS } from "./types";
+import { processedStreams as processedStreams, labelStreamMembership, isNodeWithinAnotherStream } from "../util/treeStreams";
 import { ThunkFunction } from "../store";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
 import { warningNotification } from "./notifications";
+import { Streams } from "../reducers/tree/types";
 
 export function toggleStreamTree(): ThunkFunction {
   return function(dispatch, getState) {
@@ -39,7 +41,8 @@ export function toggleStreamTree(): ThunkFunction {
       return;
     }
 
-    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
+    const streams = processedStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
+    dispatch(updateStreams(streams));
     dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees})
   }
 } 
@@ -54,9 +57,14 @@ export function changeStreamTreeBranchLabel(newLabel): ThunkFunction {
       return;
     }
 
-    const streams = labelStreamMembership(tree.nodes[0], newLabel);
-    processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
+    const labeledStreams = labelStreamMembership(tree.nodes[0], newLabel);
+    const streams = processedStreams(labeledStreams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
-    dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
+    dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streamTreeBranchLabel: newLabel})
+    dispatch(updateStreams(streams))
   }
 }
+
+export function updateStreams(streams: Streams): AnyAction {
+  return {type: UPDATE_STREAMS, streams};
+} 
