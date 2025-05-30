@@ -50,14 +50,20 @@ These are exported as the (optional) property of the dataset JSON ``meta.display
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``transmission_lines``    | Should transmission lines (if available) be rendered on the map?      | Boolean                                            |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
-| ``stream_labels``         | Branch labels which are may be used to define stream trees            + ["clade"]                                          |
+| ``stream_label``          | Show streamtrees using this branch label ("none" starts toggled off)  | "none", "clade", "lineage" etc                     |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``language``              | Language to display Auspice in                                        | "ja"                                               |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``label``                 | Labelled branch that tree starts zoomed to                            | "Sublineage:J" or "clade:2a.3a"                    |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 
-Note that ``meta.display_defaults.panels`` (optional) differs from ``meta.panels`` (required), where the latter lists the possible panels that auspice may display for the dataset. See the `JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__ for more details.
+Certain other properties on the JSON's ``meta`` dictionary also affect the view settings.
+See the `JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__ for more details.
+
+* ``meta.panels`` (required) lists the possible panels that auspice may display for the dataset, whereas ``meta.display_defaults.panels`` (optional) controls which are toggled on by default.
+
+* ``meta.stream_labels`` (optional) defines the branch labels which can be used to define streamtrees. Use an empty array to disable the use of streamtrees. If this is not set then we will use all defined branch labels on the tree.
+
 
 **See this in action:**
 
