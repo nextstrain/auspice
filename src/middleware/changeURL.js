@@ -5,6 +5,7 @@ import { urlQueryLabel } from "../util/treeVisibilityHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
+import { getFilteredAndIdxOfFilteredRoot } from "../util/treeVisibilityHelpers";
 import { removeInvalidMeasurementsFilterQuery } from "../actions/measurements";
 
 export const strainSymbolUrlString = "__strain__";
@@ -197,6 +198,24 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       // NOTE: `idxOfInViewRootNode` refers to the left tree only (if 2 trees displayed)
       query.label = urlQueryLabel(state.tree.nodes[action.idxOfInViewRootNode], state.tree.availableBranchLabels)
+      /* The "zoom to selected" button will zoom to the `idxOfFilteredRoot` (i.e. its behaviour depends on the selected
+      filters). If the LHS tree is zoomed to this node, either by chance or by having clicked on the button, then set
+      this as query. Any other zoom/filtering action will remove it */
+      if (
+        /* if there's a label then don't use zoom-to-selected as the label is more specific */
+        query.label===undefined &&
+        /* The "zoom to selected" button will zoom us to the idxOfFilteredRoot, so check we're
+        there - either because we pressed the button or because we clicked that branch */
+        action.idxOfFilteredRoot===action.idxOfInViewRootNode &&
+        /* Ensure the filtered tips (across the entire tree) are _all_ downstream of the current zoomed node
+        i.e. the CA of filtered tips when the entire tree's in view is the same as the current zoom node. See
+        <https://github.com/nextstrain/auspice/pull/1321#issuecomment-2914923800> for more context. */
+        action.idxOfFilteredRoot===getFilteredAndIdxOfFilteredRoot(state.tree, state.controls, state.tree.nodes.map(() => true)).idxOfFilteredRoot
+      ) {
+        query.treeZoom="selected"; // using a string value allows for future expansion of functionality
+      } else {
+        query.treeZoom = undefined
+      }
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
