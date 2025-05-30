@@ -55,7 +55,7 @@ export const applyInViewNodesToTree = (
       d.inView = false;
     });
     /* note that we cannot use `applyToChildren` as that operates on PhyloNodes */
-    const _markChildrenInView = (node: ReduxNode) => {
+    const _markChildrenInView = (node: ReduxNode): void => {
       node.inView = true;
       if (node.children) {
         for (const child of node.children) _markChildrenInView(child);

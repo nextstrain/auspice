@@ -14,7 +14,7 @@ const HoverPanel = ({
   hoverData
 }: {
   hoverData: HoverData
-}) => {
+}): JSX.Element => {
   if (hoverData === null) return null;
   const { hoverTitle, mouseX, mouseY, containerId, data } = hoverData;
   const panelStyle: CSSProperties = {

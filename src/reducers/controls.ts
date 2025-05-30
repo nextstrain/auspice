@@ -290,7 +290,7 @@ export const defaultMeasurementsControlState: MeasurementsControlState = {
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
-export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => exists && distMeasure === "num_date" && layout === "rect";
+export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout): boolean => exists && distMeasure === "num_date" && layout === "rect";
 
 const Controls = (state: ControlsState = getDefaultControlsState(), action): ControlsState => {
   switch (action.type) {
@@ -551,7 +551,10 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
 
 export default Controls;
 
-function getInitialSidebarState() {
+function getInitialSidebarState(): {
+  sidebarOpen: boolean
+  setDefault: boolean
+} {
   return {
     sidebarOpen: window.innerWidth > controlsHiddenWidth,
     setDefault: false

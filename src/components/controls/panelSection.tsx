@@ -17,7 +17,7 @@ type Props = {
 /**
  * A controls section for panel-specific customization.
  */
-export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props) => {
+export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props): JSX.Element => {
 
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
 

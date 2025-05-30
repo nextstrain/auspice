@@ -237,7 +237,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     return streamCategories;
   }
 
-  const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n) => [n.arrayIdx, n.currentGt] : (n) => [n.arrayIdx, getTraitFromNode(n, colorBy)];
+  const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n): [number, string] => [n.arrayIdx, n.currentGt] : (n): [number, string|undefined] => [n.arrayIdx, getTraitFromNode(n, colorBy)];
   const nodesAndCategories: [number, string|undefined][] = nodes.map(getter);
   const orderedCategories = Array.from(new Set(nodesAndCategories.map((el) => el[1])))
     .sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b));

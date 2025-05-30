@@ -4,7 +4,7 @@ type Extensions = {
   [key: string]: any
 }
 
-const registry = (() => {
+const registry: Extensions = ((): Extensions => {
   if (!process.env.EXTENSION_DATA) {
     // console.log("no EXTENSION_DATA found");
     return {};
@@ -26,7 +26,7 @@ const registry = (() => {
 })();
 
 
-export const getExtension = (what: string) => {
+export const getExtension = (what: string): any | false => {
   if (registry[what]) {
     return registry[what];
   }
@@ -34,6 +34,6 @@ export const getExtension = (what: string) => {
   return false;
 };
 
-export const hasExtension = (what: string) => {
+export const hasExtension = (what: string): boolean => {
   return Object.keys(registry).includes(what);
 };

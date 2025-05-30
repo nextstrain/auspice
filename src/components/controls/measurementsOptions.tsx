@@ -37,7 +37,7 @@ const collectionOptionsSelector = (
   });
 };
 
-const MeasurementsOptions = () => {
+const MeasurementsOptions = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state: RootState) => collectionOptionsSelector(state.measurements.collections), isEqual);
@@ -71,7 +71,7 @@ const MeasurementsOptions = () => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt) => {
+          onChange={(opt): void => {
             dispatch(changeMeasurementsCollection(opt.value));
           }}
         />
@@ -88,7 +88,7 @@ const MeasurementsOptions = () => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt) => {dispatch(changeMeasurementsGroupBy(opt.value));}}
+          onChange={(opt): void => {dispatch(changeMeasurementsGroupBy(opt.value));}}
         />
       </div>
       <SidebarSubtitle>
@@ -96,13 +96,13 @@ const MeasurementsOptions = () => {
       </SidebarSubtitle>
       <SidebarButton
         selected={display === "mean"}
-        onClick={() => {dispatch(changeMeasurementsDisplay("mean"));}}
+        onClick={(): void => {dispatch(changeMeasurementsDisplay("mean"));}}
       >
         {"Mean ± SD"}
       </SidebarButton>
       <SidebarButton
         selected={display === "raw"}
-        onClick={() => {dispatch(changeMeasurementsDisplay("raw"));}}
+        onClick={(): void => {dispatch(changeMeasurementsDisplay("raw"));}}
       >
         {"Raw"}
       </SidebarButton>
@@ -111,7 +111,7 @@ const MeasurementsOptions = () => {
         display
         on={showOverallMean}
         label="Show overall mean ± SD"
-        callback={() => dispatch(toggleOverallMean())}
+        callback={(): void => dispatch(toggleOverallMean())}
       />
       <Toggle
         // Only display threshold toggle if the collection has a valid threshold
@@ -121,7 +121,7 @@ const MeasurementsOptions = () => {
         }
         on={showThreshold}
         label="Show measurement threshold(s)"
-        callback={() => dispatch(toggleThreshold())}
+        callback={(): void => dispatch(toggleThreshold())}
       />
     </div>
   );

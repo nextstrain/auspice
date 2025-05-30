@@ -52,7 +52,7 @@ function calculateRegressionWithFreeIntercept(nodes: PhyloNode[]): Regression {
 }
 
 /** sets this.regression  */
-export function calculateRegression(this: PhyloTreeType) {
+export function calculateRegression(this: PhyloTreeType): void {
   if (this.layout==="clock") {
     this.regression = calculateRegressionThroughRoot(this.nodes);
   } else {

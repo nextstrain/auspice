@@ -3,7 +3,7 @@ import { Mutations, ReduxNode, TreeState } from "../reducers/tree/types";
 import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
 import { calcFullTipCounts } from "./treeCountingHelpers";
 
-const pseudoRandomName = () => (Math.random()*1e32).toString(36).slice(0, 6);
+const pseudoRandomName = (): string => (Math.random()*1e32).toString(36).slice(0, 6);
 
 /**
  * Adds the following properties to each node:

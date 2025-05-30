@@ -31,20 +31,20 @@ class PanelErrorBoundary extends React.Component<Props, State> {
     super(props);
     this.state = { hasError: false, errorMessage: ''};
   }
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error): State {
     // Update state so the next render will show the fallback UI.
     return {
       hasError: true,
       errorMessage: error instanceof Error ? error.message : "Unknown error (thrown value was not an instance of Error)",
     };
   }
-  override componentDidCatch(error, info) {
+  override componentDidCatch(error, info): void {
     // You can also log the error to an error reporting service
     console.error(error);
     console.error(info);
   }
 
-  override render() {
+  override render(): React.ReactNode {
     if (!this.state.hasError) return this.props.children;
 
     /**

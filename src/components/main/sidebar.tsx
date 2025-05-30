@@ -11,7 +11,7 @@ import { RootState } from "../../store";
 
 export const Sidebar = (
   { width, height, displayNarrative, narrativeTitle, navBarHandler}
-) => {
+): JSX.Element => {
   const sidebarOpen = useSelector((state: RootState) => state.controls.sidebarOpen);
 
   return (

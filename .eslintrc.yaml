@@ -42,6 +42,11 @@ rules:
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
   quote-props: ["error", "as-needed"]
 
+overrides:
+  - files: ["*.ts", "*.tsx"]
+    rules:
+      "@typescript-eslint/explicit-function-return-type": "error"
+
 parserOptions:
   ecmaVersion: 6
   sourceType: module

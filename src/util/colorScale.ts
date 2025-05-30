@@ -240,7 +240,7 @@ function createOrdinalScale(
       console.warn("Using a continous scale as there are too many values in the ordinal scale");
       continuous = true;
       const scale = scaleLinear<string>().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
-      colorScale = (val) => isValueValid(val) ? scale(val): unknownColor;
+      colorScale = (val): string => isValueValid(val) ? scale(val): unknownColor;
       const spread = minMax[1] - minMax[0];
       const dp = spread > 5 ? 2 : 3;
       legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
@@ -353,7 +353,7 @@ function createTemporalScale(
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
-  const colorScale = (val) => {
+  const colorScale = (val): string => {
     const d = numDate(val);
     return d===undefined ? unknownColor : scale(d);
   };
@@ -389,7 +389,7 @@ function createListOfColors(
 
   /** the colours to go between */
   range: [string, string],
-) {
+): string[] {
   const scale = scaleLinear<string>().domain([0, n])
     .interpolate(interpolateHcl)
     .range(range);
@@ -483,7 +483,7 @@ export function createVisibleLegendValues({
   return legendValues.slice();
 }
 
-function createDiscreteScale(domain: string[], type: ScaleType) {
+function createDiscreteScale(domain: string[], type: ScaleType): ColorScale["scale"] {
   // note: colors[n] has n colors
   let colorList: string[];
   if (type==="ordinal" || type==="categorical") {
@@ -503,7 +503,7 @@ function booleanColorScale(val: unknown): string {
 }
 
 function createLegendBounds(legendValues: number[]): LegendBounds {
-  const valBetween = (x0: number, x1: number) => x0 + 0.5*(x1-x0);
+  const valBetween = (x0: number, x1: number): number => x0 + 0.5*(x1-x0);
   const len = legendValues.length;
   const legendBounds: LegendBounds = {};
   legendBounds[legendValues[0]] = [-Infinity, valBetween(legendValues[0], legendValues[1])];
