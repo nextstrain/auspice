@@ -90,6 +90,8 @@ function Label(
       </SidebarIconContainer>
       <StyledTooltip place="bottom" type="dark" effect="solid" id="toggle-stream-trees">
         <>
+          This functionality is experimental and should be treated with caution!
+          <p/>
           Stream trees allow parts of the tree to be summarised by a stream-graph,
           similar to the frequencies panel. This can be helpful to understand the broader
           dynamics within this part of the tree as well as allowing Auspice to display
