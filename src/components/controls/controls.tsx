@@ -18,15 +18,14 @@ import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
 import { PanelSection } from "./panelSection";
-import ToggleFocus from "./toggle-focus";
+import { ToggleFocus } from "./toggle-focus";
 import ToggleTangle from "./toggle-tangle";
 import { ChooseStreamTrees } from "./choose-stream-trees";
 import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
 import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
-  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo,
-  ToggleFocusInfo} from "./miscInfoText";
+  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
@@ -69,7 +68,7 @@ function Controls(): JSX.Element {
             <ChooseLayout />
             <ChooseMetric />
             <ChooseStreamTrees />
-            <ToggleFocus tooltip={ToggleFocusInfo} />
+            <ToggleFocus />
             <ChooseBranchLabelling />
             <ChooseTipLabel />
             <ChooseSecondTree />

@@ -1,21 +1,20 @@
 import React from "react";
-import { connect } from "react-redux";
+import { useSelector } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
 import Toggle from "./toggle";
 import { SidebarIconContainer, StyledTooltip } from "./styles";
 import { SET_FOCUS } from "../../actions/types";
-import { Layout, Focus } from "../../reducers/controls";
-import { AppDispatch, RootState } from "../../store";
+import { RootState } from "../../store";
+import { useAppDispatch } from "../../hooks";
 
 
-function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, mobileDisplay,  }: {
-  tooltip: React.ReactElement;
-  focus: Focus;
-  layout: Layout;
-  streamTreesToggledOn: boolean;
-  dispatch: AppDispatch;
-  mobileDisplay: boolean;
-}): JSX.Element {
+export function ToggleFocus(): JSX.Element {
+  const focus = useSelector((state: RootState) => state.controls.focus);
+  const layout = useSelector((state: RootState) => state.controls.layout);
+  const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
+  const dispatch = useAppDispatch();
+  const mobileDisplay = useSelector((state: RootState) => state.general.mobileDisplay);
+
   // Focus functionality is only available to layouts that have the concept of a unitless y-axis
   const validLayouts = new Set(["rect", "radial"]);
   if (!validLayouts.has(layout) || streamTreesToggledOn) return <></>;
@@ -23,13 +22,15 @@ function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, m
   const label = (
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>Focus on selected</span>
-      {tooltip && !mobileDisplay && (
+      {!mobileDisplay && (
         <>
           <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-focus">
             <FaInfoCircle />
           </SidebarIconContainer>
           <StyledTooltip place="bottom" type="dark" effect="solid" id="toggle-focus">
-            {tooltip}
+            When focusing on selected nodes, nodes that do not match the
+            filter will occupy less vertical space on the tree. Only applicable to
+            rectangular and radial layouts.
           </StyledTooltip>
         </>
       )}
@@ -53,10 +54,3 @@ function ToggleFocus({ tooltip, focus, layout, streamTreesToggledOn, dispatch, m
     />
   );
 }
-
-export default connect((state: RootState) => ({
-  focus: state.controls.focus,
-  layout: state.controls.layout,
-  mobileDisplay: state.general.mobileDisplay,
-  streamTreesToggledOn: state.controls.showStreamTrees,
-}))(ToggleFocus);
