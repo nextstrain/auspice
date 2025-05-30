@@ -23,7 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
-import { processStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
+import { processedStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -658,8 +658,7 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
 
   /* temporalConfidence */
   if (
-    shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout) &&
-    !state.showStreamTrees // stream trees on => we toggle CIs off
+    shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)
   ) {
     state.temporalConfidence.display = true;
   } else {
@@ -1112,7 +1111,7 @@ export const createStateFromQueryOrJSONs = ({
   if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
-      processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})
+      tree.streams = processedStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})
     }
   }
 

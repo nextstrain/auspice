@@ -15,7 +15,8 @@ import { PhyloNode } from "../components/tree/phyloTree/types";
 import { Metadata } from "../metadata";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState } from "../reducers/tree/types";
-import { processStreams } from "../util/treeStreams";
+import { processedStreams } from "../util/treeStreams";
+import { updateStreams } from "./treeStreams";
 
 type RootIndex = number | undefined
 
@@ -129,7 +130,8 @@ export const updateVisibleTipsAndBranchThicknesses = ({
 
     if (Object.keys(tree.streams).length) {
       // recomputes them even if they're toggled off
-      processStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
+      const streams = processedStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
+      dispatch(updateStreams(streams));
     }
 
     /* Changes in visibility require a recomputation of which legend items we wish to display */
@@ -212,7 +214,8 @@ export const changeDateFilter = ({
 
     if (Object.keys(tree.streams).length) {
       // recomputes them even if they're toggled off
-      processStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
+      const streams = processedStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
+      dispatch(updateStreams(streams));
     }
 
     /* D I S P A T C H */
@@ -485,7 +488,8 @@ export function changeDistanceMeasure(metric: "num_date"|"div"): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
     if (Object.keys(tree.streams).length) {
-      processStreams(tree.streams, tree.nodes, tree.visibility,  metric, controls.colorScale, {skipCategories: true})
+      const streams = processedStreams(tree.streams, tree.nodes, tree.visibility,  metric, controls.colorScale, {skipCategories: true})
+      dispatch(updateStreams(streams));
     }
     dispatch({type: types.CHANGE_DISTANCE_MEASURE, data: metric})
   }

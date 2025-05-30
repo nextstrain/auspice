@@ -9,7 +9,6 @@ import { FaInfoCircle } from "react-icons/fa";
 import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
-import { SidebarSubtitle } from "./styles";
 
 export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
@@ -35,17 +34,9 @@ export const ChooseStreamTrees = (): JSX.Element => {
     ...availableBranchLabels.map((x) => ({value: x, label: x}))
   ];
 
-  if (unavailable.length) {
-    return (
-      <SidebarSubtitle>
-        <Label t={t} toggleOn={streamTreesToggledOn} unavailable={unavailable}/>
-      </SidebarSubtitle>
-    )
-  }
-
   return (
     <div>
-      <div style={{marginLeft: 0, marginTop: 15, marginBottom: streamTreesToggledOn ? 10 : 15}}>
+      <div style={{marginBottom: 8 }}>
         <Toggle
           display
           isExperimental
@@ -87,14 +78,16 @@ function Label(
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>
         {unavailable.length ? 
-          t("sidebar:Stream trees unavailable") :
-          t("sidebar:Show stream trees")}
+          t("sidebar:Streamtrees unavailable") :
+          t("sidebar:Show streamtrees")}
       </span>
       <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-stream-trees">
         <FaInfoCircle />
       </SidebarIconContainer>
       <StyledTooltip place="bottom" type="dark" effect="solid" id="toggle-stream-trees">
         <>
+          This functionality is experimental and should be treated with caution!
+          <p/>
           Stream trees allow parts of the tree to be summarised by a stream-graph,
           similar to the frequencies panel. This can be helpful to understand the broader
           dynamics within this part of the tree as well as allowing Auspice to display
