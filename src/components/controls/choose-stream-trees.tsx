@@ -21,10 +21,14 @@ export const ChooseStreamTrees = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
-  /* Certain conditions mean we can't show stream trees. Rather than hiding the controls we show
-  a disabled toggle and an info-box explaining why they're not available */
+  /** Certain conditions mean we can't show stream trees. If the dataset doesn't support them
+   * (either because there are no branch labels on the tree or the dataset specifies an empty
+   * array of `stream_labels`) we don't show any streamtrees-related UI. If the dataset supports
+   * them but they're not available we show a disabled toggle and an info-box explanation
+   */
+  if (!availableBranchLabels.length) return null;
+
   const unavailable = []; // empty array means it is available
-  if (!availableBranchLabels.length) unavailable.push("No candidate branch labels are present on this tree");
   if (showTreeToo) unavailable.push("Two trees are being displayed");
   if (focusOn) unavailable.push("'Focus on selected' is on");
   if (!rectangular) unavailable.push("Tree layout is not rectangular");
