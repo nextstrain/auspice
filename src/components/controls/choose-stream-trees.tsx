@@ -9,7 +9,6 @@ import { FaInfoCircle } from "react-icons/fa";
 import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
-import { SidebarSubtitle } from "./styles";
 
 export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
@@ -22,10 +21,14 @@ export const ChooseStreamTrees = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
 
-  /* Certain conditions mean we can't show stream trees. Rather than hiding the controls we show
-  a disabled toggle and an info-box explaining why they're not available */
+  /** Certain conditions mean we can't show stream trees. If the dataset doesn't support them
+   * (either because there are no branch labels on the tree or the dataset specifies an empty
+   * array of `stream_labels`) we don't show any streamtrees-related UI. If the dataset supports
+   * them but they're not available we show a disabled toggle and an info-box explanation
+   */
+  if (!availableBranchLabels.length) return null;
+
   const unavailable = []; // empty array means it is available
-  if (!availableBranchLabels.length) unavailable.push("No candidate branch labels are present on this tree");
   if (showTreeToo) unavailable.push("Two trees are being displayed");
   if (focusOn) unavailable.push("'Focus on selected' is on");
   if (!rectangular) unavailable.push("Tree layout is not rectangular");
@@ -35,17 +38,9 @@ export const ChooseStreamTrees = (): JSX.Element => {
     ...availableBranchLabels.map((x) => ({value: x, label: x}))
   ];
 
-  if (unavailable.length) {
-    return (
-      <SidebarSubtitle>
-        <Label t={t} toggleOn={streamTreesToggledOn} unavailable={unavailable}/>
-      </SidebarSubtitle>
-    )
-  }
-
   return (
     <div>
-      <div style={{marginLeft: 0, marginTop: 15, marginBottom: streamTreesToggledOn ? 10 : 15}}>
+      <div style={{marginBottom: 8 }}>
         <Toggle
           display
           isExperimental
@@ -87,14 +82,16 @@ function Label(
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>
         {unavailable.length ? 
-          t("sidebar:Stream trees unavailable") :
-          t("sidebar:Show stream trees")}
+          t("sidebar:Streamtrees unavailable") :
+          t("sidebar:Show streamtrees")}
       </span>
       <SidebarIconContainer style={{ display: "inline-flex" }} data-tip data-for="toggle-stream-trees">
         <FaInfoCircle />
       </SidebarIconContainer>
       <StyledTooltip place="bottom" type="dark" effect="solid" id="toggle-stream-trees">
         <>
+          This functionality is experimental and should be treated with caution!
+          <p/>
           Stream trees allow parts of the tree to be summarised by a stream-graph,
           similar to the frequencies panel. This can be helpful to understand the broader
           dynamics within this part of the tree as well as allowing Auspice to display
