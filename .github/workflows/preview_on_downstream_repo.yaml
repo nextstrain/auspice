@@ -49,8 +49,8 @@ jobs:
           npm install nextstrain/auspice#${{ github.sha }}
           git add package.json package-lock.json
 
-          git config user.name "nextstrain-bot"
-          git config user.email "nextstrain-bot@users.noreply.github.com"
+          git config user.name "${{ vars.GIT_USER_NAME_NEXTSTRAIN_BOT }}"
+          git config user.email "${{ vars.GIT_USER_EMAIL_NEXTSTRAIN_BOT }}"
           git commit --message="[testing only] Upgrade Auspice to ${{ github.sha }}"
 
       - name: Create Pull Request
