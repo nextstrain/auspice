@@ -14,7 +14,7 @@ They help with two distinct problems with phylogenetic trees:
 
 2. Seeing the big themes in trees is often hindered because all branches are given the same visual importance. For instance, seeing geographic jumps in a tree (where geographic ancestry has been inferred) may be difficult for many. Streamtrees may be created to partition the tree based on such jumps and the resulting visual separation of streams is often easier to interpret.
 
-While streamtrees are currently implemented using a standard Auspice phylogenetic tree structure, it is conceivable to instead use a list of samples partitioned by metadata (e.g. nextclade-assigned lineages) and thus avoid the cost of inferring a tree.
+While streamtrees are currently implemented using a standard Auspice phylogenetic tree structure, it is conceivable to instead use a list of samples partitioned by metadata (e.g. Nextclade-assigned lineages) and thus avoid the cost of inferring a tree.
 
 |summary| *Figure 1. Streamtrees summarising all available (17k) Dengue virus genomes, with streamtrees conveying the genotype relationships and individual streams representing sample geography. The dataset remains performant and interactive despite large dataset sizes and we can switch to a more typical tree rendering as needed.*
 
