@@ -12,7 +12,7 @@ They help with two distinct problems with phylogenetic trees:
 
 1. Large trees (i.e. those with more than a few thousand tips) are both hard to interpret and computationally expensive, as the number of pixels available for each tip becomes miniscule. There have been a number of innovative approaches to address this such as `Taxonium's <https://taxonium.org>`__ progressive zoom where the number of nodes rendered changes according to the zoom level. Streamtrees replace a clade of :math:`n` tips (:math:`\sim 2n` nodes) with a streamtree with one :term:`ribbon` (:term:`stream`) per color-by category, which is both computationally easier to display and easier to interpret as :math:`n` becomes large.
 
-2. Seeing the big themes in trees is often hindered by all branches given the same visual importance. For instance, seeing geographic jumps in a tree (where geographic ancestry has been inferred) may be difficult for many. Streamtrees may be created to partition the tree based on such jumps and the resulting visual separation of streams is often easier to interpret.
+2. Seeing the big themes in trees is often hindered because all branches are given the same visual importance. For instance, seeing geographic jumps in a tree (where geographic ancestry has been inferred) may be difficult for many. Streamtrees may be created to partition the tree based on such jumps and the resulting visual separation of streams is often easier to interpret.
 
 While streamtrees are currently implemented using a standard Auspice phylogenetic tree structure, it is conceivable to instead use a list of samples partitioned by metadata (e.g. nextclade-assigned lineages) and thus avoid the cost of inferring a tree.
 
