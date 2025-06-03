@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.63.1 - 2025/06/04
+
+
 * Fixed a bug where datasets without the (optional!) `display_defaults` would crash, which included newick files dragged onto auspice.us. ([#1986](https://github.com/nextstrain/auspice/pull/1986))
 
 ## version 2.63.0 - 2025/06/02
