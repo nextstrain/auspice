@@ -482,7 +482,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
   }
 
   state.availableStreamLabelKeys = availableStreamLabelKeys(tree.availableBranchLabels, metadata.streamLabels);
-  if (metadata.displayDefaults.streamLabel) {
+  if (metadata?.displayDefaults?.streamLabel) {
     if (state.availableStreamLabelKeys.includes(metadata.displayDefaults.streamLabel)) {
       state.showStreamTrees = true;
       state.streamTreeBranchLabel = metadata.displayDefaults.streamLabel;
