@@ -178,12 +178,12 @@ const SampleDate = ({isTerminal, node, t}) => {
   if (!date) return null;
 
   const dateDescription = isTerminal ?
-    (inferred ? "Inferred collection date" : "Collection date") :
-    "Inferred date"; // hardcoded assumption that internal nodes are inferred
+    (inferred ? t("Inferred collection date") : t("Collection date")) :
+    t("Inferred date"); // hardcoded assumption that internal nodes are inferred
 
   return (
     <>
-      {item(t(dateDescription), date)}
+      {item(dateDescription, date)}
       {inferred && dateRange &&
         item(t("Date Confidence Interval"), `(${dateRange.join(', ')})`)}
       {ambiguousDate && 
