@@ -11,7 +11,6 @@
 
 const utils = require("../utils");
 const queryString = require("query-string");
-const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 const fs = require("fs");
 
@@ -52,58 +51,28 @@ const interpretRequest = (req) => {
 };
 
 /**
- * Given a request, if the dataset does not exist then either
- * (a) redirect to an appropriate dataset if possible & return `true`
- * (b) throw.
- * If the dataset existed then return `false` as no redirect necessary.
+ * Given a request for which there is no perfect match, return a close match
+ * if one exists else return false
  */
-const redirectIfDatapathMatchFound = (res, info, availableDatasets) => {
+const closestMatch = (requestedDatasetParts, availableDatasets) => {
   let matchingDatasets = availableDatasets;
   let i;
-  const matchDatasetRequest = (d) => d.request.split("/")[i] === info.parts[i];
+  const matchDatasetRequest = (d) => d.request.split("/")[i] === requestedDatasetParts[i];
   // Filter gradually by path fragment, starting from the root
-  for (i = 0; i < info.parts.length; i++) {
+  for (i = 0; i < requestedDatasetParts.length; i++) {
     const newMatchingDatasets = matchingDatasets.filter(matchDatasetRequest);
     if (!newMatchingDatasets.length) break;
     matchingDatasets = newMatchingDatasets;
   }
-  // If root fragment does cannot be matched, throw
-  if (!i) throw new Error(`${info.parts.join("/")} not in available datasets`);
+  // If root fragment cannot be matched return false (no closest match found)
+  if (!i) return false;
   // If best match is not equal to path requested, redirect
-  if (matchingDatasets[0].request !== info.parts.join("/")) {
-    res.redirect(`./getDataset?prefix=/${matchingDatasets[0].request}`);
-    return true;
+  if (matchingDatasets[0].request !== requestedDatasetParts.join("/")) {
+    return matchingDatasets[0].request;
   }
   return false;
 };
 
-/**
- * sets info.address.
- * if we need v1 datasets then `info.address` will be an object with `meta`
- * and `tree` keys. Otherwise `info.address` will be a string of the fetch
- * path.
- * @sideEffect sets `info.address` {Object | string}
- * @throws
- */
-const makeFetchAddresses = (info, datasetsPath, availableDatasets) => {
-  if (info.dataType !== "dataset") {
-    info.address = path.join(
-      datasetsPath,
-      `${info.parts.join("_")}_${info.dataType}.json`
-    );
-  } else {
-    const requestStr = info.parts.join("/"); // TO DO
-    const availableInfo = availableDatasets.filter((d) => d.request === requestStr)[0];
-    if (availableInfo.v2) {
-      info.address = path.join(datasetsPath, `${info.parts.join("_")}.json`);
-    } else {
-      info.address = {
-        meta: path.join(datasetsPath, `${info.parts.join("_")}_meta.json`),
-        tree: path.join(datasetsPath, `${info.parts.join("_")}_tree.json`)
-      };
-    }
-  }
-};
 
 const sendJson = async (res, info) => {
   if (typeof info.address === "string") {
@@ -173,8 +142,7 @@ const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls)
 
 module.exports = {
   interpretRequest,
-  redirectIfDatapathMatchFound,
-  makeFetchAddresses,
+  closestMatch,
   handleError,
   sendJson,
   findAvailableSecondTreeOptions
