@@ -1,0 +1,91 @@
+{
+    "version": "v2",
+    "meta": {
+      "title": "Generic (small) feature-rich dataset for testing purposes",
+      "updated": "2023-03-28",
+      "build_url": "https://github.com/nextstrain/auspice",
+      "build_avatar": "https://avatars.githubusercontent.com/u/22159334?s=48&v=4",
+      "description": "# Markdown description",
+      "warning": "Achtung!",
+      "maintainers": [{"name": "The nextstrain team", "url": "https://nextstrain.org"}],
+      "genome_annotations": {"nuc": { "end": 100, "start": 1 }},
+      "filters": ["subtree"],
+      "panels": ["tree", "map", "entropy"],
+      "extensions": "any data structure!",
+      "geo_resolutions": [{"key": "subtree2", "title": "Subtree2 (demes)", "demes": {"red": {"latitude": 0, "longitude": -125}, "purple": {"latitude": -5, "longitude": -130}}}],
+      "colorings": [
+        { "key": "num_date", "title": "Sampling date", "type": "temporal"},
+        { "key": "subtree", "title": "subtree (Colour)", "type": "categorical", "scale": [["blue", "#2c7fb8"], ["green", "#78c679"]]},
+        { "key": "subtree2", "title": "subtree 2 (Colour)", "type": "categorical", "scale": [["red", "#f03b20"], ["purple", "#8856a7"]]},
+        { "key": "ord", "title": "ordinal (string)", "type": "ordinal"},
+        { "key": "bool", "title": "Boolean / Binary", "type": "boolean"}
+      ],
+      "display_defaults": {
+        "map_triplicate": false,
+        "geo_resolution": "subtree2",
+        "color_by": "subtree2",
+        "distance_measure": "div",
+        "layout": "rect",
+        "branch_label": "node_name",
+        "label": "node_name:alpha",
+        "tip_label": "subtree",
+        "stream_label": "river",
+        "transmission_lines": true,
+        "language": "en",
+        "sidebar": "open",
+        "panels": ["tree", "map", "entropy"]
+      },
+      "stream_labels": ["river"],
+      "data_provenance": [{"name": "test-data", "url": "https://github.com/nextstrain/auspice"}]
+    },
+    "tree": {
+      "name": "romeo",
+      "node_attrs": {"div": 0, "subtree": {"value": "green"}, "subtree2": {"value": "red"}, "ord": {"value": "A"}, "bool": {"value": "True"}, "num_date": {"value": 2000.00}},
+      "branch_attrs": {"labels": {"node_name": "romeo"}, "mutations": {"nuc": ["T50A"]}},
+      "children": [
+          {
+                "name": "alpha",
+                "node_attrs": {"div": 1, "subtree": {"value": "green"}, "subtree2": {"value": "red"}, "ord": {"value": "A"}, "bool": {"value": "True"},
+                  "num_date": {"value": 2003.00}},
+                "branch_attrs": {"labels": {"node_name": "alpha", "river": "Nile"}, "mutations": {"nuc": []}},
+                "children": [
+                    {
+                        "name": "bravo",
+                        "node_attrs": {"div": 2, "subtree": {"value": "green"}, "subtree2": {"value": "red"}, "ord": {"value": "C"}, "bool": {"value": "True"}, "num_date": {"value": 2005.00}},
+                        "branch_attrs": {"labels": {"node_name": "bravo"}, "mutations": {"nuc": []}}
+                    },
+                    {
+                        "name": "charlie",
+                        "node_attrs": {"div": 2, "subtree": {"value": "green"}, "subtree2": {"value": "red"}, "num_date": {"value": 2012.00}},
+                        "branch_attrs": {"labels": {"node_name": "charlie"}, "mutations": {"nuc": []}},
+                        "children": [
+                            {
+                                "name": "delta",
+                                "node_attrs": {"div": 3, "subtree": {"value": "green"}, "subtree2": {"value": "purple"}, "ord": {"value": "B"}, "bool": {"value": "1"}, "num_date": {"value": 2015.00}},
+                                "branch_attrs": {"labels": {"node_name": "delta"}, "mutations": {"nuc": []}}
+                            },
+                            {
+                                "name": "echo",
+                                "node_attrs": {"div": 3, "subtree": {"value": "blue"}, "subtree2": {"value": "purple"}, "ord": {"value": "B"}, "bool": {"value": "True"}, "num_date": {"value": 2018.00}},
+                                "branch_attrs": {"labels": {"node_name": "echo", "river": "Lena"}, "mutations": {"nuc": ["A50T"]}},
+                                "children": [
+                                    {
+                                        "name": "foxtrot",
+                                        "node_attrs": {"div": 4, "subtree": {"value": "blue"}, "subtree2": {"value": "purple"}, "ord": {"value": "B"}, "bool": {"value": 0}, "num_date": {"value": 2019.00}},
+                                        "branch_attrs": {"labels": {"node_name": "foxtrot"}, "mutations": {"nuc": []}}
+                                    },
+                                    {
+                                        "name": "golf",
+                                        "node_attrs": {"div": 4, "subtree": {"value": "blue"}, "subtree2": {"value": "purple"}, "ord": {"value": "A"}, "bool": {"value": "False"}, "num_date": {"value": 2020.00}},
+                                        "branch_attrs": {"labels": {"node_name": "golf"}, "mutations": {"nuc": []}}
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "root_sequence": "ATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGCATGC"
+}
