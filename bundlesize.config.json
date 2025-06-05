@@ -2,15 +2,18 @@
   "files": [
     {
       "path": "./dist/auspice.main.bundle.*.js",
-      "maxSize": "3 kB"
+      "maxSize": "3 kB",
+      "compression": "brotli"
     },
     {
       "path": "./dist/auspice?(.chunk).*([0-9]|mainComponent|mapComponent|other-vendors|core-vendors|polyfills).bundle.*.js",
-      "maxSize": "110 kB"
+      "maxSize": "100 kB",
+      "compression": "brotli"
     },
     {
       "path": "./dist/auspice.?(chunk.)locales.bundle.*.js",
-      "maxSize": "20 kB"
+      "maxSize": "20 kB",
+      "compression": "brotli"
     }
   ]
 }

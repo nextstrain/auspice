@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const zlib = require("zlib");
 
 /* Webpack config generator */
 
@@ -72,10 +73,21 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     }
   });
   /* gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin */
-  const pluginCompress = new CompressionPlugin({
+  const pluginCompressGzip = new CompressionPlugin({
     filename: "[path].gz[query]",
     algorithm: "gzip",
     test: /\.(js|css|html)$/,
+    threshold: 4096
+  });
+  const pluginCompressBrotli = new CompressionPlugin({
+    filename: "[path].br[query]",
+    algorithm: "brotliCompress",
+    test: /\.(js|css|html)$/,
+    compressionOptions: {
+      params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+      },
+    },
     threshold: 4096
   });
   const pluginHtml = new HtmlWebpackPlugin({
@@ -94,7 +106,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
-    pluginCompress,
+    pluginCompressGzip,
+    pluginCompressBrotli,
     pluginHtml,
     cleanWebpackPlugin
   ];
