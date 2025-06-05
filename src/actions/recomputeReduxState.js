@@ -3,7 +3,7 @@ import { cloneDeep, isEqualWith } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness, getFilteredAndIdxOfFilteredRoot } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { getDefaultFrequenciesState } from "../reducers/frequencies";
@@ -656,6 +656,11 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
     }
   }
 
+  /* Currently the (rather unique) treeZoom query can only have the value 'selected' */
+  if (query.treeZoom && query.treeZoom!=='selected') {
+    delete query.treeZoom;
+  }
+
   /* temporalConfidence */
   if (
     shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)
@@ -756,25 +761,29 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
 const modifyTreeStateVisAndBranchThickness = (oldState, displayDefaults, query, controlsState, dispatch) => {
   /* calculate the index of the (in-view) root note, which depends on any selected zoom */
   let newIdxRoot = oldState.idxOfInViewRootNode;
-  let cladeSelectedIdx = 0; // default to tree root
   if (query.label) {
     const [labelName, labelValue] = parseLabel(query.label)
     const idx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     if (idx === null) {
       delete query.label;
     } else {
-      cladeSelectedIdx = idx;
+      newIdxRoot = applyInViewNodesToTree(idx, oldState);
     }
+  } else if (query.treeZoom==="selected") {
+    // zoom to selected requires filters to be applied to tree to calculate the appropriate root
+    // Note that these are re-calculated by `calculateVisiblityAndBranchThickness`
+    const {idxOfFilteredRoot} = getFilteredAndIdxOfFilteredRoot(oldState, controlsState, oldState.nodes.map(() => true));
+    newIdxRoot = applyInViewNodesToTree(idxOfFilteredRoot, oldState);
+    if (!idxOfFilteredRoot) delete query.treeZoom;
   } else if (displayDefaults.label) {
     const [labelName, labelValue] = parseLabel(displayDefaults.label)
     const idx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
     if (idx === null) {
       delete displayDefaults.label;
     } else {
-      cladeSelectedIdx = idx;
+      newIdxRoot = applyInViewNodesToTree(idx, oldState);
     }
   }
-  newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState);
 
   /* calculate new branch thicknesses & visibility, as this depends on the root note */
   const visAndThicknessData = calculateVisiblityAndBranchThickness(

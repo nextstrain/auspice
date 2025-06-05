@@ -56,6 +56,12 @@ These are exported as the (optional) property of the dataset JSON ``meta.display
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
 | ``label``                 | Labelled branch that tree starts zoomed to                            | "Sublineage:J" or "clade:2a.3a"                    |
 +---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
+| ``treeZoom``              | Controls how a tree is initially zoomed (see note below)              | "treeZoom=selected"                                |
++---------------------------+-----------------------------------------------------------------------+----------------------------------------------------+
+
+
+* The `treeZoom=selected` query is only applicable in certain circumstances and acts as if we had applied all other view settings and then clicked the "zoom to selected" button. The behaviour of the "zoom to selected" button can differ depending on the current zoom level of the tree, and the URL query will only be set if the same zoom level is obtaibavle if you click the button from a fully zoomed out state; see [this GitHub thread for more details](https://github.com/nextstrain/auspice/pull/1321#issuecomment-2914923800). Finally, if a `label` query is in the URL then that will be used instead as it has higher specificity.
+
 
 Certain other properties on the JSON's ``meta`` dictionary also affect the view settings.
 See the `JSON schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__ for more details.
