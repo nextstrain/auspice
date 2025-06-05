@@ -200,6 +200,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins,
     optimization: {
       minimize: !devMode,
+      runtimeChunk: "single",
       splitChunks: {
         minChunks: 3,
         minSize: 8192,
