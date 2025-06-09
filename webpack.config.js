@@ -127,9 +127,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
    */
   const coreVendors = [
     "@babel/runtime",
-    "core-js",
-    "regenerator-runtime",
-    "whatwg-fetch",
     "style-loader",
     "@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
@@ -168,6 +165,13 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "yaml-front-matter",
     "js-yaml"
   ];
+
+  const polyfills = [
+    "core-js",
+    "regenerator-runtime",
+    "whatwg-fetch",
+    "css.escape",
+  ]
 
   const mapComponentLibraries = [
     "leaflet",
@@ -208,6 +212,12 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         minChunks: 3,
         minSize: 8192,
         cacheGroups: {
+          polyfills: {
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + polyfills.join("|") + ")[\\\\/]"),
+            name: "polyfills",
+            enforce: true,
+            chunks: "all"
+          },
           coreVendors: {
             test: new RegExp("[\\\\/]node_modules[\\\\/](" + coreVendors.join("|") + ")[\\\\/]"),
             name: "core-vendors",
