@@ -133,9 +133,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "style-loader",
     "@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
-    "leaflet",
     "redux",
-    "leaflet(-gesture-handling)?",
     "i18next",
     "styled-components",
     "stylis",
@@ -170,6 +168,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "yaml-front-matter",
     "js-yaml"
   ];
+
+  const mapComponentLibraries = [
+    "leaflet",
+    "leaflet-gesture-handling",
+  ]
 
   /**
    * It's better to keep small libraries out of the vendor bundles because
@@ -216,6 +219,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
             name: "other-vendors",
             enforce: true,
             chunks: "all"
+          },
+          mapComponent: {
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + mapComponentLibraries.join("|") + ")[\\\\/]"),
+            name: "mapComponent", /* matches the lazily imported component webpackChunkName (via special in-line comment) */
+            enforce: true,
           },
           /**
            * ATM the package size is <15kB and so not worth splitting,
