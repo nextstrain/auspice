@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { hot } from 'react-hot-loader/root';
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
-import Spinner from "./components/framework/spinner";
+import { FullPageSpinner } from "./components/framework/spinner";
 import Head from "./components/framework/head";
 import Notifications from "./components/notifications/notifications";
 
@@ -27,7 +27,7 @@ class MainComponentSwitch extends React.Component {
     switch (this.props.displayComponent) {
       case "main":
         return (
-          <Suspense fallback={<Spinner/>}>
+          <Suspense fallback={<FullPageSpinner/>}>
             <Main/>
           </Suspense>
         );
@@ -39,13 +39,13 @@ class MainComponentSwitch extends React.Component {
         );
       case "status":
         return (
-          <Suspense fallback={<Spinner/>}>
+          <Suspense fallback={<FullPageSpinner/>}>
             <Status/>
           </Suspense>
         );
       case "debugNarrative":
         return (
-          <Suspense fallback={<Spinner/>}>
+          <Suspense fallback={<FullPageSpinner/>}>
             <DebugNarrative/>
           </Suspense>
         );
