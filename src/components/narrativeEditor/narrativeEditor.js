@@ -1,4 +1,4 @@
-import React, {useState, lazy} from "react";
+import React, {useState, lazy, Suspense} from "react";
 import NavBar from "../navBar";
 import * as Styles from "./styles";
 import ExamineNarrative from "./examineNarrative";
@@ -6,7 +6,7 @@ import { useDatasetFetch } from "./useDatasetFetch";
 import { MarkdownInput } from "./markdownInput";
 import NarrativeViewHeader from "./NarrativeViewHeader";
 
-const Main = lazy(() => import("../main"));
+const Main = lazy(() => import(/* webpackChunkName: "mainComponent" */ "../main"));
 
 /**
  * TODO in the future (post MVP)
@@ -47,7 +47,9 @@ const DebugNarrative = () => {
     return (
       <>
         <NarrativeViewHeader setDisplayNarrative={setDisplayNarrative}/>
-        <Main/>
+        <Suspense fallback={null}>
+          <Main/>
+        </Suspense>
       </>
     );
   }
