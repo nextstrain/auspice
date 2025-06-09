@@ -1,6 +1,6 @@
 /* P O L Y F I L L S */
 import "whatwg-fetch";
-import "core-js";
+import "core-js/stable";        // babel will rewrite this to match the polyfills needed for our browser targets
 import "regenerator-runtime";
 import "css.escape";
 /* L I B R A R I E S */
