@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const zlib = require("zlib");
 
 /* Webpack config generator */
 
@@ -72,10 +73,21 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     }
   });
   /* gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin */
-  const pluginCompress = new CompressionPlugin({
+  const pluginCompressGzip = new CompressionPlugin({
     filename: "[path].gz[query]",
     algorithm: "gzip",
     test: /\.(js|css|html)$/,
+    threshold: 4096
+  });
+  const pluginCompressBrotli = new CompressionPlugin({
+    filename: "[path].br[query]",
+    algorithm: "brotliCompress",
+    test: /\.(js|css|html)$/,
+    compressionOptions: {
+      params: {
+        [zlib.constants.BROTLI_PARAM_QUALITY]: 11,
+      },
+    },
     threshold: 4096
   });
   const pluginHtml = new HtmlWebpackPlugin({
@@ -94,7 +106,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   ] : [
     new LodashModuleReplacementPlugin(),
     pluginProcessEnvData,
-    pluginCompress,
+    pluginCompressGzip,
+    pluginCompressBrotli,
     pluginHtml,
     cleanWebpackPlugin
   ];
@@ -127,15 +140,10 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
    */
   const coreVendors = [
     "@babel/runtime",
-    "core-js",
-    "regenerator-runtime",
-    "whatwg-fetch",
     "style-loader",
     "@hot-loader/react-dom",
     "react(-(redux|select|helmet|i18next))?",
-    "leaflet",
     "redux",
-    "leaflet(-gesture-handling)?",
     "i18next",
     "styled-components",
     "stylis",
@@ -171,6 +179,18 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "js-yaml"
   ];
 
+  const polyfills = [
+    "core-js",
+    "regenerator-runtime",
+    "whatwg-fetch",
+    "css.escape",
+  ]
+
+  const mapComponentLibraries = [
+    "leaflet",
+    "leaflet-gesture-handling",
+  ]
+
   /**
    * It's better to keep small libraries out of the vendor bundles because
    * the more libraries we include, the more small changes or updates
@@ -200,10 +220,17 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins,
     optimization: {
       minimize: !devMode,
+      runtimeChunk: "single",
       splitChunks: {
         minChunks: 3,
         minSize: 8192,
         cacheGroups: {
+          polyfills: {
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + polyfills.join("|") + ")[\\\\/]"),
+            name: "polyfills",
+            enforce: true,
+            chunks: "all"
+          },
           coreVendors: {
             test: new RegExp("[\\\\/]node_modules[\\\\/](" + coreVendors.join("|") + ")[\\\\/]"),
             name: "core-vendors",
@@ -215,6 +242,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
             name: "other-vendors",
             enforce: true,
             chunks: "all"
+          },
+          mapComponent: {
+            test: new RegExp("[\\\\/]node_modules[\\\\/](" + mapComponentLibraries.join("|") + ")[\\\\/]"),
+            name: "mapComponent", /* matches the lazily imported component webpackChunkName (via special in-line comment) */
+            enforce: true,
           },
           /**
            * ATM the package size is <15kB and so not worth splitting,

@@ -55,7 +55,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "compression": "^1.7.3",
     "compression-webpack-plugin": "^3.1.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.43.0",
     "create-react-class": "^15.7.0",
     "css-loader": "^3.4.0",
     "css.escape": "^1.5.1",
