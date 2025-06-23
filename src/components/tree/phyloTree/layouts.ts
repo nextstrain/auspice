@@ -379,10 +379,6 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
     nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
 
-  if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
-    nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
-  }
-
   /* Compute the domains to pass to the d3 scales for the x & y axes */
   let xDomain, yDomain, spanX, spanY;
   if (this.layout!=="scatter" || this.scatterVariables.xContinuous) {
