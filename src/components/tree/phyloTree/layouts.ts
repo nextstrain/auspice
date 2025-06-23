@@ -360,21 +360,36 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  /* ------------------------------------------------------------------
-   * New: limit the axis domains to nodes Auspice will actually render.
-   * ------------------------------------------------------------------ */
-  const visibleNodes = this.nodes.filter(
-    (d) => d.visibility === NODE_VISIBLE && d.x !== undefined && d.y !== undefined
-  );
+  /**
+   * Select the nodes that we'll use to define the domain of the scales - essentially
+   * select which nodes we want to use to define the viewport.
+   */
+  let nodesInDomain;
+  const useFocusOnSelected = this.focus==='selected' && (this.layout==='rect' || this.layout==='radial');
+  if (useFocusOnSelected) {
+    /**
+     * "focus on selected" limits the axis domains to nodes Auspice will actually render
+     * Note: nodes marked as `inView` may be off-screen in this mode
+     */
+    const visibleNodes = this.nodes.filter(
+      (d) => d.visibility === NODE_VISIBLE && d.x !== undefined && d.y !== undefined
+    );
 
-  /*  Fallback: if nothing is currently visible (e.g. the time-slider is
-      before the earliest sample), fall back to the original “inView” rule
-      so the scales never become undefined. */
-  let nodesInDomain = visibleNodes.length > 0
-    ? visibleNodes
-    : this.nodes.filter((d) => d.inView && d.y !== undefined && d.x !== undefined);
+    /*  Fallback: if nothing is currently visible (e.g. the time-slider is
+        before the earliest sample), fall back to the original “inView” rule
+        so the scales never become undefined. */
+    nodesInDomain = visibleNodes.length > 0
+      ? visibleNodes
+      : this.nodes.filter((d) => d.inView && d.y !== undefined && d.x !== undefined);
+  } else {
+    /**
+     * `inView` nodes are every node which descends from the inViewRootNode - so they include
+     * nodes which are filtered out, e.g. because they're beyond the selected date range
+     * This is the "normal" auspice viewport behaviour, or maybe the "old fashioned" behaviour...
+     */
+    nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  }
 
-  /* Scatter-plot nuance (unchanged) */
   if (this.layout === "scatter" && this.scatterVariables.showBranches === false) {
     nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
