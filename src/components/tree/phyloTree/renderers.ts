@@ -93,6 +93,7 @@ export const render = function render(
   this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
   this.streams = streams;
+  this.focus = focus;
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -105,7 +106,7 @@ export const render = function render(
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && streams});
+  setDisplayOrder({nodes: this.nodes, focus: this.focus, streams: this.params.showStreamTrees && streams});
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();
