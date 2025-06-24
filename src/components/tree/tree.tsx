@@ -1,17 +1,14 @@
 import React from "react";
 import { withTranslation } from "react-i18next";
-import { FaSearchMinus } from "react-icons/fa";
-import { Root, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { SelectedNode } from "../../reducers/controls";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
-import { getParentBeyondPolytomy, getParentStream } from "./phyloTree/helpers";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
@@ -19,6 +16,7 @@ import ErrorBoundary from "../../util/errorBoundary";
 import { untangleTreeToo } from "./tangle/untangling";
 import { sortByGeneOrder } from "../../util/treeMiscHelpers";
 import { TreeComponentProps, TreeComponentState } from "./types";
+import { TreeButtons } from "./treeButtons";
 
 export const spaceBetweenTrees = 100;
 export const lhsTreeId = "LEFT";
@@ -116,53 +114,6 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     if (Object.keys(newState).length) this.setState<never>(newState);
   }
 
-  getStyles = (): {
-    treeButtonsDiv: React.CSSProperties
-    resetTreeButton: React.CSSProperties
-    zoomToSelectedButton: React.CSSProperties
-    zoomOutButton: React.CSSProperties
-  } => {
-    const filteredTree = !!this.props.tree.idxOfFilteredRoot &&
-      this.props.tree.idxOfInViewRootNode !== this.props.tree.idxOfFilteredRoot;
-    const filteredTreeToo = !!this.props.treeToo.idxOfFilteredRoot &&
-      this.props.treeToo.idxOfInViewRootNode !== this.props.treeToo.idxOfFilteredRoot;
-    const activeZoomButton = filteredTree || filteredTreeToo;
-
-    const anyTreeZoomed = this.props.tree.idxOfInViewRootNode !== 0 ||
-      this.props.treeToo.idxOfInViewRootNode !== 0;
-
-    return {
-      treeButtonsDiv: {
-        zIndex: 100,
-        position: "absolute",
-        right: 5,
-        top: 0
-      },
-      resetTreeButton: {
-        zIndex: 100,
-        display: "inline-block",
-        marginLeft: 4,
-        cursor: anyTreeZoomed ? "pointer" : "auto",
-        color: anyTreeZoomed ? darkGrey : lightGrey
-      },
-      zoomToSelectedButton: {
-        zIndex: 100,
-        display: "inline-block",
-        cursor: activeZoomButton ? "pointer" : "auto",
-        color: activeZoomButton ? darkGrey : lightGrey,
-        pointerEvents: activeZoomButton ? "auto" : "none"
-      },
-      zoomOutButton: {
-        zIndex: 100,
-        display: "inline-block",
-        cursor: anyTreeZoomed ? "pointer" : "auto",
-        color: anyTreeZoomed ? darkGrey : lightGrey,
-        pointerEvents: anyTreeZoomed ? "auto" : "none",
-        marginRight: "4px"
-      }
-    };
-  };
-
   renderTreeDiv({
     width,
     height,
@@ -194,35 +145,8 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     );
   }
 
-  zoomToSelected = (): void => {
-    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-      root: [this.props.tree.idxOfFilteredRoot, this.props.treeToo.idxOfFilteredRoot]
-    }));
-  };
-
-  zoomBack = (): void => {
-    const root: Root = [undefined, undefined];
-    // Zoom out of main tree if index of root node is not 0
-    if (this.props.tree.idxOfInViewRootNode !== 0) {
-      const rootNode = this.props.tree.nodes[this.props.tree.idxOfInViewRootNode];
-      if (this.props.showStreamTrees && rootNode.inStream && !!this.props.tree.streams[rootNode.streamName].parentStreamName) {
-        root[0] = getParentStream(rootNode).arrayIdx;
-      } else {
-        root[0] = getParentBeyondPolytomy(rootNode, this.props.distanceMeasure, this.props.tree.observedMutations).arrayIdx;
-      }
-    }
-    // Also zoom out of second tree if index of root node is not 0
-    // (don't have to consider stream trees as they're not possible for the second tree)
-    if (this.props.treeToo.idxOfInViewRootNode !== 0) {
-      const rootNodeToo = this.props.treeToo.nodes[this.props.treeToo.idxOfInViewRootNode];
-      root[1] = getParentBeyondPolytomy(rootNodeToo, this.props.distanceMeasure, this.props.treeToo.observedMutations).arrayIdx;
-    }
-    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
-  }
-
   override render(): JSX.Element {
     const { t } = this.props;
-    const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")}>
@@ -275,31 +199,11 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
           null
         }
-        {this.props.narrativeMode ? null : (
-          <div style={{...styles.treeButtonsDiv}}>
-            <button
-              style={{...tabSingle, ...styles.zoomOutButton}}
-              onClick={this.zoomBack}
-            >
-              <FaSearchMinus/>
-            </button>
-            <button
-              style={{...tabSingle, ...styles.zoomToSelectedButton}}
-              onClick={this.zoomToSelected}
-            >
-              {t("Zoom to Selected")}
-            </button>
-            <button
-              style={{...tabSingle, ...styles.resetTreeButton}}
-              onClick={this.redrawTree}
-            >
-              {t("Zoom to Root")}
-            </button>
-          </div>
-        )}
+        <TreeButtons {...this.props} />
       </Card>
     );
   }
 }
 
 export default withTranslation()(TreeComponent);
+
