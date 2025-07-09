@@ -138,7 +138,7 @@ function renderDataProvenance(t, metadata) {
     .map((source) => {
       if (source.name.toUpperCase() === "GISAID") { // SPECIAL CASE
         return (<Link url="https://www.gisaid.org" key={source.name}>
-          <img key={source.name} src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+          <img src={require("../../images/gisaid-logo.png")} alt="gisaid-logo" width="65"/>
         </Link>);
       }
       const url = parseUrl(source.url);
