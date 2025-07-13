@@ -73,22 +73,20 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
         icon={<RectangularTreeIcon width={iconWidth} selected />}
         onClick={() => helpers.exportTree({dispatch, filePrefix, tree, colorings: metadata.colorings, colorBy, temporal})}
       />
-      {gisaidProvenance && (
+      {gisaidProvenance ?
         <Button
           name="Acknowledgments (TSV)"
           description={`Per-sample acknowledgments (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
           onClick={() => helpers.acknowledgmentsTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
-        />
-      )}
-      {!gisaidProvenance && (
+        /> :
         <Button
           name="Metadata (TSV)"
           description={`Per-sample metadata (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
           onClick={() => helpers.strainTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
         />
-      )}
+      }
       {helpers.areAuthorsPresent(tree) && (
         <Button
           name="Author Metadata (TSV)"
