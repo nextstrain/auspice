@@ -26,16 +26,7 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
   const temporal = distanceMeasure === "num_date";
 
   /* set gisaidProvenance based on supplied JSON metadata */
-  let gisaidProvenance = false;
-  if ("dataProvenance" in metadata) {
-    for (const source of metadata.dataProvenance) {
-      if ("name" in source) {
-        if (source.name.toUpperCase() === "GISAID") {
-          gisaidProvenance = true;
-        }
-      }
-    }
-  }
+  const gisaidProvenance = (metadata?.dataProvenance || []).filter((el) => el.name.toUpperCase()==='GISAID').length>0;
   /* Verify that we can parse dataset name from URL to support Auspice JSON download */
   const datasetNames = getDatasetNamesFromUrl(window.location.pathname);
   const supportAuspiceJsonDownload = !gisaidProvenance && datasetNames.some(Boolean);

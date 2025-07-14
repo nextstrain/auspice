@@ -844,8 +844,8 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.build_avatar) {
     metadata.buildAvatar = json.meta.build_avatar;
   }
-  if (json.meta.data_provenance) {
-    metadata.dataProvenance = json.meta.data_provenance;
+  if (Array.isArray(json?.meta?.data_provenance)) {
+    metadata.dataProvenance = json.meta.data_provenance.filter((el) => typeof el.name === 'string')
   }
   if (json.meta.filters) {
     metadata.filters = json.meta.filters;
