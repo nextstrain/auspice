@@ -271,7 +271,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
       tipTraitValues[node.name][traitName] = fullAuthorInfo.value;
       if (isPaperURLValid(fullAuthorInfo)) {
-        tipTraitValues[node.name][traitName] += ` (${fullAuthorInfo.paper_url})`;
+        tipTraitValues[node.name][traitName] += `: ${fullAuthorInfo.paper_url}`;
       }
     }
 
@@ -343,7 +343,7 @@ export const acknowledgmentsTSV = (dispatch, filePrefix, nodes, nodeVisibilities
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
       tipTraitValues[node.name][traitName] = fullAuthorInfo.value;
       if (isPaperURLValid(fullAuthorInfo)) {
-        tipTraitValues[node.name][traitName] += ` (${fullAuthorInfo.paper_url})`;
+        tipTraitValues[node.name][traitName] += `: ${fullAuthorInfo.paper_url}`;
       }
     }
 
