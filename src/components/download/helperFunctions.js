@@ -285,10 +285,10 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
 
     /* handle `accession` specially */
     const accession = getAccessionFromNode(node);
-    if ("accession" in accession) {
+    if (accession.accession) {
       const traitName = "accession";
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
-      tipTraitValues[node.name][traitName] = accession.accession;
+      tipTraitValues[node.name][traitName] = accession.accession + (accession.url ? `: ${accession.url}` : '');
     }
   }
 
