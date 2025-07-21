@@ -2,7 +2,7 @@
 import { unparse } from "papaparse";
 import { errorNotification, infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
-import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
+import { getTraitFromNode, getUrlFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
@@ -254,6 +254,10 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
       if (value) {
         if (typeof value === 'string') {
           tipTraitValues[node.name][trait] = value;
+          const url = getUrlFromNode(node, trait);
+          if (url) {
+            tipTraitValues[node.name][trait] += `: ${url}`;
+          }
         } else if (typeof value === "number") {
           tipTraitValues[node.name][trait] = parseFloat(value).toFixed(2);
         }
@@ -267,7 +271,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
       tipTraitValues[node.name][traitName] = fullAuthorInfo.value;
       if (isPaperURLValid(fullAuthorInfo)) {
-        tipTraitValues[node.name][traitName] += ` (${fullAuthorInfo.paper_url})`;
+        tipTraitValues[node.name][traitName] += `: ${fullAuthorInfo.paper_url}`;
       }
     }
 
@@ -281,10 +285,10 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
 
     /* handle `accession` specially */
     const accession = getAccessionFromNode(node);
-    if ("accession" in accession) {
+    if (accession.accession) {
       const traitName = "accession";
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
-      tipTraitValues[node.name][traitName] = accession.accession;
+      tipTraitValues[node.name][traitName] = accession.accession + (accession.url ? `: ${accession.url}` : '');
     }
   }
 
@@ -339,7 +343,7 @@ export const acknowledgmentsTSV = (dispatch, filePrefix, nodes, nodeVisibilities
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
       tipTraitValues[node.name][traitName] = fullAuthorInfo.value;
       if (isPaperURLValid(fullAuthorInfo)) {
-        tipTraitValues[node.name][traitName] += ` (${fullAuthorInfo.paper_url})`;
+        tipTraitValues[node.name][traitName] += `: ${fullAuthorInfo.paper_url}`;
       }
     }
 
