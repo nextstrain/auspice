@@ -1,7 +1,7 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable react/no-danger */
 
-import React from "react";
+import React, {lazy, Suspense} from "react";
 import { connect } from "react-redux";
 import { changePage } from "../../actions/navigation";
 import {
@@ -14,10 +14,11 @@ import {
   ProgressButton
 } from "./styles";
 import Tree from "../tree";
-import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
 import { computeChangePageArgs } from "./index";
 import {TOGGLE_NARRATIVE} from "../../actions/types";
+
+const Map = lazy(() => import(/* webpackChunkName: "mapComponent" */ "../map/map"));
 
 const BANNER_HEIGHT = 50;
 const progressHeight = 25;
@@ -126,8 +127,10 @@ class MobileNarrativeDisplay extends React.Component {
       <>
         {this.props.panelsToDisplay.includes("tree")
           ? <Tree width={width} height={height} key={this.props.treeName} /> : null}
-        {this.props.panelsToDisplay.includes("map")
-          ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} key={this.props.treeName+"_map"} /> : null}
+        {this.props.panelsToDisplay.includes("map") ?
+          (<Suspense fallback={null}>
+             <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} key={this.props.treeName+"_map"} />
+          </Suspense>) : null}
       </>
     );
   }

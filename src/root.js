@@ -7,7 +7,7 @@ import Spinner from "./components/framework/spinner";
 import Head from "./components/framework/head";
 import Notifications from "./components/notifications/notifications";
 
-const Main = lazy(() => import("./components/main"));
+const Main = lazy(() => import(/* webpackChunkName: "mainComponent" */ "./components/main"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
 const DebugNarrative = lazy(() => import("./components/narrativeEditor/narrativeEditor"));
