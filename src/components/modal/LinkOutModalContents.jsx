@@ -13,6 +13,7 @@ import { infoPanelStyles } from "../../globalStyles";
 import { dataFont, lighterGrey} from "../../globalStyles";
 import { hasExtension, getExtension } from "../../util/extensions";
 import { isColorByGenotype, decodeColorByGenotype} from "../../util/getGenotype";
+import { Dataset } from "../../actions/loadData";
 
 
 /**
@@ -74,15 +75,17 @@ const ButtonContainer = styled.div`
 `
 
 function clientDetails() {
+  // Use the Dataset object to ensure we use the matching apiCalls to fetch main JSON
+  const currentDataset = new Dataset(window.location.pathname);
   return {
-    pathname: window.location.pathname,
     origin: forceLinkOutHost || window.location.origin,
+    datasetApiCall: currentDataset.apiCalls.main
   }
 }
 
 function TaxoniumLinkOut() {
   const displayName = 'taxonium.org';
-  const {pathname, origin} = clientDetails();
+  const {origin, datasetApiCall} = clientDetails();
   const {distanceMeasure, colorBy, showTreeToo} = useSelector((state) => state.controls)
 
   // Taxonium should work with all nextstrain URLs which support the {GET, accept JSON} route
@@ -131,7 +134,7 @@ function TaxoniumLinkOut() {
   function url() {
     const baseUrl = 'https://taxonium.org';
     const queries = {
-      treeUrl: `${origin}${pathname}`, // no nextstrain queries
+      treeUrl: `${origin}${datasetApiCall}`, // no nextstrain queries
       treeType: 'nextstrain',
       ladderizeTree: 'false', // keep same orientation as Auspice
       xType: distanceMeasure==='num_date' ? 'x_time' : 'x_dist',
@@ -145,7 +148,7 @@ function TaxoniumLinkOut() {
 
 function MicrobeTraceLinkOut() {
   const displayName = 'microbetrace.cdc.gov';
-  const {pathname, origin} = clientDetails();
+  const {origin, datasetApiCall} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
   const {mainTreeNumTips} = useSelector((state) => state.metadata);
 
@@ -177,21 +180,21 @@ function MicrobeTraceLinkOut() {
     </ButtonContainer>
   )
 
-  function url() {       
+  function url() {
     /**
      * As of 2024-04-09, the 'origin' must be nextstrain.org or next.nextstrain.org
      * for these links to work. This means (nextstrain.org) the links coming from heroku
      * review apps will not work.
      */
     const baseUrl = 'https://microbetrace.cdc.gov/MicrobeTrace';
-    return `${baseUrl}?url=${encodeURIComponent(`${origin}${pathname}`)}`
+    return `${baseUrl}?url=${encodeURIComponent(`${origin}${datasetApiCall}`)}`
   }
 }
 
 
 function NextcladeLinkOut() {
   const displayName = 'nextclade';
-  const {pathname, origin} = clientDetails();
+  const {origin, datasetApiCall} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
   const {mainTreeNumTips, rootSequence} = useSelector((state) => state.metadata);
 
@@ -219,7 +222,7 @@ function NextcladeLinkOut() {
     )
   }
 
-  const url = `https://clades.nextstrain.org?dataset-json-url=${encodeURIComponent(`${origin}${pathname}`)}`
+  const url = `https://clades.nextstrain.org?dataset-json-url=${encodeURIComponent(`${origin}${datasetApiCall}`)}`
   return (
     <ButtonContainer key={displayName}>
       <ButtonText href={url} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
@@ -255,7 +258,7 @@ export const LinkOutModalContents = () => {
         Clicking on the following links will take you to an external site which will attempt to
         load the underlying data JSON which you are currently viewing.
         These sites are not part of Nextstrain and as such are not under our control, but we
-        highly encourage interoperability across platforms like these. 
+        highly encourage interoperability across platforms like these.
       </p>
 
       <div style={{paddingTop: '10px'}}/>
