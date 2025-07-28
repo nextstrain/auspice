@@ -75,11 +75,13 @@ const ButtonContainer = styled.div`
 `
 
 function clientDetails() {
+  pathname = window.location.pathname;
   // Use the Dataset object to ensure we use the matching apiCalls to fetch main JSON
-  const currentDataset = new Dataset(window.location.pathname);
+  const currentDataset = new Dataset(pathname);
   return {
     origin: forceLinkOutHost || window.location.origin,
-    datasetApiCall: currentDataset.apiCalls.main
+    datasetApiCall: currentDataset.apiCalls.main,
+    pathname,
   }
 }
 
@@ -194,7 +196,7 @@ function MicrobeTraceLinkOut() {
 
 function NextcladeLinkOut() {
   const displayName = 'nextclade';
-  const {origin, datasetApiCall} = clientDetails();
+  const {origin, pathname} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
   const {mainTreeNumTips, rootSequence} = useSelector((state) => state.metadata);
 
@@ -222,7 +224,7 @@ function NextcladeLinkOut() {
     )
   }
 
-  const url = `https://clades.nextstrain.org?dataset-json-url=${encodeURIComponent(`${origin}${datasetApiCall}`)}`
+  const url = `https://clades.nextstrain.org?dataset-json-url=${encodeURIComponent(`${origin}${pathname}`)}`
   return (
     <ButtonContainer key={displayName}>
       <ButtonText href={url} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
