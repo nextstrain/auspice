@@ -100,7 +100,7 @@ function TaxoniumLinkOut() {
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current dataset isn't viewable in taxonium as ${unsupportedMessage}`}
+          {`The current dataset isn't viewable in Taxonium as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
@@ -170,7 +170,7 @@ function MicrobeTraceLinkOut() {
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current dataset isn't viewable in MicrobeTrace as ${unsupportedMessage}`}
+          {`The current dataset isn't viewable in MicrobeTrace as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
@@ -220,14 +220,14 @@ function NextcladeLinkOut() {
   } else if (originalVersion === "v1") {
     unsupportedMessage = "v1 datasets aren't supported";
   } else if (!rootSequence) {
-    unsupportedMessage = "this dataset doesn't have a root-sequence (either within the main JSON or as a sidecar JSON).";
+    unsupportedMessage = "this dataset doesn't have a root-sequence (either within the main JSON or as a sidecar JSON)";
   }
   if (unsupportedMessage) {
     return (
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current tree isn't usable as a Nextclade dataset as ${unsupportedMessage}`}
+          {`The current tree isn't usable as a Nextclade dataset as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
