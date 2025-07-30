@@ -1,5 +1,6 @@
 # Changelog
 
+* Link-outs are explicitly disabled for v1 datasets because the nextstrain.org API does not support the v1 -> v2 conversion. ([#2002](https://github.com/nextstrain/auspice/pull/2002))
 * Added a `treeZoom=selected` query to load trees at the same zoom level after the "zoom to selected" button has been pressed, where applicable. See [the view settings docs](https://docs.nextstrain.org/projects/auspice/en/latest/advanced-functionality/view-settings.html) for more details. ([#1321](https://github.com/nextstrain/auspice/pull/1321))
 
 ## version 2.63.1 - 2025/06/04
