@@ -83,17 +83,24 @@ function clientDetails() {
 function TaxoniumLinkOut() {
   const displayName = 'taxonium.org';
   const {pathname, origin} = clientDetails();
-  const {distanceMeasure, colorBy, showTreeToo} = useSelector((state) => state.controls)
+  const {distanceMeasure, colorBy, showTreeToo} = useSelector((state) => state.controls);
+  const {originalVersion} = useSelector((state) => state.metadata);
 
   // Taxonium should work with all nextstrain URLs which support the {GET, accept JSON} route
   // which should be ~all of them (except authn-required routes, which won't work cross-origin,
   // and which we don't attempt to detect here). Tanglegrams aren't supported.
+  let unsupportedMessage;
   if (showTreeToo) {
+    unsupportedMessage = "tanglegrams aren't supported";
+  } else if (originalVersion === "v1") {
+    unsupportedMessage = "v1 datasets aren't supported";
+  }
+  if (unsupportedMessage) {
     return (
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current dataset isn't viewable in taxonium as tanglegrams aren't supported`}
+          {`The current dataset isn't viewable in Taxonium as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
@@ -147,17 +154,23 @@ function MicrobeTraceLinkOut() {
   const displayName = 'microbetrace.cdc.gov';
   const {pathname, origin} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
-  const {mainTreeNumTips} = useSelector((state) => state.metadata);
+  const {mainTreeNumTips, originalVersion} = useSelector((state) => state.metadata);
 
   // MicrobeTrace should work similarly to Taxonium (see above)
   // but trees >500 tips are very slow to load (we don't prevent the display of such trees,
   // however we do show a warning)
+  let unsupportedMessage;
   if (showTreeToo) {
+    unsupportedMessage = "tanglegrams aren't supported";
+  } else if (originalVersion === "v1") {
+    unsupportedMessage = "v1 datasets aren't supported";
+  }
+  if (unsupportedMessage) {
     return (
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current dataset isn't viewable in MicrobeTrace as tanglegrams aren't supported`}
+          {`The current dataset isn't viewable in MicrobeTrace as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
@@ -177,7 +190,7 @@ function MicrobeTraceLinkOut() {
     </ButtonContainer>
   )
 
-  function url() {       
+  function url() {
     /**
      * As of 2024-04-09, the 'origin' must be nextstrain.org or next.nextstrain.org
      * for these links to work. This means (nextstrain.org) the links coming from heroku
@@ -193,7 +206,7 @@ function NextcladeLinkOut() {
   const displayName = 'nextclade';
   const {pathname, origin} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
-  const {mainTreeNumTips, rootSequence} = useSelector((state) => state.metadata);
+  const {mainTreeNumTips, originalVersion, rootSequence} = useSelector((state) => state.metadata);
 
   // All datasets which have a root-sequence (either in-line or sidecar) can theoretically work as Nextclade
   // datasets. See <https://github.com/nextstrain/nextclade/pull/1455> for more thorough discussion here.
@@ -201,19 +214,20 @@ function NextcladeLinkOut() {
   // exactly what the threshold is isn't known. Here I use a rather ad-hoc tip-count threshold:
   const largeTreeWarning = mainTreeNumTips > 4000;
 
-  if (
-    showTreeToo || // Tanglegrams won't work (surprise surprise!)
-    !rootSequence  // Root sequence is required for Nextclade
-  ) {
+  let unsupportedMessage;
+  if (showTreeToo) {
+    unsupportedMessage = "tanglegrams aren't supported";
+  } else if (originalVersion === "v1") {
+    unsupportedMessage = "v1 datasets aren't supported";
+  } else if (!rootSequence) {
+    unsupportedMessage = "this dataset doesn't have a root-sequence (either within the main JSON or as a sidecar JSON)";
+  }
+  if (unsupportedMessage) {
     return (
       <ButtonContainer key={displayName}>
         <InactiveButton>{displayName}</InactiveButton>
         <ButtonDescription>
-          {`The current tree isn't usable as a Nextclade dataset as ${
-            showTreeToo ?
-              "tanglegrams aren't supported." :
-              "this dataset doesn't have a root-sequence (either within the main JSON or as a sidecar JSON)."
-          }`}
+          {`The current tree isn't usable as a Nextclade dataset as ${unsupportedMessage}.`}
         </ButtonDescription>
       </ButtonContainer>
     )
@@ -255,7 +269,7 @@ export const LinkOutModalContents = () => {
         Clicking on the following links will take you to an external site which will attempt to
         load the underlying data JSON which you are currently viewing.
         These sites are not part of Nextstrain and as such are not under our control, but we
-        highly encourage interoperability across platforms like these. 
+        highly encourage interoperability across platforms like these.
       </p>
 
       <div style={{paddingTop: '10px'}}/>

@@ -835,6 +835,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.version) {
     metadata.version = json.version;
   }
+  if (json.meta.extensions?.original_version) {
+    metadata.originalVersion = json.meta.extensions.original_version;
+  }
   if (json.meta.maintainers) {
     metadata.maintainers = json.meta.maintainers;
   }
