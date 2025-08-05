@@ -307,7 +307,6 @@ export const change = function change(
     svgHasChangedDimensions = false,
     animationInProgress = false,
     changeNodeOrder = false,
-    focus = null,
     newDistance = undefined,
     newLayout = undefined,
     updateLayout = undefined,
@@ -376,7 +375,7 @@ export const change = function change(
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -428,7 +427,7 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder) {
+  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
@@ -438,7 +437,7 @@ export const change = function change(
 
   /** display order calculations */
   if (newDistance || updateLayout || changeNodeOrder || streamDefinitionChange) {
-    setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && this.streams});
+    setDisplayOrder({nodes: this.nodes, focus: this.focus, streams: this.params.showStreamTrees && this.streams});
   } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
     // rippleDisplayOrders are typically called by setDisplayOrder however for ∆{colorBy,visibility} we don't want to pay
     // the price of recomputing the display orders for the entire tree, we just need to recompute the
@@ -465,6 +464,7 @@ export const change = function change(
     zoomIntoClade ||
     svgHasChangedDimensions ||
     streamDefinitionChange ||
+    changeVisibility ||
     showConfidences
   ) {
     this.mapToScreen();
