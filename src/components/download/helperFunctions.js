@@ -250,7 +250,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
     const traits = Object.keys(node.node_attrs).filter((k) => !nodeAttrsToIgnore.includes(k));
     for (const trait of traits) {
       const value = getTraitFromNode(node, trait);
-      if (value) {
+      if (value !== undefined) {
         headerInsert(headerFields, null, trait);
         if (typeof value === 'string') {
           tipTraitValues[node.name][trait] = value;
