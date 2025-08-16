@@ -8,6 +8,7 @@ import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, colorBySymbol } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -359,10 +360,37 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
-  // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
-  // then we don't consider internal nodes for the domain calc
-  if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {
+  /**
+   * Select the nodes that we'll use to define the domain of the scales - essentially
+   * select which nodes we want to use to define the viewport.
+   */
+  let nodesInDomain;
+  const useFocusOnSelected = this.focus==='selected' && (this.layout==='rect' || this.layout==='radial');
+  if (useFocusOnSelected) {
+    /**
+     * "focus on selected" limits the axis domains to nodes Auspice will actually render
+     * Note: nodes marked as `inView` may be off-screen in this mode
+     */
+    const visibleNodes = this.nodes.filter(
+      (d) => d.visibility === NODE_VISIBLE && d.x !== undefined && d.y !== undefined
+    );
+
+    /*  Fallback: if nothing is currently visible (e.g. the time-slider is
+        before the earliest sample), fall back to the original “inView” rule
+        so the scales never become undefined. */
+    nodesInDomain = visibleNodes.length > 0
+      ? visibleNodes
+      : this.nodes.filter((d) => d.inView && d.y !== undefined && d.x !== undefined);
+  } else {
+    /**
+     * `inView` nodes are every node which descends from the inViewRootNode - so they include
+     * nodes which are filtered out, e.g. because they're beyond the selected date range
+     * This is the "normal" auspice viewport behaviour, or maybe the "old fashioned" behaviour...
+     */
+    nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  }
+
+  if (this.layout === "scatter" && this.scatterVariables.showBranches === false) {
     nodesInDomain = nodesInDomain.filter((d) => !d.n.hasChildren);
   }
 
