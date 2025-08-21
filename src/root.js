@@ -20,6 +20,14 @@ if (module.hot) {
   setTimeout(() => window.dispatchEvent(new Event('resize')), 500);
 }
 
+
+const worker = new Worker(new URL('./workers/deepThought.js', import.meta.url));
+worker.postMessage({ question: "What's the answer?" });
+console.log("[root.js sending worker a question]")
+worker.onmessage = ({ data: { answer } }) => {
+  console.log(answer);
+};
+
 @connect((state) => ({displayComponent: state.general.displayComponent}))
 class MainComponentSwitch extends React.Component {
   render() {
