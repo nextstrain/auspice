@@ -14,6 +14,7 @@ import ChooseTipLabel from "./choose-tip-label";
 import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
+import StatespaceDeme from "./statespace-deme";
 import TransmissionLines from './transmission-lines';
 import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
@@ -25,7 +26,8 @@ import Language from "./language";
 import { ControlsContainer } from "./styles";
 import FilterData, {FilterInfo} from "./filter";
 import {TreeInfo, MapInfo, AnimationOptionsInfo, PanelLayoutInfo,
-  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo} from "./miscInfoText";
+  ExplodeTreeInfo, EntropyInfo, FrequencyInfo, MeasurementsInfo,
+  StatespaceInfo} from "./miscInfoText";
 import { ControlHeader } from "./controlHeader";
 import MeasurementsOptions from "./measurementsOptions";
 import { RootState } from "../../store";
@@ -98,6 +100,17 @@ function Controls(): JSX.Element {
           options={<>
             <GeoResolution />
             <TransmissionLines />
+          </>}
+        />
+      }
+
+      {panelsAvailable.includes("statespace") && !showTreeToo &&
+        <PanelSection
+          panel="statespace"
+          title={t("sidebar:Statespace")}
+          tooltip={StatespaceInfo}
+          options={<>
+            <StatespaceDeme />
           </>}
         />
       }

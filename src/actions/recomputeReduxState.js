@@ -20,6 +20,7 @@ import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
+import { candidateStatespaceColorings, defaultStatespaceDeme } from "../components/controls/statespace-deme";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
@@ -67,6 +68,9 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.c) {
     state["colorBy"] = query.c;
+  }
+  if (query.statespaceDeme) {
+    state.statespaceDeme = query.statespaceDeme;
   }
 
   if (query.focus && query.focus !== "selected") {
@@ -603,6 +607,13 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
       console.error("Error detected. Setting geoResolution to ", state.geoResolution);
       delete query.r; // no-op if query.r doesn't exist
     }
+  }
+
+  /* Which key should we start with for the statespace visualisation? */
+  const statespaceDemeValid = availableGeoResolutions.includes(state.statespaceDeme) ||
+    candidateStatespaceColorings(metadata.colorings).map(([key]) => key).includes(state.statespaceDeme);
+  if (!statespaceDemeValid) {
+    state.statespaceDeme = defaultStatespaceDeme(state.geoResolution, state.colorBy)
   }
 
   /* show label */
