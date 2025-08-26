@@ -66,7 +66,7 @@ interface Arc {
   endAngle: number
   innerRadius: number
   outerRadius: number
-  parent?: Deme// Will always be present, optional just because of how the object's built
+  demeName?: string // Will always be present, optional just because of how the object's built
   _count?: number
 }
 
@@ -74,13 +74,17 @@ interface Deme {
   name: string
   count?: number
   arcs?: Arc[]
+}
 
+interface DemeCoordinate {
   /* x-position, may be changed by d3's force calcs */
-  x?: number
+  x: number
 
   /* y-position, may be changed by d3's force calcs */
-  y?: number
+  y: number
 }
+
+type Coordinates = Map<string, DemeCoordinate>
 
 interface DemeNodes {
   [key: string]: ReduxNode[]
@@ -125,6 +129,7 @@ class StateSpace extends React.Component<Props> {
   svgDomRef: SVGSVGElement | null
   data: {
     demes?: Demes
+    coordinates?: Coordinates
     demeMultiplier?: number
     transmissionEvents?: TransmissionEvent[]
     transmissionCounts?: TransmissionCounts
@@ -176,11 +181,11 @@ class StateSpace extends React.Component<Props> {
     }
 
     if (recompute.everything) {
-      setInitialCoordinates(this.data.demes, props.width, props.height);
+      this.data.coordinates = setInitialCoordinates(this.data.demes, props.width, props.height);
     }
 
     if (recompute.everything || recompute.visibility) {
-      computeTransmissionCurves(this.data.transmissionEvents, this.data.demes, props.nodes);
+      computeTransmissionCurves(this.data.transmissionEvents, this.data.coordinates, props.nodes);
     }
 
     if (recompute.everything || recompute.colors) {
@@ -198,12 +203,12 @@ class StateSpace extends React.Component<Props> {
     const demes = Array.from(this.data.demes.values());
 
     if (recompute.everything) {
-      this.selections.labels = renderLabels({g: this.groups.labels, demes, width: this.props.width});
+      this.selections.labels = renderLabels({g: this.groups.labels, demes, coordinates: this.data.coordinates, width: this.props.width});
     }
 
     /* We remove & rerender demes on ∆colorBy & ∆geoRes, otherwise we update their attrs */
     if (recompute.everything || recompute.colors) {
-      this.selections.demes = renderDemes({g: this.groups.demes, demes});
+      this.selections.demes = renderDemes({g: this.groups.demes, demes, coordinates: this.data.coordinates});
     } else if (recompute.visibility) {
       this.selections.demes = renderUpdatesToExistingDemes({selection: this.selections.demes});
     }
@@ -211,7 +216,14 @@ class StateSpace extends React.Component<Props> {
     /* we handle transmissions differently -- the visibility is computed here, not in the data construction.
     Note that it would be more performant to update existing DOM elements rather than destroying & recreating */
     if (recompute.everything || recompute.colors || recompute.visibility) {
-      this.selections.transmissions = renderTransmissions({g: this.groups.transmissions, transmissions: this.data.transmissionEvents, demes: this.data.demes, visibility: props.visibility, dateMinNumeric: props.dateMinNumeric, dateMaxNumeric: props.dateMaxNumeric});
+      this.selections.transmissions = renderTransmissions({
+        g: this.groups.transmissions,
+        transmissions: this.data.transmissionEvents,
+        coordinates: this.data.coordinates,
+        visibility: props.visibility,
+        dateMinNumeric: props.dateMinNumeric,
+        dateMaxNumeric: props.dateMaxNumeric
+      });
     }
   }
 
@@ -296,7 +308,7 @@ function createArcs(
     // radius size depends on visibility counts
     deme.arcs.forEach((a) => {
       a.outerRadius = Math.sqrt(count)*demeMultiplier;
-      a.parent = deme;
+      a.demeName = name;
     });
     deme.count = count;
   }
@@ -331,7 +343,7 @@ function setInitialCoordinates(
   demes: Demes,
   width: number,
   height: number
-): void {
+): Coordinates {
   const xOffset = width/2, yOffset = height/2;
   const xScale = width*0.4, yScale = height*0.4;
   const n = demes.size;
@@ -343,14 +355,18 @@ function setInitialCoordinates(
     return 0
   })
 
+  const coords: [string, DemeCoordinate][] = [];
   for (const deme of orderedDemes) {
     const theta = Math.PI * 3 * i / n;
     const r = i / n;
     i++;
     // polar to cartesian
-    deme.x = xOffset + r*Math.cos(theta)*xScale;
-    deme.y = yOffset + r*Math.sin(theta)*yScale;
+    const x = xOffset + r*Math.cos(theta)*xScale;
+    const y = yOffset + r*Math.sin(theta)*yScale;
+    coords.push([deme.name, {x, y}])
   }
+
+  return new Map(coords);
 }
 
 
@@ -388,15 +404,13 @@ function collectTransmissionEvents(
 
 function computeTransmissionCurves(
   events: TransmissionEvent[],
-  demes: Demes,
+  demeCoordinates: Coordinates,
   nodes: Props['nodes'],
 ): void {
   for (const event of events) {
-    const originDeme = demes.get(event.originName);
-    const destinationDeme = demes.get(event.destinationName);
     const bezierCurve = bezier(
-      {x: originDeme.x, y: originDeme.y},
-      {x: destinationDeme.x, y: destinationDeme.y},
+      demeCoordinates.get(event.originName),
+      demeCoordinates.get(event.destinationName),
       event.nForThisPair
     );
     /* set up interpolator with origin and destination numdates */
@@ -433,8 +447,8 @@ function setUpSvg(svgDomRef: SVGSVGElement): StateSpace['groups'] {
  * made up of arcs (i.e. a deme is always a pie chart) to simplify the code.
  */
 function renderDemes(
-  {g, demes}:
-  {g: SelectionGroup, demes: Deme[]}
+  {g, demes, coordinates}:
+  {g: SelectionGroup, demes: Deme[], coordinates: Coordinates}
 ): SelectionArcs {
   g.selectAll("*").remove();
   const generateArc = arc();
@@ -452,7 +466,10 @@ function renderDemes(
         .style("fill-opacity", 0.65)
         .style("fill", (d) => d.color)
         .style("pointer-events", "all")
-        .attr("transform", (d) => `translate(${d.parent.x},${d.parent.y})`)
+        .attr("transform", (d) => {
+          const coords = coordinates.get(d.demeName);
+          return `translate(${coords.x},${coords.y})`
+        });
 }
 
 /**
@@ -462,15 +479,15 @@ function renderDemes(
  * for now it's overkill.
  */
 function renderLabels(
-  {g, demes, width}:
-  {g: SelectionGroup, demes: Deme[], width: number}
+  {g, demes, width, coordinates}:
+  {g: SelectionGroup, demes: Deme[], width: number, coordinates: Coordinates}
 ): SelectionLabels {
   g.selectAll("*").remove();
   return g.selectAll("text")
     .data(demes)
     .enter()
       .append("text")
-      .call((sel) => setLabelPosition(sel, width))
+      .call((sel) => setLabelPosition(sel, coordinates, width))
       .style("pointer-events", "none")
       .text((d) => d.name)
       .attr("class", "tipLabel")
@@ -482,12 +499,19 @@ function renderLabels(
  */
 function setLabelPosition(
   selection: SelectionLabels,
+  demeCoordinates: Coordinates,
   svgWidth: number
 ):void {
   selection
-    .attr("x", (d) => d.x*2<svgWidth ? d.x+10 : d.x-10)
-    .attr("y", (d) => d.y)
-    .attr("text-anchor", (d) => d.x*2<svgWidth ? "start" : "end");
+    .attr("x", (d) => {
+      const x = demeCoordinates.get(d.name).x;
+      return x*2<svgWidth ? x+10 : x-10;
+    })
+    .attr("y", (d) => demeCoordinates.get(d.name).y)
+    .attr("text-anchor", (d) => {
+      const x = demeCoordinates.get(d.name).x;
+      return x*2<svgWidth ? "start" : "end"
+    });
 }
 
 /**
@@ -496,15 +520,15 @@ function setLabelPosition(
  * the line are visibility according to the current temporal slice.
  */
 function renderTransmissions(
-  {g, transmissions, demes, visibility, dateMinNumeric, dateMaxNumeric}:
-  {g: SelectionGroup, transmissions: TransmissionEvent[], demes: Demes, visibility: Props['visibility'], dateMinNumeric: number, dateMaxNumeric: number}
+  {g, transmissions, coordinates, visibility, dateMinNumeric, dateMaxNumeric}:
+  {g: SelectionGroup, transmissions: TransmissionEvent[], coordinates: Coordinates, visibility: Props['visibility'], dateMinNumeric: number, dateMaxNumeric: number}
 ): SelectionTransmissions {
   g.selectAll("*").remove();
   return g.selectAll("transmissions")
     .data(transmissions)
     .enter()
       .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
-        .attr("d", (d) => renderBezier(d, demes, visibility, dateMinNumeric, dateMaxNumeric))
+        .attr("d", (d) => renderBezier(d, coordinates, visibility, dateMinNumeric, dateMaxNumeric))
         .attr("fill", "none")
         .attr("stroke-opacity", 0.6)
         .attr("stroke-linecap", "round")
@@ -515,16 +539,13 @@ function renderTransmissions(
 /**
  * Produce a SVG path ("d" attr) from a datum given temporal & visibility constraints
  */
-function renderBezier(d: TransmissionEvent, demes: Demes, visibility: Props['visibility'], numDateMin: number, numDateMax: number): string {
-  const originDeme = demes.get(d.originName);
-  const destinationDeme = demes.get(d.destinationName);
-
+function renderBezier(d: TransmissionEvent, demeCoordinates: Coordinates, visibility: Props['visibility'], numDateMin: number, numDateMax: number): string {
   return pathStringGenerator(
     extractLineSegmentForAnimationEffect(
       numDateMin,
       numDateMax,
-      {x: originDeme.x, y: originDeme.y},
-      {x: destinationDeme.x, y: destinationDeme.y},
+      demeCoordinates.get(d.originName),
+      demeCoordinates.get(d.destinationName),
       d.originNumDate,
       d.destinationNumDate,
       visibility[d.destinationIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden",
