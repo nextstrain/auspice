@@ -16,13 +16,10 @@ import { getTraitFromNode } from "../../util/treeMiscHelpers";
 import { NODE_NOT_VISIBLE, demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 import { ReduxNode, Visibility } from "../../reducers/tree/types";
 import { AppDispatch } from "../../store";
+import { BasicControlsState } from "../../reducers/controls";
 
 /**
  * ------------------ RUNNING TO-DO LIST -----------------------
- * 
- * Don't depend on geo-resolutions, instead scan the tree and
- * find any trait which is defined on internal nodes. Consider relaxing
- * even this and just showing any node-attr?
  * 
  * Browser resizing
  * 
@@ -40,10 +37,6 @@ import { AppDispatch } from "../../store";
  * 
  * Check for "TODO XXX" comments in this file
  * 
- * Sidebar <Controls> entry for Statespace
- * 
- * URL queries
- * 
  * Allow genotypes to be used as the demes
  * 
  * Remove `any` types
@@ -54,7 +47,7 @@ interface Props {
   nodes: ReduxNode[];
   nodeColors: string[]
   visibility: Visibility[]
-  geoResolution: string
+  demeKey: BasicControlsState['statespaceDeme']
   dateMinNumeric: number
   dateMaxNumeric: number
   colorBy: string
@@ -166,7 +159,8 @@ class StateSpace extends React.Component<Props> {
    * We only want to recompute data as needed (it's expensive!)
    */
   recomputeData(props, recompute: Recompute = {everything: true}): void {
-    const {nodesPerDemeAll, nodesPerDemeVisible} = nodesPerDeme(props.nodes, props.visibility, props.geoResolution);
+
+    const {nodesPerDemeAll, nodesPerDemeVisible} = nodesPerDeme(props.nodes, props.visibility, props.demeKey);
 
     if (recompute.everything || recompute.visibility) {
       this.data.demeMultiplier = computeDemeMultiplier(props.nodes);
@@ -183,7 +177,7 @@ class StateSpace extends React.Component<Props> {
     }
 
     if (recompute.everything) {
-      [this.data.transmissionEvents, this.data.transmissionCounts] = collectTransmissionEvents(this.props.nodes, this.props.geoResolution);
+      [this.data.transmissionEvents, this.data.transmissionCounts] = collectTransmissionEvents(props.nodes, props.demeKey);
     }
 
     if (recompute.everything) {
@@ -198,8 +192,7 @@ class StateSpace extends React.Component<Props> {
       this.data.transmissionEvents.forEach((e) => {e.color = props.nodeColors[e.originIdx]})
     }
 
-    console.log(this.data.demes.get('North America'), this.data.demes.get('North America').count, this.data.demes.get('North America').arcs[0].outerRadius)
-    // console.log(this.data.demes, this.data.transmissionEvents, this.data.transmissionCounts)
+    console.log(this.data.demes, this.data.transmissionEvents, this.data.transmissionCounts)
   }
 
   renderData(props:Props, recompute:Recompute={everything: true}):void {
@@ -299,13 +292,13 @@ function createArcs(
     const count = visibleNodes.length;
 
     if (deme.arcs) { // arcs already exist, but their sizes need updating
-      if (props.geoResolution===props.colorBy || props.continuousColorScale) {
+      if (props.demeKey===props.colorBy || props.continuousColorScale) {
         deme.arcs[0].color = getAverageColorFromNodes(visibleNodes, props.nodeColors);
       } else {
         createOrUpdateArcs(visibleNodes, props.legendValues, props.colorBy, props.nodeColors, deme.arcs);
       }
     } else { // create arcs from scratch!
-      if (props.geoResolution===props.colorBy || props.continuousColorScale) {
+      if (props.demeKey===props.colorBy || props.continuousColorScale) {
         deme.arcs = [{innerRadius: 0, outerRadius: 0, startAngle: 0, endAngle: 2*Math.PI, color: getAverageColorFromNodes(visibleNodes, props.nodeColors)}];
       } else {
         deme.arcs = createOrUpdateArcs(visibleNodes, props.legendValues, props.colorBy, props.nodeColors);
@@ -328,13 +321,13 @@ function createArcs(
 function nodesPerDeme(
   nodes: Props['nodes'],
   visibility: Props['visibility'],
-  geoResolution: Props['geoResolution'],
+  demeKey: Props['demeKey'],
 ): {nodesPerDemeAll: DemeNodes, nodesPerDemeVisible: DemeNodes} {
   const nodesPerDemeAll = {};
   const nodesPerDemeVisible = {};
   nodes.forEach((n, i) => {
     if (n.children) return; /* only consider terminal nodes */
-    const location = getTraitFromNode(n, geoResolution);
+    const location = getTraitFromNode(n, demeKey);
     if (!location) return; /* ignore undefined locations */
     if (!nodesPerDemeAll[location]) nodesPerDemeAll[location]=[];
     nodesPerDemeAll[location].push(n);
@@ -383,15 +376,15 @@ function setInitialCoordinates(
  */
 function collectTransmissionEvents(
   nodes: Props['nodes'],
-  geoResolution: Props['geoResolution'],
+  demeKey: Props['demeKey'],
 ): [TransmissionEvent[], TransmissionCounts] {
   const transmissionCounts: TransmissionCounts = new Map();
   const events: TransmissionEvent[] = [];
   /* loop through (phylogeny) nodes and compare each with its own children to get A->B transmissions */
   nodes.forEach((n) => {
-    const originName = getTraitFromNode(n, geoResolution);
+    const originName = getTraitFromNode(n, demeKey);
     n.children?.forEach((child) => {
-      const destinationName = getTraitFromNode(child, geoResolution);
+      const destinationName = getTraitFromNode(child, demeKey);
       if (originName && destinationName && originName !== destinationName) {
         const demePair = `${originName}__${destinationName}`;
         const occurrences = (transmissionCounts.get(demePair) || 0) + 1;
@@ -574,7 +567,7 @@ function compareProps(oldProps: Props, newProps: Props): Recompute {
     colors: false,
     visibility: false,
   };
-  if (oldProps.geoResolution !== newProps.geoResolution) {
+  if (oldProps.demeKey !== newProps.demeKey) {
     recompute.everything = true;
   } else if (oldProps.colorBy !== newProps.colorBy) {
     recompute.colors = true;
@@ -605,7 +598,7 @@ const mapStateToProps = (state: any): Omit<Props, 'width' | 'height' | 'legend' 
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
-    geoResolution: state.controls.geoResolution,
+    demeKey: state.controls.statespaceDeme,
     dateMinNumeric: state.controls.dateMinNumeric,
     dateMaxNumeric: state.controls.dateMaxNumeric,
     colorBy: state.controls.colorScale.colorBy,
