@@ -110,7 +110,7 @@ interface TransmissionEvent {
   color?: string
 }
 
-type TransmissionCounts = Map<string, number>
+export type TransmissionCounts = Map<string, number>
 
 type SelectionGroup = Selection<SVGGElement, unknown, SVGSVGElement, unknown>
 type SelectionLabels = Selection<SVGTextElement, Deme, SVGGElement, unknown>
@@ -121,6 +121,33 @@ interface Recompute {
   everything: boolean
   colors?: boolean
   visibility?: boolean
+}
+
+export type DataForWorker =  {
+  action: 'startSimulation'
+  demes: DemeForWorker[]
+  transmissionCounts: TransmissionCounts
+  svgWidth: number
+  svgHeight: number
+} | {
+  action: 'stopSimulation'
+}
+
+export type DataFromWorker = {
+  data: DemeFromWorker[]
+}
+
+export interface DemeForWorker {
+  radius: number,
+  x: number,
+  y: number,
+  name: string,
+}
+
+interface DemeFromWorker {
+  x: number,
+  y: number,
+  name: string,
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -144,6 +171,7 @@ class StateSpace extends React.Component<Props> {
     demes?: SelectionArcs
     transmissions?: SelectionTransmissions
   }
+  worker: Worker
 
   constructor(props: Props) {
     super(props);
@@ -153,6 +181,11 @@ class StateSpace extends React.Component<Props> {
     this.data = {};
     this.groups = {};
     this.selections = {};
+
+    this.worker = new Worker(new URL('./demePositions.worker.ts', import.meta.url), { type: 'module' })
+    this.worker.onmessage = (e: MessageEvent<DataFromWorker>): void => {
+      this.coordinateUpdate(e.data.data);
+    };
   }
 
   /**
@@ -177,7 +210,7 @@ class StateSpace extends React.Component<Props> {
     }
 
     if (recompute.everything) {
-      [this.data.transmissionEvents, this.data.transmissionCounts] = collectTransmissionEvents(props.nodes, props.demeKey);
+      [this.data.transmissionEvents, this.data.transmissionCounts] = collectTransmissionEvents(props.nodes, props.demeKey, this.data.demes);
     }
 
     if (recompute.everything) {
@@ -230,13 +263,65 @@ class StateSpace extends React.Component<Props> {
   override componentDidMount(): void {
     this.groups = setUpSvg(this.svgDomRef);
     this.recomputeData(this.props);
+    // TODO -- should this render be deferred until the first simulation's back?
     this.renderData(this.props);
+    this.startPositionSimulation();
+  }
+
+  startPositionSimulation(): void {
+    console.log("[MAIN] START SIMULATION")
+    const demes: DemeForWorker[] = [];
+    for (const [name, info] of this.data.demes) {
+      demes.push({
+        name,
+        ...this.data.coordinates.get(name),
+        radius: info.arcs[0].outerRadius + 10,
+      });
+    }
+    this.worker.postMessage({
+      action: 'startSimulation',
+      demes,
+      transmissionCounts: this.data.transmissionCounts,
+      svgWidth: this.props.width,
+      svgHeight: this.props.height,
+    } satisfies DataForWorker)
+  }
+
+  stopPositionSimulation(): void {
+    console.log("[MAIN] STOP SIMULATION")
+    this.worker.postMessage({action: 'stopSimulation'} satisfies DataForWorker)
+  }
+
+  coordinateUpdate(data: DemeFromWorker[]): void {
+    console.log('<<coordinates updating>>')
+    /* save the new coordinates (from worker) into the `this.data.coordinates` map */
+    data.map((d) => {
+      const c = this.data.coordinates.get(d.name);
+      c.x = d.x;
+      c.y = d.y;
+    });
+    /* update the necessary DOM elements */
+    this.selections.demes.attr("transform", (d) => {
+      const coords = this.data.coordinates.get(d.demeName);
+      return `translate(${coords.x},${coords.y})`
+    });
+    this.selections.labels
+      .call((sel) => setLabelPosition(sel, this.data.coordinates, this.props.width));
+    updateTransmissionCoordinates(this.data.transmissionEvents, this.data.coordinates);
+    this.selections.transmissions
+      .attr("d", (d) => renderBezier(d, this.data.coordinates, this.props.visibility, this.props.dateMinNumeric, this.props.dateMaxNumeric));
   }
 
   override UNSAFE_componentWillReceiveProps(nextProps: Props): void {
     const recompute = compareProps(this.props, nextProps);
+    if (recompute.everything) {
+      this.stopPositionSimulation();
+    }
     this.recomputeData(nextProps, recompute);
     this.renderData(nextProps, recompute);
+    if (recompute.everything) {
+      this.startPositionSimulation();
+    }
   }
 
 
@@ -263,6 +348,7 @@ class StateSpace extends React.Component<Props> {
   override componentWillUnmount(): void {
     const svg = select(this.svgDomRef);
     svg.selectAll("*").remove();
+    this.worker.terminate();
   }
 }
 
@@ -377,15 +463,22 @@ function setInitialCoordinates(
 function collectTransmissionEvents(
   nodes: Props['nodes'],
   demeKey: Props['demeKey'],
+  demeNames: Demes,
 ): [TransmissionEvent[], TransmissionCounts] {
   const transmissionCounts: TransmissionCounts = new Map();
   const events: TransmissionEvent[] = [];
   /* loop through (phylogeny) nodes and compare each with its own children to get A->B transmissions */
   nodes.forEach((n) => {
     const originName = getTraitFromNode(n, demeKey);
+    if (!demeNames.has(originName)) { // internal-only state value
+      return;
+    }
     n.children?.forEach((child) => {
       const destinationName = getTraitFromNode(child, demeKey);
       if (originName && destinationName && originName !== destinationName) {
+        if (!demeNames.has(destinationName)) {  // internal-only state value
+          return;
+        }
         const demePair = `${originName}__${destinationName}`;
         const occurrences = (transmissionCounts.get(demePair) || 0) + 1;
         transmissionCounts.set(demePair, occurrences);
@@ -428,6 +521,20 @@ function computeTransmissionCurves(
     event.bezierCurve = bezierCurve;
     event.bezierDates = bezierDates;
   }
+}
+
+function updateTransmissionCoordinates(
+  transmissions: TransmissionEvent[],
+  demeCoordinates: Coordinates,
+): void {
+  transmissions.forEach((event) => {
+    // recomputing the entire curve isn't the smartest way to do it, but it is the simplest
+    event.bezierCurve = bezier(
+      demeCoordinates.get(event.originName),
+      demeCoordinates.get(event.destinationName),
+      event.nForThisPair
+    );
+  });
 }
 
 /**
