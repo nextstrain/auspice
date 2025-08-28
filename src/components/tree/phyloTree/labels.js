@@ -72,7 +72,7 @@ const branchLabelFontWeight = (key) => {
 
 /** createBranchLabelVisibility (the return value should be passed to d3 style call)
  * @param {str} key e.g. "aa" or "clade"
- * @param {bool} showAll
+ * @param {bool} showAll show all labels for visible nodes
  * @param {str} layout
  * @param {int} totalTipsInView visible tips also in view
  * @return {func} Returns a function with 1 argument: the current node (branch).
@@ -80,8 +80,8 @@ const branchLabelFontWeight = (key) => {
  *                NOTE: the fn should only be provided nodes which have a label.
  */
 const createBranchLabelVisibility = (key, showAll, layout, totalTipsInView) => (d) => {
-  if (showAll) return "visible";
   if (d.visibility !== NODE_VISIBLE) return "hidden";
+  if (showAll) return "visible";
   const magicTipFractionToShowBranchLabel = 0.03;
   /* if the number of _visible_ tips descending from this node are over the
   magicTipFractionToShowBranchLabel (c/w the total number of _visible_ and
