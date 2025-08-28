@@ -1,5 +1,7 @@
 # Changelog
 
+* "show all branch labels" toggle has been updated to only show labels for visible branches, i.e. branches of selected tips after applying filters ([#2004](https://github.com/nextstrain/auspice/pull/2004))
+
 ## version 2.64.0 - 2025/08/15
 
 
