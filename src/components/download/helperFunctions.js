@@ -440,6 +440,12 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
     panels.tree.width += (spaceBetweenTrees + panels.secondTree.width);
   }
 
+  // If display includes measurements panel then just position panels as if
+  // we are using the "full" display because the map will have the "full" dimensions
+  if (panelLayout === "grid" && panels.measurements) {
+    panelLayout = "full";
+  }
+
   if (panels.tree && panels.map) {
     if (panelLayout === "grid") {
       width = panels.tree.width + padding + panels.map.width;
@@ -539,6 +545,12 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
         console.error("Second Tree / tanglegram SVG save error:", e);
       }
     }
+  }
+  if (panelsInDOM.indexOf("measurements" !== -1)) {
+    // Placeholder for measurements panel in downloaded SVG
+    // Used to determine the layout of the map panel since the measurements
+    // panel influences the map's layout in the "Grid" display
+    panels.measurements = {}
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
