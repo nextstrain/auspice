@@ -440,28 +440,44 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
     panels.tree.width += (spaceBetweenTrees + panels.secondTree.width);
   }
 
-  // If display includes measurements panel then just position panels as if
-  // we are using the "full" display because the map will have the "full" dimensions
-  if (panelLayout === "grid" && panels.measurements) {
-    panelLayout = "full";
-  }
-
-  if (panels.tree && panels.map) {
-    if (panelLayout === "grid") {
-      width = panels.tree.width + padding + panels.map.width;
-      height = Math.max(panels.tree.height, panels.map.height);
-      panels.map.x = panels.tree.width + padding;
+  // Special handling of layout if measurements panel is included
+  // Display as if we are in "full" view to display all filtered measurements
+  if (panels.measurements) {
+    if (panels.tree) {
+      width = Math.max(panels.tree.width, panels.measurements.width);
+      height = panels.tree.height + padding + panels.measurements.height;
+      panels.measurements.y = panels.tree.height + padding;
     } else {
-      width = Math.max(panels.tree.width, panels.map.width);
-      height = panels.tree.height + padding + panels.map.height;
-      panels.map.y = panels.tree.height + padding;
+      width = panels.measurements.width;
+      height = panels.measurements.height;
     }
-  } else if (panels.tree) {
-    width = panels.tree.width;
-    height = panels.tree.height;
-  } else if (panels.map) {
-    width = panels.map.width;
-    height = panels.map.height;
+
+    panels.measurementsXAxis.y = height;
+    height += panels.measurementsXAxis.height;
+
+    if (panels.map) {
+      width = Math.max(width, panels.map.width);
+      panels.map.y = height + padding;
+      height += padding + panels.map.height;
+    }
+  } else {
+    if (panels.tree && panels.map) {
+      if (panelLayout === "grid") {
+        width = panels.tree.width + padding + panels.map.width;
+        height = Math.max(panels.tree.height, panels.map.height);
+        panels.map.x = panels.tree.width + padding;
+      } else {
+        width = Math.max(panels.tree.width, panels.map.width);
+        height = panels.tree.height + padding + panels.map.height;
+        panels.map.y = panels.tree.height + padding;
+      }
+    } else if (panels.tree) {
+      width = panels.tree.width;
+      height = panels.tree.height;
+    } else if (panels.map) {
+      width = panels.map.width;
+      height = panels.map.height;
+    }
   }
 
   if (panels.entropy) {
@@ -546,11 +562,19 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
       }
     }
   }
-  if (panelsInDOM.indexOf("measurements" !== -1)) {
-    // Placeholder for measurements panel in downloaded SVG
-    // Used to determine the layout of the map panel since the measurements
-    // panel influences the map's layout in the "Grid" display
-    panels.measurements = {}
+  if (panelsInDOM.indexOf("measurements") !== -1) {
+    try {
+      panels.measurements = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsSVG")));
+      panels.measurementsXAxis = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsXAxisSVG")));
+      // Get the actual width of SVG from the measurements container since the SVG just uses width=100%
+      const measurementsContainer = document.getElementById("measurementsSVGContainer");
+      panels.measurements.width = measurementsContainer.clientWidth;
+      panels.measurementsXAxis.width = measurementsContainer.clientWidth;
+    } catch (e) {
+      panels.measurements = undefined;
+      errors.push("measurements");
+      console.error("Measurements SVG save error:", e);
+    }
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
