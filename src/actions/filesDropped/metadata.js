@@ -250,13 +250,13 @@ function checkDataForErrors(dispatch, getState, newNodeAttrs, newColorings, igno
   if (droppedColorings.size) {
     dispatch(warningNotification({
       message: `Ignoring ${droppedColorings.size} columns as they are already set as colorings or are "special" cases to be ignored`,
-      details: droppedColorings.join(", ")
+      details: [...droppedColorings].join(", ")
     }));
   }
   if (droppedNodes.size) {
     dispatch(warningNotification({
       message: `Ignoring ${droppedNodes.size} taxa (CSV rows) nodes (rows) as they don't appear in the tree`,
-      details: droppedNodes.join(", ")
+      details: [...droppedNodes].join(", ")
     }));
   }
 
