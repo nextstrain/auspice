@@ -1,6 +1,7 @@
 # Changelog
 
 * Fixed a bug that prevented drag-and-drop metadata files from being parsed that was introduced in version 2.64.0 ([#2007](https://github.com/nextstrain/auspice/pull/2007))
+* Added SVG-download support for the measurements panel. ([#2005](https://github.com/nextstrain/auspice/pull/2005))
 
 ## version 2.65.0 - 2025/09/02
 
