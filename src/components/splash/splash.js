@@ -16,20 +16,7 @@ const ColumnList = styled.ul`
   column-gap: 20px;
 `;
 
-const formatDataset = (requestPath, dispatch, changePage) => {
-  return (
-    <li key={requestPath}>
-      <div
-        style={{color: "#5097BA", textDecoration: "none", cursor: "pointer", fontWeight: "400", fontSize: "94%"}}
-        onClick={() => dispatch(changePage({path: requestPath, push: true}))}
-      >
-        {requestPath}
-      </div>
-    </li>
-  );
-};
-
-const SplashContent = ({available, browserDimensions, dispatch, errorMessage, changePage}) => {
+const SplashContent = ({available, browserDimensions, errorMessage}) => {
 
   const Header = () => (
     <>
@@ -89,7 +76,11 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
           <div style={{display: "flex", flexWrap: "wrap"}}>
             <div style={{flex: "1 50%", minWidth: "0"}}>
               <ColumnList width={browserDimensions.width}>
-                {data.map((d) => formatDataset(d.request, dispatch, changePage))}
+                {data.map((d) => (
+                  <li key={d.request}>
+                    <a href={d.request}>{d.request}</a>
+                  </li>
+                ))}
               </ColumnList>
             </div>
           </div>
