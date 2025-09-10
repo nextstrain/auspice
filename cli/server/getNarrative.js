@@ -1,38 +1,50 @@
 const queryString = require("query-string");
-const path = require("path");
+const { promisify } = require('util');
 const fs = require("fs");
 const utils = require("../utils");
+const getAvailable = require("./getAvailable");
 
-const setUpGetNarrativeHandler = ({narrativesPath}) => {
+const readdir = promisify(fs.readdir);
+
+
+const setUpGetNarrativeHandler = (dataPaths) => {
   return async (req, res) => {
+    utils.log(`GET NARRATIVE request received: ${req.url}`);
     const query = queryString.parse(req.url.split('?')[1]);
-    const prefix = query.prefix || "";
-    const filename = prefix
-      .replace(/.+narratives\//, "")  // remove the URL up to (& including) "narratives/"
-      .replace(/\/$/, "")             // remove ending slash
-      .replace(/\//g, "_")            // change slashes to underscores
-      .concat(".md");                 // add .md suffix
-
     const type = query.type ? query.type.toLowerCase() : null;
-
-    const pathName = path.join(narrativesPath, filename);
-    utils.log("trying to access & parse local narrative file: " + pathName);
-    try {
-      const fileContents = fs.readFileSync(pathName, 'utf8');
-      if (type === "md" || type === "markdown") {
-        // we could stream the response (as we sometimes do for getDataset) but narrative files are small
-        // so the expected time savings / server overhead is small.
-        res.send(fileContents);
-      } else {
-        throw new Error(`Unknown format requested: ${type}`);
-      }
-      utils.verbose("SUCCESS");
-    } catch (err) {
-      const errorMessage = `Narratives couldn't be served -- ${err.message}`;
-      utils.warn(errorMessage);
-      res.status(500).type("text/plain").send(errorMessage);
+    if (!(type === "md" || type === "markdown")) {
+      return res.status(401).type("text/plain").send(`Unknown format requested: ${type}`);
     }
-  };
+    if (!query.prefix || !(String(query.prefix).startsWith('narratives/') || String(query.prefix).startsWith('/narratives/'))) {
+      return res.status(401).type("text/plain").send(`Query must include a prefix starting with [/]narratives/`);
+    }
+
+    const requestStr = query.prefix // we know this starts with [/]narratives/
+      .replace(/^\//, "")  // remove leading slash
+      .replace(/\/$/, "")  // remove ending slash
+
+    for (const [p, dataTypes] of Object.entries(dataPaths)) {
+      if (!dataTypes.has('narratives')) continue;
+      try {
+        const files = await readdir(p);
+        const match = getAvailable.getAvailableNarratives(p, files)
+          .filter((d) => d.request===requestStr)[0]
+        if (match) {
+          // we could stream the response (as we sometimes do for getDataset) but narrative files are small
+          // so the expected time savings / server overhead is small.
+          return res.send(fs.readFileSync(match.fullPath, 'utf8'));
+        }
+        // else go scan the next dataPaths (directory)
+      } catch (err) {
+        const errorMessage = `Narratives couldn't be served -- ${err.message}`;
+        utils.warn(errorMessage);
+        res.status(500).type("text/plain").send(errorMessage);
+      }
+    }
+    const errorMessage = `No matching narrative found`;
+    utils.warn(errorMessage);
+    res.status(404).type("text/plain").send(errorMessage);
+  }
 };
 
 module.exports = {
