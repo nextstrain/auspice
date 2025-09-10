@@ -57,6 +57,7 @@ EntropyChart.prototype.update = function update({
   zoomMax = undefined,
   zoomMin = undefined
 }) {
+  console.log(`[update] selectedCds: ${selectedCds} selectedPositions: ${selectedPositions} zoomMin: ${zoomMin} zoomMax: ${zoomMax}`)
   if (selectedCds) {
     this.selectedCds = selectedCds;
     this._setUpZoomBrushWrapping()
@@ -119,6 +120,7 @@ EntropyChart.prototype._setZoomBounds = function _setZoomBounds() {
  *  - update
  */
 EntropyChart.prototype._setZoomCoordinates = function _setZoomCoordinates(overrideMin, overrideMax, cdsChanged) {
+  console.log(`[_setZoomCoordinates] overrideMin: ${overrideMin} overrideMax: ${overrideMax} cdsChanged: ${cdsChanged}`)
 
   if (cdsChanged && this.zoomCoordinates) {
     this.zoomCoordinates = undefined;
