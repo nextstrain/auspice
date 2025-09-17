@@ -1,5 +1,7 @@
 # Changelog
 
+* Added support for Node.js version 24 and its corresponding NPM version (11). ([#2012](https://github.com/nextstrain/auspice/pull/2012))
+
 ## version 2.66.0 - 2025/09/05
 
 
