@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { isValueValid, strainSymbol } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
@@ -248,6 +248,24 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
  * @param  {function} props.t
  */
 const NodeClickedPanel = ({selectedNode, nodesLhsTree, nodesRhsTree, clearSelectedNode, colorings, observedMutations, geneSortFn, tipLabelKey, t}) => {
+  const selectedNodeRef = useRef(selectedNode);
+
+  useEffect(() => {
+    selectedNodeRef.current = selectedNode;
+  }, [selectedNode]);
+
+  useEffect(() => {
+    function onKeyUp(event) {
+      if (event.key==="Escape" && selectedNodeRef.current) {
+        clearSelectedNode(selectedNodeRef.current);
+      }
+    }
+    document.addEventListener('keyup', onKeyUp);
+    return function cleanup() {
+      document.removeEventListener('keyup', onKeyUp);
+    };
+  }, [clearSelectedNode]);
+
   if (!selectedNode) return null;
   const node = (selectedNode.treeId===lhsTreeId ? nodesLhsTree : nodesRhsTree)?.[selectedNode.idx];
   if (!node) {
