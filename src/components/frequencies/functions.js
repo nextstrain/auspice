@@ -11,6 +11,7 @@ import { unassigned_label } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { computeTemporalGridPoints } from "../tree/phyloTree/grid";
+import { formatBounds } from "../../util/colorScale";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -195,7 +196,9 @@ const getMeaningfulLabels = (categories, colorScale) => {
       if (colorScale.legendLabels?.has(name)) {
         return colorScale.legendLabels.get(name);
       }
-      return `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`;
+      // Format the bounds for display. Note: Auspice has a 'temporal' colorscale but
+      // it's not (?) ever used - even for `num_date`!
+      return formatBounds(colorScale.legendBounds[name], colorScale.colorBy==='num_date')
     });
   }
   return categories.slice();
