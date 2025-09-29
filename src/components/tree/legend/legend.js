@@ -5,6 +5,7 @@ import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
 import { fastTransitionDuration, months } from "../../../util/globals";
 import { getBrighterColor, getColorByTitle } from "../../../util/colorHelpers";
+import { formatBounds } from "../../../util/colorScale";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { TOGGLE_LEGEND } from "../../../actions/types";
 
@@ -163,6 +164,7 @@ class Legend extends React.Component {
             value={d}
             label={this.styleLabelText(d)}
             index={i}
+            tooltip={tooltipText(this.props.colorScale, d)}
             clipId={i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
           />
         );
@@ -235,5 +237,20 @@ class Legend extends React.Component {
     );
   }
 }
+
+/**
+ * Create the text to be shown as a tooltip on the legend entry
+ */
+function tooltipText(colorScale, value) {
+  if (!colorScale.continuous) {
+    return value
+  }
+  
+  const bounds = colorScale.legendBounds[value];
+  const temporal = colorScale.colorBy==='num_date';
+  
+  return `Bounds: ${formatBounds(bounds, temporal)}`;
+}
+
 
 export default Legend;

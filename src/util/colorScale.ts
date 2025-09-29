@@ -608,7 +608,10 @@ function parseUserProvidedLegendData(
  */
 export function formatBounds(bounds: [number, number], temporal: boolean):string {
   if (temporal) {
-    return `(${numericToCalendar(bounds[0])}, ${numericToCalendar(bounds[0])}]`;
+    // lower/uppermost bounds are often infinity, which doesn't go to a calendar date nicely!
+    const lower = bounds[0] === -Infinity ? '-∞' : numericToCalendar(bounds[0]);
+    const upper = bounds[1] === Infinity ? '∞' : numericToCalendar(bounds[1]);
+    return `(${lower}, ${upper}]`;
   } 
   return `(${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}]`;
 }
