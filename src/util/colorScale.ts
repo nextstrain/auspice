@@ -12,6 +12,7 @@ import { sortedDomain } from "./sortedDomain";
 import { ColoringInfo, Legend, Metadata } from "../metadata";
 import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
 import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
+import { numericToCalendar } from "./dateHelpers";
 
 export const unknownColor = "#ADB1B3";
 
@@ -560,13 +561,8 @@ function parseUserProvidedLegendData(
 
   const legendValues: LegendValues = data.map((d) => d.value);
 
-  const legendLabels: LegendLabels = new Map(
-    data.map((d) => {
-      return (typeof d.display === "string" || typeof d.display === "number") ? [d.value, d.display] : [d.value, d.value];
-    })
-  );
-
   let legendBounds: LegendBounds = {};
+  let userProvidedLegendBounds: boolean;
   if (scaleType==="continuous") {
     const boundArrays = data.map((d) => d.bounds)
       .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
@@ -583,9 +579,39 @@ function parseUserProvidedLegendData(
       });
     if (boundArrays.length===legendValues.length) {
       legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
+      userProvidedLegendBounds = true;
     } else {
       legendBounds = createLegendBounds(legendValues);
+      userProvidedLegendBounds = false;
     }
   }
+
+  const legendLabels: LegendLabels = new Map(
+    data.map((d, idx) => {
+      if (typeof d.display === "string" || typeof d.display === "number") {
+        return [d.value, d.display];
+      }
+      // If the JSON scale defined bounds, but not a 'display' property, then display the bounds not the anchor value
+      if (scaleType==="continuous" && userProvidedLegendBounds) {
+        return [d.value, formatBounds(legendBounds[legendValues[idx]], false)];
+      }
+      return [d.value, d.value]; // display the value since the 'display' key wasn't specified in the JSON
+    })
+  );
+
   return {legendValues, legendLabels, legendBounds};
+}
+
+/** format the (continuous scale's bin's) bounds for display using mathematical
+ * notation to indicate the range is exclusive of the lower bound, inclusive of
+ * the upper
+ */
+export function formatBounds(bounds: [number, number], temporal: boolean):string {
+  if (temporal) {
+    // lower/uppermost bounds are often infinity, which doesn't go to a calendar date nicely!
+    const lower = bounds[0] === -Infinity ? '-∞' : numericToCalendar(bounds[0]);
+    const upper = bounds[1] === Infinity ? '∞' : numericToCalendar(bounds[1]);
+    return `(${lower}, ${upper}]`;
+  } 
+  return `(${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}]`;
 }

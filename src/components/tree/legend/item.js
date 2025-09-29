@@ -11,6 +11,7 @@ const LegendItem = ({
   rectStroke,
   rectFill,
   label,
+  tooltip,
   value
 }) => (
   <g
@@ -28,14 +29,16 @@ const LegendItem = ({
       height={legendRectSize}
       fill={rectFill}
       stroke={rectStroke}
-    />
+    >
+      <title>{tooltip}</title>
+    </rect>  
     <text
       x={legendRectSize + legendSpacing + 5}
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
       clipPath={clipId?`url(#${clipId})`:undefined}
     >
-      <title>{label}</title>
+      <title>{tooltip}</title>
       {label}
     </text>
   </g>
