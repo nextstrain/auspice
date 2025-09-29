@@ -188,10 +188,15 @@ const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
 
 const getMeaningfulLabels = (categories, colorScale) => {
   if (colorScale.continuous) {
-    return categories.map((name) => name === unassigned_label ?
-      unassigned_label :
-      `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`
-    );
+    return categories.map((name) => {
+      if (name === unassigned_label) {
+        return unassigned_label;
+      }
+      if (colorScale.legendLabels?.has(name)) {
+        return colorScale.legendLabels.get(name);
+      }
+      return `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`;
+    });
   }
   return categories.slice();
 };
