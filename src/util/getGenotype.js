@@ -61,6 +61,53 @@ export const decodeColorByGenotype = (colorBy, genomeMap) => {
   return null;
 };
 
+/**
+ * Similar to `encodeColorByGenotype` except we attempt to combine the requested gene+position with
+ * the existing genotype. If such a combination is not possible then we return the genotype of the
+ * requested gene+position (i.e. the fallback behaviour is that of `encodeColorByGenotype`).
+ * If the requested position already exists in the current color-by then we _remove_ it, unless
+ * it's the only position in which case we return the current color-by.
+ */
+export function encodeColorByGenotypeCumulative({ currentColorBy, genomeMap, gene, position }) {
+
+  if (typeof(position)==='string') {
+    position = parseInt(position, 10);
+  }
+
+  if (isNaN(position)) {
+    console.error(`encodeColorByGenotypeCumulative position argument isn't parseable as an integer`)
+    return currentColorBy;
+  }
+
+  if (!isColorByGenotype(currentColorBy)) {
+    /* simply change to the requested genotype color-by */
+    return encodeColorByGenotype({gene, positions: [position]})
+  }
+
+  const currentState = decodeColorByGenotype(currentColorBy, genomeMap);
+
+  if (currentState.gene !== gene) {
+    /* currently can't combine multiple genes in a single color-by (or nuc + some other gene),
+    so instead we change to an entirely new (genotype) coloring */
+    return encodeColorByGenotype({gene, positions: [position]})
+  }
+
+  let newPositions;
+  if (currentState.positions.includes(position)) {
+    // If it's the only position then this is a no-op
+    if (currentState.positions.length===1) {
+      return currentColorBy;
+    }
+    // else remove the position
+    newPositions = currentState.positions.filter((pos) => pos!==position);
+  } else {
+    newPositions = [...currentState.positions, position];
+  }
+
+  newPositions.sort((a,b) => a<b ? -1 : a>b ? 1 : 0);
+  return encodeColorByGenotype({gene, positions: newPositions})
+}
+
 export function decodePositions(positions, geneLength = 'Infinity') {
   return positions
     .split(",")

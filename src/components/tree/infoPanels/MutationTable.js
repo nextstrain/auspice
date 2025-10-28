@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import styled from 'styled-components';
 import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
-import { encodeColorByGenotype } from "../../../util/getGenotype";
+import { encodeColorByGenotype, encodeColorByGenotypeCumulative } from "../../../util/getGenotype";
 import { parseMutation } from "../../../util/entropy";
 import { changeColorBy } from "../../../actions/colors";
 import { StyledTooltip } from "../../controls/styles";
@@ -66,18 +66,25 @@ const TableFirstColumn = styled.td`
 
 /**
  * Returns a clickable text-like element which (when clicked) changes the
- * color-by to show the chosen mutation.
+ * color-by to show the chosen mutation. Shift-clicking will add the position to
+ * the color-by (where possible).
  *
  * There are a number of future directions we can take this element, including:
  *  - nextclade-like colourful buttons rather than simple text
- *  - shift-click to add the position to the color-by (where possible)
  *  - command-click to filter the data by the mutation (filter to mutated state)
  */
-const UnconnectedSingleMutation = ({gene, mutation, dispatch}) => {
-  function onClick() {
+const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, genomeMap, dispatch}) => {
+  function onClick(event) {
     const {pos} = parseMutation(mutation);
-    const colorBy = encodeColorByGenotype({gene: gene, positions: [pos]});
-    dispatch(changeColorBy(colorBy));
+    if (event.shiftKey) {
+      // Shift-click behaviour: add to existing color-by (where possible)
+      const colorBy = encodeColorByGenotypeCumulative({gene, position: pos, currentColorBy, genomeMap});
+      dispatch(changeColorBy(colorBy));
+    } else {
+      // Normal click behaviour: replace previous color-by
+      const colorBy = encodeColorByGenotype({gene, positions: [pos]});
+      dispatch(changeColorBy(colorBy));
+    }
   }
   
   return (<Button onClick={onClick}>
@@ -85,8 +92,9 @@ const UnconnectedSingleMutation = ({gene, mutation, dispatch}) => {
   </Button>)
 }
 
-const SingleMutation = connect((_state) => ({
-  // no connected redux state
+const SingleMutation = connect((state) => ({
+  genomeMap: state.entropy.genomeMap,
+  currentColorBy: state.controls.colorBy,
 }))(UnconnectedSingleMutation);
 
 const ListOfMutations = ({gene, name, muts, displayAsIntervals, isNuc}) => {
