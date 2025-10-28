@@ -1,7 +1,11 @@
 import React from "react";
+import { connect } from "react-redux";
 import styled from 'styled-components';
 import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
+import { encodeColorByGenotype } from "../../../util/getGenotype";
+import { parseMutation } from "../../../util/entropy";
+import { changeColorBy } from "../../../actions/colors";
 import { StyledTooltip } from "../../controls/styles";
 
 const Button = styled.button`
@@ -59,24 +63,60 @@ const TableFirstColumn = styled.td`
   white-space: nowrap;
   vertical-align: baseline;
 `;
-const ListOfMutations = ({name, muts, displayAsIntervals, isNuc}) => {
-  let mutString, title;
+
+/**
+ * Returns a clickable text-like element which (when clicked) changes the
+ * color-by to show the chosen mutation.
+ *
+ * There are a number of future directions we can take this element, including:
+ *  - nextclade-like colourful buttons rather than simple text
+ *  - shift-click to add the position to the color-by (where possible)
+ *  - command-click to filter the data by the mutation (filter to mutated state)
+ */
+const UnconnectedSingleMutation = ({gene, mutation, dispatch}) => {
+  function onClick() {
+    const {pos} = parseMutation(mutation);
+    const colorBy = encodeColorByGenotype({gene: gene, positions: [pos]});
+    dispatch(changeColorBy(colorBy));
+  }
+  
+  return (<Button onClick={onClick}>
+    {mutation}
+  </Button>)
+}
+
+const SingleMutation = connect((_state) => ({
+  // no connected redux state
+}))(UnconnectedSingleMutation);
+
+const ListOfMutations = ({gene, name, muts, displayAsIntervals, isNuc}) => {
+  let mutationElements = [];
+  let title;
   if (displayAsIntervals) {
     const intervals = parseIntervalsOfNsOrGaps(muts);
     title = `${name} (${intervals.length} regions, ${muts.length}${isNuc?'bp':' codons'}):`;
-    mutString = intervals.map((interval) =>
+    mutationElements = intervals.map((interval) =>
       interval.count===1 ?
         `${interval.start}` :
         `${interval.start}..${interval.end} (${interval.count} ${isNuc?'bp':'codons'})`
-    ).join(", ");
+    );
   } else {
     title = `${name} (${muts.length}):`;
-    mutString = muts.sort(mutSortFn).join(", ");
+    mutationElements = muts.sort(mutSortFn).map((mutation) => (
+      <SingleMutation key={mutation} gene={gene} mutation={mutation} />
+    ))
   }
   return (
     <MutationLine>
       <SubHeading key={name}>{title}</SubHeading>
-      <MutationList>{mutString}</MutationList>
+      <MutationList>
+        {/* reduce method used to intersperse commas between elements */}
+        {mutationElements.reduce((acc, item, index) => {
+          acc.push(item);
+          if (index < mutationElements.length - 1) acc.push(', ');
+          return acc;
+        }, [])}
+      </MutationList>
     </MutationLine>
   );
 };
@@ -120,6 +160,7 @@ const displayGeneMutations = (gene, mutsPerCat) => {
         {Object.entries(mutCategoryLookup).map(([key, name]) => (
           (key in mutsPerCat && mutsPerCat[key].length) ?
             (<ListOfMutations
+              gene={gene}
               key={name}
               name={name}
               muts={mutsPerCat[key]}
