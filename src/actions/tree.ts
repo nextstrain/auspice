@@ -276,8 +276,9 @@ export const applyFilter = (
    *  - "inactivate" -> inactivate values (i.e. change active prop to false). To activate just use "add".
    *  - "remove" -> remove the values from the current selection
    *  - "set"  -> set the values of the filter to be those provided. All disabled filters will be removed. XXX TODO.
+   *  - "focus" -> similar to "set" except other existing filter values are inactivated not removed.
    */
-  mode: "add" | "inactivate" | "remove" | "set",
+  mode: "add" | "inactivate" | "remove" | "set" | "focus",
 
   /** the trait name of the filter ("authors", "country" etcetera) */
   trait: string | symbol,
@@ -293,6 +294,23 @@ export const applyFilter = (
       case "set":
         newValues = values.map((value) => ({value, active: true}));
         break;
+      case "focus": {
+        const valuesToActivate = new Set(values);
+        const existingValues = (controls.filters[trait] || []).slice()
+          .map((f) => {
+            if (valuesToActivate.has(f.value)) {
+              valuesToActivate.delete(f.value);
+              return {value: f.value, active: true};
+            } else {
+              return {value: f.value, active: false};
+            }
+          });
+        newValues = ([
+          ...existingValues,
+          [...valuesToActivate].map((value) => ({value, active: true})),
+        ]).flat(); // flat to remove empty array if valuesToActivate empty
+        break;
+      }
       case "add":
         if (currentlyFilteredTraits.indexOf(trait) === -1) {
           newValues = values.map((value) => ({value, active: true}));

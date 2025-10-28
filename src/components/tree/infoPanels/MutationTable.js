@@ -4,8 +4,10 @@ import styled from 'styled-components';
 import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
 import { encodeColorByGenotype, encodeColorByGenotypeCumulative } from "../../../util/getGenotype";
+import { genotypeSymbol } from "../../../util/globals";
 import { parseMutation } from "../../../util/entropy";
 import { changeColorBy } from "../../../actions/colors";
+import { applyFilter } from "../../../actions/tree";
 import { StyledTooltip } from "../../controls/styles";
 
 const Button = styled.button`
@@ -67,17 +69,27 @@ const TableFirstColumn = styled.td`
 /**
  * Returns a clickable text-like element which (when clicked) changes the
  * color-by to show the chosen mutation. Shift-clicking will add the position to
- * the color-by (where possible).
+ * the color-by (where possible). Holding command/windows will modify the filters
+ * rather than the color-by.
  *
- * There are a number of future directions we can take this element, including:
- *  - nextclade-like colourful buttons rather than simple text
- *  - command-click to filter the data by the mutation (filter to mutated state)
+ * (Now that these are clickable it would be fun to display them as badges, similar
+ * to Nextclade)
  */
-const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, genomeMap, dispatch}) => {
+const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, gtFilters, genomeMap, dispatch}) => {
   function onClick(event) {
-    const {pos} = parseMutation(mutation);
-    if (event.shiftKey) {
-      // Shift-click behaviour: add to existing color-by (where possible)
+    const {pos, to} = parseMutation(mutation);
+    if (event.metaKey) {
+      // cmd key (mac), windows key behaviour: filter to that mutated state
+      // (if shift is also pressed then we add-to / remove-from the filters)
+      const value = `${gene} ${pos}${to}`; // the requested filter value
+      if (event.shiftKey) {
+        const alreadyActive = (new Set(gtFilters.filter((f) => f.active).map((f) => f.value))).has(value)
+        dispatch(applyFilter(alreadyActive ? 'inactivate' : 'add', genotypeSymbol, [value]))
+      } else {
+        dispatch(applyFilter('focus', genotypeSymbol, [value]))
+      }
+    } else if (event.shiftKey) {
+      // Shift-click behaviour (without command key): add to existing color-by (where possible)
       const colorBy = encodeColorByGenotypeCumulative({gene, position: pos, currentColorBy, genomeMap});
       dispatch(changeColorBy(colorBy));
     } else {
@@ -95,6 +107,7 @@ const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, genomeMap, d
 const SingleMutation = connect((state) => ({
   genomeMap: state.entropy.genomeMap,
   currentColorBy: state.controls.colorBy,
+  gtFilters: state.controls.filters[genotypeSymbol] || [],
 }))(UnconnectedSingleMutation);
 
 const ListOfMutations = ({gene, name, muts, displayAsIntervals, isNuc}) => {
