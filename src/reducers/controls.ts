@@ -442,15 +442,18 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         delete filters[action.trait]
       }
 
-      /* In the situation where a node-selected modal is active + we have
-      removed or inactivated the corresponding filter, then we want to remove
-      the modal */
+      /**
+       * If a tip modal is open then the strain will have been added as an active filter.
+       * If we inactivate/remove that specific strain filter then we want to close the modal too!
+       * (The inverse isn't true: filtering to a specific strain doesn't open the modal)
+       */
       let selectedNode = state.selectedNode
-      if (selectedNode) {
-        const filterInfo = filters?.[strainSymbol]?.find((f)=>f.value===selectedNode.name);
-        if (!filterInfo || !filterInfo.active) {
-          selectedNode = null;
-        }
+      if (selectedNode &&
+        !selectedNode.isBranch &&
+        action.trait===strainSymbol &&
+        !action.values.find((f) => f.value===selectedNode.name && f.active)
+      ) {
+        selectedNode = null;
       }
       return Object.assign({}, state, {
         filters,
