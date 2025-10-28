@@ -201,8 +201,24 @@ const InfoContainer = styled.span`
   color: #888;
 `;
 
+const Bold = styled.span`
+  font-weight: 900;
+`
+
+function MutationClickHelpText() {
+  return (
+    <>
+      <Bold>Click</Bold> on the mutation to change the color-by to that position.{' '}
+      <Bold>Shift+click</Bold> to add/remove mutations from the existing color-by selection, where possible.{' '}
+      <Bold>Command+click / Windows+click</Bold> to filter to nodes with that mutated state (holding shift will amend the existing filters).
+    </>
+  );
+}
+
 const branchMutationInfo = (<div>
-  A summary of mutations inferred to have occurred on this branch.
+  A summary of mutations inferred to have occurred on this branch.{' '}
+  <MutationClickHelpText />
+  <p/>
   Mutations are grouped into one of the following (mutually exclusive) categories,
   with the first matching category used:
 
@@ -222,7 +238,9 @@ const branchMutationInfo = (<div>
 </div>);
 
 const tipChangesInfo = (<div>
-  A summary of sequence changes between the root and the selected tip.
+  A summary of sequence changes between the root and the selected tip.{' '}
+  <MutationClickHelpText />
+  <p/>
   Changes are grouped into one of the following (mutually exclusive) categories,
   with the first matching category used:
 
@@ -260,7 +278,7 @@ export const MutationTable = ({node, geneSortFn, isTip, observedMutations}) => {
         </InfoContainer>
       </Heading>
 
-      <StyledTooltip place="bottom" type="light" effect="solid" id="seqChangesInfo">
+      <StyledTooltip place="bottom" type="light" effect="solid" id="seqChangesInfo" maxWidth="50vh">
         {isTip ? tipChangesInfo : branchMutationInfo}
       </StyledTooltip>
 
