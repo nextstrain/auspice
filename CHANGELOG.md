@@ -1,5 +1,6 @@
 # Changelog
 
+* Mutations in a node-info modal (via tip click or shift+branch click) are now clickable. Clicking on a mutation will colour the tree by the genotypes at that position. Shift+clicking will append that position to the current genotype colouring (if possible), or remove it if it's already part of it. Command clicking (with or without shift) will behave similarly but filter the tree via the specific mutated state instead of changing the colouring. ([#2018](https://github.com/nextstrain/auspice/pull/2018))
 * Added support for Node.js version 24 and its corresponding NPM version (11). ([#2012](https://github.com/nextstrain/auspice/pull/2012))
 
 ## version 2.66.0 - 2025/09/05
