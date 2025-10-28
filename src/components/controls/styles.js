@@ -106,7 +106,7 @@ export const SidebarIconContainer = styled.span`
 `;
 
 export const StyledTooltip = styled(ReactTooltip)`
-  max-width: 30vh;
+  max-width: ${(props) => props.maxWidth || '30vh'};
   white-space: normal;
   line-height: 1.2;
   padding: 21px !important; /* override internal styling */
