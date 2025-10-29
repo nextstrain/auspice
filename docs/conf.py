@@ -92,6 +92,7 @@ linkcheck_ignore = [
      # These URLs are valid but return broken when using linkcheck. They can still be checked manually.
      r'^https://academic\.oup\.com/bioinformatics/article/34/23/4121/5001388',
      r'https://www\.gnu\.org/licenses/agpl-3\.0\.en\.html',
+     r'https://www\.npmjs\.com/package/auspice',
 ]
 linkcheck_anchors_ignore_for_url = [
      # Github uses anchor-looking links for highlighting lines but
