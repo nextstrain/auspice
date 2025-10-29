@@ -1,5 +1,5 @@
 import React from "react";
-import { connect } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import styled from 'styled-components';
 import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
@@ -75,7 +75,11 @@ const TableFirstColumn = styled.td`
  * (Now that these are clickable it would be fun to display them as badges, similar
  * to Nextclade)
  */
-const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, gtFilters, genomeMap, dispatch}) => {
+const SingleMutation = ({gene, mutation}) => {
+  const dispatch = useDispatch();
+  const genomeMap = useSelector((state) => state.entropy.genomeMap);
+  const currentColorBy = useSelector((state) => state.controls.colorBy);
+  const gtFilters = useSelector((state) => state.controls.filters[genotypeSymbol] || []);
   function onClick(event) {
     const {pos, to} = parseMutation(mutation);
     if (event.metaKey) {
@@ -98,17 +102,11 @@ const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, gtFilters, g
       dispatch(changeColorBy(colorBy));
     }
   }
-  
+
   return (<Button onClick={onClick}>
     {mutation}
   </Button>)
 }
-
-const SingleMutation = connect((state) => ({
-  genomeMap: state.entropy.genomeMap,
-  currentColorBy: state.controls.colorBy,
-  gtFilters: state.controls.filters[genotypeSymbol] || [],
-}))(UnconnectedSingleMutation);
 
 const ListOfMutations = ({gene, name, muts, displayAsIntervals, isNuc}) => {
   let mutationElements = [];
