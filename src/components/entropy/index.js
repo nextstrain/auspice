@@ -14,7 +14,7 @@ import InfoPanel from "./infoPanel";
 import { changeEntropyCdsSelection, showCountsNotEntropy } from "../../actions/entropy";
 import { ENTROPY_ONSCREEN_CHANGE } from "../../actions/types";
 import { timerStart, timerEnd } from "../../util/perf";
-import { encodeColorByGenotype } from "../../util/getGenotype";
+import { encodeColorByGenotype, encodeColorByGenotypeCumulative } from "../../util/getGenotype";
 import { nucleotide_gene } from "../../util/globals";
 import { getCdsByName, calcEntropyInView } from "../../util/entropy";
 import { StyledTooltip } from "../controls/styles";
@@ -109,10 +109,23 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
+    /** Update the color-by to reflect the clicked entropy bar. Clicking on a
+     * bar will change the color-by to that position. Shift-clicking will add
+     * the position to the existing color-by (as long as the gene is the same)
+     * or remove it if it was already part of the color-by. A color-by change will
+     * propagate through redux and result in the bar being highlighted when the
+     * component updates.
+     */
     if (this.props.narrativeMode) return;
-    const colorBy = d.codon===undefined ?
-      encodeColorByGenotype({ positions: [d.x] }) :
-      encodeColorByGenotype({ gene: this.props.selectedCds.name, positions: [d.codon] });
+    /* NOTE: window.event is deprecated, however the version of d3-selection we're using doesn't supply
+       the event as an argument */
+    const shiftKey = !!window.event.shiftKey;
+    const [gene, position] = d.codon===undefined ?
+      [nucleotide_gene, d.x] :
+      [this.props.selectedCds.name, d.codon];
+    const colorBy = shiftKey ?
+      encodeColorByGenotypeCumulative({currentColorBy: this.props.colorBy, gene, position }) :
+      encodeColorByGenotype({ gene, positions: [position] });
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }

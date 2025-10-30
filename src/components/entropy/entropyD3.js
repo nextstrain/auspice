@@ -1093,7 +1093,9 @@ EntropyChart.prototype._mainTooltipAa = function _mainTooltipAa(d) {
           {this.showCounts ? `${t("Num changes observed")}: ${d.y}` : `${t("Normalised Shannon entropy")}: ${d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
-        {t("Click to color tree & map by this genotype")}
+          {t("Click to color tree & map by this genotype")}
+          <br/>
+          {t("Shift+click to add/remove positions")}
         </div>
       </div>
     );
@@ -1146,6 +1148,8 @@ EntropyChart.prototype._mainTooltipNuc = function _mainTooltipAa(d) {
         </div>
         <div style={infoPanelStyles.comment}>
           {t("Click to color tree & map by this genotype")}
+          <br/>
+          {t("Shift+click to add/remove positions")}
         </div>
       </div>
     );
