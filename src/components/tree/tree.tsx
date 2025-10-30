@@ -56,13 +56,6 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     }));
   }
 
-  /* pressing the escape key should dismiss an info modal (if one exists) */
-  handlekeydownEvent = (event: KeyboardEvent): void => {
-    if (event.key==="Escape" && this.props.selectedNode) {
-      this.clearSelectedNode(this.props.selectedNode);
-    }
-  }
-
   setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>): void {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
@@ -74,7 +67,6 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   override componentDidMount(): void {
-    document.addEventListener('keyup', this.handlekeydownEvent);
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
@@ -122,10 +114,6 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
       this.tangleRef.drawLines();
     }
     if (Object.keys(newState).length) this.setState<never>(newState);
-  }
-
-  override componentWillUnmount(): void {
-    document.removeEventListener('keyup', this.handlekeydownEvent);
   }
 
   getStyles = (): {
