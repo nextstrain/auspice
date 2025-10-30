@@ -11,6 +11,13 @@ const getNodeMutations = (n) => {
   return false;
 };
 
+export function parseMutation(m) {
+  const pos = parseInt(m.slice(1, m.length - 1), 10);
+  const from = m.slice(0, 1);
+  const to = m.slice(-1);
+  return {from, to, pos};
+}
+
 const calcMutationCounts = (nodes, visibility, selectedCds) => {
   const isAA = selectedCds!==nucleotide_gene;
   const sparse = [];
@@ -20,10 +27,8 @@ const calcMutationCounts = (nodes, visibility, selectedCds) => {
     if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
     const mutations = getNodeMutations(n);
     mutations?.[cdsName]?.forEach((m) => {
-      const pos = parseInt(m.slice(1, m.length - 1), 10);
-      const A = m.slice(0, 1);
-      const B = m.slice(-1);
-      if (valid(A, B, isAA)) {
+      const {from, to, pos} = parseMutation(m);
+      if (valid(from, to, isAA)) {
         sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
       }
     });

@@ -1,7 +1,13 @@
 import React from "react";
+import { connect } from "react-redux";
 import styled from 'styled-components';
 import { FaInfoCircle } from "react-icons/fa";
 import { getBranchMutations, getTipChanges } from "../../../util/treeMiscHelpers";
+import { encodeColorByGenotype, encodeColorByGenotypeCumulative } from "../../../util/getGenotype";
+import { genotypeSymbol } from "../../../util/globals";
+import { parseMutation } from "../../../util/entropy";
+import { changeColorBy } from "../../../actions/colors";
+import { applyFilter } from "../../../actions/tree";
 import { StyledTooltip } from "../../controls/styles";
 
 const Button = styled.button`
@@ -59,24 +65,79 @@ const TableFirstColumn = styled.td`
   white-space: nowrap;
   vertical-align: baseline;
 `;
-const ListOfMutations = ({name, muts, displayAsIntervals, isNuc}) => {
-  let mutString, title;
+
+/**
+ * Returns a clickable text-like element which (when clicked) changes the
+ * color-by to show the chosen mutation. Shift-clicking will add the position to
+ * the color-by (where possible). Holding command/windows will modify the filters
+ * rather than the color-by.
+ *
+ * (Now that these are clickable it would be fun to display them as badges, similar
+ * to Nextclade)
+ */
+const UnconnectedSingleMutation = ({gene, mutation, currentColorBy, gtFilters, genomeMap, dispatch}) => {
+  function onClick(event) {
+    const {pos, to} = parseMutation(mutation);
+    if (event.metaKey) {
+      // cmd key (mac), windows key behaviour: filter to that mutated state
+      // (if shift is also pressed then we add-to / remove-from the filters)
+      const value = `${gene} ${pos}${to}`; // the requested filter value
+      if (event.shiftKey) {
+        const alreadyActive = (new Set(gtFilters.filter((f) => f.active).map((f) => f.value))).has(value)
+        dispatch(applyFilter(alreadyActive ? 'inactivate' : 'add', genotypeSymbol, [value]))
+      } else {
+        dispatch(applyFilter('focus', genotypeSymbol, [value]))
+      }
+    } else if (event.shiftKey) {
+      // Shift-click behaviour (without command key): add to existing color-by (where possible)
+      const colorBy = encodeColorByGenotypeCumulative({gene, position: pos, currentColorBy, genomeMap});
+      dispatch(changeColorBy(colorBy));
+    } else {
+      // Normal click behaviour: replace previous color-by
+      const colorBy = encodeColorByGenotype({gene, positions: [pos]});
+      dispatch(changeColorBy(colorBy));
+    }
+  }
+  
+  return (<Button onClick={onClick}>
+    {mutation}
+  </Button>)
+}
+
+const SingleMutation = connect((state) => ({
+  genomeMap: state.entropy.genomeMap,
+  currentColorBy: state.controls.colorBy,
+  gtFilters: state.controls.filters[genotypeSymbol] || [],
+}))(UnconnectedSingleMutation);
+
+const ListOfMutations = ({gene, name, muts, displayAsIntervals, isNuc}) => {
+  let mutationElements = [];
+  let title;
   if (displayAsIntervals) {
     const intervals = parseIntervalsOfNsOrGaps(muts);
     title = `${name} (${intervals.length} regions, ${muts.length}${isNuc?'bp':' codons'}):`;
-    mutString = intervals.map((interval) =>
+    mutationElements = intervals.map((interval) =>
       interval.count===1 ?
         `${interval.start}` :
         `${interval.start}..${interval.end} (${interval.count} ${isNuc?'bp':'codons'})`
-    ).join(", ");
+    );
   } else {
     title = `${name} (${muts.length}):`;
-    mutString = muts.sort(mutSortFn).join(", ");
+    mutationElements = muts.sort(mutSortFn).map((mutation) => (
+      <SingleMutation key={mutation} gene={gene} mutation={mutation} />
+    ))
   }
   return (
     <MutationLine>
       <SubHeading key={name}>{title}</SubHeading>
-      <MutationList>{mutString}</MutationList>
+      <MutationList>
+        {/* reduce method used to intersperse commas between elements */}
+        {mutationElements.reduce((acc, item, index) => {
+          acc.push(item);
+          if (index < mutationElements.length - 1) acc.push(', ');
+          return acc;
+        }, [])}
+      </MutationList>
     </MutationLine>
   );
 };
@@ -120,6 +181,7 @@ const displayGeneMutations = (gene, mutsPerCat) => {
         {Object.entries(mutCategoryLookup).map(([key, name]) => (
           (key in mutsPerCat && mutsPerCat[key].length) ?
             (<ListOfMutations
+              gene={gene}
               key={name}
               name={name}
               muts={mutsPerCat[key]}
@@ -139,8 +201,24 @@ const InfoContainer = styled.span`
   color: #888;
 `;
 
+const Bold = styled.span`
+  font-weight: 900;
+`
+
+function MutationClickHelpText() {
+  return (
+    <>
+      <Bold>Click</Bold> on the mutation to change the color-by to that position.{' '}
+      <Bold>Shift+click</Bold> to add/remove mutations from the existing color-by selection, where possible.{' '}
+      <Bold>Command+click / Windows+click</Bold> to filter to nodes with that mutated state (holding shift will amend the existing filters).
+    </>
+  );
+}
+
 const branchMutationInfo = (<div>
-  A summary of mutations inferred to have occurred on this branch.
+  A summary of mutations inferred to have occurred on this branch.{' '}
+  <MutationClickHelpText />
+  <p/>
   Mutations are grouped into one of the following (mutually exclusive) categories,
   with the first matching category used:
 
@@ -160,7 +238,9 @@ const branchMutationInfo = (<div>
 </div>);
 
 const tipChangesInfo = (<div>
-  A summary of sequence changes between the root and the selected tip.
+  A summary of sequence changes between the root and the selected tip.{' '}
+  <MutationClickHelpText />
+  <p/>
   Changes are grouped into one of the following (mutually exclusive) categories,
   with the first matching category used:
 
@@ -198,7 +278,7 @@ export const MutationTable = ({node, geneSortFn, isTip, observedMutations}) => {
         </InfoContainer>
       </Heading>
 
-      <StyledTooltip place="bottom" type="light" effect="solid" id="seqChangesInfo">
+      <StyledTooltip place="bottom" type="light" effect="solid" id="seqChangesInfo" maxWidth="50vh">
         {isTip ? tipChangesInfo : branchMutationInfo}
       </StyledTooltip>
 
