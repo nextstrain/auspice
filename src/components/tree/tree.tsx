@@ -57,7 +57,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   /* pressing the escape key should dismiss an info modal (if one exists) */
-  handlekeydownEvent = (event: KeyboardEvent): void => {
+  onKeyUp = (event: KeyboardEvent): void => {
     if (event.key==="Escape" && this.props.selectedNode) {
       this.clearSelectedNode(this.props.selectedNode);
     }
@@ -74,7 +74,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   override componentDidMount(): void {
-    document.addEventListener('keyup', this.handlekeydownEvent);
+    document.addEventListener('keyup', this.onKeyUp);
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
@@ -125,7 +125,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   }
 
   override componentWillUnmount(): void {
-    document.removeEventListener('keyup', this.handlekeydownEvent);
+    document.removeEventListener('keyup', this.onKeyUp);
   }
 
   getStyles = (): {
