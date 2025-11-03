@@ -4,7 +4,7 @@ Overview (Server)
 
 The Auspice client (i.e. what you see in the web browser) requires a server behind it to
 - (a) serve the client HTML, CSS & JavaScript to the browser and
-- (b) handle certain `GET <https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods>`_ requests from the client, for instance "give me the zika dataset to display".
+- (b) handle certain `GET <https://en.wikipedia.org/wiki/HTTP>`_ requests from the client, for instance "give me the zika dataset to display".
 
 We provide a basic server to run Auspice locally -- any time you run ``auspice view`` or ``auspice develop`` you're running a server!
 In these cases, the server is running on your computer, sending datasets and narratives, which are stored on your machine, to the Auspice client.
