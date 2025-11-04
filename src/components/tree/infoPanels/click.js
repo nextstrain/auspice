@@ -224,7 +224,7 @@ const Trait = ({node, trait, colorings, isTerminal}) => {
 
   /* case where the colorScale is temporal */
   if (isTemporal && typeof value === "number") {
-    return item(name, numericToCalendar(value));
+    value = numericToCalendar(value);
   }
 
   const url = getUrlFromNode(node, trait);

@@ -254,13 +254,14 @@ export const strainTSV = (dispatch, filePrefix, nodes, nodeVisibilities) => {
         headerInsert(headerFields, null, trait);
         if (typeof value === 'string') {
           tipTraitValues[node.name][trait] = value;
-          const url = getUrlFromNode(node, trait);
-          if (url) {
-            headerInsert(headerFields, trait, urlify(trait));
-            tipTraitValues[node.name][urlify(trait)] = url;
-          }
         } else if (typeof value === "number") {
           tipTraitValues[node.name][trait] = parseFloat(value).toFixed(2);
+        }
+
+        const url = getUrlFromNode(node, trait);
+        if (url) {
+          headerInsert(headerFields, trait, urlify(trait));
+          tipTraitValues[node.name][urlify(trait)] = url;
         }
       }
     }
