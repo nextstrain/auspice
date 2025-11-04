@@ -1,5 +1,8 @@
 # Changelog
 
+* Downloaded TSV will include associated URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
+* Tip info modal displays link for traits that have a URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
+
 ## version 2.67.0 - 2025/11/03
 
 
