@@ -68,12 +68,6 @@ const modifyStateViaURLQuery = (state, query) => {
     state["colorBy"] = query.c;
   }
 
-  if (query.focus && query.focus !== "selected") {
-    console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
-    delete query.focus;
-  }
-  state["focus"] = query.focus === undefined ? null : query.focus;
-
   if (query.ci === undefined) {
     state["temporalConfidence"]["on"] = false;
   } else {
@@ -226,6 +220,19 @@ const modifyStateViaURLQuery = (state, query) => {
       delete query.streamLabel;
     }
   }
+
+  /* focus state is processed after streamtrees as they're mututally exclusive features and, if
+  both are in the query, then we want to ignore the focus query */
+  if (query.focus) {
+    if (query.focus !== "selected") {
+      console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
+      delete query.focus; 
+    } else if (state.showStreamTrees) {
+      console.error(`Cannot use focus and streamtrees at the same time; removing focus.`);
+      delete query.focus;
+    }
+  }
+  state.focus = query.focus === undefined ? null : query.focus;
 
 
   return state;
