@@ -1,5 +1,6 @@
 # Changelog
 
+* When multiple trees are displayed ("tangletrees") the tree-buttons (zoom out, zoom to selected, zoom to root) are now present for each tree and only change their respective tree. ([#2026](https://github.com/nextstrain/auspice/pull/2026))
 * Downloaded TSV will include associated URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
 * Tip info modal displays link for traits that have a URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
 

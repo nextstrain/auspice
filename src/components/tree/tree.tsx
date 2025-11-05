@@ -149,7 +149,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     const { t } = this.props;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
-      <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")}>
+      <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")} tallTitle={!!this.props.showTreeToo}>
         <ErrorBoundary>
           <Legend width={this.props.width}/>
         </ErrorBoundary>
@@ -199,7 +199,12 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
           null
         }
-        <TreeButtons {...this.props} />
+
+        <TreeButtons {...this.props}  mainTree={true}
+          offsetPx={this.props.showTreeToo ? widthPerTree + spaceBetweenTrees + 5 : 5} />
+
+        {this.props.showTreeToo && 
+          <TreeButtons {...this.props} mainTree={false} offsetPx={5} />}
       </Card>
     );
   }

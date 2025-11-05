@@ -27,7 +27,7 @@ class Card extends React.Component {
         fontWeight: 500,
         backgroundColor: "#FFFFFF",
         borderTop: "thin solid #BBB",
-        minHeight: "15px"
+        minHeight: this.props.tallTitle ? 25 : 15,
       }
     };
   }
