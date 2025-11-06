@@ -188,6 +188,7 @@ export const changeDateFilter = ({
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
+      idxOfFilteredRoot: tree.idxOfFilteredRoot,
     };
     if (controls.showTreeToo) {
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
@@ -196,6 +197,8 @@ export const changeDateFilter = ({
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
+      dispatchObj.idxOfInViewRootNodeToo = treeToo.idxOfInViewRootNode;
+      dispatchObj.idxOfFilteredRootToo = treeToo.idxOfFilteredRoot;
     }
 
     /* Changes in visibility require a recomputation of which legend items we wish to display */
