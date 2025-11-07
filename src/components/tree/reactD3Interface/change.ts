@@ -96,6 +96,18 @@ export const changePhyloTreeViaPropsComparison = (
     args.updateLayout = true;
   }
 
+  /* enable/disable dynamic zoom */
+  if (oldProps.zoom !== newProps.zoom) {
+    args.zoom = newProps.zoom;
+    args.updateLayout = true;
+  }
+  /* re-apply dynamic zoom on changes */
+  else if (newProps.zoom === "dynamic") {
+    if (dateRangeChange || filterChange) {
+      args.zoom = "dynamic";
+    }
+  }
+
   /* change in key used to define branch labels, tip labels */
   if (oldProps.canRenderBranchLabels===true && newProps.canRenderBranchLabels===false) {
     args.newBranchLabellingKey = "none";

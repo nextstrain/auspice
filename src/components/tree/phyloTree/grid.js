@@ -443,7 +443,7 @@ export const temporalWindowTransition = transition('temporalWindowTransition')
  * add background grey rectangles to demarcate the temporal slice
  */
 export const showTemporalSlice = function showTemporalSlice() {
-  if (this.layout !== "rect" || this.distance !== "num_date") {
+  if (this.layout !== "rect" || this.distance !== "num_date" || this.zoom === "dynamic") {
     this.hideTemporalSlice();
     return;
   }

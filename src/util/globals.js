@@ -28,6 +28,7 @@ export const defaultGeoResolution = "country";
 export const defaultLayout = "rect";
 export const defaultDistanceMeasure = "num_date";
 export const defaultFocus = null;
+export const defaultZoom = null;
 export const defaultDateRange = 6;
 export const date_select = true;
 export const file_prefix = "Zika_";

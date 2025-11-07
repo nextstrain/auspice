@@ -308,6 +308,7 @@ export const change = function change(
     animationInProgress = false,
     changeNodeOrder = false,
     focus = null,
+    zoom = undefined,
     newDistance = undefined,
     newLayout = undefined,
     updateLayout = undefined,
@@ -329,6 +330,12 @@ export const change = function change(
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
+
+  /* Update zoom state on phyloTree instance */
+  if (zoom !== undefined) {
+    this.zoom = zoom;
+  }
+
   const elemsToUpdate = new Set<TreeElement>(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify: PropsForPhyloNodes = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set<SVGProperty>(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
@@ -376,7 +383,7 @@ export const change = function change(
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -428,7 +435,7 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder) {
+  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
@@ -465,6 +472,7 @@ export const change = function change(
     zoomIntoClade ||
     svgHasChangedDimensions ||
     streamDefinitionChange ||
+    changeVisibility ||
     showConfidences
   ) {
     this.mapToScreen();
@@ -501,7 +509,7 @@ export const change = function change(
     this.drawStreams(); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
-    extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
+    extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined || updateLayout;
     extras.hideTipLabels = animationInProgress || newTipLabelKey === 'none';
     if (useModifySVGInStages) {
       this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000, extras);

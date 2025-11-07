@@ -5,6 +5,7 @@ import { defaultGeoResolution,
   defaultDistanceMeasure,
   defaultLayout,
   defaultFocus,
+  defaultZoom,
   controlsHiddenWidth,
   strainSymbol,
   twoColumnBreakpoint } from "../util/globals";
@@ -39,6 +40,8 @@ export interface Genotype {
 export type Layout = "rect" | "radial" | "unrooted" | "clock" | "scatter"
 
 export type Focus = "selected" | null
+
+export type Zoom = "dynamic" | null
 
 export type LegendBounds = {
   [key: string | number]: [number, number]
@@ -95,6 +98,7 @@ interface Defaults {
   distanceMeasure: Distance
   layout: Layout
   focus: Focus
+  zoom: Zoom
   geoResolution: string
   filters: Record<string, unknown>
   filtersInFooter: string[]
@@ -135,6 +139,7 @@ export interface BasicControlsState {
   filters: Record<string | symbol, Array<{ value: string, active: boolean }>>
   filtersInFooter: string[]
   focus: Focus
+  zoom: Zoom
   geoResolution: string
   layout: Layout
   mapAnimationCumulative: boolean
@@ -188,6 +193,7 @@ export const getDefaultControlsState = (): ControlsState => {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
     focus: defaultFocus,
+    zoom: defaultZoom,
     geoResolution: defaultGeoResolution,
     filters: {},
     filtersInFooter: [],
@@ -216,6 +222,7 @@ export const getDefaultControlsState = (): ControlsState => {
     scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
     focus: defaults.focus,
+    zoom: defaults.zoom,
     dateMin,
     dateMinNumeric,
     dateMax,
@@ -344,6 +351,9 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     }
     case types.SET_FOCUS: {
       return {...state, focus: action.focus}
+    }
+    case types.SET_ZOOM: {
+      return {...state, zoom: action.zoom}
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates: Partial<ControlsState> = { quickdraw: action.quickdraw };

@@ -42,6 +42,7 @@ const PhyloTree = function PhyloTree(
     return phyloNode;
   });
   this.zoomNode = this.nodes[idxOfInViewRootNode];
+  this.zoom = null; /* initialize zoom state */
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */

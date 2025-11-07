@@ -8,6 +8,7 @@ import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, colorBySymbol } from "../../../reducers/tree/types";
 import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -359,7 +360,26 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* update the clip mask accordingly */
   this.setClipMask();
 
-  let nodesInDomain = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  /* ------------------------------------------------------------------
+   * Conditionally limit axis domains based on dynamic zoom setting.
+   * When zoom is "dynamic", use visible nodes. Otherwise use inView.
+   * ------------------------------------------------------------------ */
+  const inViewNodes = this.nodes.filter((d) => d.inView && d.y!==undefined && d.x!==undefined);
+  let nodesInDomain: PhyloNode[];
+
+  if (this.zoom === "dynamic") {
+    const visibleNodes = inViewNodes.filter((d) => d.visibility === NODE_VISIBLE);
+
+    /*  Fallback: if nothing is currently visible (e.g. the time-slider is
+        before the earliest sample), fall back to the original “inView” rule
+        so the scales never become undefined. */
+    nodesInDomain = visibleNodes.length > 0
+      ? visibleNodes
+      : inViewNodes;
+  } else {
+    nodesInDomain = inViewNodes;
+  }
+
   // scatterplots further restrict nodes used for domain calcs - if not rendering branches,
   // then we don't consider internal nodes for the domain calc
   if (this.layout==="scatter" && this.scatterVariables.showBranches===false) {

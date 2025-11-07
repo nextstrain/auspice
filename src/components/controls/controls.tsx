@@ -19,6 +19,7 @@ import NormalizeFrequencies from "./frequency-normalization";
 import AnimationOptions from "./animation-options";
 import { PanelSection } from "./panelSection";
 import { ToggleFocus } from "./toggle-focus";
+import { ToggleZoom } from "./toggle-zoom";
 import ToggleTangle from "./toggle-tangle";
 import { ChooseStreamTrees } from "./choose-stream-trees";
 import Language from "./language";
@@ -68,6 +69,7 @@ function Controls(): JSX.Element {
             <ChooseLayout />
             <ChooseMetric />
             <ToggleFocus />
+            <ToggleZoom />
             <ChooseStreamTrees />
             <ChooseBranchLabelling />
             <ChooseTipLabel />

@@ -1,5 +1,5 @@
 import { Selection } from "d3-selection";
-import { Focus, Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
+import { Focus, Zoom, Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, Streams, TreeState } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
@@ -221,6 +221,7 @@ export interface ChangeParams {
   animationInProgress?: boolean
   changeNodeOrder?: boolean
   focus?: Focus
+  zoom?: Zoom
 
   /**
    * Streams are either toggled on/off or the partitioning (branch label) has changed
@@ -326,6 +327,7 @@ export interface PhyloTreeType {
   updateTipLabels: typeof labels.updateTipLabels
   vaccines?: PhyloNode[]
   visibility: Visibility[]
+  zoom: Zoom
 
   showStreamTrees: boolean;
 
