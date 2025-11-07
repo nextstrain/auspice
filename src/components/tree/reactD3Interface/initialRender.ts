@@ -32,6 +32,7 @@ export const renderTree = (
     layout: props.layout,
     distance: props.distanceMeasure,
     focus: props.focus,
+    zoom: props.zoom,
     parameters: { /* modifies PhyloTree's defaults */
       grid: true,
       confidence: props.temporalConfidence.display,

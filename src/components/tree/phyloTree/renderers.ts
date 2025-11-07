@@ -6,7 +6,7 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
 import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
-import { Focus, Layout, ScatterVariables } from "../../../reducers/controls";
+import { Focus, Zoom, Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, StreamSummary, TreeState } from "../../../reducers/tree/types";
 
 export const render = function render(
@@ -16,6 +16,7 @@ export const render = function render(
   layout,
   distance,
   focus,
+  zoom,
   parameters,
   callbacks,
   branchThickness,
@@ -42,6 +43,9 @@ export const render = function render(
 
   /** how to focus on nodes */
   focus: Focus
+
+  /** how to zoom the tree */
+  zoom: Zoom
 
   /** an object that contains options that will be added to this.params */
   parameters: Partial<Params>
@@ -93,6 +97,7 @@ export const render = function render(
   this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
   this.streams = streams;
+  this.zoom = zoom;
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {

@@ -74,6 +74,12 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   state["focus"] = query.focus === undefined ? null : query.focus;
 
+  if (query.zoom && query.zoom !== "dynamic") {
+    console.error(`Invalid zoom value of ${JSON.stringify(query.zoom)}; removing zoom.`);
+    delete query.zoom;
+  }
+  state["zoom"] = query.zoom === undefined ? null : query.zoom;
+
   if (query.ci === undefined) {
     state["temporalConfidence"]["on"] = false;
   } else {

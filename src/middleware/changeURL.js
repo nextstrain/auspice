@@ -91,6 +91,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         query.focus = action.focus;
       }
       break;
+    case types.SET_ZOOM:
+      if (action.zoom === null) {
+        delete query.zoom;
+      }
+      else {
+        query.zoom = action.zoom;
+      }
+      break;
     case types.TOGGLE_TEMPORAL_CONF:
       if ("ci" in query) {
         query.ci = undefined;
