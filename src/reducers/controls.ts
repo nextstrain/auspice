@@ -61,6 +61,35 @@ export interface SelectedNode {
   treeId: string
 }
 
+interface AvailableAPIData {
+  datasets:
+    {
+      /** The URL path (sans preceding slash) to load the dataset */
+      request: string
+
+      /** v2 (unified) dataset JSON.
+       * Present on the Auspice server, not present on nextstrain.org
+       * Unused in Auspice client.
+       */
+      v2?: boolean
+
+      /** a list of request paths which are candidates to be displayed as a second tree */
+      secondTreeOptions: string[]
+
+      /**
+       * Defines the intended build URL (rendered in the byline) for the dataset.
+       * This will be used if the actual dataset JSON doesn't define it itself.
+       * Unused in Auspice server, used for community sources in nextstrain.org.
+       */
+      buildUrl?: null|string
+    }[]
+  narratives:
+    {
+      /** The URL path (sans preceding slash) to load the narrative */
+      request: string
+    }[]
+}
+
 export type ScaleType = "ordinal" | "categorical" | "continuous" | "temporal" | "boolean"
 
 export interface ScatterVariables {
@@ -114,7 +143,7 @@ export interface BasicControlsState {
   absoluteDateMinNumeric: number
   analysisSlider: boolean
   animationPlayPauseButton: "Play" | "Pause"
-  available?: boolean
+  available?: AvailableAPIData
   branchLengthsToDisplay: string
   canRenderBranchLabels: boolean
   canTogglePanelLayout: boolean
