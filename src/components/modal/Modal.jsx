@@ -15,48 +15,6 @@ import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
 class Modal extends React.Component {
   constructor(props) {
     super(props);
-    this.getStyles = (bw, bh) => {
-      return {
-        behind: { /* covers the screen */
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          pointerEvents: "all",
-          zIndex: 2000,
-          backgroundColor: "rgba(80, 80, 80, .20)",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          wordWrap: "break-word",
-          wordBreak: "break-word"
-        },
-        title: {
-          fontWeight: 500,
-          fontSize: 32,
-          marginTop: "20px",
-          marginBottom: "20px"
-        },
-        secondTitle: {
-          fontWeight: 500,
-          marginTop: "0px",
-          marginBottom: "20px"
-        },
-        modal: {
-          marginLeft: 200,
-          marginTop: 130,
-          width: bw - (2 * 200),
-          height: bh - (2 * 130),
-          borderRadius: 2,
-          backgroundColor: "rgba(250, 250, 250, 1)",
-          overflowY: "auto"
-        },
-        break: {
-          marginBottom: "10px"
-        }
-      };
-    };
     this.dismissModal = this.dismissModal.bind(this);
   }
 
