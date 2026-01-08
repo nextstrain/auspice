@@ -170,7 +170,7 @@ export interface BasicControlsState {
   mapAnimationDurationInMilliseconds: number
   mapAnimationShouldLoop: boolean
   mapAnimationStartDate: unknown
-  modal: 'download' | 'linkOut' | null
+  modal: 'download' | 'linkOut' | 'datasetSelector' | null
   normalizeFrequencies: boolean
   panelLayout: string
   panelsAvailable: string[]

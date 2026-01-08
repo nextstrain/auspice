@@ -7,6 +7,7 @@ import { infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import DownloadModalContents from "../download/downloadModal";
 import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
+import DatasetSelector, {datasetSelectorStyles} from "../datasetSelector/datasetSelector.tsx";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -74,6 +75,10 @@ class Modal extends React.Component {
       case 'linkOut':
         Contents = LinkOutModalContents;
         styles = this.styles(); // No custom styles for this modal
+        break;
+      case 'datasetSelector':
+        Contents = DatasetSelector;
+        styles = this.styles(datasetSelectorStyles)
         break;
       default:
         return null;
