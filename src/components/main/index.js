@@ -10,7 +10,7 @@ import FinePrint from "../framework/fine-print";
 import Modal from "../modal/Modal.jsx";
 import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped";
-import { TOGGLE_SIDEBAR } from "../../actions/types";
+import { TOGGLE_SIDEBAR, SET_MODAL } from "../../actions/types";
 import { numberOfGridPanels } from "../../actions/panelDisplay";
 import AnimationController from "../framework/animationController";
 import { calcUsableWidth } from "../../util/computeResponsive";
@@ -43,6 +43,7 @@ const Map = lazy(() => import(/* webpackChunkName: "mapComponent" */ "../map/map
   showOnlyPanels: state.controls.showOnlyPanels,
   treeName: state.tree.name,
   secondTreeName: state.controls.showTreeToo,
+  modalOpen: !!state.controls.modal,
   mobileDisplay: state.general.mobileDisplay
 }))
 class Main extends React.Component {
@@ -80,6 +81,13 @@ class Main extends React.Component {
   }
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
+    /** Ensure any open modal is closed if we're toggling the sidebar open/closed.
+     * In practice, a modal can only be open if we're on mobile view, as in non-
+     * mobile mode a click on the sidebar chevron is captured by the modal background
+     * and closes the modal instead */
+    if (this.props.modalOpen) {
+      this.props.dispatch({ type: SET_MODAL, modal: null });
+    }
   }
 
   inGrid() {
