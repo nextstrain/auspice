@@ -67,6 +67,11 @@ interface AvailableAPIData {
       /** The URL path (sans preceding slash) to load the dataset */
       request: string
 
+      /**
+       * Does the dataset support snapshots (@YYYY-MM-DD)?
+       */
+      snapshots?: boolean
+
       /** v2 (unified) dataset JSON.
        * Present on the Auspice server, not present on nextstrain.org
        * Unused in Auspice client.

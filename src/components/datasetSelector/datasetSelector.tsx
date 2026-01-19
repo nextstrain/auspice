@@ -8,23 +8,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import CustomSelect from "../controls/customSelect";
 import { Dataset, currentDataset, SIDEBAR_DATASET_CHANGE_ID } from "../controls/choose-dataset";
 
-/**
- * A note on snapshots: Nextstrain.org now has support for snapshots (for
- * certain datasets), which are encoded as a trailing '@YYYY-MM-DD' part of the
- * dataset name/URL. As long as the snapshot syntax is valid (and the underlying
- * resource supports snapshots) then the nextstrain.org server will return the
- * dataset which was the current one at that date. (Invalid syntax results in a
- * BadRequest response.)
- *
- * Vanilla Auspice, and parts of nextstrain.org (community, groups etc) don't
- * support snapshots. In the vanilla Auspice server, supplying a snapshot only
- * works if the '@YYYY-MM-DD' string is part of the actual filename (if it's
- * not, we get a 302 redirect or 404). In nextstrain.org we'll get BadRequest
- * responses.
- *
- * The current implementation allows snapshots for any dataset, i.e. it caters
- * spefically for nextstrain.org usage!
- */
 
 interface State {
   currentDataset: Dataset;
@@ -46,6 +29,7 @@ interface RequestHierarchy {
 
 interface StateProps {
   available: {dataset?: RequestHierarchy, narrative?: RequestHierarchy};
+  snapshotDatasets: Set<string>;  // Set of dataset request paths that support snapshots
 }
 
 
@@ -107,6 +91,16 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
       }
       options = this.options(selected.parts);
     }
+
+    // If the (newly) proposed dataset doesn't support snapshots then clear them,
+    // if it does, then use our (previously used) snapshot value (if available)
+    const datasetPath = selected.parts.join('/');
+    if (!this.props.snapshotDatasets.has(datasetPath)) {
+      selected.snapshot = undefined;
+    } else if (this.state.snapshotInput && _validSnapshot(this.state.snapshotInput)) {
+      selected.snapshot = this.state.snapshotInput;
+    }
+
     this.setState({proposedDataset: selected});
   }
 
@@ -118,6 +112,15 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
         snapshot: snapshot || undefined,
       }
     });
+  }
+
+
+  /**
+   * Check if the currently proposed dataset supports snapshots
+   */
+  snapshotsAvailable = (): boolean => {
+    const datasetPath = this.state.proposedDataset.parts.join('/');
+    return this.props.snapshotDatasets.has(datasetPath);
   }
 
 
@@ -325,7 +328,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
         {this.renderDatasetName(this.state.proposedDataset, this.state.currentDataset)}
 
         {this.state.proposedDataset.parts.map(this.renderLevel)}
-        {this.renderSnapshot()}
+        {this.snapshotsAvailable() && this.renderSnapshot()}
         {this.renderDatasetLoader()}
 
         <br/>
@@ -346,9 +349,9 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
 
 const mapStateToProps: MapStateToProps<StateProps, Record<string, never>, RootState> = (
   state: RootState,
-): StateProps => ({
-  available: _parseAvailable(state.controls.available),
-});
+): StateProps => {
+  return _parseAvailable(state.controls.available);
+};
 
 
 export default withTranslation()(connect(mapStateToProps)(DatasetSelector));
@@ -403,14 +406,20 @@ function _path(dataset: Dataset): string {
  * Construct the structure of possible datasets and narratives.
  * Note that narratives are parsed since they're in the redux store, but this component
  * doesn't yet allow them to be selected.
+ * Also extracts the set of datasets that support snapshots.
  */
-function _parseAvailable(available: RootState["controls"]["available"]): StateProps["available"] {
-  const result: StateProps["available"] = {};
+function _parseAvailable(availableData: RootState["controls"]["available"]): StateProps {
+  const available: StateProps["available"] = {};
+  const snapshotDatasets = new Set<string>();
 
   // Helper to build nested hierarchy from path segments
-  const buildHierarchy = (items: { request: string }[]): RequestHierarchy => {
+  const buildHierarchy = (items: { request: string, snapshots?: boolean }[]): RequestHierarchy => {
     const hierarchy: RequestHierarchy = {};
     for (const item of items) {
+      // Track datasets that support snapshots
+      if (item.snapshots) {
+        snapshotDatasets.add(item.request);
+      }
       const segments = item.request.split("/");
       let current: RequestHierarchy = hierarchy;
       for (let i = 0; i < segments.length; i++) {
@@ -432,13 +441,13 @@ function _parseAvailable(available: RootState["controls"]["available"]): StatePr
 
     return hierarchy;
   };
-  if (available?.datasets?.length) {
-    result.dataset = buildHierarchy(available.datasets);
+  if (availableData?.datasets?.length) {
+    available.dataset = buildHierarchy(availableData.datasets);
   }
-  if (available?.narratives?.length) {
-    result.narrative = buildHierarchy(available.narratives);
+  if (availableData?.narratives?.length) {
+    available.narrative = buildHierarchy(availableData.narratives);
   }
-  return result;
+  return { available, snapshotDatasets };
 }
 
 
