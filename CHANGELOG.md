@@ -1,6 +1,15 @@
 # Changelog
 
+#### Major changes
+
+* The "Focus on selected" toggle now zoooms horizontally as well as vertically. This helps to explore clades which only existed for a small proportion of the entire tree's temporal / divergence range. ([#1993](https://github.com/nextstrain/auspice/pull/1993))
+
 * When multiple trees are displayed ("tangletrees") the tree-buttons (zoom out, zoom to selected, zoom to root) are now present for each tree and only change their respective tree. ([#2026](https://github.com/nextstrain/auspice/pull/2026))
+
+* We now have a completely new dataset selector, replacing the dropdowns in the sidebar. This is activated by clicking on the dataset name in the sidebar, and allows you to select a new dataset based on the available datasets. This fixes a slew of bugs and should make it much clearer to navigate between datasets. ([#2030](https://github.com/nextstrain/auspice/pull/2030))
+
+#### Minor changes
+
 * Downloaded TSV will include associated URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
 * Tip info modal displays link for traits that have a URL regardless of value type ([#2024](https://github.com/nextstrain/auspice/pull/2024))
 
