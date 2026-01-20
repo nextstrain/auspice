@@ -80,7 +80,7 @@ class Tangle extends React.Component {
     }
   }
   render() {
-    const textStyles = {position: "absolute", top: 5, zIndex: 100, fontSize: 16, color: "#000", fontWeight: 500};
+    const textStyles = {position: "absolute", top: 25, zIndex: 100, fontSize: 16, color: "#000", fontWeight: 500};
     const lefts = [this.props.width/2 - this.props.spaceBetweenTrees/2, this.props.width/2 + this.props.spaceBetweenTrees/2];
     return (
       <div id="TangleContainer">
