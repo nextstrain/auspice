@@ -15,7 +15,7 @@ import { entropyCreateState, genomeMap as createGenomeMap } from "../util/entrop
 import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
-import { applyInViewNodesToTree } from "../actions/tree";
+import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
@@ -67,12 +67,6 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
-
-  if (query.focus && query.focus !== "selected") {
-    console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
-    delete query.focus;
-  }
-  state["focus"] = query.focus === undefined ? null : query.focus;
 
   if (query.ci === undefined) {
     state["temporalConfidence"]["on"] = false;
@@ -226,6 +220,19 @@ const modifyStateViaURLQuery = (state, query) => {
       delete query.streamLabel;
     }
   }
+
+  /* focus state is processed after streamtrees as they're mututally exclusive features and, if
+  both are in the query, then we want to ignore the focus query */
+  if (query.focus) {
+    if (query.focus !== "selected") {
+      console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
+      delete query.focus; 
+    } else if (state.showStreamTrees) {
+      console.error(`Cannot use focus and streamtrees at the same time; removing focus.`);
+      delete query.focus;
+    }
+  }
+  state.focus = query.focus === undefined ? null : query.focus;
 
 
   return state;
@@ -1114,6 +1121,7 @@ export const createStateFromQueryOrJSONs = ({
   /* if query.label is undefined then we intend to zoom to the root */
   tree = modifyTreeStateVisAndBranchThickness(tree, metadata.displayDefaults, query, controls, dispatch);
 
+
   /** ------------------- STREAMTREE SETUP -------------------
    * scan the tree and identify / label streams for the currently chosen label.
    * Note: currently we don't support LHS/RHS trees + streamtrees, but this should
@@ -1129,6 +1137,13 @@ export const createStateFromQueryOrJSONs = ({
 
   if (treeToo && treeToo.loaded) {
     treeToo = updateSecondTree(tree, treeToo, controls, dispatch)
+  }
+
+  if (controls.focus) {
+    tree.focusNodes = getFocusedNodes(tree.nodes, tree.visibility);
+    if (treeToo?.loaded) {
+      treeToo.focusNodes = getFocusedNodes(treeToo.nodes, treeToo.visibility);
+    }
   }
 
   /* we can only calculate which legend items we wish to display _after_ the visibility has been calculated */

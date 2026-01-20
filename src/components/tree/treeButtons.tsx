@@ -17,10 +17,12 @@ export function TreeButtons(props: Props): ReactElement {
   if (props.narrativeMode) {
     return null; // hide the buttons when viewing a narrative to prevent tree manipulations
   }
+  const focusMode = props.focus==='selected'; 
   const tree = props.mainTree ? props.tree : props.treeToo;
   const filtered = !!tree.idxOfFilteredRoot &&
     tree.idxOfInViewRootNode !== tree.idxOfFilteredRoot;
-  const activeZoomButton = filtered;
+  const showZoomButton = !focusMode;
+  const activeZoomButton = filtered; // only applicable if `showZoomButton` is true
   const treeZoomed = tree.idxOfInViewRootNode !== 0;
 
   const containerStyles: React.CSSProperties = {zIndex: 100, position: "absolute", right: props.offsetPx, top: 0};
@@ -35,12 +37,16 @@ export function TreeButtons(props: Props): ReactElement {
         <FaSearchMinus/>
       </button>
 
-      <button style={activeZoomButton ? selectedButtonStyles : unselectedButtonStyles} onClick={zoomToSelected}>
-        {props.t("Zoom to Selected")}
-      </button>
+      {showZoomButton && (
+        <button style={activeZoomButton ? selectedButtonStyles : unselectedButtonStyles} onClick={zoomToSelected}>
+          {props.t("Zoom to Selected")}
+        </button>
+      )}
 
       <button style={treeZoomed ? selectedButtonStyles : unselectedButtonStyles} onClick={redrawTree}>
-        {props.t("Zoom to Root")}
+        { /* focus mode can't zoom back to the root, so change our language to suit */
+          focusMode ? props.t("Show All Selected") : props.t("Zoom to Root")
+        }
       </button>
 
     </div>

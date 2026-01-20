@@ -64,6 +64,7 @@ export const renderTree = (
     dateRange: [props.dateMinNumeric, props.dateMaxNumeric],
     scatterVariables: props.scatterVariables,
     measurementsColorGrouping: isMeasurementColorBy(props.colorBy) ? decodeMeasurementColorBy(props.colorBy) : undefined,
-    streams: props.tree.streams,
+    streams: props.tree.streams, // necessarily the LHS tree as streams aren't implemented for 2 trees
+    focusNodes: treeState.focusNodes,
   });
 };

@@ -30,6 +30,14 @@ export const changePhyloTreeViaPropsComparison = (
   Note that updating properties itself won't trigger any visual changes */
   phylotree.dateRange = [newProps.dateMinNumeric, newProps.dateMaxNumeric];
 
+  /* focus related data */
+  if (oldProps.focus !== newProps.focus) {
+    phylotree.focus = newProps.focus;
+    args.focusChange = true;
+  }
+  phylotree.focusNodes = newTreeRedux.focusNodes;
+
+
   /* colorBy change? */
   if (!!newTreeRedux.nodeColorsVersion &&
       (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
@@ -68,8 +76,8 @@ export const changePhyloTreeViaPropsComparison = (
   /* explode! */
   if (oldProps.explodeAttr !== newProps.explodeAttr) {
     args.changeNodeOrder = true;
-    args.focus = newProps.focus;
   }
+
 
   /**
    * Stream-tree related
@@ -85,14 +93,12 @@ export const changePhyloTreeViaPropsComparison = (
 
   /* enable/disable focus */
   if (oldProps.focus !== newProps.focus) {
-    args.focus = newProps.focus;
     args.updateLayout = true;
   }
   /* re-focus on changes */
   else if (oldProps.focus === "selected" &&
            newProps.focus === "selected" &&
            (zoomChange || dateRangeChange || filterChange)) {
-    args.focus = "selected";
     args.updateLayout = true;
   }
 

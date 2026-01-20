@@ -7,7 +7,7 @@ import { Callbacks, Distance, Params, PhyloNode, PhyloTreeType, Ripple } from ".
 import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
 import { Focus, Layout, ScatterVariables } from "../../../reducers/controls";
-import { ReduxNode, Visibility, StreamSummary, TreeState } from "../../../reducers/tree/types";
+import { ReduxNode, Visibility, StreamSummary, TreeState, FocusNodes} from "../../../reducers/tree/types";
 
 export const render = function render(
   this: PhyloTreeType,
@@ -30,6 +30,7 @@ export const render = function render(
   scatterVariables,
   measurementsColorGrouping,
   streams,
+  focusNodes,
 }: {
   /** the SVG element into which the tree is drawn */
   svg: Selection<SVGGElement | null, unknown, null, unknown>
@@ -81,6 +82,8 @@ export const render = function render(
   measurementsColorGrouping: string | undefined
 
   streams: Record<string, StreamSummary>
+
+  focusNodes: FocusNodes
 }): void {
   timerStart("phyloTree render()");
   this.svg = svg;
@@ -93,6 +96,8 @@ export const render = function render(
   this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
   this.streams = streams;
+  this.focus = focus;
+  this.focusNodes = focusNodes;
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
@@ -105,7 +110,7 @@ export const render = function render(
   });
 
   /* set x, y values & scale them to the screen */
-  setDisplayOrder({nodes: this.nodes, focus, streams: this.params.showStreamTrees && streams});
+  setDisplayOrder({nodes: this.nodes, focus: this.focus, streams: this.params.showStreamTrees && streams});
   this.setDistance(distance);
   this.setLayout(layout, scatterVariables);
   this.mapToScreen();
@@ -114,7 +119,9 @@ export const render = function render(
   this.setClipMask();
   if (this.params.showGrid) {
     this.addGrid();
-    this.showTemporalSlice();
+    if (!this.focus) {
+      this.showTemporalSlice();
+    }
   }
   this.drawBranches();
   this.updateTipLabels();
