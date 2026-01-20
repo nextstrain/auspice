@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.68.0 - 2026/01/20
+
+
 #### Major changes
 
 * The "Focus on selected" toggle now zoooms horizontally as well as vertically. This helps to explore clades which only existed for a small proportion of the entire tree's temporal / divergence range. ([#1993](https://github.com/nextstrain/auspice/pull/1993))
