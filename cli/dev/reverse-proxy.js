@@ -19,15 +19,16 @@ const hopByHopHeaders = [
 ];
 
 async function proxy(req, res) {
-  const upstreamUrl = new URL(req.url, PROXY);
-  utils.log(`[reverse-proxy] Proxying request "${req.url}" to upstream "${upstreamUrl.href}"`)
-
   // Charon API only supports GET
   if (req.method!=='GET') {
     res.statusCode = 501;
     res.setHeader("content-type", "text/plain; charset=utf-8");
     res.end(`Request method not supported`);
+    return;
   }
+
+  const upstreamUrl = new URL(req.url, PROXY);
+  utils.log(`[reverse-proxy] Proxying request "${req.url}" to upstream "${upstreamUrl.href}"`);
 
   const headers = { ...req.headers }
   for (const h of hopByHopHeaders) {
