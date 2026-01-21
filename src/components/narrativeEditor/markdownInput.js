@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as Styles from "./styles";
-import { updateApiCalls } from "./updateApiCalls";
 import { parseMarkdownNarrativeFile } from "../../util/parseNarrative";
 import { parseNarrativeDatasets } from "../../actions/loadData";
 import { parseMarkdown } from "../../util/parseMarkdown";
@@ -44,7 +43,6 @@ export const MarkdownInput = ({fileName, setNarrative, setError}) => {
         setError(msg);
         return;
       }
-      updateApiCalls(narrativeData.datasets);
       setNarrative(narrativeData);
     }
     function handleDragover(event) {
