@@ -20,6 +20,7 @@ import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
+import { candidateStatespaceColorings, defaultStatespaceDeme } from "../components/controls/statespace-deme";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
@@ -66,6 +67,9 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.c) {
     state["colorBy"] = query.c;
+  }
+  if (query.statespaceDeme) {
+    state.statespaceDeme = query.statespaceDeme;
   }
 
   if (query.ci === undefined) {
@@ -386,6 +390,11 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
     state.canTogglePanelLayout = false;
   }
 
+  /* TODO XXX !!! */
+  state.panelsToDisplay.push("statespace");
+  state.defaults.panels.push("statespace");
+  state.panelsAvailable.push("statespace");
+
   return state;
 };
 
@@ -589,20 +598,28 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   }
 
   /* geoResolutions */
+  let availableGeoResolutions;
   if (metadata.geoResolutions) {
-    const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
-    if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
+    availableGeoResolutions = metadata.geoResolutions.map((i) => i.key);
+    if (availableGeoResolutions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardcoded default, then any available */
-      if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
+      if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResolutions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
         state.geoResolution = metadata.displayDefaults.geoResolution;
-      } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
+      } else if (availableGeoResolutions.indexOf(defaultGeoResolution) !== -1) {
         state.geoResolution = defaultGeoResolution;
       } else {
-        state.geoResolution = availableGeoResultions[0];
+        state.geoResolution = availableGeoResolutions[0];
       }
       console.error("Error detected. Setting geoResolution to ", state.geoResolution);
       delete query.r; // no-op if query.r doesn't exist
     }
+  }
+
+  /* Which key should we start with for the statespace visualisation? */
+  const statespaceDemeValid = availableGeoResolutions.includes(state.statespaceDeme) ||
+    candidateStatespaceColorings(metadata.colorings).map(([key]) => key).includes(state.statespaceDeme);
+  if (!statespaceDemeValid) {
+    state.statespaceDeme = defaultStatespaceDeme(state.geoResolution, state.colorBy)
   }
 
   /* show label */
