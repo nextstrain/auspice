@@ -1,5 +1,4 @@
 import React from "react";
-import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { SET_MODAL } from "../../actions/types";
@@ -8,6 +7,8 @@ import { stopProp } from "../tree/infoPanels/click";
 import DownloadModalContents from "../download/downloadModal";
 import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
 import DatasetSelector, {datasetSelectorStyles} from "../datasetSelector/datasetSelector.tsx";
+
+import { registerKeyboardShortcut, unregisterKeyboardShortcut } from "../../util/keyboardRegistry.ts";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -24,13 +25,13 @@ class Modal extends React.Component {
    * and if _any_ modal's open pressing 'd' dismisses it
    */
   componentDidMount() {
-    Mousetrap.bind('d', () => {
+    registerKeyboardShortcut('d', () => {
       this.props.dispatch({ type: SET_MODAL, modal: this.props.modal ? null : 'download' });
     });
   }
 
   componentWillUnmount() {
-    Mousetrap.unbind('d');
+    unregisterKeyboardShortcut('d');
   }
 
   dismissModal() {
