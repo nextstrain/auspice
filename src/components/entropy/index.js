@@ -141,7 +141,6 @@ class Entropy extends React.Component {
 
   resetLayout(styles) {
     if (this.props.narrativeMode || !this.state.chart) return null;
-    const viewingGenome = this.props.selectedCds===nucleotide_gene;
     /**
      * The intention for this button is to be inactive when viewing the genome &
      * fully zoomed out, however zoom actions do not trigger redux state changes
@@ -155,14 +154,13 @@ class Entropy extends React.Component {
           key={1}
           style={tabGroupMember}
           onClick={() => {
-            if (viewingGenome) {
-              this.state.chart.update({
-                zoomMin: this.state.chart.zoomBounds[0],
-                zoomMax: this.state.chart.zoomBounds[1],
-              })
-            } else {
-              this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
-            }
+            // if (this.props.selectedCds === nucleotide_gene) {
+            //   this.state.chart.update({
+            //     zoomMin: this.state.chart.zoomBounds[0],
+            //     zoomMax: this.state.chart.zoomBounds[1],
+            //   })
+            // }
+            this.props.dispatch(changeEntropyCdsSelection(nucleotide_gene));
           }}
         >
           <span style={styles.switchTitle}> {this.props.t('Reset Layout')} </span>
@@ -234,6 +232,8 @@ class Entropy extends React.Component {
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
+    console.log(`[UNSAFE_componentWillReceiveProps] nextProps:`)
+    console.log(nextProps)
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
