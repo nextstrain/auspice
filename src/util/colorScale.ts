@@ -62,7 +62,7 @@ export const calcColorScale = (
           createTemporalScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (scaleType === "continuous") {
         ({continuous, colorScale, legendBounds, legendValues} =
-          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
+          createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes, colorings[colorBy].legend));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
@@ -262,6 +262,7 @@ function createContinuousScale(
   providedScale,
   t1nodes: ReduxNode[],
   t2nodes: ReduxNode[],
+  userLegend: Legend | undefined
 ): {
   continuous: boolean
   colorScale: ColorScale["scale"]
@@ -270,7 +271,17 @@ function createContinuousScale(
 } {
 
   const minMax = getMinMaxFromTree(t1nodes, t2nodes, colorBy);
+  
+  const mmWas = [...minMax];
+  const userLegendAnchorDomain = userLegend?.map((el) => el?.value);
+  const userLegendMinMax = [userLegendAnchorDomain?.at(0), userLegendAnchorDomain?.at(-1)];
+  if (typeof userLegendMinMax[0]==='number' && userLegendMinMax[0] < minMax[0]) minMax[0] = userLegendMinMax[0];
+  if (typeof userLegendMinMax[1]==='number' && userLegendMinMax[1] > minMax[1]) minMax[1] = userLegendMinMax[1];
 
+  console.log("userLegendAnchorDomain", userLegendAnchorDomain || "not present")
+  if (userLegendAnchorDomain) {
+    console.log("minMax changed. Was", mmWas, "is now", minMax)
+  }
   /* user-defined anchor points across the scale */
   const anchorPoints = _validateAnchorPoints(providedScale, (val) => typeof val==="number");
 
@@ -296,6 +307,8 @@ function createContinuousScale(
 
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
+
+  console.log("final domain", domain)
 
   return {
     continuous: true,
