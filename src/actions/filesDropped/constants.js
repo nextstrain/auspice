@@ -14,8 +14,14 @@ const isWindowsTsv = (file) => file.type === "" && file.name.endsWith('.tsv');
 // Handle Excel exported .csv files
 const isExcelCsv = (file) => file.type === "application/vnd.ms-excel" && file.name.endsWith('.csv');
 
-const isAcceptedFileType = (file) => acceptedFileTypes.includes(file.type) || isWindowsTsv(file) || isExcelCsv(file);
+const fileTypeIsCSVLike = (file) => acceptedFileTypes.includes(file.type) || isWindowsTsv(file) || isExcelCsv(file);
+
+/** Used by auspice.us */
+function isAcceptedFileType(file) {
+  return fileTypeIsCSVLike(file);
+}
 
 export {
+  fileTypeIsCSVLike,
   isAcceptedFileType
 };
