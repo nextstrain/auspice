@@ -12,6 +12,9 @@ import DatasetSelector, {datasetSelectorStyles} from "../datasetSelector/dataset
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
   modal: state.controls.modal,
+  tree: state.tree,
+  metadata: state.metadata,
+  genomeMap: state.entropy.genomeMap,
 }))
 class Modal extends React.Component {
   constructor(props) {
@@ -27,10 +30,19 @@ class Modal extends React.Component {
     Mousetrap.bind('d', () => {
       this.props.dispatch({ type: SET_MODAL, modal: this.props.modal ? null : 'download' });
     });
+    Mousetrap.bind('q', () => {
+      const { treeStateToJson, metadataStateToJson } = require("../../util/treeJsonProcessing");
+      const json = {
+        meta: metadataStateToJson(this.props.metadata, this.props.genomeMap),
+        tree: treeStateToJson(this.props.tree),
+      };
+      console.log(JSON.stringify(json, null, 2));
+    });
   }
 
   componentWillUnmount() {
     Mousetrap.unbind('d');
+    Mousetrap.unbind('q');
   }
 
   dismissModal() {

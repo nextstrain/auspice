@@ -3,6 +3,14 @@ import { Mutations, ReduxNode, TreeState } from "../reducers/tree/types";
 import { getVaccineFromNode, getTraitFromNode, getDivFromNode } from "./treeMiscHelpers";
 import { calcFullTipCounts } from "./treeCountingHelpers";
 
+/**
+ * Lightweight type alias for the Chromosome[] structure produced by genomeMap().
+ * We avoid importing the actual types from entropyCreateStateFromJsons.ts as they
+ * are not exported; this is sufficient for our reconstruction purposes.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type GenomeMap = any[];
+
 const pseudoRandomName = (): string => (Math.random()*1e32).toString(36).slice(0, 6);
 
 /**
@@ -169,6 +177,170 @@ const collectObservedMutations = (nodesArray: ReduxNode[]): Mutations => {
     });
   });
   return mutations;
+};
+
+/**
+ * Inverse of treeJsonToState: reconstructs the nested JSON tree
+ * from the Redux tree state, stripping computed properties.
+ */
+export const treeStateToJson = (tree: TreeState): object | object[] => {
+  const root = tree.nodes[0]; // synthetic __ROOT
+
+  const cleanNode = (node: ReduxNode): object => {
+    const cleaned: Record<string, unknown> = {};
+    if (node.name) cleaned.name = node.name;
+    if (node.node_attrs) cleaned.node_attrs = node.node_attrs;
+    if (node.branch_attrs) cleaned.branch_attrs = node.branch_attrs;
+    if (node.children?.length) {
+      cleaned.children = node.children.map(cleanNode);
+    }
+    return cleaned;
+  };
+
+  const trees = root.children.map(cleanNode);
+  return trees.length === 1 ? trees[0] : trees;
+};
+
+/**
+ * Inverse of genomeMap() in entropyCreateStateFromJsons.ts: reconstructs the
+ * `genome_annotations` JSON object from the Chromosome[] genomeMap structure.
+ */
+export const genomeMapToGenomeAnnotations = (genomeMap: GenomeMap): Record<string, unknown> => {
+  const chromosome = genomeMap[0];
+  if (!chromosome) return {};
+
+  const annotations: Record<string, Record<string, unknown>> = {};
+
+  annotations.nuc = { start: chromosome.range[0], end: chromosome.range[1] };
+
+  for (const gene of chromosome.genes) {
+    for (const cds of gene.cds) {
+      const annotation: Record<string, unknown> = {};
+      annotation.strand = cds.strand;
+
+      if (cds.isWrapping && cds.segments.length === 2) {
+        /*
+         * Wrapping CDSs were originally a single contiguous CDS whose end
+         * position exceeded the genome length. During ingestion, these are
+         * split into two segments. We merge them back, but the original
+         * single start/end representation used a convention where end >
+         * genome length (e.g. start=93, end=110 on a 100nt genome).
+         * We reconstruct this, but if the original JSON actually used an
+         * explicit two-segment representation for a wrapping CDS, we would
+         * not be able to distinguish that case from an auto-split one.
+         */
+        const genomeLength = chromosome.range[1];
+        const positive = cds.strand === '+';
+        /* For +ve strand: segment[0] is the 5' portion (higher genome coords),
+           segment[1] is the wrapped portion (lower genome coords).
+           For -ve strand: segments were reversed during ingestion, so
+           segment[0] is at genome start, segment[1] is the 5' end. */
+        const seg5prime = positive ? cds.segments[0] : cds.segments[1];
+        const segWrapped = positive ? cds.segments[1] : cds.segments[0];
+        annotation.start = seg5prime.rangeGenome[0];
+        annotation.end = segWrapped.rangeGenome[1] + genomeLength;
+      } else if (cds.segments.length === 1) {
+        annotation.start = cds.segments[0].rangeGenome[0];
+        annotation.end = cds.segments[0].rangeGenome[1];
+      } else {
+        /*
+         * Multi-segment CDSs (spliced/slippage) are stored as an explicit
+         * segments array. The original JSON used the same representation,
+         * so this is a faithful reconstruction.
+         */
+        annotation.segments = cds.segments.map((seg) => ({
+          start: seg.rangeGenome[0],
+          end: seg.rangeGenome[1],
+        }));
+      }
+
+      /*
+       * Colors may not match the original JSON: if the original CDS did not
+       * specify a color, one was auto-assigned from a rotating palette during
+       * ingestion. We always include the color here since we cannot
+       * distinguish auto-assigned from explicitly provided colors.
+       */
+      if (cds.color) annotation.color = cds.color;
+
+      if (cds.displayName) annotation.display_name = cds.displayName;
+      if (cds.description) annotation.description = cds.description;
+
+      /*
+       * The `gene` field is only needed when a gene groups multiple CDSs,
+       * or when the gene name differs from the CDS name. If gene.name
+       * equals cds.name (the common case of 1 gene = 1 CDS), we omit
+       * it to match the typical original JSON structure.
+       */
+      if (gene.name !== cds.name) {
+        annotation.gene = gene.name;
+      }
+
+      annotations[cds.name] = annotation;
+    }
+  }
+
+  return annotations;
+};
+
+/**
+ * Inverse of createMetadataStateFromJSON: reconstructs the `meta` JSON object
+ * from the Redux metadata state, reversing key transformations applied during ingestion.
+ */
+export const metadataStateToJson = (metadata: Record<string, unknown>, genomeMap?: GenomeMap): object => {
+  const meta: Record<string, unknown> = {};
+
+  if (metadata.title) meta.title = metadata.title;
+  if (metadata.updated) meta.updated = metadata.updated;
+  if (metadata.description) meta.description = metadata.description;
+  if (metadata.warning) meta.warning = metadata.warning;
+  if (metadata.maintainers) meta.maintainers = metadata.maintainers;
+  if (metadata.buildUrl) meta.build_url = metadata.buildUrl;
+  if (metadata.buildAvatar) meta.build_avatar = metadata.buildAvatar;
+  if (metadata.dataProvenance) meta.data_provenance = metadata.dataProvenance;
+  if (metadata.filters) meta.filters = metadata.filters;
+  if (metadata.panels) meta.panels = metadata.panels;
+  if (metadata.streamLabels) meta.stream_labels = metadata.streamLabels;
+  if (metadata.geoResolutions) meta.geo_resolutions = metadata.geoResolutions;
+
+  // Reverse colorings: dict keyed by coloring key → array of {key, ...rest}
+  if (metadata.colorings) {
+    meta.colorings = Object.entries(metadata.colorings as Record<string, object>)
+      .filter(([key]) => key !== 'gt') // 'gt' is synthetically added during ingestion
+      .map(([key, value]) => ({ key, ...value as object }));
+  }
+
+  // Reverse display_defaults: camelCase → snake_case
+  if (metadata.displayDefaults) {
+    const auspiceKeyToJsonKey: Record<string, string> = {
+      colorBy: "color_by",
+      geoResolution: "geo_resolution",
+      distanceMeasure: "distance_measure",
+      selectedBranchLabel: "branch_label",
+      tipLabelKey: "tip_label",
+      mapTriplicate: "map_triplicate",
+      layout: "layout",
+      language: "language",
+      sidebar: "sidebar",
+      panels: "panels",
+      streamLabel: "stream_label",
+      showTransmissionLines: "transmission_lines",
+      label: "label",
+    };
+    const displayDefaults: Record<string, unknown> = {};
+    const dd = metadata.displayDefaults as Record<string, unknown>;
+    for (const [auspiceKey, jsonKey] of Object.entries(auspiceKeyToJsonKey)) {
+      if (dd[auspiceKey] !== undefined) {
+        displayDefaults[jsonKey] = dd[auspiceKey];
+      }
+    }
+    if (Object.keys(displayDefaults).length) meta.display_defaults = displayDefaults;
+  }
+
+  if (genomeMap?.length) {
+    meta.genome_annotations = genomeMapToGenomeAnnotations(genomeMap);
+  }
+
+  return meta;
 };
 
 export const treeJsonToState = (treeJSON): TreeState => {
