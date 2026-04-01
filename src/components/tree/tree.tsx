@@ -163,6 +163,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
           observedMutations={this.props.tree.observedMutations}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
           tipLabelKey={this.props.tipLabelKey}
+          proteinOnly={this.props.genomeMap?.[0].proteinOnly===true}
           t={t}
         />
         <NodeClickedPanel
@@ -203,7 +204,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
         <TreeButtons {...this.props}  mainTree={true}
           offsetPx={this.props.showTreeToo ? widthPerTree + spaceBetweenTrees + 5 : 5} />
 
-        {this.props.showTreeToo && 
+        {this.props.showTreeToo &&
           <TreeButtons {...this.props} mainTree={false} offsetPx={5} />}
       </Card>
     );

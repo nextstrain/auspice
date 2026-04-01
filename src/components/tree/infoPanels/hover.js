@@ -173,9 +173,9 @@ const TipMutations = ({node, t}) => {
  * @param  {Object} props.node     branch node which is currently highlighted
  * @param  {Object} props.geneSortFn function to sort a list of genes
  * @param  {Object} props.observedMutations counts of all observed mutations across the tree
-
+ * @param  {boolean}  props.proteinOnly Is the dataset protein only, i.e. no nuc annotation/mutations
  */
-const BranchMutations = ({node, geneSortFn, observedMutations, t}) => {
+const BranchMutations = ({node, geneSortFn, observedMutations, proteinOnly, t}) => {
   if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
   const elements = []; // elements to render
   const mutations = node.branch_attrs.mutations;
@@ -187,7 +187,9 @@ const BranchMutations = ({node, geneSortFn, observedMutations, t}) => {
     (muts.length > maxNum ? ` + ${muts.length-maxNum} more` : '');
 
   /* --------- NUCLEOTIDE MUTATIONS --------------- */
-  if (categorisedMutations.nuc) {
+  if (proteinOnly) {
+    // don't render anything
+  } else if (categorisedMutations.nuc) {
     const nDisplay = 5; // max number of mutations to display per category
     if (categorisedMutations.nuc.unique.length) {
       elements.push(<InfoLine name='Unique Nucleotide mutations:' value={subset(categorisedMutations.nuc.unique, nDisplay)} key="nuc_unique"/>);
@@ -399,7 +401,7 @@ function StreamRibbonInfo({node, streamDetails, colorBy}) {
   const streamCountsSummary = streamCounts.total === streamCounts.visible ?
   `${streamCounts.total} (all visible)` :
   `${streamCounts.visible}/${streamCounts.total}`;
-  
+
   const category = node.streamCategories[streamDetails.categoryIndex].name;
   const rippleNodeIdxs = node.streamCategories.filter((s) => s.name===category).at(0).nodes;
   const nVisible = rippleNodeIdxs.filter((idx) => node.shell.that.nodes[idx].visibility===NODE_VISIBLE).length;
@@ -482,6 +484,7 @@ const HoverInfoPanel = ({
   geneSortFn,
   observedMutations,
   tipLabelKey,
+  proteinOnly,
   t
 }) => {
   if (!selectedNode) return null
@@ -491,7 +494,7 @@ const HoverInfoPanel = ({
   if (selectedNode.streamDetails) {
     return (
       <Container node={node} panelDims={panelDims} xy={[selectedNode.streamDetails.x, selectedNode.streamDetails.y]}>
-        {selectedNode.isBranch ? 
+        {selectedNode.isBranch ?
           <StreamConnectorInfo node={node} lineType={['joiner', 'backbone'][selectedNode.streamDetails.categoryIndex]}/> :
           <StreamRibbonInfo node={node} streamDetails={selectedNode.streamDetails} colorBy={colorBy}/>}
       </Container>
@@ -516,7 +519,7 @@ const HoverInfoPanel = ({
       ) : (
         <>
           <BranchDescendants node={node} t={t} tipLabelKey={tipLabelKey}/>
-          <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} t={t}/>
+          <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} proteinOnly={proteinOnly} t={t}/>
           <BranchLength node={node} t={t} isTerminal={false}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>
