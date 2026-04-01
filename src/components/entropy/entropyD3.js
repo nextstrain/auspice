@@ -501,6 +501,22 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     return this._drawLoadingState();
   }
 
+  if (this.bars.length === 0) {
+    // render "no muts here" text following approach of _drawLoadingState
+    this._groups.mainBars
+      .append("text")
+      .attr("x", () => this.scales.xMain.range()[1]/2)
+      .attr("y", () => this.scales.y.range()[0]/2)
+      .attr("pointer-events", "none")
+      .attr("text-anchor", "middle")
+      .attr("dominant-baseline", "middle")
+      .style("fill", darkGrey)
+      .style("font-size", '3rem')
+      .style("font-weight", 300)
+      .text(this.aa ? `No mutations for ${this.selectedCds.name}` : 'No nucleotide mutations')
+    return;
+  }
+
   /* Calculate bar width */
   const validXPos = this.scales.xMain.domain()[0]; // any value inside the scale's domain will do
   let barWidth = this.scales.xMain(validXPos+1) - this.scales.xMain(validXPos); // pixels between 2 nucleotides
