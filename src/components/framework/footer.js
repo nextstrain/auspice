@@ -19,7 +19,7 @@ const FooterStyles = styled.div`
   font-family: ${dataFont};
   font-size: 15px;
   font-weight: 300;
-  color: rgb(136, 136, 136);
+  color: rgb(3, 3, 3);
   line-height: 1.4;
 
   p {
