@@ -1,7 +1,8 @@
 # Changelog
 
-## version 2.68.0 - 2026/01/20
+* Allow protein-only datasets, i.e. a dataset whose genome annotation is missing a nuc block but with CDSs defined. This work is in tandem with [this Augur PR](https://github.com/nextstrain/augur/pull/1958). ([Auspice PR #2040](https://github.com/nextstrain/auspice/pull/2040))
 
+## version 2.68.0 - 2026/01/20
 
 #### Major changes
 
@@ -18,24 +19,20 @@
 
 ## version 2.67.0 - 2025/11/03
 
-
 * Mutations in a node-info modal (via tip click or shift+branch click) are now clickable. Clicking on a mutation will colour the tree by the genotypes at that position. Shift+clicking will append that position to the current genotype colouring (if possible), or remove it if it's already part of it. Command clicking (with or without shift) will behave similarly but filter the tree via the specific mutated state instead of changing the colouring. ([#2018](https://github.com/nextstrain/auspice/pull/2018))
 * Shift-clicking bars in the entropy panel will now add the position to the existing color-by (as long as the gene is the same), or remove it if it was already part of the color-by. ([#2019](https://github.com/nextstrain/auspice/pull/2019))
 * Added support for Node.js version 24 and its corresponding NPM version (11). ([#2012](https://github.com/nextstrain/auspice/pull/2012))
 
 ## version 2.66.0 - 2025/09/05
 
-
 * Fixed a bug that prevented drag-and-drop metadata files from being parsed that was introduced in version 2.64.0 ([#2007](https://github.com/nextstrain/auspice/pull/2007))
 * Added SVG-download support for the measurements panel. ([#2005](https://github.com/nextstrain/auspice/pull/2005))
 
 ## version 2.65.0 - 2025/09/02
 
-
 * "show all branch labels" toggle has been updated to only show labels for visible branches, i.e. branches of selected tips after applying filters ([#2004](https://github.com/nextstrain/auspice/pull/2004))
 
 ## version 2.64.0 - 2025/08/15
-
 
 * Link-outs are explicitly disabled for v1 datasets because the nextstrain.org API does not support the v1 -> v2 conversion. ([#2002](https://github.com/nextstrain/auspice/pull/2002))
 * Added a `treeZoom=selected` query to load trees at the same zoom level after the "zoom to selected" button has been pressed, where applicable. See [the view settings docs](https://docs.nextstrain.org/projects/auspice/en/latest/advanced-functionality/view-settings.html) for more details. ([#1321](https://github.com/nextstrain/auspice/pull/1321))
@@ -54,7 +51,6 @@
 
 ## version 2.63.1 - 2025/06/04
 
-
 * Fixed a bug where datasets without the (optional!) `display_defaults` would crash, which included newick files dragged onto auspice.us. ([#1986](https://github.com/nextstrain/auspice/pull/1986))
 
 ## version 2.63.0 - 2025/06/02
@@ -71,7 +67,6 @@
 * Dropped support for Node.JS versions 16 & 18 and their corresponding NPM versions (7 & 8). ([#1975](https://github.com/nextstrain/auspice/pull/1975))
 
 ## version 2.62.0 - 2025/01/21
-
 
 * Added a new color tree by measurements feature.
   Clicking on a group in the measurements panel will add a new coloring to the tree,
