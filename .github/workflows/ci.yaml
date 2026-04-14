@@ -101,6 +101,9 @@ jobs:
     if: ${{ github.ref == 'refs/heads/release' }}
     needs: [build-and-smoke-test, unit-test, lint, type-check, check-lockfile]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -110,8 +113,6 @@ jobs:
       - run: node --version
       - run: npm ci --loglevel verbose
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   rebuild-docker-image:
     needs: [publish]
