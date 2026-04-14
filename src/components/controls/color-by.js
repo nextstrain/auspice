@@ -136,10 +136,12 @@ class ColorBy extends React.Component {
 
   getGtGeneOptions() {
     if (!this.props.genomeMap?.length) return [];
-    const options = [
-      // Nuc is first option, especially helpful when there are many many genes/CDSs
-      {value: nucleotide_gene, label: "nucleotide"}
-    ]
+    const proteinOnly = this.props.genomeMap?.[0].proteinOnly === true;
+    const options = proteinOnly ?
+      [] :
+      [ // Nuc is first option, especially helpful when there are many many genes/CDSs
+        {value: nucleotide_gene, label: "nucleotide"}
+      ]
     this.props.genomeMap[0].genes.forEach((gene) => {
       /**
        * A lot of the code in this file refers to "gene(s)", however the actual dropdown

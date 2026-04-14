@@ -226,7 +226,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.focus) {
     if (query.focus !== "selected") {
       console.error(`Invalid focus value of ${JSON.stringify(query.focus)}; removing focus.`);
-      delete query.focus; 
+      delete query.focus;
     } else if (state.showStreamTrees) {
       console.error(`Cannot use focus and streamtrees at the same time; removing focus.`);
       delete query.focus;
@@ -1161,7 +1161,10 @@ export const createStateFromQueryOrJSONs = ({
   /* calculate entropy in view */
   if (entropy.loaded) {
     /* The selected CDS + positions are only known if a genotype color-by has been set (display defaults | url) */
-    entropy.selectedCds = nucleotide_gene;
+    /* if the JSON is proteinOnly and we have a single gene (and CDS within that gene), default to viewing that gene */
+    entropy.selectedCds = (entropy.genomeMap[0].proteinOnly && entropy.genomeMap[0].genes.length === 1 && entropy.genomeMap[0].genes[0].cds.length === 1) ?
+      entropy.genomeMap[0].genes[0].cds[0] :
+      nucleotide_gene;
     entropy.selectedPositions = [];
     if (isColorByGenotype(controls.colorBy)) {
       const gt = decodeColorByGenotype(controls.colorBy);
