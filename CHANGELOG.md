@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.69.0 - 2026/04/14
+
+
 * Allow protein-only datasets, i.e. a dataset whose genome annotation is missing a nuc block but with CDSs defined. This work is in tandem with [this Augur PR](https://github.com/nextstrain/augur/pull/1958). ([Auspice PR #2040](https://github.com/nextstrain/auspice/pull/2040))
 
 ## version 2.68.0 - 2026/01/20
