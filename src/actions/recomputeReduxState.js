@@ -1062,7 +1062,7 @@ export const createStateFromQueryOrJSONs = ({
       }
     }
 
-    // Similar to the state changes applied for `ADD_EXTRA_METADATA`
+    // Similar logic to updating tree state via UPDATE_METADATA actions
     if (newColoringData !== undefined) {
       newMeasurementsColoringData = true;
       // Update controls

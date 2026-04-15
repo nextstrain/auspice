@@ -1,8 +1,12 @@
-import { successNotification, warningNotification } from "../notifications";
 import { AppDispatch, RootState } from "../../store";
-import { ADD_EXTRA_METADATA } from "../types";
-import { NewMetadata } from "./updateMetadata.types";
-import { NodeAttr } from "../../reducers/tree/types";
+import { UPDATE_METADATA } from "../types";
+import { hasMultipleGridPanels } from "../panelDisplay";
+import { SPECIAL_CASED_NODE_ATTRS } from "../../reducers/tree/types";
+import type{ ControlsState } from "../../reducers/controls";
+import type { TreeState, NodeAttr} from "../../reducers/tree/types";
+import type { UpdateMetadataAction, NewMetadata, AttrDetails } from "./updateMetadata.types";
+
+export const SUCCESS = "SUCCESS";
 
 /**
  * A redux thunk action to update node attributes and related data. The newMetadata
@@ -10,97 +14,191 @@ import { NodeAttr } from "../../reducers/tree/types";
  * dispatching notifications as needed. The resulting dispatched action contains
  * validated data which the reducers can simply merge into state.
  */
-export const updateMetadata = (newMetadata: NewMetadata) => {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
-    const { controls } = getState();
-    /* filter the attributes to _new_ ones, i.e. those not on the tree */
-    filterAttrs(newMetadata, controls.coloringsPresentOnTree, dispatch);
+export const updateMetadata = (
+  newMetadata: NewMetadata
+) => {
+  return (dispatch: AppDispatch, getState: () => RootState): string => {
+    const existingState = getState();
 
-    // I think we want a different action structure, but for now let's reuse the existing one
-    const action = convertToActionStructure(newMetadata)
-    dispatch(action);
-    dispatch(successNotification({
-      message: `Adding metadata from ${newMetadata.info?.fileName}`,
-      details: `${Object.keys(action.newColorings).length} new coloring${Object.keys(action.newColorings).length > 1 ? "s" : ""} for ${Object.keys(action.newNodeAttrs).length} node${Object.keys(action.newNodeAttrs).length > 1 ? "s" : ""}`
-    }));
+    // Compute new redux state data for relevant reducers ("fat actions" pattern)
+    const tree = _reduxTree(existingState.tree, newMetadata.attributes || {});
+    if (tree===undefined) {
+      return "No matching nodes in tree!";
+    }
+    const treeToo = _reduxTree(existingState.treeToo, newMetadata.attributes || {}) || existingState.treeToo;
+    const metadata = _reduxMetadata(existingState.metadata, newMetadata, tree);
+    const controls = _reduxControls(existingState.controls, newMetadata);
+
+    dispatch({ type: UPDATE_METADATA, tree, treeToo, metadata, controls })
+    return SUCCESS;
   }
 }
 
 /**
- * Filters the attributes (i.e. coloring names) to exclude those already present on the tree.
- * In the future this should be relaxed and instead merge incoming data with existing data.
+ * Compute data to be easily merged into the tree reducer(s)
+ * Returns undefined if there's no state updates to make (either because the incoming data
+ * doesn't update the tree state or the (second tree's) tree state is empty)
+ *
+ * NOTE: there is an out-of-sync bug lurking here: if you are filtering to (e.g.) country=X
+ * and the **NewMetadata** updates these values, the filters won't update. Specifically,
+ * the value count in the filter badge _will_ update (via updated `totalStateCounts` state)
+ * but the actual tree visibility won't.
  */
-function filterAttrs(
-  newMetadata: NewMetadata,
-  coloringsPresentOnTree: RootState['controls']['coloringsPresentOnTree'],
-  dispatch: AppDispatch
-): void {
-  const existingAttrs = coloringsPresentOnTree.intersection(new Set(Object.keys(newMetadata.attributes)));
+function _reduxTree(
+  tree: TreeState,
+  attributes: NewMetadata['attributes']
+): UpdateMetadataAction['tree'] | undefined {
 
-  // find empty attrs, those with no valid values
-  const emptyAttrs: Set<string> = new Set(
-    Object.entries(newMetadata.attributes)
-      .filter(([_key, attrInfo]) => Object.keys(attrInfo.strains).length === 0)
-      .map(([key, _attrInfo]) => key)
+  const attrsWithUpdates: string[] = Object.entries(attributes)
+    .flatMap(([k, v]) => Object.keys(v.strains).length ? k : [])
+    .filter((k) => !SPECIAL_CASED_NODE_ATTRS.has(k));
+
+  if (!attrsWithUpdates.length || tree.nodes === null) return undefined;
+
+  const attrsNonContinuous: Set<string> = new Set(attrsWithUpdates
+    .filter((attrName) => attributes[attrName].scaleType !== 'continuous'));
+
+  /* Compute updated nodeAttrs for all nodes for all node attr keys which have updates.
+   * While we do this, count all observed terminal values (similar to `countTraitsAcrossTree`)
+   * for non-continuous traits.
+   */
+  const counts: Record<string, Map<string, number>> = {};
+  const nodeAttrs = Object.fromEntries(
+    tree.nodes.map((node) => {
+      const name = node.name;
+      const nodeAttrs = Object.fromEntries(
+        attrsWithUpdates.map((attrName) => {
+          // attr data is either (i) new data, (ii) reference to existing data, (iii) undefined.
+          // Above we restrict attrsWithUpdates to always represent "normal" NodeAttr types
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          const attrData = (attributes[attrName].strains[name] || node.node_attrs[attrName]) as (NodeAttr | undefined);
+          const value = attrData?.value;
+          if (!node.hasChildren && value && attrsNonContinuous.has(attrName)) {
+            if (!counts[attrName]) counts[attrName] = new Map();
+            counts[attrName].set(String(value), (counts[attrName].get(String(value)) || 0) + 1);
+          }
+          return [attrName, attrData];
+        })
+      );
+      return [name, nodeAttrs]
+    })
   );
 
-  const colsToRemove = existingAttrs.union(emptyAttrs);
-
-  if (colsToRemove.size) {
-    newMetadata.attributes = Object.fromEntries(
-      Object.entries(newMetadata.attributes)
-        .filter(([attrName, _info]) => !colsToRemove.has(attrName))
-    )
+  return {
+    nodeAttrs,
+    nodeAttrKeys: new Set([...tree.nodeAttrKeys, ...attrsWithUpdates]),
+    totalStateCounts: {...tree.totalStateCounts, ...counts},
   }
 
-  if (colsToRemove.size || newMetadata.info?.ignoredAttrNames?.size) {
-    const cols = colsToRemove.union(newMetadata.info?.ignoredAttrNames || new Set());
-    dispatch(warningNotification({
-      message: `Ignoring ${cols.size} columns as they are already set as colorings, contain no valid values, or are "special" cases to be ignored`,
-      details: [...cols].join(", ")
-    }));
-  }
-}
-
-interface ColorInfo {
-  title: string;
-  type: string;
-  /** elements are [traitValue, hex]. Leave undefined for Auspice to create one */
-  scale?: [string, string][]
-}
-interface AddExtraMetadata {
-  type: typeof ADD_EXTRA_METADATA;
-
-  /** newNodeAttrs[strain][traitName] = {value: traitValue}; */
-  newNodeAttrs: Record<string, Record<string, NodeAttr>>;
-
-  /** newColorings keys are traitName */
-  newColorings: Record<string, ColorInfo>
-
-  newGeoResolution: NewMetadata['geographic'];
 }
 
 /**
- * temporary
+ * Return an object representing updates to the existing redux controls **state** which
+ * the reducer can simply merge in.
  */
-function convertToActionStructure(newMetadata: NewMetadata): AddExtraMetadata {
-  const newNodeAttrs: AddExtraMetadata['newNodeAttrs'] = {};
-  const newColorings: AddExtraMetadata['newColorings'] = {};
-  for (const [traitName, info] of Object.entries(newMetadata.attributes)) {
-    for (const [strain, nodeAttr] of Object.entries(info.strains)) {
-      if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {}
-      newNodeAttrs[strain][traitName] = nodeAttr;
-    }
-    newColorings[traitName] = {
-      title: info.name,
-      type: info.scaleType,
-      scale: Object.keys(info.colours).length ? Object.entries(info.colours) : undefined,
+function _reduxControls(
+  state: ControlsState,
+  newMetadata: NewMetadata
+): UpdateMetadataAction['controls'] {
+  const updates: UpdateMetadataAction['controls'] = {};
+
+  /* colorings first (auspice assumes all attrs are colorings) */
+  if (newMetadata.attributes) {
+    const coloringsPresentOnTree = (new Set(state.coloringsPresentOnTree))
+      .union(new Set(Object.keys(newMetadata.attributes)));
+    updates.coloringsPresentOnTree = coloringsPresentOnTree;
+  }
+
+  /* geographic resolutions */
+  if (newMetadata.geographic?.length && !state.panelsAvailable.includes("map")) {
+    updates.panelsAvailable = [...state.panelsAvailable, "map"],
+    updates.panelsToDisplay = [...updates.panelsAvailable];
+    updates.canTogglePanelLayout = hasMultipleGridPanels(updates.panelsAvailable);
+    updates.geoResolution = newMetadata.geographic[0].key;
+  }
+
+  return updates;
+}
+
+
+/**
+ * Return an object representing updates to the existing redux **state** which the reducer
+ * can simply merge in.
+ * NOTE: metadata redux state is untyped
+ */
+function _reduxMetadata(
+  state: Record<string, any>,
+  newMetadata: NewMetadata,
+  tree: UpdateMetadataAction['tree'],
+): UpdateMetadataAction['metadata'] {
+
+  const colorings = Object.fromEntries([
+    // First update existing colorings
+    ...Object.entries(state.colorings)
+      .map(([key, value]) => {
+        // The redux state values are untyped, so for now assume they are the expected shape
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const oldColoring = value as UpdateMetadataAction['metadata']['colorings'][string];
+        const coloring = Object.hasOwn(newMetadata.attributes, key) ?
+          _updateColoring(oldColoring, newMetadata.attributes[key], tree.totalStateCounts[key]) :
+          oldColoring;
+        return [key, coloring]
+      }),
+    // Then add entirely new colorings
+    ...Object.keys(newMetadata.attributes)
+      .filter((key) => !Object.hasOwn(state.colorings, key))
+      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes[key], tree.totalStateCounts[key])])
+  ]);
+
+
+  /* currently the only usage of `updateMetadata` guarantees that each geographic
+  trait key (name) is also a coloring, but as usage is expanded we should check this */
+  const geoResolutions = newMetadata.geographic?.length &&
+    [...(state.geoResolutions || []), ...newMetadata.geographic];
+
+  return {
+    ...(Object.keys(colorings).length && { colorings }),
+    ...(geoResolutions && { geoResolutions }),
+  }
+}
+
+
+/**
+ * Return coloring object (for a specific attr), with new coloring info **attrInfo**
+ * either merged in or replacing wholesale the original coloring **state**
+ */
+function _updateColoring(
+  state: UpdateMetadataAction['metadata']['colorings'][string],
+  attrDetails: AttrDetails,
+  stateCounts: undefined | Map<string, number>,
+): UpdateMetadataAction['metadata']['colorings'][string] {
+  let replace = state === undefined;
+  if (!replace && (state.type !== attrDetails.scaleType || state.type !== 'categorical')) {
+    console.warn(`Merging scale colors is only possible for categorical scales`)
+    replace = true;
+  }
+
+  if (replace) {
+    return {
+      title: attrDetails.name,
+      type: attrDetails.scaleType,
+      ...(attrDetails.colors?.length && { scale: attrDetails.colors }),
     }
   }
+
+  const updatedScale: [string, string][] = Object.entries({
+    // existing scale pairs, less any values which no longer exist on the tree
+    ...Object.fromEntries(
+      (state.scale || []) // restrict to strings as we only consider categorical scales
+        .filter(([value,]) => typeof value === 'string' && stateCounts?.get(value) > 0)
+    ),
+    // plus new value-color pairs
+    ...Object.fromEntries(attrDetails.colors || []),
+  })
+
   return {
-    type: ADD_EXTRA_METADATA,
-    newNodeAttrs,
-    newColorings,
-    newGeoResolution: newMetadata.geographic,
+    ...state,
+    title: attrDetails.name,
+    ...(updatedScale.length && {scale: updatedScale})
   }
 }

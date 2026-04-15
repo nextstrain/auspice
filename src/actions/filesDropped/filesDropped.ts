@@ -1,7 +1,7 @@
-import { errorNotification } from "../notifications";
+import { errorNotification, successNotification } from "../notifications";
 import { fileTypeIsCSVLike } from "./constants";
 import { handleCsvLikeDroppedFile } from "./parseCsv";
-import { updateMetadata } from "../updateMetadata/updateMetadata";
+import { updateMetadata, SUCCESS } from "../updateMetadata/updateMetadata";
 import { AppDispatch, RootState } from "../../store";
 import { NewMetadata } from "../updateMetadata/updateMetadata.types"
 
@@ -37,7 +37,19 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
       return;
     }
 
-    dispatch(updateMetadata(newMetadata));
+    if (!Object.keys(newMetadata.attributes).length) {
+      throw Error(`${file.name} no valid colorings found`)
+    }
+
+    const result = dispatch(updateMetadata(newMetadata));
+    if (result===SUCCESS) {
+      dispatch(successNotification({
+        message: `Adding metadata from ${file.name}`,
+        details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
+      }));
+    } else {
+      throw Error(result);
+    }
   } catch (err) {
     console.error(err)
     dispatch(errorNotification({

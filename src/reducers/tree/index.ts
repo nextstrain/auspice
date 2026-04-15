@@ -3,6 +3,7 @@ import { countTraitsAcrossTree } from "../../util/treeCountingHelpers";
 import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeState, TreeTooState } from "./types";
+import type { UpdateMetadataAction } from "../../actions/updateMetadata/updateMetadata.types"
 
 export const getDefaultTreeState = (): TreeState | TreeTooState => {
   return {
@@ -98,6 +99,24 @@ const Tree = (
           ...countTraitsAcrossTree(state.nodes, nonContinuousColorings, false, true)
         },
         nodeAttrKeys
+      };
+    }
+    case types.UPDATE_METADATA: {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const { tree: newData } = action as UpdateMetadataAction;
+      if (!newData) return state;
+
+      // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      for (const node of state.nodes) {
+        for (const [attrName, attrData] of Object.entries(newData.nodeAttrs[node.name] || {})) {
+          if (!attrData) continue;
+          node.node_attrs[attrName] = attrData;
+        }
+      }
+      return {
+        ...state,
+        totalStateCounts: newData.totalStateCounts,
+        nodeAttrKeys: newData.nodeAttrKeys,
       };
     }
     case types.REMOVE_METADATA: {

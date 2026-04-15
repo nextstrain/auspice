@@ -1,4 +1,6 @@
-import { NodeAttr } from "../../reducers/tree/types";
+import { TreeState, NodeAttr } from "../../reducers/tree/types";
+import type { ScaleType, ControlsState } from "../../reducers/controls";
+import type { ColoringInfo } from "../../metadata";
 
 /**
  * Struct containing new metadata information for merging with the current redux state.
@@ -6,7 +8,7 @@ import { NodeAttr } from "../../reducers/tree/types";
  * covering use cases from drag-and-drop metadata TSVs to in-app editing of attr colours.
  */
 export interface NewMetadata {
-  attributes?: Record<string, ColoringInfo>;
+  attributes?: Record<string, AttrDetails>;
 
   geographic?: {
     /** trait name */
@@ -16,19 +18,48 @@ export interface NewMetadata {
     demes: {
       [deme: string]: LatLong;
     }
-  };
-
-  info: MetadataInfo;
+    }[];
 }
 
-export interface ColoringInfo {
+export interface UpdateMetadataAction {
+  type: "UPDATE_METADATA";
+  tree: undefined | ActionTree;
+  treeToo: undefined | ActionTree;
+  controls: Partial<ControlsState>;
+  metadata: ActionMetadata;
+}
+
+/** Metadata state is untyped, but we can define some basic types for the action */
+interface ActionMetadata {
+  colorings?: {
+    [coloringKey: string]: ColoringInfo;
+  };
+  geoResolutions?: {
+    demes: {
+      [demeName: string]: LatLong;
+    };
+    key: string;
+  }[];
+}
+
+
+
+interface ActionTree {
+  /** nodeAttrs -> nodeName -> attrName -> attrData */
+  nodeAttrs: Record<string, Record<string, NodeAttr>>
+  nodeAttrKeys: TreeState['nodeAttrKeys']
+  totalStateCounts: TreeState['totalStateCounts']
+}
+
+
+export interface AttrDetails {
   /** node_attr key to use */
   key: string;
 
   /** attr name (e.g. in legends, menus) */
   name: string;
 
-  scaleType: string;
+  scaleType: ScaleType;
 
   /** Lookup of strain name to attribute values.
    * The value type is NodeAttr and thus we don't (yet) allow
@@ -37,14 +68,10 @@ export interface ColoringInfo {
    */
   strains: Record<string, NodeAttr>;
 
-  /** Lookup of attrValue to specified colour */
-  colours: Record<string, string>;
+  /** Mapping of attrValue to specified color */
+  colors?: [string|number, string][]
 }
 
-interface MetadataInfo {
-  fileName ?: string;
-  ignoredAttrNames?: Set<string>;
-}
 
 interface LatLong {
   latitude: number;

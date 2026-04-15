@@ -1,7 +1,7 @@
 let Papa: typeof import("papaparse"); /* lazily imported once a file is dropped on */
 let XLSX: typeof import("xlsx/xlsx.mini"); /* lazily imported once a file is dropped on */
 import { rgb } from "d3-color";
-import { NewMetadata, ColoringInfo } from "../updateMetadata/updateMetadata.types"
+import { NewMetadata, AttrDetails } from "../updateMetadata/updateMetadata.types"
 
 /**
  * ------------------------------------------------------
@@ -48,13 +48,12 @@ interface LatLongKeys {
   longitude: string;
 }
 
-/** A similar type to `ColoringInfo` */
 interface AttrColoring {
   attrName: string;
   fieldName?: string;
-  scaleType: ColoringInfo['scaleType'];
-  strains: ColoringInfo['strains'];
-  colours: ColoringInfo['colours'];
+  scaleType: AttrDetails['scaleType'];
+  strains: AttrDetails['strains'];
+  colors?: AttrDetails['colors'];
   colorScaleFieldName: string | undefined;
 }
 
@@ -62,7 +61,7 @@ interface Header {
   fields: string[];
   strainKey: string;
   latLongKeys: LatLongKeys | undefined;
-  ignoredFields: NonNullable<NewMetadata['info']['ignoredAttrNames']>
+  ignoredFields: Set<string>;
 }
 
 
@@ -78,13 +77,19 @@ export async function handleCsvLikeDroppedFile(file: File, nodeNames: Set<string
   if (errors.length) throw new Error(errors.map((e) => e.message).join(", "));
   let { colorings, header } = processHeader(meta.fields);
   processRows(colorings, header, data, nodeNames);
+  if (colorings.length === 0) {
+    throw new Error("No valid columns")
+  }
   // Drop coloring for which no valid strains were found
   colorings = colorings.filter((coloring) => Object.keys(coloring.strains).length)
+  if (colorings.length === 0) {
+    throw new Error("No matching nodes found in tree")
+  }
   addExistenceColoring(colorings, fileName);
 
   const geographic = header.latLongKeys ?
     processLatLongs(data, colorings, header, `${fileName}_geo`) :
-    undefined;
+    [];
 
   return {
     attributes: Object.fromEntries(colorings.map((c) => [
@@ -94,14 +99,10 @@ export async function handleCsvLikeDroppedFile(file: File, nodeNames: Set<string
         name: c.attrName,
         scaleType: c.scaleType,
         strains: c.strains,
-        colours: c.colours,
+        colors: c.colors,
       }
     ])),
     geographic,
-    info: {
-      fileName,
-      ignoredAttrNames: header.ignoredFields
-    }
   }
 }
 
@@ -177,7 +178,7 @@ function processHeader(fields: string[]): {
         ignoredFields.add(fieldName);
         return null;
       }
-      if (latLongFields.has(fieldName)) {
+      if (latLongFields.has(fieldName) || fieldName==='') {
         return null;
       }
       let attrName = fieldName;
@@ -193,7 +194,7 @@ function processHeader(fields: string[]): {
           attrName = prefix; /* MicroReact uses this to colour things, but we do this by default */
         }
       }
-      return { attrName, colours: {}, fieldName, colorScaleFieldName: undefined, scaleType, strains: {} };
+      return { attrName, colors: [], fieldName, colorScaleFieldName: undefined, scaleType, strains: {} };
     })
     .filter((x): x is AttrColoring => !!x)
     .map((data) => {
@@ -228,7 +229,7 @@ function addExistenceColoring(colorings: AttrColoring[], fileName: string): void
         .flatMap((c) => Array.from(Object.keys(c.strains)))
         .map((s) => [s, { value: `Strains in ${fileName}` }])
     ),
-    colours: {},
+    colors: [],
     colorScaleFieldName: undefined,
   })
 }
@@ -239,7 +240,8 @@ function processRows(colorings: AttrColoring[], header: Header, data: ParseResul
       console.error("[internal error] fieldName not set")
       continue;
     }
-    const colours: Record<string, string[]> = {}
+    /* Track per-row colors defined in the CSV. Since all CSV-based color schemes are non-continuous this data type will be ok. */
+    const colorsObserved: Record<string, string[]> = {};
     const fieldName = attrInfo.fieldName;
     if (header.ignoredFields.has(fieldName) || fieldName === header.strainKey) continue;
     for (const row of data) {
@@ -248,32 +250,32 @@ function processRows(colorings: AttrColoring[], header: Header, data: ParseResul
       const value = row[fieldName];
       if (!value) continue; // skip empty strings (Note: values of `0`, `false` etc are all strings so not skipped)
       attrInfo.strains[strain] = { value };
-      // Colours are defined per strain, so store them in a list so we can average as needed
+      // Colors are defined per strain, so store them in a list so we can average as needed
       if (attrInfo.colorScaleFieldName) {
         const hex = row[attrInfo.colorScaleFieldName];
         if (hex) {
-          if (!colours[value]) colours[value] = [];
-          colours[value].push(hex);
+          if (!colorsObserved[value]) colorsObserved[value] = [];
+          colorsObserved[value].push(hex);
         }
       }
     }
-    attrInfo.colours = Object.fromEntries(
-      Object.entries(colours).map(([value, hexes]) => {
-        return [value, _averageColour(hexes)];
-      }).filter((x) => !!x[1])
-    )
+    // Turn colors into [value, hex] pairs, averaging multiple reported colors as needed
+    const colors: [string, string][] = Object.entries(colorsObserved)
+      .map(([value, hexes]) => [value, _averageColor(hexes)] as const)
+      .filter((entry): entry is [string, string] => entry[1] !== null);
+    if (colors.length) attrInfo.colors = colors;
   }
 }
 
 /**
- * Returns the average of a list of hex colour values.
+ * Returns the average of a list of hex color values.
  */
-function _averageColour(hexes: string[]): string | null {
+function _averageColor(hexes: string[]): string | null {
   if (hexes.length === 0) return null
   const validatedHexes = hexes.filter((h) => h.match(/^#[A-Fa-f0-9]{3}([A-Fa-f0-9]{3})?$/));
   if (validatedHexes.length !== hexes.length) {
     const dropped = Array.from((new Set(hexes)).difference(new Set(validatedHexes)));
-    console.warn(`Validation of colour hexes dropped these invalid values: ${dropped.join(', ')}`);
+    console.warn(`Validation of color hexes dropped these invalid values: ${dropped.join(', ')}`);
   }
   if (validatedHexes.length === 0) return null;
   if (validatedHexes.length === 1) return hexes[0]
@@ -328,7 +330,7 @@ function processLatLongs(
     attrName,
     scaleType: 'categorical',
     strains: {},
-    colours: {},
+    colors: [],
     colorScaleFieldName: undefined,
   }
   for (const { deme, latitude, longitude, strains } of coordsStrains.values()) {
@@ -338,5 +340,5 @@ function processLatLongs(
     }
   }
   colorings.push(attrColoring);
-  return newGeoResolution;
+  return [newGeoResolution];
 }

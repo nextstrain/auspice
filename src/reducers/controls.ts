@@ -15,7 +15,6 @@ import { hasMultipleGridPanels } from "../actions/panelDisplay";
 import { Distance } from "../components/tree/phyloTree/types";
 import { MeasurementsDisplay } from "./measurements/types";
 
-
 export interface ColorScale {
   colorBy: string
   continuous: boolean
@@ -539,6 +538,9 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         };
       }
       return newState;
+    }
+    case types.UPDATE_METADATA: {
+      return Object.assign({}, state, action.controls);
     }
     case types.REMOVE_METADATA: {
       const coloringsPresentOnTree = new Set(state.coloringsPresentOnTree);

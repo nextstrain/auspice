@@ -32,6 +32,9 @@ const Metadata = (state = {
       }
       return Object.assign({}, state, {colorings, geoResolutions});
     }
+    case types.UPDATE_METADATA: {
+      return Object.assign({}, state, action.metadata);
+    }
     case types.REMOVE_METADATA: {
       const colorings = {...state.colorings};
       action.nodeAttrsToRemove.forEach((colorBy) => {
@@ -79,6 +82,5 @@ function getBuildUrlFromGetAvailableJson(availableData) {
   }
   return false;
 }
-
 
 export default Metadata;
