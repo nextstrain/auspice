@@ -12,9 +12,8 @@ import { NewMetadata } from "./updateMetadata.types";
 export const updateMetadata = (newMetadata: NewMetadata) => {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     console.log("ACTION::updateMetadata. STATE", getState(), "newMetadata", newMetadata)
-    const { controls } = getState();
     /* filter the attributes to _new_ ones, i.e. those not on the tree */
-    filterAttrs(newMetadata, controls.coloringsPresentOnTree, dispatch);
+    filterAttrs(newMetadata, dispatch);
 
     /* currently the only usage of `updateMetadata` guarantees that each geographic
     trait key (name) is a new colouring, but as usage is expanded we should check this here */
@@ -28,16 +27,13 @@ export const updateMetadata = (newMetadata: NewMetadata) => {
 }
 
 /**
- * Filters the attributes (i.e. coloring names) to exclude those already present on the tree.
- * In the future this should be relaxed and instead merge incoming data with existing data.
+ * Filters the attributes (i.e. coloring names) to exclude empty structs
+ * TODO: shift to the file parsing code
  */
 function filterAttrs(
   newMetadata: NewMetadata,
-  coloringsPresentOnTree: RootState['controls']['coloringsPresentOnTree'],
   dispatch: AppDispatch
 ): void {
-  const existingAttrs = coloringsPresentOnTree.intersection(new Set(Object.keys(newMetadata.attributes)));
-
   // find empty attrs, those with no valid values
   const emptyAttrs: Set<string> = new Set(
     Object.entries(newMetadata.attributes)
@@ -45,7 +41,7 @@ function filterAttrs(
       .map(([key, _attrInfo]) => key)
   );
 
-  const colsToRemove = existingAttrs.union(emptyAttrs);
+  const colsToRemove = emptyAttrs;
 
   if (colsToRemove.size) {
     newMetadata.attributes = Object.fromEntries(

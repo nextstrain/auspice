@@ -35,14 +35,7 @@ const Metadata = (state = {
     case types.UPDATE_METADATA: {
       // TODO XXX
       const updates = { colorings: { ...state.colorings } };
-      for (const attrInfo of Object.values(action.attributes)) {
-        // if coloring exists already we need to merge not overwrite! TODO!
-        updates.colorings[attrInfo.key] = {
-          title: attrInfo.name,
-          type: attrInfo.scaleType,
-          scale: Object.keys(attrInfo.colours).length ? Object.entries(attrInfo.colours) : undefined,
-        }
-      }
+      Object.values(action.attributes).forEach((attrInfo) => _mergeAttr(updates.colorings, attrInfo));
       if (action.geographic) {
         // todo: cover case where we merge / update existing deme
         updates.geoResolutions = [ ...(state.geoResolutions || []), ...action.geographic ];
@@ -97,5 +90,30 @@ function getBuildUrlFromGetAvailableJson(availableData) {
   return false;
 }
 
+/**
+ * Merge an attribute (type: `ColoringInfo`) into colorings state
+ */
+function _mergeAttr(colorings, attrInfo) {
+  const key = attrInfo.key;
+
+  const replace = !Object.hasOwn(colorings, key) ||
+    attrInfo.scaleType !== colorings[key].type;
+
+  if (replace) {
+    colorings[key] = {
+      title: attrInfo.name,
+      type: attrInfo.scaleType,
+      scale: Object.keys(attrInfo.colours).length ? Object.entries(attrInfo.colours) : undefined,
+    }
+  } else {
+    colorings[key] = { ...colorings[key] };
+    colorings[key].title = attrInfo.name;
+    const scaleDict = {
+      ...Object.fromEntries(colorings[key].scale || []),
+      ...(attrInfo.colours || {})
+    }
+    colorings[key].scale = Object.entries(scaleDict);
+  }
+}
 
 export default Metadata;
