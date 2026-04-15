@@ -28,6 +28,9 @@ const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
 const Measurements = lazy(() => import("../measurements"));
 const Map = lazy(() => import(/* webpackChunkName: "mapComponent" */ "../map/map"));
+const Statespace = lazy(() => import("../statespace/statespace"));
+
+
 
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
@@ -227,6 +230,35 @@ class Main extends React.Component {
             </Suspense> :
             null
           }
+
+
+          {this.props.panelsToDisplay.includes("statespace") ?
+            <Suspense
+              fallback={
+                <PanelSpinner
+                  width={this.inGrid() ? grid.width : full.width}
+                  height={this.inGrid() ? grid.height : full.height}
+                  key={keyName + "_statespace_spinner"}
+                />
+              }
+            >
+              <PanelErrorBoundary
+                width={this.shouldMapBeInGrid() ? grid.width : full.width}
+                height={this.shouldMapBeInGrid() ? grid.height : full.height}
+                name="map"
+              >
+                <Statespace
+                  width={this.shouldMapBeInGrid() ? grid.width : full.width}
+                  height={this.shouldMapBeInGrid() ? grid.height : full.height}
+                  key={keyName+"_statespace"}
+                  justGotNewDatasetRenderNewMap={false}
+                  legend={this.shouldShowMapLegend()}
+                />
+              </PanelErrorBoundary>
+            </Suspense> :
+            null
+          }
+
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
               <PanelErrorBoundary width={chartEntropy.width} height={chartEntropy.height} name="entropy">
