@@ -314,6 +314,21 @@ export const addNodeAttrs = (nodes, newAttrs) => {
 };
 
 /**
+ * TKTK
+ */
+export const overwriteAttributes = (nodes, attributes) => {
+  for (const node of nodes) {
+    for (const [attrKey, attrInfo] of Object.entries(attributes)) {
+      if (Object.hasOwn(attrInfo.strains, node.name)) {
+        const value = attrInfo.strains[node.name];
+        // overwrite any existing data, including other properties (e.g. confidence values)
+        node.node_attrs[attrKey] = value;
+      }
+    }
+  }
+}
+
+/**
  * Remove attrs from the `nodes` data structure.
  * @param {Array} nodes
  * @param {Array} attrsToRemove

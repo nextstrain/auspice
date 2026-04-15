@@ -32,6 +32,23 @@ const Metadata = (state = {
       }
       return Object.assign({}, state, {colorings, geoResolutions});
     }
+    case types.UPDATE_METADATA: {
+      // TODO XXX
+      const updates = { colorings: { ...state.colorings } };
+      for (const attrInfo of Object.values(action.attributes)) {
+        // if coloring exists already we need to merge not overwrite! TODO!
+        updates.colorings[attrInfo.key] = {
+          title: attrInfo.name,
+          type: attrInfo.scaleType,
+          scale: Object.keys(attrInfo.colours).length ? Object.entries(attrInfo.colours) : undefined,
+        }
+      }
+      if (action.geographic) {
+        // todo: cover case where we merge / update existing deme
+        updates.geoResolutions = [ ...(state.geoResolutions || []), ...action.geographic ];
+      }
+      return Object.assign({}, state, updates);
+    }
     case types.REMOVE_METADATA: {
       const colorings = {...state.colorings};
       action.nodeAttrsToRemove.forEach((colorBy) => {

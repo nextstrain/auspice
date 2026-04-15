@@ -77,6 +77,10 @@ const treeToo = (
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
       addNodeAttrs(state.nodes, action.newNodeAttrs);
       return state;
+    case types.UPDATE_METADATA: {
+      console.log("UPDATE_METADATA tree2 TODO XXX")
+      return state;
+    }
     case types.REMOVE_METADATA:
       // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
       removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);

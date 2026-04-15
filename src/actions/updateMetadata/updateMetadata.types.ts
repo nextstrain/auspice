@@ -16,9 +16,13 @@ export interface NewMetadata {
     demes: {
       [deme: string]: LatLong;
     }
-  };
+    }[];
 
   info: MetadataInfo;
+}
+
+export interface UpdateMetadataAction extends NewMetadata {
+  type: "UPDATE_METADATA",
 }
 
 export interface ColoringInfo {

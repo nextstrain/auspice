@@ -84,7 +84,7 @@ export async function handleCsvLikeDroppedFile(file: File, nodeNames: Set<string
 
   const geographic = header.latLongKeys ?
     processLatLongs(data, colorings, header, `${fileName}_geo`) :
-    undefined;
+    [];
 
   return {
     attributes: Object.fromEntries(colorings.map((c) => [
@@ -338,5 +338,5 @@ function processLatLongs(
     }
   }
   colorings.push(attrColoring);
-  return newGeoResolution;
+  return [newGeoResolution];
 }

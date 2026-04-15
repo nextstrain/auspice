@@ -1,8 +1,7 @@
 import { successNotification, warningNotification } from "../notifications";
 import { AppDispatch, RootState } from "../../store";
-import { ADD_EXTRA_METADATA } from "../types";
+import { UPDATE_METADATA } from "../types";
 import { NewMetadata } from "./updateMetadata.types";
-import { NodeAttr } from "../../reducers/tree/types";
 
 /**
  * A redux thunk action to update node attributes and related data. The newMetadata
@@ -17,13 +16,13 @@ export const updateMetadata = (newMetadata: NewMetadata) => {
     /* filter the attributes to _new_ ones, i.e. those not on the tree */
     filterAttrs(newMetadata, controls.coloringsPresentOnTree, dispatch);
 
-    // I think we want a different action structure, but for now let's reuse the existing one
-    const action = convertToActionStructure(newMetadata)
-    console.log("ACTION::updateMetadata dispatching:", action)
-    dispatch(action);
+    /* currently the only usage of `updateMetadata` guarantees that each geographic
+    trait key (name) is a new colouring, but as usage is expanded we should check this here */
+
+    dispatch({type: UPDATE_METADATA, ...newMetadata,})
     dispatch(successNotification({
       message: `Adding metadata from ${newMetadata.info?.fileName}`,
-      details: `${Object.keys(action.newColorings).length} new coloring${Object.keys(action.newColorings).length > 1 ? "s" : ""} for ${Object.keys(action.newNodeAttrs).length} node${Object.keys(action.newNodeAttrs).length > 1 ? "s" : ""}`
+      details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
     }));
   }
 }
@@ -61,48 +60,5 @@ function filterAttrs(
       message: `Ignoring ${cols.size} columns as they are already set as colorings, contain no valid values, or are "special" cases to be ignored`,
       details: [...cols].join(", ")
     }));
-  }
-}
-
-interface ColorInfo {
-  title: string;
-  type: string;
-  /** elements are [traitValue, hex]. Leave undefined for Auspice to create one */
-  scale?: [string, string][]
-}
-interface AddExtraMetadata {
-  type: typeof ADD_EXTRA_METADATA;
-
-  /** newNodeAttrs[strain][traitName] = {value: traitValue}; */
-  newNodeAttrs: Record<string, Record<string, NodeAttr>>;
-
-  /** newColorings keys are traitName */
-  newColorings: Record<string, ColorInfo>
-
-  newGeoResolution: NewMetadata['geographic'];
-}
-
-/**
- * temporary
- */
-function convertToActionStructure(newMetadata: NewMetadata): AddExtraMetadata {
-  const newNodeAttrs: AddExtraMetadata['newNodeAttrs'] = {};
-  const newColorings: AddExtraMetadata['newColorings'] = {};
-  for (const [traitName, info] of Object.entries(newMetadata.attributes)) {
-    for (const [strain, nodeAttr] of Object.entries(info.strains)) {
-      if (!newNodeAttrs[strain]) newNodeAttrs[strain] = {}
-      newNodeAttrs[strain][traitName] = nodeAttr;
-    }
-    newColorings[traitName] = {
-      title: info.name,
-      type: info.scaleType,
-      scale: Object.keys(info.colours).length ? Object.entries(info.colours) : undefined,
-    }
-  }
-  return {
-    type: ADD_EXTRA_METADATA,
-    newNodeAttrs,
-    newColorings,
-    newGeoResolution: newMetadata.geographic,
   }
 }
