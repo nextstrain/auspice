@@ -2,7 +2,7 @@ import { successNotification, warningNotification } from "../notifications";
 import { AppDispatch, RootState } from "../../store";
 import { UPDATE_METADATA } from "../types";
 import { NewMetadata } from "./updateMetadata.types";
-
+import { changeColorBy } from "../colors";
 /**
  * A redux thunk action to update node attributes and related data. The newMetadata
  * has not been cross-referenced with Redux state and so this thunk does that work,
@@ -12,6 +12,7 @@ import { NewMetadata } from "./updateMetadata.types";
 export const updateMetadata = (newMetadata: NewMetadata) => {
   return (dispatch: AppDispatch, getState: () => RootState): void => {
     console.log("ACTION::updateMetadata. STATE", getState(), "newMetadata", newMetadata)
+    const { controls } = getState();
     /* filter the attributes to _new_ ones, i.e. those not on the tree */
     filterAttrs(newMetadata, dispatch);
 
@@ -23,6 +24,14 @@ export const updateMetadata = (newMetadata: NewMetadata) => {
       message: `Adding metadata from ${newMetadata.info?.fileName}`,
       details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
     }));
+
+    /** If the dataset didn't have any colorings, but now does, then switch to the first one
+     * (very common in auspice.us)
+     */
+    const colorOpts = getState().controls.coloringsPresentOnTree;
+    if (!controls.coloringsPresentOnTree.size && colorOpts.size) {
+      dispatch(changeColorBy([...colorOpts][0]));
+    }
   }
 }
 
