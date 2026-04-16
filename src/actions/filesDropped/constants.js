@@ -16,12 +16,15 @@ const isExcelCsv = (file) => file.type === "application/vnd.ms-excel" && file.na
 
 const fileTypeIsCSVLike = (file) => acceptedFileTypes.includes(file.type) || isWindowsTsv(file) || isExcelCsv(file);
 
+const fileTypeIsJson = (file) => file.type === "application/json" || file.name.endsWith('.json');
+
 /** Used by auspice.us */
 function isAcceptedFileType(file) {
-  return fileTypeIsCSVLike(file);
+  return fileTypeIsCSVLike(file) || fileTypeIsJson(file);
 }
 
 export {
   fileTypeIsCSVLike,
+  fileTypeIsJson,
   isAcceptedFileType
 };
