@@ -1,6 +1,7 @@
 import { errorNotification } from "../notifications";
-import { fileTypeIsCSVLike } from "./constants";
+import { fileTypeIsCSVLike, fileTypeIsJson } from "./constants";
 import { handleCsvLikeDroppedFile } from "./parseCsv";
+import { handleNodeDataJsonFile } from "./parseNodeDataJson";
 import { updateMetadata } from "../updateMetadata/updateMetadata";
 import { AppDispatch, RootState } from "../../store";
 import { NewMetadata } from "../updateMetadata/updateMetadata.types"
@@ -29,6 +30,8 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
     let newMetadata: NewMetadata;
     if (fileTypeIsCSVLike(file)) {
       newMetadata = await handleCsvLikeDroppedFile(file, nodeNames);
+    } else if (fileTypeIsJson(file)) {
+      newMetadata = await handleNodeDataJsonFile(file, nodeNames);
     } else {
       dispatch(errorNotification({
         message: `Cannot parse ${file.name}`,
