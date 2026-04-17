@@ -1,5 +1,5 @@
 import { errorNotification } from "../notifications";
-import { fileTypeIsCSVLike, fileTypeIsJson } from "./constants";
+import { fileTypeIsCSVLike, fileTypeIsJson, isAcceptedFileType } from "./constants";
 import { handleCsvLikeDroppedFile } from "./parseCsv";
 import { handleNodeDataJsonFile } from "./parseNodeDataJson";
 import { updateMetadata } from "../updateMetadata/updateMetadata";
@@ -13,39 +13,42 @@ import { NewMetadata } from "../updateMetadata/updateMetadata.types"
  */
 export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispatch, getState: () => RootState): Promise<void> => {
 
-  if (files.length !== 1) {
-    dispatch(errorNotification({
-      message: "More than one file dropped",
-      details: "Currently we only allow a single CSV to be used"
-    }));
-    return;
-  }
+  const acceptedFiles = [...files].filter(isAcceptedFileType);
+  const failures: string[] = [];
 
-  const file = files[0];
+  if (acceptedFiles.length !== files.length) {
+    [...files]
+      .filter((file) => !acceptedFiles.includes(file))
+      .forEach((file) => {
+        failures.push(`'${file.name}' (invalid file type)`);
+      });
+  }
 
   const { tree, treeToo } = getState();
   const nodeNames = _collectNodeNames(tree, treeToo);
 
-  try {
-    let newMetadata: NewMetadata;
-    if (fileTypeIsCSVLike(file)) {
-      newMetadata = await handleCsvLikeDroppedFile(file, nodeNames);
-    } else if (fileTypeIsJson(file)) {
-      newMetadata = await handleNodeDataJsonFile(file, nodeNames);
-    } else {
-      dispatch(errorNotification({
-        message: `Cannot parse ${file.name}`,
-        details: `Currently only CSV/TSV/XLSX files are allowed, not ${file.type}`
-      }));
-      return;
+  for (const file of files) {
+    try {
+      let newMetadata: NewMetadata;
+      if (fileTypeIsCSVLike(file)) {
+        newMetadata = await handleCsvLikeDroppedFile(file, nodeNames);
+      } else if (fileTypeIsJson(file)) {
+        newMetadata = await handleNodeDataJsonFile(file, nodeNames);
+      } else {
+        console.error("[internal logic error] unhandled file type");
+        continue;
+      }
+      dispatch(updateMetadata(newMetadata));
+    } catch (err) {
+      console.error(err)
+      failures.push(`'${file.name}' (parsing failed)`);
     }
+  }
 
-    dispatch(updateMetadata(newMetadata));
-  } catch (err) {
-    console.error(err)
+  if (failures.length) {
     dispatch(errorNotification({
-      message: `Parsing of '${file.name}' failed`,
-      details: err instanceof Error ? err.message : String(err),
+      message: `At least one dropped file had failures`,
+      details: failures.join(", "),
     }))
   }
 
