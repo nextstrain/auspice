@@ -12,55 +12,41 @@ import { NewMetadata } from "../updateMetadata/updateMetadata.types"
  * Exported for use by auspice.us
  */
 export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispatch, getState: () => RootState): Promise<void> => {
-
-  if (files.length !== 1) {
-    dispatch(errorNotification({
-      message: "More than one file dropped",
-      details: "Currently we only allow a single CSV to be used"
-    }));
-    return;
-  }
-
-  const file = files[0];
-
   const { tree, treeToo } = getState();
   const nodeNames = _collectNodeNames(tree, treeToo);
 
-  try {
-    let newMetadata: NewMetadata;
-    if (fileTypeIsCSVLike(file)) {
-      newMetadata = await handleCsvLikeDroppedFile(file, nodeNames);
-    } else if (fileTypeIsJson(file)) {
-      newMetadata = await handleNodeDataJsonFile(file, nodeNames);
-    } else {
+  for (const file of files) {
+    try {
+      let newMetadata: NewMetadata;
+      if (fileTypeIsCSVLike(file)) {
+        newMetadata = await handleCsvLikeDroppedFile(file, nodeNames);
+      } else if (fileTypeIsJson(file)) {
+        newMetadata = await handleNodeDataJsonFile(file, nodeNames);
+      } else {
+        // console.error("[internal logic error] unhandled file type");
+        dispatch(errorNotification({
+          message: `Parsing of '${file.name}' failed`,
+          details: `Unhandled file type`,
+        }))
+        continue;
+      }
+      const result = dispatch(updateMetadata(newMetadata));
+      if (result===SUCCESS) {
+        dispatch(successNotification({
+          message: `Adding metadata from ${file.name}`,
+          details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
+        }));
+      } else {
+        throw Error(result);
+      }
+    } catch (err) {
+      console.error(err)
       dispatch(errorNotification({
-        message: `Cannot parse ${file.name}`,
-        details: `Currently only CSV/TSV/XLSX files are allowed, not ${file.type}`
-      }));
-      return;
+        message: `Parsing of '${file.name}' failed`,
+        details: err instanceof Error ? err.message : String(err),
+      }))
     }
-
-    if (!Object.keys(newMetadata.attributes).length) {
-      throw Error(`${file.name} no valid colorings found`)
-    }
-
-    const result = dispatch(updateMetadata(newMetadata));
-    if (result===SUCCESS) {
-      dispatch(successNotification({
-        message: `Adding metadata from ${file.name}`,
-        details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
-      }));
-    } else {
-      throw Error(result);
-    }
-  } catch (err) {
-    console.error(err)
-    dispatch(errorNotification({
-      message: `Parsing of '${file.name}' failed`,
-      details: err instanceof Error ? err.message : String(err),
-    }))
   }
-
 };
 
 export default handleFilesDropped;
