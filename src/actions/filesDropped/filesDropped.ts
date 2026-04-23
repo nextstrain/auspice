@@ -38,6 +38,11 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
         console.error("[internal logic error] unhandled file type");
         continue;
       }
+
+      if (!Object.keys(newMetadata.attributes).length) {
+        throw Error(`${file.name} no valid colorings found`)
+      }
+
       const result = dispatch(updateMetadata(newMetadata));
       if (result===true) {
         dispatch(successNotification({

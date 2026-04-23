@@ -26,7 +26,7 @@ export async function handleNodeDataJsonFile(file: File, nodeNames: Set<string>)
 
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- validated above: json is an object with a 'nodes' object value
   const nodes = json.nodes as Record<string, Record<string, unknown>>;
-  const attributes: Record<string, ColoringInfo> = {};
+  let attributes: Record<string, ColoringInfo> = {};
 
   for (const [strain, data] of Object.entries(nodes)) {
     if (!nodeNames.has(strain)) continue;
@@ -74,9 +74,11 @@ export async function handleNodeDataJsonFile(file: File, nodeNames: Set<string>)
     }
   }
 
-  for (const attrKey of Object.keys(attributes)) {
-    _postprocess(attributes[attrKey], dataTypesPerAttr[attrKey]);
-  }
+  attributes = Object.fromEntries(
+    Object.entries(attributes)
+      .map(([key, coloring]) => _postprocess(key, coloring, dataTypesPerAttr[key]))
+      .filter((el) => !!el)
+  );
 
   return {
     attributes,
@@ -88,18 +90,23 @@ export async function handleNodeDataJsonFile(file: File, nodeNames: Set<string>)
 /**
  * Postprocess the data structures now that all nodes have been read.
  */
-function _postprocess(coloring: ColoringInfo, dataTypes: Set<string>): void {
+function _postprocess(attrKey: string, coloring: ColoringInfo, dataTypes: Set<string>): [string, ColoringInfo] | undefined {
   if (dataTypes.size > 1) {
     // coerce all values to a string to be safe rather than try to handle these
     console.warn(`Added coloring '${coloring.name}' has mixed data types - some information may be dropped. Please fix the JSON.`)
     for (const [name, node_attr] of Object.entries(coloring.strains)) {
       coloring.strains[name] = { value: String(node_attr.value) };
     }
-    return;
   }
-  if (dataTypes.has('number')) {
+  if (dataTypes.size === 1 && dataTypes.has('number')) {
     coloring.scaleType = 'continuous';
-  } else if (dataTypes.has('boolean')) {
+  } else if (dataTypes.size === 1 && dataTypes.has('boolean')) {
     coloring.scaleType = 'boolean';
   }
+
+  if (!Object.keys(coloring.strains).length) {
+    return undefined;
+  }
+
+  return [attrKey, coloring];
 }
