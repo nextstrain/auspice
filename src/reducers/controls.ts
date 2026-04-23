@@ -541,25 +541,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return newState;
     }
     case types.UPDATE_METADATA: {
-      // TODO XXX
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { attributes } = action as UpdateMetadataAction;
-      /* colorings first (auspice assumes all attrs are colorings) */
-      const coloringsPresentOnTree = (new Set(state.coloringsPresentOnTree))
-        .union(new Set(Object.keys(attributes)));
-      const updatedState = Object.assign({}, state, { coloringsPresentOnTree });
-      /* geographic resolutions */
-      if (action.geographic && !state.panelsAvailable.includes("map")) {
-        console.log("TODO XXX")
-        // newState = {
-        //   ...newState,
-        //   geoResolution: action.newGeoResolution.key,
-        //   canTogglePanelLayout: hasMultipleGridPanels([...state.panelsToDisplay, "map"]),
-        //   panelsAvailable: [...state.panelsAvailable, "map"],
-        //   panelsToDisplay: [...state.panelsToDisplay, "map"]
-        // };
-      }
-      return updatedState;
+      return Object.assign({}, state, action.controls);
     }
     case types.REMOVE_METADATA: {
       const coloringsPresentOnTree = new Set(state.coloringsPresentOnTree);

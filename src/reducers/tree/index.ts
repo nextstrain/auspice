@@ -105,8 +105,19 @@ const Tree = (
       // TODO XXX
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const { attributes } = action as UpdateMetadataAction;
+
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      overwriteAttributes(state.nodes, attributes);
+      for (const node of state.nodes) {
+        const _updates = action.nodeAttrUpdates[node.name];
+        if (!_updates) continue;
+        // overwrite any existing data, including other properties (e.g. confidence values)
+        for (const [attrKey, attrData] of Object.entries(_updates)) {
+          node.node_attrs[attrKey] = attrData;
+        }
+      }
+
+      // following not yet updated TKTK
+
       // add the new nodeAttrKeys to ensure tip labels get updated
       const nodeAttrKeys = new Set(state.nodeAttrKeys);
       Object.keys(attributes).forEach((attr) => nodeAttrKeys.add(attr));
