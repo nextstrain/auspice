@@ -1,4 +1,4 @@
-import { errorNotification } from "../notifications";
+import { errorNotification, successNotification } from "../notifications";
 import { fileTypeIsCSVLike, fileTypeIsJson, isAcceptedFileType } from "./constants";
 import { handleCsvLikeDroppedFile } from "./parseCsv";
 import { handleNodeDataJsonFile } from "./parseNodeDataJson";
@@ -38,7 +38,15 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
         console.error("[internal logic error] unhandled file type");
         continue;
       }
-      dispatch(updateMetadata(newMetadata));
+      const result = dispatch(updateMetadata(newMetadata));
+      if (result===true) {
+        dispatch(successNotification({
+          message: `Adding metadata from ${newMetadata.info?.fileName}`,
+          details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
+        }));
+      } else {
+        throw Error(result);
+      }
     } catch (err) {
       console.error(err)
       failures.push(`'${file.name}' (parsing failed)`);

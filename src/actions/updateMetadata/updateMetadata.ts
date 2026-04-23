@@ -10,7 +10,7 @@ import { changeColorBy } from "../colors";
  * validated data which the reducers can simply merge into state.
  */
 export const updateMetadata = (newMetadata: NewMetadata) => {
-  return (dispatch: AppDispatch, getState: () => RootState): void => {
+  return (dispatch: AppDispatch, getState: () => RootState): true | string => {
     console.log("ACTION::updateMetadata. STATE", getState(), "newMetadata", newMetadata)
     const { controls } = getState();
     /* filter the attributes to _new_ ones, i.e. those not on the tree */
@@ -18,12 +18,7 @@ export const updateMetadata = (newMetadata: NewMetadata) => {
 
     /* currently the only usage of `updateMetadata` guarantees that each geographic
     trait key (name) is a new colouring, but as usage is expanded we should check this here */
-
-    dispatch({type: UPDATE_METADATA, ...newMetadata,})
-    dispatch(successNotification({
-      message: `Adding metadata from ${newMetadata.info?.fileName}`,
-      details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
-    }));
+    dispatch({ type: UPDATE_METADATA, ...newMetadata, })
 
     /** If the dataset didn't have any colorings, but now does, then switch to the first one
      * (very common in auspice.us)
@@ -32,6 +27,8 @@ export const updateMetadata = (newMetadata: NewMetadata) => {
     if (!controls.coloringsPresentOnTree.size && colorOpts.size) {
       dispatch(changeColorBy([...colorOpts][0]));
     }
+
+    return true;
   }
 }
 
