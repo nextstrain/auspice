@@ -1,8 +1,9 @@
 import { AnyAction } from "@reduxjs/toolkit";
 import { countTraitsAcrossTree } from "../../util/treeCountingHelpers";
-import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
+import { addNodeAttrs, removeNodeAttrs, overwriteAttributes } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeState, TreeTooState } from "./types";
+import {UpdateMetadataAction} from "../../actions/updateMetadata/updateMetadata.types"
 
 export const getDefaultTreeState = (): TreeState | TreeTooState => {
   return {
@@ -91,6 +92,39 @@ const Tree = (
       const nonContinuousColorings = Object.keys(action.newColorings).filter((coloring: string) => {
         return action.newColorings[coloring].type !== "continuous"
       });
+      return {
+        ...state,
+        totalStateCounts: {
+          ...state.totalStateCounts,
+          ...countTraitsAcrossTree(state.nodes, nonContinuousColorings, false, true)
+        },
+        nodeAttrKeys
+      };
+    }
+    case types.UPDATE_METADATA: {
+      // TODO XXX
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const { attributes } = action as UpdateMetadataAction;
+
+      // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      for (const node of state.nodes) {
+        const _updates = action.nodeAttrUpdates[node.name];
+        if (!_updates) continue;
+        // overwrite any existing data, including other properties (e.g. confidence values)
+        for (const [attrKey, attrData] of Object.entries(_updates)) {
+          node.node_attrs[attrKey] = attrData;
+        }
+      }
+
+      // following not yet updated TKTK
+
+      // add the new nodeAttrKeys to ensure tip labels get updated
+      const nodeAttrKeys = new Set(state.nodeAttrKeys);
+      Object.keys(attributes).forEach((attr) => nodeAttrKeys.add(attr));
+      // add the new non-continuous colorings to totalStateCounts so that they can function as filters
+      const nonContinuousColorings = Object.values(attributes)
+        .filter((attrInfo) => attrInfo.scaleType !== 'continuous')
+        .map((attrInfo) => attrInfo.key);
       return {
         ...state,
         totalStateCounts: {
