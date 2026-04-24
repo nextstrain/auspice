@@ -10,7 +10,8 @@ type EditableMetadata = Partial<Pick<Metadata,
   "warning" |
   "description" |
   "maintainers" |
-  "dataProvenance"
+  "dataProvenance" |
+  "legendPlacements"
 >>
 
 /**

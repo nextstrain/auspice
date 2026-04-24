@@ -151,7 +151,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     return (
       <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")} tallTitle={!!this.props.showTreeToo}>
         <ErrorBoundary>
-          <Legend width={this.props.width}/>
+          <Legend legendPlacement={this.props.legendPlacement} width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
           selectedNode={this.state.hoveredNode}
