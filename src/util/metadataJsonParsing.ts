@@ -1,5 +1,5 @@
 import type { Metadata, LegendContinuous, LegendNonContinuous } from "../reducers/metadata.types";
-import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES } from "../reducers/metadata.types";
+import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES, PANELS_WITH_LEGEND, LegendPlacements } from "../reducers/metadata.types";
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
 import { ScaleType, SCALE_TYPE_VALUES, getDefaultControlsState } from "../reducers/controls";
@@ -110,6 +110,7 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
     });
   }
 
+  metadata.legendPlacements = computeLegendPlacements(metadata.panels || []);
   metadata.sharing = computeMetadataSharing(metadata, json.meta?.sharing)
 
   if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
@@ -123,6 +124,43 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
   assertMetadataComplete(metadata);
   return { metadata, entropy };
 
+}
+
+function computeLegendPlacements(panels: Metadata["panels"]): Metadata["legendPlacements"] {
+  return panels.reduce((acc, panel) => {
+    if (!PANELS_WITH_LEGEND.includes(panel)) return acc;
+
+    let panelPlacement: LegendPlacements = {};
+    switch (panel) {
+      case "tree":
+        panelPlacement = {
+          tree: {
+            vertical: "top",
+            horizontal: "left"
+          }
+        }
+        break;
+      case "map":
+        panelPlacement = {
+          map: {
+            vertical: "top",
+            horizontal: "right"
+          }
+        }
+        break;
+      case "measurements":
+        panelPlacement = {
+          measurements: {
+            vertical: "top",
+            horizontal: "right"
+          }
+        }
+        break;
+      default:
+        throw new Error(`Unknown default legend placement for panel ${panel}`)
+    }
+    return {...acc, ...panelPlacement};
+  }, {})
 }
 
 /* control ability to share / download assets */

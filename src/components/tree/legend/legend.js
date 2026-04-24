@@ -195,24 +195,26 @@ class Legend extends React.Component {
   getContainerStyles() {
     const styles = {
       position: "absolute",
-      top: 26,
       borderRadius: 4,
       zIndex: 1000,
       userSelect: "none"
     };
-    styles[this.props.right ? "right" : "left"] = 5;
+    // vertical = top or bottom, horizontal = left or right
+    const { vertical, horizontal } =  this.props.legendPlacement;
+    styles[vertical] = 26;
+    styles[horizontal] = 5;
     return styles;
   }
 
   getArrowOffset() {
-    if (this.props.right) {
+    if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - 20;
     }
     return this.getTitleWidth();
   }
 
   getTitleOffset() {
-    if (this.props.right) {
+    if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - this.getTitleWidth() - 15;
     }
     return 5;

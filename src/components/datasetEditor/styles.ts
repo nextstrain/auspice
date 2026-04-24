@@ -30,9 +30,13 @@ export const Form = styled.form`
 `;
 
 export const DatasetEditorForm = styled(Form)`
-  input {
+  input:not([type=radio]) {
     margin-bottom: 1em;
     width: 100%;
+  }
+
+  input[type=radio] {
+    margin-right: 0.2em;
   }
 
   textarea {

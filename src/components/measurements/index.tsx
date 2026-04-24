@@ -157,6 +157,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
+  const legendPlacement = useSelector((state: RootState) => {
+     if (!state.metadata.loaded) throw new Error("[INTERNAL ERROR] metadata state not loaded")
+    return state.metadata.legendPlacements.measurements
+  });
   // Convert legendValues to string to ensure that subsequent attribute matches work as intended
   const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map(String), isEqual);
   const colorings = useSelector((state: RootState) => {
@@ -363,7 +367,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
     <>
       {showLegend &&
         <ErrorBoundary>
-          <Legend right width={width}/>
+          <Legend legendPlacement={legendPlacement} width={width}/>
         </ErrorBoundary>
       }
       <div id={svgContainerDOMId} ref={svgContainerRef} style={getSVGContainerStyle()}>

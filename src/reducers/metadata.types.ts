@@ -40,6 +40,7 @@ export type Metadata = {
     panels?: Panel[];
   };
   geoResolutions?: Array<GeoResolutions>;
+  legendPlacements: LegendPlacements;
 }
 
 export type MetadataReduxState =
@@ -58,6 +59,19 @@ export const SIDEBAR_VALUES = ["open", "closed"] as const;
 export type Sidebar = typeof SIDEBAR_VALUES[number];
 
 export type Panel = typeof PANEL_VALUES[number];
+
+// TODO: Create PanelWithLegend from PANELS_WITH_LEGEND while also confirming as subset of Panel
+export const PANELS_WITH_LEGEND = ["tree", "map", "measurements"];
+export type PanelWithLegend = Extract<Panel, "tree" | "map" | "measurements">;
+
+export type LegendPlacements = {
+  [K in PanelWithLegend]?: LegendPlacement
+}
+
+export type LegendPlacement = {
+  vertical: "top" | "bottom";
+  horizontal: "left" | "right";
+}
 
 export type Colorings = {
   [key: string]: ColoringInfo
