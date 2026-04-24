@@ -20,6 +20,7 @@ const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwn
     colorBy: state.controls.colorBy,
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
+    legendPlacement: state.metadata.legendPlacements.tree,
     scatterVariables: state.controls.scatterVariables,
     temporalConfidence: state.controls.temporalConfidence,
     distanceMeasure: state.controls.distanceMeasure,
