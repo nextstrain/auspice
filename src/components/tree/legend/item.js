@@ -1,6 +1,7 @@
 import React from "react";
 import { updateTipRadii } from "../../../actions/tree";
 import { dataFont, darkGrey } from "../../../globalStyles";
+import { SET_MODAL } from "../../../actions/types";
 
 const LegendItem = ({
   dispatch,
@@ -12,7 +13,8 @@ const LegendItem = ({
   rectFill,
   label,
   tooltip,
-  value
+  value,
+  supportColorEdit
 }) => (
   <g
     transform={transform}
@@ -21,6 +23,11 @@ const LegendItem = ({
     }}
     onMouseLeave={() => {
       dispatch(updateTipRadii());
+    }}
+    onClick={(e) => {
+      if (supportColorEdit && e.shiftKey) {
+        dispatch({ type: SET_MODAL, modal: "colorByEditor" });
+      }
     }}
   >
     <rect
@@ -31,7 +38,7 @@ const LegendItem = ({
       stroke={rectStroke}
     >
       <title>{tooltip}</title>
-    </rect>  
+    </rect>
     <text
       x={legendRectSize + legendSpacing + 5}
       y={legendRectSize - legendSpacing}

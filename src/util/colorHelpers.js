@@ -130,7 +130,9 @@ export const getEmphasizedColor = (color) => {
   return rgb(hslColor).toString();
 };
 
-export const getBrighterColor = (color) => rgb(color).brighter([0.65]).toString();
+const colorK = 0.65;
+export const getBrighterColor = (color) => rgb(color).brighter([colorK]).toString();
+export const getDarkerColorHex = (color) => rgb(color).darker([colorK]).formatHex();
 
 /**
  * Return the display title for the selected colorBy

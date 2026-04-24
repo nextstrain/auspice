@@ -8,6 +8,7 @@ import { getBrighterColor, getColorByTitle } from "../../../util/colorHelpers";
 import { formatBounds } from "../../../util/colorScale";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { TOGGLE_LEGEND } from "../../../actions/types";
+import { isColorByGenotype } from "../../../util/getGenotype";
 
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
@@ -149,6 +150,8 @@ class Legend extends React.Component {
   legendItems() {
     const values = this.props.colorScale.visibleLegendValues;
     const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
+    // We do not support editing Genotype colors because we do not keep nuc/aa colors in Redux state.
+    const supportColorEdit = !isColorByGenotype(this.props.colorBy);
     const items = values
       .filter((d) => d !== undefined)
       .map((d, i) => {
@@ -166,6 +169,7 @@ class Legend extends React.Component {
             index={i}
             tooltip={tooltipText(this.props.colorScale, d)}
             clipId={i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
+            supportColorEdit={supportColorEdit}
           />
         );
       });

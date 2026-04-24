@@ -9,6 +9,7 @@ import DownloadModalContents from "../download/downloadModal";
 import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
 import DatasetSelector, {datasetSelectorStyles} from "../datasetSelector/datasetSelector.tsx";
 import DatasetEditor, { datasetEditorStyles } from "../datasetEditor/datasetEditor.tsx";
+import ColorByEditor, { colorByEditorStyles } from "../datasetEditor/colorByEditor.tsx";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -84,6 +85,10 @@ class Modal extends React.Component {
       case 'datasetEditor':
         Contents = DatasetEditor;
         styles = this.styles(datasetEditorStyles);
+        break;
+      case 'colorByEditor':
+        Contents = ColorByEditor;
+        styles = this.styles(colorByEditorStyles);
         break;
       default:
         return null;
