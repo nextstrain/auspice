@@ -8,6 +8,7 @@ import { stopProp } from "../tree/infoPanels/click";
 import DownloadModalContents from "../download/downloadModal";
 import { LinkOutModalContents } from "./LinkOutModalContents.jsx";
 import DatasetSelector, {datasetSelectorStyles} from "../datasetSelector/datasetSelector.tsx";
+import DatasetEditor, { datasetEditorStyles } from "../datasetEditor/datasetEditor.tsx";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -44,7 +45,7 @@ class Modal extends React.Component {
       dismissMsg: (x) => x, // default
       ...callbacks
     };
-    
+
     const container = apply.container({...infoPanelStyles.modalContainer}, this.props.broswerDimensions)
 
     const dismissMsg = apply.dismissMsg({...infoPanelStyles.topRightMessage}, this.props.broswerDimensions)
@@ -80,6 +81,10 @@ class Modal extends React.Component {
         Contents = DatasetSelector;
         styles = this.styles(datasetSelectorStyles)
         break;
+      case 'datasetEditor':
+        Contents = DatasetEditor;
+        styles = this.styles(datasetEditorStyles);
+        break;
       default:
         return null;
     }
@@ -90,7 +95,7 @@ class Modal extends React.Component {
           <p style={styles.dismissMsg}>
             ({t("click outside this box to return to the app")})
           </p>
-          <Contents/>
+          <Contents dismissModal={this.dismissModal} />
         </div>
       </div>
     );
@@ -98,4 +103,3 @@ class Modal extends React.Component {
 }
 
 export default withTranslation()(Modal);
-

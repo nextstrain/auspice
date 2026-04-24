@@ -89,5 +89,22 @@
   "Projection": "Projection",
   "Time point": "Time point",
   "Frequency": "Frequency",
-  "Projected frequency": "Projected frequency"
+  "Projected frequency": "Projected frequency",
+
+
+  "__Dataset edtor__": "########################################",
+  "Edit dataset": "Edit dataset",
+  "Dataset title": "Dataset title",
+  "Dataset updated": "Dataset updated",
+  "Build URL": "Build URL",
+  "Avatar URL": "Avatar URL",
+  "Maintainers": "Maintainers",
+  "Add maintainer": "Add maintainer",
+  "Data provenances": "Data provenances",
+  "Add data provenance": "Add data provenance",
+  "Warning": "Warning",
+  "Description": "Description",
+  "Submit": "Submit",
+  "Name": "Name",
+  "URL": "URL"
 }
