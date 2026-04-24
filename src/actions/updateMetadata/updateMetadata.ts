@@ -18,18 +18,23 @@ export const SUCCESS = "SUCCESS";
 export const updateMetadata = (
   newMetadata: NewMetadata,
   /** Replace redux state where possible, rather than merge */
-  replace = false
+  replace = false,
+  /** Expect tree updates, only returns SUCCESS when tree is updated */
+  treeUpdates = true,
 ) => {
   return (dispatch: AppDispatch, getState: () => RootState): string => {
     const existingState = getState();
 
     // Compute new redux state data for relevant reducers ("fat actions" pattern)
-    const tree = _reduxTree(existingState.tree, newMetadata.attributes || {}, replace);
-    if (tree===undefined) {
-      return "No matching nodes in tree!";
+    let tree: UpdateMetadataAction["tree"] | undefined;
+    if (treeUpdates) {
+      tree = _reduxTree(existingState.tree, newMetadata.attributes || {}, replace);
+      if (tree===undefined) {
+        return "No matching nodes in tree!";
+      }
     }
     const treeToo = _reduxTree(existingState.treeToo, newMetadata.attributes || {}, replace) || existingState.treeToo;
-    const metadata = _reduxMetadata(existingState.metadata, newMetadata, tree, replace);
+    const metadata = _reduxMetadata(existingState.metadata, newMetadata, tree || existingState.tree, replace);
     const controls = _reduxControls(existingState.controls, newMetadata);
 
     dispatch({ type: UPDATE_METADATA, tree, treeToo, metadata, controls })
@@ -146,36 +151,39 @@ function _reduxControls(
 function _reduxMetadata(
   state: Record<string, any>,
   newMetadata: NewMetadata,
-  tree: UpdateMetadataAction['tree'],
+  tree: UpdateMetadataAction['tree'] | TreeState,
   /** replace color scales entirely rather than attempt to merge in new colors */
   replace: boolean
 ): UpdateMetadataAction['metadata'] {
 
-  const colorings = Object.fromEntries([
+  const { attributes, geographic, ...actionMetadata } = newMetadata;
+
+  const colorings = attributes ? Object.fromEntries([
     // First update existing colorings
     ...Object.entries(state.colorings)
       .map(([key, value]) => {
         // The redux state values are untyped, so for now assume they are the expected shape
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const oldColoring = value as UpdateMetadataAction['metadata']['colorings'][string];
-        const coloring = Object.hasOwn(newMetadata.attributes, key) ?
-          _updateColoring(oldColoring, newMetadata.attributes[key], tree.totalStateCounts[key], replace) :
+        const coloring = Object.hasOwn(attributes, key) ?
+          _updateColoring(oldColoring, attributes[key], tree.totalStateCounts[key], replace) :
           oldColoring;
         return [key, coloring]
       }),
     // Then add entirely new colorings
-    ...Object.keys(newMetadata.attributes)
+    ...Object.keys(attributes)
       .filter((key) => !Object.hasOwn(state.colorings, key))
-      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes[key], tree.totalStateCounts[key], undefined)])
-  ]);
+      .map((key) => [key, _updateColoring(undefined, attributes[key], tree.totalStateCounts[key], undefined)])
+  ]) : {};
 
 
   /* currently the only usage of `updateMetadata` guarantees that each geographic
   trait key (name) is also a coloring, but as usage is expanded we should check this */
-  const geoResolutions = newMetadata.geographic?.length &&
-    [...(state.geoResolutions || []), ...newMetadata.geographic];
+  const geoResolutions = geographic?.length &&
+    [...(state.geoResolutions || []), ...geographic];
 
   return {
+    ...actionMetadata,
     ...(Object.keys(colorings).length && { colorings }),
     ...(geoResolutions && { geoResolutions }),
   }

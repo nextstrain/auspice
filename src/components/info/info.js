@@ -7,6 +7,7 @@ import Byline from "./byline";
 import Warning from "./warning";
 import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
+import EditButton from "../datasetEditor/editButton";
 
 /**
  * The <Info> panel is shown above data viz panels and conveys static and dynamic
@@ -43,6 +44,7 @@ class Info extends React.Component {
 
           <div width={this.props.width} style={styles.title}>
             {this.props.metadata.title || ""}
+            <EditButton />
           </div>
 
           <div width={this.props.width} style={styles.byline}>
