@@ -56,3 +56,25 @@ export const DatasetEditorForm = styled(Form)`
   }
 
 `;
+
+export const ColorByEditorForm = styled(Form)`
+  input[type="color"] {
+    width: 25px;
+    height: 25px;
+    margin-right: 1em;
+    padding: 0;
+    border: 3px solid;
+  }
+  // Remove internal border of color input
+  // Copied from <https://stackoverflow.com/a/74751637>
+  input[type="color"]::-moz-color-swatch {
+    border: none;
+  }
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: 0;
+  }
+  input[type="color"]::-webkit-color-swatch {
+    border: none;
+  }
+`;

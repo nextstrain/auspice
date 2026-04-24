@@ -108,5 +108,9 @@
   "Name": "Name",
   "URL": "URL",
   "This dataset has been edited!": "This dataset has been edited!",
-  "Edited dataset warning detail": "All changes will be lost if you refresh the page. Download the dataset if you would like to save your changes."
+  "Edited dataset warning detail": "All changes will be lost if you refresh the page. Download the dataset if you would like to save your changes.",
+
+
+  "__Color By editor__": "########################################",
+  "Edit colors for": "Edit colors for"
 }
