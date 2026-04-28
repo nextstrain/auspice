@@ -106,5 +106,9 @@
   "Description": "Description",
   "Submit": "Submit",
   "Name": "Name",
-  "URL": "URL"
+  "URL": "URL",
+  "Top left": "Top left",
+  "Top right": "Top right",
+  "Bottom left": "Bottom left",
+  "Bottom right": "Bottom right"
 }

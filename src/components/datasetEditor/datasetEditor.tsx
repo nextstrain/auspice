@@ -27,7 +27,7 @@ const DatasetEditorForm = styled.form`
     padding: 0.3em;
   }
 
-  input {
+  input:not([type=radio]) {
     margin-bottom: 1em;
     width: 100%;
   }
@@ -43,6 +43,17 @@ const DatasetEditorForm = styled.form`
   .underlined {
     margin-bottom: 1em;
     text-decoration: underline;
+  }
+
+  .radio {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    margin: 0.25em 1em;
+  }
+
+  .radio > input {
+    margin-right: 0.2em;
   }
 `;
 
@@ -68,6 +79,10 @@ function convertToNameAndUrl(state: NameAndUrlState[]): NameAndUrl[] {
   })
 }
 
+// TODO: Move this to Redux state
+const legendPlacements = ["Top left", "Top right", "Bottom left", "Bottom right"] as const;
+type LegendState = typeof legendPlacements[number];
+
 export default function DatasetEditor({
   dismissModal
 }: {
@@ -83,6 +98,9 @@ export default function DatasetEditor({
   const [ description, setDescription ] = useState(metadata.description || "");
   const [ maintainers, setMaintainers ] = useState<NameAndUrlState[]>(convertToNameAndUrlState(metadata.maintainers || []));
   const [ dataProvenances, setDataProvenances ] = useState<NameAndUrlState[]>(convertToNameAndUrlState(metadata.dataProvenance || []));
+  // TODO: Use Redux state for default legend placement
+  const [ treeLegend, setTreeLegend ] = useState<LegendState>("Top left");
+  const [ mapLegend, setMapLegend ] = useState<LegendState>("Top right");
 
   function submit(event: React.FormEvent): void {
     event.preventDefault();
@@ -97,6 +115,8 @@ export default function DatasetEditor({
       description,
       maintainers: convertToNameAndUrl(maintainers),
       dataProvenances: convertToNameAndUrl(dataProvenances),
+      treeLegend,
+      mapLegend,
     });
 
     dismissModal();
@@ -230,6 +250,31 @@ export default function DatasetEditor({
               value={description}
               onChange={(e): void => setDescription(e.currentTarget.value)}/>
           </label>
+          <div className="row">
+            <div className="col-xs-12 underlined">
+              {t("Legend placement")}:
+            </div>
+            <div className="col-lg-6">
+              <div>
+                {t("Tree panel")}:<br/>
+              </div>
+              <LegendPlacementInputs
+                name="tree"
+                legendState={treeLegend}
+                legendStateSetter={setTreeLegend}
+              />
+            </div>
+            <div className="col-lg-6">
+              <div>
+                {t("Map panel")}: <br/>
+              </div>
+              <LegendPlacementInputs
+                name="map"
+                legendState={mapLegend}
+                legendStateSetter={setMapLegend}
+              />
+            </div>
+          </div>
         </div>
       </div>
       <br/>
@@ -302,6 +347,35 @@ function NameAndUrlInputs({
           </div>
         </Flex>
       )}
+    </>
+  )
+}
+
+function LegendPlacementInputs({
+  name,
+  legendState,
+  legendStateSetter,
+}: {
+  name: string,
+  legendState: LegendState,
+  legendStateSetter: Dispatch<LegendState>
+}): JSX.Element {
+  const { t } = useTranslation();
+
+  return (
+    <>
+      {legendPlacements.map((placement) => (
+        <label className="radio" key={placement}>
+          <input
+            name={name}
+            type="radio"
+            value={placement}
+            checked={legendState === placement}
+            onChange={(e): void => legendStateSetter(e.currentTarget.value)}
+          />
+          {t(placement)}
+        </label>
+      ))}
     </>
   )
 }
