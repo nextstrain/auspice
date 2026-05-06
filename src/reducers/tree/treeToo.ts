@@ -1,6 +1,6 @@
 import { AnyAction } from "@reduxjs/toolkit";
 import { getDefaultTreeState } from ".";
-import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
+import { removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeTooState } from "./types";
 import type { UpdateMetadataAction } from "../../actions/updateMetadata/updateMetadata.types"
@@ -74,11 +74,7 @@ const treeToo = (
         };
       }
       return state;
-    case types.ADD_EXTRA_METADATA:
-      // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      addNodeAttrs(state.nodes, action.newNodeAttrs);
-      return state;
-      case types.UPDATE_METADATA: {
+    case types.UPDATE_METADATA: {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { tree: newData } = action as UpdateMetadataAction;
         if (!newData) return state;

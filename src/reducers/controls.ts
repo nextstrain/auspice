@@ -523,22 +523,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
-    case types.ADD_EXTRA_METADATA: {
-      for (const colorBy of Object.keys(action.newColorings)) {
-        state.coloringsPresentOnTree.add(colorBy);
-      }
-      let newState = Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree, filters: state.filters });
-      if (action.newGeoResolution && !state.panelsAvailable.includes("map")) {
-        newState = {
-          ...newState,
-          geoResolution: action.newGeoResolution.key,
-          canTogglePanelLayout: hasMultipleGridPanels([...state.panelsToDisplay, "map"]),
-          panelsAvailable: [...state.panelsAvailable, "map"],
-          panelsToDisplay: [...state.panelsToDisplay, "map"]
-        };
-      }
-      return newState;
-    }
     case types.UPDATE_METADATA: {
       return Object.assign({}, state, action.controls);
     }
