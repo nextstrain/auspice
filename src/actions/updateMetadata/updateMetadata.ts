@@ -15,18 +15,20 @@ export const SUCCESS = "SUCCESS";
  * validated data which the reducers can simply merge into state.
  */
 export const updateMetadata = (
-  newMetadata: NewMetadata
+  newMetadata: NewMetadata,
+  /** Replace redux state where possible, rather than merge */
+  replace = false
 ) => {
   return (dispatch: AppDispatch, getState: () => RootState): string => {
     const existingState = getState();
 
     // Compute new redux state data for relevant reducers ("fat actions" pattern)
-    const tree = _reduxTree(existingState.tree, newMetadata.attributes || {});
+    const tree = _reduxTree(existingState.tree, newMetadata.attributes || {}, replace);
     if (tree===undefined) {
       return "No matching nodes in tree!";
     }
-    const treeToo = _reduxTree(existingState.treeToo, newMetadata.attributes || {}) || existingState.treeToo;
-    const metadata = _reduxMetadata(existingState.metadata, newMetadata, tree);
+    const treeToo = _reduxTree(existingState.treeToo, newMetadata.attributes || {}, replace) || existingState.treeToo;
+    const metadata = _reduxMetadata(existingState.metadata, newMetadata, tree, replace);
     const controls = _reduxControls(existingState.controls, newMetadata);
 
     dispatch({ type: UPDATE_METADATA, tree, treeToo, metadata, controls })
@@ -46,7 +48,9 @@ export const updateMetadata = (
  */
 function _reduxTree(
   tree: TreeState,
-  attributes: NewMetadata['attributes']
+  attributes: NewMetadata['attributes'],
+  /** each supplied attribute will become the tree's attr values - no existing data will be preserved */
+  replace: boolean,
 ): UpdateMetadataAction['tree'] | undefined {
 
   const attrsWithUpdates: string[] = Object.entries(attributes)
@@ -68,10 +72,14 @@ function _reduxTree(
       const name = node.name;
       const nodeAttrs = Object.fromEntries(
         attrsWithUpdates.map((attrName) => {
-          // attr data is either (i) new data, (ii) reference to existing data, (iii) undefined.
-          // Above we restrict attrsWithUpdates to always represent "normal" NodeAttr types
+          // attr data may be (i) new data, (ii) existing data, (iii) undefined
+          // re: type assertion -- above we restrict attrsWithUpdates to always represent "normal" NodeAttr types
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const attrData = (attributes[attrName].strains[name] || node.node_attrs[attrName]) as (NodeAttr | undefined);
+          const attrData = (
+            replace ?
+              (attributes[attrName].strains[name] || undefined) :
+              (attributes[attrName].strains[name] || node.node_attrs[attrName])
+          ) as (NodeAttr | undefined);
           const value = attrData?.value;
           if (!node.hasChildren && value && attrsNonContinuous.has(attrName)) {
             if (!counts[attrName]) counts[attrName] = new Map();
@@ -130,6 +138,8 @@ function _reduxMetadata(
   state: Record<string, any>,
   newMetadata: NewMetadata,
   tree: UpdateMetadataAction['tree'],
+  /** replace color scales entirely rather than attempt to merge in new colors */
+  replace: boolean
 ): UpdateMetadataAction['metadata'] {
 
   const colorings = Object.fromEntries([
@@ -140,14 +150,14 @@ function _reduxMetadata(
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const oldColoring = value as UpdateMetadataAction['metadata']['colorings'][string];
         const coloring = Object.hasOwn(newMetadata.attributes, key) ?
-          _updateColoring(oldColoring, newMetadata.attributes[key], tree.totalStateCounts[key]) :
+          _updateColoring(oldColoring, newMetadata.attributes[key], tree.totalStateCounts[key], replace) :
           oldColoring;
         return [key, coloring]
       }),
     // Then add entirely new colorings
     ...Object.keys(newMetadata.attributes)
       .filter((key) => !Object.hasOwn(state.colorings, key))
-      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes[key], tree.totalStateCounts[key])])
+      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes[key], tree.totalStateCounts[key], undefined)])
   ]);
 
 
@@ -164,21 +174,23 @@ function _reduxMetadata(
 
 
 /**
- * Return coloring object (for a specific attr), with new coloring info **attrInfo**
+ * Return coloring object (for a specific attr), with new coloring info **attrDetails**
  * either merged in or replacing wholesale the original coloring **state**
  */
 function _updateColoring(
   state: UpdateMetadataAction['metadata']['colorings'][string],
   attrDetails: AttrDetails,
   stateCounts: undefined | Map<string, number>,
+  replace: boolean
 ): UpdateMetadataAction['metadata']['colorings'][string] {
-  let replace = state === undefined;
+  replace = replace || state === undefined;
   if (!replace && (state.type !== attrDetails.scaleType || state.type !== 'categorical')) {
     console.warn(`Merging scale colors is only possible for categorical scales`)
     replace = true;
   }
 
   if (replace) {
+    attrDetails.colors
     return {
       title: attrDetails.name,
       type: attrDetails.scaleType,
