@@ -5,6 +5,7 @@ import { SPECIAL_CASED_NODE_ATTRS } from "../../reducers/tree/types";
 import type{ ControlsState } from "../../reducers/controls";
 import type { TreeState, NodeAttr} from "../../reducers/tree/types";
 import type { UpdateMetadataAction, NewMetadata, AttrDetails } from "./updateMetadata.types";
+import { changeColorBy } from "../colors";
 
 export const SUCCESS = "SUCCESS";
 
@@ -32,6 +33,14 @@ export const updateMetadata = (
     const controls = _reduxControls(existingState.controls, newMetadata);
 
     dispatch({ type: UPDATE_METADATA, tree, treeToo, metadata, controls })
+
+    // If the dataset didn't have any colorings, but now does, then switch to the first one
+    // (very common in auspice.us)
+    const colorsNowAvailable = getState().controls.coloringsPresentOnTree;
+    if (!existingState.controls.coloringsPresentOnTree.size && colorsNowAvailable.size) {
+      dispatch(changeColorBy([...colorsNowAvailable][0]));
+    }
+
     return SUCCESS;
   }
 }
