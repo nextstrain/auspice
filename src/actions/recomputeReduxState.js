@@ -1129,7 +1129,7 @@ export const createStateFromQueryOrJSONs = ({
    * Note: currently we don't support LHS/RHS trees + streamtrees, but this should
    * be feasible to implement if desired.
    */
-  if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
+  if (controls.showStreamTrees && treeToo && treeToo.loaded) controls.showStreamTrees = false;
   if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
