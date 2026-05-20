@@ -110,7 +110,7 @@ getDataset    req, res  /charon/getDataset
 getNarrative  req, res  /charon/getNarrative
 ============= ========= ====================
 
-For information about the ``req`` and ``res`` arguments see the express documentation for the `request object <https://expressjs.com/en/api.html#req>`__ and `response object <https://expressjs.com/en/api.html#res>`__, respectively.
+For information about the ``req`` and ``res`` arguments see the express documentation for the `request object <https://expressjs.com/en/api/request/>`__ and `response object <https://expressjs.com/en/api/response/>`__, respectively.
 
 You can see `nextstrain.org <https://nextstrain.org>`__'s implementation of these handlers `here <https://github.com/nextstrain/nextstrain.org/tree/HEAD/src/app.js>`__.
 
