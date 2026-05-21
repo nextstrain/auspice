@@ -27,18 +27,18 @@ interface State {
 }
 
 class PanelErrorBoundary extends React.Component<Props, State> {
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = { hasError: false, errorMessage: ''};
   }
-  static getDerivedStateFromError(error): State {
+  static getDerivedStateFromError(error: unknown): State {
     // Update state so the next render will show the fallback UI.
     return {
       hasError: true,
       errorMessage: error instanceof Error ? error.message : "Unknown error (thrown value was not an instance of Error)",
     };
   }
-  override componentDidCatch(error, info): void {
+  override componentDidCatch(error: unknown, info: unknown): void {
     // You can also log the error to an error reporting service
     console.error(error);
     console.error(info);

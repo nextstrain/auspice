@@ -53,7 +53,9 @@ export const renderTree = (
       onStreamLeave: callbacks.onStreamLeave.bind(that),
       tipLabel: makeTipLabelFunc(props.tipLabelKey)
     },
+    // @ts-expect-error TS2322
     branchThickness: treeState.branchThickness, /* guaranteed to be in redux by now */
+    // @ts-expect-error TS2322
     visibility: treeState.visibility,
     drawConfidence: props.temporalConfidence.on,
     vaccines: treeState.vaccines,
@@ -65,6 +67,7 @@ export const renderTree = (
     scatterVariables: props.scatterVariables,
     measurementsColorGrouping: isMeasurementColorBy(props.colorBy) ? decodeMeasurementColorBy(props.colorBy) : undefined,
     streams: props.tree.streams, // necessarily the LHS tree as streams aren't implemented for 2 trees
+    // @ts-expect-error TS2322
     focusNodes: treeState.focusNodes,
   });
 };

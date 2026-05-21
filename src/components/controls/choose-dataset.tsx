@@ -12,7 +12,7 @@ const DatasetSelectContainer = styled.div`
   padding-top: 20px;
 
   &:hover ${SidebarSubtitle} {
-    color: ${(props): string => props.theme.selectedColor};
+    color: ${(props: {theme: {selectedColor: string}}): string => props.theme.selectedColor};
   }
 `;
 
@@ -44,13 +44,13 @@ export function currentDataset(): Dataset {
   const parts = window.location.pathname
     .replace(/^\//, '')
     .replace(/\/$/, '')
-    .split(":")[0] // drop any tangletree dataset (RHS tree / second tree)
+    .split(":")[0]! // drop any tangletree dataset (RHS tree / second tree)
     .split('/');
   let snapshot: string | undefined;
   const lastPart = parts.at(-1);
   if (lastPart && lastPart.includes('@')) {
     const [word, snap] = lastPart.split('@');
-    parts[parts.length - 1] = word;
+    parts[parts.length - 1] = word!;
     snapshot = snap;
   }
   return { parts, snapshot };

@@ -10,7 +10,8 @@ import { RootState } from "../../store";
 
 
 export const Sidebar = (
-  { width, height, displayNarrative, narrativeTitle, navBarHandler}
+  { width, height, displayNarrative, narrativeTitle, navBarHandler}:
+  { width: number; height: number; displayNarrative: boolean; narrativeTitle: string; navBarHandler: () => void }
 ): JSX.Element => {
   const sidebarOpen = useSelector((state: RootState) => state.controls.sidebarOpen);
 

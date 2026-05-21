@@ -34,6 +34,7 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
       if (result===SUCCESS) {
         dispatch(successNotification({
           message: `Adding metadata from ${file.name}`,
+          // @ts-expect-error TS2769
           details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
         }));
       } else {
@@ -56,9 +57,9 @@ export default handleFilesDropped;
  * Return a set of all node names found across both trees
  */
 function _collectNodeNames(tree: RootState['tree'], treeToo: RootState['treeToo']): Set<string> {
-  const names = new Set(tree.nodes.map((n) => n.name)); // can be internal nodes
+  const names = new Set(tree.nodes!.map((n) => n.name!)); // can be internal nodes
   if (Array.isArray(treeToo.nodes)) {
-    treeToo.nodes.forEach((node) => names.add(node.name));
+    treeToo.nodes.forEach((node) => names.add(node.name!));
   }
   return names;
 }

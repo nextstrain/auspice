@@ -92,6 +92,7 @@ export const render = function render(
     ...parameters
   };
   this.callbacks = callbacks;
+  // @ts-expect-error
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.measurementsColorGrouping = measurementsColorGrouping;
   this.dateRange = dateRange;
@@ -151,12 +152,14 @@ export const drawVaccines = function drawVaccines(this: PhyloTreeType): void {
   if (!("vaccines" in this.groups)) {
     this.groups.vaccines = this.svg.append("g").attr("id", "vaccines");
   }
+  // @ts-expect-error
   this.groups.vaccines
     .selectAll(".vaccineCross")
     .data(vaccineData)
     .enter()
     .append("path")
     .attr("class", "vaccineCross")
+    // @ts-expect-error
     .attr("d", (d) => d.vaccineCross)
     .style("stroke", "#333")
     .style("stroke-width", 2 * this.params.branchStrokeWidth)
@@ -170,6 +173,7 @@ export const drawVaccines = function drawVaccines(this: PhyloTreeType): void {
 
 export const removeMeasurementsColoringCrosshair = function removeMeasurementsColoringCrosshair(this: PhyloTreeType): void {
   if ("measurementsColoringCrosshair" in this.groups) {
+    // @ts-expect-error
     this.groups.measurementsColoringCrosshair.selectAll("*").remove();
   }
 }
@@ -186,6 +190,7 @@ export const drawMeasurementsColoringCrosshair = function drawMeasurementsColori
 
   const matchingStrains = this.nodes.filter((d) => !d.n.hasChildren && d.n.name === this.measurementsColorGrouping);
   if (matchingStrains.length === 1) {
+    // @ts-expect-error
     this.groups.measurementsColoringCrosshair
       .selectAll(".crosshair")
       .data(matchingStrains)
@@ -195,9 +200,13 @@ export const drawMeasurementsColoringCrosshair = function drawMeasurementsColori
         .attr("fill", "currentColor")
         .attr("strokeWidth", "0")
         .attr("viewBox", "0 0 256 256")
+        // @ts-expect-error
         .attr("height", (d) => d.r * 5)
+        // @ts-expect-error
         .attr("width", (d) => d.r * 5)
+        // @ts-expect-error
         .attr("x", (d) => d.xTip - (d.r * 5 / 2))
+        // @ts-expect-error
         .attr("y", (d) => d.yTip - (d.r * 5 / 2))
         .style("cursor", "pointer")
         .style("pointer-events", "auto")
@@ -227,15 +236,20 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
   const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
     .filter((d) => !d.n.hasChildren);
 
+  // @ts-expect-error
   this.groups.tips
     .selectAll(".tip")
     .data(nodes)
     .enter()
     .append("circle")
     .attr("class", "tip")
+    // @ts-expect-error
     .attr("id", (d) => getDomId("tip", d.n.name))
+    // @ts-expect-error
     .attr("cx", (d) => d.xTip)
+    // @ts-expect-error
     .attr("cy", (d) => d.yTip)
+    // @ts-expect-error
     .attr("r", (d) => d.r)
     .on("mouseover", this.callbacks.onTipHover)
     .on("mouseout", this.callbacks.onTipLeave)
@@ -282,6 +296,7 @@ export const strokeForBranch = (
   cause the branches to not appear, we're falling back to the previous solution which
   doesn't use gradients. The commented code remains & hopefully a solution can be
   found which reinstates gradients!                            James, April 4 2020. */
+  // @ts-expect-error
   return d.branchStroke;
   // const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
   // if (d.branchStroke === d.parent.branchStroke || b === "T") {
@@ -307,15 +322,19 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
   }
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
+    // @ts-expect-error
     this.groups.branchTee.selectAll("*").remove();
   } else {
+    // @ts-expect-error
     this.groups.branchTee
       .selectAll('.branch')
       .data(nodes.filter((d) => d.n.hasChildren)) // only want internal nodes for the tee
       .enter()
       .append("path")
       .attr("class", "branch T")
+      // @ts-expect-error
       .attr("id", (d) => getDomId("branchT", d.n.name))
+      // @ts-expect-error
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
       .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
@@ -341,13 +360,16 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   if (!("branchStem" in this.groups)) {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
   }
+  // @ts-expect-error
   this.groups.branchStem
     .selectAll('.branch')
     .data(nodes)
     .enter()
     .append("path")
     .attr("class", "branch S")
+    // @ts-expect-error
     .attr("id", (d) => getDomId("branchS", d.n.name))
+    // @ts-expect-error
     .attr("d", (d) => d.branch[0])
     .style("stroke", (d) => {
       if (!d.branchStroke) return params.branchStroke;
@@ -371,11 +393,14 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
  */
 export const drawRegression = function drawRegression(this: PhyloTreeType): void {
   /* check we have computed a sensible regression before attempting to draw */
+  // @ts-expect-error
   if (this.regression.slope===undefined) {
     return;
   }
 
+  // @ts-expect-error
   const leftY = this.yScale(this.regression.intercept + this.xScale.domain()[0] * this.regression.slope);
+  // @ts-expect-error
   const rightY = this.yScale(this.regression.intercept + this.xScale.domain()[1] * this.regression.slope);
 
   const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
@@ -385,6 +410,7 @@ export const drawRegression = function drawRegression(this: PhyloTreeType): void
     this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", "url(#treeClip)");
   }
 
+  // @ts-expect-error
   this.groups.regression
     .append("path")
     .attr("d", path)
@@ -396,8 +422,10 @@ export const drawRegression = function drawRegression(this: PhyloTreeType): void
 
   /* Compute & draw regression text. Note that the text hasn't been created until now,
   as we need to wait until rendering time when the scales have been calculated */
+  // @ts-expect-error
   this.groups.regression
     .append("text")
+    // @ts-expect-error
     .text(makeRegressionText(this.regression, this.layout, this.yScale))
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
@@ -410,6 +438,7 @@ export const drawRegression = function drawRegression(this: PhyloTreeType): void
 
 export const removeRegression = function removeRegression(this: PhyloTreeType): void {
   if ("regression" in this.groups) {
+    // @ts-expect-error
     this.groups.regression.selectAll("*").remove();
   }
 };
@@ -479,6 +508,7 @@ const handleBranchHoverColor = (
   if (!d) { return; }
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
+  // @ts-expect-error
   const tel = d.that.svg.select("#"+getDomId("branchT", d.n.name));
   if (!tel.empty()) { // Some displays don't have S & T parts of the branch
     tel.style("stroke", c2);
@@ -486,6 +516,7 @@ const handleBranchHoverColor = (
 
   /* If we reinstate gradient stem colours this section must be updated; see the
   commit which added this comment for the previous implementation */
+  // @ts-expect-error
   const sel = d.that.svg.select("#"+getDomId("branchS", d.n.name));
   if (!sel.empty()) {
     sel.style("stroke", c2);
@@ -494,11 +525,13 @@ const handleBranchHoverColor = (
 
 export const branchStrokeForLeave = function branchStrokeForLeave(d: PhyloNode): void {
   if (!d) { return; }
+  // @ts-expect-error
   handleBranchHoverColor(d, d.n.parent.shell.branchStroke, d.branchStroke);
 };
 
 export const branchStrokeForHover = function branchStrokeForHover(d: PhyloNode): void {
   if (!d) { return; }
+  // @ts-expect-error
   handleBranchHoverColor(d, getEmphasizedColor(d.n.parent.shell.branchStroke), getEmphasizedColor(d.branchStroke));
 };
 
@@ -549,6 +582,7 @@ export interface LabelDatum {
 
 export function drawStreams(this: PhyloTreeType): void {
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
+  // @ts-expect-error
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
 
   /* initial set up - runs when streams are turned on / removed
@@ -557,7 +591,9 @@ export function drawStreams(this: PhyloTreeType): void {
     this.groups.streams = this.svg.append("g").attr("id", "streams");
     this.groups.streamsLabels = this.svg.append("g").attr("id", "stream-labels");
   } else if (!streamsToDraw.length && "streams" in this.groups) {
+    // @ts-expect-error
     this.groups.streams.selectAll("*").remove();
+    // @ts-expect-error
     this.groups.streamsLabels.selectAll("*").remove();
     delete this.groups.streams;
     delete this.groups.streamsLabels;
@@ -571,6 +607,7 @@ export function drawStreams(this: PhyloTreeType): void {
    * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update
    * individual elements.
    */
+  // @ts-expect-error
   this.groups.streams.selectAll('.streamGroup')
     .data(streamsToDraw, (d) => String(d))
     .join(
@@ -592,6 +629,7 @@ export function drawStreams(this: PhyloTreeType): void {
       },
     );
 
+  // @ts-expect-error
   const areaGenerator: (param: Ripple) => string = area<Ripple[0]>()
     .x((d) => d.x)
     .y0((d) => d.y0)
@@ -606,12 +644,15 @@ export function drawStreams(this: PhyloTreeType): void {
    */
   const connectorPath = (node: PhyloNode, lineType: 'joiner'|'backbone'): string => { // a.k.a. branch
     // don't draw connectors to empty streams!
+    // @ts-expect-error
     if (node.n.streamNodeCounts.visible===0) return "";
 
     const y = this.yScale(node.displayOrder);
 
     if (lineType==='backbone') {
+      // @ts-expect-error
       const xStreamStart = node.streamRipples.at(0).at(0).x; // first category, first pivot
+      // @ts-expect-error
       const xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
       return `M${xStreamStart},${y}H${xStreamEnd}`;
     }
@@ -624,12 +665,15 @@ export function drawStreams(this: PhyloTreeType): void {
       return "";
     }
 
+    // @ts-expect-error
     const x1 = node.streamRipples[0][0].x; // first category, first pivot
 
+    // @ts-expect-error
     const parentStreamName = this.streams[node.n.streamName].parentStreamName;
     if (parentStreamName) { // draw a kinked connector
       const x0 = node.xBase; // represents the div/time of the stream-defining branch
       // NOTE: We guarantee that the the pivots do not extend beyond x0 (i.e. to the LHS)
+      // @ts-expect-error
       const yParent = this.yScale(this.nodes[this.streams[parentStreamName].startNode].displayOrder);
       return `M${x0},${yParent}L${x0},${y}L${x1},${y}`;
     }
@@ -641,8 +685,10 @@ export function drawStreams(this: PhyloTreeType): void {
   }
 
   for (const name of streamsToDraw) {
+    // @ts-expect-error
     const node = this.nodes[this.streams[name].startNode];
     const callbacks = this.callbacks;
+    // @ts-expect-error
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select('.connector')
       .selectAll(`.connectorPath`)
       .data([node, node], (_d, i) => i===0?'joiner':'backbone')
@@ -651,8 +697,10 @@ export function drawStreams(this: PhyloTreeType): void {
           return enter
             .append("path")
             .attr("class", `connectorPath`)
+            // @ts-expect-error
             .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid d3 rebinding `this`
             .attr("stroke-width", this.params.branchStrokeWidth)
+            // @ts-expect-error
             .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
             .attr("fill", 'None')
             .style("cursor", "pointer")
@@ -660,19 +708,24 @@ export function drawStreams(this: PhyloTreeType): void {
             .on("mouseover", function (_d, i, paths) {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              // @ts-expect-error
               (callbacks.onStreamHover as OmitThisParameter<typeof callbacks.onStreamHover>)(node, i, Array.from(paths), true)
             })
             .on("mouseout",  function (_d, i, paths) {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              // @ts-expect-error
               (callbacks.onStreamLeave as OmitThisParameter<typeof callbacks.onStreamLeave>)(node, i, Array.from(paths), true)
             })
+            // @ts-expect-error
             .on("click", callbacks.onBranchClick)
         },
         (update) => {
           return update.call(
             (selection) => selection.transition("500")
+              // @ts-expect-error
               .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
+              // @ts-expect-error
               .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
               .attr("stroke-width", this.params.branchStrokeWidth)
           );
@@ -682,8 +735,10 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
+    // @ts-expect-error
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
       .selectAll<SVGPathElement, Ripple>(`.ripple`)
+      // @ts-expect-error
       .data(node.streamRipples, (d) => String(d.key))
       .join(
         (enter) => {
@@ -691,19 +746,23 @@ export function drawStreams(this: PhyloTreeType): void {
             .append("path")
             .attr("class", `ripple`)
             .attr("d", (d) => areaGenerator(d))
+            // @ts-expect-error
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
             .on("mouseover", (_d, i, paths) => {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              // @ts-expect-error
               (this.callbacks.onStreamHover as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
             })
             .on("mouseout",  (_d, i, paths) => {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              // @ts-expect-error
               (this.callbacks.onStreamLeave as OmitThisParameter<typeof this.callbacks.onStreamHover>)(node, i, Array.from(paths), false)
             })
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
+            // @ts-expect-error
             .on("click", () => this.callbacks.onBranchClick(node))
         },
         (update) => {
@@ -720,21 +779,28 @@ export function drawStreams(this: PhyloTreeType): void {
 
   const labelData: LabelDatum[] = streamsToDraw
     .map((streamName): LabelDatum|null => {
+      // @ts-expect-error
       const phyloNode = this.nodes[this.streams[streamName].startNode];
+      // @ts-expect-error
       if (phyloNode.n.streamNodeCounts.visible===0) {
         return null;
       }
       /* Text anchor -- if there's enough of the joiner branch in-view then we want to use 'end',
          which stops the label overlapping the stream.  TODO XXX */
+      // @ts-expect-error
       const textAnchor = this.zoomNode.n.name===phyloNode.n.name ? 'start' : 'middle';
+      // @ts-expect-error
       const streamMaxPixels = _tallestPivot(phyloNode)[1];
       const minFontSize = 10, maxFontSize = 24;
       const fontSize = Math.floor(Math.max(minFontSize, Math.min(streamMaxPixels/2, maxFontSize)));
       const visibility = fontSize===minFontSize ? 'hidden' : 'visible';
       return {
+        // @ts-expect-error
         phyloNode,
         streamName,
+        // @ts-expect-error
         x: phyloNode.streamRipples.at(0).at(0).x, // The start of the stream / end of the joiner connector
+        // @ts-expect-error
         y: this.yScale(phyloNode.displayOrder),
         textAnchor,
         fontSize,
@@ -744,6 +810,7 @@ export function drawStreams(this: PhyloTreeType): void {
     .filter((d) => !!d); // remove labels for non-rendered streams
 
   /* LABELS */
+  // @ts-expect-error
   this.groups.streamsLabels
       .selectAll<SVGTextElement, LabelDatum>(`.labelText`)
       .data(labelData, (d) => String(d.streamName))
@@ -759,6 +826,7 @@ export function drawStreams(this: PhyloTreeType): void {
             .attr("dominant-baseline", "ideographic")
             .attr("font-size", (d) => d.fontSize)
             .attr('visibility', (d) => d.visibility)
+            // @ts-expect-error
             .text((d) => d.phyloNode.n.streamName)
             .style("pointer-events", "none");
         },
@@ -779,9 +847,12 @@ export function drawStreams(this: PhyloTreeType): void {
 }
 
 function _tallestPivot(node: PhyloNode): [number, number] {
+  // @ts-expect-error
   return node.streamRipples[0].reduce(([i, maxH], pivotData, pivotIdx) => {
+    // @ts-expect-error
     const h = node.streamRipples.at(-1)[pivotIdx].y1 - pivotData.y0;
     if (pivotIdx===0) return [0,h];
+    // @ts-expect-error
     if (h>maxH) return [pivotIdx, h];
     return [i, maxH];
   }, [undefined, undefined]);
@@ -798,6 +869,7 @@ export const nonHoveredRippleOpacity = 0.3;
  */
 export function highlightStreamtreeRipples(this: PhyloTreeType, attr: TreeState['hoveredLegendSwatch']): void {
   const g = this.groups?.streams
+  // @ts-expect-error
   if (!g) return null;
 
   if (attr===false) {

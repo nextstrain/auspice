@@ -54,7 +54,7 @@ interface ReduxNodeBase {
     url?: string;
     accession?: string;
     vaccine?: NodeAttrVaccine;
-    [node_attr: string]: NodeAttr | number | string | NodeAttrAuthor | NodeAttrVaccine;
+    [node_attr: string]: NodeAttr | number | string | NodeAttrAuthor | NodeAttrVaccine | undefined;
   }
   parent?: ReduxNode
   parentInfo?: {

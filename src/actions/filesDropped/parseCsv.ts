@@ -75,7 +75,7 @@ export async function handleCsvLikeDroppedFile(file: File, nodeNames: Set<string
   const {fileName, csvString} = await readDroppedFile(file);
   const { errors, data, meta } = await parseCsv(csvString);
   if (errors.length) throw new Error(errors.map((e) => e.message).join(", "));
-  let { colorings, header } = processHeader(meta.fields);
+  let { colorings, header } = processHeader(meta.fields!);
   processRows(colorings, header, data, nodeNames);
   if (colorings.length === 0) {
     throw new Error("No valid columns")
@@ -163,7 +163,7 @@ function processHeader(fields: string[]): {
   colorings: AttrColoring[];
   header: Header;
 } {
-  const strainKey = fields[0];
+  const strainKey = fields[0]!;
 
   /* There are a number of "special case" columns we currently ignore */
   const fieldsToIgnore = new Set(["name", "div", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
@@ -186,12 +186,12 @@ function processHeader(fields: string[]): {
       /* interpret column names using microreact-style syntax */
       if (fieldName.includes("__")) {
         const [prefix, suffix] = fieldName.split("__");
-        if (["shape", "colour", "color"].includes(suffix)) {
+        if (["shape", "colour", "color"].includes(suffix!)) {
           // don't track in `ignoredFields` as we don't want a user-facing warning
           return null;
         }
         if (suffix === "autocolour") {
-          attrName = prefix; /* MicroReact uses this to colour things, but we do this by default */
+          attrName = prefix!; /* MicroReact uses this to colour things, but we do this by default */
         }
       }
       return { attrName, colors: [], fieldName, colorScaleFieldName: undefined, scaleType, strains: {} };
@@ -246,10 +246,10 @@ function processRows(colorings: AttrColoring[], header: Header, data: ParseResul
     if (header.ignoredFields.has(fieldName) || fieldName === header.strainKey) continue;
     for (const row of data) {
       const strain = row[header.strainKey];
-      if (!nodeNames.has(strain)) continue;
+      if (!nodeNames.has(strain!)) continue;
       const value = row[fieldName];
       if (!value) continue; // skip empty strings (Note: values of `0`, `false` etc are all strings so not skipped)
-      attrInfo.strains[strain] = { value };
+      attrInfo.strains[strain!] = { value };
       // Colors are defined per strain, so store them in a list so we can average as needed
       if (attrInfo.colorScaleFieldName) {
         const hex = row[attrInfo.colorScaleFieldName];
@@ -278,7 +278,7 @@ function _averageColor(hexes: string[]): string | null {
     console.warn(`Validation of color hexes dropped these invalid values: ${dropped.join(', ')}`);
   }
   if (validatedHexes.length === 0) return null;
-  if (validatedHexes.length === 1) return hexes[0]
+  if (validatedHexes.length === 1) return hexes[0]!
   let r=0, g=0, b=0; // same algorithm as `getAverageColorFromNodes`
   validatedHexes.forEach((c) => {
     const tmpRGB = rgb(c);
@@ -304,7 +304,7 @@ function processLatLongs(
   header: Header,
   attrName: string
 ): NewMetadata['geographic'] {
-  const [latKey, longKey] = [header.latLongKeys.latitude, header.latLongKeys.longitude];
+  const [latKey, longKey] = [header.latLongKeys!.latitude, header.latLongKeys!.longitude];
   const coordsStrains = new Map();
   let demeCounter = 0;
 
@@ -325,7 +325,7 @@ function processLatLongs(
 
   /* invert map to link each strain to a dummy value with lat/longs */
   // TODO XXX what about the shape here?
-  const newGeoResolution = {key: attrName, demes: {}};
+  const newGeoResolution: {key: string; demes: Record<string, {latitude: number; longitude: number}>} = {key: attrName, demes: {}};
   const attrColoring: AttrColoring = {
     attrName,
     scaleType: 'categorical',

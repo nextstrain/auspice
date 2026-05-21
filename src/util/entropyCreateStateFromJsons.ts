@@ -132,7 +132,7 @@ export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
     .filter(([name,]) => name!=='nuc')
     .map(([annotationKey, annotation]) => {
 
-      if (typeof annotation !== 'object') {
+      if (typeof annotation !== 'object' || annotation === null) {
         throw new Error(`Genome annotation for '${annotationKey}' is not a JSON object.`);
       }
 
@@ -150,7 +150,7 @@ export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
       /* Assertion is safe: see docstring of UnknownJsonObject
        */
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      annotationsPerGene[geneName][annotationKey] = annotation as UnknownJsonObject;
+      annotationsPerGene[geneName]![annotationKey] = annotation as UnknownJsonObject;
     })
 
   const nextColor = nextColorGenerator();
@@ -226,6 +226,7 @@ function validColor(color: string | undefined | unknown): false | string {
 function* nextColorGenerator(): Generator<string> {
   let i=0;
   while (true) {
+    // @ts-expect-error TS2322
     yield genotypeColors[i++];
     if (i===genotypeColors.length) i=0;
   }
@@ -506,7 +507,7 @@ function _isCdsWrapping(
 ): boolean {
   const positive = strand==='+';
   // segments ordered to guarantee rangeLocal will always be greater (than the previous segment)
-  let prevSegment: CdsSegment;
+  let prevSegment: CdsSegment | undefined;
   for (const segment of segments) {
     if (prevSegment) {
       if (positive && prevSegment.rangeGenome[0] > segment.rangeGenome[0]) {

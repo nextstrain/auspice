@@ -22,8 +22,11 @@ const updateNodesWithNewData = (
   nodes.forEach((d, i) => {
     d.update = false;
     for (const key in newNodeProps) {
+      // @ts-expect-error
       const val = newNodeProps[key][i];
+      // @ts-expect-error
       if (val !== d[key]) {
+        // @ts-expect-error
         d[key] = val;
         d.update = true;
         // tmp++;
@@ -41,26 +44,34 @@ const updateNodesWithNewData = (
 const svgSetters = {
   attrs: {
     ".tip": {
+      // @ts-expect-error
       r: (d: PhyloNode): number => d.r,
+      // @ts-expect-error
       cx: (d: PhyloNode): number => d.xTip,
+      // @ts-expect-error
       cy: (d: PhyloNode): number => d.yTip
     },
     ".branch": {
     },
     ".vaccineCross": {
+      // @ts-expect-error
       d: (d: PhyloNode): string => d.vaccineCross
     },
     ".conf": {
+      // @ts-expect-error
       d: (d: PhyloNode): string => d.confLine
     }
   },
   styles: {
     ".tip": {
+      // @ts-expect-error
       fill: (d: PhyloNode): string => d.fill,
+      // @ts-expect-error
       stroke: (d: PhyloNode): string => d.tipStroke,
       visibility: (d: PhyloNode): "visible" | "hidden" => d.visibility === NODE_VISIBLE ? "visible" : "hidden"
     },
     ".conf": {
+      // @ts-expect-error
       stroke: (d: PhyloNode): string => d.branchStroke,
       "stroke-width": calcConfidenceWidth
     },
@@ -92,18 +103,24 @@ function createUpdateCall(
 ): UpdateCall {
   return (selection) => {
     // First: the properties to update via d3Selection.attr call
+    // @ts-expect-error
     if (svgSetters.attrs[treeElem]) {
+      // @ts-expect-error
       [...properties].filter((x) => svgSetters.attrs[treeElem][x])
         .forEach((attrName) => {
           // console.log(`applying attr ${attrName} to ${treeElem}`)
+          // @ts-expect-error
           selection.attr(attrName, svgSetters.attrs[treeElem][attrName]);
         });
     }
     // Second: the properties to update via d3Selection.style call
+    // @ts-expect-error
     if (svgSetters.styles[treeElem]) {
+      // @ts-expect-error
       [...properties].filter((x) => svgSetters.styles[treeElem][x])
         .forEach((styleName) => {
           // console.log(`applying style ${styleName} to ${treeElem}`)
+          // @ts-expect-error
           selection.style(styleName, svgSetters.styles[treeElem][styleName]);
         });
     }
@@ -119,6 +136,7 @@ const genericSelectAndModify = (
   // console.log("general svg update for", treeElem);
 
   svg.selectAll<SVGGElement, PhyloNode>(treeElem)
+    // @ts-expect-error
     .filter((d) => d.update)
     .transition().duration(transitionTime)
     .call(updateCall);
@@ -153,10 +171,12 @@ export const modifySVG = function modifySVG(
         if (applyBranchPropsAlso) {
           updateCall = (selection): void => {
             createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
+            // @ts-expect-error
             selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
           };
         } else {
           updateCall = (selection): void => {
+            // @ts-expect-error
             selection.attr("d", (d) => d.branch[STidx]);
           };
         }
@@ -338,6 +358,7 @@ export const change = function change(
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
+  // @ts-expect-error
   if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2 || performanceFlags.get("skipTreeAnimation")===true) {
     transitionTime = 0;
   }
@@ -367,6 +388,7 @@ export const change = function change(
     if (this.params.showStreamTrees) {
       /* note: this won't play nicely with other changes to the streamtrees, but we rely on the knowledge that
       tip radii changes are via mouse-over events _only_ and so there won't be any other SVG changes requested */
+      // @ts-expect-error
       this.highlightStreamtreeRipples(hoveredLegendSwatch)
     }
 
@@ -374,6 +396,7 @@ export const change = function change(
   if (changeBranchThickness) {
     elemsToUpdate.add(".branch").add(".conf");
     svgPropsToUpdate.add("stroke-width");
+    // @ts-expect-error
     nodePropsToModify["stroke-width"] = branchThickness;
   }
   if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
@@ -423,8 +446,10 @@ export const change = function change(
       d.update = true;
     });
     /* if clade is terminal, use the parent as the zoom node */
+    // @ts-expect-error
     this.zoomNode = zoomIntoClade.n.hasChildren ?
       zoomIntoClade :
+      // @ts-expect-error
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
@@ -438,11 +463,13 @@ export const change = function change(
 
   /** display order calculations */
   if (newDistance || updateLayout || changeNodeOrder || streamDefinitionChange) {
+    // @ts-expect-error
     setDisplayOrder({nodes: this.nodes, focus: this.focus, streams: this.params.showStreamTrees && this.streams});
   } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
     // rippleDisplayOrders are typically called by setDisplayOrder however for ∆{colorBy,visibility} we don't want to pay
     // the price of recomputing the display orders for the entire tree, we just need to recompute the
     // display-order-dimensions of the ripples
+    // @ts-expect-error
     setRippleDisplayOrders(this.nodes, this.streams)
   }
 
@@ -498,6 +525,7 @@ export const change = function change(
      * changes.
      */
     for (const name of ['branchLabels', 'branchTee', 'branchStem', 'tips', 'tipLabels', 'vaccines']) {
+      // @ts-expect-error
       this.groups?.[name]?.selectAll("*")?.remove();
     }
     this.addGrid();

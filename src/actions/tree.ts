@@ -37,21 +37,31 @@ export const applyInViewNodesToTree = (
   tree: TreeState,
 ): number => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
+  // @ts-expect-error
   if (tree.nodes[0].shell) {
+    // @ts-expect-error
     tree.nodes.forEach((d) => {
+      // @ts-expect-error
       d.shell.inView = false;
+      // @ts-expect-error
       d.shell.update = true;
     });
+    // @ts-expect-error
     if (tree.nodes[validIdxRoot].hasChildren) {
+      // @ts-expect-error
       applyToChildren(tree.nodes[validIdxRoot].shell, (d: PhyloNode) => {d.inView = true;});
+    // @ts-expect-error
     } else if (tree.nodes[validIdxRoot].parent.arrayIdx===0) {
       // subtree with n=1 tips => don't make the parent in-view as this will cover the entire tree!
+      // @ts-expect-error
       tree.nodes[validIdxRoot].shell.inView = true;
     } else {
+      // @ts-expect-error
       applyToChildren(tree.nodes[validIdxRoot].parent.shell, (d: PhyloNode) => {d.inView = true;});
     }
   } else {
     /* FYI applyInViewNodesToTree is now setting inView on the redux nodes */
+    // @ts-expect-error
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
@@ -62,7 +72,9 @@ export const applyInViewNodesToTree = (
         for (const child of node.children) _markChildrenInView(child);
       }
     };
+    // @ts-expect-error
     const startingNode = tree.nodes[validIdxRoot].hasChildren ? tree.nodes[validIdxRoot] : tree.nodes[validIdxRoot].parent;
+    // @ts-expect-error
     _markChildrenInView(startingNode);
   }
 
@@ -138,8 +150,11 @@ export const updateVisibleTipsAndBranchThicknesses = ({
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
+      // @ts-expect-error
       genotype: controls.colorScale.genotype,
+      // @ts-expect-error
       scaleType: controls.colorScale.scaleType,
+      // @ts-expect-error
       legendValues: controls.colorScale.legendValues,
       treeNodes: tree.nodes,
       treeTooNodes: treeToo ? treeToo.nodes : undefined,
@@ -209,8 +224,11 @@ export const changeDateFilter = ({
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
+      // @ts-expect-error
       scaleType: controls.colorScale.scaleType,
+      // @ts-expect-error
       genotype: controls.colorScale.genotype,
+      // @ts-expect-error
       legendValues: controls.colorScale.legendValues,
       treeNodes: tree.nodes,
       treeTooNodes: treeToo ? treeToo.nodes : undefined,
@@ -262,13 +280,18 @@ export const updateTipRadii = (
     };
     const tt = controls.showTreeToo;
     if (tipSelectedIdx) {
+      // @ts-expect-error
       d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
       if (tt) {
+        // @ts-expect-error
         const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
+        // @ts-expect-error
         d.dataToo = calcTipRadii({tipSelectedIdx: idx, colorScale, tree: treeToo});
       }
     } else {
+      // @ts-expect-error
       d.data = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree});
+      // @ts-expect-error
       if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, colorScale, tree: treeToo});
     }
     dispatch(d);
@@ -297,6 +320,7 @@ export const applyFilter = (
   return (dispatch, getState) => {
     const { controls } = getState();
     const currentlyFilteredTraits = Reflect.ownKeys(controls.filters);
+    // @ts-expect-error
     let newValues;
     switch (mode) {
       case "set":
@@ -323,6 +347,7 @@ export const applyFilter = (
         if (currentlyFilteredTraits.indexOf(trait) === -1) {
           newValues = values.map((value) => ({value, active: true}));
         } else {
+          // @ts-expect-error
           newValues = controls.filters[trait].slice();
           const currentItemNames = newValues.map((i) => i.value);
           values.forEach((valueToAdd) => {
@@ -331,6 +356,7 @@ export const applyFilter = (
               newValues.push({value: valueToAdd, active: true});
             } else {
               /* it's already there, ensure it's active */
+              // @ts-expect-error
               newValues[idx].active = true;
             }
           });
@@ -342,6 +368,7 @@ export const applyFilter = (
           console.error(`trying to ${mode} values from an un-initialised filter!`);
           return;
         }
+        // @ts-expect-error
         newValues = controls.filters[trait].map((f) => ({...f}));
         const currentItemNames = newValues.map((i) => i.value);
         for (const item of values) {
@@ -350,6 +377,7 @@ export const applyFilter = (
             if (mode==="remove") {
               newValues.splice(idx, 1);
             } else {
+              // @ts-expect-error
               newValues[idx].active = false;
             }
           } else {
@@ -381,6 +409,7 @@ const _resetExpodedTree = (nodes: ReduxNode[]): void => {
       n.children = n.unexplodedChildren;
       n.hasChildren = true;
       delete n.unexplodedChildren;
+      // @ts-expect-error
       for (const child of n.children) {
         child.parent = n;
       }
@@ -405,23 +434,29 @@ const _traverseAndCreateSubtrees = (
   attr: string,
 ): void => {
   // store original children so we traverse the entire tree
+  // @ts-expect-error
   const originalChildren = node.hasChildren ? [...node.children] : [];
 
   if (node.arrayIdx === 0) { // __ROOT will hold all (exploded) subtrees
     node.unexplodedChildren = originalChildren;
   } else if (node.hasChildren) {
     const parentTrait = getTraitFromNode(node, attr);
+    // @ts-expect-error
     const childrenToPrune = node.children
       .map((c) => getTraitFromNode(c, attr))
       .map((childTrait, idx) => (childTrait!==parentTrait) ? idx : undefined)
       .filter((v) => v!==undefined);
     if (childrenToPrune.length) {
       childrenToPrune.forEach((idx) => {
+        // @ts-expect-error
         const subtreeRootNode = node.children[idx];
+        // @ts-expect-error
         root.children.push(subtreeRootNode);
+        // @ts-expect-error
         subtreeRootNode.parent = root;
       });
       node.unexplodedChildren = originalChildren;
+      // @ts-expect-error
       node.children = node.children.filter((_c, idx) => {
         return !childrenToPrune.includes(idx);
       });
@@ -444,7 +479,9 @@ const _orderSubtrees = (
   nodes: ReduxNode[],
   attr: string,
 ): void => {
+  // @ts-expect-error
   const attrValueOrder = getLegendOrder(attr, metadata.colorings[attr], nodes, undefined);
+  // @ts-expect-error
   nodes[0].children.sort((childA, childB) => {
     const [attrA, attrB] = [getTraitFromNode(childA, attr), getTraitFromNode(childB, attr)];
     if (attrValueOrder.length) {
@@ -465,18 +502,25 @@ export const explodeTree = (
 ): ThunkFunction => {
   return (dispatch, getState) => {
     const {tree, metadata, controls} = getState();
+    // @ts-expect-error
     _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
     if (attr) {
+      // @ts-expect-error
       const root = tree.nodes[0];
+      // @ts-expect-error
       _traverseAndCreateSubtrees(root, root, attr);
+      // @ts-expect-error
       if (root.unexplodedChildren.length === root.children.length) {
         dispatch(warningNotification({message: "Cannot explode tree on this trait - is it defined on internal nodes?"}));
         return;
       }
+      // @ts-expect-error
       _orderSubtrees(metadata, tree.nodes, attr);
     }
     /* tree splitting necessitates recalculation of tip counts */
+    // @ts-expect-error
     calcFullTipCounts(tree.nodes[0]);
+    // @ts-expect-error
     calcTipCounts(tree.nodes[0], tree.visibility);
     /* we default to zooming out completely whenever we explode the tree. There are nicer behaviours here,
     such as re-calculating the MRCA of visible nodes, but this comes at the cost of increased complexity.
@@ -487,13 +531,19 @@ export const explodeTree = (
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}
     );
+    // @ts-expect-error
     visData.idxOfInViewRootNode = 0;
     /* Changes in visibility require a recomputation of which legend items we wish to display */
+    // @ts-expect-error
     visData.visibleLegendValues = createVisibleLegendValues({
       colorBy: controls.colorBy,
+      // @ts-expect-error
       genotype: controls.colorScale.genotype,
+      // @ts-expect-error
       scaleType: controls.colorScale.scaleType,
+      // @ts-expect-error
       legendValues: controls.colorScale.legendValues,
+      // @ts-expect-error
       treeNodes: tree.nodes,
       visibility: visData.visibility
     });
@@ -511,6 +561,7 @@ export function changeDistanceMeasure(metric: "num_date"|"div"): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
     if (Object.keys(tree.streams).length) {
+      // @ts-expect-error
       processStreams(tree.streams, tree.nodes, tree.visibility,  metric, controls.colorScale, {skipCategories: true})
     }
     dispatch({type: types.CHANGE_DISTANCE_MEASURE, data: metric})
@@ -534,10 +585,13 @@ export function getFocusedNodes(nodes: ReduxNode[], visibility: any[]): FocusNod
 
   let focusNodes = nodes.filter((_n, i) => visibility[i] === NODE_VISIBLE).map((n) => n.arrayIdx)
   if (focusNodes.length===0) {
+    // @ts-expect-error
     focusNodes = nodes.filter((n) => n.shell.inView).map((n) => n.arrayIdx);
   }
   const focusNodesSet = new Set(focusNodes);
+  // @ts-expect-error
   const focusRoots = focusNodes.filter((idx) => !focusNodesSet.has(nodes[idx].parent.arrayIdx));
 
+  // @ts-expect-error
   return {nodes: focusNodes, roots: focusRoots}
 }

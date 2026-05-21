@@ -16,7 +16,7 @@ function calculateRegressionThroughRoot(nodes: PhyloNode[]): Regression {
   if (nTips===0) {
     return {slope: undefined, intercept: undefined, r2: undefined};
   }
-  const offset = nodes[0].x;
+  const offset = nodes[0]!.x;
   const XY = sum(
     terminalNodes.map((d) => (d.y) * (d.x - offset))
   ) / nTips;
@@ -67,9 +67,9 @@ export function makeRegressionText(
 ): string {
   if (layout==="clock") {
     if (guessAreMutationsPerSite(yScale)) {
-      return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+      return `rate estimate: ${regression.slope!.toExponential(2)} subs per site per year`;
     }
-    return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
+    return `rate estimate: ${formatDivergence(regression.slope!)} subs per year`;
   }
-  return `intercept = ${regression.intercept.toPrecision(3)}, slope = ${regression.slope.toPrecision(3)}, R^2 = ${regression.r2.toPrecision(3)}`;
+  return `intercept = ${regression.intercept!.toPrecision(3)}, slope = ${regression.slope!.toPrecision(3)}, R^2 = ${regression.r2!.toPrecision(3)}`;
 }

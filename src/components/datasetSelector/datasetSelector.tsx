@@ -38,7 +38,7 @@ interface StateProps {
  */
 class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatch}, State> {
 
-  constructor(props) {
+  constructor(props: StateProps & {dispatch: AppDispatch}) {
     super(props);
     const d = currentDataset();
     this.state = {
@@ -66,11 +66,12 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
       nextstrain.animationTickReference = null;
       this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     }
+    // @ts-expect-error TS2322
     this.props.dispatch(changePage({path: _path(this.state.proposedDataset)}));
   }
 
 
-  updateProposedParts = (idx, value): void => {
+  updateProposedParts = (idx: number, value: string): void => {
     const selected = {
       parts: [...this.state.proposedDataset.parts.slice(0, idx), value],
       snapshot: this.state.proposedDataset.snapshot,
@@ -81,13 +82,13 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
       const values = options.map((opt) => opt.value)
       // At the proposed position, does the current dataset have a value?
       const previousValue = this.state.currentDataset.parts[selected.parts.length];
-      if (values.includes(previousValue)) {
+      if (previousValue !== undefined && values.includes(previousValue)) {
         selected.parts.push(previousValue)
       } else {
         // What to choose for the "default" next value, if the previous one at this level isn't
         // valid? We simply take the first available option, but in the nextstrain.org context
         // the server's manifest has a better default. We could explore better choices in the future.
-        selected.parts.push(values[0]);
+        selected.parts.push(values[0]!);
       }
       options = this.options(selected.parts);
     }
@@ -165,9 +166,9 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
           menuPortalTarget={document.body}
           menuPosition="fixed"
           styles={{
-            menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-            option: (base) => ({ ...base, fontSize: '14px' }),
-            control: (base) => ({
+            menuPortal: (base: React.CSSProperties) => ({ ...base, zIndex: 9999 }),
+            option: (base: React.CSSProperties) => ({ ...base, fontSize: '14px' }),
+            control: (base: React.CSSProperties) => ({
               ...base,
               backgroundColor: options.length === 1 ? '#e0e0e0' : base.backgroundColor,
               width: '500px',
@@ -180,7 +181,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
           isMulti={false}
           isDisabled={options.length === 1}
           value={options.filter((opt) => opt.value === currentValue)}
-          onChange={(opt): void => this.updateProposedParts(currentIdx, opt.value)}
+          onChange={(opt: {value: string}): void => this.updateProposedParts(currentIdx, opt.value)}
         />
       </div>
     )
@@ -192,8 +193,8 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
    * If *matchAgainst* is provided, then parts of the provided dataset which don't match
    * are emphasized.
    */ 
-  renderDatasetName = (dataset: Dataset, matchAgainst?: Dataset): JSX.Element[] => {
-    const jsx: JSX.Element[] = dataset.parts.flatMap((word, idx) => {
+  renderDatasetName = (dataset: Dataset, matchAgainst?: Dataset): (JSX.Element | null)[] => {
+    const jsx: (JSX.Element | null)[] = dataset.parts.flatMap((word, idx) => {
       // highlight (red) if changed
       const style = matchAgainst && matchAgainst.parts[idx]!==word ? {color: 'orange'} : {}
       return [<Strong style={style} key={word}>{word}</Strong>, idx+1===dataset.parts.length ? null : <span key={word+"slash"}> / </span>]
@@ -357,7 +358,7 @@ const mapStateToProps: MapStateToProps<StateProps, Record<string, never>, RootSt
 export default withTranslation()(connect(mapStateToProps)(DatasetSelector));
 
 
-function Strong({style={}, children}): JSX.Element {
+function Strong({style={}, children}: {style?: React.CSSProperties; children: React.ReactNode}): JSX.Element {
   return <span style={{...style, fontWeight: 700}}>{children}</span>
 }
 
@@ -423,7 +424,7 @@ function _parseAvailable(availableData: RootState["controls"]["available"]): Sta
       const segments = item.request.split("/");
       let current: RequestHierarchy = hierarchy;
       for (let i = 0; i < segments.length; i++) {
-        const segment = segments[i];
+        const segment = segments[i]!;
         const isLast = i === segments.length - 1;
         if (isLast) {
           current[segment] = true;
@@ -456,6 +457,6 @@ function _validSnapshot(snapshot:string): boolean {
   if (!snapshotRegex.test(snapshot)) return false
   const parts = snapshot.split('-').map((p) => parseInt(p, 10))
   // Note that the nextstrain server handles "invalid" months/days, but do some low-effort validation here
-  if (parts[1]===0 || parts[1]>12 || parts[2]===0 || parts[2]>31) return false
+  if (parts[1]! === 0 || parts[1]! > 12 || parts[2]! === 0 || parts[2]! > 31) return false
   return true
 }

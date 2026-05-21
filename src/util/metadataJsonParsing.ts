@@ -17,6 +17,7 @@ export function computeMetadataSharing(
   }
 
   for (const [key, value] of Object.entries(_parseJsonSharingData(userData, Object.keys(sharing)))) {
+    // @ts-expect-error TS7053
     sharing[key] = value;
   }
 

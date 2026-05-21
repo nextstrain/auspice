@@ -20,7 +20,7 @@ const processNodes = (nodes: ReduxNode[]): {
 } => {
   const nodeNamesSeen = new Set<string>();
   const nodeAttrKeys = new Set<string>();
-  calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
+  calcFullTipCounts(nodes[0]!); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
     d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
     d.hasChildren = typeof d.children !== "undefined";
@@ -60,7 +60,7 @@ const processBranchLabelsInPlace = (nodes: ReduxNode[]): string[] => {
         .forEach((labelName) => {
           availableBranchLabels.add(labelName);
           /* cast all branch label values to strings */
-          n.branch_attrs.labels[labelName] = String(n.branch_attrs.labels[labelName]);
+          n.branch_attrs!.labels![labelName] = String(n.branch_attrs!.labels![labelName]);
         });
     }
   });
@@ -75,14 +75,14 @@ const makeSubtreeRootNode = (
   const node: ReduxNode = {
     name: "__ROOT",
     node_attrs: {hidden: "always"},
-    children: subtreeIndicies.map((idx) => nodesArray[idx])
+    children: subtreeIndicies.map((idx) => nodesArray[idx]!) as ReduxNode[]
   };
   node.parent = node;
   // ensure root has minimum observed divergence & date (across subtree roots)
-  const observedDivs = node.children.map((n) => getDivFromNode(n)).filter((div) => div!==undefined);
-  if (observedDivs.length) node.node_attrs.div = Math.min(...observedDivs);
-  const observedTimes = node.children.map((n) => getTraitFromNode(n, "num_date")).filter((num_date) => num_date!==undefined);
-  if (observedTimes.length) node.node_attrs.num_date = {value: Math.min(...observedTimes)};
+  const observedDivs = node.children!.map((n) => getDivFromNode(n)).filter((div) => div!==undefined);
+  if (observedDivs.length) node.node_attrs!.div = Math.min(...observedDivs);
+  const observedTimes = node.children!.map((n) => getTraitFromNode(n, "num_date")).filter((num_date) => num_date!==undefined);
+  if (observedTimes.length) node.node_attrs!.num_date = {value: Math.min(...observedTimes)};
   return node;
 };
 
@@ -102,11 +102,11 @@ const flattenTree = (
 
   stack.push(root);
   while (stack.length !== 0) {
-    const node = stack.pop();
+    const node = stack.pop()!;
     array.push(node);
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
-        stack.push(node.children[i]);
+        stack.push(node.children[i]!);
       }
     }
   }
@@ -129,11 +129,11 @@ const appendParentsToTree = (
   stack.push(root);
 
   while (stack.length !== 0) {
-    const node = stack.pop();
+    const node = stack.pop()!;
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
-        node.children[i].parent = node;
-        stack.push(node.children[i]);
+        node.children[i]!.parent = node;
+        stack.push(node.children[i]!);
       }
     }
   }
@@ -147,7 +147,7 @@ const appendParentsToTree = (
 const addParentInfo = (nodes: ReduxNode[]): void => {
   nodes.forEach((n) => {
     n.parentInfo = {
-      original: n.parent
+      original: n.parent!
     };
   });
 };
@@ -164,14 +164,14 @@ const collectObservedMutations = (nodesArray: ReduxNode[]): Mutations => {
     if (!n.branch_attrs || !n.branch_attrs.mutations) return;
     Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
       muts.forEach((mut) => {
-        mutations[`${gene}:${mut}`] ? mutations[`${gene}:${mut}`]++ : (mutations[`${gene}:${mut}`] = 1);
+        mutations[`${gene}:${mut}`] ? mutations[`${gene}:${mut}`]!++ : (mutations[`${gene}:${mut}`] = 1);
       });
     });
   });
   return mutations;
 };
 
-export const treeJsonToState = (treeJSON): TreeState => {
+export const treeJsonToState = (treeJSON: unknown): TreeState => {
   const trees = Array.isArray(treeJSON) ? treeJSON : [treeJSON];
   const nodesArray: ReduxNode[] = [];
   const subtreeIndicies = [];
@@ -185,7 +185,7 @@ export const treeJsonToState = (treeJSON): TreeState => {
   addParentInfo(nodesArray);
   const vaccines = nodes.filter((d) => {
     const v = getVaccineFromNode(d);
-    return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
+    return (v && (Object.keys(v).length > 1 || Object.keys(v)[0]! !== "serum"));
   });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   const observedMutations = collectObservedMutations(nodesArray);

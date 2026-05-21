@@ -42,7 +42,7 @@ export async function handleNodeDataJsonFile(file: File, nodeNames: Set<string>)
 
       // track data types to help guess a scale later on
       if (!Object.hasOwn(dataTypesPerAttr, key)) dataTypesPerAttr[key] = new Set();
-      dataTypesPerAttr[key].add(typeof value);
+      dataTypesPerAttr[key]!.add(typeof value);
 
       if (!attributes[key]) {
         // default to a categorical scale, will be updated in postprocessing
@@ -77,7 +77,7 @@ export async function handleNodeDataJsonFile(file: File, nodeNames: Set<string>)
 
   attributes = Object.fromEntries(
     Object.entries(attributes)
-      .map(([key, coloring]) => _postprocess(key, coloring, dataTypesPerAttr[key]))
+      .map(([key, coloring]) => _postprocess(key, coloring, dataTypesPerAttr[key]!))
       .filter((el) => !!el)
   );
 

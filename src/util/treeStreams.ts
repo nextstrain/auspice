@@ -12,14 +12,14 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
 *  "streams": each key -> object
 *  "connectedStreamOrdering" (or a tree structure? This seems hard...)
 */
-export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams {
+export function labelStreamMembership(tree: ReduxNode, branchLabelKey: string): Streams {
   const streams: Streams = {};
   streams[streamLabelSymbol] = branchLabelKey;
 
-  const stack: [ReduxNode, false|string][] = tree.children.map((subtreeRootNode) => [subtreeRootNode, false]);
+  const stack: [ReduxNode, false|string][] = tree.children!.map((subtreeRootNode) => [subtreeRootNode, false]);
 
   while (stack.length) {
-    const [node, parentStreamMembership] = stack.pop();
+    const [node, parentStreamMembership] = stack.pop()!;
     let newStreamMembership = node?.branch_attrs?.labels?.[branchLabelKey];
 
     if (newStreamMembership && newStreamMembership in streams) {
@@ -30,17 +30,22 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
     /* clear any previous stream-related information using `streamName` as a sentinel value */
     // note that node.inStream (which is on every node) is re-set later in this loop
     if (node.streamName) {
+      // @ts-expect-error TS2790
       delete node.streamName;
+      // @ts-expect-error TS2790
       delete node.streamPivots;
+      // @ts-expect-error TS2790
       delete node.streamCategories;
+      // @ts-expect-error TS2790
       delete node.streamDimensions;
+      // @ts-expect-error TS2790
       delete node.streamMaxHeight;
     }
 
     if (newStreamMembership) {
       streams[newStreamMembership] = {
         name: newStreamMembership,
-        startNode: node.arrayIdx,
+        startNode: node.arrayIdx!,
         members: [], // terminals only
         streamChildren: [], // direct children only
         parentStreamName: parentStreamMembership,
@@ -53,22 +58,22 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 
       if (parentStreamMembership) {
         if (!(parentStreamMembership in streams)) throw new Error("labelStreamMembership fatal error II");
-        streams[parentStreamMembership].streamChildren.push(newStreamMembership);
+        streams[parentStreamMembership]!.streamChildren.push(newStreamMembership);
       }
     }
 
     const currentStreamMembership = newStreamMembership || parentStreamMembership;
     node.inStream = !!currentStreamMembership;
     if (currentStreamMembership && !node.hasChildren) {
-      streams[currentStreamMembership].members.push(node.arrayIdx);
+      streams[currentStreamMembership]!.members.push(node.arrayIdx!);
       // update domains
-      const domains = streams[currentStreamMembership].domains;
+      const domains = streams[currentStreamMembership]!.domains;
       const div = getDivFromNode(node);
       const num_date = getTraitFromNode(node, 'num_date');
-      if (div<domains.div[0]) {domains.div[0]=div}
-      if (div>domains.div[1]) {domains.div[1]=div}
-      if (num_date<domains.num_date[0]) {domains.num_date[0]=num_date}
-      if (num_date>domains.num_date[1]) {domains.num_date[1]=num_date}
+      if (div<domains.div[0]!) {domains.div[0]=div}
+      if (div>domains.div[1]!) {domains.div[1]=div}
+      if (num_date<domains.num_date[0]!) {domains.num_date[0]=num_date}
+      if (num_date>domains.num_date[1]!) {domains.num_date[1]=num_date}
     }
 
     for (const child of node.children || []) {
@@ -85,7 +90,7 @@ export function processStreams(
   nodes: ReduxNode[],
   visibility: Visibility[],
   metric: "num_date"|"div",
-  colorScale,
+  colorScale: any,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
 ):void {
   /**
@@ -94,27 +99,27 @@ export function processStreams(
   if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(s, 'streamPivots'))) {
     // entire domain spanning all streams
     const domain = (Object.values(streams)).reduce((dd, stream) => {
-      if (dd[0] > stream.domains[metric][0]) dd[0] = stream.domains[metric][0];
-      if (dd[1] < stream.domains[metric][1]) dd[1] = stream.domains[metric][1];
+      if (dd[0]! > stream.domains[metric]![0]!) dd[0] = stream.domains[metric]![0];
+      if (dd[1]! < stream.domains[metric]![1]!) dd[1] = stream.domains[metric]![1];
         return dd;
     }, [Infinity, -Infinity]);
     const nPivots = 500 ; // which will represent the entire domain
     const nExtend = 2;
     // use (nPivots-2*nExtend) to span the domain into pieces (of a constant size), then extend the domain either side by nExtend pieces
-    const size = Math.abs(domain[1] - domain[0])/(nPivots-1-2*nExtend);
-    const pivots = Array.from(Array(nPivots), (_, i) => domain[0]-nExtend*size + i*size);
+    const size = Math.abs(domain[1]! - domain[0]!)/(nPivots-1-2*nExtend);
+    const pivots = Array.from(Array(nPivots), (_, i) => domain[0]!-nExtend*size + i*size);
     /** Sigma calculation This seems really hard to get right over every dataset
      * the following seems to work nicely over the dozen or so testing datasets
      * I used, but there may be a better way to compute this, e.g. relative to
      * the density of tips across the pivots etc.
      */
-    streams[sigma] = (pivots.at(-1)-pivots.at(0))/nPivots*5;
+    streams[sigma] = (pivots.at(-1)!-pivots.at(0)!)/nPivots*5;
 
     // Each stream sees a filtered version of these pivots
     for (const stream of Object.values(streams)) {
-      const startNode = nodes[stream.startNode];
-      const parentPosition: number = metric==='div' ? getDivFromNode(startNode.parent) : getTraitFromNode(startNode.parent, 'num_date');
-      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric], parentPosition, streams[sigma], 5);
+      const startNode = nodes[stream.startNode]!;
+      const parentPosition: number = metric==='div' ? getDivFromNode(startNode.parent!) : getTraitFromNode(startNode.parent!, 'num_date');
+      startNode.streamPivots = restrictPivots(pivots, stream.domains[metric]!, parentPosition, streams[sigma], 5);
     }
 
     /**
@@ -140,7 +145,7 @@ export function processStreams(
   }
 
   for (const stream of Object.values(streams)) {
-    const startNode = nodes[stream.startNode];
+    const startNode = nodes[stream.startNode]!;
     const nodesThisStream = _pick(nodes, stream.members)
 
     /**
@@ -155,13 +160,13 @@ export function processStreams(
      * Importantly this considers all candidate nodes to be visible. We also need to recalculate this
      * when the pivots have changed (because values in weight space are evaluated at pivots)
      */
-    let dimensions: StreamDimensions;
+    let dimensions: StreamDimensions = [];
     let everythingIsVisibleAnyway = false;
-    let streamNodeCountsTotal: number;
-    let streamNodeCountsVisible: number;
+    let streamNodeCountsTotal: number = 0;
+    let streamNodeCountsVisible: number = 0;
 
     if (!Object.hasOwn(startNode, "streamMaxHeight") || !skipPivots) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots!, metric, startNode.streamCategories, true, streams[sigma]!));
       startNode.streamMaxHeight = dimensions.length ? computeStreamMaxHeight(dimensions) : 0;
       /**
        * NOTE: the heights of these (i.e. in KDE weight space) can be huge if we have finely spaced pivots such that the PDFs are evaluated a large number
@@ -179,7 +184,7 @@ export function processStreams(
      * Compute the dimensions of the stream, taking into account visibility
      */
     if (!everythingIsVisibleAnyway) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, visibility, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots!, metric, startNode.streamCategories, visibility, streams[sigma]!));
     }
 
     startNode.streamDimensions = dimensions;
@@ -210,18 +215,18 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     ];
     /* NOTE: plenty of speed-ups here if it's a bottleneck */
     const categories: ColorCategory[] = Object.entries(colorScale.legendBounds)
-      .map(([name, bounds]) => [name, bounds[0], bounds[1], colorScale.scale(parseFloat(name)), []])
+      .map(([name, bounds]) => [name, (bounds as any)[0], (bounds as any)[1], colorScale.scale(parseFloat(name)), []])
     const undefinedNodes: number[] = [];
     
     for (const n of nodes) {
       const v = getTraitFromNode(n, colorBy);
       if (v===undefined) {
-        undefinedNodes.push(n.arrayIdx);
+        undefinedNodes.push(n.arrayIdx!);
         continue;
       }
       for (const c of categories) {
         if (v <= c[2] && v >= c[1]) {
-          c[4].push(n.arrayIdx)
+          c[4].push(n.arrayIdx!)
           break;
         }
       }
@@ -231,13 +236,13 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
       .map((c) => ({name: c[0], color: c[3], nodes: c[4]})); 
 
     if (undefinedNodes.length) {
-      streamCategories.push({name: undefined, color: colorScale.scale(undefined), nodes: undefinedNodes});
+      streamCategories.push({name: undefined as any, color: colorScale.scale(undefined), nodes: undefinedNodes});
     }
 
     return streamCategories;
   }
 
-  const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n): [number, string] => [n.arrayIdx, n.currentGt] : (n): [number, string|undefined] => [n.arrayIdx, getTraitFromNode(n, colorBy)];
+  const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n): [number, string] => [n.arrayIdx!, n.currentGt!] : (n): [number, string|undefined] => [n.arrayIdx!, getTraitFromNode(n, colorBy)];
   const nodesAndCategories: [number, string|undefined][] = nodes.map(getter);
   const orderedCategories = Array.from(new Set(nodesAndCategories.map((el) => el[1])))
     .sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b));
@@ -258,19 +263,19 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
  *
  * See stream-trees.md for more explanation
  */
-function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, categories: ReduxNode['streamCategories'], visibility: true|Visibility[], sigma:number):
+function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric: 'num_date'|'div', categories: ReduxNode['streamCategories'], visibility: true|Visibility[], sigma:number):
   {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number} {
   let [streamNodeCountsTotal, streamNodeCountsVisible] = [0,0];
 
   // per-stream weight (to increase weights of small streams)
   const w = Math.exp(-(nodes.length-4)/4)+1;
 
-  const dimensions = categories.map((categoryInfo) => {
+  const dimensions = categories!.map((categoryInfo) => {
     const mass = pivots.map(() => 0);
-    
-    const categoryNodes = nodes.filter((node) => categoryInfo.nodes.includes(node.arrayIdx))
+
+    const categoryNodes = nodes.filter((node) => categoryInfo.nodes.includes(node.arrayIdx!))
     streamNodeCountsTotal += categoryNodes.length;
-    const visibleCategoryNodes = categoryNodes.filter((node) => visibility===true || visibility[node.arrayIdx]===NODE_VISIBLE);
+    const visibleCategoryNodes = categoryNodes.filter((node) => visibility===true || visibility[node.arrayIdx!]===NODE_VISIBLE);
     streamNodeCountsVisible += visibleCategoryNodes.length;
 
     for (const node of visibleCategoryNodes) {
@@ -279,7 +284,7 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
       // We know that once \mu is 3*\sigma away from the pivot we don't really add any weight so could leverage this to
       // speed things up (we do this already for the pivots in this stream, but could also do it for the individual nodes)
       pivots.forEach((pivot, idx) => {
-        mass[idx]+= w * kde(pivot);
+        mass[idx]!+= w * kde(pivot);
       })
     }
     return mass;
@@ -288,10 +293,9 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
 }
 
 function computeStreamMaxHeight(dimensions: StreamDimensions): number {
-  const nPivots = dimensions[0].length;
-  return Array.from(Array(nPivots), undefined)
-    .map((_, pivotIdx) => _sum(dimensions.map((weightsPerPivot) => weightsPerPivot[pivotIdx])))
-    .reduce((maxValue, cv) => cv > maxValue ? cv : maxValue, 0)
+  const nPivots = dimensions[0]!.length;
+  return Array.from(Array(nPivots), (_, pivotIdx) => _sum(dimensions.map((weightsPerPivot) => weightsPerPivot[pivotIdx]!)))
+    .reduce((maxValue, cv) => cv! > maxValue ? cv! : maxValue, 0)
 }
 
 /**
@@ -327,13 +331,13 @@ function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode
   let _counter = 100000
   while (stack.length && _counter>0) {
     _counter--
-    const element = stack.pop();
-    element.children = streams[element.name].streamChildren
+    const element = stack.pop()!;
+    element.children = streams[element.name]!.streamChildren
     .map((name) => [
       name,
-      metric==='div' ? getDivFromNode(nodes[streams[name].startNode].parent) : getTraitFromNode(nodes[streams[name].startNode].parent, 'num_date')
+      metric==='div' ? getDivFromNode(nodes[streams[name]!.startNode]!.parent!) : getTraitFromNode(nodes[streams[name]!.startNode]!.parent!, 'num_date')
     ])
-      .sort((a, b) => a[1]<b[1] ? -1 : a[1]>b[1] ? 1 : 0)
+      .sort((a, b) => a[1]!<b[1]! ? -1 : a[1]!>b[1]! ? 1 : 0)
       .map(([name]) => ({name, parent: element, children: [], seen: false}))
     for (const el of element.children) {
       stack.push(el);
@@ -342,7 +346,7 @@ function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode
 
   function _topmostTerminal(n: Node): Node {
     while (n.children.length) {
-      n = n.children[0];
+      n = n.children[0]!;
     }
     return n;
   }
@@ -354,7 +358,7 @@ function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode
   while (true && _counter>0) {
     _counter--
 
-    const currentNode = postOrder.at(-1);
+    const currentNode = postOrder.at(-1)!;
     currentNode.seen=true;
     if (currentNode.parent===false) break; // We've reached the root!
     const nextSibling = currentNode.parent.children.filter((c) => !c.seen)[0];
@@ -372,7 +376,7 @@ function calcRenderingOrder(rootName: string, streams: Streams, nodes: ReduxNode
 
 
 function _pick<T>(arr:T[], idxs: number[]):T[] {
-  return idxs.map((idx) => arr[idx])
+  return idxs.map((idx) => arr[idx]!)
 }
 
 function _sum(arr: number[]): number {
@@ -385,8 +389,8 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
   let n = node.parent;
   while (true) { // eslint-disable-line no-constant-condition
     if (n?.branch_attrs?.labels?.[branchLabelKey]) return true;
-    if (n.parent===n) return false;
-    n = n.parent;
+    if (n!.parent===n) return false;
+    n = n!.parent;
   }
 }
 

@@ -14,7 +14,7 @@ const HoverPanel = ({
   hoverData
 }: {
   hoverData: HoverData
-}): JSX.Element => {
+}): JSX.Element | null => {
   if (hoverData === null) return null;
   const { hoverTitle, mouseX, mouseY, containerId, data } = hoverData;
   const panelStyle: CSSProperties = {
@@ -38,6 +38,7 @@ const HoverPanel = ({
 
   // Find the relative position of the hovered element to the hover panel's container div
   const container = document.getElementById(containerId);
+  if (!container) return null;
   const containerPosition = container.getBoundingClientRect();
   // Make the max width of the hover panel half the container width to fit the
   // minimum available space based on expectations of positioning below

@@ -16,8 +16,8 @@ export const onTipHover = function onTipHover(this: TreeComponent, d: PhyloNode)
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select("#"+getDomId("tip", d.n.name))
-    .attr("r", (e) => e["r"] + 4);
+  phylotree!.svg.select("#"+getDomId("tip", d.n.name!))
+    .attr("r", (e: any) => e["r"] + 4);
   this.setState({
     hoveredNode: {node: d, isBranch: false}
   });
@@ -29,8 +29,8 @@ export const onTipClick = function onTipClick(this: TreeComponent, d: PhyloNode)
   /* The order of these two dispatches is important: the reducer handling
   `SELECT_NODE` must have access to the filtering state _prior_ to these filters
   being applied */
-  this.props.dispatch({type: SELECT_NODE, name: d.n.name, idx: d.n.arrayIdx, isBranch: false, treeId: d.that.id});
-  this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name]));
+  this.props.dispatch({type: SELECT_NODE, name: d.n.name!, idx: d.n.arrayIdx, isBranch: false, treeId: d.that.id});
+  this.props.dispatch(applyFilter("add", strainSymbol, [d.n.name!]));
 };
 
 
@@ -42,14 +42,14 @@ export const onBranchHover = function onBranchHover(this: TreeComponent, d: Phyl
   /* if temporal confidence bounds are defined for this branch, then display them on hover */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
-    if (!("confidenceIntervals" in tree.groups)) {
-      tree.groups.confidenceIntervals = tree.svg.append("g").attr("id", "confidenceIntervals");
+    if (!("confidenceIntervals" in tree!.groups)) {
+      tree!.groups.confidenceIntervals = tree!.svg.append("g").attr("id", "confidenceIntervals");
     }
-    tree.groups.confidenceIntervals
+    tree!.groups.confidenceIntervals!
       .selectAll(".conf")
       .data([d])
       .enter()
-        .call((sel) => tree.drawSingleCI(sel, 0.5));
+        .call((sel) => tree!.drawSingleCI(sel, 0.5));
   }
 
   /* Set the hovered state so that an info box can be displayed */
@@ -78,9 +78,9 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
    * we want to zoom back to the parent stream
    */
   if (zoomBackwards && this.props.showStreamTrees) { // Note: streamtrees only (currently) work for single trees
-    const parentStreamName = this.props.tree.streams[d.n.streamName].parentStreamName;
+    const parentStreamName = this.props.tree.streams[d.n.streamName!]!.parentStreamName;
     if (parentStreamName) { // if this is false we are zooming back into the "normal" tree, so use the non-stream-tree code path
-      const parentStreamIndex = this.props.tree.streams[parentStreamName].startNode
+      const parentStreamIndex = this.props.tree.streams[parentStreamName as string]!.startNode
       return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
         root: [parentStreamIndex, undefined],
       }));
@@ -107,7 +107,7 @@ export const onBranchLeave = function onBranchLeave(this: TreeComponent, d: Phyl
   /* Remove the temporal confidence bar unless it's meant to be displayed */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
-    tree.removeConfidence();
+    tree!.removeConfidence();
   }
   /* Set selectedNode state to an empty object, which will remove the info box */
   this.setState({hoveredNode: null});
@@ -118,8 +118,8 @@ export const onTipLeave = function onTipLeave(this: TreeComponent, d: PhyloNode)
     this.state.tree :
     this.state.treeToo;
   if (this.state.hoveredNode) {
-    phylotree.svg.select("#"+getDomId("tip", d.n.name))
-      .attr("r", (dd) => dd["r"]);
+    phylotree!.svg.select("#"+getDomId("tip", d.n.name!))
+      .attr("r", (dd: any) => dd["r"]);
   }
   this.setState({hoveredNode: null});
 };
@@ -142,11 +142,11 @@ export const clearSelectedNode = function clearSelectedNode(this: TreeComponent,
 export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean): void {
   /** For each ripple (SVGPathElement) _not_ hovered, lower the opacity so that we focus attention on the hovered ribbon */
   if (isBranch) {
-    select(paths[0]).style("stroke", getEmphasizedColor(node.branchStroke))
+    select(paths[0]!).style("stroke", getEmphasizedColor(node.branchStroke))
   } else {
     paths.forEach((path, i) => {
       if (i===categoryIndex) {
-        select(path).attr("fill", getEmphasizedColor(node.n.streamCategories[categoryIndex].color))
+        select(path).attr("fill", getEmphasizedColor(node.n.streamCategories![categoryIndex]!.color))
       } else {
         select(path).style('opacity', nonHoveredRippleOpacity)
       }
@@ -167,15 +167,16 @@ export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryInde
   }});
 }
 
-export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch): void {
+export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean): void {
   if (isBranch) {
     /* return branch colour back to normal */
-    select(paths[0]).style("stroke", node.branchStroke)
+    // @ts-expect-error TS2769
+    select(paths[0]!).style("stroke", node.branchStroke ?? null)
   } else {
     /** ensure each ripple's opacity is reset back to 1  */
     paths.forEach((path, i) => {
       if (i===categoryIndex) {
-        select(path).attr("fill", node.n.streamCategories[categoryIndex].color)
+        select(path).attr("fill", node.n.streamCategories![categoryIndex]!.color)
       } else {
         select(path).style('opacity', 1)
       }
@@ -196,6 +197,6 @@ function selectStreamLabel(node: PhyloNode): Selection<SVGTextElement, LabelDatu
   // When `groups.streamsLabels` is created we haven't bound any data so it's datum type is `unknown`
   // We subsequently bind `LabelDatum` elements, but we can't change the underlying type without an assertion
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return node.that.groups.streamsLabels
+  return node.that.groups.streamsLabels!
     .select(`#${CSS.escape(`label${node.n.streamName}`)}`) as Selection<SVGTextElement, LabelDatum, null, unknown>;
 }

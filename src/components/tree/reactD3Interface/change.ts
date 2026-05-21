@@ -45,19 +45,21 @@ export const changePhyloTreeViaPropsComparison = (
     args.changeColorBy = true;
     args.branchStroke = calculateStrokeColors(newTreeRedux, true, newProps.colorByConfidence, newProps.colorBy);
     args.tipStroke = calculateStrokeColors(newTreeRedux, false, newProps.colorByConfidence, newProps.colorBy);
-    args.fill = args.tipStroke.map(getBrighterColor);
+    args.fill = args.tipStroke!.map(getBrighterColor);
     args.newMeasurementsColorGrouping = isMeasurementColorBy(newProps.colorBy) ? decodeMeasurementColorBy(newProps.colorBy) : undefined;
   }
 
   /* visibility */
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
     args.changeVisibility = true;
+    // @ts-expect-error TS2322
     args.visibility = newTreeRedux.visibility;
   }
 
   /* tip radii */
   if (!!newTreeRedux.tipRadiiVersion && oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion) {
     args.changeTipRadii = true;
+    // @ts-expect-error TS2322
     args.tipRadii = newTreeRedux.tipRadii;
     args.hoveredLegendSwatch = newTreeRedux.hoveredLegendSwatch;
   }
@@ -65,6 +67,7 @@ export const changePhyloTreeViaPropsComparison = (
   /* branch thickness (stroke-width) */
   if (oldTreeRedux.branchThicknessVersion !== newTreeRedux.branchThicknessVersion) {
     args.changeBranchThickness = true;
+    // @ts-expect-error TS2322
     args.branchThickness = newTreeRedux.branchThickness;
   }
 

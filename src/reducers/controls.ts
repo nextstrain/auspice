@@ -323,9 +323,9 @@ export const defaultMeasurementsControlState: MeasurementsControlState = {
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
-export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout): boolean => exists && distMeasure === "num_date" && layout === "rect";
+export const shouldDisplayTemporalConfidence = (exists: boolean, distMeasure: string, layout: string): boolean => exists && distMeasure === "num_date" && layout === "rect";
 
-const Controls = (state: ControlsState = getDefaultControlsState(), action): ControlsState => {
+const Controls = (state: ControlsState = getDefaultControlsState(), action: {type: string; [key: string]: any}): ControlsState => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
@@ -388,7 +388,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
         newDates.dateMax = action.dateMax;
         newDates.dateMaxNumeric = action.dateMaxNumeric;
       }
-      const colorScale = {...state.colorScale, visibleLegendValues: action.visibleLegendValues};
+      const colorScale = {...state.colorScale, visibleLegendValues: action.visibleLegendValues} as ColorScale;
       return {...state, ...newDates, colorScale};
     }
     case types.CHANGE_ABSOLUTE_DATE_MIN:
@@ -484,7 +484,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       if (selectedNode &&
         !selectedNode.isBranch &&
         action.trait===strainSymbol &&
-        !action.values.find((f) => f.value===selectedNode.name && f.active)
+        !action.values.find((f: {value: unknown; active: unknown}) => f.value===selectedNode!.name && f.active)
       ) {
         selectedNode = null;
       }

@@ -46,32 +46,42 @@ export const calcColorScale = (
 
     let genotype: Genotype;
     if (isColorByGenotype(colorBy)) {
+      // @ts-expect-error
       genotype = decodeColorByGenotype(colorBy);
       setGenotype(tree.nodes, genotype.gene, genotype.positions, metadata.rootSequence); /* modifies nodes recursively */
       if (treeToo && metadata.identicalGenomeMapAcrossBothTrees) {
         setGenotype(treeToo.nodes, genotype.gene, genotype.positions, metadata.rootSequenceSecondTree);
       }
     }
+    // @ts-expect-error
     const scaleType: ScaleType = genotype ? "categorical" : colorings[colorBy].type;
+    // @ts-expect-error
     if (genotype) {
+      // @ts-expect-error
       ({legendValues, colorScale} = createScaleForGenotype(tree.nodes, treeToo?.nodes, genotype.aa));
       domain = [...legendValues];
     } else if (colorings && colorings[colorBy]) {
       if (scaleType === "temporal" || colorBy === "num_date") {
         ({continuous, colorScale, legendBounds, legendValues} =
+          // @ts-expect-error
           createTemporalScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (scaleType === "continuous") {
         ({continuous, colorScale, legendBounds, legendValues} =
+          // @ts-expect-error
           createContinuousScale(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (colorings[colorBy].scale) { /* scale set via JSON */
         ({continuous, legendValues, colorScale} =
+          // @ts-expect-error
           createNonContinuousScaleFromProvidedScaleMap(colorBy, colorings[colorBy].scale, tree.nodes, treeTooNodes));
       } else if (scaleType === "categorical") {
+        // @ts-expect-error
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = createDiscreteScale(legendValues, "categorical");
       } else if (scaleType === "ordinal") {
+        // @ts-expect-error
         ({continuous, colorScale, legendValues, legendBounds} = createOrdinalScale(colorBy, tree.nodes, treeTooNodes));
       } else if (scaleType === "boolean") {
+        // @ts-expect-error
         legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
         colorScale = booleanColorScale;
       } else {
@@ -95,11 +105,14 @@ export const calcColorScale = (
     const visibleLegendValues = createVisibleLegendValues({
       colorBy,
       scaleType,
+      // @ts-expect-error
       genotype,
       legendValues,
       treeNodes: tree.nodes,
       treeTooNodes,
+      // @ts-expect-error
       visibility: tree.visibility,
+      // @ts-expect-error
       visibilityToo: treeToo ? treeToo.visibility : undefined
     });
 
@@ -109,9 +122,13 @@ export const calcColorScale = (
       colorBy,
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
       legendValues,
+      // @ts-expect-error
       legendBounds,
+      // @ts-expect-error
       legendLabels,
+      // @ts-expect-error
       genotype,
+      // @ts-expect-error
       domain,
       scaleType: scaleType,
       visibleLegendValues: visibleLegendValues
@@ -167,6 +184,7 @@ export function createNonContinuousScaleFromProvidedScaleMap(
     domain = domain.concat(extraVals);
     const extraColors = createListOfColors(extraVals.length, ["#BDC3C6", "#868992"]);
     extraVals.forEach((val, idx) => {
+      // @ts-expect-error
       colorMap.set(val, extraColors[idx]);
     });
   }
@@ -202,6 +220,7 @@ function createScaleForGenotype(
     range.push(rgb(102, 102, 102).formatHex());
   }
   return {
+    // @ts-expect-error
     colorScale: scaleOrdinal<string>().domain(domain).range(range),
     legendValues
   };
@@ -240,6 +259,7 @@ function createOrdinalScale(
       duplication, as this is identical to that of the continuous scale below */
       console.warn("Using a continous scale as there are too many values in the ordinal scale");
       continuous = true;
+      // @ts-expect-error
       const scale = scaleLinear<string>().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
       colorScale = (val): string => isValueValid(val) ? scale(val): unknownColor;
       const spread = minMax[1] - minMax[0];
@@ -254,12 +274,13 @@ function createOrdinalScale(
     continuous = false;
     colorScale = createDiscreteScale(legendValues, "categorical");
   }
+  // @ts-expect-error
   return {continuous, colorScale, legendValues, legendBounds};
 }
 
 function createContinuousScale(
   colorBy: string,
-  providedScale,
+  providedScale: any,
   t1nodes: ReduxNode[],
   t2nodes: ReduxNode[],
 ): {
@@ -278,9 +299,12 @@ function createContinuousScale(
   let domain: number[];
   let range: string[];
   if (anchorPoints) {
+    // @ts-expect-error
     domain = anchorPoints.map((pt) => pt[0]);
+    // @ts-expect-error
     range = anchorPoints.map((pt) => pt[1]);
   } else {
+    // @ts-expect-error
     range = colors[9];
     domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
   }
@@ -308,7 +332,7 @@ function createContinuousScale(
 
 function createTemporalScale(
   colorBy: string,
-  providedScale,
+  providedScale: any,
   t1nodes: ReduxNode[],
   t2nodes: ReduxNode[],
 ): {
@@ -322,7 +346,9 @@ function createTemporalScale(
   let range: string[];
   const anchorPoints = _validateAnchorPoints(providedScale, (val) => numDate(val)!==undefined);
   if (anchorPoints) {
+    // @ts-expect-error
     domain = anchorPoints.map((pt) => numDate(pt[0]));
+    // @ts-expect-error
     range = anchorPoints.map((pt) => pt[1]);
   } else {
     /* construct a domain / range which "focuses" on the tip dates, and be spaced according to sampling */
@@ -344,6 +370,7 @@ function createTemporalScale(
     for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
     domain.push(vals[vals.length-1]);
     domain = [...new Set(domain)]; /* filter to unique values only */
+    // @ts-expect-error
     range = colors[domain.length]; /* use the right number of colours */
   }
 
@@ -354,7 +381,7 @@ function createTemporalScale(
   // Hack to avoid a bug: https://github.com/nextstrain/auspice/issues/540
   if (Object.is(legendValues[0], -0)) legendValues[0] = 0;
 
-  const colorScale = (val): string => {
+  const colorScale = (val: any): string => {
     const d = numDate(val);
     return d===undefined ? unknownColor : scale(d);
   };
@@ -378,6 +405,7 @@ function getMinMaxFromTree(
     .filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i)
     .map((v) => +v); // coerce throw new Error(to numeric
+  // @ts-expect-error
   return [min(vals), max(vals)];
 }
 
@@ -405,11 +433,15 @@ function getDiscreteValuesFromTree(
   const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
     const stateCountSecondTree = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
+    // @ts-expect-error
     for (const state of stateCountSecondTree.keys()) {
+      // @ts-expect-error
       const currentCount = stateCount.get(state) || 0;
+      // @ts-expect-error
       stateCount.set(state, currentCount+1);
     }
   }
+  // @ts-expect-error
   const domain = sortedDomain(Array.from(stateCount.keys()).filter((x) => isValueValid(x)), attr, stateCount);
   return domain;
 }
@@ -490,9 +522,12 @@ function createDiscreteScale(domain: string[], type: ScaleType): ColorScale["sca
   if (type==="ordinal" || type==="categorical") {
     /* TODO: use different colours! */
     colorList = domain.length < colors.length ?
+      // @ts-expect-error
       colors[domain.length].slice() :
+      // @ts-expect-error
       colors[colors.length - 1].slice();
   }
+  // @ts-expect-error
   const scale = scaleOrdinal<string>().domain(domain).range(colorList);
   return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 }
@@ -507,10 +542,13 @@ function createLegendBounds(legendValues: number[]): LegendBounds {
   const valBetween = (x0: number, x1: number): number => x0 + 0.5*(x1-x0);
   const len = legendValues.length;
   const legendBounds: LegendBounds = {};
+  // @ts-expect-error
   legendBounds[legendValues[0]] = [-Infinity, valBetween(legendValues[0], legendValues[1])];
   for (let i = 1; i < len - 1; i++) {
+    // @ts-expect-error
     legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
   }
+  // @ts-expect-error
   legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), Infinity];
   return legendBounds;
 }
@@ -566,11 +604,14 @@ function parseUserProvidedLegendData(
   if (scaleType==="continuous") {
     const boundArrays = data.map((d) => d.bounds)
       .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
+      // @ts-expect-error
       .map(([a, b]): [number, number] => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
       .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
         for (let i=0; i<idx; i++) {
           const previousBound = arr[i];
+          // @ts-expect-error
           if ((a < previousBound[1] && a > previousBound[0]) || (b < previousBound[1] && b > previousBound[0])) {
+            // @ts-expect-error
             console.warn(`Legend bounds must not overlap. Check [${a}, ${b}] and [${previousBound[0]}, ${previousBound[1]}]. Auspice will create its own bounds.`);
             return false;
           }
@@ -578,6 +619,7 @@ function parseUserProvidedLegendData(
         return true;
       });
     if (boundArrays.length===legendValues.length) {
+      // @ts-expect-error
       legendValues.forEach((v, i) => {legendBounds[v]=boundArrays[i];});
       userProvidedLegendBounds = true;
     } else {
@@ -593,6 +635,7 @@ function parseUserProvidedLegendData(
       }
       // If the JSON scale defined bounds, but not a 'display' property, then display the bounds not the anchor value
       if (scaleType==="continuous" && userProvidedLegendBounds) {
+        // @ts-expect-error
         return [d.value, formatBounds(legendBounds[legendValues[idx]], false)];
       }
       return [d.value, d.value]; // display the value since the 'display' key wasn't specified in the JSON

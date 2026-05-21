@@ -13,7 +13,7 @@ type Props = TreeComponentProps & {
   mainTree: boolean;
 }
 
-export function TreeButtons(props: Props): ReactElement {
+export function TreeButtons(props: Props): ReactElement | null {
   if (props.narrativeMode) {
     return null; // hide the buttons when viewing a narrative to prevent tree manipulations
   }
@@ -60,13 +60,13 @@ export function TreeButtons(props: Props): ReactElement {
 
   function zoomBack(): void {
     // Zoom out of main tree as long as we're not showing everything
-    let rootIdx: number;
+    let rootIdx: number = 0;
     if (tree.idxOfInViewRootNode !== 0) {
-      const rootNode = tree.nodes[tree.idxOfInViewRootNode];
-      if (props.mainTree && props.showStreamTrees && rootNode.inStream && !!tree.streams[rootNode.streamName].parentStreamName) {
-        rootIdx = getParentStream(rootNode).arrayIdx;
+      const rootNode = tree.nodes![tree.idxOfInViewRootNode];
+      if (props.mainTree && props.showStreamTrees && rootNode!.inStream && !!tree.streams[rootNode!.streamName!]!.parentStreamName) {
+        rootIdx = getParentStream(rootNode!).arrayIdx!;
       } else {
-        rootIdx = getParentBeyondPolytomy(rootNode, props.distanceMeasure, tree.observedMutations).arrayIdx;
+        rootIdx = getParentBeyondPolytomy(rootNode!, props.distanceMeasure, tree.observedMutations).arrayIdx!;
       }
     }
     props.dispatch(updateVisibleTipsAndBranchThicknesses({

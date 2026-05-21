@@ -4,7 +4,7 @@ import { FaChevronRight, FaChevronDown } from "react-icons/fa";
 
 const Container = styled.span`
   padding-right: 6px;
-  color: ${(props): unknown => props.theme.color};
+  color: ${(props: {theme: {color: string}}): string => props.theme.color};
 `
 
 type Props = {

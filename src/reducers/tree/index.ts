@@ -87,10 +87,10 @@ const Tree = (
       if (!newData) return state;
 
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      for (const node of state.nodes) {
-        for (const [attrName, attrData] of Object.entries(newData.nodeAttrs[node.name] || {})) {
+      for (const node of state.nodes!) {
+        for (const [attrName, attrData] of Object.entries(newData.nodeAttrs[node.name!] || {})) {
           if (!attrData) continue;
-          node.node_attrs[attrName] = attrData;
+          node.node_attrs![attrName] = attrData;
         }
       }
       return {
@@ -101,6 +101,7 @@ const Tree = (
     }
     case types.REMOVE_METADATA: {
       // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      // @ts-expect-error TS2345
       removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
       const nodeAttrKeys = new Set(state.nodeAttrKeys);
       const totalStateCounts = {...state.totalStateCounts};

@@ -29,14 +29,14 @@ export const countTraitsAcrossTree = (
         return;
       }
 
-      if (visibility && visibility[node.arrayIdx] !== NODE_VISIBLE) {
+      if (visibility && visibility[node.arrayIdx!] !== NODE_VISIBLE) {
         return;
       }
 
       const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
       if (value===undefined) return;                    // check for invalid values
-      const currentValueCount = counts[trait].get(value) || 0;
-      counts[trait].set(value, currentValueCount+1);
+      const currentValueCount = counts[trait]!.get(value) || 0;
+      counts[trait]!.set(value, currentValueCount+1);
     });
   });
   return counts;
@@ -84,11 +84,11 @@ export const calcTipCounts = (
   node.tipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {
-      calcTipCounts(node.children[i], visibility);
-      node.tipCount += node.children[i].tipCount;
+      calcTipCounts(node.children[i]!, visibility);
+      node.tipCount += node.children[i]!.tipCount!;
     }
   } else {
-    node.tipCount = visibility[node.arrayIdx] === NODE_VISIBLE ? 1 : 0;
+    node.tipCount = visibility[node.arrayIdx!] === NODE_VISIBLE ? 1 : 0;
   }
 };
 
@@ -114,8 +114,8 @@ export const calcFullTipCounts = (
   node.fullTipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {
-      calcFullTipCounts(node.children[i]);
-      node.fullTipCount += node.children[i].fullTipCount;
+      calcFullTipCounts(node.children[i]!);
+      node.fullTipCount += node.children[i]!.fullTipCount!;
     }
   } else {
     node.fullTipCount = 1;

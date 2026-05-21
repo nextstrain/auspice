@@ -25,11 +25,11 @@ export const determineLegendMatch = (
     nodeAttr = numDate(nodeAttr);
   }
   if (colorScale.continuous) {
-    if (selectedLegendItem === colorScale.legendValues[0] && nodeAttr===colorScale.legendBounds[selectedLegendItem][0]) {
+    if (selectedLegendItem === colorScale.legendValues[0] && nodeAttr===colorScale.legendBounds![selectedLegendItem]![0]) {
       return true;
     }
-    return (nodeAttr <= colorScale.legendBounds[selectedLegendItem][1]) &&
-           (nodeAttr > colorScale.legendBounds[selectedLegendItem][0]);
+    return (nodeAttr <= colorScale.legendBounds![selectedLegendItem]![1]) &&
+           (nodeAttr > colorScale.legendBounds![selectedLegendItem]![0]);
   }
   return nodeAttr === selectedLegendItem;
 };
@@ -79,7 +79,7 @@ export const calcTipRadii = ({
   } else if (geoFilter.length===2 && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLocationMatch(d, geoFilter[0], geoFilter[1]) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
-    const radii = tree.nodes.map(() => tipRadius);
+    const radii = tree.nodes!.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
     return radii;
   } else if (tree && tree.nodes) {

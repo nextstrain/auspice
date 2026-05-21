@@ -81,10 +81,10 @@ const treeToo = (
 
         // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
         const deltaAttrs = newData.nodeAttrs;
-        for (const node of state.nodes) {
-          for (const [attrName, attrData] of Object.entries(deltaAttrs[node.name] || {})) {
+        for (const node of state.nodes!) {
+          for (const [attrName, attrData] of Object.entries(deltaAttrs[node.name!] || {})) {
             if (!attrData) continue;
-            node.node_attrs[attrName] = attrData;
+            node.node_attrs![attrName] = attrData;
           }
         }
         return {
@@ -95,6 +95,7 @@ const treeToo = (
       }
     case types.REMOVE_METADATA:
       // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
+      // @ts-expect-error TS2345
       removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
       return state;
     default:

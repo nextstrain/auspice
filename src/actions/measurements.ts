@@ -64,6 +64,7 @@ interface MeasurementsQuery {
  * https://nodejs.org/docs/latest-v22.x/api/querystring.html#querystringparsestr-sep-eq-options
  */
 interface Query extends MeasurementsQuery {
+  // @ts-expect-error
   [key: string]: string | string[]
 }
 
@@ -117,12 +118,15 @@ const getCollectionToDisplay = (
   defaultKey: string
 ): Collection => {
   const defaultCollection = collections.filter((collection) => collection.key === defaultKey)[0];
+  // @ts-expect-error
   if (!collectionKey) return defaultCollection;
   const potentialCollections = collections.filter((collection) => collection.key === collectionKey);
+  // @ts-expect-error
   if (potentialCollections.length === 0) return defaultCollection;
   if (potentialCollections.length > 1) {
     console.error(`Found multiple collections with key ${collectionKey}. Returning the first matching collection only.`);
   }
+  // @ts-expect-error
   return potentialCollections[0];
 };
 
@@ -141,7 +145,9 @@ function getCollectionDefaultControl(
     measurementsShowThreshold: 'show_threshold'
   }
   const collectionDefaults = collection["display_defaults"] || {};
+  // @ts-expect-error
   const displayDefaultKey = collectionControlToDisplayDefaults[controlKey];
+  // @ts-expect-error
   let defaultControl = collectionDefaults[displayDefaultKey];
   // Check default is a valid value for the control key
   switch (controlKey) {
@@ -202,6 +208,7 @@ function getCollectionDefaultControls(collection: Collection): MeasurementsContr
   if (Object.keys(collection).length) {
     for (const [key, value] of Object.entries(defaultControls)) {
       const collectionDefault = getCollectionDefaultControl(key, collection);
+      // @ts-expect-error
       defaultControls[key] = collectionDefault !== undefined ? collectionDefault : value;
     }
   }
@@ -224,11 +231,13 @@ const getCollectionDisplayControls = (
   const newControls = cloneDeep(defaultMeasurementsControlState);
   Object.entries(controls).forEach(([key, value]) => {
     if (key in newControls) {
+      // @ts-expect-error
       newControls[key] = cloneDeep(value);
     }
   })
   // Checks the current group by is available as a grouping in collection
   // If it doesn't exist, set to undefined so it will get filled in with collection's default
+  // @ts-expect-error
   if (!collection.groupings.has(newControls.measurementsGroupBy)) {
     newControls.measurementsGroupBy = undefined
   }
@@ -257,10 +266,12 @@ const getCollectionDisplayControls = (
   for (const [key, value] of Object.entries(newControls)) {
     // Skip values that are not undefined because this indicates they are URL params or existing controls
     if (value !== undefined) continue;
+    // @ts-expect-error
     newControls[key] = collectionDefaultControls[key]
   }
 
   // Remove the color grouping value if it is not included for the new group by
+  // @ts-expect-error
   const groupingValues = collection.groupings.get(newControls.measurementsGroupBy).values || [];
   if (newControls.measurementsColorGrouping !== undefined && !groupingValues.includes(newControls.measurementsColorGrouping)) {
     newControls.measurementsColorGrouping = undefined;
@@ -283,6 +294,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Check for properties with the same type that can be directly copied
     for (const collectionProp of propertiesWithSameType) {
       if (collectionProp in jsonCollection) {
+        // @ts-expect-error
         collection[collectionProp] = cloneDeep(jsonCollection[collectionProp]);
       }
     }
@@ -320,6 +332,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     // Create a temp object for groupings to keep track of values and their
     // counts so that we can create a stable default order for grouping field values
     const groupingsValues: GroupingValues = jsonCollection.groupings.reduce((tempObject, {key}) => {
+      // @ts-expect-error
       tempObject[key] = new Map();
       return tempObject;
     }, {});
@@ -343,21 +356,28 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
           parsedMeasurement[field] = fieldValueString;
 
           // Add remaining field titles
+          // @ts-expect-error
           if (!collection.fields.has(field)) {
+            // @ts-expect-error
             collection.fields.set(field, {title: field});
           }
 
           // Only save the unique values if the field is in defined filters
           // OR there are no JSON defined filters, so all fields are filters
+          // @ts-expect-error
           if ((collection.filters.has(field)) || !collectionFiltersArray) {
+            // @ts-expect-error
             const filterObject = collection.filters.get(field) || { values: new Set()};
             filterObject.values.add(fieldValueString);
+            // @ts-expect-error
             collection.filters.set(field, filterObject);
           }
 
           // Save grouping field values and counts
           if (field in groupingsValues) {
+            // @ts-expect-error
             const previousValue = groupingsValues[field].get(fieldValueString);
+            // @ts-expect-error
             groupingsValues[field].set(fieldValueString, previousValue ? previousValue + 1 : 1);
           }
         }
@@ -371,6 +391,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
     collection.groupings = new Map(
       jsonCollection.groupings.map(({key, order}): [string, {values: string[]}] => {
         const defaultOrder = order ? order.map((x) => x.toString()) : [];
+        // @ts-expect-error
         const valuesByCount = [...groupingsValues[key].entries()]
           // Use the grouping values' counts to sort the values, highest count first
           .sort(([, valueCountA], [, valueCountB]) => valueCountB - valueCountA)
@@ -392,6 +413,7 @@ const parseMeasurementsJSON = (json: MeasurementsJson): MeasurementsState => {
 
   const collectionKeys = collections.map((collection) => collection.key);
   let defaultCollectionKey = json["default_collection"];
+  // @ts-expect-error
   if (!collectionKeys.includes(defaultCollectionKey)) {
     defaultCollectionKey = collectionKeys[0];
   }
@@ -440,8 +462,10 @@ export const changeMeasurementsCollection = (
   newCollectionKey: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
+  // @ts-expect-error
   const collectionToDisplay = getCollectionToDisplay(measurements.collections, newCollectionKey, measurements.defaultCollectionKey);
   const newControls = getCollectionDisplayControls(controls, collectionToDisplay);
+  // @ts-expect-error
   const queryParams = createMeasurementsQueryFromControls(newControls, collectionToDisplay, measurements.defaultCollectionKey);
 
   batch(() => {
@@ -454,6 +478,7 @@ export const changeMeasurementsCollection = (
 
     /* After the collection has been updated, update the measurement coloring data if needed */
     updateMeasurementsColorData(
+      // @ts-expect-error
       newControls.measurementsColorGrouping,
       controls.measurementsColorGrouping,
       controls.colorBy,
@@ -476,6 +501,7 @@ function updateMeasurementsFilters(
     dispatch({
       type: APPLY_MEASUREMENTS_FILTER,
       controls: newControls,
+      // @ts-expect-error
       queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
     });
 
@@ -485,6 +511,7 @@ function updateMeasurementsFilters(
      * filtered measurements
      */
     updateMeasurementsColorData(
+      // @ts-expect-error
       controls.measurementsColorGrouping,
       controls.measurementsColorGrouping,
       controls.colorBy,
@@ -562,6 +589,7 @@ export const toggleOverallMean = (): ThunkFunction => (dispatch, getState) => {
   dispatch({
     type: TOGGLE_MEASUREMENTS_OVERALL_MEAN,
     controls: newControls,
+    // @ts-expect-error
     queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 }
@@ -574,6 +602,7 @@ export const toggleThreshold = (): ThunkFunction => (dispatch, getState) => {
   dispatch({
     type: TOGGLE_MEASUREMENTS_THRESHOLD,
     controls: newControls,
+    // @ts-expect-error
     queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 };
@@ -588,6 +617,7 @@ export const changeMeasurementsDisplay = (
   dispatch({
     type: CHANGE_MEASUREMENTS_DISPLAY,
     controls: newControls,
+    // @ts-expect-error
     queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
   });
 }
@@ -596,9 +626,11 @@ export const changeMeasurementsGroupBy = (
   newGroupBy: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
+  // @ts-expect-error
   const groupingValues = measurements.collectionToDisplay.groupings.get(newGroupBy).values || [];
   const newControls: Partial<MeasurementsControlState> = {
     /* If the measurementsColorGrouping is no longer valid, then set to undefined */
+    // @ts-expect-error
     measurementsColorGrouping: groupingValues.includes(controls.measurementsColorGrouping)
       ? controls.measurementsColorGrouping
       : undefined,
@@ -609,11 +641,13 @@ export const changeMeasurementsGroupBy = (
     dispatch({
       type: CHANGE_MEASUREMENTS_GROUP_BY,
       controls: newControls,
+      // @ts-expect-error
       queryParams: createMeasurementsQueryFromControls(newControls, measurements.collectionToDisplay, measurements.defaultCollectionKey)
     });
 
     /* After the group by has been updated, update the measurement coloring data if needed */
     updateMeasurementsColorData(
+      // @ts-expect-error
       newControls.measurementsColorGrouping,
       controls.measurementsColorGrouping,
       controls.colorBy,
@@ -629,9 +663,11 @@ export function getActiveMeasurementFilters(
   // Find active filters to filter measurements
   const activeFilters: {string?: string[]} = {};
   Object.entries(filters).forEach(([field, valuesMap]) => {
+    // @ts-expect-error
     activeFilters[field] = activeFilters[field] || [];
     valuesMap.forEach(({active}, fieldValue) => {
       // Save array of active values for the field filter
+      // @ts-expect-error
       if (active) activeFilters[field].push(fieldValue);
     });
   });
@@ -657,7 +693,9 @@ function computeColorScale(measurements: Measurement[]): [number, string][] {
     .map((m) => m.value)
     .sort((a, b) => a - b);
   const colorRange = colors[9];
+  // @ts-expect-error
   const step = 1 / (colorRange.length - 1);
+  // @ts-expect-error
   return colorRange.map((color, i) => [quantile(sortedValues, (step * i)), color]);
 }
 
@@ -671,6 +709,7 @@ function averageMeasurementValue(
   const strainMeasurementValues: {[strain: string]: number[]} = measurements
     .filter((m) => m[groupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
     .reduce((accum, m) => {
+      // @ts-expect-error
       (accum[m.strain] = accum[m.strain] || []).push(m.value)
       return accum
     }, {});
@@ -687,7 +726,9 @@ const addMeasurementsColorData = (
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
   const measurementColorBy = encodeMeasurementColorBy(groupingValue);
+  // @ts-expect-error
   const collectionMeasurements = measurements.collectionToDisplay.measurements;
+  // @ts-expect-error
   const strainValues = averageMeasurementValue(collectionMeasurements, controls.measurementsGroupBy, groupingValue, controls.measurementsFilters);
 
   const newMetadata: NewMetadata = {
@@ -730,6 +771,7 @@ function updateMeasurementsColorData(
         message: "Measurement coloring is no longer valid",
         details: "Falling back to the default color-by"
       }));
+      // @ts-expect-error
       dispatch(changeColorBy(defaultColorBy));
       dispatch(applyFilter("remove", hasMeasurementColorAttr, [hasMeasurementColorValue]));
     }
@@ -764,6 +806,7 @@ export const applyMeasurementsColorBy = (
       dispatch({type: CHANGE_MEASUREMENTS_COLOR_GROUPING, controls:{measurementsColorGrouping: groupingValue}});
     }
     dispatch(addMeasurementsColorData(groupingValue));
+    // @ts-expect-error
     dispatch(changeColorBy(encodeMeasurementColorBy(groupingValue)));
     dispatch(applyFilter("add", hasMeasurementColorAttr, [hasMeasurementColorValue]))
   });
@@ -797,25 +840,32 @@ function createMeasurementsQueryFromControls(
     m_collection: collection.key === defaultCollectionKey ? "" : collection.key
   };
   for (const [controlKey, controlValue] of Object.entries(measurementControls)) {
+    // @ts-expect-error
     let queryKey = controlToQueryParamMap[controlKey];
     const collectionDefault = getCollectionDefaultControl(controlKey, collection);
+    // @ts-expect-error
     const controlDefault = collectionDefault !== undefined ? collectionDefault : defaultMeasurementsControlState[controlKey];
     // Remove URL param if control state is the same as the default state
     if (controlValue === controlDefault) {
+      // @ts-expect-error
       newQuery[queryKey] = "";
     } else {
       switch(controlKey) {
         case "measurementsDisplay": // fallthrough
         case "measurementsGroupBy":
+          // @ts-expect-error
           newQuery[queryKey] = controlValue;
           break;
         case "measurementsShowOverallMean":
+          // @ts-expect-error
           newQuery[queryKey] = controlValue ? "show" : "hide";
           break;
         case "measurementsShowThreshold":
           if (collection.thresholds) {
+            // @ts-expect-error
             newQuery[queryKey] = controlValue ? "show" : "hide";
           } else {
+            // @ts-expect-error
             newQuery[queryKey] = "";
           }
           break;
@@ -823,6 +873,7 @@ function createMeasurementsQueryFromControls(
           // First clear all of the measurements filter query params
           for (const field of collection.filters.keys()) {
             queryKey = filterQueryPrefix + field;
+            // @ts-expect-error
             newQuery[queryKey] = "";
           }
           // Then add back measurements filter query params for active filters only
@@ -831,6 +882,7 @@ function createMeasurementsQueryFromControls(
             const activeFilterValues = [...values]
               .filter(([_, {active}]) => active)
               .map(([fieldValue]) => fieldValue);
+            // @ts-expect-error
             newQuery[queryKey] = activeFilterValues;
           }
           break;
@@ -863,14 +915,17 @@ export const combineMeasurementsControlsAndQuery = (
   },
 } => {
   const updatedQuery = cloneDeep(query);
+  // @ts-expect-error
   const collectionKeys = measurements.collections.map((collection) => collection.key);
   // Remove m_collection query if it's invalid or the default collection key
+  // @ts-expect-error
   if (!collectionKeys.includes(updatedQuery.m_collection) ||
     updatedQuery.m_collection === measurements.defaultCollectionKey) {
     delete updatedQuery.m_collection;
   }
   // Parse collection's default controls
   const collectionKey = updatedQuery.m_collection || measurements.defaultCollectionKey;
+  // @ts-expect-error
   const collectionToDisplay = getCollectionToDisplay(measurements.collections, collectionKey, measurements.defaultCollectionKey)
   const collectionControls = getCollectionDefaultControls(collectionToDisplay);
   const collectionGroupings = Array.from(collectionToDisplay.groupings.keys());
@@ -906,10 +961,12 @@ export const combineMeasurementsControlsAndQuery = (
     }
 
     // Remove query if it's invalid or the same as the collection's default controls
+    // @ts-expect-error
     if (newControlState === undefined || newControlState === collectionControls[controlKey]) {
         delete updatedQuery[queryKey];
         continue;
     }
+    // @ts-expect-error
     collectionControls[controlKey] = newControlState
   }
 
@@ -927,7 +984,9 @@ export const combineMeasurementsControlsAndQuery = (
     if (typeof filterValues === "string") {
       filterValues = Array(filterValues);
     }
+    // @ts-expect-error
     const collectionFieldValues = collectionToDisplay.filters.get(field).values;
+    // @ts-expect-error
     const validFilterValues = filterValues.filter((value) => collectionFieldValues.has(value));
     if (!validFilterValues.length) {
       delete updatedQuery[filterKey];
@@ -949,10 +1008,12 @@ export const combineMeasurementsControlsAndQuery = (
   let newColoringData = undefined;
   if (typeof(updatedQuery.c) === 'string' && isMeasurementColorBy(updatedQuery.c)) {
     const colorGrouping = decodeMeasurementColorBy(updatedQuery.c);
+    // @ts-expect-error
     const groupingValues = collectionToDisplay.groupings.get(collectionControls.measurementsGroupBy).values || [];
     // If the color grouping value is invalid, then remove the coloring query
     // otherwise create the node attrs and coloring data needed for the measurements color-by
     if (!groupingValues.includes(colorGrouping)) {
+      // @ts-expect-error
       updatedQuery.c = undefined;
     } else {
       // similar logic to `addMeasurementsColorData` action with slightly different data structures
@@ -971,6 +1032,7 @@ export const combineMeasurementsControlsAndQuery = (
       };
       const strainAverageValues = averageMeasurementValue(
         collectionToDisplay.measurements,
+        // @ts-expect-error
         collectionControls.measurementsGroupBy,
         colorGrouping,
         collectionControls.measurementsFilters
@@ -992,6 +1054,7 @@ export const combineMeasurementsControlsAndQuery = (
     collectionToDisplay,
     collectionControls,
     updatedQuery,
+    // @ts-expect-error
     newColoringData,
   }
 }

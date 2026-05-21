@@ -68,6 +68,7 @@ interface TreeStrainProperties {
  * equivalent to the previous value.
  */
 function useDeepCompareMemo<T>(value: T): T {
+  // @ts-expect-error
   const ref: MutableRefObject<T> = useRef();
   if (!isEqual(value, ref.current)) {
     ref.current = value;
@@ -96,10 +97,12 @@ const treeStrainPropertySelector = (
     treeStrainVisibility: {},
     treeStrainColors: {}
   };
+  // @ts-expect-error
   return tree.nodes.reduce((treeStrainProperty, node, index) => {
     const { treeStrainVisibility, treeStrainColors } = treeStrainProperty;
     // Only store properties of terminal strain nodes
     if (!node.hasChildren) {
+      // @ts-expect-error
       treeStrainVisibility[node.name] = tree.visibility[index];
       /*
       * If the color scale is continuous, we want to group by the legend value
@@ -107,13 +110,18 @@ const treeStrainPropertySelector = (
       * within the legend bounds into a single group.
       */
       let attribute = getTipColorAttribute(node, colorScale);
+      // @ts-expect-error
       if (colorScale.continuous) {
+        // @ts-expect-error
         const matchingLegendValue = colorScale.visibleLegendValues
+          // @ts-expect-error
           .find((legendValue) => determineLegendMatch(legendValue, node, colorScale));
         if (matchingLegendValue !== undefined) attribute = matchingLegendValue;
       }
+      // @ts-expect-error
       treeStrainColors[node.name] = {
         attribute,
+        // @ts-expect-error
         color: tree.nodeColors[index]
       };
 
@@ -146,6 +154,7 @@ const filterMeasurements = (
     activeFilters,
     filteredMeasurements: measurements.filter((measurement) => {
       // First check the strain is visible in the tree
+      // @ts-expect-error
       if (!isVisible(treeStrainVisibility[measurement.strain])) return false;
       // Then check that the measurement contains values for all active filters
       return matchesAllActiveFilters(measurement, activeFilters);
@@ -153,11 +162,12 @@ const filterMeasurements = (
   };
 };
 
-const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Element => {
+const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}: any): JSX.Element => {
   const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
   // Convert legendValues to string to ensure that subsequent attribute matches work as intended
+  // @ts-expect-error
   const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map(String), isEqual);
   const colorings = useSelector((state: RootState) => state.metadata.colorings);
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
@@ -169,14 +179,19 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   const showOverallMean = useSelector((state: RootState) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state: RootState) => state.controls.measurementsShowThreshold);
   const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay, isEqual);
+  // @ts-expect-error
   const { title, x_axis_label, thresholds, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
+  // @ts-expect-error
   const svgContainerRef: MutableRefObject<HTMLDivElement> = useRef(null);
+  // @ts-expect-error
   const d3Ref: MutableRefObject<SVGSVGElement> = useRef(null);
+  // @ts-expect-error
   const d3XAxisRef: MutableRefObject<SVGSVGElement> = useRef(null);
 
   // State for storing data for the HoverPanel
+  // @ts-expect-error
   const [hoverData, setHoverData] = useState<HoverData>(null);
 
   // Filter and group measurements
@@ -185,9 +200,12 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   // Default ordering of rows is the groupings value order from redux state
   let groupByValueOrder = groupingOrderedValues;
   // If there are active filters for the current group-by field, ordering is the user's filter order
+  // @ts-expect-error
   if (activeFilters[groupBy] && activeFilters[groupBy].length) {
+    // @ts-expect-error
     groupByValueOrder = activeFilters[groupBy];
   }
+  // @ts-expect-error
   const groupedMeasurements = groupMeasurements(filteredMeasurements, groupBy, groupByValueOrder);
 
   //
@@ -217,6 +235,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
     data: Measurement | MeanAndStandardDeviation,
     mouseX: number,
     mouseY: number,
+    // @ts-expect-error
     colorByAttr: string = null
   ): void => {
     let newHoverData = null;
@@ -253,6 +272,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
         data: newData
       };
     }
+    // @ts-expect-error
     setHoverData(newHoverData);
   }, [fields, colorings, colorBy]);
 
@@ -274,6 +294,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
       dispatch(applyMeasurementsColorBy(grouping));
     } else if (grouping === colorGrouping && isMeasurementColorBy(colorBy)) {
       // Clicking on the same grouping twice will toggle back to the previous non-measurements coloring
+      // @ts-expect-error
       dispatch(changeColorBy(prevNonMeasurementColorBy.current));
     }
   }, [dispatch, colorGrouping, colorBy]);
@@ -385,7 +406,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   );
 };
 
-const Measurements = ({height, width, showLegend}): JSX.Element => {
+const Measurements = ({height, width, showLegend}: any): JSX.Element => {
   const measurementsLoaded = useSelector((state: RootState) => state.measurements.loaded);
   const measurementsError = useSelector((state: RootState) => state.measurements.error);
   const showOnlyPanels = useSelector((state: RootState) => state.controls.showOnlyPanels);

@@ -20,11 +20,11 @@ export function toggleStreamTree(): ThunkFunction {
       // started with ?streamLabel=none so we didn't compute any streams)
       // Note: availableStreamLabelKeys can be set in the JSON, so this allows the author to define a default
       // stream tree key while not starting with stream trees displayed
-      dispatch(changeStreamTreeBranchLabel(controls.availableStreamLabelKeys[0]));
+      dispatch(changeStreamTreeBranchLabel(controls.availableStreamLabelKeys[0]!));
       return;
     }
 
-    const currentRoot = tree.nodes[tree.idxOfInViewRootNode]
+    const currentRoot = tree.nodes![tree.idxOfInViewRootNode]
     if (currentRoot && currentRoot.inStream && !currentRoot.streamName) {
       /**
        * This block indicates a situation where we aren't viewing streams, but the current in-view root is _within_ a stream and
@@ -39,22 +39,24 @@ export function toggleStreamTree(): ThunkFunction {
       return;
     }
 
+    // @ts-expect-error TS2345
     processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
     dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees})
   }
 } 
 
 
-export function changeStreamTreeBranchLabel(newLabel): ThunkFunction {
+export function changeStreamTreeBranchLabel(newLabel: string): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
 
-    if (isNodeWithinAnotherStream(tree.nodes[tree.idxOfInViewRootNode], newLabel)) {
+    if (isNodeWithinAnotherStream(tree.nodes![tree.idxOfInViewRootNode]!, newLabel)) {
       dispatch(warningNotification({message: `Cannot switch streams to ${newLabel} as the subtree we're viewing would be inside a stream`}));
       return;
     }
 
-    const streams = labelStreamMembership(tree.nodes[0], newLabel);
+    const streams = labelStreamMembership(tree.nodes![0]!, newLabel);
+    // @ts-expect-error TS2345
     processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
     dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})

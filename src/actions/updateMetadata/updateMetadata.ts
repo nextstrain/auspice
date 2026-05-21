@@ -38,7 +38,8 @@ export const updateMetadata = (
     // (very common in auspice.us)
     const colorsNowAvailable = getState().controls.coloringsPresentOnTree;
     if (!existingState.controls.coloringsPresentOnTree.size && colorsNowAvailable.size) {
-      dispatch(changeColorBy([...colorsNowAvailable][0]));
+      // @ts-expect-error TS2345
+      dispatch(changeColorBy([...colorsNowAvailable][0]!));
     }
 
     return SUCCESS;
@@ -62,14 +63,14 @@ function _reduxTree(
   replace: boolean,
 ): UpdateMetadataAction['tree'] | undefined {
 
-  const attrsWithUpdates: string[] = Object.entries(attributes)
+  const attrsWithUpdates: string[] = Object.entries(attributes!)
     .flatMap(([k, v]) => Object.keys(v.strains).length ? k : [])
     .filter((k) => !SPECIAL_CASED_NODE_ATTRS.has(k));
 
   if (!attrsWithUpdates.length || tree.nodes === null) return undefined;
 
   const attrsNonContinuous: Set<string> = new Set(attrsWithUpdates
-    .filter((attrName) => attributes[attrName].scaleType !== 'continuous'));
+    .filter((attrName) => attributes![attrName]!.scaleType !== 'continuous'));
 
   /* Compute updated nodeAttrs for all nodes for all node attr keys which have updates.
    * While we do this, count all observed terminal values (similar to `countTraitsAcrossTree`)
@@ -86,8 +87,8 @@ function _reduxTree(
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const attrData = (
             replace ?
-              (attributes[attrName].strains[name] || undefined) :
-              (attributes[attrName].strains[name] || node.node_attrs[attrName])
+              (attributes![attrName]!.strains[name!] || undefined) :
+              (attributes![attrName]!.strains[name!] || node.node_attrs![attrName])
           ) as (NodeAttr | undefined);
           const value = attrData?.value;
           if (!node.hasChildren && value && attrsNonContinuous.has(attrName)) {
@@ -103,7 +104,7 @@ function _reduxTree(
 
   return {
     nodeAttrs,
-    nodeAttrKeys: new Set([...tree.nodeAttrKeys, ...attrsWithUpdates]),
+    nodeAttrKeys: new Set([...(tree.nodeAttrKeys || []), ...attrsWithUpdates]),
     totalStateCounts: {...tree.totalStateCounts, ...counts},
   }
 
@@ -131,7 +132,7 @@ function _reduxControls(
     updates.panelsAvailable = [...state.panelsAvailable, "map"],
     updates.panelsToDisplay = [...updates.panelsAvailable];
     updates.canTogglePanelLayout = hasMultipleGridPanels(updates.panelsAvailable);
-    updates.geoResolution = newMetadata.geographic[0].key;
+    updates.geoResolution = newMetadata.geographic![0]!.key;
   }
 
   return updates;
@@ -153,20 +154,20 @@ function _reduxMetadata(
 
   const colorings = Object.fromEntries([
     // First update existing colorings
-    ...Object.entries(state.colorings)
+    ...Object.entries(state.colorings!)
       .map(([key, value]) => {
         // The redux state values are untyped, so for now assume they are the expected shape
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const oldColoring = value as UpdateMetadataAction['metadata']['colorings'][string];
-        const coloring = Object.hasOwn(newMetadata.attributes, key) ?
-          _updateColoring(oldColoring, newMetadata.attributes[key], tree.totalStateCounts[key], replace) :
+        const oldColoring = value as any;
+        const coloring = Object.hasOwn(newMetadata.attributes!, key) ?
+          _updateColoring(oldColoring, newMetadata.attributes![key]!, tree!.totalStateCounts[key], replace) :
           oldColoring;
         return [key, coloring]
       }),
     // Then add entirely new colorings
-    ...Object.keys(newMetadata.attributes)
-      .filter((key) => !Object.hasOwn(state.colorings, key))
-      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes[key], tree.totalStateCounts[key], undefined)])
+    ...Object.keys(newMetadata.attributes!)
+      .filter((key) => !Object.hasOwn(state.colorings!, key))
+      .map((key) => [key, _updateColoring(undefined, newMetadata.attributes![key]!, tree!.totalStateCounts[key], false)])
   ]);
 
 
@@ -187,11 +188,11 @@ function _reduxMetadata(
  * either merged in or replacing wholesale the original coloring **state**
  */
 function _updateColoring(
-  state: UpdateMetadataAction['metadata']['colorings'][string],
+  state: any,
   attrDetails: AttrDetails,
   stateCounts: undefined | Map<string, number>,
   replace: boolean
-): UpdateMetadataAction['metadata']['colorings'][string] {
+): any {
   replace = replace || state === undefined;
   if (!replace && (state.type !== attrDetails.scaleType || state.type !== 'categorical')) {
     console.warn(`Merging scale colors is only possible for categorical scales`)
@@ -211,7 +212,7 @@ function _updateColoring(
     // existing scale pairs, less any values which no longer exist on the tree
     ...Object.fromEntries(
       (state.scale || []) // restrict to strings as we only consider categorical scales
-        .filter(([value,]) => typeof value === 'string' && stateCounts?.get(value) > 0)
+        .filter(([value]: [unknown]) => typeof value === 'string' && (stateCounts?.get(value) ?? 0) > 0)
     ),
     // plus new value-color pairs
     ...Object.fromEntries(attrDetails.colors || []),

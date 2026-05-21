@@ -57,18 +57,20 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>): void {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
-    newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
+    // @ts-expect-error TS7009
+    newState.treeToo = new PhyloTree(props.treeToo.nodes!, rhsTreeId, props.treeToo.idxOfInViewRootNode);
     if (attemptUntangle) {
-      untangleTreeToo(newState.tree, newState.treeToo);
+      untangleTreeToo(newState.tree!, newState.treeToo!);
     }
-    renderTree(this, false, newState.treeToo, props);
+    renderTree(this, false, newState.treeToo!, props);
   }
 
   override componentDidMount(): void {
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
-      newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
-      renderTree(this, true, newState.tree, this.props);
+      // @ts-expect-error TS7009
+      newState.tree = new PhyloTree(this.props.tree.nodes!, lhsTreeId, this.props.tree.idxOfInViewRootNode);
+      renderTree(this, true, newState.tree!, this.props);
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
@@ -85,7 +87,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     const {
       newState: potentialNewState,
       change: leftTreeUpdated,
-    } = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
+    } = changePhyloTreeViaPropsComparison(true, this.state.tree!, prevProps, this.props);
     if (potentialNewState) newState = potentialNewState;
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
@@ -163,23 +165,23 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
           observedMutations={this.props.tree.observedMutations}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
           tipLabelKey={this.props.tipLabelKey}
-          proteinOnly={this.props.genomeMap?.[0].proteinOnly===true}
+          proteinOnly={(this.props.genomeMap as any)?.[0]?.proteinOnly===true}
           t={t}
         />
         <NodeClickedPanel
           clearSelectedNode={this.clearSelectedNode}
-          selectedNode={this.props.selectedNode}
-          nodesLhsTree={this.props.tree.nodes}
-          nodesRhsTree={this.props.treeToo?.nodes}
-          observedMutations={this.props.tree.observedMutations}
-          colorings={this.props.colorings}
-          geneSortFn={this.state.geneSortFn}
+          selectedNode={this.props.selectedNode as any}
+          nodesLhsTree={this.props.tree.nodes as any}
+          nodesRhsTree={this.props.treeToo?.nodes as any}
+          observedMutations={this.props.tree.observedMutations as any}
+          colorings={this.props.colorings as any}
+          geneSortFn={this.state.geneSortFn as any}
           tipLabelKey={this.props.tipLabelKey}
           t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
-            ref={(r): void => {this.tangleRef = r;}}
+            ref={(r): void => {this.tangleRef = r ?? undefined;}}
             width={this.props.width}
             height={this.props.height}
             lookup={this.props.treeToo.tangleTipLookup}

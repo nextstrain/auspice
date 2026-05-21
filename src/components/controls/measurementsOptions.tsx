@@ -37,14 +37,17 @@ const collectionOptionsSelector = (
   });
 };
 
-const MeasurementsOptions = (): JSX.Element => {
+const MeasurementsOptions = (): JSX.Element | null => {
   const dispatch = useAppDispatch();
   const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay);
+  // @ts-expect-error TS2345
   const collectionOptions = useSelector((state: RootState) => collectionOptionsSelector(state.measurements.collections), isEqual);
   const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
   const display = useSelector((state: RootState) => state.controls.measurementsDisplay);
   const showOverallMean = useSelector((state: RootState) => state.controls.measurementsShowOverallMean);
   const showThreshold = useSelector((state: RootState) => state.controls.measurementsShowThreshold);
+
+  if (!collection) return null;
 
   // Create grouping options for the Select library
   let groupingOptions: SelectOption[] = [];
@@ -52,7 +55,7 @@ const MeasurementsOptions = (): JSX.Element => {
     groupingOptions = [...collection.groupings.keys()].map((grouping) => {
       return {
         value: grouping,
-        label: collection.fields.get(grouping).title
+        label: collection.fields.get(grouping)!.title
       };
     });
   }
@@ -71,7 +74,7 @@ const MeasurementsOptions = (): JSX.Element => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt): void => {
+          onChange={(opt: SelectOption): void => {
             dispatch(changeMeasurementsCollection(opt.value));
           }}
         />
@@ -88,7 +91,7 @@ const MeasurementsOptions = (): JSX.Element => {
           isClearable={false}
           isSearchable={false}
           isMulti={false}
-          onChange={(opt): void => {dispatch(changeMeasurementsGroupBy(opt.value));}}
+          onChange={(opt: SelectOption): void => {dispatch(changeMeasurementsGroupBy(opt.value));}}
         />
       </div>
       <SidebarSubtitle>
