@@ -23,14 +23,8 @@ const Metadata = (state = {
     case types.TREE_TOO_DATA:
     case types.CLEAN_START:
       return action.metadata;
-    case types.ADD_EXTRA_METADATA: {
-      const colorings = Object.assign({}, state.colorings, action.newColorings);
-      let geoResolutions = state.geoResolutions;
-      if (action.newGeoResolution) {
-        if (!geoResolutions) geoResolutions = [action.newGeoResolution]; /* case where no geoRes in JSON */
-        else geoResolutions = [...geoResolutions, action.newGeoResolution];
-      }
-      return Object.assign({}, state, {colorings, geoResolutions});
+    case types.UPDATE_METADATA: {
+      return Object.assign({}, state, action.metadata);
     }
     case types.REMOVE_METADATA: {
       const colorings = {...state.colorings};
@@ -79,6 +73,5 @@ function getBuildUrlFromGetAvailableJson(availableData) {
   }
   return false;
 }
-
 
 export default Metadata;

@@ -14,8 +14,10 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     /* Language and Environment */
     "jsx": "react",                                      /* Specify what JSX code is generated. */
     "target": "es2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "ESNext.Collection"],
 
     /* Modules */
+    "module": "esnext",                                  /* Specify what module code is generated. Required for dynamic `import()`. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
     "types": ["node", "webpack-env"],                    /* Specify type package names to be included without being referenced in a source file. */
 

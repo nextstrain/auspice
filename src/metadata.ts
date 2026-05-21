@@ -17,7 +17,7 @@ export type ColoringInfo = {
   title: string
   type: ScaleType
 
-  /** scale set via JSON or ADD_EXTRA_METADATA action */
+  /** scale set via JSON or actions */
   scale?: [string | number, string][]
 
   legend?: Legend

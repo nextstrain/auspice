@@ -1,8 +1,8 @@
 import { AnyAction } from "@reduxjs/toolkit";
-import { countTraitsAcrossTree } from "../../util/treeCountingHelpers";
-import { addNodeAttrs, removeNodeAttrs } from "../../util/treeMiscHelpers";
+import { removeNodeAttrs } from "../../util/treeMiscHelpers";
 import * as types from "../../actions/types";
 import { TreeState, TreeTooState } from "./types";
+import type { UpdateMetadataAction } from "../../actions/updateMetadata/updateMetadata.types"
 
 export const getDefaultTreeState = (): TreeState | TreeTooState => {
   return {
@@ -81,23 +81,22 @@ const Tree = (
       return {...state, streams: action.streams}
     case types.TREE_TOO_DATA:
       return action.tree;
-    case types.ADD_EXTRA_METADATA: {
+    case types.UPDATE_METADATA: {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const { tree: newData } = action as UpdateMetadataAction;
+      if (!newData) return state;
+
       // add data into `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      addNodeAttrs(state.nodes, action.newNodeAttrs);
-      // add the new nodeAttrKeys to ensure tip labels get updated
-      const nodeAttrKeys = new Set(state.nodeAttrKeys);
-      Object.keys(action.newColorings).forEach((attr) => nodeAttrKeys.add(attr));
-      // add the new non-continuous colorings to totalStateCounts so that they can function as filters
-      const nonContinuousColorings = Object.keys(action.newColorings).filter((coloring: string) => {
-        return action.newColorings[coloring].type !== "continuous"
-      });
+      for (const node of state.nodes) {
+        for (const [attrName, attrData] of Object.entries(newData.nodeAttrs[node.name] || {})) {
+          if (!attrData) continue;
+          node.node_attrs[attrName] = attrData;
+        }
+      }
       return {
         ...state,
-        totalStateCounts: {
-          ...state.totalStateCounts,
-          ...countTraitsAcrossTree(state.nodes, nonContinuousColorings, false, true)
-        },
-        nodeAttrKeys
+        totalStateCounts: newData.totalStateCounts,
+        nodeAttrKeys: newData.nodeAttrKeys,
       };
     }
     case types.REMOVE_METADATA: {

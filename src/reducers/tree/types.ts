@@ -16,6 +16,8 @@ export type FocusNodes = {
   roots: number[];
 }
 
+/** node attr keys whose data structures are not the typical NodeAttr */
+export const SPECIAL_CASED_NODE_ATTRS = new Set(['div', 'hidden', 'author', 'url', 'accession', 'vaccine']);
 
 interface ReduxNodeBase {
   /** the index of the node in the nodes array. set so that we can access visibility / nodeColors if needed */
@@ -29,19 +31,30 @@ interface ReduxNodeBase {
   }
   children?: ReduxNode[]
   currentGt?: string
-  
+
   /** see the number of subtending tips (alive or dead) */
   fullTipCount?: number
 
   hasChildren?: boolean
   inView?: boolean
   name?: string
+
+  /**
+   * The JSON structure of `node_attrs` is a mixture of many types. This is ~impossible to express
+   * in TS (as the index signature needs to encompass the known value types) and is also hard to
+   * reason with in code. We would be wise to (when parsing the JSON) convert the simple types (div,
+   * hidden, url, accession) into `NodeAttr` types, and store the `author` and `vaccine` structures
+   * somewhere else.
+   */
   node_attrs?: {
     div?: number
     hidden?: "always" | "timetree" | "divtree"
-    num_date?: {
-      value: number
-    }
+    num_date?: NodeAttr<number>;
+    author?: NodeAttrAuthor;
+    url?: string;
+    accession?: string;
+    vaccine?: NodeAttrVaccine;
+    [node_attr: string]: NodeAttr | number | string | NodeAttrAuthor | NodeAttrVaccine;
   }
   parent?: ReduxNode
   parentInfo?: {
@@ -55,6 +68,43 @@ interface ReduxNodeBase {
   /** Is the node part of a (currently active) stream tree? */
   inStream?: boolean
 }
+
+
+export interface NodeAttr<
+  T extends number | string | boolean = number | string | boolean,
+> {
+  value: T;
+  confidence?: T extends number ?
+    [number, number] :
+    T extends string ?
+    Record<string, number> :
+    never;
+  entropy?: number;
+  url?: string;
+}
+
+interface NodeAttrAuthor {
+  /** unique value for this publication */
+  value: string;
+  /** Publication title */
+  title?: string;
+  /** Journal title (including year, if applicable) */
+  journal?: string;
+  /** URL link to paper */
+  paper_url?: string;
+}
+
+interface NodeAttrVaccine {
+  /** selection_date */
+  selection_date?: string;
+  /** Vaccine usage start date */
+  start_date: string;
+  /** When the vaccine was stopped */
+  end_date: string;
+  /** strain used to raise sera */
+  serum?: boolean;
+}
+
 
 export type StreamDimensions = Array<Array<number>>
 

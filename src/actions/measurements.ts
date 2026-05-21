@@ -8,7 +8,6 @@ import { ControlsState, defaultMeasurementsControlState, MeasurementsControlStat
 import { getDefaultMeasurementsState } from "../reducers/measurements";
 import { infoNotification, warningNotification } from "./notifications";
 import {
-  ADD_EXTRA_METADATA,
   APPLY_MEASUREMENTS_FILTER,
   CHANGE_MEASUREMENTS_COLLECTION,
   CHANGE_MEASUREMENTS_COLOR_GROUPING,
@@ -31,6 +30,8 @@ import {
 } from "../reducers/measurements/types";
 import { changeColorBy } from "./colors";
 import { applyFilter, updateVisibleTipsAndBranchThicknesses } from "./tree";
+import type { NewMetadata } from "./updateMetadata/updateMetadata.types";
+import { updateMetadata } from "./updateMetadata/updateMetadata";
 
 /**
  * Temp object for groupings to keep track of values and their counts so that
@@ -651,75 +652,66 @@ export function matchesAllActiveFilters(
   return true;
 }
 
-function createMeasurementsColoringData(
-  filters: MeasurementFilters,
+function computeColorScale(measurements: Measurement[]): [number, string][] {
+  const sortedValues = measurements
+    .map((m) => m.value)
+    .sort((a, b) => a - b);
+  const colorRange = colors[9];
+  const step = 1 / (colorRange.length - 1);
+  return colorRange.map((color, i) => [quantile(sortedValues, (step * i)), color]);
+}
+
+function averageMeasurementValue(
+  measurements: Measurement[],
   groupBy: string,
   groupingValue: string,
-  collection: Collection,
-): {
-  nodeAttrs: MeasurementsNodeAttrs,
-  colorings: Colorings,
-} {
-  const measurementColorBy = encodeMeasurementColorBy(groupingValue);
-  const activeMeasurementFilters = getActiveMeasurementFilters(filters);
-  const strainMeasurementValues: {[strain: string]: number[]} = collection.measurements
+  measurementFilters: MeasurementFilters,
+): { [strain: string]: { value: number } } {
+  const activeMeasurementFilters = getActiveMeasurementFilters(measurementFilters);
+  const strainMeasurementValues: {[strain: string]: number[]} = measurements
     .filter((m) => m[groupBy] === groupingValue && matchesAllActiveFilters(m, activeMeasurementFilters))
     .reduce((accum, m) => {
       (accum[m.strain] = accum[m.strain] || []).push(m.value)
       return accum
     }, {});
-
-  const nodeAttrs: MeasurementsNodeAttrs = {};
-  for (const [strain, measurements] of Object.entries(strainMeasurementValues)) {
-    const averageMeasurementValue = measurements.reduce((sum, value) => sum + value) / measurements.length;
-    nodeAttrs[strain] = {
-      [measurementColorBy]: {
-        value: averageMeasurementValue
-      },
-      [hasMeasurementColorAttr]: {
-        value: hasMeasurementColorValue
-      }
-    };
-  }
-  const sortedValues = collection.measurements
-    .map((m) => m.value)
-    .sort((a, b) => a - b);
-
-  // Matching the default coloring for continuous scales
-  const colorRange = colors[9];
-  const step = 1 / (colorRange.length - 1);
-  const measurementsColorScale: [number, string][] = colorRange.map((color, i) => {
-    return [quantile(sortedValues, (step * i)), color]
-  });
-
-  return {
-    nodeAttrs,
-    colorings: {
-      [measurementColorBy]: {
-        title: `Measurements (${groupingValue})`,
-        type: "continuous",
-        scale: measurementsColorScale,
-      },
-      [hasMeasurementColorAttr]: {
-        title: `Has measurements for ${groupingValue}`,
-        type: "boolean",
-      }
-    }
-  };
+  const strainAverageValue = Object.entries(strainMeasurementValues)
+    .map(([strain, values]) => {
+      const mean = values.reduce((sum, value) => sum + value) / values.length;
+      return [strain, { value: mean }];
+    });
+  return Object.fromEntries(strainAverageValue)
 }
 
 const addMeasurementsColorData = (
   groupingValue: string
 ): ThunkFunction => (dispatch, getState) => {
   const { controls, measurements } = getState();
-  const { nodeAttrs, colorings } = createMeasurementsColoringData(
-    controls.measurementsFilters,
-    controls.measurementsGroupBy,
-    groupingValue,
-    measurements.collectionToDisplay,
-  );
+  const measurementColorBy = encodeMeasurementColorBy(groupingValue);
+  const collectionMeasurements = measurements.collectionToDisplay.measurements;
+  const strainValues = averageMeasurementValue(collectionMeasurements, controls.measurementsGroupBy, groupingValue, controls.measurementsFilters);
 
-  dispatch({type: ADD_EXTRA_METADATA, newNodeAttrs: nodeAttrs, newColorings: colorings});
+  const newMetadata: NewMetadata = {
+    attributes: {
+      [measurementColorBy]: {
+        key: measurementColorBy,
+        name: `Measurements (${groupingValue})`,
+        scaleType: 'continuous',
+        strains: strainValues,
+        colors: computeColorScale(collectionMeasurements),
+      },
+      [hasMeasurementColorAttr]: {
+        key: measurementColorBy,
+        name: `Has measurements for ${groupingValue}`,
+        scaleType: 'boolean',
+        strains: Object.fromEntries(
+          Object.entries(strainValues)
+            .map(([strain,]) => [strain, {value: hasMeasurementColorValue}])
+        )
+      }
+    }
+  }
+
+  dispatch(updateMetadata(newMetadata, true));
 }
 
 function updateMeasurementsColorData(
@@ -963,16 +955,37 @@ export const combineMeasurementsControlsAndQuery = (
     if (!groupingValues.includes(colorGrouping)) {
       updatedQuery.c = undefined;
     } else {
-      collectionControls['measurementsColorGrouping'] = colorGrouping;
-      newColoringData = {
-        coloringsPresentOnTree: [updatedQuery.c],
-        ...createMeasurementsColoringData(
-          collectionControls.measurementsFilters,
-          collectionControls.measurementsGroupBy,
-          colorGrouping,
-          collectionToDisplay
-        ),
-      }
+      // similar logic to `addMeasurementsColorData` action with slightly different data structures
+      const coloringsPresentOnTree = [updatedQuery.c];
+      const measurementColorBy = encodeMeasurementColorBy(colorGrouping);
+      const colorings = {
+        [measurementColorBy]: {
+          title: `Measurements (${colorGrouping})`,
+          type: "continuous",
+          scale: computeColorScale(collectionToDisplay.measurements),
+        },
+        [hasMeasurementColorAttr]: {
+          title: `Has measurements for ${colorGrouping}`,
+          type: "boolean",
+        }
+      };
+      const strainAverageValues = averageMeasurementValue(
+        collectionToDisplay.measurements,
+        collectionControls.measurementsGroupBy,
+        colorGrouping,
+        collectionControls.measurementsFilters
+      );
+      const nodeAttrs = Object.fromEntries(
+        Object.entries(strainAverageValues)
+          .map(([strain, nodeAttr]) => {
+            return [strain, {
+              [measurementColorBy]: nodeAttr,
+              [hasMeasurementColorAttr]: { value: hasMeasurementColorValue },
+            }];
+          }
+          )
+      );
+      newColoringData = { coloringsPresentOnTree, colorings, nodeAttrs };
     }
   }
   return {
