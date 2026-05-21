@@ -30,15 +30,15 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey: string): 
     /* clear any previous stream-related information using `streamName` as a sentinel value */
     // note that node.inStream (which is on every node) is re-set later in this loop
     if (node.streamName) {
-      // @ts-expect-error TS2790
+      // @ts-expect-error TS2790 — deleting optional properties not marked as optional in ReduxNode
       delete node.streamName;
-      // @ts-expect-error TS2790
+      // @ts-expect-error TS2790 — deleting optional properties not marked as optional in ReduxNode
       delete node.streamPivots;
-      // @ts-expect-error TS2790
+      // @ts-expect-error TS2790 — deleting optional properties not marked as optional in ReduxNode
       delete node.streamCategories;
-      // @ts-expect-error TS2790
+      // @ts-expect-error TS2790 — deleting optional properties not marked as optional in ReduxNode
       delete node.streamDimensions;
-      // @ts-expect-error TS2790
+      // @ts-expect-error TS2790 — deleting optional properties not marked as optional in ReduxNode
       delete node.streamMaxHeight;
     }
 
@@ -127,7 +127,7 @@ export function processStreams(
      * This is needed because the display order (for non-stream tips) is 1 unit = 1 tip. Since kernel PDF values can be huge
      * (or tiny, depending on STDEV) the kde-weight space can be very large and thus streams take up all the display order space
      * and normal tips are all squashed together.
-     * 
+     *
      * The scale factor is the PDF evaluated at x=0, i.e. the max height of an individual kernel in display order space will be
      * equivalent to what a single tip would have occupied. Because kernels aren't all stacked on top of each other we add a
      * fudge factor here (can be improved).
@@ -162,8 +162,8 @@ export function processStreams(
      */
     let dimensions: StreamDimensions = [];
     let everythingIsVisibleAnyway = false;
-    let streamNodeCountsTotal: number = 0;
-    let streamNodeCountsVisible: number = 0;
+    let streamNodeCountsTotal = 0;
+    let streamNodeCountsVisible = 0;
 
     if (!Object.hasOwn(startNode, "streamMaxHeight") || !skipPivots) {
       ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots!, metric, startNode.streamCategories, true, streams[sigma]!));
@@ -217,7 +217,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     const categories: ColorCategory[] = Object.entries(colorScale.legendBounds)
       .map(([name, bounds]) => [name, (bounds as any)[0], (bounds as any)[1], colorScale.scale(parseFloat(name)), []])
     const undefinedNodes: number[] = [];
-    
+
     for (const n of nodes) {
       const v = getTraitFromNode(n, colorBy);
       if (v===undefined) {
@@ -233,7 +233,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     }
     const streamCategories = categories
       .filter((c) => c[4].length>0)
-      .map((c) => ({name: c[0], color: c[3], nodes: c[4]})); 
+      .map((c) => ({name: c[0], color: c[3], nodes: c[4]}));
 
     if (undefinedNodes.length) {
       streamCategories.push({name: undefined as any, color: colorScale.scale(undefined), nodes: undefinedNodes});
@@ -303,17 +303,17 @@ function computeStreamMaxHeight(dimensions: StreamDimensions): number {
  * of stream names which can be rendered in order such that there are no crossings (i.e. stream connector lines
  * don't go "through" other streams). Using a toy example of stream R which has 2 child streams {A,B}
  * we want to render this as
- * 
+ *
  *                 ┌ AAAAAAAAAAAAAAAAAA
  *                 │         ┌ BBBBBBBBBBBBBB
  *                 │         │
  * ─────────── RRRRRRRRRRRRRRRRRRRRRRRRRR
- * 
+ *
  * Where we want A to be drawn above B (i.e. smaller display order) based on the numeric date of the branch leaving R.
  * This approach continues to further child streams (e.g. child streams of A).  We construct this via a tree
  * structure (where nodes represent streams) and return a list of nodes ordered by a post-order traversal,
  * i.e. [A,B,R]. These streams can then be assigned display orders in a simple incremental fashion.
- * 
+ *
  * For divergence trees we do the same but using divergence values. Note that this often results in a different
  * return value! E.g. B might branch off before A in divergence space.
  */
@@ -396,7 +396,7 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
 
 /**
  * Given the dataset's pivot array, restrict this to a subset of pivots which are applicable for this stream.
- * 
+ *
  * While it's obvious that the pivots should span the stream's tips (i.e. the domain) it's a little more
  * ambiguous about how far to extend it either side. The more we extend it the more we get smooth ends to the
  * KDE however there are downsides.
@@ -417,7 +417,7 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
   if (jsonDefinedStreamLabels) {
     const labels = jsonDefinedStreamLabels.filter((l) => availableBranchLabels.includes(l));
     if (labels.length!==jsonDefinedStreamLabels.length) {
-      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " + 
+      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " +
         jsonDefinedStreamLabels.filter((l) => labels.includes(l)).join(", "));
     }
     return labels;
@@ -436,4 +436,3 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
     })
     .filter((l) => l!=='aa' && l!=='none');
 }
-

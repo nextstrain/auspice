@@ -67,10 +67,10 @@ function setFocus(newToggleValue: null|"selected"): ThunkFunction {
     dispatch({
       type: SET_FOCUS,
       focus: newToggleValue,
-      // @ts-expect-error TS2345
-      focusNodes: getFocusedNodes(tree.nodes, tree.visibility),
-      // @ts-expect-error TS2345
-      focusNodesTreeToo: treeToo.nodes ? getFocusedNodes(treeToo.nodes, treeToo.visibility) : undefined,
+      // @ts-expect-error TS2345 — untyped property access in complex structures  
+    focusNodes: getFocusedNodes(tree.nodes, tree.visibility),
+      // @ts-expect-error TS2345 — untyped property access in complex structures  
+    focusNodesTreeToo: treeToo.nodes ? getFocusedNodes(treeToo.nodes, treeToo.visibility) : undefined,
     });
   }
 }

@@ -57,8 +57,8 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   setUpAndRenderTreeToo(props: TreeComponentProps, newState: Partial<TreeComponentState>): void {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
-    // @ts-expect-error TS7009
-    newState.treeToo = new PhyloTree(props.treeToo.nodes!, rhsTreeId, props.treeToo.idxOfInViewRootNode);
+    // @ts-expect-error TS7009 — PhyloTree constructor assignment to optional property
+    newState.treeToo = new PhyloTree(props.treeToo.nodes, rhsTreeId, props.treeToo.idxOfInViewRootNode);
     if (attemptUntangle) {
       untangleTreeToo(newState.tree!, newState.treeToo!);
     }
@@ -68,9 +68,9 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
   override componentDidMount(): void {
     if (this.props.tree.loaded) {
       const newState: Partial<TreeComponentState> = {};
-      // @ts-expect-error TS7009
-      newState.tree = new PhyloTree(this.props.tree.nodes!, lhsTreeId, this.props.tree.idxOfInViewRootNode);
-      renderTree(this, true, newState.tree!, this.props);
+      // @ts-expect-error TS7009 — PhyloTree constructor assignment to optional property
+      newState.tree = new PhyloTree(this.props.tree.nodes, lhsTreeId, this.props.tree.idxOfInViewRootNode);
+    renderTree(this, true, newState.tree!, this.props);
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }

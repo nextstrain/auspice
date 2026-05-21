@@ -38,8 +38,8 @@ export const updateMetadata = (
     // (very common in auspice.us)
     const colorsNowAvailable = getState().controls.coloringsPresentOnTree;
     if (!existingState.controls.coloringsPresentOnTree.size && colorsNowAvailable.size) {
-      // @ts-expect-error TS2345
-      dispatch(changeColorBy([...colorsNowAvailable][0]!));
+      // @ts-expect-error TS2345 — dispatch function call with incompatible action type  
+    dispatch(changeColorBy([...colorsNowAvailable][0]!));
     }
 
     return SUCCESS;

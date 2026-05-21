@@ -34,8 +34,8 @@ export const handleFilesDropped = (files: FileList) => async (dispatch: AppDispa
       if (result===SUCCESS) {
         dispatch(successNotification({
           message: `Adding metadata from ${file.name}`,
-          // @ts-expect-error TS2769
-          details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
+          // @ts-expect-error TS2769 — untyped property access in complex structures      
+    details: `n = ${Object.keys(newMetadata.attributes).length} fields(s)`,
         }));
       } else {
         throw Error(result);

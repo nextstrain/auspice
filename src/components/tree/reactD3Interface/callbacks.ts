@@ -170,7 +170,7 @@ export function onStreamHover(this: TreeComponent, node: PhyloNode, categoryInde
 export function onStreamLeave(this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean): void {
   if (isBranch) {
     /* return branch colour back to normal */
-    // @ts-expect-error TS2769
+    // @ts-expect-error TS2769 — untyped property access in complex structures
     select(paths[0]!).style("stroke", node.branchStroke ?? null)
   } else {
     /** ensure each ripple's opacity is reset back to 1  */

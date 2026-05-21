@@ -40,7 +40,7 @@ const collectionOptionsSelector = (
 const MeasurementsOptions = (): JSX.Element | null => {
   const dispatch = useAppDispatch();
   const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay);
-  // @ts-expect-error TS2345
+  // @ts-expect-error TS2345 — untyped property access in complex structures
   const collectionOptions = useSelector((state: RootState) => collectionOptionsSelector(state.measurements.collections), isEqual);
   const groupBy = useSelector((state: RootState) => state.controls.measurementsGroupBy);
   const display = useSelector((state: RootState) => state.controls.measurementsDisplay);

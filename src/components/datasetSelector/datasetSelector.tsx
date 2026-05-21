@@ -66,7 +66,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
       nextstrain.animationTickReference = null;
       this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     }
-    // @ts-expect-error TS2322
+    // @ts-expect-error TS2322 — changePage return type incompatible with dispatch
     this.props.dispatch(changePage({path: _path(this.state.proposedDataset)}));
   }
 

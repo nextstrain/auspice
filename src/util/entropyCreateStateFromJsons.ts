@@ -226,7 +226,7 @@ function validColor(color: string | undefined | unknown): false | string {
 function* nextColorGenerator(): Generator<string> {
   let i=0;
   while (true) {
-    // @ts-expect-error TS2322
+    // @ts-expect-error TS2322 — tuple/array destructuring with incompatible types
     yield genotypeColors[i++];
     if (i===genotypeColors.length) i=0;
   }

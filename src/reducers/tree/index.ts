@@ -101,7 +101,7 @@ const Tree = (
     }
     case types.REMOVE_METADATA: {
       // remove data from `nodes` in-place, so no redux update will be triggered if you only listen to `nodes`
-      // @ts-expect-error TS2345
+      // @ts-expect-error TS2345 — untyped property access in complex structures
       removeNodeAttrs(state.nodes, action.nodeAttrsToRemove);
       const nodeAttrKeys = new Set(state.nodeAttrKeys);
       const totalStateCounts = {...state.totalStateCounts};

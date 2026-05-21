@@ -52,14 +52,14 @@ export const changePhyloTreeViaPropsComparison = (
   /* visibility */
   if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
     args.changeVisibility = true;
-    // @ts-expect-error TS2322
+    // @ts-expect-error TS2322 — untyped property access in complex structures
     args.visibility = newTreeRedux.visibility;
   }
 
   /* tip radii */
   if (!!newTreeRedux.tipRadiiVersion && oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion) {
     args.changeTipRadii = true;
-    // @ts-expect-error TS2322
+    // @ts-expect-error TS2322 — untyped property access in complex structures
     args.tipRadii = newTreeRedux.tipRadii;
     args.hoveredLegendSwatch = newTreeRedux.hoveredLegendSwatch;
   }
@@ -67,7 +67,7 @@ export const changePhyloTreeViaPropsComparison = (
   /* branch thickness (stroke-width) */
   if (oldTreeRedux.branchThicknessVersion !== newTreeRedux.branchThicknessVersion) {
     args.changeBranchThickness = true;
-    // @ts-expect-error TS2322
+    // @ts-expect-error TS2322 — untyped property access in complex structures
     args.branchThickness = newTreeRedux.branchThickness;
   }
 

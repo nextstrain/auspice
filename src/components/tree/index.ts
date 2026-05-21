@@ -19,10 +19,10 @@ const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwn
   scatterVariables: state.controls.scatterVariables,
   temporalConfidence: state.controls.temporalConfidence,
   distanceMeasure: state.controls.distanceMeasure,
-  // @ts-expect-error TS2322
+  // @ts-expect-error TS2322 — redux state type not yet converted to match prop types
   explodeAttr: state.controls.explodeAttr,
   focus: state.controls.focus,
-  // @ts-expect-error TS2322
+  // @ts-expect-error TS2322 — redux state type not yet converted to match prop types
   colorScale: state.controls.colorScale,
   colorings: state.metadata.colorings,
   genomeMap: state.entropy.genomeMap,

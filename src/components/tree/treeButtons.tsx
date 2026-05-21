@@ -17,7 +17,7 @@ export function TreeButtons(props: Props): ReactElement | null {
   if (props.narrativeMode) {
     return null; // hide the buttons when viewing a narrative to prevent tree manipulations
   }
-  const focusMode = props.focus==='selected'; 
+  const focusMode = props.focus==='selected';
   const tree = props.mainTree ? props.tree : props.treeToo;
   const filtered = !!tree.idxOfFilteredRoot &&
     tree.idxOfInViewRootNode !== tree.idxOfFilteredRoot;
@@ -32,7 +32,7 @@ export function TreeButtons(props: Props): ReactElement | null {
 
   return (
     <div style={containerStyles}>
-      
+
       <button style={treeZoomed ? selectedButtonStyles : unselectedButtonStyles} onClick={zoomBack}>
         <FaSearchMinus/>
       </button>
@@ -60,7 +60,7 @@ export function TreeButtons(props: Props): ReactElement | null {
 
   function zoomBack(): void {
     // Zoom out of main tree as long as we're not showing everything
-    let rootIdx: number = 0;
+    let rootIdx = 0;
     if (tree.idxOfInViewRootNode !== 0) {
       const rootNode = tree.nodes![tree.idxOfInViewRootNode];
       if (props.mainTree && props.showStreamTrees && rootNode!.inStream && !!tree.streams[rootNode!.streamName!]!.parentStreamName) {

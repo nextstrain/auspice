@@ -9,7 +9,7 @@ export function toggleStreamTree(): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
     const showStreamTrees = !controls.showStreamTrees; // new state
-    
+
     if (showStreamTrees===false) { /* turn off stream trees */
       dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees});
       return;
@@ -39,11 +39,11 @@ export function toggleStreamTree(): ThunkFunction {
       return;
     }
 
-    // @ts-expect-error TS2345
+    // @ts-expect-error TS2345 — dispatch function call with incompatible action type
     processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
     dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees})
   }
-} 
+}
 
 
 export function changeStreamTreeBranchLabel(newLabel: string): ThunkFunction {
@@ -56,9 +56,8 @@ export function changeStreamTreeBranchLabel(newLabel: string): ThunkFunction {
     }
 
     const streams = labelStreamMembership(tree.nodes![0]!, newLabel);
-    // @ts-expect-error TS2345
+    // @ts-expect-error TS2345 — color scale object type mismatch
     processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
-
     dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
   }
 }
