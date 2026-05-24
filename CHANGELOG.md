@@ -1,5 +1,8 @@
 # Changelog
 
+* Dragging on extra metadata is now more powerful. Columns which match existing colorings will now be merged, and Augur node-data JSONs can also be used. See [Drag-and-drop extra metadata](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/drag-drop-csv-tsv.html) for more. ([#2039](https://github.com/nextstrain/auspice/pull/2039))
+
+
 ## version 2.70.0 - 2026/05/13
 
 
