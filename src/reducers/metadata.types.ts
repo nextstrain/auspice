@@ -1,4 +1,5 @@
 import { ScaleType } from "./controls"
+import { colorOptions } from "../util/globals";
 
 /**
  * Type definitions related to the metadata redux structure
@@ -18,6 +19,8 @@ export type Metadata = {
   }>;
   identicalGenomeMapAcrossBothTrees?: boolean;
   colorings?: Colorings;
+  /** legacy code which is set as the default reducer state. To remove! */
+  colorOptions: typeof colorOptions;
   version?: string;
   originalVersion?: string;
   warning?: string;
