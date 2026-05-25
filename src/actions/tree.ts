@@ -12,7 +12,7 @@ import { getTraitFromNode } from "../util/treeMiscHelpers";
 import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
 import { PhyloNode } from "../components/tree/phyloTree/types";
-import { Metadata } from "../metadata";
+import { Metadata } from "../reducers/metadata.types";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState, FocusNodes } from "../reducers/tree/types";
 import { processStreams } from "../util/treeStreams";
@@ -89,7 +89,7 @@ export const updateVisibleTipsAndBranchThicknesses = ({
 ): ThunkFunction => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
-  
+
     if (!tree.nodes) {return;}
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */

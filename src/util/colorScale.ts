@@ -9,7 +9,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
-import { ColoringInfo, Legend, Metadata } from "../metadata";
+import { ColoringInfo, Legend, Metadata } from "../reducers/metadata.types";
 import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
 import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
 import { numericToCalendar } from "./dateHelpers";

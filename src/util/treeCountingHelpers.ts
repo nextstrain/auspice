@@ -1,4 +1,4 @@
-import { Colorings } from "../metadata";
+import { Colorings } from "../reducers/metadata.types";
 import { ReduxNode, TraitCounts, Visibility } from "../reducers/tree/types";
 import { NODE_VISIBLE } from "./globals";
 import { getTraitFromNode } from "./treeMiscHelpers";

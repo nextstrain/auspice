@@ -1,6 +1,6 @@
 import { TreeState, NodeAttr } from "../../reducers/tree/types";
 import type { ScaleType, ControlsState } from "../../reducers/controls";
-import type { ColoringInfo } from "../../metadata";
+import type { ColoringInfo } from "../../reducers/metadata.types";
 
 /**
  * Struct containing new metadata information for merging with the current redux state.

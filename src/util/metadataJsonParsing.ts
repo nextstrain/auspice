@@ -1,4 +1,4 @@
-import type { Metadata } from "../metadata";
+import type { Metadata } from "../reducers/metadata.types";
 
 /* control ability to share / download assets */
 export function computeMetadataSharing(

@@ -1,4 +1,8 @@
-import { ScaleType } from "./reducers/controls"
+import { ScaleType } from "./controls"
+
+/**
+ * Type definitions related to the metadata redux structure
+ */
 
 export type Metadata = {
   rootSequence?: unknown
