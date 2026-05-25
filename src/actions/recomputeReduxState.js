@@ -11,7 +11,7 @@ import { countTraitsAcrossTree, calcTotalTipsInTree, gatherTraitNames } from "..
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { castIncorrectTypes } from "../util/castJsonTypes";
-import { entropyCreateState, genomeMap as createGenomeMap } from "../util/entropyCreateStateFromJsons";
+import { genomeMap as createGenomeMap } from "../util/entropyCreateStateFromJsons";
 import { calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale, createVisibleLegendValues } from "../util/colorScale";
 import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../util/processFrequencies";
@@ -24,7 +24,7 @@ import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
 import { processStreams, labelStreamMembership, availableStreamLabelKeys } from "../util/treeStreams";
-import { computeMetadataSharing } from "../util/metadataJsonParsing";
+import { parseJsonMetaBlock, convertColoringsListToDict } from "../util/metadataJsonParsing";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
@@ -805,108 +805,6 @@ const modifyTreeStateVisAndBranchThickness = (oldState, displayDefaults, query, 
   return newState;
 };
 
-/**
- * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
- * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
- * to be respected. By simply converting it back to a dict, all the auspice
- * code may continue to work. This should be attended to in the future.
- * @param {obj} coloringsList list of objects
- * @returns {obj} a dictionary representation, where the "key" property of each element
- * in the list has become a property of the object
- */
-const convertColoringsListToDict = (coloringsList) => {
-  const colorings = {};
-  coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = { ...coloring };
-    delete colorings[coloring.key].key;
-  });
-  return colorings;
-};
-
-/**
- *
- * A lot of this is simply changing augur's snake_case to auspice's camelCase
- */
-const createMetadataStateFromJSON = (json) => {
-  const metadata = {};
-  if (json.meta.colorings) {
-    metadata.colorings = convertColoringsListToDict(json.meta.colorings);
-  }
-  metadata.title = json.meta.title;
-  metadata.updated = json.meta.updated;
-  if (json.meta.description) {
-    metadata.description = json.meta.description;
-  }
-  if (json.meta.warning) {
-    metadata.warning = json.meta.warning;
-  }
-  if (json.version) {
-    metadata.version = json.version;
-  }
-  if (json.meta.extensions?.original_version) {
-    metadata.originalVersion = json.meta.extensions.original_version;
-  }
-  if (json.meta.maintainers) {
-    metadata.maintainers = json.meta.maintainers;
-  }
-  if (json.meta.build_url) {
-    metadata.buildUrl = json.meta.build_url;
-  }
-  if (json.meta.build_avatar) {
-    metadata.buildAvatar = json.meta.build_avatar;
-  }
-  if (Array.isArray(json?.meta?.data_provenance)) {
-    metadata.dataProvenance = json.meta.data_provenance.filter((el) => typeof el.name === 'string')
-  }
-  if (json.meta.filters) {
-    metadata.filters = json.meta.filters;
-  }
-  if (json.meta.panels) {
-    metadata.panels = json.meta.panels;
-  }
-  if (json.meta.stream_labels) {
-    metadata.streamLabels = json.meta.stream_labels;
-  }
-  if (json.root_sequence) {
-    /* A dataset may set the root sequence inline (i.e. within the main dataset JSON), which
-    we capture here. Alternatively it may be a sidecar JSON file */
-    metadata.rootSequence = json.root_sequence;
-  }
-  if (json.meta.display_defaults) {
-    metadata.displayDefaults = {};
-    const jsonKeyToAuspiceKey = {
-      color_by: "colorBy",
-      geo_resolution: "geoResolution",
-      distance_measure: "distanceMeasure",
-      branch_label: "selectedBranchLabel",
-      tip_label: "tipLabelKey",
-      map_triplicate: "mapTriplicate",
-      layout: "layout",
-      language: "language",
-      sidebar: "sidebar",
-      panels: "panels",
-      stream_label: "streamLabel",
-      transmission_lines: "showTransmissionLines",
-      label: "label",
-    };
-    for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
-      if (Object.prototype.hasOwnProperty.call(json.meta.display_defaults, jsonKey)) {
-        metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
-      }
-    }
-  }
-  if (json.meta.geo_resolutions) {
-    metadata.geoResolutions = json.meta.geo_resolutions;
-  }
-
-  metadata.sharing = computeMetadataSharing(metadata, json.meta?.sharing)
-
-  if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
-    console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
-  }
-  metadata.loaded = true;
-  return metadata;
-};
 
 /**
  * Conceptually similar to `createMetadataStateFromJSON` but here looking at metadata from
@@ -973,10 +871,7 @@ export const createStateFromQueryOrJSONs = ({
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies, measurements;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
-    /* create metadata state */
-    metadata = createMetadataStateFromJSON(json);
-    /* entropy state */
-    entropy = entropyCreateState(json.meta.genome_annotations);
+    ({ metadata, entropy } = parseJsonMetaBlock(json));
     /* ensure default frequencies state */
     frequencies = getDefaultFrequenciesState();
     /* Load measurements if available, otherwise ensure default measurements state */
