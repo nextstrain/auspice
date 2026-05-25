@@ -5,13 +5,49 @@ import { ScaleType } from "./controls"
  */
 
 export type Metadata = {
-  rootSequence?: unknown
-  rootSequenceSecondTree?: unknown
-  identicalGenomeMapAcrossBothTrees?: boolean
-  colorings: Colorings
-  sharing: MetadataSharing
-  dataProvenance?: { name: string; url: string; }[]
+  loaded: boolean;
+  title: string;
+  updated: string;
+  sharing: MetadataSharing;
+  streamLabels?: string[];
+  rootSequence?: unknown; // todo xxx
+  rootSequenceSecondTree?: unknown; // todo xxx
+  maintainers?: Array<{
+    name: string;
+    url?: string;
+  }>;
+  identicalGenomeMapAcrossBothTrees?: boolean;
+  colorings?: Colorings;
+  version?: string;
+  originalVersion?: string;
+  warning?: string;
+  description?: string;
+  buildUrl?: string;
+  buildAvatar?: string;
+  panels?: Panel[];
+  filters?: string[];
+  dataProvenance?: { name: string; url: string; }[];
+  displayDefaults?: {
+    mapTriplicate?: boolean;
+    geoResolution?: string;
+    colorBy?: string;
+    distanceMeasure?: "num_date" | "div";
+    layout?: "rect" | "radial" | "unrooted" | "clock";
+    selectedBranchLabel?: string;
+    label?: string;
+    tipLabelKey?: string;
+    streamLabel?: string;
+    showTransmissionLines?: boolean;
+    language?: string;
+    sidebar?: "open" | "closed";
+    panels?: Panel[];
+  };
+  geoResolutions?: Array<GeoResolutions>;
 }
+
+export const PANEL_VALUES = ["tree", "map", "frequencies", "entropy", "measurements"] as const;
+
+export type Panel = typeof PANEL_VALUES[number];
 
 export type Colorings = {
   [key: string]: ColoringInfo
@@ -19,27 +55,33 @@ export type Colorings = {
 
 export type ColoringInfo = {
   title: string
-  type: ScaleType
+} & (
+  {
+    type: "continuous";
+    scale?: [number, string][];
+    legend?: Array<LegendContinuous>;
+  } | {
+    type: Exclude<ScaleType, "continuous">;
+    scale?: [string, string][];
+    legend?: Array<LegendNonContinuous>
+  }
+)
 
-  /** scale set via JSON or actions */
-  scale?: [string | number, string][]
-
-  legend?: Legend
+export interface LegendNonContinuous {
+  /** Used to compute the legend swatch colour */
+  value: string;
+  /** Displayed in the legend. Auspice will use `value` if missing. */
+  display?: string | number;
 }
 
-export type Legend = {
-  /**
-   * Used to compute the legend swatch colour. The type of this depends on the scaleType.
-   * Continuous scales demand numeric values, however few restrictions are placed on other scales.
-   */
-  value: unknown
-
-  /** Displayed in the legend. Falls back to `value` if missing. */
-  display?: string | number
-
-  /** Custom legendBounds. Only considered for continuous scales. */
-  bounds?: [number, number]
-}[]
+export interface LegendContinuous {
+  /** Used to compute the legend swatch colour */
+  value: number;
+  /** Displayed in the legend. Auspice will use `value` if missing. */
+  display?: string | number;
+  /** provide the lower & upper bounds to match data to this legend entry */
+  bounds: [number, number];
+}
 
 /**
  * Fine-grained controls on the ability of Auspice to download various
@@ -55,4 +97,17 @@ export interface MetadataSharing {
   /** gisaid_acknowledgments is not exposed as a JSON configuration, it is set dynamically within Auspice  */
   gisaid_acknowledgments?: boolean;
   screenshot: boolean;
+}
+
+export interface GeoResolutions {
+  key: string;
+  title?: string;
+  demes: Record<string, LatLong>;
+}
+
+interface LatLong {
+  /** latitude is [-90, 90] */
+  latitude: number;
+  /** longitude is [-180, 180] */
+  longitude: number;
 }

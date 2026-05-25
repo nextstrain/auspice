@@ -199,19 +199,30 @@ function _updateColoring(
   }
 
   if (replace) {
-    attrDetails.colors
+    if (attrDetails.scaleType === 'continuous') {
+      return {
+        title: attrDetails.name,
+        type: attrDetails.scaleType,
+        ...(attrDetails.colors?.length && { scale: attrDetails.colors.filter((d): d is [number, string] => typeof d[0] === 'number') }),
+      }
+    }
     return {
       title: attrDetails.name,
       type: attrDetails.scaleType,
-      ...(attrDetails.colors?.length && { scale: attrDetails.colors }),
+      ...(attrDetails.colors?.length && { scale: attrDetails.colors.filter((d): d is [string, string] => typeof d[0] === 'string') }),
     }
+  }
+
+  // Following lets TypeScript see the narrowing of the scale type
+  if (state.type === 'continuous') {
+    throw new Error('Unreachable: merge path only handles categorical scales');
   }
 
   const updatedScale: [string, string][] = Object.entries({
     // existing scale pairs, less any values which no longer exist on the tree
     ...Object.fromEntries(
-      (state.scale || []) // restrict to strings as we only consider categorical scales
-        .filter(([value,]) => typeof value === 'string' && stateCounts?.get(value) > 0)
+      (state.scale || [])
+        .filter(([value,]) => stateCounts?.get(value) > 0)
     ),
     // plus new value-color pairs
     ...Object.fromEntries(attrDetails.colors || []),

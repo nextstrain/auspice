@@ -9,7 +9,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { sortedDomain } from "./sortedDomain";
-import { ColoringInfo, Legend, Metadata } from "../reducers/metadata.types";
+import { ColoringInfo, LegendContinuous, Metadata } from "../reducers/metadata.types";
 import { ColorScale, ControlsState, Genotype, LegendBounds, LegendLabels, LegendValues, ScaleType } from "../reducers/controls";
 import { ReduxNode, TreeState, TreeTooState, Visibility } from "../reducers/tree/types";
 import { numericToCalendar } from "./dateHelpers";
@@ -533,7 +533,7 @@ function _validateAnchorPoints(
  * Parse the user-defined `legend` for a given coloring to produce legendValues, legendLabels and legendBounds.
  */
 function parseUserProvidedLegendData(
-  providedLegend: Legend | undefined,
+  providedLegend: ColoringInfo['legend'],
 
   /** Dynamically generated legendValues (via traversal of tree(s)). */
   currentLegendValues: LegendValues,
@@ -564,7 +564,9 @@ function parseUserProvidedLegendData(
   let legendBounds: LegendBounds = {};
   let userProvidedLegendBounds: boolean;
   if (scaleType==="continuous") {
-    const boundArrays = data.map((d) => d.bounds)
+    const boundArrays = data
+      .filter((d): d is LegendContinuous => 'bounds' in d)
+      .map((d) => d.bounds)
       .filter((b) => Array.isArray(b) && b.length === 2 && typeof b[0] === "number" && typeof b[1] === "number")
       .map(([a, b]): [number, number] => a > b ? [b, a] : [a, b]) // ensure each bound is correctly ordered
       .filter(([a, b], idx, arr) => { // ensure no overlap with previous bounds.
@@ -612,6 +614,6 @@ export function formatBounds(bounds: [number, number], temporal: boolean):string
     const lower = bounds[0] === -Infinity ? '-∞' : numericToCalendar(bounds[0]);
     const upper = bounds[1] === Infinity ? '∞' : numericToCalendar(bounds[1]);
     return `(${lower}, ${upper}]`;
-  } 
+  }
   return `(${bounds[0].toFixed(2)}, ${bounds[1].toFixed(2)}]`;
 }
