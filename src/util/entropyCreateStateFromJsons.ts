@@ -520,3 +520,85 @@ function _isCdsWrapping(
   }
   return false; // fallthrough
 }
+
+
+/**
+ * Inverse of genomeMap(): reconstructs the
+ * `genome_annotations` JSON object from the Chromosome[] genomeMap structure.
+ */
+export const genomeMapToGenomeAnnotations = (genomeMap: Chromosome[]): UnknownJsonObject => {
+  const chromosome = genomeMap[0];
+  if (!chromosome) return {};
+
+  const annotations: Record<string, Record<string, unknown>> = {};
+
+  annotations.nuc = { start: chromosome.range[0], end: chromosome.range[1] };
+
+  for (const gene of chromosome.genes) {
+    for (const cds of gene.cds) {
+      const annotation: Record<string, unknown> = {};
+      annotation.strand = cds.strand;
+
+      if (cds.isWrapping && cds.segments.length === 2) {
+        /*
+         * Wrapping CDSs were originally a single contiguous CDS whose end
+         * position exceeded the genome length. During ingestion, these are
+         * split into two segments. We merge them back, but the original
+         * single start/end representation used a convention where end >
+         * genome length (e.g. start=93, end=110 on a 100nt genome).
+         * We reconstruct this, but if the original JSON actually used an
+         * explicit two-segment representation for a wrapping CDS, we would
+         * not be able to distinguish that case from an auto-split one.
+         */
+        const genomeLength = chromosome.range[1];
+        const positive = cds.strand === '+';
+        /* For +ve strand: segment[0] is the 5' portion (higher genome coords),
+           segment[1] is the wrapped portion (lower genome coords).
+           For -ve strand: segments were reversed during ingestion, so
+           segment[0] is at genome start, segment[1] is the 5' end. */
+        const seg5prime = positive ? cds.segments[0] : cds.segments[1];
+        const segWrapped = positive ? cds.segments[1] : cds.segments[0];
+        annotation.start = seg5prime.rangeGenome[0];
+        annotation.end = segWrapped.rangeGenome[1] + genomeLength;
+      } else if (cds.segments.length === 1) {
+        annotation.start = cds.segments[0].rangeGenome[0];
+        annotation.end = cds.segments[0].rangeGenome[1];
+      } else {
+        /*
+         * Multi-segment CDSs (spliced/slippage) are stored as an explicit
+         * segments array. The original JSON used the same representation,
+         * so this is a faithful reconstruction.
+         */
+        annotation.segments = cds.segments.map((seg) => ({
+          start: seg.rangeGenome[0],
+          end: seg.rangeGenome[1],
+        }));
+      }
+
+      /*
+       * Colors may not match the original JSON: if the original CDS did not
+       * specify a color, one was auto-assigned from a rotating palette during
+       * ingestion. We always include the color here since we cannot
+       * distinguish auto-assigned from explicitly provided colors.
+       */
+      if (cds.color) annotation.color = cds.color;
+
+      if (cds.displayName) annotation.display_name = cds.displayName;
+      if (cds.description) annotation.description = cds.description;
+
+      /*
+       * The `gene` field is only needed when a gene groups multiple CDSs,
+       * or when the gene name differs from the CDS name. If gene.name
+       * equals cds.name (the common case of 1 gene = 1 CDS), we omit
+       * it to match the typical original JSON structure.
+       */
+      if (gene.name !== cds.name) {
+        annotation.gene = gene.name;
+      }
+
+      annotations[cds.name] = annotation;
+    }
+  }
+
+  return annotations;
+};

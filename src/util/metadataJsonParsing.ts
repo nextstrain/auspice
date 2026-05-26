@@ -3,6 +3,8 @@ import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES } 
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
 import { ScaleType, SCALE_TYPE_VALUES } from "../reducers/controls";
+import type { RootState } from "../store";
+import { genomeMapToGenomeAnnotations } from "./entropyCreateStateFromJsons";
 
 
 /**
@@ -248,4 +250,87 @@ function _validateLegendArray(
     !utils.isString(el.value)
   ) return true;
   return false;
+}
+
+
+
+/**
+ * Somewhat the inverse of parseJsonMetaBlock: reconstructs the `meta` JSON object
+ * from the Redux metadata state, reversing structural transformations applied during ingestion.
+ */
+export function metadataStateToJson(reduxState: RootState): object {
+  const { metadata, entropy } = reduxState;
+  const meta: Record<string, unknown> = {};
+
+  // Ordering of metadata props here matches the `parseJsonMetaBlock` function so
+  // it's easier to compare code side-by-side
+
+  if (metadata.title) meta.title = metadata.title;
+  if (metadata.updated) meta.updated = metadata.updated;
+
+  if (metadata.colorings) {
+    const _colorings = Object.entries(metadata.colorings)
+      .filter(([key]) => key !== 'gt') // 'gt' is dynamically generated in Auspice
+      .map(([key, value]) => ({ key, ...value }));
+    if (_colorings.length) meta.colorings = _colorings;
+  }
+
+  if (metadata.description) meta.description = metadata.description;
+  if (metadata.warning) meta.warning = metadata.warning;
+  // `metadata.version` is stored in JSON.version, not JSON.meta.version
+  // Don't export 'originalVersion' (json.meta.extensions.original_version)
+  if (metadata.maintainers) meta.maintainers = metadata.maintainers;
+  if (metadata.buildUrl) meta.build_url = metadata.buildUrl;
+  if (metadata.buildAvatar) meta.build_avatar = metadata.buildAvatar;
+  if (metadata.dataProvenance) meta.data_provenance = metadata.dataProvenance;
+  if (metadata.filters) meta.filters = metadata.filters;
+  if (metadata.panels) meta.panels = metadata.panels;
+  if (metadata.streamLabels) meta.stream_labels = metadata.streamLabels;
+
+  // Note: metadata.rootSequence is assigned to json.root_sequence (or a sidecar), not json.meta
+
+  /** Future work: We should read the current redux state and store that as the display_defaults.
+   * I.e. if we've selected colorBy=X then making that the display_default means when we load
+   * the dataset we restore the state. There are exceptions however -- genotype, measurements
+   * colorings etc.
+   */
+  if (metadata.displayDefaults) {
+    const dd = metadata.displayDefaults;
+    meta.display_defaults = {
+      //                     [auspice prop]      [json key name]  [auspice prop]
+      ...(Object.hasOwn(dd, 'mapTriplicate') && { map_triplicate: dd.mapTriplicate }),
+      ...(Object.hasOwn(dd, 'geoResolution') && { geo_resolution: dd.geoResolution }),
+      ...(Object.hasOwn(dd, 'colorBy') && { color_by: dd.colorBy }),
+      ...(Object.hasOwn(dd, 'distanceMeasure') && { distance_measure: dd.distanceMeasure }),
+      ...(Object.hasOwn(dd, 'layout') && { layout: dd.layout }),
+      ...(Object.hasOwn(dd, 'selectedBranchLabel') && { branch_label: dd.selectedBranchLabel }),
+      ...(Object.hasOwn(dd, 'label') && { label: dd.label }),
+      ...(Object.hasOwn(dd, 'tipLabelKey') && { tip_label: dd.tipLabelKey }),
+      ...(Object.hasOwn(dd, 'streamLabel') && { stream_label: dd.streamLabel }),
+      ...(Object.hasOwn(dd, 'showTransmissionLines') && { transmission_lines: dd.showTransmissionLines }),
+      ...(Object.hasOwn(dd, 'language') && { language: dd.language }),
+      ...(Object.hasOwn(dd, 'sidebar') && { sidebar: dd.sidebar }),
+      ...(Object.hasOwn(dd, 'panels') && { panels: dd.panels }),
+    }
+  }
+
+  if (metadata.geoResolutions) meta.geo_resolutions = metadata.geoResolutions;
+
+  const sharing = _computeJsonSharing(metadata.sharing)
+  if (Object.keys(sharing).length) meta.sharing = sharing;
+
+  if (entropy.genomeMap?.length) {
+    meta.genome_annotations = genomeMapToGenomeAnnotations(entropy.genomeMap);
+  }
+
+  return meta;
+}
+
+
+function _computeJsonSharing(sharing: Metadata['sharing']): Record<string, false> {
+  return Object.fromEntries(
+    Object.entries(sharing)
+      .filter(([key, _value]) => key!=='gisaid_acknowledgments')
+      .filter(([_key, value]) => value===false)
+  )
 }
