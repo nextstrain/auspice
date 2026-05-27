@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+# Provision specific JSONs for tests
+
+set -x -e -o pipefail
+
+DEST="test/fetched-jsons"
+CHARON="https://nextstrain.org/charon/getDataset?prefix="
+FETCH="curl --fail --compressed"
+
+${FETCH} ${CHARON}/ebola/all-outbreaks@2026-05-18 --output ${DEST}/ebola-all-outbreaks.json
+${FETCH} ${CHARON}/ebola/ebov-2013@2025-10-14 --output ${DEST}/ebola-ebov-2013.json

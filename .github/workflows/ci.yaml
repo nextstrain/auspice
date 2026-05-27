@@ -23,6 +23,7 @@ jobs:
       # also skips life cycle scripts for dependencies. If the job fails here,
       # try removing this flag.
       - run: npm ci --loglevel verbose --ignore-scripts
+      - run: npm run fetch-test-data
       - run: npm test
 
   build-and-smoke-test:
