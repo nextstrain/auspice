@@ -39,16 +39,10 @@ export const publications = {
 };
 
 @connect((state) => ({
-  browserDimensions: state.browserDimensions.browserDimensions,
   colorBy: state.controls.colorBy,
-  distanceMeasure: state.controls.distanceMeasure,
   metadata: state.metadata,
-  entropy: state.entropy,
-  tree: state.tree,
   nodes: state.tree.nodes,
   visibility: state.tree.visibility,
-  panelsToDisplay: state.controls.panelsToDisplay,
-  panelLayout: state.controls.panelLayout
 }))
 class DownloadModalContents extends React.Component {
   getRelevantPublications() {
@@ -111,7 +105,7 @@ class DownloadModalContents extends React.Component {
         </div>
         <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
           <div style={{ width: "100%" }}>
-            <DownloadButtons {...this.props} relevantPublications={relevantPublications}/>
+            <DownloadButtons relevantPublications={relevantPublications}/>
           </div>
         </div>
       </>
