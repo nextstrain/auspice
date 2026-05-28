@@ -10,8 +10,8 @@ export type Metadata = {
   updated: string;
   sharing: MetadataSharing;
   streamLabels?: string[];
-  rootSequence?: unknown; // todo xxx
-  rootSequenceSecondTree?: unknown; // todo xxx
+  rootSequence?: RootSequence;
+  rootSequenceSecondTree?: RootSequence;
   maintainers?: Array<{
     name: string;
     url?: string;
@@ -31,21 +31,30 @@ export type Metadata = {
     mapTriplicate?: boolean;
     geoResolution?: string;
     colorBy?: string;
-    distanceMeasure?: "num_date" | "div";
-    layout?: "rect" | "radial" | "unrooted" | "clock";
+    distanceMeasure?: DistanceMeasure;
+    layout?: Layout;
     selectedBranchLabel?: string;
     label?: string;
     tipLabelKey?: string;
     streamLabel?: string;
     showTransmissionLines?: boolean;
     language?: string;
-    sidebar?: "open" | "closed";
+    sidebar?: Sidebar;
     panels?: Panel[];
   };
   geoResolutions?: Array<GeoResolutions>;
 }
 
 export const PANEL_VALUES = ["tree", "map", "frequencies", "entropy", "measurements"] as const;
+
+export const DISTANCE_MEASURE_VALUES = ["num_date", "div"] as const;
+export type DistanceMeasure = typeof DISTANCE_MEASURE_VALUES[number];
+
+export const LAYOUT_VALUES = ["rect", "radial", "unrooted", "clock"] as const;
+export type Layout = typeof LAYOUT_VALUES[number];
+
+export const SIDEBAR_VALUES = ["open", "closed"] as const;
+export type Sidebar = typeof SIDEBAR_VALUES[number];
 
 export type Panel = typeof PANEL_VALUES[number];
 
@@ -110,4 +119,8 @@ interface LatLong {
   latitude: number;
   /** longitude is [-180, 180] */
   longitude: number;
+}
+
+interface RootSequence {
+  [cdsNameOrNuc: string]: string;
 }

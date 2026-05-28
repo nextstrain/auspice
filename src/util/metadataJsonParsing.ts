@@ -1,5 +1,5 @@
 import type { Metadata, LegendContinuous, LegendNonContinuous } from "../reducers/metadata.types";
-import { PANEL_VALUES } from "../reducers/metadata.types";
+import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES } from "../reducers/metadata.types";
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
 import { ScaleType, SCALE_TYPE_VALUES } from "../reducers/controls";
@@ -58,10 +58,14 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
   if (Array.isArray(json.meta.stream_labels) && json.meta.stream_labels.every((p) => utils.isString(p))) {
     metadata.streamLabels = json.meta.stream_labels;
   }
-  if (json.root_sequence) {
+  if (json.root_sequence && utils.isObject(json.root_sequence)) {
     /* A dataset may set the root sequence inline (i.e. within the main dataset JSON), which
-    we capture here. Alternatively it may be a sidecar JSON file */
-    metadata.rootSequence = json.root_sequence;
+    we capture here. Alternatively it may be a sidecar JSON file (which is added to state later on) */
+    const rs = Object.entries(json.root_sequence)
+      .filter((entry): entry is [string, string] => utils.isString(entry[1]));
+    if (rs.length) {
+      metadata.rootSequence = Object.fromEntries(rs);
+    }
   }
 
   if (utils.isObject(json.meta.display_defaults)) {
@@ -71,8 +75,8 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
       ...(utils.isBoolean(dd.map_triplicate) && {mapTriplicate: dd.map_triplicate}),
       ...(utils.isString(dd.geo_resolution) && { geoResolution: dd.geo_resolution }),
       ...(utils.isString(dd.color_by) && { colorBy: dd.color_by }),
-      ...(utils.isOneOf(dd.distance_measure, ['num_date', 'div']) && { distanceMeasure: dd.distance_measure }),
-      ...(utils.isOneOf(dd.layout, ["rect", "radial", "unrooted", "clock"]) && { layout: dd.layout }),
+      ...(utils.isOneOf(dd.distance_measure, DISTANCE_MEASURE_VALUES) && { distanceMeasure: dd.distance_measure }),
+      ...(utils.isOneOf(dd.layout, LAYOUT_VALUES) && { layout: dd.layout }),
       ...(utils.isString(dd.branch_label) && { selectedBranchLabel: dd.branch_label }),
       // 'label' is the branch label that tree starts zoomed to, expressed as <key>:<value>
       ...(utils.isString(dd.label) && dd.label.split(':').length===2 && { label: dd.label }),
@@ -80,7 +84,7 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
       ...(utils.isString(dd.stream_label) && { streamLabel: dd.stream_label }),
       ...(utils.isBoolean(dd.transmission_lines) && {showTransmissionLines: dd.transmission_lines}),
       ...(utils.isString(dd.language) && { language: dd.language }),
-      ...(utils.isOneOf(dd.sidebar, ['open', 'closed']) && { sidebar: dd.sidebar }),
+      ...(utils.isOneOf(dd.sidebar, SIDEBAR_VALUES) && { sidebar: dd.sidebar }),
       ...(validPanels.length && { panels: validPanels }),
     }
   }
