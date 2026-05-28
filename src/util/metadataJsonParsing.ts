@@ -2,9 +2,10 @@ import type { Metadata, LegendContinuous, LegendNonContinuous } from "../reducer
 import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES } from "../reducers/metadata.types";
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
-import { ScaleType, SCALE_TYPE_VALUES } from "../reducers/controls";
+import { ScaleType, SCALE_TYPE_VALUES, getDefaultControlsState } from "../reducers/controls";
 import type { RootState } from "../store";
 import { genomeMapToGenomeAnnotations } from "./entropyCreateStateFromJsons";
+import { urlQueryLabel } from "./treeVisibilityHelpers";
 
 
 /**
@@ -289,29 +290,9 @@ export function metadataStateToJson(reduxState: RootState): object {
 
   // Note: metadata.rootSequence is assigned to json.root_sequence (or a sidecar), not json.meta
 
-  /** Future work: We should read the current redux state and store that as the display_defaults.
-   * I.e. if we've selected colorBy=X then making that the display_default means when we load
-   * the dataset we restore the state. There are exceptions however -- genotype, measurements
-   * colorings etc.
-   */
-  if (metadata.displayDefaults) {
-    const dd = metadata.displayDefaults;
-    meta.display_defaults = {
-      //                     [auspice prop]      [json key name]  [auspice prop]
-      ...(Object.hasOwn(dd, 'mapTriplicate') && { map_triplicate: dd.mapTriplicate }),
-      ...(Object.hasOwn(dd, 'geoResolution') && { geo_resolution: dd.geoResolution }),
-      ...(Object.hasOwn(dd, 'colorBy') && { color_by: dd.colorBy }),
-      ...(Object.hasOwn(dd, 'distanceMeasure') && { distance_measure: dd.distanceMeasure }),
-      ...(Object.hasOwn(dd, 'layout') && { layout: dd.layout }),
-      ...(Object.hasOwn(dd, 'selectedBranchLabel') && { branch_label: dd.selectedBranchLabel }),
-      ...(Object.hasOwn(dd, 'label') && { label: dd.label }),
-      ...(Object.hasOwn(dd, 'tipLabelKey') && { tip_label: dd.tipLabelKey }),
-      ...(Object.hasOwn(dd, 'streamLabel') && { stream_label: dd.streamLabel }),
-      ...(Object.hasOwn(dd, 'showTransmissionLines') && { transmission_lines: dd.showTransmissionLines }),
-      ...(Object.hasOwn(dd, 'language') && { language: dd.language }),
-      ...(Object.hasOwn(dd, 'sidebar') && { sidebar: dd.sidebar }),
-      ...(Object.hasOwn(dd, 'panels') && { panels: dd.panels }),
-    }
+  const display_defaults = computedDisplayDefaults(reduxState);
+  if (Object.keys(display_defaults).length) {
+    meta.display_defaults = display_defaults;
   }
 
   if (metadata.geoResolutions) meta.geo_resolutions = metadata.geoResolutions;
@@ -333,4 +314,41 @@ function _computeJsonSharing(sharing: Metadata['sharing']): Record<string, false
       .filter(([key, _value]) => key!=='gisaid_acknowledgments')
       .filter(([_key, value]) => value===false)
   )
+}
+
+/**
+ * Compute the display_defaults to (as best as we can) produce a JSON whose initial (default)
+ * state represents the current state of Auspice.
+ */
+function computedDisplayDefaults(state: RootState): Record<string, unknown> {
+  // Start by setting two base properties from the original display_defaults rather than
+  // recreating them from the current UI state
+  const dd = state.metadata.displayDefaults || {};
+  const defaults: Record<string, unknown> = {
+    //                     [auspice prop]      [json key name]  [auspice prop]
+    ...(Object.hasOwn(dd, 'mapTriplicate') && { map_triplicate: dd.mapTriplicate }),
+    ...(Object.hasOwn(dd, 'sidebar') && { sidebar: dd.sidebar }),
+  }
+
+  // Now inject specific data from redux state (i.e. UI-driven) if it doesn't match Auspice's defaults.
+  // (If it matches the defaults Auspice would set, then don't export it)
+  const defaultControls = getDefaultControlsState();
+  const { controls } = state;
+  if (controls.layout !== defaultControls.layout) defaults.layout = controls.layout;
+  if (controls.colorBy !== defaultControls.colorBy) defaults.color_by = controls.colorBy;
+  if (controls.distanceMeasure !== defaultControls.distanceMeasure) defaults.distance_measure = controls.distanceMeasure;
+  if (controls.geoResolution !== defaultControls.geoResolution) defaults.geo_resolution = controls.geoResolution;
+  if (controls.selectedBranchLabel !== defaultControls.selectedBranchLabel) defaults.branch_label = controls.selectedBranchLabel;
+  if (controls.tipLabelKey !== defaultControls.tipLabelKey) defaults.tip_label = controls.tipLabelKey;
+  if (controls.showTransmissionLines !== defaultControls.showTransmissionLines) defaults.transmission_lines = controls.showTransmissionLines;
+  if (controls.showStreamTrees) defaults.stream_label = controls.streamTreeBranchLabel;
+  if (controls.panelsToDisplay.length) defaults.panels = controls.panelsToDisplay;
+  // Find out if the current zoom level has an available (branch) label
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const label = urlQueryLabel(state.tree.nodes![state.tree.idxOfInViewRootNode], state.tree.availableBranchLabels)
+  if (label) defaults.label = label;
+  // language is special-cased in the code
+  if (state.general.language !== 'en') defaults.language = state.general.language;
+
+  return defaults;
 }

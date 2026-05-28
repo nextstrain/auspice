@@ -10,6 +10,7 @@
 
 import { configureStore, EnhancedStore } from '@reduxjs/toolkit';
 import rootReducer from "../src/reducers";
+import { getDefaultControlsState } from "../src/reducers/controls";
 import { createStateFromQueryOrJSONs } from "../src/actions/recomputeReduxState";
 import { CLEAN_START } from "../src/actions/types";
 import { createDatasetJson } from "../src/util/constructDatasetJson";
@@ -30,6 +31,7 @@ declare global {
   namespace jest {
     interface Matchers<R> {
       toMatchAnnotation(expected: unknown): R;
+      toEqualDisplayDefault(expected: unknown): R;
     }
   }
 }
@@ -130,7 +132,7 @@ describe.each(datasets)("\n\n%s round-trip", (_name, originalJson) => {
     if (display_defauts) {
       for (const key of Object.keys(display_defauts)) {
         it(`JSON.meta.display_defaults.${key} values are the same`, () => {
-          expect(display_defauts[key]).toEqual(reconstructedJson.meta.display_defaults[key])
+          expect(display_defauts[key]).toEqualDisplayDefault([key, reconstructedJson.meta.display_defaults[key]])
         });
       }
     }
@@ -226,5 +228,40 @@ expect.extend({
       pass,
       message: (): string => `Annotations blocks differed (using custom comparison)`
     };
+  },
+});
+
+expect.extend({
+  // received: original JSON, expected: reconstructed JSON
+  toEqualDisplayDefault(received, [key, expected]) {
+    if (received === expected || JSON.stringify(received) === JSON.stringify(expected)) {
+      return { pass: true, message: (): string => '' }
+    }
+
+    // If the originally specified default matched Auspice's starting defaults,
+    // then the JSON behaves the same way without the default being present. Thus we recreate
+    // a JSON without it.
+    if (received && expected === undefined) {
+      const defaultControls = getDefaultControlsState();
+      if (
+        (key === 'distance_measure' && defaultControls.distanceMeasure === received) ||
+        (key === 'layout' && defaultControls.layout === received) ||
+        (key === 'geo_resolution' && defaultControls.geoResolution === received) ||
+        (key === 'color_by' && defaultControls.colorBy === received) ||
+        (key === 'geo_resolution' && defaultControls.geoResolution === received) ||
+        (key === 'branch_label' && defaultControls.selectedBranchLabel === received) ||
+        (key === 'tip_label' && defaultControls.tipLabelKey === received) ||
+        (key === 'transmission_lines' && defaultControls.showTransmissionLines === received) ||
+        (key === 'language' && received==='en') // hardcoded default in Auspice code
+      ) {
+        return { pass: true, message: (): string => '' }
+      }
+    }
+
+    return {
+      pass: false,
+      message: (): string => "Display defaults did not agree (after comparison with Auspice's defaults)." +
+        `Original JSON: ${ received }, reconstructed JSON: ${ expected }`
+    }
   },
 });
