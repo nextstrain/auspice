@@ -1,6 +1,6 @@
 /* eslint no-restricted-syntax: 0 */
 import { unparse } from "papaparse";
-import { errorNotification, infoNotification, warningNotification } from "../../actions/notifications";
+import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getUrlFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
@@ -8,7 +8,7 @@ import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
 import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
-import { Dataset } from "../../actions/loadData";
+import { createDatasetJson } from "../../util/constructDatasetJson";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -697,34 +697,32 @@ export const entropyTSV = (dispatch, filePrefix, entropy) => {
 
 
 /**
- * Write out Auspice JSON(s) for the current view. We do this by re-fetching the original
- * JSON because we don't keep a copy of the unprocessed data around.
+ * Write out Auspice JSON(s) for the current view by recreating JSON state from Redux state
  *
- * Sidecar files are not fetched, but we can also download them if desired.
+ * Sidecar files and second trees are not yet handled
  *
  * Note that we are not viewing a narrative, as the download button functionality is disabled
  * for narratives.
  */
-export const auspiceJSON = (dispatch, datasetNames) => {
-  const filenames = [];
-  if (!datasetNames.some(Boolean)) {
-    console.error(`Unable to fetch empty dataset names: ${JSON.stringify(datasetNames)}`);
-    return dispatch(errorNotification({message: "Unable to download Auspice JSON (see console for more info)"}))
+export function auspiceJSON(dispatch, state, filePrefix) {
+  let fname = filePrefix + '.json';
+  if (fname === 'nextstrain_.json') { // datasets with no URL-relevant information (i.e. auspice.us)
+    if (state.metadata.title) { // use the title in the filename (or at least the first 25 chars)
+      fname = 'nextstrain_' + state.metadata.title.trim().slice(0, 25).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '.json';
+    } else {
+      fname = 'nextstrain.json';
+    }
   }
-  for (const datasetName of datasetNames) {
-    if (!datasetName) continue; // e.g. no 2nd tree
-    const filename = datasetName.replace('/', '_') + '.json';
-    filenames.push(filename);
-    const dataset = new Dataset(datasetName);
-    dataset.fetchMain(); // initialises dataset.main (a promise)
-    dataset.main.then((jsonContents) => {
-      write(filename, MIME.json, JSON.stringify(jsonContents));
-    }).catch((err) => {
-      // I think this error path should be rarely (never!) encountered, because the fetch call has
-      // worked to load the dataset in the first place...
-      console.error(`Error fetching JSON for ${datasetName}: ${err}`);
-      dispatch(errorNotification({message: `Error preparing ${filename} JSON for download (see console for more info)`}));
-    });
+  const json = createDatasetJson(() => state);
+  write(fname, MIME.json, JSON.stringify(json));
+
+  dispatch(infoNotification({
+    message: `Saving main dataset JSON as '${fname}'`
+  }));
+
+  if (state.treeToo.loaded) {
+    dispatch(warningNotification({
+      message: `Download functionality only supports the main (LHS) tree at the moment`
+    }));
   }
-  dispatch(infoNotification({message: `Preparing Auspice JSON(s) for download: ${filenames.join(', ')}`}));
-};
+}

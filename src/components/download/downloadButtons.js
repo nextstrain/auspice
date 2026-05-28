@@ -8,7 +8,6 @@ import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 import { getNumSelectedTips } from "../../util/treeVisibilityHelpers";
-import { getDatasetNamesFromUrl } from "../../actions/loadData";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -30,13 +29,6 @@ export const DownloadButtons = ({ relevantPublications }) => {
   const partialData = selectedTipsCount !== totalTipCount;
   const filePrefix = getFilePrefix();
   const temporal = state.controls.distanceMeasure === "num_date";
-
-  /**
-   * Currently our ability to download JSONs relies on parsing the URL and re-fetching the
-   * JSON. Check that we can parse datasets from the URL before exposing the button here.
-   * This check will be removed as part of <https://github.com/nextstrain/auspice/issues/2000>
-   */
-  const datasetNames = getDatasetNamesFromUrl(window.location.pathname);
   const entropyBar = state.entropy?.selectedCds===nucleotide_gene ? "nucleotide" : "codon";
 
   return (
@@ -51,12 +43,12 @@ export const DownloadButtons = ({ relevantPublications }) => {
         {partialData ? `Currently ${selectedTipsCount}/${totalTipCount} tips are displayed and will be downloaded.` : `Currently the entire dataset (${totalTipCount} tips) will be downloaded.`}
       </div>
 
-      {state.metadata.sharing.dataset_json && datasetNames.some(Boolean) && (
+      {state.metadata.sharing.dataset_json && (
         <Button
           name="Auspice (Nextstrain) JSON"
-          description={`The main Auspice dataset JSON(s) for the current view`}
+          description={`The main Auspice dataset JSON with the current view as the display default.`}
           icon={<DatasetIcon width={iconWidth} selected />}
-          onClick={() => helpers.auspiceJSON(dispatch, datasetNames)}
+          onClick={() => helpers.auspiceJSON(dispatch, state, filePrefix)}
         />
       )}
       {state.metadata.sharing.trees && (
