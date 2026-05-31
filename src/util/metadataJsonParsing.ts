@@ -6,6 +6,7 @@ import { ScaleType, SCALE_TYPE_VALUES, getDefaultControlsState } from "../reduce
 import type { RootState } from "../store";
 import { genomeMapToGenomeAnnotations } from "./entropyCreateStateFromJsons";
 import { urlQueryLabel } from "./treeVisibilityHelpers";
+import { version } from "../version";
 
 
 /**
@@ -304,6 +305,13 @@ export function metadataStateToJson(reduxState: RootState): object {
     meta.genome_annotations = genomeMapToGenomeAnnotations(entropy.genomeMap);
   }
 
+  /** We don't store any extensions data from the original JSON, so we can't re-export that.
+   * For debugging purposes, detail where this JSON came from:
+   */
+  meta.extensions = {
+    generated_by: `JSON created in Auspice (${version}) on ${_today()}`,
+  }
+
   return meta;
 }
 
@@ -351,4 +359,9 @@ function computedDisplayDefaults(state: RootState): Record<string, unknown> {
   if (state.general.language !== 'en') defaults.language = state.general.language;
 
   return defaults;
+}
+
+/** Return current YYYY-MM-DD in user's local timezone */
+function _today(): string {
+  return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }

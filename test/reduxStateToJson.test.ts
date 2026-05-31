@@ -93,6 +93,7 @@ describe.each(datasets)("\n\n%s round-trip", (_name, originalJson) => {
         [...Object.keys(originalJson.meta as Record<string, unknown>)].filter((k) => !NON_ROUND_TRIPPED_KEYS.includes(k))
       );
       const reconstructedKeys = new Set(Object.keys(reconstructedJson.meta || {}));
+      reconstructedKeys.delete('extensions'); // Auspice always uses this, but it may not be in the original JSON
       expect(originalKeys).toEqual(reconstructedKeys);
     });
 
