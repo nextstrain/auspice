@@ -1,4 +1,3 @@
-import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
 import type { Metadata } from "./metadata.types";
 
@@ -17,7 +16,6 @@ const initialState: Metadata = {
   rootSequence: undefined,
   identicalGenomeMapAcrossBothTrees: false,
   rootSequenceSecondTree: undefined,
-  colorOptions, // this can't be removed as the colorScale currently runs before it should
 };
 
 const metadata = (state: Metadata = initialState, action: any): Metadata => {

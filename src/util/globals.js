@@ -2,16 +2,6 @@ import { sqrt as scaleSqrt } from "d3-scale/src/pow";
 import scaleLinear from "d3-scale/src/linear";
 import { hasExtension, getExtension } from "../util/extensions";
 
-export const colorOptions = {
-  country: {key: "country", legendTitle: "Country", menuItem: "country", type: "discrete"},
-  region: {key: "region", legendTitle: "Region", menuItem: "region", type: "discrete"},
-  num_date: {key: "num_date", legendTitle: "Sampling date", menuItem: "date", type: "continuous"},
-  ep: {key: "ep", legendTitle: "Epitope Mutations", menuItem: "epitope mutations", type: "continuous"},
-  ne: {key: "ne", legendTitle: "Non-epitope Mutations", menuItem: "nonepitope mutations", type: "continuous"},
-  rb: {key: "rb", legendTitle: "Receptor Binding Mutations", menuItem: "RBS mutations", type: "continuous"},
-  gt: {key: "genotype", legendTitle: "Genotype", menuItem: "genotype", type: "discrete"}
-};
-
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
 export const margin = 60;
