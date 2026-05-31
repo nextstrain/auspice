@@ -1,29 +1,10 @@
 import * as types from "../actions/types";
 import type { Metadata } from "./metadata.types";
 
-const initialState: Metadata = {
-  loaded: false,
-  title: "",
-  updated: "",
-  sharing: {
-    dataset_json: true,
-    metadata_tsv: true,
-    authors: true,
-    trees: true,
-    entropy: true,
-    screenshot: true,
-  },
-  rootSequence: undefined,
-  identicalGenomeMapAcrossBothTrees: false,
-  rootSequenceSecondTree: undefined,
-};
-
-const metadata = (state: Metadata = initialState, action: any): Metadata => {
+const metadata = (state: Metadata = {loaded: false}, action: any): Metadata => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return { loaded: false };
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
     case types.TREE_TOO_DATA:
     case types.CLEAN_START:
