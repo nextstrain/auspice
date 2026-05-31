@@ -1,6 +1,6 @@
 import { TreeState, NodeAttr } from "../../reducers/tree/types";
 import type { ScaleType, ControlsState } from "../../reducers/controls";
-import type { ColoringInfo } from "../../reducers/metadata.types";
+import type { Colorings, GeoResolutions } from "../../reducers/metadata.types";
 
 /**
  * Struct containing new metadata information for merging with the current redux state.
@@ -9,16 +9,7 @@ import type { ColoringInfo } from "../../reducers/metadata.types";
  */
 export interface NewMetadata {
   attributes?: Record<string, AttrDetails>;
-
-  geographic?: {
-    /** trait name */
-    key: string;
-
-    /** map of trait value (the deme name) to lat/long */
-    demes: {
-      [deme: string]: LatLong;
-    }
-    }[];
+  geographic?: GeoResolutions[];
 }
 
 export interface UpdateMetadataAction {
@@ -29,20 +20,10 @@ export interface UpdateMetadataAction {
   metadata: ActionMetadata;
 }
 
-/** Metadata state is untyped, but we can define some basic types for the action */
-interface ActionMetadata {
-  colorings?: {
-    [coloringKey: string]: ColoringInfo;
-  };
-  geoResolutions?: {
-    demes: {
-      [demeName: string]: LatLong;
-    };
-    key: string;
-  }[];
-}
-
-
+type ActionMetadata = Partial<{
+  colorings: Colorings;
+  geoResolutions: GeoResolutions[];
+}>;
 
 interface ActionTree {
   /** nodeAttrs -> nodeName -> attrName -> attrData */
@@ -70,10 +51,4 @@ export interface AttrDetails {
 
   /** Mapping of attrValue to specified color */
   colors?: [string|number, string][]
-}
-
-
-interface LatLong {
-  latitude: number;
-  longitude: number;
 }

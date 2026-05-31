@@ -118,7 +118,7 @@ export interface GeoResolutions {
   demes: Record<string, LatLong>;
 }
 
-interface LatLong {
+export interface LatLong {
   /** latitude is [-90, 90] */
   latitude: number;
   /** longitude is [-180, 180] */
