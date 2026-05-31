@@ -1,7 +1,11 @@
 # Changelog
 
-## version 2.71.0 - 2026/05/25
+* Downloaded JSONs (via the "download data" button at the bottom of the page) are now created from internal state rather than re-fetching the original JSON.
+This allows additional dropped-on metadata to be exported, as well as allowing the functionality to work in auspice.us.
+Additionally, the current state of the UI (such as the color-by, which panels are toggled on etc) are saved into the downloaded JSON where possible.
+([#2055](https://github.com/nextstrain/auspice/pull/2055))
 
+## version 2.71.0 - 2026/05/25
 
 * Dragging on extra metadata is now more powerful. Columns which match existing colorings will now be merged, and Augur node-data JSONs can also be used. See [Drag-and-drop extra metadata](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/drag-drop-csv-tsv.html) for more. ([#2039](https://github.com/nextstrain/auspice/pull/2039))
 
