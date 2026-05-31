@@ -1,19 +1,26 @@
 import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
+import type { Metadata } from "./metadata.types";
 
-/* The metadata reducer holds data that is
- * (a) mostly derived from the dataset JSON
- * (b) rarely changes
- */
-
-const Metadata = (state = {
-  loaded: false, /* see comment in the sequences reducer for explanation */
-  metadata: null,
+const initialState: Metadata = {
+  loaded: false,
+  title: "",
+  updated: "",
+  sharing: {
+    dataset_json: true,
+    metadata_tsv: true,
+    authors: true,
+    trees: true,
+    entropy: true,
+    screenshot: true,
+  },
   rootSequence: undefined,
   identicalGenomeMapAcrossBothTrees: false,
   rootSequenceSecondTree: undefined,
-  colorOptions // this can't be removed as the colorScale currently runs before it should
-}, action) => {
+  colorOptions, // this can't be removed as the colorScale currently runs before it should
+};
+
+const metadata = (state: Metadata = initialState, action: any): Metadata => {
   switch (action.type) {
     case types.DATA_INVALID:
       return Object.assign({}, state, {
@@ -28,7 +35,7 @@ const Metadata = (state = {
     }
     case types.REMOVE_METADATA: {
       const colorings = {...state.colorings};
-      action.nodeAttrsToRemove.forEach((colorBy) => {
+      action.nodeAttrsToRemove.forEach((colorBy: string) => {
         if (colorBy in colorings) {
           delete colorings[colorBy];
         }
@@ -57,7 +64,12 @@ const Metadata = (state = {
   }
 };
 
-function getBuildUrlFromGetAvailableJson(availableData) {
+interface AvailableDataset {
+  request: string;
+  buildUrl?: string;
+}
+
+function getBuildUrlFromGetAvailableJson(availableData: AvailableDataset[] | undefined): string | undefined | false {
   if (!availableData) return undefined;
   /* check if the current dataset is present in the getAvailable data
   We currently parse the URL (pathname) for the current dataset but this
@@ -68,10 +80,10 @@ function getBuildUrlFromGetAvailableJson(availableData) {
     .split(":")[0];
   for (let i=0; i<availableData.length; i++) {
     if (availableData[i].request === displayedDatasetString) {
-      return availableData[i].buildUrl; // may be `undefined`
+      return availableData[i].buildUrl;
     }
   }
   return false;
 }
 
-export default Metadata;
+export default metadata;

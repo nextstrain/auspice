@@ -94,7 +94,9 @@ interface AvailableAPIData {
     }[]
 }
 
-export type ScaleType = "ordinal" | "categorical" | "continuous" | "temporal" | "boolean"
+export const SCALE_TYPE_VALUES = ["ordinal", "categorical", "continuous", "temporal", "boolean"] as const;
+
+export type ScaleType = typeof SCALE_TYPE_VALUES[number];
 
 export interface ScatterVariables {
   showBranches?: boolean

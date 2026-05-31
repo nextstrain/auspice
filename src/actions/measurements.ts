@@ -1,7 +1,7 @@
 import { batch } from "react-redux";
 import { quantile } from "d3-array";
 import { cloneDeep } from "lodash";
-import { Colorings } from "../metadata";
+import { Colorings } from "../reducers/metadata.types";
 import { AppDispatch, ThunkFunction } from "../store";
 import { colors, measurementIdSymbol } from "../util/globals";
 import { ControlsState, defaultMeasurementsControlState, MeasurementsControlState, MeasurementFilters } from "../reducers/controls";
