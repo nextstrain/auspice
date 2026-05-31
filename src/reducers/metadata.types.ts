@@ -5,7 +5,7 @@ import { ScaleType } from "./controls"
  */
 
 export type Metadata = {
-  loaded: boolean;
+  loaded: true;
   title: string;
   updated: string;
   sharing: MetadataSharing;
@@ -44,6 +44,10 @@ export type Metadata = {
   };
   geoResolutions?: Array<GeoResolutions>;
 }
+
+export type MetadataReduxState =
+  | { loaded: false }
+  | Metadata;
 
 export const PANEL_VALUES = ["tree", "map", "frequencies", "entropy", "measurements"] as const;
 

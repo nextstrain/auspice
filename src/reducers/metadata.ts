@@ -1,7 +1,7 @@
 import * as types from "../actions/types";
-import type { Metadata } from "./metadata.types";
+import type { MetadataReduxState, Metadata } from "./metadata.types";
 
-const metadata = (state: Metadata = {loaded: false}, action: any): Metadata => {
+const metadata = (state: MetadataReduxState = {loaded: false}, action: any): MetadataReduxState => {
   switch (action.type) {
     case types.DATA_INVALID:
       return { loaded: false };
@@ -10,9 +10,11 @@ const metadata = (state: Metadata = {loaded: false}, action: any): Metadata => {
     case types.CLEAN_START:
       return action.metadata;
     case types.UPDATE_METADATA: {
+      if (!assertLoaded(state, action.type)) return state;
       return Object.assign({}, state, action.metadata);
     }
     case types.REMOVE_METADATA: {
+      if (!assertLoaded(state, action.type)) return state;
       const colorings = {...state.colorings};
       action.nodeAttrsToRemove.forEach((colorBy: string) => {
         if (colorBy in colorings) {
@@ -22,6 +24,7 @@ const metadata = (state: Metadata = {loaded: false}, action: any): Metadata => {
       return {...state, colorings}
     }
     case types.SET_AVAILABLE: {
+      if (!assertLoaded(state, action.type)) return state;
       if (state.buildUrl) {
         return state; // do not use data from getAvailable to overwrite a buildUrl set from a dataset JSON
       }
@@ -32,6 +35,7 @@ const metadata = (state: Metadata = {loaded: false}, action: any): Metadata => {
       return state;
     }
     case types.SET_ROOT_SEQUENCE:
+      if (!assertLoaded(state, action.type)) return state;
       return {...state, rootSequence: action.data};
     case types.REMOVE_TREE_TOO:
       return Object.assign({}, state, {
@@ -63,6 +67,14 @@ function getBuildUrlFromGetAvailableJson(availableData: AvailableDataset[] | und
     }
   }
   return false;
+}
+
+function assertLoaded(state: MetadataReduxState, actionType: string): state is Metadata {
+  if (!state.loaded) {
+    console.error(`Metadata reducer: action ${actionType} called while loaded=false`);
+    return false;
+  }
+  return true
 }
 
 export default metadata;

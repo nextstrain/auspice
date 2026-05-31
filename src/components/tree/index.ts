@@ -5,38 +5,43 @@ import { TreeComponentOwnProps, TreeComponentStateProps } from "./types";
 
 const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwnProps, RootState> = (
   state: RootState,
-): TreeComponentStateProps => ({
-  tree: state.tree,
-  treeToo: state.treeToo,
-  selectedNode: state.controls.selectedNode,
-  dateMinNumeric: state.controls.dateMinNumeric,
-  dateMaxNumeric: state.controls.dateMaxNumeric,
-  filters: state.controls.filters,
-  quickdraw: state.controls.quickdraw,
-  colorBy: state.controls.colorBy,
-  colorByConfidence: state.controls.colorByConfidence,
-  layout: state.controls.layout,
-  scatterVariables: state.controls.scatterVariables,
-  temporalConfidence: state.controls.temporalConfidence,
-  distanceMeasure: state.controls.distanceMeasure,
-  explodeAttr: state.controls.explodeAttr,
-  focus: state.controls.focus,
-  colorScale: state.controls.colorScale,
-  colorings: state.metadata.colorings,
-  genomeMap: state.entropy.genomeMap,
-  showTreeToo: state.controls.showTreeToo,
-  showTangle: state.controls.showTangle,
-  showStreamTrees: state.controls.showStreamTrees,
-  panelsToDisplay: state.controls.panelsToDisplay,
-  selectedBranchLabel: state.controls.selectedBranchLabel,
-  canRenderBranchLabels: state.controls.canRenderBranchLabels,
-  showAllBranchLabels: state.controls.showAllBranchLabels,
-  tipLabelKey: state.controls.tipLabelKey,
-  narrativeMode: state.narrative.display,
-  animationPlayPauseButton: state.controls.animationPlayPauseButton,
-  showOnlyPanels: state.controls.showOnlyPanels,
-  performanceFlags: state.controls.performanceFlags,
-});
+): TreeComponentStateProps => {
+  if (!state.metadata.loaded) {
+    throw new Error("[INTERNAL ERROR] Tree component instantiated before metadata loaded=true")
+  }
+  return {
+    tree: state.tree,
+    treeToo: state.treeToo,
+    selectedNode: state.controls.selectedNode,
+    dateMinNumeric: state.controls.dateMinNumeric,
+    dateMaxNumeric: state.controls.dateMaxNumeric,
+    filters: state.controls.filters,
+    quickdraw: state.controls.quickdraw,
+    colorBy: state.controls.colorBy,
+    colorByConfidence: state.controls.colorByConfidence,
+    layout: state.controls.layout,
+    scatterVariables: state.controls.scatterVariables,
+    temporalConfidence: state.controls.temporalConfidence,
+    distanceMeasure: state.controls.distanceMeasure,
+    explodeAttr: state.controls.explodeAttr,
+    focus: state.controls.focus,
+    colorScale: state.controls.colorScale,
+    colorings: state.metadata.colorings,
+    genomeMap: state.entropy.genomeMap,
+    showTreeToo: state.controls.showTreeToo,
+    showTangle: state.controls.showTangle,
+    showStreamTrees: state.controls.showStreamTrees,
+    panelsToDisplay: state.controls.panelsToDisplay,
+    selectedBranchLabel: state.controls.selectedBranchLabel,
+    canRenderBranchLabels: state.controls.canRenderBranchLabels,
+    showAllBranchLabels: state.controls.showAllBranchLabels,
+    tipLabelKey: state.controls.tipLabelKey,
+    narrativeMode: state.narrative.display,
+    animationPlayPauseButton: state.controls.animationPlayPauseButton,
+    showOnlyPanels: state.controls.showOnlyPanels,
+    performanceFlags: state.controls.performanceFlags,
+  };
+};
 
 const Tree = connect(mapStateToProps)(UnconnectedTree);
 

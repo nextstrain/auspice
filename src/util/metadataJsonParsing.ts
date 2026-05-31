@@ -10,7 +10,9 @@ import { version } from "../version";
 
 
 /**
- * Parse the `json.meta` property returning redux state for redux.metadata and redux.entropy
+ * Parse the `json.meta` property returning redux state for redux.metadata and redux.entropy.
+ *
+ * We don't check for the presence of unhandled keys, we just ignore them.
  */
 export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy: unknown } {
   if (!validJson(json)) {
@@ -262,6 +264,11 @@ function _validateLegendArray(
  */
 export function metadataStateToJson(reduxState: RootState): object {
   const { metadata, entropy } = reduxState;
+  if (!metadata.loaded) {
+    console.error("Internal error (metadata.loaded = false)")
+    return {};
+  }
+
   const meta: Record<string, unknown> = {};
 
   // Ordering of metadata props here matches the `parseJsonMetaBlock` function so
@@ -329,6 +336,10 @@ function _computeJsonSharing(sharing: Metadata['sharing']): Record<string, false
  * state represents the current state of Auspice.
  */
 function computedDisplayDefaults(state: RootState): Record<string, unknown> {
+  if (!state.metadata.loaded) {
+    console.error("Internal error (metadata.loaded = false)")
+    return {};
+  }
   // Start by setting two base properties from the original display_defaults rather than
   // recreating them from the current UI state
   const dd = state.metadata.displayDefaults || {};
