@@ -1,4 +1,6 @@
 import React from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { withTheme } from 'styled-components';
 import * as icons from "../framework/svg-icons";
 import { NODE_VISIBLE, nucleotide_gene } from "../../util/globals";
@@ -6,7 +8,6 @@ import { materialButton } from "../../globalStyles";
 import * as helpers from "./helperFunctions";
 import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 import { getNumSelectedTips } from "../../util/treeVisibilityHelpers";
-import { getDatasetNamesFromUrl } from "../../actions/loadData";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -18,20 +19,17 @@ const iconWidth = 25;
  * A React Component displaying buttons which trigger data-downloads. Intended for display within the
  * larger Download modal component
  */
-export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, distanceMeasure, panelsToDisplay, panelLayout, visibility, relevantPublications}) => {
-  const totalTipCount = metadata.mainTreeNumTips;
-  const selectedTipsCount = getNumSelectedTips(tree.nodes, tree.visibility);
+export const DownloadButtons = ({ relevantPublications }) => {
+  // Access the entire state as we'll need it to download JSON
+  const state = useSelector((state) => state);
+  const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const totalTipCount = state.metadata.mainTreeNumTips;
+  const selectedTipsCount = getNumSelectedTips(state.tree.nodes, state.tree.visibility);
   const partialData = selectedTipsCount !== totalTipCount;
   const filePrefix = getFilePrefix();
-  const temporal = distanceMeasure === "num_date";
-
-  /**
-   * Currently our ability to download JSONs relies on parsing the URL and re-fetching the
-   * JSON. Check that we can parse datasets from the URL before exposing the button here.
-   * This check will be removed as part of <https://github.com/nextstrain/auspice/issues/2000>
-   */
-  const datasetNames = getDatasetNamesFromUrl(window.location.pathname);
-  const entropyBar = entropy?.selectedCds===nucleotide_gene ? "nucleotide" : "codon";
+  const temporal = state.controls.distanceMeasure === "num_date";
+  const entropyBar = state.entropy?.selectedCds===nucleotide_gene ? "nucleotide" : "codon";
 
   return (
     <>
@@ -44,63 +42,64 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
         <p/>
         {partialData ? `Currently ${selectedTipsCount}/${totalTipCount} tips are displayed and will be downloaded.` : `Currently the entire dataset (${totalTipCount} tips) will be downloaded.`}
       </div>
-      {metadata.sharing.dataset_json && datasetNames.some(Boolean) && (
+
+      {state.metadata.sharing.dataset_json && (
         <Button
           name="Auspice (Nextstrain) JSON"
-          description={`The main Auspice dataset JSON(s) for the current view`}
+          description={`The main Auspice dataset JSON with the current view as the display default.`}
           icon={<DatasetIcon width={iconWidth} selected />}
-          onClick={() => helpers.auspiceJSON(dispatch, datasetNames)}
+          onClick={() => helpers.auspiceJSON(dispatch, state, filePrefix)}
         />
       )}
-      {metadata.sharing.trees && (
+      {state.metadata.sharing.trees && (
         <>
           <Button
             name={`${temporal ? 'TimeTree' : 'Tree'} (Newick)`}
             description={`Phylogenetic tree in Newick format with branch lengths in units of ${temporal ? 'years' : 'divergence'}.`}
             icon={<RectangularTreeIcon width={iconWidth} selected />}
-            onClick={() => helpers.exportTree({ isNewick: true, dispatch, filePrefix, tree, temporal })}
+            onClick={() => helpers.exportTree({ isNewick: true, dispatch, filePrefix, tree: state.tree, temporal })}
           />
           <Button
             name={`${temporal ? 'TimeTree' : 'Tree'} (Nexus)`}
             description={`Phylogeny in Nexus format with branch lengths in units of ${temporal?'years':'divergence'}. Colorings are included as annotations.`}
             icon={<RectangularTreeIcon width={iconWidth} selected />}
-            onClick={() => helpers.exportTree({dispatch, filePrefix, tree, colorings: metadata.colorings, colorBy, temporal})}
+            onClick={() => helpers.exportTree({dispatch, filePrefix, tree: state.tree, colorings: state.metadata.colorings, colorBy: state.controls.colorBy, temporal})}
           />
         </>
       )}
-      {metadata.sharing.gisaid_acknowledgments && (
+      {state.metadata.sharing.gisaid_acknowledgments && (
         <Button
           name="Acknowledgments (TSV)"
           description={`Per-sample acknowledgments (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.acknowledgmentsTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
+          onClick={() => helpers.acknowledgmentsTSV(dispatch, filePrefix, state.tree.nodes, state.tree.visibility)}
         />
       )}
-      {metadata.sharing.metadata_tsv && (
+      {state.metadata.sharing.metadata_tsv && (
         <Button
           name="Metadata (TSV)"
           description={`Per-sample metadata (n = ${selectedTipsCount}).`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.strainTSV(dispatch, filePrefix, tree.nodes, tree.visibility)}
+          onClick={() => helpers.strainTSV(dispatch, filePrefix, state.tree.nodes, state.tree.visibility)}
         />
       )}
-      {metadata.sharing.authors && helpers.areAuthorsPresent(tree) && (
+      {state.metadata.sharing.authors && helpers.areAuthorsPresent(state.tree) && (
         <Button
           name="Author Metadata (TSV)"
-          description={`Metadata for ${selectedTipsCount} samples grouped by their ${getNumUniqueAuthors(tree.nodes, tree.visibility)} authors.`}
+          description={`Metadata for ${selectedTipsCount} samples grouped by their ${getNumUniqueAuthors(state.tree.nodes, state.tree.visibility)} authors.`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.authorTSV(dispatch, filePrefix, tree)}
+          onClick={() => helpers.authorTSV(dispatch, filePrefix, state.tree)}
         />
       )}
-      {metadata.sharing.entropy && entropy.loaded && (
+      {state.metadata.sharing.entropy && state.entropy.loaded && (
         <Button
           name="Genetic diversity data (TSV)"
-          description={`The data behind the diversity panel showing ${entropy.showCounts?`a count of changes across the tree`:`normalised shannon entropy`} per ${entropyBar}.`}
+          description={`The data behind the diversity panel showing ${state.entropy.showCounts?`a count of changes across the tree`:`normalised shannon entropy`} per ${entropyBar}.`}
           icon={<MetaIcon width={iconWidth} selected />}
-          onClick={() => helpers.entropyTSV(dispatch, filePrefix, entropy)}
+          onClick={() => helpers.entropyTSV(dispatch, filePrefix, state.entropy)}
         />
       )}
-      {metadata.sharing.screenshot && (
+      {state.metadata.sharing.screenshot && (
         <Button
           name="Screenshot (SVG)"
           description="Screenshot of the current nextstrain display in SVG format; CC-BY licensed."
@@ -108,12 +107,12 @@ export const DownloadButtons = ({dispatch, t, tree, entropy, metadata, colorBy, 
           onClick={() => helpers.SVG(
             dispatch,
             t,
-            metadata,
-            tree.nodes,
-            visibility,
+            state.metadata,
+            state.tree.nodes,
+            state.tree.visibility,
             getFilePrefix(),
-            panelsToDisplay,
-            panelLayout,
+            state.controls.panelsToDisplay,
+            state.controls.panelLayout.panelLayout,
             relevantPublications
           )}
         />

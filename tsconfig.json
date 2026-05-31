@@ -19,7 +19,8 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     /* Modules */
     "module": "esnext",                                  /* Specify what module code is generated. Required for dynamic `import()`. */
     "moduleResolution": "node",                          /* Specify how TypeScript looks up a file from a given module specifier. */
-    "types": ["node", "webpack-env"],                    /* Specify type package names to be included without being referenced in a source file. */
+    "types": ["node", "webpack-env", "jest"],             /* Specify type package names to be included without being referenced in a source file. */
+    "resolveJsonModule": true,                             /* Allow importing .json files. */
 
     /* JavaScript Support */
     "allowJs": true,                                     /* Allow JavaScript files to be a part of your program. This allows TS files to import from JS files. */
@@ -50,6 +51,7 @@ Visit https://aka.ms/tsconfig.json for a detailed list of options.
     "skipLibCheck": true,                                /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ]
 }

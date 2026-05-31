@@ -289,7 +289,6 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
      */
     state.filtersInFooter = [...metadata.filters];
   } else {
-    console.warn("JSON did not include any filters");
     state.filtersInFooter = [];
   }
   if (metadata.displayDefaults) {

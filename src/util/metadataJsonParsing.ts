@@ -2,7 +2,11 @@ import type { Metadata, LegendContinuous, LegendNonContinuous } from "../reducer
 import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES } from "../reducers/metadata.types";
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
-import { ScaleType, SCALE_TYPE_VALUES } from "../reducers/controls";
+import { ScaleType, SCALE_TYPE_VALUES, getDefaultControlsState } from "../reducers/controls";
+import type { RootState } from "../store";
+import { genomeMapToGenomeAnnotations } from "./entropyCreateStateFromJsons";
+import { urlQueryLabel } from "./treeVisibilityHelpers";
+import { version } from "../version";
 
 
 /**
@@ -248,4 +252,116 @@ function _validateLegendArray(
     !utils.isString(el.value)
   ) return true;
   return false;
+}
+
+
+
+/**
+ * Somewhat the inverse of parseJsonMetaBlock: reconstructs the `meta` JSON object
+ * from the Redux metadata state, reversing structural transformations applied during ingestion.
+ */
+export function metadataStateToJson(reduxState: RootState): object {
+  const { metadata, entropy } = reduxState;
+  const meta: Record<string, unknown> = {};
+
+  // Ordering of metadata props here matches the `parseJsonMetaBlock` function so
+  // it's easier to compare code side-by-side
+
+  if (metadata.title) meta.title = metadata.title;
+  if (metadata.updated) meta.updated = metadata.updated;
+
+  if (metadata.colorings) {
+    const _colorings = Object.entries(metadata.colorings)
+      .filter(([key]) => key !== 'gt') // 'gt' is dynamically generated in Auspice
+      .map(([key, value]) => ({ key, ...value }));
+    if (_colorings.length) meta.colorings = _colorings;
+  }
+
+  if (metadata.description) meta.description = metadata.description;
+  if (metadata.warning) meta.warning = metadata.warning;
+  // `metadata.version` is stored in JSON.version, not JSON.meta.version
+  // Don't export 'originalVersion' (json.meta.extensions.original_version)
+  if (metadata.maintainers) meta.maintainers = metadata.maintainers;
+  if (metadata.buildUrl) meta.build_url = metadata.buildUrl;
+  if (metadata.buildAvatar) meta.build_avatar = metadata.buildAvatar;
+  if (metadata.dataProvenance) meta.data_provenance = metadata.dataProvenance;
+  if (metadata.filters) meta.filters = metadata.filters;
+  if (metadata.panels) meta.panels = metadata.panels;
+  if (metadata.streamLabels) meta.stream_labels = metadata.streamLabels;
+
+  // Note: metadata.rootSequence is assigned to json.root_sequence (or a sidecar), not json.meta
+
+  const display_defaults = computedDisplayDefaults(reduxState);
+  if (Object.keys(display_defaults).length) {
+    meta.display_defaults = display_defaults;
+  }
+
+  if (metadata.geoResolutions) meta.geo_resolutions = metadata.geoResolutions;
+
+  const sharing = _computeJsonSharing(metadata.sharing)
+  if (Object.keys(sharing).length) meta.sharing = sharing;
+
+  if (entropy.genomeMap?.length) {
+    meta.genome_annotations = genomeMapToGenomeAnnotations(entropy.genomeMap);
+  }
+
+  /** We don't store any extensions data from the original JSON, so we can't re-export that.
+   * For debugging purposes, detail where this JSON came from:
+   */
+  meta.extensions = {
+    generated_by: `JSON created in Auspice (${version}) on ${_today()}`,
+  }
+
+  return meta;
+}
+
+
+function _computeJsonSharing(sharing: Metadata['sharing']): Record<string, false> {
+  return Object.fromEntries(
+    Object.entries(sharing)
+      .filter(([key, _value]) => key!=='gisaid_acknowledgments')
+      .filter(([_key, value]) => value===false)
+  )
+}
+
+/**
+ * Compute the display_defaults to (as best as we can) produce a JSON whose initial (default)
+ * state represents the current state of Auspice.
+ */
+function computedDisplayDefaults(state: RootState): Record<string, unknown> {
+  // Start by setting two base properties from the original display_defaults rather than
+  // recreating them from the current UI state
+  const dd = state.metadata.displayDefaults || {};
+  const defaults: Record<string, unknown> = {
+    //                     [auspice prop]      [json key name]  [auspice prop]
+    ...(Object.hasOwn(dd, 'mapTriplicate') && { map_triplicate: dd.mapTriplicate }),
+    ...(Object.hasOwn(dd, 'sidebar') && { sidebar: dd.sidebar }),
+  }
+
+  // Now inject specific data from redux state (i.e. UI-driven) if it doesn't match Auspice's defaults.
+  // (If it matches the defaults Auspice would set, then don't export it)
+  const defaultControls = getDefaultControlsState();
+  const { controls } = state;
+  if (controls.layout !== defaultControls.layout) defaults.layout = controls.layout;
+  if (controls.colorBy !== defaultControls.colorBy) defaults.color_by = controls.colorBy;
+  if (controls.distanceMeasure !== defaultControls.distanceMeasure) defaults.distance_measure = controls.distanceMeasure;
+  if (controls.geoResolution !== defaultControls.geoResolution) defaults.geo_resolution = controls.geoResolution;
+  if (controls.selectedBranchLabel !== defaultControls.selectedBranchLabel) defaults.branch_label = controls.selectedBranchLabel;
+  if (controls.tipLabelKey !== defaultControls.tipLabelKey) defaults.tip_label = controls.tipLabelKey;
+  if (controls.showTransmissionLines !== defaultControls.showTransmissionLines) defaults.transmission_lines = controls.showTransmissionLines;
+  if (controls.showStreamTrees) defaults.stream_label = controls.streamTreeBranchLabel;
+  if (controls.panelsToDisplay.length) defaults.panels = controls.panelsToDisplay;
+  // Find out if the current zoom level has an available (branch) label
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const label = urlQueryLabel(state.tree.nodes![state.tree.idxOfInViewRootNode], state.tree.availableBranchLabels)
+  if (label) defaults.label = label;
+  // language is special-cased in the code
+  if (state.general.language !== 'en') defaults.language = state.general.language;
+
+  return defaults;
+}
+
+/** Return current YYYY-MM-DD in user's local timezone */
+function _today(): string {
+  return new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 }

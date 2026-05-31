@@ -22,3 +22,6 @@ npm-debug.log
 ### IDE ###
 .vscode/*
 .zed/*
+
+test/fetched-jsons/*
+!test/fetched-jsons/README.md
