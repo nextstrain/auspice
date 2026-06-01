@@ -225,3 +225,36 @@ Releasing Auspice requires a few manual steps as there are so many downstream ta
             ```
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
 1. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
+
+---
+
+## Maps
+
+Auspice renders phylogeographic data on an interactive world map. The map displays demes (coloured circles representing geographic locations) and transmission lines connecting them, overlaid on a tiled basemap.
+
+### Libraries
+
+- [Leaflet](https://leafletjs.com/) (v1.7.1) — provides the interactive map container, pan/zoom controls, event handling, and the coordinate system for overlays.
+- [MapLibre GL JS](https://maplibre.org/) — renders Mapbox Vector Tiles (MVT/PBF format) client-side using WebGL. Vector tiles are smaller and sharper than raster tiles at all zoom levels.
+- [@maplibre/maplibre-gl-leaflet](https://github.com/maplibre/maplibre-gl-leaflet) — bridges MapLibre GL into Leaflet as a tile layer, allowing the existing Leaflet infrastructure (events, controls, D3 overlays) to remain unchanged.
+- [D3](https://d3js.org/) — renders demes and transmission lines as SVG overlays on top of the Leaflet map.
+
+### Basemap style
+
+The default basemap uses a custom Mapbox style (`mapbox://styles/trvrb/ciu03v244002o2in5hlm3q6w2`) created by Trevor Bedford. This style provides a deliberately muted geography so it does not visually compete with the D3 data overlays (demes and transmission lines).
+
+### How Mapbox fits in
+
+Mapbox is used exclusively as a **tile and asset hosting service** — we do not use any Mapbox client SDK. The rendering is done entirely by MapLibre GL JS (an open-source fork of Mapbox GL JS). The sequence of API calls when the map loads is:
+
+1. **Style JSON** — MapLibre fetches the style document from `https://api.mapbox.com/styles/v1/{user}/{styleId}`. This JSON describes layers, paint properties, and references to sources/sprites/fonts via `mapbox://` protocol URLs.
+2. **TileJSON metadata** — The style's `sources` reference tilesets like `mapbox://mapbox.mapbox-streets-v7`. MapLibre resolves these to `https://api.mapbox.com/v4/{tileset_id}.json` which returns tile URL templates.
+3. **Vector tiles (PBF)** — Using the URL templates from TileJSON, MapLibre fetches individual tiles as protocol-buffer-encoded vector data (e.g. `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf`). This is the [Vector Tiles API](https://docs.mapbox.com/api/maps/vector-tiles/) ($0.25/1k requests).
+4. **Sprites** — Icon/pattern atlases referenced as `mapbox://sprites/{user}/{styleId}` are fetched from `https://api.mapbox.com/styles/v1/{user}/{styleId}/sprite{@2x}.{png,json}`.
+5. **Glyphs (fonts)** — Label fonts referenced as `mapbox://fonts/{user}/{stack}/{range}.pbf` are fetched from `https://api.mapbox.com/fonts/v1/{user}/{stack}/{range}.pbf`.
+
+Because MapLibre doesn't understand the proprietary `mapbox://` protocol, we provide a `transformRequest` callback (in `src/components/map/map.js`) that rewrites each `mapbox://` URL to its HTTPS equivalent before the request is made. All requests are authenticated via an `access_token` query parameter using the token configured in `src/util/globals.js`.
+
+### Configuration
+
+The basemap can be customised via the `mapTiles` extension — see [the client customisation API documentation](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html) for details on providing your own style URL and access token.
