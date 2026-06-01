@@ -161,19 +161,22 @@ By default, the client makes API requests (:doc:`as detailed here <requests>`) t
 Custom Map tiles
 ~~~~~~~~~~~~~~~~
 
-Auspice uses `Leaflet <https://leafletjs.com/>`__ to render the map, which requires access to a tile set in order to render the geography. By default, auspice uses `Mapbox <https://www.mapbox.com/>`__ for these tiles, and we make these available for local use of auspice. If you are distributing your own version of auspice (i.e. not running it locally) you must set an appropriate API address here so that the map can fetch suitable tiles.
+.. note::
+  Auspice v3 introduced a breaking change to this interface. This page reflects the v3 API.
+  Navigate to Auspice v2 docs for the raster-tile URL approach.
+
+Auspice uses `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to render the map using vector tiles. By default, auspice uses a custom `Mapbox <https://www.mapbox.com/>`__ style for these tiles, and we make these available for local use of auspice. If you are distributing your own version of auspice (i.e. not running it locally) you must provide your own style URL and access token so that the map can fetch suitable tiles.
 
 .. code:: json
 
    {
      "mapTiles": {
-       "api": "API address for Leaflet to fetch map tiles",
+       "style": "A MapLibre/Mapbox style URL (e.g. mapbox://styles/user/styleid)",
+       "accessToken": "Access token for the tile provider",
        "attribution": "HTML-formatted attribution string to be displayed in bottom-right-hand corner of map",
        "mapboxWordmark": "(optional) should the Mapbox logo be displayed in the bottom-left of the map? (boolean)"
      }
    }
-
-Please see `this discussion post <https://discussion.nextstrain.org/t/build-with-newest-nextstrain-ncov-has-api-requests-to-mapbox-403-forbidden/396/11?u=james>`__ for a hands-on guide to setting custom map tile info. For some examples of other tile sets you may use, see the `OpenStreetMap wiki <https://wiki.openstreetmap.org/wiki/Tile_servers>`__, and please remember to adhere to the licenses and terms of use for each tile server. The API address contains parameters as specified by the `Leaflet API <https://docs.mapbox.com/api/overview/>`__.
 
 --------------
 
