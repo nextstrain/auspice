@@ -6,6 +6,8 @@ import leaflet from "leaflet";
 import { GestureHandling } from "leaflet-gesture-handling";
 import "leaflet/dist/leaflet.css";
 import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@maplibre/maplibre-gl-leaflet';
 import _min from "lodash/min";
 import _max from "lodash/max";
 import domtoimage from "dom-to-image";
@@ -494,8 +496,35 @@ class Map extends React.Component {
 
     map.getRenderer(map).options.padding = 2;
 
-    L.tileLayer(this.state.tilesSettings.api, {attribution: this.state.tilesSettings.attribution || ''})
-      .addTo(map);
+    const token = this.state.tilesSettings.accessToken;
+    L.maplibreGL({
+      style: this.state.tilesSettings.style,
+      // MapLibre doesn't understand Mapbox's proprietary mapbox:// protocol URLs which
+      // appear inside the style JSON for sources, sprites, and fonts. We rewrite them here.
+      transformRequest: (url) => {
+        // Mapbox's TileJSON responses reference tile URLs over http:// which fails CORS
+        if (url.startsWith('http://')) {
+          return {url: url.replace('http://', 'https://')};
+        }
+        if (!url.startsWith('mapbox://')) return {url};
+        const path = url.slice('mapbox://'.length);
+        // mapbox://fonts/{user}/{stack}/{range}.pbf → /fonts/v1/{user}/{stack}/{range}.pbf
+        if (path.startsWith('fonts/')) {
+          return {url: `https://api.mapbox.com/fonts/v1/${path.slice('fonts/'.length)}?access_token=${token}`};
+        }
+        // mapbox://sprites/{user}/{styleId}{suffix} → /styles/v1/{user}/{styleId}/sprite{suffix}
+        if (path.startsWith('sprites/')) {
+          const match = path.match(/^sprites\/([^/]+)\/([^@.]+)(.*)/);
+          if (match) {
+            const [, user, styleId, suffix] = match;
+            return {url: `https://api.mapbox.com/styles/v1/${user}/${styleId}/sprite${suffix}?access_token=${token}`};
+          }
+        }
+        // mapbox://{tileset_id} → /v4/{tileset_id}.json (TileJSON metadata for vector sources)
+        return {url: `https://api.mapbox.com/v4/${path}.json?access_token=${token}`};
+      },
+      attribution: this.state.tilesSettings.attribution || ''
+    }).addTo(map);
 
     if (!this.props.narrativeMode) {
       L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
