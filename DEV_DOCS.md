@@ -385,6 +385,7 @@ We interact with this via `maplibre-gl-leaflet` so the canvas layer is within Le
 A **MapLibre Style Spec JSON** describes layers, paint properties, and references (URLs) to vector tiles, sprites, glyphs etc. to fetch for map rendering.
 Auspice uses [a customised style JSON](https://github.com/nextstrain/auspice/blob/master/src/util/map-styles.json) originally based on [OpenMapTiles' positron theme](https://github.com/openmaptiles/positron-gl-style).
 The underlying resources (tiles, sprites etc) are currently fetched from OpenMapTiles, as defined in the styles JSON.
+You can use a built-time extension to use a different style sheet; see [test/example-customisations/openfreemap/](https://github.com/nextstrain/auspice/tree/master/test/example-customisations/openfreemap/).
 
 > Auspice v2 used **Mapbox** as our tile provider via a customised MapBox style sheet.
   Auspice v3 can no longer use Mapbox stylesheets (as MapLibre doesn't understand the proprietary `mapbox://` protocol), however there is a helper script [transform-mapbox-style-json.js](https://github.com/nextstrain/auspice/blob/master/scripts/transform-mapbox-style-json.js) which transforms the JSON to rewrite each `mapbox://` URL to its HTTPS equivalent, thus producing a MapLibre-compatible style sheet which can be used as via build-time extensions.

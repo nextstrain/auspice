@@ -208,7 +208,9 @@ Examples of map customisations are available in the Auspice repo:
 
 1. `(Transformed) Mapbox styles <https://github.com/nextstrain/auspice/tree/master/test/example-customisations/mapbox/>`__
 
-  
+2. `OpenFreeMap's positron theme <https://github.com/nextstrain/auspice/tree/master/test/example-customisations/openfreemap/>`__
+
+
 --------------
 
 Tracking Analytics
