@@ -1,6 +1,6 @@
 import { TreeState, NodeAttr } from "../../reducers/tree/types";
 import type { ScaleType, ControlsState } from "../../reducers/controls";
-import type { Colorings, GeoResolutions } from "../../reducers/metadata.types";
+import type { Metadata } from "../../reducers/metadata.types";
 
 /**
  * Struct containing new metadata information for merging with the current redux state.
@@ -9,7 +9,7 @@ import type { Colorings, GeoResolutions } from "../../reducers/metadata.types";
  */
 export interface NewMetadata {
   attributes?: Record<string, AttrDetails>;
-  geographic?: GeoResolutions[];
+  geographic?: Metadata["geoResolutions"];
 }
 
 export interface UpdateMetadataAction {
@@ -20,10 +20,7 @@ export interface UpdateMetadataAction {
   metadata: ActionMetadata;
 }
 
-type ActionMetadata = Partial<{
-  colorings: Colorings;
-  geoResolutions: GeoResolutions[];
-}>;
+type ActionMetadata = Partial<Pick<Metadata, "colorings" | "geoResolutions">>;
 
 interface ActionTree {
   /** nodeAttrs -> nodeName -> attrName -> attrData */
