@@ -36,12 +36,12 @@ The initial Auspice page (i.e. the one which displays a listing of available dat
 External Requests
 -----------------
 
-Leaflet
-~~~~~~~
+Leaflet + MapLibre GL
+~~~~~~~~~~~~~~~~~~~~~
 
-We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles.
+We use `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to display the map. MapLibre renders Mapbox Vector Tiles (MVT) client-side from a Mapbox style URL.
 
-If a map is displayed by Auspice the individual tiles are requested from api.mapbox.com. Panning and zooming of the map result in futher requests for tiles. These are requested using our hardcoded access key, however this may change to a build-time-customisation in the future.
+If a map is displayed by Auspice, vector tiles are requested from api.mapbox.com. Panning and zooming of the map result in further requests for tiles. These are requested using our hardcoded access key, however this may be customised via the ``mapTiles`` extension (see :ref:`the client customisation API documentation <client-api-available-customisations>`).
 
 Web Analytics (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~
