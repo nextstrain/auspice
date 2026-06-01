@@ -12,10 +12,7 @@ export type Metadata = {
   streamLabels?: string[];
   rootSequence?: RootSequence;
   rootSequenceSecondTree?: RootSequence;
-  maintainers?: Array<{
-    name: string;
-    url?: string;
-  }>;
+  maintainers?: NameAndUrl[];
   identicalGenomeMapAcrossBothTrees?: boolean;
   colorings?: Colorings;
   version?: string;
@@ -26,7 +23,7 @@ export type Metadata = {
   buildAvatar?: string;
   panels?: Panel[];
   filters?: string[];
-  dataProvenance?: { name: string; url: string; }[];
+  dataProvenance?: NameAndUrl[];
   displayDefaults?: {
     mapTriplicate?: boolean;
     geoResolution?: string;
@@ -127,4 +124,9 @@ export interface LatLong {
 
 interface RootSequence {
   [cdsNameOrNuc: string]: string;
+}
+
+export interface NameAndUrl {
+  name: string;
+  url?: string;
 }
