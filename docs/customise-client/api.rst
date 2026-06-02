@@ -165,18 +165,36 @@ Custom Map tiles
   Auspice v3 introduced a breaking change to this interface. This page reflects the v3 API.
   Navigate to Auspice v2 docs for the raster-tile URL approach.
 
-Auspice uses `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to render the map using vector tiles. By default, auspice uses a custom `Mapbox <https://www.mapbox.com/>`__ style for these tiles, and we make these available for local use of auspice. If you are distributing your own version of auspice (i.e. not running it locally) you must provide your own style URL and access token so that the map can fetch suitable tiles.
+Auspice uses `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to render the map using vector tiles. By default, auspice uses a custom `Mapbox <https://www.mapbox.com/>`__ style for these tiles, and we make these available for local use of auspice. If you are distributing your own version of auspice (i.e. not running it locally) you must provide your own tiles so that the map can fetch them.
+
+The renderer is provider-agnostic: it simply renders whatever `MapLibre style <https://maplibre.org/maplibre-style-spec/>`__ you give it, so you are not limited to Mapbox. Any provider that serves a MapLibre-compatible style works (e.g. Mapbox, MapTiler, Stadia Maps, or a self-hosted style).
 
 .. code:: json
 
    {
      "mapTiles": {
-       "style": "A MapLibre/Mapbox style URL (e.g. mapbox://styles/user/styleid)",
-       "accessToken": "Access token for the tile provider",
-       "attribution": "HTML-formatted attribution string to be displayed in bottom-right-hand corner of map",
+       "style": "A MapLibre style — see below",
+       "accessToken": "(optional) access token for the tile provider — see below",
+       "attribution": "HTML-formatted attribution string to be displayed in the bottom-right-hand corner of the map",
        "mapboxWordmark": "(optional) should the Mapbox logo be displayed in the bottom-left of the map? (boolean)"
      }
    }
+
+If ``mapTiles`` is provided it fully replaces the default; specify every field you need (there is no merging with our defaults).
+
+``style``
+  Either a URL string that resolves to a `MapLibre style document <https://maplibre.org/maplibre-style-spec/>`__, or the style document inline as a JSON object. The document declares everything the map needs — sources (tiles), sprites, fonts (glyphs), and layers — so in most cases this is the only thing you need to provide.
+
+``accessToken``
+  Optional, and only relevant if your provider requires a key. Rather than embedding the key directly in the style, place the string ``<ACCESS_TOKEN>`` wherever the key value is required and supply the key here; it is substituted in at runtime. Because the placeholder is the *value* only, the surrounding query parameter comes from your provider's own URLs (``?access_token=<ACCESS_TOKEN>`` for Mapbox, ``?key=<ACCESS_TOKEN>`` for MapTiler, etc.), so the same mechanism works across providers. Providers that don't need a key can omit this field entirely.
+
+.. note::
+
+  Mapbox styles authored in Mapbox Studio reference sources, sprites, and fonts via Mapbox's proprietary ``mapbox://`` protocol, which MapLibre cannot fetch directly. If you wish to use such a style inline, you can rewrite those references to their ``https://api.mapbox.com/...`` equivalents (and template the token as ``<ACCESS_TOKEN>``) using ``scripts/transform-mapbox-style-json.js`` in the auspice source. This is how our default style is produced.
+
+.. note::
+
+  As tiles are fetched, auspice rewrites any ``http://`` request to ``https://``. This guards against mixed-content and CORS failures, and is needed because Mapbox's TileJSON responses reference their tile URLs over ``http://``. This rewrite is provider-agnostic and harmless for providers that already serve everything over ``https://``.
 
 --------------
 
