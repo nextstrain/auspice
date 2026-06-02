@@ -243,18 +243,19 @@ Auspice renders phylogeographic data on an interactive world map. The map displa
 
 The default basemap uses a custom Mapbox style (`mapbox://styles/trvrb/ciu03v244002o2in5hlm3q6w2`) created by Trevor Bedford. This style provides a deliberately muted geography so it does not visually compete with the D3 data overlays (demes and transmission lines).
 
-### How Mapbox fits in
+### Maps and map tile server(s)
 
-Mapbox is used exclusively as a **tile and asset hosting service** — we do not use any Mapbox client SDK. The rendering is done entirely by MapLibre GL JS (an open-source fork of Mapbox GL JS). The sequence of API calls when the map loads is:
+**MapLibre GL JS** is used as the rendering engine in Auspice, using webworkers to render vector tiles into a canvas.
+We interact with this via `maplibre-gl-leaflet` so the canvas layer is within Leaflet as that is how we overlay our d3 elements on the map.
 
-1. **Style JSON** — MapLibre fetches the style document from `https://api.mapbox.com/styles/v1/{user}/{styleId}`. This JSON describes layers, paint properties, and references to sources/sprites/fonts via `mapbox://` protocol URLs.
-2. **TileJSON metadata** — The style's `sources` reference tilesets like `mapbox://mapbox.mapbox-streets-v7`. MapLibre resolves these to `https://api.mapbox.com/v4/{tileset_id}.json` which returns tile URL templates.
-3. **Vector tiles (PBF)** — Using the URL templates from TileJSON, MapLibre fetches individual tiles as protocol-buffer-encoded vector data (e.g. `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/{z}/{x}/{y}.vector.pbf`). This is the [Vector Tiles API](https://docs.mapbox.com/api/maps/vector-tiles/) ($0.25/1k requests).
-4. **Sprites** — Icon/pattern atlases referenced as `mapbox://sprites/{user}/{styleId}` are fetched from `https://api.mapbox.com/styles/v1/{user}/{styleId}/sprite{@2x}.{png,json}`.
-5. **Glyphs (fonts)** — Label fonts referenced as `mapbox://fonts/{user}/{stack}/{range}.pbf` are fetched from `https://api.mapbox.com/fonts/v1/{user}/{stack}/{range}.pbf`.
+A **MapLibre Style Spec JSON** describes layers, paint properties, and references (URLs) to vector tiles, sprites, glyphs etc. to fetch for map rendering.
+Auspice's default style JSON (see below) is inlined, but this may be replaced by a custom one via our extentions architecture; see [our API docs for more](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html).
 
-Because MapLibre doesn't understand the proprietary `mapbox://` protocol, we provide a `transformRequest` callback (in `src/components/map/map.js`) that rewrites each `mapbox://` URL to its HTTPS equivalent before the request is made. All requests are authenticated via an `access_token` query parameter using the token configured in `src/util/globals.js`.
+We use **Mapbox** as our tile provider, and hardcode the styles JSON in our codebase.
+Because MapLibre doesn't understand the proprietary `mapbox://` protocol, we transform the JSON to rewrite each `mapbox://` URL to its HTTPS equivalent:
 
-### Configuration
-
-The basemap can be customised via the `mapTiles` extension — see [the client customisation API documentation](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html) for details on providing your own style URL and access token.
+```sh
+node scripts/transform-mapbox-style-json.js \
+  'https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2?access_token=pk.ey...' \
+  > src/util/mapbox-styles.json
+```
