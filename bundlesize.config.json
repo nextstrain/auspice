@@ -6,8 +6,13 @@
       "compression": "brotli"
     },
     {
-      "path": "./dist/auspice?(.chunk).*([0-9]|mainComponent|mapComponent|other-vendors|core-vendors|polyfills).bundle.*.js",
+      "path": "./dist/auspice?(.chunk).*([0-9]|mainComponent|other-vendors|core-vendors|polyfills).bundle.*.js",
       "maxSize": "100 kB",
+      "compression": "brotli"
+    },
+    {
+      "path": "./dist/auspice?(.chunk).*mapComponent.bundle.*.js",
+      "maxSize": "250 kB",
       "compression": "brotli"
     },
     {
