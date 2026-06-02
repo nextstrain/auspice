@@ -499,29 +499,17 @@ class Map extends React.Component {
     const token = this.state.tilesSettings.accessToken;
     L.maplibreGL({
       style: this.state.tilesSettings.style,
-      // MapLibre doesn't understand Mapbox's proprietary mapbox:// protocol URLs which
-      // appear inside the style JSON for sources, sprites, and fonts. We rewrite them here.
+      // Provider-agnostic request rewriting. Any provider-proprietary URLs (e.g. Mapbox's
+      // mapbox:// protocol) are expected to already be resolved within the style document;
+      // see scripts/transform-mapbox-style-json.js for how we do this for our Mapbox default.
       transformRequest: (url) => {
-        // Mapbox's TileJSON responses reference tile URLs over http:// which fails CORS
-        if (url.startsWith('http://')) {
-          return {url: url.replace('http://', 'https://')};
-        }
-        if (!url.startsWith('mapbox://')) return {url};
-        const path = url.slice('mapbox://'.length);
-        // mapbox://fonts/{user}/{stack}/{range}.pbf → /fonts/v1/{user}/{stack}/{range}.pbf
-        if (path.startsWith('fonts/')) {
-          return {url: `https://api.mapbox.com/fonts/v1/${path.slice('fonts/'.length)}?access_token=${token}`};
-        }
-        // mapbox://sprites/{user}/{styleId}{suffix} → /styles/v1/{user}/{styleId}/sprite{suffix}
-        if (path.startsWith('sprites/')) {
-          const match = path.match(/^sprites\/([^/]+)\/([^@.]+)(.*)/);
-          if (match) {
-            const [, user, styleId, suffix] = match;
-            return {url: `https://api.mapbox.com/styles/v1/${user}/${styleId}/sprite${suffix}?access_token=${token}`};
-          }
-        }
-        // mapbox://{tileset_id} → /v4/{tileset_id}.json (TileJSON metadata for vector sources)
-        return {url: `https://api.mapbox.com/v4/${path}.json?access_token=${token}`};
+        // Upgrade insecure URLs (e.g. Mapbox's TileJSON references tile URLs over http://).
+        let next = url.startsWith('http://') ? `https://${url.slice('http://'.length)}` : url;
+        // Substitute the access token into URLs that template it. The placeholder is the token
+        // value only — the surrounding query param (?access_token=, ?key=, …) comes from the
+        // provider's own URL structure — so this works regardless of tile provider.
+        if (token) next = next.replaceAll('<ACCESS_TOKEN>', token);
+        return {url: next};
       },
       attribution: this.state.tilesSettings.attribution || ''
     }).addTo(map);
