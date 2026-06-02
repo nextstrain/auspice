@@ -24,6 +24,7 @@ interface DatasetJson {
  */
 export function createDatasetJson(getState: () => RootState): DatasetJson {
   const reduxState = getState();
+  if (!reduxState.metadata.loaded) throw new Error("[INTERNAL ERROR] metadata state not loaded")
   const rootSequence = handleRootSequences(reduxState.metadata);
   const json = {
     version: "v2" as const,

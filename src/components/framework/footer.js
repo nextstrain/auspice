@@ -222,7 +222,6 @@ const CollapseTitle = ({name, isExpanded=false}) => (
     tree: state.tree,
     totalStateCounts: state.tree.totalStateCounts,
     metadata: state.metadata,
-    colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     activeFilters: state.controls.filters,
     filtersInFooter: state.controls.filtersInFooter

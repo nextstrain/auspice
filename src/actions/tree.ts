@@ -464,7 +464,8 @@ export const explodeTree = (
   attr: string | undefined,
 ): ThunkFunction => {
   return (dispatch, getState) => {
-    const {tree, metadata, controls} = getState();
+    const { tree, metadata, controls } = getState();
+    if (!metadata.loaded) throw new Error("[INTERNAL ERROR] metadata state not loaded")
     _resetExpodedTree(tree.nodes); // ensure we start with an unexploded tree
     if (attr) {
       const root = tree.nodes[0];

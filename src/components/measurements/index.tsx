@@ -159,7 +159,10 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
   // Convert legendValues to string to ensure that subsequent attribute matches work as intended
   const legendValues = useSelector((state: RootState) => state.controls.colorScale.legendValues.map(String), isEqual);
-  const colorings = useSelector((state: RootState) => state.metadata.colorings);
+  const colorings = useSelector((state: RootState) => {
+     if (!state.metadata.loaded) throw new Error("[INTERNAL ERROR] metadata state not loaded")
+    return state.metadata.colorings
+  });
   const colorBy = useSelector((state: RootState) => state.controls.colorBy);
   const defaultColorBy = useSelector((state: RootState) => state.controls.defaults.colorBy);
   const colorGrouping = useSelector((state: RootState) => state.controls.measurementsColorGrouping);

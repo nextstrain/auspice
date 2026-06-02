@@ -1,12 +1,11 @@
 import { ScaleType } from "./controls"
-import { colorOptions } from "../util/globals";
 
 /**
  * Type definitions related to the metadata redux structure
  */
 
 export type Metadata = {
-  loaded: boolean;
+  loaded: true;
   title: string;
   updated: string;
   sharing: MetadataSharing;
@@ -19,8 +18,6 @@ export type Metadata = {
   }>;
   identicalGenomeMapAcrossBothTrees?: boolean;
   colorings?: Colorings;
-  /** legacy code which is set as the default reducer state. To remove! */
-  colorOptions: typeof colorOptions;
   version?: string;
   originalVersion?: string;
   warning?: string;
@@ -47,6 +44,10 @@ export type Metadata = {
   };
   geoResolutions?: Array<GeoResolutions>;
 }
+
+export type MetadataReduxState =
+  | { loaded: false }
+  | Metadata;
 
 export const PANEL_VALUES = ["tree", "map", "frequencies", "entropy", "measurements"] as const;
 
@@ -117,7 +118,7 @@ export interface GeoResolutions {
   demes: Record<string, LatLong>;
 }
 
-interface LatLong {
+export interface LatLong {
   /** latitude is [-90, 90] */
   latitude: number;
   /** longitude is [-180, 180] */

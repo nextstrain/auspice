@@ -1,39 +1,20 @@
-import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
-import type { Metadata } from "./metadata.types";
+import type { MetadataReduxState, Metadata } from "./metadata.types";
 
-const initialState: Metadata = {
-  loaded: false,
-  title: "",
-  updated: "",
-  sharing: {
-    dataset_json: true,
-    metadata_tsv: true,
-    authors: true,
-    trees: true,
-    entropy: true,
-    screenshot: true,
-  },
-  rootSequence: undefined,
-  identicalGenomeMapAcrossBothTrees: false,
-  rootSequenceSecondTree: undefined,
-  colorOptions, // this can't be removed as the colorScale currently runs before it should
-};
-
-const metadata = (state: Metadata = initialState, action: any): Metadata => {
+const metadata = (state: MetadataReduxState = {loaded: false}, action: any): MetadataReduxState => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        loaded: false
-      });
+      return { loaded: false };
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
     case types.TREE_TOO_DATA:
     case types.CLEAN_START:
       return action.metadata;
     case types.UPDATE_METADATA: {
+      if (!assertLoaded(state, action.type)) return state;
       return Object.assign({}, state, action.metadata);
     }
     case types.REMOVE_METADATA: {
+      if (!assertLoaded(state, action.type)) return state;
       const colorings = {...state.colorings};
       action.nodeAttrsToRemove.forEach((colorBy: string) => {
         if (colorBy in colorings) {
@@ -43,6 +24,7 @@ const metadata = (state: Metadata = initialState, action: any): Metadata => {
       return {...state, colorings}
     }
     case types.SET_AVAILABLE: {
+      if (!assertLoaded(state, action.type)) return state;
       if (state.buildUrl) {
         return state; // do not use data from getAvailable to overwrite a buildUrl set from a dataset JSON
       }
@@ -53,6 +35,7 @@ const metadata = (state: Metadata = initialState, action: any): Metadata => {
       return state;
     }
     case types.SET_ROOT_SEQUENCE:
+      if (!assertLoaded(state, action.type)) return state;
       return {...state, rootSequence: action.data};
     case types.REMOVE_TREE_TOO:
       return Object.assign({}, state, {
@@ -84,6 +67,14 @@ function getBuildUrlFromGetAvailableJson(availableData: AvailableDataset[] | und
     }
   }
   return false;
+}
+
+function assertLoaded(state: MetadataReduxState, actionType: string): state is Metadata {
+  if (!state.loaded) {
+    console.error(`Metadata reducer: action ${actionType} called while loaded=false`);
+    return false;
+  }
+  return true
 }
 
 export default metadata;
