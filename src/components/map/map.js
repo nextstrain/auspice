@@ -482,6 +482,14 @@ class Map extends React.Component {
 
     L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
 
+    /** We hardcode the Leaflet (i.e. viewport) zoom min/max here - 14 is plenty for phylogeo.
+     * Note that the styles (i.e. the tile provider) defines its own minzoom/maxzoom. Since
+     * we are rendering vector tiles, if maxzoom < 14 we'll still be able to zoom in to 14
+     * we'll just lose some detail as the higher-reslution (vector) tiles won't be fetched.
+     *
+     * Note also that leaflet zoom levels (256px frame) may be off-by-one compared to the
+     * tile providers zoom levels (512px frame).
+     */
     const map = L.map('map', {
       center: center,
       zoom: zoom,
@@ -497,7 +505,7 @@ class Map extends React.Component {
     map.getRenderer(map).options.padding = 2;
 
     const token = this.state.tilesSettings.accessToken;
-    L.maplibreGL({
+    const glLayer = L.maplibreGL({
       style: this.state.tilesSettings.style,
       // Provider-agnostic request rewriting. Any provider-proprietary URLs (e.g. Mapbox's
       // mapbox:// protocol) are expected to already be resolved within the style document;
@@ -513,6 +521,18 @@ class Map extends React.Component {
       },
       attribution: this.state.tilesSettings.attribution || ''
     }).addTo(map);
+
+    // DEV: log the tile zoom vs the MapLibre GL zoom on every zoom change. Leaflet uses a 256px
+    // tile frame and MapLibre a 512px one, so the GL zoom is ~1 below the Leaflet zoom; the tile
+    // zoom actually fetched is floor(gl zoom) clamped to the source's maxzoom.
+    if (process.env.NODE_ENV !== 'production') {
+      map.on('zoomend', () => {
+        const leafletZoom = map.getZoom();
+        const glZoom = glLayer.getMaplibreMap().getZoom();
+        // eslint-disable-next-line no-console
+        console.log(`[map zoom] leaflet=${leafletZoom.toFixed(2)} maplibreGL=${glZoom.toFixed(2)} tileZoom=${Math.floor(glZoom)}`);
+      });
+    }
 
     if (!this.props.narrativeMode) {
       L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
