@@ -482,6 +482,14 @@ class Map extends React.Component {
 
     L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
 
+    /** We hardcode the Leaflet (i.e. viewport) zoom min/max here - 14 is plenty for phylogeo.
+     * Note that the styles (i.e. the tile provider) defines its own minzoom/maxzoom. Since
+     * we are rendering vector tiles, if maxzoom < 14 we'll still be able to zoom in to 14
+     * we'll just lose some detail as the higher-reslution (vector) tiles won't be fetched.
+     *
+     * Note also that leaflet zoom levels (256px frame) may be off-by-one compared to the
+     * tile providers zoom levels (512px frame).
+     */
     const map = L.map('map', {
       center: center,
       zoom: zoom,
