@@ -7,6 +7,7 @@ const utils = require('./cli/utils');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
 const zlib = require("zlib");
 
 /* Webpack config generator */
@@ -94,6 +95,46 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     filename: 'index.html',
     template: './src/index.html'
   });
+  const pluginServiceWorker = new WorkboxPlugin.GenerateSW({
+    // Emit the worker at the app root so registration at /service-worker.js can control /dist assets.
+    swDest: "service-worker.js",
+
+    // Inline Workbox runtime so the service worker update check depends on this one file changing.
+    inlineWorkboxRuntime: true,
+
+    // Let an activated worker control existing Auspice tabs without waiting for a full reload.
+    clientsClaim: true,
+
+    // Activate newly installed workers immediately so updated precache manifests are used promptly.
+    skipWaiting: true,
+
+    // Remove Workbox caches from prior configurations so stale generated cache names do not persist.
+    cleanupOutdatedCaches: true,
+
+    // Add entries that are not part of webpack's emitted asset list but must be available offline.
+    manifestTransforms: [
+      (manifestEntries, compilation) => {
+        return {
+          manifest: [
+            ...manifestEntries,
+
+            // Cache the HTML shell and revise it when the webpack compilation hash changes.
+            {url: "/dist/index.html", revision: compilation.hash}
+          ]
+        };
+      }
+    ],
+
+    // Serve the HTML shell for app navigations while offline.
+    navigateFallback: "/dist/index.html",
+
+    // Keep API, static asset, and favicon requests from being rewritten to the app shell.
+    navigateFallbackDenylist: [
+      /^\/charon\//,
+      /^\/dist\//,
+      /^\/favicon\.png$/
+    ]
+  });
   const cleanWebpackPlugin = new CleanWebpackPlugin({
     cleanStaleWebpackAssets: true
   });
@@ -109,6 +150,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     pluginCompressGzip,
     pluginCompressBrotli,
     pluginHtml,
+    pluginServiceWorker,
     cleanWebpackPlugin
   ];
 
