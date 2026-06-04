@@ -33,7 +33,7 @@ jobs:
           node-version: '20'
 
       - name: Checkout downstream repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Checkout downstream repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ inputs.repository }}
           token: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_REPO }}
