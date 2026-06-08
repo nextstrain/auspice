@@ -1,4 +1,5 @@
 /* eslint no-console: off */
+/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/consistent-type-assertions */
 
 import path from "path";
 import fs from "fs";
@@ -8,13 +9,14 @@ import express from "express";
 import expressStaticGzip from "express-static-gzip";
 import compression from 'compression';
 import nakedRedirect from 'express-naked-redirect';
-import * as utils from "./utils.js";
+import * as utils from "./utils.ts";
 import { version } from '../src/version.js';
-import chalk from 'chalk';
-import { processPathArguments } from "./server/processPaths.js";
-import { setUpGetAvailableHandler } from "./server/getAvailable.js";
-import { setUpGetDatasetHandler } from "./server/getDataset.js";
-import { setUpGetNarrativeHandler } from "./server/getNarrative.js";
+import _chalk from 'chalk';
+const chalk = _chalk as any as import('chalk').Chalk;
+import { processPathArguments } from "./server/processPaths.ts";
+import { setUpGetAvailableHandler } from "./server/getAvailable.ts";
+import { setUpGetDatasetHandler } from "./server/getDataset.ts";
+import { setUpGetNarrativeHandler } from "./server/getNarrative.ts";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -75,7 +77,7 @@ function defaultRouteHandlers({app, dataPaths}) {
   const sep = "\n - "
   return 'Looking for datasets & narratives in the following paths,\n' +
     '(if there are multiple matches then the first one will be used)' + sep +
-    Object.entries(dataPaths)
+    (Object.entries(dataPaths) as [string, Set<string>][])
       .map(([p, dataTypes]) => `${p} (${Array.from(dataTypes).join(', ')})`)
       .join(sep);
 }
@@ -126,7 +128,7 @@ const run = async (args) => {
   const auspiceBuild = getAuspiceBuild(args.customBuildOnly);
   utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
+  app.get("/favicon.png", (_req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {
     maxAge: '30d',
     enableBrotli: true,
@@ -148,7 +150,7 @@ const run = async (args) => {
   });
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
-  app.get("*", (req, res) => {
+  app.get("*", (_req, res) => {
     res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"), {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 

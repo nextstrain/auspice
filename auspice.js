@@ -2,9 +2,9 @@
 
 import argparse from 'argparse';
 import { version } from './src/version.js';
-import * as view from "./cli/view.js";
-import * as build from "./cli/build.js";
-import * as develop from "./cli/develop.js";
+import * as view from "./cli/view.ts";
+import * as build from "./cli/build.ts";
+import * as develop from "./cli/develop.ts";
 import * as convert from "./cli/convert.js";
 
 const parser = new argparse.ArgumentParser({

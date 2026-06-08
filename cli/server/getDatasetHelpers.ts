@@ -8,7 +8,7 @@
 *
 */
 
-import * as utils from "../utils.js";
+import * as utils from "../utils.ts";
 import queryString from "query-string";
 import { convertFromV1 } from "./convertJsonSchemas.js";
 import fs from "fs";
@@ -36,7 +36,7 @@ export const interpretRequest = (req) => {
   utils.log(`[GET DATASET] ${Object.entries(query).map(([k,v]) => `${k}: '${v}'`).join(', ')}`);
   if (!query.prefix) throw new Error("'prefix' not defined in request");
   const datanameParts = splitPrefixIntoParts(query.prefix);
-  const info = {parts: datanameParts};
+  const info: {parts: string[], dataType?: string} = {parts: datanameParts};
   /* query.type is used to indicate which sidecar file should be fetched,
   without it we fetch the "main" dataset JSON. See the `Dataset` constructor
   in `./src/actions/loadData.js` for which sidecars auspice may try to fetch */

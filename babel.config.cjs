@@ -1,4 +1,4 @@
-const utils = require('./cli/utils');
+const utils = require('./cli/utils.ts');
 
 /* What variables does this config depend on?
  * process.env.BABEL_EXTENSION_PATH -- a resolved path

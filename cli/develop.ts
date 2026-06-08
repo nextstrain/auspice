@@ -6,11 +6,13 @@ import express from "express";
 import webpack from "webpack";
 import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
-import * as utils from "./utils.js";
-import * as view from "./view.js";
+import * as utils from "./utils.ts";
+import * as view from "./view.ts";
 import { version } from '../src/version.js';
-import chalk from 'chalk';
-import { processPathArguments } from "./server/processPaths.js";
+import _chalk from 'chalk';
+/* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+const chalk = _chalk as any as import('chalk').Chalk;
+import { processPathArguments } from "./server/processPaths.ts";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,7 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const generateWebpackConfig = require("../webpack.config.cjs").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
 
-const addParser = (parser) => {
+const addParser = (parser): void => {
   const description = `Launch auspice in development mode.
     This runs a local server and uses hot-reloading to allow automatic updating as you edit the code.
     NOTE: there is a speed penalty for this ability and this should never be used for production.
@@ -36,7 +38,7 @@ const addParser = (parser) => {
 };
 
 
-const run = async (args) => {
+const run = async (args): Promise<void> => {
   const dataPaths = processPathArguments(args)
 
   /* Basic server set up */
@@ -46,7 +48,7 @@ const run = async (args) => {
 
   const baseDir = path.resolve(__dirname, "..");
   utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
+  app.get("/favicon.png", (_req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
@@ -59,7 +61,7 @@ const run = async (args) => {
   process.env.BABEL_EXTENSION_PATH = extensionPath;
 
   /* Redirects / to webpack-generated index */
-  app.use((req, res, next) => {
+  app.use((req, _res, next) => {
     if (!/^\/__webpack_hmr|^\/charon|\.[A-Za-z0-9]{1,5}$/.test(req.path)) {
       req.url = webpackConfig.output.publicPath;
     }
@@ -90,7 +92,7 @@ const run = async (args) => {
     return res.status(500).type("text/plain").send(errorMessage);
   });
 
-  app.get("*", (req, res) => res.redirect("/"));
+  app.get("*", (_req, res) => res.redirect("/"));
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
