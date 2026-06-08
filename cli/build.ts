@@ -30,7 +30,7 @@ const addParser = (parser): void => {
   subparser.addArgument('--serverless', {action: "storeTrue", help: SUPPRESS});
 };
 
-const run = (args) => {
+const run = (args): void => {
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
@@ -70,7 +70,7 @@ const run = (args) => {
 /* Where should the built files be saved? (or sourced??)
  * This may grow more complex over time
  */
-function getCustomOutputPath(extensions) {
+function getCustomOutputPath(extensions): string | false {
   if (extensions && path.resolve(__dirname, "..") !== process.cwd()) {
     return process.cwd();
   }

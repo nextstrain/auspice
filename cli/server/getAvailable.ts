@@ -6,7 +6,22 @@ import { findAvailableSecondTreeOptions } from './getDatasetHelpers.ts';
 
 const readdir = promisify(fs.readdir);
 
-export const getAvailableDatasets = (dir, files) => {
+export interface DatasetInfo {
+  request: string;
+  v2: boolean;
+  secondTreeOptions: string[];
+  fileType: string;
+  dir: string;
+  buildUrl?: string;
+}
+
+export interface NarrativeInfo {
+  fullPath: string;
+  request: string;
+  fileType: string;
+}
+
+export const getAvailableDatasets = (dir, files): DatasetInfo[] => {
   const datasets = [];
   /* NOTE: if there are v1 & v2 files with the same name the v2 JSON is
    * preferentially fetched. E.g. if `zika.json`, `zika_meta.json` and
@@ -62,7 +77,7 @@ export const getAvailableDatasets = (dir, files) => {
   return datasets;
 };
 
-export const getAvailableNarratives = (dir, files) => {
+export const getAvailableNarratives = (dir, files): NarrativeInfo[] => {
   return files
     .filter((file) => file.endsWith(".md") && file!=="README.md")
     .map((file) => ({
@@ -77,9 +92,10 @@ export const setUpGetAvailableHandler = (dataPaths) => {
    * Remember that auspice itself only serves local files.
    * Servers often use their own handler instead of this.
    */
-  return async (_req, res) => {
+  return async (_req, res): Promise<void> => {
     utils.log("GET AVAILABLE returning locally available datasets & narratives");
-    let resources = []
+    let resources: (DatasetInfo | NarrativeInfo)[] = []
+    /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
     for (const [p, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
       try {
         // FUTURE TODO - recurse into subfolders (readdir can do this natively)
@@ -103,10 +119,10 @@ export const setUpGetAvailableHandler = (dataPaths) => {
 
 };
 
-function availableResponseStructure(resources) {
-  const datasets = resources.filter((r) => r.fileType==='dataset')
+function availableResponseStructure(resources: (DatasetInfo | NarrativeInfo)[]): {datasets: {request: string, buildUrl?: string, secondTreeOptions?: string[]}[], narratives: {request: string}[]} {
+  const datasets = resources.filter((r): r is DatasetInfo => r.fileType==='dataset')
     .map((r) => ({request: r.request, buildUrl: r.buildUrl, secondTreeOptions: r.secondTreeOptions}));
-  const narratives = resources.filter((r) => r.fileType==='narrative')
+  const narratives = resources.filter((r): r is NarrativeInfo => r.fileType==='narrative')
     .map((r) => ({request: r.request}));
   return {datasets, narratives};
 }
@@ -114,7 +130,7 @@ function availableResponseStructure(resources) {
 /**
  * First match wins
  */
-function unique(resources) {
+function unique(resources: (DatasetInfo | NarrativeInfo)[]): (DatasetInfo | NarrativeInfo)[] {
   const seen = {dataset: new Set(), narrative: new Set()};
   return resources.filter((r) => {
     if (seen[r.fileType].has(r.request)) {
