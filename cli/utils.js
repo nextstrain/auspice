@@ -1,20 +1,23 @@
 /* eslint no-console: off */
-const fs = require('fs');
-const chalk = require('chalk');
-const path = require("path");
+import fs from 'fs';
+import chalk from 'chalk';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const verbose = (msg) => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const verbose = (msg) => {
   if (global.AUSPICE_VERBOSE) {
     console.log(chalk.greenBright(`[verbose]\t${msg}`));
   }
 };
-const log = (msg) => {
+export const log = (msg) => {
   console.log(chalk.blueBright(msg));
 };
-const warn = (msg) => {
+export const warn = (msg) => {
   console.warn(chalk.yellowBright(`[warning]\t${msg}`));
 };
-const error = (msg) => {
+export const error = (msg) => {
   console.error(chalk.redBright(`[error]\t${msg}`));
   process.exit(2);
 };
@@ -23,7 +26,7 @@ const isNpmGlobalInstall = () => {
   return __dirname.indexOf("lib/node_modules/auspice") !== -1;
 };
 
-const cleanUpPathname = (pathIn) => {
+export const cleanUpPathname = (pathIn) => {
   let pathOut = pathIn;
   if (!pathOut.endsWith("/")) pathOut += "/";
   if (pathOut.startsWith("~")) {
@@ -47,13 +50,13 @@ const getCurrentDirectoriesFor = (type) => {
 };
 
 
-const defaultDataPaths = ({narrative=false} = {}) => {
+export const defaultDataPaths = ({narrative=false} = {}) => {
   return isNpmGlobalInstall() ?
     [getCurrentDirectoriesFor(narrative ? "narratives" : "data")] :
     [path.join(path.resolve(__dirname), "..", narrative ? "narratives" : "data")];
 }
 
-const readFilePromise = (fileName) => {
+export const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
     fs.readFile(fileName, 'utf8', (err, data) => {
       if (err) {
@@ -71,7 +74,7 @@ const readFilePromise = (fileName) => {
 /* write an index.html file to the current working directory
  * Optionally set the hrefs for local files to relative links (needed for github pages)
  */
-const exportIndexDotHtml = ({relative=false}) => {
+export const exportIndexDotHtml = ({relative=false}) => {
   if (path.resolve(__dirname, "..") === process.cwd()) {
     warn("Cannot export index.html to the auspice source directory.");
     return;
@@ -85,15 +88,4 @@ const exportIndexDotHtml = ({relative=false}) => {
       .replace(/\/dist\/auspice\.bundle\.([0-9a-f]{20})\.js/, "dist/auspice.bundle.$1.js");
   }
   fs.writeFileSync(outputFilePath, data);
-};
-
-module.exports = {
-  verbose,
-  log,
-  warn,
-  error,
-  readFilePromise,
-  exportIndexDotHtml,
-  cleanUpPathname,
-  defaultDataPaths
 };

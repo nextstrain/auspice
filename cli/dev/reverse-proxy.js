@@ -1,7 +1,6 @@
-
-const utils = require("../utils");
-const { URL } = require("url");
-const fetch = require("node-fetch");
+import * as utils from "../utils.js";
+import { URL } from "url";
+import fetch from "node-fetch";
 
 const PROXY = process.env.PROXY || `http://localhost:5000`
 
@@ -59,8 +58,6 @@ async function proxy(req, res) {
   }
 }
 
-module.exports = {
-  getAvailable: proxy,
-  getDataset: proxy,
-  getNarrative: proxy,
-};
+export const getAvailable = proxy;
+export const getDataset = proxy;
+export const getNarrative = proxy;

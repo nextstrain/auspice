@@ -1,4 +1,4 @@
-const utils = require("../utils");
+import * as utils from "../utils.js";
 
 /** In auspice v1, the `prettyString` function was used extensively to transform values
  * for "nicer" display. v2 JSONs intentially avoid this -- the strings are intended to
@@ -397,7 +397,7 @@ const setNodeBranchAttrs = (v2) => {
 };
 
 
-const convertFromV1 = ({tree, meta}) => {
+export const convertFromV1 = ({tree, meta}) => {
   const v2 = {version: "v2", meta: { extensions: { original_version: "v1" }}};
   // set metadata
   setColorings(v2["meta"], meta);
@@ -410,9 +410,4 @@ const convertFromV1 = ({tree, meta}) => {
   setVaccineChoicesOnNodes(v2, meta);
   removeNonV2TreeProps(v2);
   return v2;
-};
-
-
-module.exports = {
-  convertFromV1
 };

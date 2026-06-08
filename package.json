@@ -5,6 +5,7 @@
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
   "repository": "github:nextstrain/auspice",
+  "type": "module",
   "homepage": "https://www.npmjs.com/package/auspice",
   "engines": {
     "node": "^24 || ^26",
@@ -13,7 +14,7 @@
   "bin": {
     "auspice": "./auspice.js"
   },
-  "main": "index.js",
+  "exports": "./index.js",
   "scripts": {
     "view": "node auspice.js view --verbose",
     "dev": "node auspice.js develop --verbose",
@@ -140,6 +141,7 @@
     "@types/webpack-env": "^1.18.2",
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
+    "babel-plugin-transform-import-meta": "^2.3.3",
     "chai": "^4.1.2",
     "chai-http": "^4.0.0",
     "eslint": "^8.39.0",

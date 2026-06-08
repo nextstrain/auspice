@@ -142,7 +142,7 @@ Currently
 
 .. code:: js
 
-   const auspice = require("auspice");
+   import auspice from "auspice";
 
 returns an object with two properties:
 

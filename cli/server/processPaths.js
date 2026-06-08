@@ -1,4 +1,4 @@
-const utils = require("../utils");
+import * as utils from "../utils.js";
 
 /**
  * Returns an object linking (absolute) paths to a set whose members indicate whether
@@ -13,7 +13,7 @@ const utils = require("../utils");
  * (via `defaultDataPaths()`), however in my (james) experience it's never worked
  * well an I recommend providing paths via args.
  */
-function processPathArguments(args) {
+export function processPathArguments(args) {
 
   if (args.handlers) {
     if (args.datasetDir || args.narrativeDir || args.path.length>0) {
@@ -70,8 +70,3 @@ function processPathArguments(args) {
 
   return dataPaths;
 }
-
-
-module.exports = {
-  processPathArguments,
-};

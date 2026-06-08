@@ -1,16 +1,22 @@
 /* eslint no-console: off */
-const path = require("path");
-const express = require("express");
-const webpack = require("webpack");
-const webpackDevMiddleware = require("webpack-dev-middleware");
-const webpackHotMiddleware = require("webpack-hot-middleware");
-const utils = require("./utils");
-const view = require("./view");
-const version = require('../src/version').version;
-const chalk = require('chalk');
-const generateWebpackConfig = require("../webpack.config.js").default;
+import path from "path";
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import express from "express";
+import webpack from "webpack";
+import webpackDevMiddleware from "webpack-dev-middleware";
+import webpackHotMiddleware from "webpack-hot-middleware";
+import * as utils from "./utils.js";
+import * as view from "./view.js";
+import { version } from '../src/version.js';
+import chalk from 'chalk';
+import { processPathArguments } from "./server/processPaths.js";
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const generateWebpackConfig = require("../webpack.config.cjs").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
-const { processPathArguments } = require("./server/processPaths");
 
 const addParser = (parser) => {
   const description = `Launch auspice in development mode.
@@ -30,7 +36,7 @@ const addParser = (parser) => {
 };
 
 
-const run = (args) => {
+const run = async (args) => {
   const dataPaths = processPathArguments(args)
 
   /* Basic server set up */
@@ -73,7 +79,7 @@ const run = (args) => {
   if (args.gh_pages) {
     handlerMsg = view.serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else if (args.handlers) {
-    handlerMsg = view.customRouteHandlers(app, path.resolve(args.handlers));
+    handlerMsg = await view.customRouteHandlers(app, path.resolve(args.handlers));
   } else {
     handlerMsg = view.defaultRouteHandlers({app, dataPaths});
   }
@@ -115,7 +121,7 @@ const run = (args) => {
 
 };
 
-module.exports = {
+export {
   addParser,
   run
 };

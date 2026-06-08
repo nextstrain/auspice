@@ -1,9 +1,9 @@
-const { promisify } = require('util');
-const path = require("path");
-const fs = require('fs');
-const getAvailable = require("./getAvailable");
-const helpers = require("./getDatasetHelpers");
-const utils = require("../utils");
+import { promisify } from 'util';
+import path from "path";
+import fs from 'fs';
+import * as getAvailable from "./getAvailable.js";
+import * as helpers from "./getDatasetHelpers.js";
+import * as utils from "../utils.js";
 
 const readdir = promisify(fs.readdir);
 
@@ -11,7 +11,7 @@ const readdir = promisify(fs.readdir);
  * Returns a route handler which responds to requests by serving the relevant JSON file
  * from disk.
  */
-const setUpGetDatasetHandler = (dataPaths) => {
+export const setUpGetDatasetHandler = (dataPaths) => {
   return async (req, res) => {
 
     let requestInfo;
@@ -99,8 +99,3 @@ async function matchDatasetFile(dataPaths, requestInfo) {
   }
   return allAvailableDatasets;
 }
-
-
-module.exports = {
-  setUpGetDatasetHandler
-};

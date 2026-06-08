@@ -4,6 +4,7 @@ import NavBar from "../navBar";
 import Flex from "../../components/framework/flex";
 import { CenterContent } from "./centerContent";
 import { FinePrintStyles, getCitation, getCustomFinePrint } from "../../components/framework/fine-print";
+import logoLightSvg from "../../images/logo-light.svg";
 
 const getNumColumns = (width) => width > 1000 ? 3 : width > 750 ? 2 : 1;
 
@@ -32,9 +33,7 @@ const SplashContent = ({available, browserDimensions, errorMessage}) => {
         <img
           alt="logo"
           width="102"
-          src={
-            require("../../images/logo-light.svg")
-          }
+          src={logoLightSvg}
         />
       </Flex>
     </>

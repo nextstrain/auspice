@@ -1,17 +1,24 @@
 /* eslint no-console: off */
-/* eslint global-require: off */
 
-const path = require("path");
-const fs = require("fs");
-const express = require("express");
-const expressStaticGzip = require("express-static-gzip");
-const compression = require('compression');
-const nakedRedirect = require('express-naked-redirect');
-const utils = require("./utils");
-const version = require('../src/version').version;
-const chalk = require('chalk');
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import express from "express";
+import expressStaticGzip from "express-static-gzip";
+import compression from 'compression';
+import nakedRedirect from 'express-naked-redirect';
+import * as utils from "./utils.js";
+import { version } from '../src/version.js';
+import chalk from 'chalk';
+import { processPathArguments } from "./server/processPaths.js";
+import { setUpGetAvailableHandler } from "./server/getAvailable.js";
+import { setUpGetDatasetHandler } from "./server/getDataset.js";
+import { setUpGetNarrativeHandler } from "./server/getNarrative.js";
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SUPPRESS = require('argparse').Const.SUPPRESS;
-const { processPathArguments } = require("./server/processPaths");
 
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
@@ -49,9 +56,9 @@ const serveRelativeFilepaths = ({app, dir}) => {
   return `JSON requests will be served relative to ${dir}.`;
 };
 
-function customRouteHandlers(app, handlersPath) {
+async function customRouteHandlers(app, handlersPath) {
   utils.verbose(`Loading handlers from ${handlersPath}`);
-  const customCode = require(handlersPath);
+  const customCode = await import(handlersPath);
   app.get("/charon/getAvailable", customCode.getAvailable);
   app.get("/charon/getDataset", customCode.getDataset);
   app.get("/charon/getNarrative", customCode.getNarrative);
@@ -62,9 +69,9 @@ function customRouteHandlers(app, handlersPath) {
  * Adds route handlers for the three canonical charon routes to the *app*
  */
 function defaultRouteHandlers({app, dataPaths}) {
-  app.get("/charon/getAvailable", require("./server/getAvailable").setUpGetAvailableHandler(dataPaths));
-  app.get("/charon/getDataset", require("./server/getDataset").setUpGetDatasetHandler(dataPaths));
-  app.get("/charon/getNarrative", require("./server/getNarrative").setUpGetNarrativeHandler(dataPaths));
+  app.get("/charon/getAvailable", setUpGetAvailableHandler(dataPaths));
+  app.get("/charon/getDataset", setUpGetDatasetHandler(dataPaths));
+  app.get("/charon/getNarrative", setUpGetNarrativeHandler(dataPaths));
   const sep = "\n - "
   return 'Looking for datasets & narratives in the following paths,\n' +
     '(if there are multiple matches then the first one will be used)' + sep +
@@ -106,7 +113,7 @@ function hasAuspiceBuild(directory) {
   )
 }
 
-const run = (args) => {
+const run = async (args) => {
   const dataPaths = processPathArguments(args)
 
   /* Basic server set up */
@@ -143,7 +150,7 @@ const run = (args) => {
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else if (args.handlers) {
-    handlerMsg = customRouteHandlers(app, path.resolve(args.handlers));
+    handlerMsg = await customRouteHandlers(app, path.resolve(args.handlers));
   } else {
     handlerMsg = defaultRouteHandlers({app, dataPaths});
   }
@@ -186,7 +193,7 @@ const run = (args) => {
 
 };
 
-module.exports = {
+export {
   addParser,
   run,
   addDatasetNarrativePathArgs,
