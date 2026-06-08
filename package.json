@@ -141,8 +141,6 @@
     "@typescript-eslint/eslint-plugin": "^8.60.1",
     "@typescript-eslint/parser": "^8.60.1",
     "babel-plugin-transform-import-meta": "^2.3.3",
-    "chai": "^4.1.2",
-    "chai-http": "^4.0.0",
     "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.2.1",
     "eslint-plugin-react-hooks": "^4.0.1",
