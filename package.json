@@ -29,7 +29,6 @@
     "get-data": "env bash ./scripts/get-data.sh",
     "fetch-test-data": "./scripts/fetch-test-data",
     "heroku-postbuild": "npm run build && npm run get-data",
-    "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "test": "jest test/*.js test/*.ts",
     "smoke-test": "NODE_ENV=test ENV=dev npx playwright test",
     "diff-lang": "./scripts/diff-lang.js"
