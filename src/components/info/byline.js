@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import { withTranslation, Trans } from 'react-i18next';
 import styled from 'styled-components';
 import { headerFont } from "../../globalStyles";
+import gisaidLogo from "../../images/gisaid-logo.png";
 
 /**
  * React component for the byline of the current dataset.
@@ -138,7 +139,7 @@ function renderDataProvenance(t, metadata) {
     .map((source) => {
       if (source.name.toUpperCase() === "GISAID") { // SPECIAL CASE
         return (<Link url="https://www.gisaid.org" key={source.name}>
-          <img src={require("../../images/gisaid-logo.png")} alt="gisaid-logo" width="65"/>
+          <img src={gisaidLogo} alt="gisaid-logo" width="65"/>
         </Link>);
       }
       const url = parseUrl(source.url);

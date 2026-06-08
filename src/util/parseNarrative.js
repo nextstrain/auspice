@@ -1,10 +1,10 @@
 /* eslint no-param-reassign: off */
 
-const { safeLoadFront } = require('yaml-front-matter');
-const queryString = require("query-string");
+import { safeLoadFront } from 'yaml-front-matter';
+import queryString from "query-string";
 
 
-const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
+export const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
   const frontMatter = safeLoadFront(fileContents);
 
   if (Object.keys(frontMatter).length === 1) {
@@ -22,7 +22,7 @@ const parseMarkdownNarrativeFile = (fileContents, markdownParser) => {
 };
 
 
-function createTitleSlideFromFrontmatter(frontMatter, markdownParser) {
+export function createTitleSlideFromFrontmatter(frontMatter, markdownParser) {
   let markdown = ""; // A markdown interpretation of the YAML for display
 
   markdown += parseTitleSlideTitle(frontMatter);
@@ -45,7 +45,7 @@ function createTitleSlideFromFrontmatter(frontMatter, markdownParser) {
   };
 }
 
-function parseTitleSlideTitle(frontMatter) {
+export function parseTitleSlideTitle(frontMatter) {
   if (!frontMatter.title) throw new Error("Narrative YAML frontmatter must define a title!");
   return `## ${frontMatter.title}\n`;
 }
@@ -139,7 +139,7 @@ function* parseNarrativeBody(markdown, fallbackDataset, markdownParser) {
   }
 }
 
-function parseNarrativeAuthors(frontMatter) {
+export function parseNarrativeAuthors(frontMatter) {
   let authorMd = "";
   const authors = parseAttributions(frontMatter, "authors", "authorLinks");
   if (authors) {
@@ -152,7 +152,7 @@ function parseNarrativeAuthors(frontMatter) {
   return authorMd+"\n";
 }
 
-function parseNarrativeTranslators(frontMatter) {
+export function parseNarrativeTranslators(frontMatter) {
   const translators = parseAttributions(frontMatter, "translators", "translatorLinks");
   if (translators) return `### Translators: ${translators}\n`;
   return "";
@@ -212,13 +212,3 @@ function attributionLink(attribution, attributionLinkValue) {
   }
   return attribution;
 }
-
-
-module.exports = {
-  parseMarkdownNarrativeFile,
-  /* following functions exported for unit testing */
-  createTitleSlideFromFrontmatter,
-  parseTitleSlideTitle,
-  parseNarrativeAuthors,
-  parseNarrativeTranslators
-};
