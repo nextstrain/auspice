@@ -212,6 +212,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     resolve: {
       alias: aliasesToResolve,
       extensions: ['.ts', '.tsx', '...'],
+      fullySpecified: false,
       fallback: {
         buffer: require.resolve("buffer/"),
         fs: false
@@ -269,6 +270,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     },
     module: {
       rules: [
+        {
+          test: /\.(ts|js)x?$/,
+          type: "javascript/auto",
+          resolve: { fullySpecified: false }
+        },
         {
           test: /\.(ts|js)x?$/,
           loader: 'babel-loader',
