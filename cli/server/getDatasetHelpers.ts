@@ -13,12 +13,12 @@ import queryString from "query-string";
 import { convertFromV1 } from "./convertJsonSchemas.js";
 import fs from "fs";
 
-export const handleError = (res, clientMsg, serverMsg="", code=500) => {
+export const handleError = (res, clientMsg, serverMsg="", code=500): void => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
   return res.status(code).type("text/plain").send(clientMsg);
 };
 
-const splitPrefixIntoParts = (url) => url
+const splitPrefixIntoParts = (url): string[] => url
   .replace(/^\//, '')
   .replace(/\/$/, '')
   .split("/");
@@ -31,7 +31,7 @@ const splitPrefixIntoParts = (url) => url
  * @returns {string[]} ret.parts is the dataset name spit on '/' character
  * @returns {string}   ret.dataType is the dataset type ('dataset', 'root-sequence' etc)
  */
-export const interpretRequest = (req) => {
+export const interpretRequest = (req): {parts: string[], dataType?: string} => {
   const query = queryString.parse(req.url.split('?')[1]);
   utils.log(`[GET DATASET] ${Object.entries(query).map(([k,v]) => `${k}: '${v}'`).join(', ')}`);
   if (!query.prefix) throw new Error("'prefix' not defined in request");
@@ -56,10 +56,10 @@ export const interpretRequest = (req) => {
  * Given a request for which there is no perfect match, return a close match
  * if one exists else return false
  */
-export const closestMatch = (requestedDatasetParts, availableDatasets) => {
+export const closestMatch = (requestedDatasetParts, availableDatasets): string | false => {
   let matchingDatasets = availableDatasets;
   let i;
-  const matchDatasetRequest = (d) => d.request.split("/")[i] === requestedDatasetParts[i];
+  const matchDatasetRequest = (d): boolean => d.request.split("/")[i] === requestedDatasetParts[i];
   // Filter gradually by path fragment, starting from the root
   for (i = 0; i < requestedDatasetParts.length; i++) {
     const newMatchingDatasets = matchingDatasets.filter(matchDatasetRequest);
@@ -76,7 +76,7 @@ export const closestMatch = (requestedDatasetParts, availableDatasets) => {
 };
 
 
-export const sendJson = async (res, info) => {
+export const sendJson = async (res, info): Promise<void> => {
   if (typeof info.address === "string") {
     /* In general, JSONs are designed such that no server modifications
     are needed by the server. This allows us to read as a stream and
@@ -111,7 +111,7 @@ export const sendJson = async (res, info) => {
  * (c) differ from the `currentDatasetUrl` by only 1 part
  * Note: the "parts" of the URL are formed by splitting it on `"/"`
  */
-export const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+export const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls): string[] => {
   const currentDatasetUrlArr = currentDatasetUrl.split('/');
 
   const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
