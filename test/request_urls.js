@@ -14,6 +14,7 @@ const isValidURLCallback = (url) => {
     chai.request(url)
       .get('')
       .end((err, res) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         expect(err).to.be.null;
         expect(res).to.have.status(200);
         done(); // Call done to signal callback end

@@ -29,6 +29,7 @@ const calcMutationCounts = (nodes, visibility, selectedCds) => {
     mutations?.[cdsName]?.forEach((m) => {
       const {from, to, pos} = parseMutation(m);
       if (valid(from, to, isAA)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
       }
     });
@@ -39,7 +40,7 @@ const calcMutationCounts = (nodes, visibility, selectedCds) => {
   for (let i = 0; i < sparse.length; i++) {
     if (!sparse[i]) {continue;}
     if (sparse[i] > m) {m = sparse[i];}
-    counts[j] = isAA ? 
+    counts[j] = isAA ?
       {codon: parseInt(i, 10), y: sparse[i]} :
       {x: i, y: sparse[i]}; /* TODO reset y scale in D3 or compute entropy */
     j++;
@@ -118,7 +119,7 @@ const calcEntropy = (nodes, visibility, selectedCds) => {
         counts[position][anc_state[position]] = nUnobserved;
       }
     }
-    
+
     let s = 0; /* shannon entropy */
     for (const count of Object.values(counts[position])) {
       const a = count / visibleTips;
@@ -177,10 +178,10 @@ export function getCdsByName(genomeMap, name) {
  * codon).
  * If _either_ of the rangeGenome positions are _beyond_ the CDS then we return
  * the entire rangeLocal of the cds + set the flag `valid` to false.
- * 
+ *
  * For wrapping genes, the UI forces the rangeGenome (i.e. the zoomCoordinates)
  * to be on either side of the origin, and we maintain thus assumption here.
- * 
+ *
  * Returns [rangeLocalInView:rangeLocal, valid:bool]
  */
 export function getCdsRangeLocalFromRangeGenome(cds, rangeGenome) {
@@ -203,12 +204,12 @@ export function getCdsRangeLocalFromRangeGenome(cds, rangeGenome) {
    * The general approach is to visit the segments in the order they appear,
    * i.e. in the context of the strand it's always 5' -> 3' but for -ve strand
    * CDSs this appears 3' -> 5' in the context of the +ve strand. Once we find
-   * an intersection we can work out the appropriate local coordinate. 
+   * an intersection we can work out the appropriate local coordinate.
    * Remember that zoomStart/End are reversed if the CDS is wrapping!
    */
   let prevSeg;
   for (const seg of segments) {
-    /* If the zoom start (5') is inside the segment, then we know one of the local bounds */  
+    /* If the zoom start (5') is inside the segment, then we know one of the local bounds */
     if (seg.rangeGenome[0]<=zoomStart && seg.rangeGenome[1]>=zoomStart) {
       if (positive) {
         const delta = zoomStart - seg.rangeGenome[0];
@@ -217,8 +218,8 @@ export function getCdsRangeLocalFromRangeGenome(cds, rangeGenome) {
         const delta = zoomStart - seg.rangeGenome[0];
         cdsLocalEnd = seg.rangeLocal[1] - delta;
       }
-    }       
-    /* If the zoom end (3') is inside the segment, then we know one of the local bounds */      
+    }
+    /* If the zoom end (3') is inside the segment, then we know one of the local bounds */
     if (seg.rangeGenome[0]<=zoomEnd && seg.rangeGenome[1]>=zoomEnd) {
       if (positive) {
         const delta = zoomEnd - seg.rangeGenome[0];

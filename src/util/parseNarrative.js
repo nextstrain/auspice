@@ -54,7 +54,7 @@ function parseUrl(urlString, fallbackDataset=false) {
   let url, dataset;
   try {
     url = new URL(urlString);
-  } catch (err) {
+  } catch (_err) {
     if (fallbackDataset) {
       console.error(`Couldn't parse the URL "${urlString}". Falling back to "${fallbackDataset}".`);
       return {dataset: fallbackDataset, query: ""};

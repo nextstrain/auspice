@@ -25,7 +25,7 @@ export const strainNameToIdx = (nodes, name) => {
 /**
  * Find the node with the given label name & value
  * NOTE: if there are multiple nodes with the same label then `null` is returned
- * 
+ *
  * @param {Array} nodes tree nodes (flat)
  * @param {string} labelName label name
  * @param {string} labelValue label value
@@ -157,7 +157,7 @@ const getInView = (tree) => {
   let inView;
   try {
     inView = tree.nodes.map((d) => d.shell.inView);
-  } catch (e) {
+  } catch (_err) {
     /* edge case: this fn may be called before the shell structure of the nodes
      * has been created (i.e. phyloTree's not run yet). In this case, it's
      * safe to assume that everything's in view */

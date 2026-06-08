@@ -172,7 +172,7 @@ function parseUrl(potentialUrl) {
   try {
     const urlObj = new URL(potentialUrl);
     return urlObj.href;
-  } catch (err) {
+  } catch (_err) {
     return false;
   }
 }
