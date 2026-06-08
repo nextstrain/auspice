@@ -25,10 +25,6 @@ export const error = (msg): never => {
   process.exit(2);
 };
 
-const isNpmGlobalInstall = (): boolean => {
-  return __dirname.indexOf("lib/node_modules/auspice") !== -1;
-};
-
 export const cleanUpPathname = (pathIn): string | undefined => {
   let pathOut = pathIn;
   if (!pathOut.endsWith("/")) pathOut += "/";
@@ -42,22 +38,6 @@ export const cleanUpPathname = (pathIn): string | undefined => {
   }
   return pathOut;
 };
-
-const getCurrentDirectoriesFor = (type): string | undefined => {
-  const cwd = process.cwd();
-  const folderName = type === "data" ? "auspice" : "narratives";
-  if (fs.existsSync(path.join(cwd, folderName))) {
-    return cleanUpPathname(path.join(cwd, folderName));
-  }
-  return cleanUpPathname(cwd);
-};
-
-
-export const defaultDataPaths = ({narrative=false} = {}): (string | undefined)[] => {
-  return isNpmGlobalInstall() ?
-    [getCurrentDirectoriesFor(narrative ? "narratives" : "data")] :
-    [path.join(path.resolve(__dirname), "..", narrative ? "narratives" : "data")];
-}
 
 export const readFilePromise = (fileName): Promise<unknown> => {
   return new Promise((resolve, reject) => {
