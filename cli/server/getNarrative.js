@@ -1,13 +1,13 @@
-const queryString = require("query-string");
-const { promisify } = require('util');
-const fs = require("fs");
-const utils = require("../utils");
-const getAvailable = require("./getAvailable");
+import queryString from "query-string";
+import { promisify } from 'util';
+import fs from "fs";
+import * as utils from "../utils.js";
+import * as getAvailable from "./getAvailable.js";
 
 const readdir = promisify(fs.readdir);
 
 
-const setUpGetNarrativeHandler = (dataPaths) => {
+export const setUpGetNarrativeHandler = (dataPaths) => {
   return async (req, res) => {
     utils.log(`GET NARRATIVE request received: ${req.url}`);
     const query = queryString.parse(req.url.split('?')[1]);
@@ -45,8 +45,4 @@ const setUpGetNarrativeHandler = (dataPaths) => {
     utils.warn(errorMessage);
     res.status(404).type("text/plain").send(errorMessage);
   }
-};
-
-module.exports = {
-  setUpGetNarrativeHandler,
 };

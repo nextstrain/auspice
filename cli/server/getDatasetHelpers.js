@@ -8,13 +8,12 @@
 *
 */
 
+import * as utils from "../utils.js";
+import queryString from "query-string";
+import { convertFromV1 } from "./convertJsonSchemas.js";
+import fs from "fs";
 
-const utils = require("../utils");
-const queryString = require("query-string");
-const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
-const fs = require("fs");
-
-const handleError = (res, clientMsg, serverMsg="", code=500) => {
+export const handleError = (res, clientMsg, serverMsg="", code=500) => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
   return res.status(code).type("text/plain").send(clientMsg);
 };
@@ -32,7 +31,7 @@ const splitPrefixIntoParts = (url) => url
  * @returns {string[]} ret.parts is the dataset name spit on '/' character
  * @returns {string}   ret.dataType is the dataset type ('dataset', 'root-sequence' etc)
  */
-const interpretRequest = (req) => {
+export const interpretRequest = (req) => {
   const query = queryString.parse(req.url.split('?')[1]);
   utils.log(`[GET DATASET] ${Object.entries(query).map(([k,v]) => `${k}: '${v}'`).join(', ')}`);
   if (!query.prefix) throw new Error("'prefix' not defined in request");
@@ -57,7 +56,7 @@ const interpretRequest = (req) => {
  * Given a request for which there is no perfect match, return a close match
  * if one exists else return false
  */
-const closestMatch = (requestedDatasetParts, availableDatasets) => {
+export const closestMatch = (requestedDatasetParts, availableDatasets) => {
   let matchingDatasets = availableDatasets;
   let i;
   const matchDatasetRequest = (d) => d.request.split("/")[i] === requestedDatasetParts[i];
@@ -77,7 +76,7 @@ const closestMatch = (requestedDatasetParts, availableDatasets) => {
 };
 
 
-const sendJson = async (res, info) => {
+export const sendJson = async (res, info) => {
   if (typeof info.address === "string") {
     /* In general, JSONs are designed such that no server modifications
     are needed by the server. This allows us to read as a stream and
@@ -112,7 +111,7 @@ const sendJson = async (res, info) => {
  * (c) differ from the `currentDatasetUrl` by only 1 part
  * Note: the "parts" of the URL are formed by splitting it on `"/"`
  */
-const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+export const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
   const currentDatasetUrlArr = currentDatasetUrl.split('/');
 
   const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
@@ -141,12 +140,4 @@ const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls)
   });
 
   return availableTangleTreeOptions;
-};
-
-module.exports = {
-  interpretRequest,
-  closestMatch,
-  handleError,
-  sendJson,
-  findAvailableSecondTreeOptions
 };

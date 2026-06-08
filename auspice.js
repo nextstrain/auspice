@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const argparse = require('argparse');
-const version = require('./src/version').version;
-const view = require("./cli/view");
-const build = require("./cli/build");
-const develop = require("./cli/develop");
-const convert = require("./cli/convert");
+import argparse from 'argparse';
+import { version } from './src/version.js';
+import * as view from "./cli/view.js";
+import * as build from "./cli/build.js";
+import * as develop from "./cli/develop.js";
+import * as convert from "./cli/convert.js";
 
 const parser = new argparse.ArgumentParser({
   version: version,
@@ -38,5 +38,3 @@ if (args.subcommand === "build") {
 } else if (args.subcommand === "convert") {
   convert.run(args);
 }
-
-// console.dir(args);

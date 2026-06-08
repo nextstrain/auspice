@@ -1,7 +1,7 @@
 /* eslint no-console: off */
-const fs = require("fs");
-const convertFromV1 = require("./server/convertJsonSchemas").convertFromV1;
-const utils = require("./utils");
+import fs from "fs";
+import { convertFromV1 } from "./server/convertJsonSchemas.js";
+import * as utils from "./utils.js";
 
 
 const addParser = (parser) => {
@@ -35,7 +35,7 @@ const run = (args) => {
   fs.writeFileSync(args.output, JSON.stringify(v2, null, args.minify_json ? 0 : 2));
 };
 
-module.exports = {
+export {
   addParser,
   run
 };

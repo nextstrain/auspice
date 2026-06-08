@@ -1,12 +1,12 @@
-const utils = require("../utils");
-const fs = require('fs');
-const path = require("path");
-const { promisify } = require('util');
-const { findAvailableSecondTreeOptions } = require('./getDatasetHelpers');
+import * as utils from "../utils.js";
+import fs from 'fs';
+import path from "path";
+import { promisify } from 'util';
+import { findAvailableSecondTreeOptions } from './getDatasetHelpers.js';
 
 const readdir = promisify(fs.readdir);
 
-const getAvailableDatasets = (dir, files) => {
+export const getAvailableDatasets = (dir, files) => {
   const datasets = [];
   /* NOTE: if there are v1 & v2 files with the same name the v2 JSON is
    * preferentially fetched. E.g. if `zika.json`, `zika_meta.json` and
@@ -62,7 +62,7 @@ const getAvailableDatasets = (dir, files) => {
   return datasets;
 };
 
-const getAvailableNarratives = (dir, files) => {
+export const getAvailableNarratives = (dir, files) => {
   return files
     .filter((file) => file.endsWith(".md") && file!=="README.md")
     .map((file) => ({
@@ -72,7 +72,7 @@ const getAvailableNarratives = (dir, files) => {
     }));
 };
 
-const setUpGetAvailableHandler = (dataPaths) => {
+export const setUpGetAvailableHandler = (dataPaths) => {
   /* return Auspice's default handler for "/charon/getAvailable" requests.
    * Remember that auspice itself only serves local files.
    * Servers often use their own handler instead of this.
@@ -101,13 +101,6 @@ const setUpGetAvailableHandler = (dataPaths) => {
     res.json(availableResponseStructure(resources));
   };
 
-};
-
-
-module.exports = {
-  setUpGetAvailableHandler,
-  getAvailableDatasets,
-  getAvailableNarratives,
 };
 
 function availableResponseStructure(resources) {

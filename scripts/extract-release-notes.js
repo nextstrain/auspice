@@ -3,7 +3,7 @@
  * It is intended to be run as part of releaseNewVersion.sh
  */
 
-const fs = require('fs');
+import fs from 'fs';
 
 function main() {
   const releaseNotes = [];
