@@ -14,7 +14,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run server',
+    command: 'npm run view -- test/data test/fetched-jsons',
     url: 'http://localhost:4000',
     reuseExistingServer: true,
   },
