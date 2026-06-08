@@ -1,7 +1,7 @@
 /* eslint no-console: off */
 import fs from "fs";
 import { convertFromV1 } from "./server/convertJsonSchemas.js";
-import * as utils from "./utils.js";
+import * as utils from "./utils.ts";
 
 
 const addParser = (parser) => {

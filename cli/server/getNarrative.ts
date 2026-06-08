@@ -1,8 +1,8 @@
 import queryString from "query-string";
 import { promisify } from 'util';
 import fs from "fs";
-import * as utils from "../utils.js";
-import * as getAvailable from "./getAvailable.js";
+import * as utils from "../utils.ts";
+import * as getAvailable from "./getAvailable.ts";
 
 const readdir = promisify(fs.readdir);
 
@@ -23,7 +23,7 @@ export const setUpGetNarrativeHandler = (dataPaths) => {
       .replace(/^\//, "")  // remove leading slash
       .replace(/\/$/, "")  // remove ending slash
 
-    for (const [p, dataTypes] of Object.entries(dataPaths)) {
+    for (const [p, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
       if (!dataTypes.has('narratives')) continue;
       try {
         const files = await readdir(p);
@@ -36,7 +36,7 @@ export const setUpGetNarrativeHandler = (dataPaths) => {
         }
         // else go scan the next dataPaths (directory)
       } catch (err) {
-        const errorMessage = `Narratives couldn't be served -- ${err.message}`;
+        const errorMessage = `Narratives couldn't be served -- ${err instanceof Error ? err.message : err}`;
         utils.warn(errorMessage);
         return res.status(500).type("text/plain").send(errorMessage);
       }

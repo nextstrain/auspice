@@ -1,28 +1,31 @@
 /* eslint no-console: off */
 import fs from 'fs';
-import chalk from 'chalk';
+import _chalk from 'chalk';
+// chalk 2.x types aren't compatible with nodenext module resolution
+/* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+const chalk = _chalk as any as import('chalk').Chalk;
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const verbose = (msg) => {
+export const verbose = (msg): void => {
   if (global.AUSPICE_VERBOSE) {
     console.log(chalk.greenBright(`[verbose]\t${msg}`));
   }
 };
-export const log = (msg) => {
+export const log = (msg): void => {
   console.log(chalk.blueBright(msg));
 };
-export const warn = (msg) => {
+export const warn = (msg): void => {
   console.warn(chalk.yellowBright(`[warning]\t${msg}`));
 };
-export const error = (msg) => {
+export const error = (msg): void => {
   console.error(chalk.redBright(`[error]\t${msg}`));
   process.exit(2);
 };
 
-const isNpmGlobalInstall = () => {
+const isNpmGlobalInstall = (): boolean => {
   return __dirname.indexOf("lib/node_modules/auspice") !== -1;
 };
 
@@ -74,7 +77,7 @@ export const readFilePromise = (fileName) => {
 /* write an index.html file to the current working directory
  * Optionally set the hrefs for local files to relative links (needed for github pages)
  */
-export const exportIndexDotHtml = ({relative=false}) => {
+export const exportIndexDotHtml = ({relative=false}): void => {
   if (path.resolve(__dirname, "..") === process.cwd()) {
     warn("Cannot export index.html to the auspice source directory.");
     return;

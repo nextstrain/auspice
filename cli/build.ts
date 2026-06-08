@@ -2,7 +2,7 @@ import webpack from "webpack";
 import path from "path";
 import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
-import * as utils from "./utils.js";
+import * as utils from "./utils.ts";
 
 const require = createRequire(import.meta.url);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -10,7 +10,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const generateWebpackConfig = require("../webpack.config.cjs").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
 
-const addParser = (parser) => {
+const addParser = (parser): void => {
   const description = `Build the client source code bundle.
   For development, you may want to use "auspice develop" which recompiles code on the fly as changes are made.
   You may provide customisations (e.g. code, options) to this step to modify the functionality and appearance of auspice.

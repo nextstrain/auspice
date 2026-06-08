@@ -1,4 +1,4 @@
-import * as utils from "../utils.js";
+import * as utils from "../utils.ts";
 
 /** In auspice v1, the `prettyString` function was used extensively to transform values
  * for "nicer" display. v2 JSONs intentially avoid this -- the strings are intended to

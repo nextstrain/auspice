@@ -1,4 +1,4 @@
-import * as utils from "../utils.js";
+import * as utils from "../utils.ts";
 
 /**
  * Returns an object linking (absolute) paths to a set whose members indicate whether
@@ -64,7 +64,7 @@ export function processPathArguments(args) {
     }
   }
 
-  if (undefined in dataPaths) {
+  if ("undefined" in dataPaths) {
     utils.error("One or more provided paths does not exist")
   }
 

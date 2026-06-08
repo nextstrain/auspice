@@ -1,8 +1,8 @@
-import * as utils from "../utils.js";
+import * as utils from "../utils.ts";
 import fs from 'fs';
 import path from "path";
 import { promisify } from 'util';
-import { findAvailableSecondTreeOptions } from './getDatasetHelpers.js';
+import { findAvailableSecondTreeOptions } from './getDatasetHelpers.ts';
 
 const readdir = promisify(fs.readdir);
 
@@ -77,10 +77,10 @@ export const setUpGetAvailableHandler = (dataPaths) => {
    * Remember that auspice itself only serves local files.
    * Servers often use their own handler instead of this.
    */
-  return async (req, res) => {
+  return async (_req, res) => {
     utils.log("GET AVAILABLE returning locally available datasets & narratives");
     let resources = []
-    for (const [p, dataTypes] of Object.entries(dataPaths)) {
+    for (const [p, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
       try {
         // FUTURE TODO - recurse into subfolders (readdir can do this natively)
         const files = await readdir(p);
