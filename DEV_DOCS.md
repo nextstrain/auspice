@@ -93,7 +93,7 @@ General advice for writing tests:
 
 > Smoke tests are currently very limited but we may expand these in the future
 
-1. Fetch datasets with `npm run get-data`.
+1. Fetch testing datasets with `npm run fetch-test-data`.
 2. Install the testing browser with `npx playwright install chromium`.
 3. Run `npm run smoke-test`.
 
