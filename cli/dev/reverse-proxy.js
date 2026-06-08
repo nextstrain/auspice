@@ -1,4 +1,4 @@
-import * as utils from "../utils.js";
+import * as utils from "../utils.ts";
 import { URL } from "url";
 import fetch from "node-fetch";
 

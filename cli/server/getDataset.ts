@@ -1,9 +1,9 @@
 import { promisify } from 'util';
 import path from "path";
 import fs from 'fs';
-import * as getAvailable from "./getAvailable.js";
-import * as helpers from "./getDatasetHelpers.js";
-import * as utils from "../utils.js";
+import * as getAvailable from "./getAvailable.ts";
+import * as helpers from "./getDatasetHelpers.ts";
+import * as utils from "../utils.ts";
 
 const readdir = promisify(fs.readdir);
 
@@ -18,7 +18,8 @@ export const setUpGetDatasetHandler = (dataPaths) => {
     try {
       requestInfo = helpers.interpretRequest(req);
     } catch (err) {
-      return helpers.handleError(res, err.message, err.message, 400);
+      const msg = err instanceof Error ? err.message : String(err);
+      return helpers.handleError(res, msg, msg, 400);
     }
 
     const matchResult = await matchDatasetFile(dataPaths, requestInfo);
@@ -65,13 +66,13 @@ async function matchDatasetFile(dataPaths, requestInfo) {
    * (this "first match wins" approach mirrors that of `getAvailable`)
    */
   const allAvailableDatasets = []
-  for (const [dir, dataTypes] of Object.entries(dataPaths)) {
+  for (const [dir, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
     if (!dataTypes.has('datasets')) continue;
-    let files = [];
+    let files: string[] = [];
     try {
       files = await readdir(dir);
     } catch (err) {
-      utils.warn(`Error reading datasets from ${dir}: ${err.message}`)
+      utils.warn(`Error reading datasets from ${dir}: ${err instanceof Error ? err.message : err}`)
     }
 
     if (requestInfo.dataType==='dataset') {
