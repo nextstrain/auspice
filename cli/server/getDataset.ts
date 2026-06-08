@@ -2,6 +2,7 @@ import { promisify } from 'util';
 import path from "path";
 import fs from 'fs';
 import * as getAvailable from "./getAvailable.ts";
+import type { DatasetInfo } from "./getAvailable.ts";
 import * as helpers from "./getDatasetHelpers.ts";
 import * as utils from "../utils.ts";
 
@@ -12,7 +13,7 @@ const readdir = promisify(fs.readdir);
  * from disk.
  */
 export const setUpGetDatasetHandler = (dataPaths) => {
-  return async (req, res) => {
+  return async (req, res): Promise<void> => {
 
     let requestInfo;
     try {
@@ -60,12 +61,13 @@ const SIDECARS = {
  *  - object: the paths for (v1) meta/tree dataset JSONs
  *  - array:  no matching file found. The array represents all available datasets
  */
-async function matchDatasetFile(dataPaths, requestInfo) {
+async function matchDatasetFile(dataPaths, requestInfo): Promise<string | {meta: string, tree: string} | DatasetInfo[]> {
   /**
    * Iterate through the dataPaths and return the first match we find
    * (this "first match wins" approach mirrors that of `getAvailable`)
    */
   const allAvailableDatasets = []
+  /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
   for (const [dir, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
     if (!dataTypes.has('datasets')) continue;
     let files: string[] = [];

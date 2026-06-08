@@ -20,7 +20,7 @@ export const log = (msg): void => {
 export const warn = (msg): void => {
   console.warn(chalk.yellowBright(`[warning]\t${msg}`));
 };
-export const error = (msg): void => {
+export const error = (msg): never => {
   console.error(chalk.redBright(`[error]\t${msg}`));
   process.exit(2);
 };
@@ -29,7 +29,7 @@ const isNpmGlobalInstall = (): boolean => {
   return __dirname.indexOf("lib/node_modules/auspice") !== -1;
 };
 
-export const cleanUpPathname = (pathIn) => {
+export const cleanUpPathname = (pathIn): string | undefined => {
   let pathOut = pathIn;
   if (!pathOut.endsWith("/")) pathOut += "/";
   if (pathOut.startsWith("~")) {
@@ -43,7 +43,7 @@ export const cleanUpPathname = (pathIn) => {
   return pathOut;
 };
 
-const getCurrentDirectoriesFor = (type) => {
+const getCurrentDirectoriesFor = (type): string | undefined => {
   const cwd = process.cwd();
   const folderName = type === "data" ? "auspice" : "narratives";
   if (fs.existsSync(path.join(cwd, folderName))) {
@@ -53,13 +53,13 @@ const getCurrentDirectoriesFor = (type) => {
 };
 
 
-export const defaultDataPaths = ({narrative=false} = {}) => {
+export const defaultDataPaths = ({narrative=false} = {}): (string | undefined)[] => {
   return isNpmGlobalInstall() ?
     [getCurrentDirectoriesFor(narrative ? "narratives" : "data")] :
     [path.join(path.resolve(__dirname), "..", narrative ? "narratives" : "data")];
 }
 
-export const readFilePromise = (fileName) => {
+export const readFilePromise = (fileName): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     fs.readFile(fileName, 'utf8', (err, data) => {
       if (err) {

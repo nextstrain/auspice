@@ -8,7 +8,7 @@ const readdir = promisify(fs.readdir);
 
 
 export const setUpGetNarrativeHandler = (dataPaths) => {
-  return async (req, res) => {
+  return async (req, res): Promise<void> => {
     utils.log(`GET NARRATIVE request received: ${req.url}`);
     const query = queryString.parse(req.url.split('?')[1]);
     const type = query.type ? query.type.toLowerCase() : null;
@@ -23,6 +23,7 @@ export const setUpGetNarrativeHandler = (dataPaths) => {
       .replace(/^\//, "")  // remove leading slash
       .replace(/\/$/, "")  // remove ending slash
 
+    /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
     for (const [p, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
       if (!dataTypes.has('narratives')) continue;
       try {
