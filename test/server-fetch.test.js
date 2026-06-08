@@ -17,7 +17,7 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { setUpGetDatasetHandler } from "../cli/server/getDataset.js";
+import { setUpGetDatasetHandler } from "../cli/server/getDataset.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
