@@ -77,7 +77,7 @@ If embarking on this journey, consider using Playwright since it is already used
 
 #### For smoke tests
 
-1. Fetch the datasets with `npm run get-data`.
+1. Fetch testing datasets with `npm run fetch-test-data`.
 2. Install the testing browser with `npx playwright install chromium`.
 3. Run `npm run smoke-test`.
 
@@ -93,14 +93,9 @@ If embarking on this journey, consider using Playwright since it is already used
     E.g., `npx jest test/dates.test.js`
 
 
-
-#### Manual testing
-
-A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
-
 #### Test on downstream repositories
 
-Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
+A GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
 
 ## git-lfs
 
