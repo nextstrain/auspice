@@ -9,4 +9,3 @@
 import { convertFromV1 } from "./cli/server/convertJsonSchemas.js";
 
 export { convertFromV1 };
-export const parseNarrativeFile = undefined;
