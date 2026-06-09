@@ -27,7 +27,6 @@
     "type-check": "tsc && tsc --project cli/tsconfig.json",
     "type-check:watch": "tsc --watch",
     "fetch-test-data": "./scripts/fetch-test-data",
-    "heroku-postbuild": "npm run build",
     "test": "jest test/*.js test/*.ts",
     "smoke-test": "NODE_ENV=test ENV=dev npx playwright test",
     "diff-lang": "./scripts/diff-lang.js"
