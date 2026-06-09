@@ -18,7 +18,6 @@ import { initReactI18next } from "react-i18next";
 /* S T Y L E S H E E T S */
 import "./css/global.css";
 import "./css/browserCompatability.css";
-import "./css/bootstrapCustomized.css";
 import "./css/static.css";
 import "./css/notifications.css";
 import "./css/select.css";

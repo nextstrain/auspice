@@ -96,7 +96,7 @@ const SplashContent = ({available, browserDimensions, errorMessage}) => {
   return (
     <>
       <NavBar sidebar={false}/>
-      <div className="static container">
+      <div className="static" style={{marginRight: "auto", marginLeft: "auto", paddingLeft: "15px", paddingRight: "15px", maxWidth: "1150px"}}>
         <Header/>
         {errorMessage ? <ErrorMessage/> : <Intro/>}
         <ListAvailable type="datasets" data={available.datasets}/>
