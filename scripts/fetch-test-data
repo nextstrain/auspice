@@ -1,12 +1,50 @@
-#!/usr/bin/env bash
+#!/usr/bin/env node
 
-# Provision specific JSONs for tests
+const fs = require('fs');
+const path = require('path');
 
-set -x -e -o pipefail
+const DEST = path.join(__dirname, '..', 'test', 'fetched-jsons');
+const CHARON = 'https://nextstrain.org/charon/getDataset?prefix=';
 
-DEST="test/fetched-jsons"
-CHARON="https://nextstrain.org/charon/getDataset?prefix="
-FETCH="curl --fail --compressed"
+const datasets = [
+  { src: 'ebola/all-outbreaks@2026-05-18', dst: 'ebola-all-outbreaks' },
+  { src: 'ebola/ebov-2013@2025-10-14', dst: 'ebola-ebov-2013' },
+  { src: 'mumps/global@2026-05-30', dst: 'mumps', tipFrequencies: true},
+];
 
-${FETCH} ${CHARON}/ebola/all-outbreaks@2026-05-18 --output ${DEST}/ebola-all-outbreaks.json
-${FETCH} ${CHARON}/ebola/ebov-2013@2025-10-14 --output ${DEST}/ebola-ebov-2013.json
+async function main() {
+  if (!fs.existsSync(DEST)) {
+    console.error(`Expected directory ${DEST} to exist`);
+    process.exit(1);
+  }
+
+  const fetches = datasets.flatMap(({src, dst, tipFrequencies}) => {
+    const items = [
+      {url: `${CHARON}/${src}`, output: `${dst}.json`},
+    ];
+    if (tipFrequencies) {
+      items.push({url: `${CHARON}/${src}&type=tip-frequencies`, output: `${dst}_tip-frequencies.json`});
+    }
+    return items;
+  });
+
+  await Promise.all(
+    fetches.map(async ({url, output}) => {
+      console.log(`Fetching ${url}`);
+      const res = await fetch(url);
+      if (!res.ok) {
+        throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`);
+      }
+      const outputPath = path.join(DEST, output);
+      fs.writeFileSync(outputPath, Buffer.from(await res.arrayBuffer()));
+      console.log(`  -> ${outputPath}`);
+    })
+  );
+
+  console.log(`Fetched ${fetches.length} files`);
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});
