@@ -1,29 +1,35 @@
 /* eslint no-console: off */
-const fs = require('fs');
-const chalk = require('chalk');
-const path = require("path");
+import fs from 'fs';
+import _chalk from 'chalk';
+// chalk 2.x types aren't compatible with nodenext module resolution
+/* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+const chalk = _chalk as any as import('chalk').Chalk;
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-const verbose = (msg) => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+export const verbose = (msg): void => {
   if (global.AUSPICE_VERBOSE) {
     console.log(chalk.greenBright(`[verbose]\t${msg}`));
   }
 };
-const log = (msg) => {
+export const log = (msg): void => {
   console.log(chalk.blueBright(msg));
 };
-const warn = (msg) => {
+export const warn = (msg): void => {
   console.warn(chalk.yellowBright(`[warning]\t${msg}`));
 };
-const error = (msg) => {
+export const error = (msg): never => {
   console.error(chalk.redBright(`[error]\t${msg}`));
   process.exit(2);
 };
 
-const isNpmGlobalInstall = () => {
+const isNpmGlobalInstall = (): boolean => {
   return __dirname.indexOf("lib/node_modules/auspice") !== -1;
 };
 
-const cleanUpPathname = (pathIn) => {
+export const cleanUpPathname = (pathIn): string | undefined => {
   let pathOut = pathIn;
   if (!pathOut.endsWith("/")) pathOut += "/";
   if (pathOut.startsWith("~")) {
@@ -37,7 +43,7 @@ const cleanUpPathname = (pathIn) => {
   return pathOut;
 };
 
-const getCurrentDirectoriesFor = (type) => {
+const getCurrentDirectoriesFor = (type): string | undefined => {
   const cwd = process.cwd();
   const folderName = type === "data" ? "auspice" : "narratives";
   if (fs.existsSync(path.join(cwd, folderName))) {
@@ -47,13 +53,13 @@ const getCurrentDirectoriesFor = (type) => {
 };
 
 
-const defaultDataPaths = ({narrative=false} = {}) => {
+export const defaultDataPaths = ({narrative=false} = {}): (string | undefined)[] => {
   return isNpmGlobalInstall() ?
     [getCurrentDirectoriesFor(narrative ? "narratives" : "data")] :
     [path.join(path.resolve(__dirname), "..", narrative ? "narratives" : "data")];
 }
 
-const readFilePromise = (fileName) => {
+export const readFilePromise = (fileName): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     fs.readFile(fileName, 'utf8', (err, data) => {
       if (err) {
@@ -71,7 +77,7 @@ const readFilePromise = (fileName) => {
 /* write an index.html file to the current working directory
  * Optionally set the hrefs for local files to relative links (needed for github pages)
  */
-const exportIndexDotHtml = ({relative=false}) => {
+export const exportIndexDotHtml = ({relative=false}): void => {
   if (path.resolve(__dirname, "..") === process.cwd()) {
     warn("Cannot export index.html to the auspice source directory.");
     return;
@@ -85,15 +91,4 @@ const exportIndexDotHtml = ({relative=false}) => {
       .replace(/\/dist\/auspice\.bundle\.([0-9a-f]{20})\.js/, "dist/auspice.bundle.$1.js");
   }
   fs.writeFileSync(outputFilePath, data);
-};
-
-module.exports = {
-  verbose,
-  log,
-  warn,
-  error,
-  readFilePromise,
-  exportIndexDotHtml,
-  cleanUpPathname,
-  defaultDataPaths
 };

@@ -1,9 +1,10 @@
-const { promisify } = require('util');
-const path = require("path");
-const fs = require('fs');
-const getAvailable = require("./getAvailable");
-const helpers = require("./getDatasetHelpers");
-const utils = require("../utils");
+import { promisify } from 'util';
+import path from "path";
+import fs from 'fs';
+import * as getAvailable from "./getAvailable.ts";
+import type { DatasetInfo } from "./getAvailable.ts";
+import * as helpers from "./getDatasetHelpers.ts";
+import * as utils from "../utils.ts";
 
 const readdir = promisify(fs.readdir);
 
@@ -11,14 +12,15 @@ const readdir = promisify(fs.readdir);
  * Returns a route handler which responds to requests by serving the relevant JSON file
  * from disk.
  */
-const setUpGetDatasetHandler = (dataPaths) => {
-  return async (req, res) => {
+export const setUpGetDatasetHandler = (dataPaths) => {
+  return async (req, res): Promise<void> => {
 
     let requestInfo;
     try {
       requestInfo = helpers.interpretRequest(req);
     } catch (err) {
-      return helpers.handleError(res, err.message, err.message, 400);
+      const msg = err instanceof Error ? err.message : String(err);
+      return helpers.handleError(res, msg, msg, 400);
     }
 
     const matchResult = await matchDatasetFile(dataPaths, requestInfo);
@@ -59,19 +61,20 @@ const SIDECARS = {
  *  - object: the paths for (v1) meta/tree dataset JSONs
  *  - array:  no matching file found. The array represents all available datasets
  */
-async function matchDatasetFile(dataPaths, requestInfo) {
+async function matchDatasetFile(dataPaths, requestInfo): Promise<string | {meta: string, tree: string} | DatasetInfo[]> {
   /**
    * Iterate through the dataPaths and return the first match we find
    * (this "first match wins" approach mirrors that of `getAvailable`)
    */
   const allAvailableDatasets = []
-  for (const [dir, dataTypes] of Object.entries(dataPaths)) {
+  /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+  for (const [dir, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
     if (!dataTypes.has('datasets')) continue;
-    let files = [];
+    let files: string[] = [];
     try {
       files = await readdir(dir);
     } catch (err) {
-      utils.warn(`Error reading datasets from ${dir}: ${err.message}`)
+      utils.warn(`Error reading datasets from ${dir}: ${err instanceof Error ? err.message : err}`)
     }
 
     if (requestInfo.dataType==='dataset') {
@@ -99,8 +102,3 @@ async function matchDatasetFile(dataPaths, requestInfo) {
   }
   return allAvailableDatasets;
 }
-
-
-module.exports = {
-  setUpGetDatasetHandler
-};

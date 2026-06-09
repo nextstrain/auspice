@@ -1,5 +1,1 @@
-const version = "2.71.0";
-
-module.exports = {
-  version
-};
+export const version = "2.71.0";

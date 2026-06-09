@@ -1,6 +1,6 @@
 import { unknownColor, createNonContinuousScaleFromProvidedScaleMap } from "../src/util/colorScale";
 
-const crypto = require("crypto");
+import crypto from "crypto"
 
 /* ---------------------------------------------------------------------- */
 

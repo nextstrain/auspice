@@ -20,7 +20,7 @@ class Language extends React.Component {
         try {
           const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`);
           i18n.addResourceBundle(lang, ns, res.default);
-        } catch (err) {
+        } catch (_err) {
           console.error(`Language ${lang} not found!`);
         }
       }
