@@ -23,10 +23,9 @@ Please see the [project boards](https://github.com/orgs/nextstrain/projects) for
 
 This is useful for debugging, modifying the source code, or using an unpublished feature branch.
 
-You can install using your system `npm` or [within a Conda environment](https://docs.nextstrain.org/projects/auspice/en/stable/introduction/install.html#install-dependencies) to keep things isolated.
+The following steps assume you are using an environment with a suitable nodejs version such as a conda environment. Check the `engines` section of Auspice's [package.json](https://github.com/nextstrain/auspice/blob/master/package.json) for the currently supported nodejs versions.
 
 ```sh
-# grab the GitHub auspice repo
 git clone https://github.com/nextstrain/auspice.git
 cd auspice
 
@@ -37,7 +36,8 @@ npm ci
 npm install --global .
 ```
 
-Updating Auspice should only require pulling the new version from GitHub - it shouldn't require any `npm` commands. You will, however, have to re-build Auspice whenever the client-related code has changed, via `auspice build`.
+When you update Auspice (e.g. via source code modifications or `git pull`) you may need to (i) update dependencies via `npm ci` and (ii) rebuild the client bundles via `auspice build` / `npm run build`.
+
 
 ## Contributing code
 
@@ -48,69 +48,11 @@ Where possible, **please rebase** your work onto master rather than merging chan
 
 From a fork: `git pull --rebase upstream master`
 
-### Make sure tests are passing
-
-We use the following libraries for all kinds of testing, so it'd help to read the docs to get familiar with their APIs and features:
-
-1. [`Jest`](https://github.com/facebook/jest)
-2. [`Playwright`](https://playwright.dev)
-
-When you submit a pull request to the auspice repository, certain tests will need to pass before it can be merged.
-
-You will likely want to run these tests locally before submitting:
-
-First, install the dependencies with `npm i`, then:
-
-#### For unit tests
-
-Run `npm test`.
-
-#### For linting
-
-Run `npm run lint`. If there are issues run `npm run lint:fix`.
-
-#### For integration tests
-
-Auspice used to have integration testing using jest + puppeteer, however this was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
-Ideally this functionality will be brought back, and that PR would be a good place to start.
-If embarking on this journey, consider using Playwright since it is already used for smoke tests.
-
-#### For smoke tests
-
-1. Fetch the datasets with `npm run get-data`.
-2. Install the testing browser with `npx playwright install chromium`.
-3. Run `npm run smoke-test`.
-
-
-#### Test Tips
-
-1. Run a single `describe()`, `it()`, or `test()` **within a file**, add `.only()`:
-
-    E.g., `describe.only()`, `it.only()`, or `test.only()`
-
-2. You can run a single test file like so:
-
-    E.g., `npx jest test/dates.test.js`
-
-
-
-#### Manual testing
-
-A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
-
-#### Test on downstream repositories
-
-Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
-
-## git-lfs
-
-[Git Large File Storage](https://github.com/git-lfs/git-lfs) was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
-You may uninstall it via `git lfs uninstall` if needed.
-
 
 ## Typescript
 
 Auspice is in the process of moving to typescript, and currently supports both `.js(x)` and `.ts(x)` files.
+New code should ideally be written in TS.
 [This guide](https://www.typescriptlang.org/docs/handbook/migrating-from-javascript.html) is helpful to understand the bigger picture of migrating a JS project to TS. 
 Typescript is supposed to help us, so there's no problem using `any` types as we move code from JS to TS, however new code would ideally be typed.
 
@@ -123,6 +65,66 @@ The various moving parts involved are:
 * `typescript` (`tsc` command) is used by `npm run type-check` as well as other plugins/libraries
 * `@typescript-eslint/eslint-plugin`, `@typescript-eslint/parser` allow ESLint to parse TypeScript syntax
 * `@babel/preset-typescript` is used by babel-loader (via webpack) to parse `.ts(x)` files
+
+
+## Tests
+
+Auspice has various tests in place, although test coverage is sporadic.
+When you submit a pull request to the auspice repository, certain tests will need to pass before it can be merged.
+These tests can be run locally:
+
+#### Unit tests
+
+Unit tests use [`Jest`](https://github.com/facebook/jest) and can be run via `npm test`.
+These tests rely on datasets which need to be fetched ahead of time via `npm run fetch-test-data`.
+
+General advice for writing tests:
+
+1. Run a single `describe()`, `it()`, or `test()` **within a file**, add `.only()`:
+
+    E.g., `describe.only()`, `it.only()`, or `test.only()`
+
+2. You can run a single test file like so:
+
+    E.g., `npx jest test/dates.test.js`
+
+
+#### Smoke tests
+
+> Smoke tests are currently very limited but we may expand these in the future
+
+1. Fetch datasets with `npm run get-data`.
+2. Install the testing browser with `npx playwright install chromium`.
+3. Run `npm run smoke-test`.
+
+
+#### For integration tests
+
+Auspice used to have integration testing using jest + puppeteer, however this was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
+Ideally this functionality will be brought back, and that PR would be a good place to start.
+If embarking on this journey, consider using Playwright since it is already used for smoke tests.
+
+
+## Linting & type-checking
+
+Linting via eslint: `npm run lint`, typechecking via `npm type-check`
+
+
+## Heroku review apps
+
+
+A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
+
+
+#### Test on downstream repositories
+
+Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
+
+## git-lfs
+
+[Git Large File Storage](https://github.com/git-lfs/git-lfs) was removed in [PR 1672](https://github.com/nextstrain/auspice/pull/1672).
+You may uninstall it via `git lfs uninstall` if needed.
+
 
 ## Contributing to Documentation
 
