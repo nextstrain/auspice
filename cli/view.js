@@ -120,6 +120,9 @@ const run = (args) => {
   utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
   app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
+  app.get("/service-worker.js", (req, res) => {
+    res.sendFile(path.join(auspiceBuild.distDir, "service-worker.js"), {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
+  });
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {
     maxAge: '30d',
     enableBrotli: true,

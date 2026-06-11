@@ -32,6 +32,15 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 /* google analytics */
 initialiseGoogleAnalyticsIfRequired();
 
+if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      // Ask the browser to check for an updated worker on each app load with network.
+      .then((registration) => registration.update())
+      .catch((error) => console.warn("Failed to register service worker", error)); // eslint-disable-line no-console
+  });
+}
+
 i18n
   .use(initReactI18next)
   .init({

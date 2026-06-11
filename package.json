@@ -114,6 +114,7 @@
     "webpack-dev-middleware": "^3.7.3",
     "webpack-hot-middleware": "^2.25.2",
     "whatwg-fetch": "^0.10.1",
+    "workbox-webpack-plugin": "^7.4.1",
     "xlsx": "^0.17.1",
     "yaml-front-matter": "^4.0.0"
   },
