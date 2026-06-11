@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { infoPanelStyles } from "../../globalStyles";
-import { genericFooterDescription } from "../../util/globals";
+import { FooterDescription } from "../framework/footer";
 import { datasetSummary } from "../info/datasetSummary";
 import { DownloadButtons } from "./downloadButtons";
 
@@ -88,10 +88,6 @@ class DownloadModalContents extends React.Component {
         {" " + t("A full list of sequence authors is available via the TSV files below")}
         <div style={infoPanelStyles.break} />
 
-        <div>
-          {genericFooterDescription}
-        </div>
-
         <div style={infoPanelStyles.modalSubheading}>
           {t("Data usage policy")}
         </div>
@@ -111,6 +107,15 @@ class DownloadModalContents extends React.Component {
             <DownloadButtons relevantPublications={relevantPublications}/>
           </div>
         </div>
+
+        {metadata.description && (
+          <>
+            <div style={infoPanelStyles.modalSubheading}>
+              {t("Dataset description")}:
+            </div>
+            <FooterDescription md={metadata.description} />
+          </>
+        )}
       </>
     );
   }

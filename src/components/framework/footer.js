@@ -157,7 +157,7 @@ const FooterStyles = styled.div`
  * Most (?) datasets contain a description (markdown format) to be rendered in the footer.
  * If it's not set, then we use a generic paragraph of text.
  */
-function FooterDescription({ md }) {
+export function FooterDescription({ md }) {
   if (md) {
     return (
       <Suspense fallback={<div />}>
