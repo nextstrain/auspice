@@ -89,5 +89,36 @@
   "Projection": "Projection",
   "Time point": "Time point",
   "Frequency": "Frequency",
-  "Projected frequency": "Projected frequency"
+  "Projected frequency": "Projected frequency",
+
+
+  "__Dataset edtor__": "########################################",
+  "Edit dataset": "Edit dataset",
+  "Dataset title": "Dataset title",
+  "Dataset updated": "Dataset updated",
+  "Build URL": "Build URL",
+  "Avatar URL": "Avatar URL",
+  "maintainers": "Maintainers",
+  "Add maintainers": "Add maintainer",
+  "data provenances": "Data provenances",
+  "Add data provenances": "Add data provenance",
+  "Warning": "Warning",
+  "Description": "Description",
+  "Submit": "Submit",
+  "Name": "Name",
+  "URL": "URL",
+  "Legend placement": "Legend placement",
+  "tree panel": "Tree panel",
+  "map panel": "Map panel",
+  "measurements panel": "Measurements panel",
+  "top left": "Top left",
+  "top right": "Top right",
+  "bottom left": "Bottom left",
+  "bottom right": "Bottom right",
+  "This dataset has been edited!": "This dataset has been edited!",
+  "Edited dataset warning detail": "All changes will be lost if you refresh the page. Download the dataset if you would like to save your changes.",
+
+
+  "__Color By editor__": "########################################",
+  "Edit colors for": "Edit colors for"
 }
