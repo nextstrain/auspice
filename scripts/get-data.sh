@@ -2,7 +2,7 @@
 
 data_files=(
   "dengue_all.json" "dengue_denv1.json" "dengue_denv2.json" "dengue_denv3.json" "dengue_denv4.json"\
-  "ebola.json" "ebola_root-sequence.json" \
+  "ebola_all-outbreaks.json" "ebola.json" "ebola_root-sequence.json" \
   "ebola_2019-09-14-no-epi-id_meta.json" "ebola_2019-09-14-no-epi-id_tree.json" \
   "lassa_s_tree.json" "lassa_s_meta.json" \
   "lassa_l_tree.json" "lassa_l_meta.json" \
