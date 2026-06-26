@@ -62,6 +62,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     }
     // console.log("extensionData", extensionData);
   }
+  const enableServiceWorker = !devMode && process.env.AUSPICE_ENABLE_SERVICE_WORKER === "true";
 
   /* plugins */
   /* inject strings into the client-accessible process.env */
@@ -69,6 +70,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "process.env": {
       NODE_ENV: devMode ? JSON.stringify("development") : JSON.stringify("production"),
       SKIP_REDUX_CHECKS: JSON.stringify(process.env.SKIP_REDUX_CHECKS),
+      ENABLE_SERVICE_WORKER: JSON.stringify(enableServiceWorker),
       EXTENSION_DATA: JSON.stringify(extensionData)
     }
   });
@@ -111,6 +113,46 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     pluginHtml,
     cleanWebpackPlugin
   ];
+
+  if (enableServiceWorker) {
+    const WorkboxPlugin = require('workbox-webpack-plugin');
+    plugins.push(new WorkboxPlugin.GenerateSW({
+      // The asset name of the service worker file created by this plugin.
+      swDest: "service-worker.js",
+
+      // Serve the index page for offline navigation requests to the root path.
+      navigateFallback: "/dist/index.html",
+      navigateFallbackAllowlist: [/^\/(\?.*)?$/],
+
+      // Add the index page to precache, updating when the webpack build output changes.
+      // TODO: upgrade to html-webpack-plugin to v5 and remove this block. The
+      // newer version would emit index.html earlier and allow Workbox to
+      // discover it natively and precache with a content-based revision.
+      manifestTransforms: [
+        (manifestEntries, compilation) => {
+          return {
+            manifest: [
+              ...manifestEntries,
+              // NOTE: compilation.hash captures changes unrelated to this file,
+              // but it's better than no revision.
+              {url: "/dist/index.html", revision: compilation.hash}
+            ]
+          };
+        }
+      ],
+
+      // A separate runtime would be imported from root, but Auspice serves assets from /dist/.
+      inlineWorkboxRuntime: true,
+
+      // Control all clients immediately (no reload required).
+      clientsClaim: true,
+      skipWaiting: true,
+
+      // Rarely needed, but shouldn't hurt.
+      // <https://github.com/GoogleChrome/workbox/issues/1407#issuecomment-463687081>
+      cleanupOutdatedCaches: true,
+    }));
+  }
 
   if (analyzeBundle) {
     const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;

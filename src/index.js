@@ -32,6 +32,16 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 /* google analytics */
 initialiseGoogleAnalyticsIfRequired();
 
+/* service worker */
+if (process.env.ENABLE_SERVICE_WORKER && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      // Check for updates on each network-connected page load.
+      .then((registration) => registration.update())
+      .catch((error) => console.warn("Failed to register service worker", error)); // eslint-disable-line no-console
+  });
+}
+
 i18n
   .use(initReactI18next)
   .init({
