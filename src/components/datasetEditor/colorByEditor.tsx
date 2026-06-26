@@ -65,7 +65,12 @@ export default function ColorByEditor({
         scale={colorScale.scale}
       />
       <Flex justifyContent="center">
-        <button type="submit">{t("Submit")}</button>
+        <button type="submit" style={{ margin: 10 }}>
+          {t("Apply changes")}
+        </button>
+        <button type="button" style={{ margin: 10 }} onClick={dismissModal}>
+          {t("Discard changes")}
+        </button>
       </Flex>
     </ColorByEditorForm>
   );
