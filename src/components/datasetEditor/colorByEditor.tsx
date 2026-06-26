@@ -9,7 +9,7 @@ import { ColorScale } from "../../reducers/controls";
 import { updateMetadata, SUCCESS } from "../../actions/updateMetadata/updateMetadata";
 import { NewMetadata } from "../../actions/updateMetadata/updateMetadata.types";
 import { warningNotification } from "../../actions/notifications";
-import { getBrighterColor, getDarkerColorHex } from "../../util/colorHelpers";
+import { getBrighterColorHex, getDarkerColorHex } from "../../util/colorHelpers";
 import { ColorByEditorForm } from "./styles";
 
 export default function ColorByEditor({
@@ -103,7 +103,7 @@ function ColorInputs({
    * the main color in the Redux state.
    */
   function ColorInput(val: any): JSX.Element {
-    const [color, setColor] = useState(getBrighterColor(scale(val)));
+    const [color, setColor] = useState(getBrighterColorHex(scale(val)));
     const borderColor = getDarkerColorHex(color);
     const id = `color-${val}`;
     return (

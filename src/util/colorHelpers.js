@@ -131,7 +131,9 @@ export const getEmphasizedColor = (color) => {
 };
 
 const colorK = 0.65;
-export const getBrighterColor = (color) => rgb(color).brighter([colorK]).toString();
+const _getBrighterColor = (color) => rgb(color).brighter([colorK]);
+export const getBrighterColor = (color) => _getBrighterColor(color).toString();
+export const getBrighterColorHex = (color) => _getBrighterColor(color).formatHex();
 export const getDarkerColorHex = (color) => rgb(color).darker([colorK]).formatHex();
 
 /**
