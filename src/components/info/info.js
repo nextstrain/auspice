@@ -43,8 +43,8 @@ class Info extends React.Component {
         <div style={styles.base}>
 
           <div width={this.props.width} style={styles.title}>
-            {this.props.metadata.title || ""}
             <EditButton />
+            {this.props.metadata.title || ""}
           </div>
 
           <div width={this.props.width} style={styles.byline}>

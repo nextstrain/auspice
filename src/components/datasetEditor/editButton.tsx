@@ -7,6 +7,7 @@ import { FaPencilAlt } from "react-icons/fa";
 import { SET_MODAL } from "../../actions/types";
 
 const Button = styled.button`
+  float: right;
   display: inline-flex;
   justify-content: center;
   align-items: center;
