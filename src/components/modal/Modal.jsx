@@ -46,7 +46,7 @@ class Modal extends React.Component {
       dismissMsg: (x) => x, // default
       ...callbacks
     };
-    
+
     const container = apply.container({...infoPanelStyles.modalContainer}, this.props.broswerDimensions)
 
     const dismissMsg = apply.dismissMsg({...infoPanelStyles.topRightMessage}, this.props.broswerDimensions)
@@ -69,6 +69,7 @@ class Modal extends React.Component {
 
     let Contents = null;
     let styles;
+    let clickOutsideToClose = true;
     switch (this.props.modal) {
       case 'download':
         Contents = DownloadModalContents;
@@ -85,21 +86,25 @@ class Modal extends React.Component {
       case 'datasetEditor':
         Contents = DatasetEditor;
         styles = this.styles(datasetEditorStyles);
+        clickOutsideToClose = false;
         break;
       case 'colorByEditor':
         Contents = ColorByEditor;
         styles = this.styles(colorByEditorStyles);
+        clickOutsideToClose = false;
         break;
       default:
         return null;
     }
 
     return (
-      <div style={styles.container} onClick={this.dismissModal}>
+      <div style={styles.container} onClick={clickOutsideToClose && this.dismissModal}>
         <div style={styles.panel} onClick={(e) => stopProp(e)}>
-          <p style={styles.dismissMsg}>
-            ({t("click outside this box to return to the app")})
-          </p>
+          {clickOutsideToClose &&
+            <p style={styles.dismissMsg}>
+              ({t("click outside this box to return to the app")})
+            </p>
+          }
           <Contents dismissModal={this.dismissModal} />
         </div>
       </div>
