@@ -7,6 +7,7 @@ import Byline from "./byline";
 import Warning from "./warning";
 import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
+import EditedBanner from "../datasetEditor/editedBanner";
 import EditButton from "../datasetEditor/editButton";
 
 /**
@@ -41,7 +42,9 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-
+          {this.props.metadata.edited &&
+            <EditedBanner />
+          }
           <div width={this.props.width} style={styles.title}>
             <EditButton />
             {this.props.metadata.title || ""}

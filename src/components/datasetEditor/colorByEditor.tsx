@@ -6,9 +6,8 @@ import { AppDispatch, RootState } from "../../store";
 import { LegendValues } from "../../reducers/controls";
 import Flex from "../framework/flex";
 import { ColorScale } from "../../reducers/controls";
-import { updateMetadata, SUCCESS } from "../../actions/updateMetadata/updateMetadata";
+import { updateMetadata } from "../../actions/updateMetadata/updateMetadata";
 import { NewMetadata } from "../../actions/updateMetadata/updateMetadata.types";
-import { warningNotification } from "../../actions/notifications";
 import { getBrighterColorHex, getDarkerColorHex } from "../../util/colorHelpers";
 import { ColorByEditorForm } from "./styles";
 
@@ -32,6 +31,7 @@ export default function ColorByEditor({
     ]);
 
     const newMetadata: NewMetadata = {
+      edited: true,
       attributes: {
         [colorScale.colorBy]: {
           key: colorScale.colorBy,
@@ -43,15 +43,7 @@ export default function ColorByEditor({
       }
     }
 
-    const result = dispatch(updateMetadata(newMetadata, true, false));
-    if (result===SUCCESS) {
-      dispatch(warningNotification({
-        message: t("This dataset has been edited!"),
-        details: t("Edited dataset warning detail"),
-        autoClose: false,
-      }))
-    }
-
+    dispatch(updateMetadata(newMetadata, true, false));
     dismissModal();
   }
 

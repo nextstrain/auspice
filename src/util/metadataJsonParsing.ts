@@ -21,7 +21,7 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
 
   const metadata: Partial<Metadata> = {};
 
-
+  metadata.edited = false;
   metadata.title = utils.isString(json.meta.title) ? json.meta.title : '';
   metadata.updated = utils.isString(json.meta.updated) ? json.meta.updated : '';
   metadata.colorings = convertColoringsListToDict(json.meta.colorings);
