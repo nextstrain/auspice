@@ -5,8 +5,7 @@ import { useSelector } from "react-redux";
 import { FaTrashAlt } from "react-icons/fa";
 import { AppDispatch, RootState } from "../../store";
 import { NameAndUrl, LegendPlacement, Metadata } from "../../reducers/metadata.types";
-import { warningNotification } from "../../actions/notifications";
-import { SUCCESS, updateMetadata } from "../../actions/updateMetadata/updateMetadata";
+import { updateMetadata } from "../../actions/updateMetadata/updateMetadata";
 import Flex from "../framework/flex";
 import { DatasetEditorForm } from "./styles";
 
@@ -48,7 +47,8 @@ export default function DatasetEditor({
       )
     );
 
-    const result = dispatch(updateMetadata({
+    dispatch(updateMetadata({
+      edited: true,
       title: e.currentTarget.datasetTitle.value,
       updated: e.currentTarget.updated.value,
       buildUrl: e.currentTarget.buildUrl.value,
@@ -59,14 +59,6 @@ export default function DatasetEditor({
       dataProvenance: convertToNameAndUrl(dataProvenances),
       legendPlacements: updatedLegendPlacements,
     }, true, false));
-
-    if (result===SUCCESS) {
-      dispatch(warningNotification({
-        message: t("This dataset has been edited!"),
-        details: t("Edited dataset warning detail"),
-        autoClose: false,
-      }));
-    }
 
     dismissModal();
   }

@@ -91,8 +91,7 @@
   "Frequency": "Frequency",
   "Projected frequency": "Projected frequency",
 
-
-  "__Dataset edtor__": "########################################",
+  "__Dataset editor__": "########################################",
   "Edit dataset": "Edit dataset",
   "Dataset title": "Dataset title",
   "Dataset updated": "Dataset updated",
@@ -116,9 +115,9 @@
   "top right": "Top right",
   "bottom left": "Bottom left",
   "bottom right": "Bottom right",
-  "This dataset has been edited!": "This dataset has been edited!",
-  "Edited dataset warning detail": "All changes will be lost if you refresh the page. Download the dataset if you would like to save your changes.",
-
+  "This dataset has been edited": "This dataset has been edited. Changes will be lost if you reload or close the page. ",
+  "Click to download": "Click to download",
+  "the modified JSON.": "the modified JSON.",
 
   "__Color By editor__": "########################################",
   "Edit colors for": "Edit colors for"

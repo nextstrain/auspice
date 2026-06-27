@@ -6,6 +6,7 @@ import { ScaleType } from "./controls"
 
 export type Metadata = {
   loaded: true;
+  edited: boolean;
   title: string;
   updated: string;
   sharing: MetadataSharing;

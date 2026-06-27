@@ -3,6 +3,7 @@ import type { ScaleType, ControlsState } from "../../reducers/controls";
 import type { Metadata } from "../../reducers/metadata.types";
 
 type EditableMetadata = Partial<Pick<Metadata,
+  "edited" |
   "title" |
   "updated" |
   "buildUrl" |
