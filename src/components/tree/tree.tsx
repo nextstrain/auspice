@@ -138,7 +138,10 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
             id={mainTree ? "MainTree" : "SecondTree"}
             width={width}
             height={height}
-            ref={(c): void => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
+            ref={(c): void => {
+              if (mainTree) { this.domRefs.mainTree = c; }
+              else { this.domRefs.secondTree = c; }
+            }}
           />
         </g></g></g></g>
       </svg>

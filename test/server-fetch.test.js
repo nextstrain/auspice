@@ -13,10 +13,13 @@
  * (see src/actions/loadData.js).
  */
 
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const { setUpGetDatasetHandler } = require("../cli/server/getDataset");
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { setUpGetDatasetHandler } from "../cli/server/getDataset.ts";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const DATA_DIR = path.resolve(__dirname, "fetched-jsons");
 const MAIN_FIXTURE = path.join(DATA_DIR, "mumps.json");

@@ -82,7 +82,6 @@ class FilterData extends React.Component {
         ...(this.props.totalStateCountsSecondTree?.[traitName]?.keys() || []),
       ]);
 
-      this.props.totalStateCounts[traitName];
       const traitTitle = this.getFilterTitle(traitName);
       const filterValuesCurrentlyActive = new Set((this.props.activeFilters[traitName] || []).filter((x) => x.active).map((x) => x.value));
       for (const traitValue of Array.from(traitData).sort()) {

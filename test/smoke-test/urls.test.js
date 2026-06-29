@@ -1,5 +1,5 @@
-const {readFileSync} = require('fs');
-const {expect, test} = require('@playwright/test');
+import {readFileSync} from 'fs';
+import {expect, test} from '@playwright/test';
 
 test.describe.configure({ mode: 'parallel' });
 
@@ -7,7 +7,7 @@ const testCases = [];
 
 // Load a suite of smoke tests from a simple text file. File is of the format:
 // [path], [comma separated text assertions]
-const text = readFileSync(require.resolve('./urls.txt'), 'utf8').trim();
+const text = readFileSync(new URL('./urls.txt', import.meta.url), 'utf8').trim();
 for (const line of text.split(/\r?\n/)) {
   if (line.length === 0) continue; // allow for blank lines.
   if (line.match(/^#/)) continue; // allow for comments.

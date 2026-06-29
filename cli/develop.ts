@@ -1,18 +1,26 @@
 /* eslint no-console: off */
-const path = require("path");
-const express = require("express");
-const webpack = require("webpack");
-const webpackDevMiddleware = require("webpack-dev-middleware");
-const webpackHotMiddleware = require("webpack-hot-middleware");
-const utils = require("./utils");
-const view = require("./view");
-const version = require('../src/version').version;
-const chalk = require('chalk');
-const generateWebpackConfig = require("../webpack.config.js").default;
-const SUPPRESS = require('argparse').Const.SUPPRESS;
-const { processPathArguments } = require("./server/processPaths");
+import path from "path";
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import express from "express";
+import webpack from "webpack";
+import webpackDevMiddleware from "webpack-dev-middleware";
+import webpackHotMiddleware from "webpack-hot-middleware";
+import * as utils from "./utils.ts";
+import * as view from "./view.ts";
+import { version } from '../src/version.js';
+import _chalk from 'chalk';
+/* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+const chalk = _chalk as any as import('chalk').Chalk;
+import { processPathArguments } from "./server/processPaths.ts";
 
-const addParser = (parser) => {
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const generateWebpackConfig = require("../webpack.config.cjs").default;
+const SUPPRESS = require('argparse').Const.SUPPRESS;
+
+const addParser = (parser): void => {
   const description = `Launch auspice in development mode.
     This runs a local server and uses hot-reloading to allow automatic updating as you edit the code.
     NOTE: there is a speed penalty for this ability and this should never be used for production.
@@ -30,7 +38,7 @@ const addParser = (parser) => {
 };
 
 
-const run = (args) => {
+const run = async (args): Promise<void> => {
   const dataPaths = processPathArguments(args)
 
   /* Basic server set up */
@@ -40,7 +48,7 @@ const run = (args) => {
 
   const baseDir = path.resolve(__dirname, "..");
   utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
+  app.get("/favicon.png", (_req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
@@ -53,7 +61,7 @@ const run = (args) => {
   process.env.BABEL_EXTENSION_PATH = extensionPath;
 
   /* Redirects / to webpack-generated index */
-  app.use((req, res, next) => {
+  app.use((req, _res, next) => {
     if (!/^\/__webpack_hmr|^\/charon|\.[A-Za-z0-9]{1,5}$/.test(req.path)) {
       req.url = webpackConfig.output.publicPath;
     }
@@ -73,7 +81,7 @@ const run = (args) => {
   if (args.gh_pages) {
     handlerMsg = view.serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
   } else if (args.handlers) {
-    handlerMsg = view.customRouteHandlers(app, path.resolve(args.handlers));
+    handlerMsg = await view.customRouteHandlers(app, path.resolve(args.handlers));
   } else {
     handlerMsg = view.defaultRouteHandlers({app, dataPaths});
   }
@@ -84,7 +92,7 @@ const run = (args) => {
     return res.status(500).type("text/plain").send(errorMessage);
   });
 
-  app.get("*", (req, res) => res.redirect("/"));
+  app.get("*", (_req, res) => res.redirect("/"));
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
@@ -115,7 +123,7 @@ const run = (args) => {
 
 };
 
-module.exports = {
+export {
   addParser,
   run
 };

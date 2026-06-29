@@ -1,14 +1,14 @@
-const queryString = require("query-string");
-const { promisify } = require('util');
-const fs = require("fs");
-const utils = require("../utils");
-const getAvailable = require("./getAvailable");
+import queryString from "query-string";
+import { promisify } from 'util';
+import fs from "fs";
+import * as utils from "../utils.ts";
+import * as getAvailable from "./getAvailable.ts";
 
 const readdir = promisify(fs.readdir);
 
 
-const setUpGetNarrativeHandler = (dataPaths) => {
-  return async (req, res) => {
+export const setUpGetNarrativeHandler = (dataPaths) => {
+  return async (req, res): Promise<void> => {
     utils.log(`GET NARRATIVE request received: ${req.url}`);
     const query = queryString.parse(req.url.split('?')[1]);
     const type = query.type ? query.type.toLowerCase() : null;
@@ -23,7 +23,8 @@ const setUpGetNarrativeHandler = (dataPaths) => {
       .replace(/^\//, "")  // remove leading slash
       .replace(/\/$/, "")  // remove ending slash
 
-    for (const [p, dataTypes] of Object.entries(dataPaths)) {
+    /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+    for (const [p, dataTypes] of Object.entries(dataPaths) as [string, Set<string>][]) {
       if (!dataTypes.has('narratives')) continue;
       try {
         const files = await readdir(p);
@@ -36,7 +37,7 @@ const setUpGetNarrativeHandler = (dataPaths) => {
         }
         // else go scan the next dataPaths (directory)
       } catch (err) {
-        const errorMessage = `Narratives couldn't be served -- ${err.message}`;
+        const errorMessage = `Narratives couldn't be served -- ${err instanceof Error ? err.message : err}`;
         utils.warn(errorMessage);
         return res.status(500).type("text/plain").send(errorMessage);
       }
@@ -45,8 +46,4 @@ const setUpGetNarrativeHandler = (dataPaths) => {
     utils.warn(errorMessage);
     res.status(404).type("text/plain").send(errorMessage);
   }
-};
-
-module.exports = {
-  setUpGetNarrativeHandler,
 };

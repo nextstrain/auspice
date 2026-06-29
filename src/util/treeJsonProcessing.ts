@@ -164,6 +164,7 @@ const collectObservedMutations = (nodesArray: ReduxNode[]): Mutations => {
     if (!n.branch_attrs || !n.branch_attrs.mutations) return;
     Object.entries(n.branch_attrs.mutations).forEach(([gene, muts]) => {
       muts.forEach((mut) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         mutations[`${gene}:${mut}`] ? mutations[`${gene}:${mut}`]++ : (mutations[`${gene}:${mut}`] = 1);
       });
     });

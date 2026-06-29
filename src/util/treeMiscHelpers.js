@@ -103,7 +103,7 @@ function validateUrl(url) {
     if (url.startsWith("https_")) url = url.replace("https_", "https:");
     const urlObj = new URL(url);
     return urlObj.href;
-  } catch (err) {
+  } catch (_err) {
     console.warn(`Dataset provided the invalid URL ${url}`);
     return undefined;
   }

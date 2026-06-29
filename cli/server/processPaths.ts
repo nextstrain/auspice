@@ -1,4 +1,6 @@
-const utils = require("../utils");
+import * as utils from "../utils.ts";
+
+type AvailableResourceTypes = Set<'datasets' | 'narratives'>;
 
 /**
  * Returns an object linking (absolute) paths to a set whose members indicate whether
@@ -13,7 +15,7 @@ const utils = require("../utils");
  * (via `defaultDataPaths()`), however in my (james) experience it's never worked
  * well an I recommend providing paths via args.
  */
-function processPathArguments(args) {
+export function processPathArguments(args): Record<string, AvailableResourceTypes> {
 
   if (args.handlers) {
     if (args.datasetDir || args.narrativeDir || args.path.length>0) {
@@ -42,13 +44,13 @@ function processPathArguments(args) {
     utils.warn(`[DEPRECATED] Instead of 'auspice ... --narrativeDir ${args.narrativeDir}' please use 'auspice ... ${args.narrativeDir}' `)
   }
 
-  const dataPaths = Object.fromEntries(
+  const dataPaths: Record<string,AvailableResourceTypes> = Object.fromEntries(
     (args.path.length ?
       args.path.map(utils.cleanUpPathname) :
       args.datasetDir ?
         [utils.cleanUpPathname(args.datasetDir)] :
         utils.defaultDataPaths()
-    ).map((p) => [p, new Set(['datasets'])])
+    ).map((p: string) => [p, new Set(['datasets'])])
   );
 
   for (const narrativePath of
@@ -64,14 +66,9 @@ function processPathArguments(args) {
     }
   }
 
-  if (undefined in dataPaths) {
+  if ("undefined" in dataPaths) {
     utils.error("One or more provided paths does not exist")
   }
 
   return dataPaths;
 }
-
-
-module.exports = {
-  processPathArguments,
-};

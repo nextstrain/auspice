@@ -3,7 +3,7 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
-const utils = require('./cli/utils');
+const utils = require('./cli/utils.ts');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
@@ -238,6 +238,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     resolve: {
       alias: aliasesToResolve,
       extensions: ['.ts', '.tsx', '...'],
+      fullySpecified: false,
       fallback: {
         buffer: require.resolve("buffer/"),
         fs: false
@@ -295,6 +296,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     },
     module: {
       rules: [
+        {
+          test: /\.(ts|js)x?$/,
+          type: "javascript/auto",
+          resolve: { fullySpecified: false }
+        },
         {
           test: /\.(ts|js)x?$/,
           loader: 'babel-loader',
