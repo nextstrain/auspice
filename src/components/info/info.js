@@ -25,7 +25,8 @@ import EditButton from "../datasetEditor/editButton";
     metadata: state.metadata,
     nodes: state.tree.nodes,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    visibility: state.tree.visibility
+    visibility: state.tree.visibility,
+    mobileDisplay: state.general.mobileDisplay
   };
 })
 class Info extends React.Component {
@@ -42,11 +43,11 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-          {this.props.metadata.edited &&
+          {!this.props.mobileDisplay && this.props.metadata.edited &&
             <EditedBanner />
           }
           <div width={this.props.width} style={styles.title}>
-            <EditButton />
+            {!this.props.mobileDisplay && <EditButton />}
             {this.props.metadata.title || ""}
           </div>
 
