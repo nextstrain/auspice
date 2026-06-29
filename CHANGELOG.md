@@ -5,6 +5,17 @@ This allows additional dropped-on metadata to be exported, as well as allowing t
 Additionally, the current state of the UI (such as the color-by, which panels are toggled on etc) are saved into the downloaded JSON where possible.
 ([#2055](https://github.com/nextstrain/auspice/pull/2055))
 
+* Dataset footers (shown at the bottom of the page) now must be defined in the dataset JSON itself.
+  The remaining hardcoded footers have been removed from Auspice and added to their respective datasets, see [#980](https://github.com/nextstrain/auspice/issues/980) for a full list.
+  ([#2073](https://github.com/nextstrain/auspice/pull/2073))
+
+* Documentation related to required NodeJS versions and dev docs has been updated
+  ([#2072](https://github.com/nextstrain/auspice/pull/2072))
+
+#### Internal changes
+
+* More TypeScript usage ([#2054](https://github.com/nextstrain/auspice/pull/2054), [#2058](https://github.com/nextstrain/auspice/pull/2058))
+
 ## version 2.71.0 - 2026/05/25
 
 * Dragging on extra metadata is now more powerful. Columns which match existing colorings will now be merged, and Augur node-data JSONs can also be used. See [Drag-and-drop extra metadata](https://docs.nextstrain.org/projects/auspice/en/stable/advanced-functionality/drag-drop-csv-tsv.html) for more. ([#2039](https://github.com/nextstrain/auspice/pull/2039))
