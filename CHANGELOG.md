@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.72.0 - 2026/06/30
+
+
 * Downloaded JSONs (via the "download data" button at the bottom of the page) are now created from internal state rather than re-fetching the original JSON.
 This allows additional dropped-on metadata to be exported, as well as allowing the functionality to work in auspice.us.
 Additionally, the current state of the UI (such as the color-by, which panels are toggled on etc) are saved into the downloaded JSON where possible.
