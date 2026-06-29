@@ -279,7 +279,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
           test: /\.(ts|js)x?$/,
           loader: 'babel-loader',
           exclude: [
-            /node_modules\/(core-js|regenerator-runtime)/
+            /node_modules\/(core-js|regenerator-runtime)/,
+            /node_modules\/maplibre-gl/
           ],
           options: {
             cwd: path.resolve(__dirname)
