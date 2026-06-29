@@ -12,7 +12,8 @@ const CHARON = 'https://nextstrain.org/charon/getDataset?prefix=';
 const datasets = [
   { src: 'ebola/all-outbreaks@2026-05-18', dst: 'ebola-all-outbreaks' },
   { src: 'ebola/ebov-2013@2025-10-14', dst: 'ebola-ebov-2013' },
-  { src: 'mumps/global@2026-05-30', dst: 'mumps', tipFrequencies: true},
+  { src: 'mumps/global@2026-05-30', dst: 'mumps', tipFrequencies: true },
+  { src: 'zika@2026-06-05', dst: 'zika'},
 ];
 
 async function main() {
