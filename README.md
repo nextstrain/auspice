@@ -39,20 +39,11 @@ See [the relevant page on Auspice docs](https://docs.nextstrain.org/projects/aus
 To get up & running, you'll need datasets to visualise.
 (Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to run your own analyses.)
 
-If you've installed auspice from `npm` you may get datasets to display via:
+If you've installed auspice from `npm` you may get an example dataset to display via:
 
 ```bash
 mkdir data
 curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
-curl http://data.nextstrain.org/ncov.json --compressed -o data/ncov.json
-...
-```
-
-If you've installed auspice from source, we have a helper script to download a number of datasets for testing:
-
-```bash
-# from the auspice src directory
-npm run get-data
 ```
 
 ### Obtain narratives to view locally

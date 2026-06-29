@@ -73,6 +73,6 @@ It should be simple to deploy a custom version of auspice to any server, but we 
 Deploying to Heroku is straightforward, but there are a few points to note:
 
 1. You must set the config var ``HOST=0.0.0.0`` for the app.
-2. You will need to either create a ``Procfile`` or a ``npm run start`` script which calls ``auspice view`` (or ``npx auspice view`` depending on how you implement auspice).
-3. Make sure the datasets to be served are either (a) included in your git repo or (b) downloaded by the heroku build pipeline. `We use option (b) <https://github.com/nextstrain/auspice/blob/master/package.json>`_ by specifying a npm script called ``heroku-postbuild``.
-
+2. You will need to either create a ``Procfile`` or a ``npm run start`` script which calls ``auspice view`` (or some equivalent).
+3. Datasets & narratives can be sourced by providing positional argument(s) to ``auspice view`` or by writing your own request handlers for the server.
+   If you need to download datasets at heroku-buildtime you can use the ``heroku-postbuild`` npm script.
