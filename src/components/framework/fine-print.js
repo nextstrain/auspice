@@ -11,7 +11,7 @@ import { publications } from "../download/downloadModal";
 import { hasExtension, getExtension } from "../../util/extensions";
 import { canShowLinkOuts } from "../modal/LinkOutModalContents.jsx";
 
-const logoPNG = require("../../images/favicon.png");
+import logoPNG from "../../images/favicon.png";
 
 const MarkdownDisplay = lazy(() => import("../markdownDisplay"));
 

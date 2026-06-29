@@ -29,10 +29,10 @@ rules:
   # Not possible while strictNullChecks is disabled in tsconfig.
   "@typescript-eslint/no-non-null-assertion": "error"
   no-unused-vars: off
-  "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_" }]
+  "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "destructuredArrayIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_"}]
   no-use-before-define: off
   "@typescript-eslint/no-use-before-define": ["error", { "functions": false }]
-  "@typescript-eslint/no-var-requires": off # Remove this override once all files use ES6 style imports.
+  "@typescript-eslint/no-require-imports": off # Remove this override once all files use ES6 style imports.
   prefer-const: ["error", {"destructuring": "all"}]
   react/no-array-index-key: error
   react/prop-types: off # Remove this override once all props have been typed using PropTypes or TypeScript.

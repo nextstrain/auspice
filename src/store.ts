@@ -41,10 +41,9 @@ const store = configureStore({
   devTools: process.env.NODE_ENV !== 'production',
 })
 
-if (process.env.NODE_ENV !== 'production' && module.hot) {
-  // console.log("hot reducer reload");
-  module.hot.accept('./reducers', () => {
-    const nextRootReducer = require('./reducers/index');
+if (process.env.NODE_ENV !== 'production' && import.meta.webpackHot) {
+  import.meta.webpackHot.accept('./reducers', async () => {
+    const nextRootReducer = (await import('./reducers/index')).default;
     store.replaceReducer(nextRootReducer);
   });
 }

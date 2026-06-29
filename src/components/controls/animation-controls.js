@@ -21,9 +21,8 @@ class AnimationControls extends React.Component {
     return (
       <SidebarButton
         onClick={() => {
-          this.props.animationPlayPauseButton === "Play" ?
-            this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Pause"}) :
-            this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
+          const newState = this.props.animationPlayPauseButton === "Play" ? "Pause" : "Play";
+          this.props.dispatch({ type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: newState });
         }}
       >
         <span>
