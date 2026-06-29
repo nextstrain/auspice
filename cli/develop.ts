@@ -113,8 +113,8 @@ const run = async (args): Promise<void> => {
       utils.error(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
 
       Example commands to fix:
-        ${chalk.yellow('HOST="localhost" auspice develop')}
-        ${chalk.yellow('HOST="localhost" npm run develop')}`);
+        ${chalk.yellow('HOST="localhost" auspice develop <PATH>')}
+        ${chalk.yellow('HOST="localhost" npm run develop -- <PATH>')}`);
     }
 
     utils.error(`Uncaught error in app.listen(). Code: ${error.code}`);

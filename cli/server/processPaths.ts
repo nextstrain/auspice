@@ -10,10 +10,6 @@ type AvailableResourceTypes = Set<'datasets' | 'narratives'>;
  * that behaviour is still allowed here in addition to the newer approach of supplying
  * any number of paths which can contain datasets and/or narratives. The two approaches
  * are mutually exclusive and enforcement of this happens here.
- *
- * If no paths are provided via arguments then we attempt to choose sensible defaults
- * (via `defaultDataPaths()`), however in my (james) experience it's never worked
- * well an I recommend providing paths via args.
  */
 export function processPathArguments(args): Record<string, AvailableResourceTypes> {
 
@@ -31,34 +27,42 @@ export function processPathArguments(args): Record<string, AvailableResourceType
     return {}
   }
 
-  if ((args.datasetDir || args.narrativeDir) && args.path.length>0) {
-    utils.error("Incompatible arguments defining paths for datasets and/or narratives: " +
-      "You must either specify the paths as named arguments (--datasetDir and/or --narrativeDir) " +
-      "_or_ specify one or more <path> positional arguments.");
+  if (args.path.length === 0) {
+    if (!args.datasetDir && !args.narrativeDir) {
+      utils.error("Please provide paths to search for datasets and narratives: 'auspice ... PATH [PATH ...]'");
+    } else if (!args.datasetDir) { // i.e. we do have --narrativeDir
+      utils.error("Please provide a '--datasetDir <PATH>' with datasets, or alternatively use the new positional-args invocation: 'auspice ... PATH [PATH ...]'");
+    }
+    // loud deprecation warnings!
+    if (args.datasetDir) {
+      utils.warn(`[DEPRECATED] Instead of 'auspice ... --datasetDir ${args.datasetDir}' please use 'auspice ... ${args.datasetDir}' `)
+    }
+    if (args.narrativeDir) {
+      utils.warn(`[DEPRECATED] Instead of 'auspice ... --narrativeDir ${args.narrativeDir}' please use 'auspice ... ${args.narrativeDir}' `)
+    }
+  } else { // else: we do have positional path arguments
+    if (args.datasetDir || args.narrativeDir) {
+      utils.error("Incompatible arguments defining paths for datasets and/or narratives: " +
+        "You must either specify the paths as named arguments ('--datasetDir' and optionally '--narrativeDir') " +
+        "or specify one or more <path> positional arguments.");
+    }
   }
 
-  if (args.datasetDir) {
-    utils.warn(`[DEPRECATED] Instead of 'auspice ... --datasetDir ${args.datasetDir}' please use 'auspice ... ${args.datasetDir}' `)
-  }
-  if (args.narrativeDir) {
-    utils.warn(`[DEPRECATED] Instead of 'auspice ... --narrativeDir ${args.narrativeDir}' please use 'auspice ... ${args.narrativeDir}' `)
-  }
 
   const dataPaths: Record<string,AvailableResourceTypes> = Object.fromEntries(
     (args.path.length ?
       args.path.map(utils.cleanUpPathname) :
-      args.datasetDir ?
-        [utils.cleanUpPathname(args.datasetDir)] :
-        utils.defaultDataPaths()
+      [utils.cleanUpPathname(args.datasetDir)]
     ).map((p: string) => [p, new Set(['datasets'])])
   );
 
-  for (const narrativePath of
-    (args.path.length ?
-      args.path.map(utils.cleanUpPathname) :
-      args.narrativeDir ?
-        [utils.cleanUpPathname(args.narrativeDir)] :
-        utils.defaultDataPaths({narrative: true}))) {
+  const narrativePaths = args.path.length ?
+    args.path.map(utils.cleanUpPathname) :
+    args.narrativeDir ?
+      [utils.cleanUpPathname(args.narrativeDir)] :
+      []; // if no '--narrativeDir' then use auspice without narratives
+
+  for (const narrativePath of narrativePaths) {
     if (narrativePath in dataPaths) {
       dataPaths[narrativePath].add('narratives');
     } else {

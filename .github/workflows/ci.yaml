@@ -38,7 +38,7 @@ jobs:
           node-version: ${{ matrix.node }}
       # Build is implicit with the "prepare" life cycle script
       - run: npm ci --loglevel verbose
-      - run: npm run get-data
+      - run: npm run fetch-test-data
       - run: npx playwright install chromium
       - run: npm run smoke-test
 
