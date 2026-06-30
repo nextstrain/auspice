@@ -1,15 +1,28 @@
 import { TreeState, NodeAttr } from "../../reducers/tree/types";
 import type { ScaleType, ControlsState } from "../../reducers/controls";
-import type { Colorings, GeoResolutions } from "../../reducers/metadata.types";
+import type { Metadata } from "../../reducers/metadata.types";
+
+type EditableMetadata = Partial<Pick<Metadata,
+  "edited" |
+  "title" |
+  "updated" |
+  "buildUrl" |
+  "buildAvatar" |
+  "warning" |
+  "description" |
+  "maintainers" |
+  "dataProvenance" |
+  "legendPlacements"
+>>
 
 /**
  * Struct containing new metadata information for merging with the current redux state.
  * This interface is intended to be a versatile action for updating existing state
  * covering use cases from drag-and-drop metadata TSVs to in-app editing of attr colours.
  */
-export interface NewMetadata {
+export interface NewMetadata extends EditableMetadata {
   attributes?: Record<string, AttrDetails>;
-  geographic?: GeoResolutions[];
+  geographic?: Metadata["geoResolutions"];
 }
 
 export interface UpdateMetadataAction {
@@ -20,10 +33,7 @@ export interface UpdateMetadataAction {
   metadata: ActionMetadata;
 }
 
-type ActionMetadata = Partial<{
-  colorings: Colorings;
-  geoResolutions: GeoResolutions[];
-}>;
+type ActionMetadata = EditableMetadata & Partial<Pick<Metadata, "colorings" | "geoResolutions">>;
 
 interface ActionTree {
   /** nodeAttrs -> nodeName -> attrName -> attrData */

@@ -1,5 +1,8 @@
 # Changelog
 
+* Added ability to edit a subset of dataset features and colors, where changes
+  are only saved locally. ([#2046](https://github.com/nextstrain/auspice/pull/2046))
+
 ## version 2.72.0 - 2026/06/30
 
 
