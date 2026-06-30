@@ -36,8 +36,8 @@ How to edit the metadata
 
 1. Click on the edit button to the right of the dataset title to open the editor modal.
 2. Edit desired fields.
-3. Click "Submit" to save changes locally.
-4. Click outside the modal if you want to discard all changes.
+3. Click "Apply changes" or press "Enter" to save changes locally.
+4. Click "Discard changes" or press "Esc" to discard all changes and close the modal.
 
 .. image:: ../assets/dataset-editing-modal.png
 
@@ -59,7 +59,7 @@ within Auspice.
 2. Open the legend.
 3. Shift-click on one of the legend swatches to open the editor modal.
 4. Click on the color value that you would like to change.
-5. Click "Submit" to save changes locally.
-6. Click outside the modal if you want to discard all changes.
+5. Click "Apply changes" or press "Enter" to save changes locally.
+6. Click "Discard changes" or press "Esc" to discard all changes and close the modal.
 
 .. image:: ../assets/color-editing-modal.png
