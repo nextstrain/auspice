@@ -48,6 +48,14 @@ You can customise the default Auspice server by supplying your own handlers for 
 See :ref:`the API documentation <server-api-supplying-custom-handlers>` for how to define these and provide them to `auspice view`.
 
 
+Offline Use
+======================================
+
+Setting the environment variable ``AUSPICE_ENABLE_SERVICE_WORKER=true`` when running ``auspice build`` will generate and register a `service worker <https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API>`_ that enables use without a network connection. It is disabled by default.
+
+The service worker is registered at the site root and controls the whole origin, so it should only be enabled for deployments served at the root path. Because the worker controls the entire origin and is cleaned up by serving the deployment again without it enabled, **do not enable it for ephemeral origin deployments** (e.g. one-off review apps): once such an origin is destroyed there is no way to automatically clean up a registered worker and it is left to the user or their browser.
+
+
 AGPL Source Code Requirement
 ============================
 

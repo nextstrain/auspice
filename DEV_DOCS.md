@@ -110,6 +110,38 @@ If embarking on this journey, consider using Playwright since it is already used
 Linting via eslint: `npm run lint`, typechecking via `npm type-check`
 
 
+## Offline use
+
+Auspice can register a [service worker](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API) for use without a network connection.
+This is opt-in and primarily intended for [auspice.us](https://auspice.us); it is enabled by setting the environment variable `AUSPICE_ENABLE_SERVICE_WORKER=true` at build time.
+It is **disabled by default** and is **always disabled in dev mode** (a caching service worker would interfere with hot-reloading).
+
+When enabled, the service worker is registered at the site root with a scope of the whole origin.
+
+What it intercepts:
+
+* The build's static assets – `index.html` and referenced JS/CSS bundles.
+* [Navigation requests](https://web.dev/articles/handling-navigation-requests) to the root path `/`.
+
+What it does **not** intercept:
+
+* **Charon API requests**
+* **Map tiles**
+
+These are runtime `fetch()` requests with no caching configured, so they always go to the network and will fail when offline.
+
+### Removing a registered service worker
+
+There are two options for removal:
+
+1. Automatic – the easiest option for configurable origins (e.g. `localhost:4000`).
+
+    Instructions: rebuild without `AUSPICE_ENABLE_SERVICE_WORKER`, serve the build **at the same origin**, and open a page. The service worker will be unregistered and Workbox caches removed. The service worker will be fully removed when all pages at the origin have been closed.
+
+2. Manual – useful for ephemeral review apps (e.g. `*.herokuapp.com`).
+
+    Instructions: find and remove the service worker and Workbox caches in browser developer tools. For Chromium-based browsers, this is typically under the "Application" tab > "Service workers" and "Cache storage".
+
 ## Heroku review apps
 
 

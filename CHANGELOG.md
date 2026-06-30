@@ -7,6 +7,7 @@
 This allows additional dropped-on metadata to be exported, as well as allowing the functionality to work in auspice.us.
 Additionally, the current state of the UI (such as the color-by, which panels are toggled on etc) are saved into the downloaded JSON where possible.
 ([#2055](https://github.com/nextstrain/auspice/pull/2055))
+* Added support for offline use through the `AUSPICE_ENABLE_SERVICE_WORKER` environment variable read at build-time. This is added primarily for auspice.us, but should work for any Auspice server where assets are served at the root path.
 
 * Dataset footers (shown at the bottom of the page) now must be defined in the dataset JSON itself.
   The remaining hardcoded footers have been removed from Auspice and added to their respective datasets, see [#980](https://github.com/nextstrain/auspice/issues/980) for a full list.

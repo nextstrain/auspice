@@ -125,6 +125,20 @@ const run = (args) => {
     enableBrotli: true,
   }));
 
+  let serviceWorkerPath = path.join(auspiceBuild.distDir, "service-worker.js");
+  if (fs.existsSync(serviceWorkerPath)) {
+    utils.verbose(`Serving service worker from "${auspiceBuild.distDir}"`);
+  } else {
+    /* Service workers are disabled, but a client may have a previous
+     * registration. Serve a worker which unregisters itself so those clients
+     * are returned to the network. */
+    utils.verbose(`Serving self-unregistering service worker`);
+    serviceWorkerPath = path.join(__dirname, "server", "cleanupServiceWorker.js");
+  }
+  app.get("/service-worker.js", (req, res) => {
+    res.sendFile(serviceWorkerPath, {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
+  });
+
   let handlerMsg = "";
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
