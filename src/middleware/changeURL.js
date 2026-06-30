@@ -7,6 +7,7 @@ import { genotypeSymbol, nucleotide_gene, strainSymbol } from "../util/globals";
 import { encodeGenotypeFilters, decodeColorByGenotype, isColorByGenotype } from "../util/getGenotype";
 import { getFilteredAndIdxOfFilteredRoot } from "../util/treeVisibilityHelpers";
 import { removeInvalidMeasurementsFilterQuery } from "../actions/measurements";
+import { defaultStatespaceDeme } from "../components/controls/statespace-deme";
 
 export const strainSymbolUrlString = "__strain__";
 
@@ -128,6 +129,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.CHANGE_GEO_RESOLUTION: {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
+      break;
+    }
+    case types.CHANGE_STATESPACE_DEME: {
+      // TODO - this case is correct, but if we subsequently change the geo-res or color-by then it's not
+      // easier to just always set it?
+      query.statespaceDeme = action.statespaceDeme===defaultStatespaceDeme(state.controls.geoResolution, state.controls.colorBy)
+        ? undefined
+        : action.statespaceDeme;
       break;
     }
     case types.TOGGLE_TRANSMISSION_LINES: {
