@@ -94,7 +94,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   });
   const pluginHtml = new HtmlWebpackPlugin({
     filename: 'index.html',
-    template: './src/index.html'
+    template: './src/index.html',
+    scriptLoading: 'blocking'
   });
   const cleanWebpackPlugin = new CleanWebpackPlugin({
     cleanStaleWebpackAssets: true
@@ -123,23 +124,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       // Serve the index page for offline navigation requests to the root path.
       navigateFallback: "/dist/index.html",
       navigateFallbackAllowlist: [/^\/(\?.*)?$/],
-
-      // Add the index page to precache, updating when the webpack build output changes.
-      // TODO: upgrade to html-webpack-plugin to v5 and remove this block. The
-      // newer version would emit index.html earlier and allow Workbox to
-      // discover it natively and precache with a content-based revision.
-      manifestTransforms: [
-        (manifestEntries, compilation) => {
-          return {
-            manifest: [
-              ...manifestEntries,
-              // NOTE: compilation.hash captures changes unrelated to this file,
-              // but it's better than no revision.
-              {url: "/dist/index.html", revision: compilation.hash}
-            ]
-          };
-        }
-      ],
 
       // A separate runtime would be imported from root, but Auspice serves assets from /dist/.
       inlineWorkboxRuntime: true,
