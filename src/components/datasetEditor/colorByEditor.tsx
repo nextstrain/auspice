@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux"
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import Mousetrap from "mousetrap";
 import { AppDispatch, RootState } from "../../store";
 import { LegendValues } from "../../reducers/controls";
 import Flex from "../framework/flex";
@@ -23,6 +24,20 @@ export default function ColorByEditor({
     if (!state.metadata.loaded) throw new Error("[INTERNAL ERROR] metadata state not loaded");
     return state.metadata.colorings[colorScale.colorBy];
   });
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    Mousetrap.bind('enter', () => {
+      formRef.current?.requestSubmit();
+    });
+    Mousetrap.bind('escape', () => {
+      dismissModal();
+    });
+    return () => {
+      Mousetrap.unbind('enter');
+      Mousetrap.unbind('escape');
+    };
+  }, [dismissModal]);
 
   function handleSubmit(e: React.SyntheticEvent): void {
     e.preventDefault();
@@ -48,7 +63,7 @@ export default function ColorByEditor({
   }
 
   return (
-    <ColorByEditorForm onSubmit={handleSubmit}>
+    <ColorByEditorForm ref={formRef} onSubmit={handleSubmit}>
       <h2>
         {t("Edit colors for")} {colorScale.colorBy}
       </h2>
