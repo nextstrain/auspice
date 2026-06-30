@@ -1,8 +1,9 @@
-import React, { useRef, useState, Dispatch } from "react";
+import React, { useRef, useState, useEffect, Dispatch } from "react";
 import { useDispatch } from "react-redux"
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { FaTrashAlt } from "react-icons/fa";
+import Mousetrap from "mousetrap";
 import { AppDispatch, RootState } from "../../store";
 import { NameAndUrl, LegendPlacement, Metadata } from "../../reducers/metadata.types";
 import { updateMetadata } from "../../actions/updateMetadata/updateMetadata";
@@ -38,6 +39,20 @@ export default function DatasetEditor({
   const { legendPlacements } = metadata;
   const [ maintainers, setMaintainers ] = useState<NameAndUrlState[]>(convertToNameAndUrlState(metadata.maintainers || []));
   const [ dataProvenances, setDataProvenances ] = useState<NameAndUrlState[]>(convertToNameAndUrlState(metadata.dataProvenance || []));
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    Mousetrap.bind('enter', () => {
+      formRef.current?.requestSubmit();
+    });
+    Mousetrap.bind('escape', () => {
+      dismissModal();
+    });
+    return () => {
+      Mousetrap.unbind('enter');
+      Mousetrap.unbind('escape');
+    };
+  }, [dismissModal]);
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>): void {
     e.preventDefault();
@@ -65,7 +80,7 @@ export default function DatasetEditor({
 
 
   return (
-    <DatasetEditorForm onSubmit={handleSubmit}>
+    <DatasetEditorForm ref={formRef} onSubmit={handleSubmit}>
       <div className="row">
         <div className="col-sm-6">
           <div className="row">
