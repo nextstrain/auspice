@@ -558,6 +558,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   if (this.params.showStreamTrees) {
     this.mapStreamsToScreen()
   }
+  timerEnd("mapToScreen");
 };
 
 /**
