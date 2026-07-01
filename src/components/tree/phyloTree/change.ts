@@ -75,7 +75,10 @@ const svgSetters = {
 };
 
 
-type UpdateCall = (selection: Transition<SVGGElement, PhyloNode, SVGGElement | null, unknown>) => void;
+type ModifiableSelection =
+  | Transition<SVGGElement, PhyloNode, SVGGElement | null, unknown>
+  | Selection<SVGGElement, PhyloNode, SVGGElement | null, unknown>;
+type UpdateCall = (selection: ModifiableSelection) => void;
 
 
 /** createUpdateCall
@@ -118,20 +121,25 @@ const genericSelectAndModify = (
 ): void => {
   // console.log("general svg update for", treeElem);
 
-  svg.selectAll<SVGGElement, PhyloNode>(treeElem)
-    .filter((d) => d.update)
-    .transition().duration(transitionTime)
-    .call(updateCall);
-  if (!transitionTime) {
-    timerFlush();
+  const selection = svg.selectAll<SVGGElement, PhyloNode>(treeElem)
+    .filter((d) => d.update);
+  if (transitionTime) {
+    selection.transition().duration(transitionTime).call(updateCall);
+  } else {
+    /* transitionTime===0: apply the update directly rather than via a
+     * (zero-duration) transition. Starting a transition here would interrupt any
+     * in-flight transition on the same elements — e.g. a quick legend-hover
+     * tip-radius change (transitionTime 0) landing mid-zoom would cancel the
+     * zoom's position transition and freeze those tips. A direct write updates
+     * the attrs/styles immediately without touching other running transitions. */
+    selection.call(updateCall);
   }
-
 };
 
 /* use D3 to select and modify elements, such that a given element is only ever modified _once_
  * @elemsToUpdate {set} - the class names to select, e.g. ".tip" or ".branch"
  * @svgPropsToUpdate {set} - the props (styles & attrs) to update. The respective functions are defined above
- * @transitionTime {INT} - in ms. if 0 then no transition (timerFlush is used)
+ * @transitionTime {INT} - in ms. if 0 the update is applied directly (no transition)
  * @extras {dict} - extra keywords to tell this function to call certain phyloTree update methods. In flux.
  */
 export const modifySVG = function modifySVG(
