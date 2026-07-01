@@ -439,6 +439,21 @@ export const change = function change(
   if (svgHasChangedDimensions || changeNodeOrder) {
     this.nodes.forEach((d) => {d.update = true;});
   }
+  /* A branch's stem start-point is offset by its stem-parent's stroke-width
+   * (mapToScreen: xBase - 0.5*(parentStrokeWidth - strokeWidth)). So when
+   * thicknesses change we must also redraw the CHILDREN of every thickness-changed
+   * branch: their own thickness (hence d.update) may be unchanged, yet their stem
+   * path start has moved. Without this, a filter/date change can leave a child stem
+   * a few px off from a full render. Collect first, then flag, to avoid cascading. */
+  if (changeBranchThickness) {
+    const stemChildren: PhyloNode[] = [];
+    this.nodes.forEach((d) => {
+      if (d.update && d.n.hasChildren) {
+        for (const child of d.n.children) stemChildren.push(child.shell);
+      }
+    });
+    stemChildren.forEach((c) => { if (c) c.update = true; });
+  }
 
   /** PHYLOTREE METHODS
    * Note the order here is (often) critical! This order reflects the order in the initial tree render cycle
