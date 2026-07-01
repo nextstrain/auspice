@@ -29,6 +29,7 @@
     "fetch-test-data": "./scripts/fetch-test-data",
     "test": "jest test/*.js test/*.ts",
     "smoke-test": "NODE_ENV=test ENV=dev npx playwright test",
+    "profile": "node test/profiling/runProfiling.mjs",
     "diff-lang": "./scripts/diff-lang.js"
   },
   "dependencies": {
