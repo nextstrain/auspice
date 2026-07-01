@@ -218,7 +218,10 @@ export const unrootedLayout = function unrootedLayout(this: PhyloTreeType): void
  * arcs and whether that arc is more than pi or not
  */
 export const radialLayout = function radialLayout(this: PhyloTreeType): void {
-  const maxDisplayOrder = Math.max(...this.nodes.map((d) => d.displayOrder).filter((val) => val));
+  let maxDisplayOrder = 0;
+  this.nodes.forEach((d) => {
+    if (d.displayOrder && d.displayOrder > maxDisplayOrder) maxDisplayOrder = d.displayOrder;
+  });
   const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
     const angleCBar1 = 2.0 * 0.95 * Math.PI * d.displayOrderRange[0] / maxDisplayOrder;
@@ -344,7 +347,7 @@ export const setScales = function setScales(this: PhyloTreeType): void {
 */
 export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   timerStart("mapToScreen");
-  const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren).filter((d) => d.inView);
+  const inViewTerminalNodes = this.nodes.filter((d) => !d.n.hasChildren && d.inView);
 
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
   this.margins = {
