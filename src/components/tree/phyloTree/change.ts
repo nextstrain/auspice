@@ -141,6 +141,7 @@ export const modifySVG = function modifySVG(
   transitionTime: number,
   extras: Extras,
 ): void {
+  timerStart("modifySVG");
   let updateCall: UpdateCall;
   const classesToPotentiallyUpdate: TreeElement[] = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
@@ -222,6 +223,7 @@ export const modifySVG = function modifySVG(
   } else {
     this.removeMeasurementsColoringCrosshair();
   }
+  timerEnd("modifySVG");
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
