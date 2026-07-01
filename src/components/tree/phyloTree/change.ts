@@ -430,7 +430,13 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
+  /* A visibility change (date filter / animation tick) does NOT move node
+   * positions (setDisplayOrder/setLayout are gated off for it, and mapToScreen's
+   * domain uses inView, which only zoom changes). So we trust the selective
+   * d.update set that updateNodesWithNewData() just computed from the visibility
+   * and stroke-width deltas, rather than blanket-flagging every node — this is
+   * what lets modifySVG touch only the changed band instead of all ~50k paths. */
+  if (svgHasChangedDimensions || changeNodeOrder) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
