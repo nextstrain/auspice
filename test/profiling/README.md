@@ -4,6 +4,26 @@ A headless, reproducible harness that measures Auspice's built-in `src/util/perf
 timers (`timerStart`/`timerEnd`) across representative datasets and produces a ranked
 baseline of where time is spent. **Measure-only** — it changes no application code.
 
+## Render-equivalence suite (`npm run render-equiv`)
+
+A regression suite (`renderEquivalence.mjs` + `domSnapshot.mjs`) that guards the
+incremental tree-update path. For each operation (colorBy, layout, distance, filter,
+zoom, confidence, …) and for sequences of operations, it drives the **incremental**
+update in-app — via `history.pushState` + a `popstate` event, which the app's own
+listener turns into an incremental `phylotree.change()` (zero source changes) — and
+asserts the settled SVG DOM is **identical** to a from-scratch **full render** of the
+same end state (a fresh page at the app's resulting URL). Any mismatch is a stale-DOM
+regression.
+
+```bash
+npm run render-equiv                 # reuse current dist/ build
+npm run render-equiv -- --build      # force a fresh build first
+npm run render-equiv -- --only ebola-zoom,ebola-filter-date-colorby
+```
+
+Run it after any change to the tree render/update code. It surfaced (and we then
+fixed) the branch stem-offset divergence in the selective-redraw optimization.
+
 ## Quick start
 
 ```bash
