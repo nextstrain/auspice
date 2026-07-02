@@ -11,6 +11,7 @@ import { TOGGLE_LEGEND } from "../../../actions/types";
 import { SET_MODAL } from "../../../actions/types";
 import { warningNotification } from "../../../actions/notifications";
 import { isColorByGenotype } from "../../../util/getGenotype";
+import { enableDatasetEditor } from "../../datasetEditor/datasetEditor";
 
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
@@ -147,6 +148,8 @@ class Legend extends React.Component {
   }
 
   handleLegendItemOnClick(e) {
+    if (!enableDatasetEditor()) return;
+
     if (e.shiftKey) {
       // We do not support editing Genotype colors because we do not keep nuc/aa colors in Redux state.
       if (isColorByGenotype(this.props.colorBy)) {

@@ -31,6 +31,7 @@ The following are definable as top-level keys of the JSON file. A useful referen
 -  ``googleAnalyticsKey`` You can specify a Google Analytics key to enable (some) analytics functionality. This is deprecated and will be removed from an upcoming release.
 -  ``serverAddress`` Specify the address / prefix which the auspice client uses for API requests.
 -  ``mapTiles`` Specify the address (and other information) for the tiles used to render the map.
+-  ``enableDatasetEditor`` Set to ``true`` to turn on the ability to edit datasets and colors in the app.
 
 .. note::
 

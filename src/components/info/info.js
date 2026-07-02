@@ -9,6 +9,7 @@ import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
 import EditedBanner from "../datasetEditor/editedBanner";
 import EditButton from "../datasetEditor/editButton";
+import { enableDatasetEditor } from "../datasetEditor/datasetEditor";
 
 /**
  * The <Info> panel is shown above data viz panels and conveys static and dynamic
@@ -43,11 +44,11 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-          {!this.props.mobileDisplay && this.props.metadata.edited &&
+          {enableDatasetEditor() && !this.props.mobileDisplay && this.props.metadata.edited &&
             <EditedBanner />
           }
           <div width={this.props.width} style={styles.title}>
-            {!this.props.mobileDisplay && <EditButton />}
+            {enableDatasetEditor() && !this.props.mobileDisplay && <EditButton />}
             {this.props.metadata.title || ""}
           </div>
 

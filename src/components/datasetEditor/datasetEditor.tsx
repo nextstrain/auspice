@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { FaTrashAlt } from "react-icons/fa";
 import Mousetrap from "mousetrap";
+import { hasExtension, getExtension } from "../../util/extensions";
 import { AppDispatch, RootState } from "../../store";
 import { NameAndUrl, LegendPlacement, Metadata } from "../../reducers/metadata.types";
 import { updateMetadata } from "../../actions/updateMetadata/updateMetadata";
@@ -355,4 +356,11 @@ function LegendPlacementInputs({
       </Flex>
     </>
   )
+}
+
+export function enableDatasetEditor(): boolean {
+  if (!hasExtension("enableDatasetEditor") || !getExtension("enableDatasetEditor")) {
+    return false;
+  }
+  return true;
 }
