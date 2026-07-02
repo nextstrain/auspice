@@ -18,7 +18,7 @@ export const createDefaultParams = (): Params => ({
   fillSelected: "#A73",
   radiusSelected: 5,
   branchStroke: "#AAA",
-  branchStrokeWidth: 2,
+  branchStrokeWidth: 1.5,
   tipStroke: "#AAA",
   tipFill: "#CCC",
   tipStrokeWidth: 1,

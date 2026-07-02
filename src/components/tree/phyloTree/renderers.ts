@@ -318,7 +318,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("stroke-width", (d) => params.showStreamTrees ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
       .style("visibility", getBranchVisibility)
       .style("fill", "none")
       .style("pointer-events", "auto")
@@ -354,7 +354,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => params.showStreamTrees ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
     .style("pointer-events", "auto")
@@ -640,6 +640,17 @@ export function drawStreams(this: PhyloTreeType): void {
     return `M${node.xBase},${y}H${x1}`;
   }
 
+  /* A stream's connector (joiner + backbone) is a single line, so colour it by the stream's dominant
+   * colour category — the category with the most member tips. For a single-colour stream that's just
+   * its colour; for a multi-colour stream it's the largest component (until we can blend). */
+  const dominantStreamColor = (node: PhyloNode): string => {
+    const cats = node.n.streamCategories;
+    if (!cats || !cats.length) return node.branchStroke;
+    let best = cats[0];
+    for (const c of cats) if (c.nodes.length > best.nodes.length) best = c;
+    return best.color;
+  };
+
   for (const name of streamsToDraw) {
     const node = this.nodes[this.streams[name].startNode];
     const callbacks = this.callbacks;
@@ -653,7 +664,7 @@ export function drawStreams(this: PhyloTreeType): void {
             .attr("class", `connectorPath`)
             .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid d3 rebinding `this`
             .attr("stroke-width", this.params.branchStrokeWidth)
-            .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+            .style("stroke", (d) => dominantStreamColor(d))
             .attr("fill", 'None')
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
@@ -673,7 +684,7 @@ export function drawStreams(this: PhyloTreeType): void {
           return update.call(
             (selection) => selection.transition("500")
               .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
-              .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+              .style("stroke", (d) => dominantStreamColor(d))
               .attr("stroke-width", this.params.branchStrokeWidth)
           );
         },

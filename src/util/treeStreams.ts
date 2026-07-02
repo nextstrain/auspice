@@ -11,7 +11,7 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
 export const AUTO_STREAM_LABEL = "__auto__";
 
 /** Target maximum tips per stream for the automatic partition. Tunable: smaller → more, smaller streams. */
-export const AUTO_STREAM_TIP_THRESHOLD = 1000;
+export const AUTO_STREAM_TIP_THRESHOLD = 200;
 
 /**
 * Side effects:
