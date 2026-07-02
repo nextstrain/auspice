@@ -23,7 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
-import { processStreams, labelStreamMembership, availableStreamLabelKeys, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TIP_THRESHOLD } from "../util/treeStreams";
+import { processStreams, labelStreamMembership, availableStreamLabelKeys, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
 import { parseJsonMetaBlock, convertColoringsListToDict } from "../util/metadataJsonParsing";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -1026,7 +1026,7 @@ export const createStateFromQueryOrJSONs = ({
   if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
   if (controls.showStreamTrees) {
     tree.streams = controls.streamTreeBranchLabel === AUTO_STREAM_LABEL ?
-      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TIP_THRESHOLD) :
+      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TARGET_COUNT) :
       labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
       processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})

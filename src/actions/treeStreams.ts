@@ -1,5 +1,5 @@
 import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, CHANGE_STREAM_TREE_BRANCH_LABEL } from "./types";
-import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TIP_THRESHOLD } from "../util/treeStreams";
+import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
 import { ThunkFunction } from "../store";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
@@ -59,7 +59,7 @@ export function changeStreamTreeBranchLabel(newLabel): ThunkFunction {
     }
 
     const streams = isAuto ?
-      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TIP_THRESHOLD) :
+      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TARGET_COUNT) :
       labelStreamMembership(tree.nodes[0], newLabel);
     processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 

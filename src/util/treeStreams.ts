@@ -10,8 +10,11 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
  */
 export const AUTO_STREAM_LABEL = "__auto__";
 
-/** Target maximum tips per stream for the automatic partition. Tunable: smaller → more, smaller streams. */
-export const AUTO_STREAM_TIP_THRESHOLD = 200;
+/** Target number of streams for the automatic partition (the greedy split keeps splitting the
+ * largest clade until it reaches ~this many streams). Tunable "X" — larger → more, smaller streams.
+ * Parameterising by stream count gives a consistent on-screen density across trees of very different
+ * sizes, with no per-tree tuning. */
+export const AUTO_STREAM_TARGET_COUNT = 100;
 
 /**
 * Side effects:
@@ -90,25 +93,26 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 
 
 /**
- * Automatically partition the tree into streams by a tip-count threshold, as an alternative to
- * `labelStreamMembership` (which keys off a dataset-defined branch label). Descending from the
- * root, a node becomes a stream start when it is the shallowest node whose subtree has
- * `fullTipCount <= tipCountThreshold` (a "maximal clade under the cap"); its entire subtree then
- * becomes members. Nodes above every such clade (the "spine") stay non-stream and render as normal
- * branches via the existing `!d.n.inStream` render filter. Produces the same output contract as
- * `labelStreamMembership` so all downstream stream processing is unchanged. Maximal clades never
- * nest, so `parentStreamName` is always false and `streamChildren` stays empty.
+ * Automatically partition the tree into ~`targetStreamCount` streams via a greedy top-down split,
+ * as an alternative to `labelStreamMembership` (which keys off a dataset-defined branch label).
+ * Starting from the (in-view) root's children, we repeatedly split the largest clade (by
+ * `fullTipCount`) into its children until we reach ~`targetStreamCount` clades; each resulting clade
+ * root is a stream start and its whole subtree becomes members. Nodes above the split frontier (the
+ * "spine") stay non-stream and render as normal branches via the existing `!d.n.inStream` filter.
+ * Parameterising by stream COUNT (rather than an absolute tip cap) gives a consistent on-screen
+ * density regardless of tree size. Produces the same output contract as `labelStreamMembership`;
+ * auto streams never nest, so `parentStreamName` is always false and `streamChildren` stays empty.
  */
-export function autoPartitionStreams(tree: ReduxNode, tipCountThreshold: number): Streams {
+export function autoPartitionStreams(tree: ReduxNode, targetStreamCount: number): Streams {
   const streams: Streams = {};
   streams[streamLabelSymbol] = AUTO_STREAM_LABEL;
 
-  const stack: [ReduxNode, false|string][] = tree.children.map((subtreeRootNode) => [subtreeRootNode, false]);
-
-  while (stack.length) {
-    const [node, parentStreamMembership] = stack.pop();
-
-    /* clear any previous stream-related information using `streamName` as a sentinel value */
+  /* Clear any previous stream membership across the whole subtree. The greedy "mark" pass below
+   * only visits stream subtrees, so without this the spine could retain stale membership. */
+  const clearStack: ReduxNode[] = [tree];
+  while (clearStack.length) {
+    const node = clearStack.pop();
+    node.inStream = false;
     if (node.streamName) {
       delete node.streamName;
       delete node.streamPivots;
@@ -116,42 +120,61 @@ export function autoPartitionStreams(tree: ReduxNode, tipCountThreshold: number)
       delete node.streamDimensions;
       delete node.streamMaxHeight;
     }
+    for (const child of node.children || []) clearStack.push(child);
+  }
 
-    /* Start a stream iff we're not already within one and this subtree is small enough (and
-     * non-empty). Descending from the root (fullTipCount > threshold), the first node at/below
-     * the threshold is the maximal clade under the cap. */
-    let newStreamMembership: false|string = false;
-    if (!parentStreamMembership && node.fullTipCount > 0 && node.fullTipCount <= tipCountThreshold) {
-      newStreamMembership = `auto_${node.arrayIdx}`;
-      streams[newStreamMembership] = {
-        name: newStreamMembership,
-        startNode: node.arrayIdx,
-        members: [], // terminals only
-        streamChildren: [], // auto streams never nest
-        parentStreamName: false,
-        domains: {
-          num_date: [Infinity, -Infinity],
-          div: [Infinity, -Infinity],
-        }
-      };
-      node.streamName = newStreamMembership;
+  /* Greedy split: repeatedly replace the largest splittable clade with its children until we have
+   * ~targetStreamCount clades. The frontier stays ~targetStreamCount long, so a linear max-scan is
+   * cheap (no heap needed). */
+  const frontier: ReduxNode[] = (tree.children || []).filter((n) => n.fullTipCount > 0);
+  while (frontier.length < targetStreamCount) {
+    let bestIdx = -1;
+    let bestCount = -1;
+    for (let i = 0; i < frontier.length; i++) {
+      const n = frontier[i];
+      if (n.hasChildren && n.fullTipCount > bestCount) {
+        bestCount = n.fullTipCount;
+        bestIdx = i;
+      }
     }
-
-    const currentStreamMembership = newStreamMembership || parentStreamMembership;
-    node.inStream = !!currentStreamMembership;
-    if (currentStreamMembership && !node.hasChildren) {
-      streams[currentStreamMembership].members.push(node.arrayIdx);
-      const domains = streams[currentStreamMembership].domains;
-      const div = getDivFromNode(node);
-      const num_date = getTraitFromNode(node, 'num_date');
-      if (div<domains.div[0]) {domains.div[0]=div}
-      if (div>domains.div[1]) {domains.div[1]=div}
-      if (num_date<domains.num_date[0]) {domains.num_date[0]=num_date}
-      if (num_date>domains.num_date[1]) {domains.num_date[1]=num_date}
-    }
-
+    if (bestIdx === -1) break; // no splittable clade remains (all are tips)
+    const [node] = frontier.splice(bestIdx, 1);
     for (const child of node.children || []) {
-      stack.push([child, currentStreamMembership])
+      if (child.fullTipCount > 0) frontier.push(child);
+    }
+  }
+
+  /* Each frontier node is a stream start; mark its subtree (members = terminals). */
+  for (const startNode of frontier) {
+    const name = `auto_${startNode.arrayIdx}`;
+    streams[name] = {
+      name,
+      startNode: startNode.arrayIdx,
+      members: [], // terminals only
+      streamChildren: [], // auto streams never nest
+      parentStreamName: false,
+      domains: {
+        num_date: [Infinity, -Infinity],
+        div: [Infinity, -Infinity],
+      }
+    };
+    startNode.streamName = name;
+
+    const markStack: ReduxNode[] = [startNode];
+    while (markStack.length) {
+      const node = markStack.pop();
+      node.inStream = true;
+      if (!node.hasChildren) {
+        streams[name].members.push(node.arrayIdx);
+        const domains = streams[name].domains;
+        const div = getDivFromNode(node);
+        const num_date = getTraitFromNode(node, 'num_date');
+        if (div<domains.div[0]) {domains.div[0]=div}
+        if (div>domains.div[1]) {domains.div[1]=div}
+        if (num_date<domains.num_date[0]) {domains.num_date[0]=num_date}
+        if (num_date>domains.num_date[1]) {domains.num_date[1]=num_date}
+      }
+      for (const child of node.children || []) markStack.push(child);
     }
   }
 
