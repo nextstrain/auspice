@@ -547,7 +547,7 @@ export interface LabelDatum {
   visibility: string;
 }
 
-export function drawStreams(this: PhyloTreeType): void {
+export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
 
@@ -585,7 +585,7 @@ export function drawStreams(this: PhyloTreeType): void {
       undefined, // no update method needed
       (exit) => {
         return exit
-          .call((selection) => selection.transition('500')
+          .call((selection) => selection.transition().duration(transitionTime)
             .style('opacity', 0)
             .remove()
           )
@@ -689,7 +689,7 @@ export function drawStreams(this: PhyloTreeType): void {
         },
         (update) => {
           return update.call(
-            (selection) => selection.transition("500")
+            (selection) => selection.transition().duration(transitionTime)
               .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
               .style("stroke", (d) => dominantStreamColor(d))
               .attr("stroke-width", this.params.branchStrokeWidth)
@@ -726,7 +726,7 @@ export function drawStreams(this: PhyloTreeType): void {
         },
         (update) => {
           return update.call(
-            (selection) => selection.transition("500")
+            (selection) => selection.transition().duration(transitionTime)
               .attr("d", (d) => areaGenerator(d))
           );
         },

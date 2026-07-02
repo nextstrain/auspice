@@ -507,8 +507,8 @@ export const change = function change(
     this.drawBranchLabels(this.params.branchLabelKey);
     if (this.vaccines) this.drawVaccines();
     if (this.regression) this.drawRegression();
-    if (this.confidencesInSVG) this.removeConfidence(); 
-    this.drawStreams(); // removes streams, as appropriate
+    if (this.confidencesInSVG) this.removeConfidence();
+    this.drawStreams(transitionTime); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
     extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
@@ -519,7 +519,7 @@ export const change = function change(
       this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
     }
     if (this.params.showStreamTrees || changeColorBy) {
-      this.drawStreams(); // removes streams, as appropriate
+      this.drawStreams(transitionTime); // removes streams, as appropriate
     }
   }
 
