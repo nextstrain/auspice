@@ -407,9 +407,7 @@ export const change = function change(
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
-  // recalculate gradients here?
   if (changeColorBy) {
-    this.updateColorBy();
     this.measurementsColorGrouping = newMeasurementsColorGrouping;
   }
   // recalculate existing regression if needed
