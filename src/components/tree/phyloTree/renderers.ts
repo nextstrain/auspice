@@ -718,7 +718,7 @@ export function drawStreams(this: PhyloTreeType): void {
       );
   }
 
-  const labelData: LabelDatum[] = streamsToDraw
+  const labelData: LabelDatum[] = (this.params.showStreamTreeLabels ? streamsToDraw : [])
     .map((streamName): LabelDatum|null => {
       const phyloNode = this.nodes[this.streams[streamName].startNode];
       if (phyloNode.n.streamNodeCounts.visible===0) {

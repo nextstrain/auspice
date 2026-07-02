@@ -14,6 +14,7 @@ export const createDefaultParams = (): Params => ({
   orientation: [1, 1],
   showGrid: true,
   showStreamTrees: false,
+  showStreamTreeLabels: false,
   fillSelected: "#A73",
   radiusSelected: 5,
   branchStroke: "#AAA",

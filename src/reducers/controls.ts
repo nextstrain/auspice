@@ -190,6 +190,7 @@ export interface BasicControlsState {
   showOnlyPanels: boolean
   showTangle: boolean
   showStreamTrees: boolean
+  showStreamTreeLabels: boolean
   streamTreeBranchLabel: string | null
   availableStreamLabelKeys: string[]
   showTransmissionLines: boolean
@@ -287,6 +288,7 @@ export const getDefaultControlsState = (): ControlsState => {
     showTreeToo: false,
     showTangle: false,
     showStreamTrees: false,
+    showStreamTreeLabels: false,
     streamTreeBranchLabel: null,
     availableStreamLabelKeys: [],
     zoomMin: undefined,
@@ -519,6 +521,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return state;
     case types.TOGGLE_STREAM_TREE:
       return {...state, showStreamTrees: action.showStreamTrees};
+    case types.TOGGLE_STREAM_TREE_LABELS:
+      return {...state, showStreamTreeLabels: action.value};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
       return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true};
     case types.TOGGLE_SIDEBAR:

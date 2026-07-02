@@ -5,6 +5,15 @@ import { NODE_VISIBLE } from "./globals";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
 
 /**
+ * Sentinel "branch label" signifying the automatic (tip-count based) stream partition
+ * rather than a dataset-defined branch label.
+ */
+export const AUTO_STREAM_LABEL = "__auto__";
+
+/** Target maximum tips per stream for the automatic partition. Tunable: smaller → more, smaller streams. */
+export const AUTO_STREAM_TIP_THRESHOLD = 1000;
+
+/**
 * Side effects:
 *  - sets node.streamMembership -> false | stream name
 *  - sets node.streamStart -> boolean
@@ -80,6 +89,76 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 }
 
 
+/**
+ * Automatically partition the tree into streams by a tip-count threshold, as an alternative to
+ * `labelStreamMembership` (which keys off a dataset-defined branch label). Descending from the
+ * root, a node becomes a stream start when it is the shallowest node whose subtree has
+ * `fullTipCount <= tipCountThreshold` (a "maximal clade under the cap"); its entire subtree then
+ * becomes members. Nodes above every such clade (the "spine") stay non-stream and render as normal
+ * branches via the existing `!d.n.inStream` render filter. Produces the same output contract as
+ * `labelStreamMembership` so all downstream stream processing is unchanged. Maximal clades never
+ * nest, so `parentStreamName` is always false and `streamChildren` stays empty.
+ */
+export function autoPartitionStreams(tree: ReduxNode, tipCountThreshold: number): Streams {
+  const streams: Streams = {};
+  streams[streamLabelSymbol] = AUTO_STREAM_LABEL;
+
+  const stack: [ReduxNode, false|string][] = tree.children.map((subtreeRootNode) => [subtreeRootNode, false]);
+
+  while (stack.length) {
+    const [node, parentStreamMembership] = stack.pop();
+
+    /* clear any previous stream-related information using `streamName` as a sentinel value */
+    if (node.streamName) {
+      delete node.streamName;
+      delete node.streamPivots;
+      delete node.streamCategories;
+      delete node.streamDimensions;
+      delete node.streamMaxHeight;
+    }
+
+    /* Start a stream iff we're not already within one and this subtree is small enough (and
+     * non-empty). Descending from the root (fullTipCount > threshold), the first node at/below
+     * the threshold is the maximal clade under the cap. */
+    let newStreamMembership: false|string = false;
+    if (!parentStreamMembership && node.fullTipCount > 0 && node.fullTipCount <= tipCountThreshold) {
+      newStreamMembership = `auto_${node.arrayIdx}`;
+      streams[newStreamMembership] = {
+        name: newStreamMembership,
+        startNode: node.arrayIdx,
+        members: [], // terminals only
+        streamChildren: [], // auto streams never nest
+        parentStreamName: false,
+        domains: {
+          num_date: [Infinity, -Infinity],
+          div: [Infinity, -Infinity],
+        }
+      };
+      node.streamName = newStreamMembership;
+    }
+
+    const currentStreamMembership = newStreamMembership || parentStreamMembership;
+    node.inStream = !!currentStreamMembership;
+    if (currentStreamMembership && !node.hasChildren) {
+      streams[currentStreamMembership].members.push(node.arrayIdx);
+      const domains = streams[currentStreamMembership].domains;
+      const div = getDivFromNode(node);
+      const num_date = getTraitFromNode(node, 'num_date');
+      if (div<domains.div[0]) {domains.div[0]=div}
+      if (div>domains.div[1]) {domains.div[1]=div}
+      if (num_date<domains.num_date[0]) {domains.num_date[0]=num_date}
+      if (num_date>domains.num_date[1]) {domains.num_date[1]=num_date}
+    }
+
+    for (const child of node.children || []) {
+      stack.push([child, currentStreamMembership])
+    }
+  }
+
+  return streams;
+}
+
+
 export function processStreams(
   streams: Streams,
   nodes: ReduxNode[],
@@ -122,7 +201,7 @@ export function processStreams(
      * This is needed because the display order (for non-stream tips) is 1 unit = 1 tip. Since kernel PDF values can be huge
      * (or tiny, depending on STDEV) the kde-weight space can be very large and thus streams take up all the display order space
      * and normal tips are all squashed together.
-     * 
+     *
      * The scale factor is the PDF evaluated at x=0, i.e. the max height of an individual kernel in display order space will be
      * equivalent to what a single tip would have occupied. Because kernels aren't all stacked on top of each other we add a
      * fudge factor here (can be improved).
@@ -212,7 +291,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     const categories: ColorCategory[] = Object.entries(colorScale.legendBounds)
       .map(([name, bounds]) => [name, bounds[0], bounds[1], colorScale.scale(parseFloat(name)), []])
     const undefinedNodes: number[] = [];
-    
+
     for (const n of nodes) {
       const v = getTraitFromNode(n, colorBy);
       if (v===undefined) {
@@ -228,7 +307,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     }
     const streamCategories = categories
       .filter((c) => c[4].length>0)
-      .map((c) => ({name: c[0], color: c[3], nodes: c[4]})); 
+      .map((c) => ({name: c[0], color: c[3], nodes: c[4]}));
 
     if (undefinedNodes.length) {
       streamCategories.push({name: undefined, color: colorScale.scale(undefined), nodes: undefinedNodes});
@@ -267,7 +346,7 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
 
   const dimensions = categories.map((categoryInfo) => {
     const mass = pivots.map(() => 0);
-    
+
     const categoryNodes = nodes.filter((node) => categoryInfo.nodes.includes(node.arrayIdx))
     streamNodeCountsTotal += categoryNodes.length;
     const visibleCategoryNodes = categoryNodes.filter((node) => visibility===true || visibility[node.arrayIdx]===NODE_VISIBLE);
@@ -299,17 +378,17 @@ function computeStreamMaxHeight(dimensions: StreamDimensions): number {
  * of stream names which can be rendered in order such that there are no crossings (i.e. stream connector lines
  * don't go "through" other streams). Using a toy example of stream R which has 2 child streams {A,B}
  * we want to render this as
- * 
+ *
  *                 ┌ AAAAAAAAAAAAAAAAAA
  *                 │         ┌ BBBBBBBBBBBBBB
  *                 │         │
  * ─────────── RRRRRRRRRRRRRRRRRRRRRRRRRR
- * 
+ *
  * Where we want A to be drawn above B (i.e. smaller display order) based on the numeric date of the branch leaving R.
  * This approach continues to further child streams (e.g. child streams of A).  We construct this via a tree
  * structure (where nodes represent streams) and return a list of nodes ordered by a post-order traversal,
  * i.e. [A,B,R]. These streams can then be assigned display orders in a simple incremental fashion.
- * 
+ *
  * For divergence trees we do the same but using divergence values. Note that this often results in a different
  * return value! E.g. B might branch off before A in divergence space.
  */
@@ -392,7 +471,7 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
 
 /**
  * Given the dataset's pivot array, restrict this to a subset of pivots which are applicable for this stream.
- * 
+ *
  * While it's obvious that the pivots should span the stream's tips (i.e. the domain) it's a little more
  * ambiguous about how far to extend it either side. The more we extend it the more we get smooth ends to the
  * KDE however there are downsides.
@@ -413,17 +492,18 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
   if (jsonDefinedStreamLabels) {
     const labels = jsonDefinedStreamLabels.filter((l) => availableBranchLabels.includes(l));
     if (labels.length!==jsonDefinedStreamLabels.length) {
-      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " + 
+      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " +
         jsonDefinedStreamLabels.filter((l) => labels.includes(l)).join(", "));
     }
-    return labels;
+    // Offer the automatic (tip-count based) partition alongside any dataset-defined labels
+    return [...labels, AUTO_STREAM_LABEL];
   }
 
   // Use a hardcoded list to sort labels which are present so certain ones come first
   const preset = ['stream', 'streams', 'stream_label'];
 
   // we may want to do something here to exclude certain branch labels, e.g. ones which are repeated many times on the tree
-  return ([...availableBranchLabels])
+  const labels = ([...availableBranchLabels])
     .sort((a, b) => {
       const [ai, bi] = [preset.indexOf(a), preset.indexOf(b)];
       if (ai===-1 && bi!==-1) return 1;
@@ -431,5 +511,6 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
       return ai -bi;
     })
     .filter((l) => l!=='aa' && l!=='none');
+  // Always offer the automatic (tip-count based) partition, even when the tree has no branch labels
+  return [...labels, AUTO_STREAM_LABEL];
 }
-

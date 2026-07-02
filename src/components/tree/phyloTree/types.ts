@@ -189,6 +189,7 @@ export interface Params {
   showGrid: boolean
   showTipLabels?: boolean
   showStreamTrees: boolean
+  showStreamTreeLabels?: boolean
   tickLabelFill: string
   tickLabelSize: number
   tipFill: string

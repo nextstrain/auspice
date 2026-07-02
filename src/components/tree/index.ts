@@ -31,6 +31,7 @@ const mapStateToProps: MapStateToProps<TreeComponentStateProps, TreeComponentOwn
     showTreeToo: state.controls.showTreeToo,
     showTangle: state.controls.showTangle,
     showStreamTrees: state.controls.showStreamTrees,
+    showStreamTreeLabels: state.controls.showStreamTreeLabels,
     panelsToDisplay: state.controls.panelsToDisplay,
     selectedBranchLabel: state.controls.selectedBranchLabel,
     canRenderBranchLabels: state.controls.canRenderBranchLabels,

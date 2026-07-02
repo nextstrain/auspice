@@ -87,7 +87,8 @@ export const changePhyloTreeViaPropsComparison = (
    */
   phylotree.streams = newProps.tree.streams;
   phylotree.params.showStreamTrees = newProps.showStreamTrees;
-  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.tree.streams !== newProps.tree.streams) {
+  phylotree.params.showStreamTreeLabels = newProps.showStreamTreeLabels;
+  if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.tree.streams !== newProps.tree.streams || oldProps.showStreamTreeLabels !== newProps.showStreamTreeLabels) {
     args.streamDefinitionChange = true;
   }
 

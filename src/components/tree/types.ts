@@ -41,6 +41,7 @@ export interface TreeComponentStateProps {
   showTangle: boolean
   showTreeToo: boolean
   showStreamTrees: boolean
+  showStreamTreeLabels: boolean
   temporalConfidence: TemporalConfidence
   tipLabelKey: string | symbol
   tree: TreeState

@@ -2,7 +2,8 @@ import React from "react";
 import { useTranslation } from 'react-i18next';
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
-import { toggleStreamTree, changeStreamTreeBranchLabel } from "../../actions/treeStreams";
+import { toggleStreamTree, changeStreamTreeBranchLabel, toggleStreamTreeLabels } from "../../actions/treeStreams";
+import { AUTO_STREAM_LABEL } from "../../util/treeStreams";
 import Toggle from "./toggle";
 import { RootState } from "../../store";
 import { FaInfoCircle } from "react-icons/fa";
@@ -13,6 +14,7 @@ import CustomSelect from "./customSelect";
 export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
   const streamTreeBranchLabel = useSelector((state: RootState) => state.controls.streamTreeBranchLabel);
+  const showStreamTreeLabels = useSelector((state: RootState) => state.controls.showStreamTreeLabels);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const focusOn = useSelector((state: RootState) => state.controls.focus);
   const rectangular = useSelector((state: RootState) => state.controls.layout === "rect");
@@ -35,7 +37,7 @@ export const ChooseStreamTrees = (): JSX.Element => {
   if (explodedTree) unavailable.push("Viewing exploded tree");
 
   const selectOptions = [
-    ...availableBranchLabels.map((x) => ({value: x, label: x}))
+    ...availableBranchLabels.map((x) => ({value: x, label: x === AUTO_STREAM_LABEL ? "Automatic (by clade size)" : x}))
   ];
 
   return (
@@ -66,6 +68,14 @@ export const ChooseStreamTrees = (): JSX.Element => {
               isSearchable={false}
               isMulti={false}
               onChange={(value): void => dispatch(changeStreamTreeBranchLabel(value.value))}
+            />
+          </div>
+          <div style={{marginTop: 8}}>
+            <Toggle
+              display
+              on={showStreamTreeLabels}
+              callback={(): void => dispatch(toggleStreamTreeLabels())}
+              label="Show stream labels"
             />
           </div>
         </div>
