@@ -66,7 +66,7 @@ const svgSetters = {
     },
     // only allow stroke to be set on individual branches
     ".branch": {
-      "stroke-width": (d: PhyloNode): string => (d.that.params.showStreamTrees ? d.that.params.branchStrokeWidth : d["stroke-width"]) + "px", // uniform in streamtree mode, else per-node thickness (as per drawBranches())
+      "stroke-width": (d: PhyloNode): string => (d.that.params.showStreamTrees && d.n.tipCount > 0 ? d.that.params.branchStrokeWidth : d["stroke-width"]) + "px", // streamtree mode: branches with visible descendants match the backbone width; branches with none (fully filtered) keep their thin per-node thickness
       stroke: (d: PhyloNode): string => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
       cursor: (d: PhyloNode): "pointer" | "default" => d.visibility === NODE_VISIBLE ? "pointer" : "default",
       visibility: getBranchVisibility

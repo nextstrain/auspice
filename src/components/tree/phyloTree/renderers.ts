@@ -318,7 +318,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => params.showStreamTrees ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
+      .style("stroke-width", (d) => params.showStreamTrees && d.n.tipCount > 0 ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
       .style("visibility", getBranchVisibility)
       .style("fill", "none")
       .style("pointer-events", "auto")
@@ -354,7 +354,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => params.showStreamTrees ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
+    .style("stroke-width", (d) => params.showStreamTrees && d.n.tipCount > 0 ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
     .style("pointer-events", "auto")
@@ -612,7 +612,14 @@ export function drawStreams(this: PhyloTreeType): void {
 
     if (lineType==='backbone') {
       const xStreamStart = node.streamRipples.at(0).at(0).x; // first category, first pivot
-      const xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      let xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      // End the backbone at the farthest-right *visible* tip rather than the full (unfiltered) extent,
+      // so filtering out high-divergence/late tips retracts the right end. The left end is left at the
+      // first pivot so it still extends back to connect with the parent lineage (evolutionary history).
+      const visibleMax = node.n.streamVisibleMax;
+      if (visibleMax !== undefined && Number.isFinite(visibleMax)) {
+        xStreamEnd = Math.min(xStreamEnd, this.xScale(visibleMax));
+      }
       return `M${xStreamStart},${y}H${xStreamEnd}`;
     }
 

@@ -238,9 +238,10 @@ export function processStreams(
     let everythingIsVisibleAnyway = false;
     let streamNodeCountsTotal: number;
     let streamNodeCountsVisible: number;
+    let streamVisibleMax: number;
 
     if (!Object.hasOwn(startNode, "streamMaxHeight") || !skipPivots) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, streams[sigma]));
       startNode.streamMaxHeight = dimensions.length ? computeStreamMaxHeight(dimensions) : 0;
       /**
        * NOTE: the heights of these (i.e. in KDE weight space) can be huge if we have finely spaced pivots such that the PDFs are evaluated a large number
@@ -258,11 +259,12 @@ export function processStreams(
      * Compute the dimensions of the stream, taking into account visibility
      */
     if (!everythingIsVisibleAnyway) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, visibility, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, visibility, streams[sigma]));
     }
 
     startNode.streamDimensions = dimensions;
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
+    startNode.streamVisibleMax = streamVisibleMax;
   }
 }
 
@@ -338,8 +340,9 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
  * See stream-trees.md for more explanation
  */
 function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, categories: ReduxNode['streamCategories'], visibility: true|Visibility[], sigma:number):
-  {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number} {
+  {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number, streamVisibleMax: number} {
   let [streamNodeCountsTotal, streamNodeCountsVisible] = [0,0];
+  let streamVisibleMax = -Infinity; // farthest-right visible tip position (in `metric`)
 
   // per-stream weight (to increase weights of small streams)
   const w = Math.exp(-(nodes.length-4)/4)+1;
@@ -354,6 +357,7 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
 
     for (const node of visibleCategoryNodes) {
       const mu = metric==='div' ? getDivFromNode(node) : getTraitFromNode(node, 'num_date');
+      if (mu > streamVisibleMax) streamVisibleMax = mu;
       const kde = pdf.factory(mu, sigma);
       // We know that once \mu is 3*\sigma away from the pivot we don't really add any weight so could leverage this to
       // speed things up (we do this already for the pivots in this stream, but could also do it for the individual nodes)
@@ -363,7 +367,7 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
     }
     return mass;
   })
-  return {dimensions, streamNodeCountsTotal, streamNodeCountsVisible};
+  return {dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax};
 }
 
 function computeStreamMaxHeight(dimensions: StreamDimensions): number {

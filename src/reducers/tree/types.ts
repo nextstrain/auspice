@@ -130,6 +130,10 @@ interface StreamStartNode {
 
   streamNodeCounts: {total: number; visible: number}
 
+  /** the largest position (in the current distance metric) among *visible* member tips; used to end
+   * the stream backbone at the farthest-right visible tip rather than the full (unfiltered) extent */
+  streamVisibleMax: number
+
   unexplodedChildren: ReduxNode[]
 }
 
