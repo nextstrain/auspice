@@ -2,6 +2,7 @@ import { ReduxNode, StreamDimensions, Visibility, Streams, sigma, weightToDispla
   colorBySymbol, streamLabelSymbol } from "../reducers/tree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
+import { timerStart, timerEnd } from "./perf";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
 
 /**
@@ -113,6 +114,7 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
  * never nest, so `parentStreamName` is always false and `streamChildren` stays empty.
  */
 export function autoPartitionStreams(tree: ReduxNode, targetStreamCount: number): Streams {
+  timerStart("autoPartitionStreams");
   const streams: Streams = {};
   streams[streamLabelSymbol] = AUTO_STREAM_LABEL;
 
@@ -191,6 +193,7 @@ export function autoPartitionStreams(tree: ReduxNode, targetStreamCount: number)
     }
   }
 
+  timerEnd("autoPartitionStreams");
   return streams;
 }
 
@@ -203,10 +206,13 @@ export function processStreams(
   colorScale,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
 ):void {
+  timerStart("processStreams");
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
+   * NOTE: `streamPivots` is stored on the stream's START NODE, not on the StreamSummary `s`, so the
+   * skip is keyed off `nodes[s.startNode]`. (Checking `s` never matched, so the block always ran.)
    */
-  if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(s, 'streamPivots'))) {
+  if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(nodes[s.startNode], 'streamPivots'))) {
     // entire domain spanning all streams
     const domain = (Object.values(streams)).reduce((dd, stream) => {
       if (dd[0] > stream.domains[metric][0]) dd[0] = stream.domains[metric][0];
@@ -254,6 +260,11 @@ export function processStreams(
 
   }
 
+  /* `visibility` is shared across every stream in this call, so derive "is everything visible" once
+   * rather than allocating a Set over the whole tree per stream. */
+  const visibilitySet = new Set(visibility);
+  const everythingVisible = visibilitySet.size===1 && visibilitySet.has(NODE_VISIBLE);
+
   for (const stream of Object.values(streams)) {
     const startNode = nodes[stream.startNode];
     const nodesThisStream = _pick(nodes, stream.members)
@@ -285,8 +296,7 @@ export function processStreams(
        * separated by 1 unit of display order space) means tips are right on top of each other if the display order space occupied by streams is very large.
        * (by large, I've seen examples of 10e6...)
        */
-      const visibilityValues = new Set(visibility);
-      if (visibilityValues.size===1 && visibilityValues.has(NODE_VISIBLE)) {
+      if (everythingVisible) {
         everythingIsVisibleAnyway = true;
       }
     }
@@ -302,6 +312,7 @@ export function processStreams(
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
     startNode.streamVisibleMax = streamVisibleMax;
   }
+  timerEnd("processStreams");
 }
 
 
@@ -356,12 +367,19 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
 
   const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n): [number, string] => [n.arrayIdx, n.currentGt] : (n): [number, string|undefined] => [n.arrayIdx, getTraitFromNode(n, colorBy)];
   const nodesAndCategories: [number, string|undefined][] = nodes.map(getter);
-  const orderedCategories = Array.from(new Set(nodesAndCategories.map((el) => el[1])))
+  /* bucket node indexes by category in a single pass rather than re-filtering the full list per category */
+  const nodeIdxsByCategory = new Map<string|undefined, number[]>();
+  for (const [nodeIdx, catName] of nodesAndCategories) {
+    const bucket = nodeIdxsByCategory.get(catName);
+    if (bucket) bucket.push(nodeIdx);
+    else nodeIdxsByCategory.set(catName, [nodeIdx]);
+  }
+  const orderedCategories = Array.from(nodeIdxsByCategory.keys())
     .sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b));
   return orderedCategories.map((name) => ({
     name,
     color: colorScale.scale(name),
-    nodes: nodesAndCategories.filter(([_, catName]) => catName===name).map(([nodeIdx,]) => nodeIdx)
+    nodes: nodeIdxsByCategory.get(name) ?? []
   }));
 }
 
@@ -383,10 +401,17 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
   // per-stream weight (to increase weights of small streams)
   const w = Math.exp(-(nodes.length-4)/4)+1;
 
+  /* pivots are evenly spaced (a contiguous slice of the master grid), so a tip's gaussian only needs
+   * evaluating over the pivot window within ±3σ of its mean — beyond that the kernel is negligible
+   * (<0.3% of peak). This turns the inner loop from O(tips × allPivots) into O(tips × ~30 pivots). */
+  const cutoff = 3 * sigma;
+  const step = pivots.length > 1 ? pivots[1] - pivots[0] : 0;
+
   const dimensions = categories.map((categoryInfo) => {
     const mass = pivots.map(() => 0);
 
-    const categoryNodes = nodes.filter((node) => categoryInfo.nodes.includes(node.arrayIdx))
+    const categoryIdxs = new Set(categoryInfo.nodes);
+    const categoryNodes = nodes.filter((node) => categoryIdxs.has(node.arrayIdx))
     streamNodeCountsTotal += categoryNodes.length;
     const visibleCategoryNodes = categoryNodes.filter((node) => visibility===true || visibility[node.arrayIdx]===NODE_VISIBLE);
     streamNodeCountsVisible += visibleCategoryNodes.length;
@@ -395,11 +420,15 @@ function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, c
       const mu = metric==='div' ? getDivFromNode(node) : getTraitFromNode(node, 'num_date');
       if (mu > streamVisibleMax) streamVisibleMax = mu;
       const kde = pdf.factory(mu, sigma);
-      // We know that once \mu is 3*\sigma away from the pivot we don't really add any weight so could leverage this to
-      // speed things up (we do this already for the pivots in this stream, but could also do it for the individual nodes)
-      pivots.forEach((pivot, idx) => {
-        mass[idx]+= w * kde(pivot);
-      })
+      if (step > 0) {
+        const lo = Math.max(0, Math.ceil((mu - cutoff - pivots[0]) / step));
+        const hi = Math.min(pivots.length - 1, Math.floor((mu + cutoff - pivots[0]) / step));
+        for (let idx = lo; idx <= hi; idx++) {
+          mass[idx] += w * kde(pivots[idx]);
+        }
+      } else {
+        pivots.forEach((pivot, idx) => { mass[idx] += w * kde(pivot); });
+      }
     }
     return mass;
   })

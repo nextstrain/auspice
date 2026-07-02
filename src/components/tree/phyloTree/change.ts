@@ -341,6 +341,13 @@ export const change = function change(
   if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2 || performanceFlags.get("skipTreeAnimation")===true) {
     transitionTime = 0;
   }
+  /* Streams are only ~O(100) elements, so they can animate cheaply even on trees too large to animate
+   * tip-by-tip (`skipTreeAnimation`). Give them their own budget that is only suppressed by the
+   * rapid-successive-render guard (keeps date-slider drags / playback snappy), not by tip count. */
+  let streamTransitionTime = idealTransitionTime;
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+    streamTransitionTime = 0;
+  }
 
   /* the logic of converting what react is telling us to change
   and what SVG elements, node properties, svg props we actually change */
@@ -508,7 +515,7 @@ export const change = function change(
     if (this.vaccines) this.drawVaccines();
     if (this.regression) this.drawRegression();
     if (this.confidencesInSVG) this.removeConfidence();
-    this.drawStreams(transitionTime); // removes streams, as appropriate
+    this.drawStreams(streamTransitionTime); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
     extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
@@ -519,7 +526,7 @@ export const change = function change(
       this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
     }
     if (this.params.showStreamTrees || changeColorBy) {
-      this.drawStreams(transitionTime); // removes streams, as appropriate
+      this.drawStreams(streamTransitionTime); // removes streams, as appropriate
     }
   }
 

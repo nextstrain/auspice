@@ -580,6 +580,9 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
           .attr('class', `streamGroup`);
         selection.append("g").attr("class", "connector");
         selection.append("g").attr("class", "ripples");
+        /* fade new stream groups in (exiting groups already fade out) so a coarse↔fine re-partition
+         * cross-dissolves instead of hard-swapping. transitionTime===0 → instant, still pop-free. */
+        selection.style('opacity', 0).transition().duration(transitionTime).style('opacity', 1);
         return selection
       },
       undefined, // no update method needed
