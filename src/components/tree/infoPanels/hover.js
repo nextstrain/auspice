@@ -492,6 +492,13 @@ const HoverInfoPanel = ({
   const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
 
   if (selectedNode.streamDetails) {
+    /* A dynamic auto-stream re-partition (triggered by the very click that this hovered node is
+     * mid-interaction with) rebuilds the streams map, after which the still-hovered node may no
+     * longer be a stream in the current map — its stale `streamName` won't key in. Bail rather than
+     * deref undefined (e.g. `streams[node.streamName].streamChildren`). onStreamLeave clears the
+     * hover state a moment later. */
+    const streams = selectedNode.node.that.streams;
+    if (!node.streamName || !streams[node.streamName]) return null;
     return (
       <Container node={node} panelDims={panelDims} xy={[selectedNode.streamDetails.x, selectedNode.streamDetails.y]}>
         {selectedNode.isBranch ?

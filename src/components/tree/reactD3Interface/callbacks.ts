@@ -78,7 +78,8 @@ export const onBranchClick = function onBranchClick(this: TreeComponent, d: Phyl
    * we want to zoom back to the parent stream
    */
   if (zoomBackwards && this.props.showStreamTrees) { // Note: streamtrees only (currently) work for single trees
-    const parentStreamName = this.props.tree.streams[d.n.streamName].parentStreamName;
+    const currentStream = this.props.tree.streams[d.n.streamName]; // may be undefined once a dynamic re-partition has cleared this node's streamName
+    const parentStreamName = currentStream && currentStream.parentStreamName;
     if (parentStreamName) { // if this is false we are zooming back into the "normal" tree, so use the non-stream-tree code path
       const parentStreamIndex = this.props.tree.streams[parentStreamName].startNode
       return this.props.dispatch(updateVisibleTipsAndBranchThicknesses({

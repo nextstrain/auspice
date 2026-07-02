@@ -16,6 +16,12 @@ export const AUTO_STREAM_LABEL = "__auto__";
  * sizes, with no per-tree tuning. */
 export const AUTO_STREAM_TARGET_COUNT = 100;
 
+/** Minimum visible tips a clade must exceed to be split further. Prevents over-splitting when the
+ * on-screen tip count is small (e.g. zoomed into a little clade): rather than degenerating into
+ * many ~single-tip streams (which just look like the raw tree), the partition yields fewer, chunkier
+ * streams. Effectively caps the stream count at ~onScreenTips / this value. */
+export const AUTO_STREAM_MIN_TIPS = 10;
+
 /**
 * Side effects:
 *  - sets node.streamMembership -> false | stream name
@@ -95,49 +101,56 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 /**
  * Automatically partition the tree into ~`targetStreamCount` streams via a greedy top-down split,
  * as an alternative to `labelStreamMembership` (which keys off a dataset-defined branch label).
- * Starting from the (in-view) root's children, we repeatedly split the largest clade (by
- * `fullTipCount`) into its children until we reach ~`targetStreamCount` clades; each resulting clade
- * root is a stream start and its whole subtree becomes members. Nodes above the split frontier (the
- * "spine") stay non-stream and render as normal branches via the existing `!d.n.inStream` filter.
- * Parameterising by stream COUNT (rather than an absolute tip cap) gives a consistent on-screen
- * density regardless of tree size. Produces the same output contract as `labelStreamMembership`;
- * auto streams never nest, so `parentStreamName` is always false and `streamChildren` stays empty.
+ * Starting from the root's children, we repeatedly split the largest clade (by *visible* `tipCount`)
+ * into its children until ~`targetStreamCount` clades HAVE visible tips; each resulting clade root is
+ * a stream start and its whole subtree becomes members. Splitting by on-screen (visible) tip count
+ * makes the partition track whatever is currently in view / passing filters — coarse when zoomed
+ * out, finer when zoomed/filtered in. The frontier still covers every non-empty clade
+ * (`fullTipCount > 0`), so 0-visible regions become coarse, invisible streams rather than a mass of
+ * thin branches. Nodes above the frontier (the "spine") render as normal branches via the existing
+ * `!d.n.inStream` filter. On an unfiltered full-tree load `tipCount === fullTipCount`, so this
+ * reduces to a plain count-based split. Same output contract as `labelStreamMembership`; auto streams
+ * never nest, so `parentStreamName` is always false and `streamChildren` stays empty.
  */
 export function autoPartitionStreams(tree: ReduxNode, targetStreamCount: number): Streams {
   const streams: Streams = {};
   streams[streamLabelSymbol] = AUTO_STREAM_LABEL;
 
-  /* Clear any previous stream membership across the whole subtree. The greedy "mark" pass below
-   * only visits stream subtrees, so without this the spine could retain stale membership. */
+  /* Clear previous stream MEMBERSHIP (streamName / inStream) across the whole subtree. The greedy
+   * "mark" pass below only visits stream subtrees, so without this the spine could retain a stale
+   * membership. We deliberately DO NOT delete the render data (streamPivots / streamCategories /
+   * streamDimensions / streamMaxHeight): on a dynamic re-partition, a node that is no longer a stream
+   * start may still have live d3 ripple hover/leave handler closures that read
+   * `node.streamCategories[categoryIndex]` — deleting it crashes them. The stale data is harmless
+   * (only stream starts present in the current `streams` map are rendered/read; the rest is ignored
+   * and overwritten by `processStreams` if the node becomes a stream again). */
   const clearStack: ReduxNode[] = [tree];
   while (clearStack.length) {
     const node = clearStack.pop();
     node.inStream = false;
-    if (node.streamName) {
-      delete node.streamName;
-      delete node.streamPivots;
-      delete node.streamCategories;
-      delete node.streamDimensions;
-      delete node.streamMaxHeight;
-    }
+    delete node.streamName;
     for (const child of node.children || []) clearStack.push(child);
   }
 
-  /* Greedy split: repeatedly replace the largest splittable clade with its children until we have
-   * ~targetStreamCount clades. The frontier stays ~targetStreamCount long, so a linear max-scan is
-   * cheap (no heap needed). */
+  /* Greedy split: repeatedly split the largest VISIBLE-bearing clade (by on-screen `tipCount`, with
+   * `fullTipCount` fallback for an unfiltered load) until ~targetStreamCount clades have visible
+   * tips. The frontier keeps every non-empty clade, so 0-visible regions stay covered by coarse
+   * (invisible) streams instead of exploding into thin branches. Frontier is ~targetStreamCount
+   * long, so a linear scan is cheap. */
+  const visTips = (n: ReduxNode): number => n.tipCount ?? n.fullTipCount;
   const frontier: ReduxNode[] = (tree.children || []).filter((n) => n.fullTipCount > 0);
-  while (frontier.length < targetStreamCount) {
+  const visibleStreamCount = (): number => frontier.reduce((c, n) => c + (visTips(n) > 0 ? 1 : 0), 0);
+  while (visibleStreamCount() < targetStreamCount) {
     let bestIdx = -1;
-    let bestCount = -1;
+    let bestCount = AUTO_STREAM_MIN_TIPS; // only split clades with MORE than the floor of visible tips (keeps streams chunky, avoids ~single-tip degenerates)
     for (let i = 0; i < frontier.length; i++) {
       const n = frontier[i];
-      if (n.hasChildren && n.fullTipCount > bestCount) {
-        bestCount = n.fullTipCount;
+      if (n.hasChildren && visTips(n) > bestCount) {
+        bestCount = visTips(n);
         bestIdx = i;
       }
     }
-    if (bestIdx === -1) break; // no splittable clade remains (all are tips)
+    if (bestIdx === -1) break; // no splittable visible clade remains
     const [node] = frontier.splice(bestIdx, 1);
     for (const child of node.children || []) {
       if (child.fullTipCount > 0) frontier.push(child);

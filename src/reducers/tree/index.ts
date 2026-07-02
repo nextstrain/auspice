@@ -57,6 +57,9 @@ const Tree = (
       return {
         ...state,
         ...newStates,
+        // a dynamic streamtree re-partition (auto streams, discrete visibility change) ships a fresh
+        // streams map; otherwise streams were recomputed in place and keep their object identity
+        ...(action.streams ? {streams: action.streams} : {}),
       };
     }
     case types.SET_FOCUS:
