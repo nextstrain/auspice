@@ -8,6 +8,7 @@ import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
 import { Focus, Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, StreamSummary, TreeState, FocusNodes} from "../../../reducers/tree/types";
+import { prepareStreamMorph, interpolatePoints, StreamMorphSnapshot, PreparedMorph } from "./streamMorph";
 
 export const render = function render(
   this: PhyloTreeType,
@@ -547,9 +548,14 @@ export interface LabelDatum {
   visibility: string;
 }
 
-export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
+export function drawStreams(this: PhyloTreeType, transitionTime = 0, morphSnapshot?: StreamMorphSnapshot): void {
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
+
+  /* When a re-partition snapshot is present (and we're animating), plan an area-morph: each entering
+   * child ripple starts as its slice of the parent's rendered shape and tweens to its final shape. */
+  const morph: PreparedMorph | undefined = (morphSnapshot && transitionTime) ?
+    prepareStreamMorph(this, morphSnapshot) : undefined;
 
   /* initial set up - runs when streams are turned on / removed
      NOTE: we use 2 top-level groups here so that the labels are always drawn on top of any connectors / ribbons */
@@ -581,12 +587,21 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
         selection.append("g").attr("class", "connector");
         selection.append("g").attr("class", "ripples");
         /* fade new stream groups in (exiting groups already fade out) so a coarse↔fine re-partition
-         * cross-dissolves instead of hard-swapping. transitionTime===0 → instant, still pop-free. */
-        selection.style('opacity', 0).transition().duration(transitionTime).style('opacity', 1);
+         * cross-dissolves instead of hard-swapping. transitionTime===0 → instant, still pop-free.
+         * A group whose ripples are area-morphing must NOT also fade (it would ghost). */
+        selection.filter((d) => !(morph && morph.morphingNewNames.has(String(d))))
+          .style('opacity', 0).transition().duration(transitionTime).style('opacity', 1);
         return selection
       },
       undefined, // no update method needed
       (exit) => {
+        /* Old groups whose area has been handed off into a morphing new group are removed immediately
+         * (their pixels are re-emitted as the morph's t=0 shapes); the rest fade out as before. */
+        if (morph) {
+          exit.filter((d) => morph.handedOffOldNames.has(String(d))).remove();
+          return exit.filter((d) => !morph.handedOffOldNames.has(String(d)))
+            .call((selection) => selection.transition().duration(transitionTime).style('opacity', 0).remove());
+        }
         return exit
           .call((selection) => selection.transition().duration(transitionTime)
             .style('opacity', 0)
@@ -595,7 +610,7 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
       },
     );
 
-  const areaGenerator: (param: Ripple) => string = area<Ripple[0]>()
+  const areaGenerator: (param: Ripple[0][]) => string = area<Ripple[0]>()
     .x((d) => d.x)
     .y0((d) => d.y0)
     .y1((d) => d.y1);
@@ -703,6 +718,7 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
         },
       );
 
+    const t0ForStream = morph?.t0ByStreamAndKey.get(name);
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
       .selectAll<SVGPathElement, Ripple>(`.ripple`)
       .data(node.streamRipples, (d) => String(d.key))
@@ -711,7 +727,7 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
           return enter
             .append("path")
             .attr("class", `ripple`)
-            .attr("d", (d) => areaGenerator(d))
+            .attr("d", (d) => areaGenerator(t0ForStream?.get(String(d.key)) ?? d))
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
             .on("mouseover", (_d, i, paths) => {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
@@ -726,6 +742,17 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0): void {
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
             .on("click", () => this.callbacks.onBranchClick(node))
+            .call((selection) => {
+              /* morph the entering child ripples from their parent-slice t=0 shape to the final shape */
+              if (!t0ForStream) return;
+              selection.filter((d) => t0ForStream.has(String(d.key)))
+                .transition().duration(transitionTime)
+                .attrTween("d", (d): ((t: number) => string) => {
+                  const t0 = t0ForStream.get(String(d.key));
+                  if (!t0) return (): string => areaGenerator(d);
+                  return (t: number): string => areaGenerator(interpolatePoints(t0, d, t));
+                });
+            })
         },
         (update) => {
           return update.call(

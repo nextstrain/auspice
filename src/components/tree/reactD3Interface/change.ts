@@ -1,6 +1,7 @@
 import { decodeMeasurementColorBy, isMeasurementColorBy } from "../../../actions/measurements";
 import { calculateStrokeColors, getBrighterColor } from "../../../util/colorHelpers";
 import { ChangeParams, PhyloTreeType } from "../phyloTree/types";
+import { buildStreamMorphSnapshot } from "../phyloTree/streamMorph";
 import { TreeComponentProps, TreeComponentState } from "../types";
 
 export const changePhyloTreeViaPropsComparison = (
@@ -85,6 +86,14 @@ export const changePhyloTreeViaPropsComparison = (
    * have `phyloTree/change.ts` or just reach in and update it here. Historically
    * we've used both but we should standardise this usage.
    */
+  /* Snapshot the OLD streams + their rendered pixel shapes BEFORE we overwrite `phylotree.streams`
+   * (and before `mapStreamsToScreen` mutates the ripple arrays in place), so a dynamic re-partition
+   * can area-morph split/merge instead of cross-fading. Main tree only — streamtrees are single-tree. */
+  if (mainTree && oldProps.showStreamTrees && newProps.showStreamTrees &&
+      oldProps.tree.streams && newProps.tree.streams &&
+      oldProps.tree.streams !== newProps.tree.streams) {
+    args.streamMorphSnapshot = buildStreamMorphSnapshot(phylotree, oldProps.tree.streams);
+  }
   phylotree.streams = newProps.tree.streams;
   phylotree.params.showStreamTrees = newProps.showStreamTrees;
   phylotree.params.showStreamTreeLabels = newProps.showStreamTreeLabels;

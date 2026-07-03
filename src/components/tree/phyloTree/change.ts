@@ -325,6 +325,7 @@ export const change = function change(
     scatterVariables = undefined,
     performanceFlags = undefined,
     newMeasurementsColorGrouping = undefined,
+    streamMorphSnapshot = undefined,
   }: ChangeParams
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -515,7 +516,7 @@ export const change = function change(
     if (this.vaccines) this.drawVaccines();
     if (this.regression) this.drawRegression();
     if (this.confidencesInSVG) this.removeConfidence();
-    this.drawStreams(streamTransitionTime); // removes streams, as appropriate
+    this.drawStreams(streamTransitionTime, streamMorphSnapshot); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
     extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
