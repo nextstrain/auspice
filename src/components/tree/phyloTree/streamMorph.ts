@@ -19,6 +19,8 @@ type Pt = { x: number; y0: number; y1: number };
 
 interface RippleSnapshot {
   categoryName: string | undefined;
+  /** the d3 join key (`<categoryName>_<colorBy>`) so merge targets can match the exiting DOM ripples */
+  key: string;
   pts: Pt[];
 }
 
@@ -47,12 +49,47 @@ type MorphPlan =
   | { kind: "none" };
 
 export interface PreparedMorph {
-  /** newStreamName -> (rippleKey -> t=0 point array, resampled to the final ripple's length) */
+  /** SPLIT: newStreamName -> (rippleKey -> t=0 point array); entering child tweens from this to its shape */
   t0ByStreamAndKey: Map<string, Map<string, Pt[]>>;
   /** new streams that are morphing (their entering group should NOT also opacity-fade) */
   morphingNewNames: Set<string>;
   /** old streams whose area is handed off into a morphing new stream (remove immediately, no fade) */
   handedOffOldNames: Set<string>;
+  /** MERGE: oldChildName -> (rippleKey -> target shape); exiting child tweens its shape into this */
+  mergeExit: Map<string, Map<string, Pt[]>>;
+  /** old streams that are merging into a new parent (morph + fade on exit rather than a plain fade) */
+  mergingOldNames: Set<string>;
+}
+
+/** Per-pivot [minY,maxY] pixel envelope of a stacked stream (all its category ripples). */
+function computeEnvelope(ripplePts: readonly (readonly Pt[])[]): [number, number][] {
+  const nP = ripplePts.length ? ripplePts[0].length : 0;
+  const env: [number, number][] = new Array(nP);
+  for (let p = 0; p < nP; p++) {
+    let lo = Infinity, hi = -Infinity;
+    for (const pts of ripplePts) {
+      const pt = pts[p];
+      if (!pt) continue;
+      if (pt.y0 < lo) lo = pt.y0;
+      if (pt.y1 < lo) lo = pt.y1;
+      if (pt.y0 > hi) hi = pt.y0;
+      if (pt.y1 > hi) hi = pt.y1;
+    }
+    env[p] = [lo, hi];
+  }
+  return env;
+}
+
+/** The display-order band [min,max] spanned by a stream's member tips. */
+function computeBand(members: Iterable<number>, nodes: PhyloNode[]): [number, number] {
+  let lo = Infinity, hi = -Infinity;
+  for (const m of members) {
+    const d = nodes[m]?.displayOrder;
+    if (d === undefined) continue;
+    if (d < lo) lo = d;
+    if (d > hi) hi = d;
+  }
+  return [lo, hi];
 }
 
 /**
@@ -68,31 +105,9 @@ export function buildStreamMorphSnapshot(phylotree: PhyloTreeType, oldStreams: S
     const catNames = node.n.streamCategories ? node.n.streamCategories.map((c) => c.name) : [];
     const ripples: RippleSnapshot[] = (node.streamRipples || []).map((rip, i) => ({
       categoryName: catNames[i],
+      key: String(rip.key),
       pts: rip.map((pt) => ({ x: pt.x, y0: pt.y0, y1: pt.y1 })),
     }));
-
-    let bandMin = Infinity, bandMax = -Infinity;
-    for (const m of stream.members) {
-      const d = phylotree.nodes[m]?.displayOrder;
-      if (d === undefined) continue;
-      if (d < bandMin) bandMin = d;
-      if (d > bandMax) bandMax = d;
-    }
-
-    const nP = ripples.length ? ripples[0].pts.length : 0;
-    const envelope: [number, number][] = new Array(nP);
-    for (let p = 0; p < nP; p++) {
-      let lo = Infinity, hi = -Infinity;
-      for (const r of ripples) {
-        const pt = r.pts[p];
-        if (!pt) continue;
-        if (pt.y0 < lo) lo = pt.y0;
-        if (pt.y1 < lo) lo = pt.y1;
-        if (pt.y0 > hi) hi = pt.y0;
-        if (pt.y1 > hi) hi = pt.y1;
-      }
-      envelope[p] = [lo, hi];
-    }
 
     const snap: OldStreamSnapshot = {
       name: stream.name,
@@ -100,8 +115,8 @@ export function buildStreamMorphSnapshot(phylotree: PhyloTreeType, oldStreams: S
       members: new Set(stream.members),
       pivots: node.n.streamPivots ? [...node.n.streamPivots] : [],
       ripples,
-      band: [bandMin, bandMax],
-      envelope,
+      band: computeBand(stream.members, phylotree.nodes),
+      envelope: computeEnvelope(ripples.map((r) => r.pts)),
     };
     byName.set(stream.name, snap);
     byStartNode.set(stream.startNode, stream.name);
@@ -182,9 +197,56 @@ function resampleEnvelope(srcPivots: number[], srcEnv: [number, number][], dst: 
 }
 
 /**
- * Build the t=0 shapes for a SPLIT child: carve the parent's rendered envelope into the child's
- * display-order sub-slice, then stack the child's categories within that slice in proportion to the
- * child's own final heights (so only the band position morphs, not the internal category ratios).
+ * Carve one stream ("child") into its display-order sub-slice of another stream's ("parent") rendered
+ * envelope, keeping the child's own x + per-category height proportions. Used both ways: for a SPLIT
+ * this is the child's t=0 (its slice of the OLD parent, morphing out to its own shape); for a MERGE
+ * it's the child's target (its slice of the NEW parent, morphing in from the child's own shape). The
+ * children's slices tile the parent band (display-order is partition-invariant), so together they
+ * refill the parent silhouette.
+ */
+function carveSlice(
+  childRipples: readonly { key: string; pts: Pt[] }[],
+  childPivots: number[],
+  childBand: [number, number],
+  parentBand: [number, number],
+  parentEnvelope: [number, number][],
+  parentPivots: number[],
+): Map<string, Pt[]> {
+  const [pMin, pMax] = parentBand;
+  const bandLen = pMax - pMin;
+  const [cMin, cMax] = childBand;
+  const fracLo = bandLen > 0 ? (cMin - pMin) / bandLen : 0;
+  const fracHi = bandLen > 0 ? (cMax - pMin) / bandLen : 1;
+
+  const env = resampleEnvelope(parentPivots, parentEnvelope, childPivots);
+  const nP = childPivots.length;
+  const nCat = childRipples.length;
+  const arrays: Pt[][] = childRipples.map(() => new Array(nP));
+
+  for (let p = 0; p < nP; p++) {
+    const [envLo, envHi] = env[p];
+    const sliceLo = envLo + fracLo * (envHi - envLo);
+    const span = (envLo + fracHi * (envHi - envLo)) - sliceLo;
+    let total = 0;
+    const h = new Array(nCat);
+    for (let k = 0; k < nCat; k++) { const q = childRipples[k].pts[p]; const hk = Math.abs(q.y1 - q.y0); h[k] = hk; total += hk; }
+    let cum = 0;
+    for (let k = 0; k < nCat; k++) {
+      const y0 = total > 0 ? sliceLo + (cum / total) * span : sliceLo;
+      cum += h[k];
+      const y1 = total > 0 ? sliceLo + (cum / total) * span : sliceLo;
+      arrays[k][p] = { x: childRipples[k].pts[p].x, y0, y1 };
+    }
+  }
+
+  const out = new Map<string, Pt[]>();
+  childRipples.forEach((rip, k) => out.set(rip.key, arrays[k]));
+  return out;
+}
+
+/**
+ * Build the t=0 shapes for a SPLIT child: its slice of the OLD parent's rendered envelope, keyed by
+ * the child's (new) ripple keys, resampled to the child's final pivots so it can tween to its shape.
  */
 function buildSplitStartRipples(
   node: PhyloNode,
@@ -195,52 +257,40 @@ function buildSplitStartRipples(
   const t1 = node.streamRipples;
   const pivots = node.n.streamPivots;
   if (!t1 || !t1.length || !pivots || !pivots.length) return undefined;
-
-  let cMin = Infinity, cMax = -Infinity;
-  for (const m of stream.members) {
-    const d = phylotree.nodes[m]?.displayOrder;
-    if (d === undefined) continue;
-    if (d < cMin) cMin = d;
-    if (d > cMax) cMax = d;
-  }
-  const [pMin, pMax] = parent.band;
-  const bandLen = pMax - pMin;
-  const fracLo = bandLen > 0 ? (cMin - pMin) / bandLen : 0;
-  const fracHi = bandLen > 0 ? (cMax - pMin) / bandLen : 1;
-
-  const env = resampleEnvelope(parent.pivots, parent.envelope, pivots);
-  const nP = pivots.length;
-  const nCat = t1.length;
-  const arrays: Pt[][] = t1.map(() => new Array(nP));
-
-  for (let p = 0; p < nP; p++) {
-    const [envLo, envHi] = env[p];
-    const sliceLo = envLo + fracLo * (envHi - envLo);
-    const span = (envLo + fracHi * (envHi - envLo)) - sliceLo;
-    let total = 0;
-    const h = new Array(nCat);
-    for (let k = 0; k < nCat; k++) { const q = t1[k][p]; const hk = Math.abs(q.y1 - q.y0); h[k] = hk; total += hk; }
-    let cum = 0;
-    for (let k = 0; k < nCat; k++) {
-      const y0 = total > 0 ? sliceLo + (cum / total) * span : sliceLo;
-      cum += h[k];
-      const y1 = total > 0 ? sliceLo + (cum / total) * span : sliceLo;
-      arrays[k][p] = { x: t1[k][p].x, y0, y1 };
-    }
-  }
-
-  const out = new Map<string, Pt[]>();
-  t1.forEach((rip, k) => out.set(String(rip.key), arrays[k]));
-  return out;
+  const childRipples = t1.map((rip) => ({ key: String(rip.key), pts: rip }));
+  const childBand = computeBand(stream.members, phylotree.nodes);
+  return carveSlice(childRipples, pivots, childBand, parent.band, parent.envelope, parent.pivots);
 }
 
-/** Compute all per-stream t=0 shapes + which groups should skip the fade / be handed off immediately. */
+/**
+ * Build the target shapes for a MERGE child: its slice of the NEW parent's rendered envelope, keyed
+ * by the child's (old) ripple keys, over the child's old pivots so its old shape can tween into it.
+ */
+function buildMergeTargetRipples(
+  child: OldStreamSnapshot,
+  parentNode: PhyloNode,
+  parentStream: StreamSummary,
+  phylotree: PhyloTreeType,
+): Map<string, Pt[]> | undefined {
+  const parentRipples = parentNode.streamRipples;
+  const parentPivots = parentNode.n.streamPivots;
+  if (!parentRipples || !parentRipples.length || !parentPivots || !parentPivots.length) return undefined;
+  if (!child.ripples.length) return undefined;
+  const parentEnv = computeEnvelope(parentRipples);
+  const parentBand = computeBand(parentStream.members, phylotree.nodes);
+  return carveSlice(child.ripples, child.pivots, child.band, parentBand, parentEnv, parentPivots);
+}
+
+/** Compute all per-stream morph shapes + which groups should skip the fade / hand off / merge. */
 export function prepareStreamMorph(phylotree: PhyloTreeType, snapshot: StreamMorphSnapshot): PreparedMorph {
   const t0ByStreamAndKey = new Map<string, Map<string, Pt[]>>();
   const morphingNewNames = new Set<string>();
   const handedOffOldNames = new Set<string>();
+  const mergeExit = new Map<string, Map<string, Pt[]>>();
+  const mergingOldNames = new Set<string>();
+  const empty: PreparedMorph = { t0ByStreamAndKey, morphingNewNames, handedOffOldNames, mergeExit, mergingOldNames };
   const newStreams = phylotree.streams;
-  if (!newStreams) return { t0ByStreamAndKey, morphingNewNames, handedOffOldNames };
+  if (!newStreams) return empty;
 
   const plans = computeMorphPlans(newStreams, snapshot, phylotree.nodes);
   for (const [name, plan] of plans) {
@@ -253,10 +303,22 @@ export function prepareStreamMorph(phylotree: PhyloTreeType, snapshot: StreamMor
         morphingNewNames.add(name);
         handedOffOldNames.add(plan.parent.name);
       }
+    } else if (plan.kind === "merge") {
+      /* K children → this new parent. The parent enters + fades in (default path); each exiting child
+       * morphs its shape into its slice of the parent. If the parent is invisible/degenerate (e.g. its
+       * tips scrolled out of view on a zoom-in) the children fall back to the plain fade. */
+      const parentStream = newStreams[name];
+      const parentNode = phylotree.nodes[parentStream.startNode];
+      for (const child of plan.children) {
+        const target = buildMergeTargetRipples(child, parentNode, parentStream, phylotree);
+        if (target) {
+          mergeExit.set(child.name, target);
+          mergingOldNames.add(child.name);
+        }
+      }
     }
-    /* merge: added in a later step */
   }
-  return { t0ByStreamAndKey, morphingNewNames, handedOffOldNames };
+  return empty;
 }
 
 /** Per-index linear interpolation of two equal-length point arrays; NaN-safe (falls back to `b`). */

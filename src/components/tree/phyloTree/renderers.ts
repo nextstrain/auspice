@@ -573,6 +573,11 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0, morphSnapsh
     return;
   }
 
+  const areaGenerator: (param: Ripple[0][]) => string = area<Ripple[0]>()
+    .x((d) => d.x)
+    .y0((d) => d.y0)
+    .y1((d) => d.y1);
+
   /** For each stream, construct a SVG group to house the stream, and within each group create
    * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update
    * individual elements.
@@ -595,11 +600,27 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0, morphSnapsh
       },
       undefined, // no update method needed
       (exit) => {
-        /* Old groups whose area has been handed off into a morphing new group are removed immediately
-         * (their pixels are re-emitted as the morph's t=0 shapes); the rest fade out as before. */
         if (morph) {
+          /* Split parents: their pixels are re-emitted as a morphing new group's t=0 → remove now. */
           exit.filter((d) => morph.handedOffOldNames.has(String(d))).remove();
-          return exit.filter((d) => !morph.handedOffOldNames.has(String(d)))
+          /* Merge children: morph each exiting ripple into its slice of the new parent (which fades in
+           * via the enter path), fading + removing the group over the same duration. So the children
+           * visibly converge into the parent rather than cross-dissolving. */
+          exit.filter((d) => morph.mergingOldNames.has(String(d))).each(function(name) {
+            const targets = morph.mergeExit.get(String(name));
+            if (targets) {
+              select(this).select('.ripples').selectAll<SVGPathElement, Ripple>('.ripple')
+                .transition().duration(transitionTime)
+                .attrTween("d", (d): ((t: number) => string) => {
+                  const target = targets.get(String(d.key));
+                  if (!target) return (): string => areaGenerator(d);
+                  return (t: number): string => areaGenerator(interpolatePoints(d, target, t));
+                });
+            }
+            select(this).transition().duration(transitionTime).style('opacity', 0).remove();
+          });
+          /* Everything else fades out as before. */
+          return exit.filter((d) => !morph.handedOffOldNames.has(String(d)) && !morph.mergingOldNames.has(String(d)))
             .call((selection) => selection.transition().duration(transitionTime).style('opacity', 0).remove());
         }
         return exit
@@ -609,11 +630,6 @@ export function drawStreams(this: PhyloTreeType, transitionTime = 0, morphSnapsh
           )
       },
     );
-
-  const areaGenerator: (param: Ripple[0][]) => string = area<Ripple[0]>()
-    .x((d) => d.x)
-    .y0((d) => d.y0)
-    .y1((d) => d.y1);
 
   /**
    * Joiner lines connect the parent stream or parent branch to the start of this stream
