@@ -66,7 +66,7 @@ const svgSetters = {
     },
     // only allow stroke to be set on individual branches
     ".branch": {
-      "stroke-width": (d: PhyloNode): string => d["stroke-width"] + "px", // style - as per drawBranches()
+      "stroke-width": (d: PhyloNode): string => (d.that.params.showStreamTrees && d.n.tipCount > 0 ? d.that.params.branchStrokeWidth : d["stroke-width"]) + "px", // streamtree mode: branches with visible descendants match the backbone width; branches with none (fully filtered) keep their thin per-node thickness
       stroke: (d: PhyloNode): string => strokeForBranch(d), // TODO: revisit if we bring back SVG gradients
       cursor: (d: PhyloNode): "pointer" | "default" => d.visibility === NODE_VISIBLE ? "pointer" : "default",
       visibility: getBranchVisibility
@@ -325,6 +325,7 @@ export const change = function change(
     scatterVariables = undefined,
     performanceFlags = undefined,
     newMeasurementsColorGrouping = undefined,
+    streamMorphSnapshot = undefined,
   }: ChangeParams
 ): void {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
@@ -340,6 +341,13 @@ export const change = function change(
   let transitionTime = idealTransitionTime;
   if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2 || performanceFlags.get("skipTreeAnimation")===true) {
     transitionTime = 0;
+  }
+  /* Streams are only ~O(100) elements, so they can animate cheaply even on trees too large to animate
+   * tip-by-tip (`skipTreeAnimation`). Give them their own budget that is only suppressed by the
+   * rapid-successive-render guard (keeps date-slider drags / playback snappy), not by tip count. */
+  let streamTransitionTime = idealTransitionTime;
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+    streamTransitionTime = 0;
   }
 
   /* the logic of converting what react is telling us to change
@@ -507,8 +515,8 @@ export const change = function change(
     this.drawBranchLabels(this.params.branchLabelKey);
     if (this.vaccines) this.drawVaccines();
     if (this.regression) this.drawRegression();
-    if (this.confidencesInSVG) this.removeConfidence(); 
-    this.drawStreams(); // removes streams, as appropriate
+    if (this.confidencesInSVG) this.removeConfidence();
+    this.drawStreams(streamTransitionTime, streamMorphSnapshot); // removes streams, as appropriate
   } else {
     const extras: Extras = { removeConfidences, showConfidences, newBranchLabellingKey };
     extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance !== undefined;
@@ -519,7 +527,7 @@ export const change = function change(
       this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
     }
     if (this.params.showStreamTrees || changeColorBy) {
-      this.drawStreams(); // removes streams, as appropriate
+      this.drawStreams(streamTransitionTime); // removes streams, as appropriate
     }
   }
 

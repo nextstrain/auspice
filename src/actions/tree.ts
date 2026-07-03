@@ -15,7 +15,8 @@ import { PhyloNode } from "../components/tree/phyloTree/types";
 import { Metadata } from "../reducers/metadata.types";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState, FocusNodes } from "../reducers/tree/types";
-import { processStreams } from "../util/treeStreams";
+import { processStreams, autoPartitionStreams, AUTO_STREAM_LABEL } from "../util/treeStreams";
+import { ControlsState } from "../reducers/controls";
 import { NODE_VISIBLE } from "../util/globals";
 
 type RootIndex = number | undefined
@@ -76,6 +77,32 @@ export const applyInViewNodesToTree = (
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  */
+/**
+ * Recompute the streamtrees for a visibility change. When AUTO streams are shown and the change is
+ * discrete (not a drag/animation tick), re-partition so the currently on-screen tips are split into
+ * ~`controls.streamTreeTargetCount` streams (dynamic coarse↔fine LOD), handing the fresh map back via
+ * `dispatchObj.streams` (a new object → streamDefinitionChange → teardown+redraw at the new
+ * granularity; safe because streams render in place). Otherwise recompute the existing streams in
+ * place via the cheap skip-path, preserving object identity so nothing tears down (smooth drag).
+ */
+function updateStreamsForVisibilityChange(
+  dispatchObj: AnyAction,
+  tree: TreeState,
+  controls: ControlsState,
+  discrete: boolean,
+): void {
+  if (!Object.keys(tree.streams).length) return;
+  const repartition = discrete && controls.showStreamTrees && controls.streamTreeBranchLabel === AUTO_STREAM_LABEL;
+  if (repartition) {
+    const streams = autoPartitionStreams(tree.nodes[0], controls.streamTreeTargetCount);
+    processStreams(streams, tree.nodes, dispatchObj.visibility, controls.distanceMeasure, controls.colorScale);
+    dispatchObj.streams = streams;
+  } else {
+    // recomputes them even if they're toggled off
+    processStreams(tree.streams, tree.nodes, dispatchObj.visibility, controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
+  }
+}
+
 export const updateVisibleTipsAndBranchThicknesses = ({
   root = [undefined, undefined],
 }: {
@@ -130,10 +157,8 @@ export const updateVisibleTipsAndBranchThicknesses = ({
       /* tip selected is the same as the first tree - the reducer uses that */
     }
 
-    if (Object.keys(tree.streams).length) {
-      // recomputes them even if they're toggled off
-      processStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
-    }
+    /* zoom & trait filters are discrete → re-partition (dynamic LOD) when auto streams are shown */
+    updateStreamsForVisibilityChange(dispatchObj, tree, controls, true);
 
     /* Changes in visibility require a recomputation of which legend items we wish to display */
     dispatchObj.visibleLegendValues = createVisibleLegendValues({
@@ -218,10 +243,9 @@ export const changeDateFilter = ({
       visibilityToo: dispatchObj.visibilityToo
     });
 
-    if (Object.keys(tree.streams).length) {
-      // recomputes them even if they're toggled off
-      processStreams(tree.streams, tree.nodes, dispatchObj.visibility,  controls.distanceMeasure, controls.colorScale, {skipPivots: true, skipCategories: true});
-    }
+    /* only re-partition on a settled date change (quickdraw false); during drag / animation ticks
+       keep the cheap in-place recompute so the streams thin smoothly (no teardown) */
+    updateStreamsForVisibilityChange(dispatchObj, tree, controls, !quickdraw);
 
     /* D I S P A T C H */
     dispatch(dispatchObj);

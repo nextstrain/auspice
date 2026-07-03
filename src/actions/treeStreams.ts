@@ -1,5 +1,5 @@
-import { TOGGLE_STREAM_TREE, CHANGE_STREAM_TREE_BRANCH_LABEL } from "./types";
-import { processStreams, labelStreamMembership, isNodeWithinAnotherStream } from "../util/treeStreams";
+import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, TOGGLE_STREAM_TREE_UPDATE_LAYOUT, CHANGE_STREAM_TREE_BRANCH_LABEL, CHANGE_STREAM_TREE_TARGET_COUNT } from "./types";
+import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL } from "../util/treeStreams";
 import { ThunkFunction } from "../store";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
@@ -39,8 +39,11 @@ export function toggleStreamTree(): ThunkFunction {
       return;
     }
 
-    processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale)
-    dispatch({type: TOGGLE_STREAM_TREE, showStreamTrees})
+    /* Re-enable by rebuilding streams fresh via changeStreamTreeBranchLabel rather than
+     * re-processing the streams already in the store: processStreams mutates its input
+     * (e.g. renderingOrder / per-node stream fields), which violates redux immutability
+     * when run on store state and aborts the redraw. */
+    dispatch(changeStreamTreeBranchLabel(controls.streamTreeBranchLabel));
   }
 } 
 
@@ -48,15 +51,51 @@ export function toggleStreamTree(): ThunkFunction {
 export function changeStreamTreeBranchLabel(newLabel): ThunkFunction {
   return function(dispatch, getState) {
     const {controls, tree} = getState();
+    const isAuto = newLabel === AUTO_STREAM_LABEL;
 
-    if (isNodeWithinAnotherStream(tree.nodes[tree.idxOfInViewRootNode], newLabel)) {
+    if (!isAuto && isNodeWithinAnotherStream(tree.nodes[tree.idxOfInViewRootNode], newLabel)) {
       dispatch(warningNotification({message: `Cannot switch streams to ${newLabel} as the subtree we're viewing would be inside a stream`}));
       return;
     }
 
-    const streams = labelStreamMembership(tree.nodes[0], newLabel);
+    const streams = isAuto ?
+      autoPartitionStreams(tree.nodes[0], controls.streamTreeTargetCount) :
+      labelStreamMembership(tree.nodes[0], newLabel);
     processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
     dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
+  }
+}
+
+
+/**
+ * Change the auto-streamtree granularity (the target stream count, via the FINE/MEDIUM/COARSE
+ * control) and re-partition over the current view. Shipping a fresh `streams` map triggers
+ * `streamDefinitionChange`, so the coarse↔fine change flows through the split/merge area-morph.
+ * Only meaningful for auto streams; a no-op for label-defined streams.
+ */
+export function changeStreamTreeTargetCount(newCount: number): ThunkFunction {
+  return function(dispatch, getState) {
+    const {controls, tree} = getState();
+    if (controls.streamTreeBranchLabel !== AUTO_STREAM_LABEL) return;
+    if (!tree.nodes || !Object.keys(tree.streams).length) return;
+
+    const streams = autoPartitionStreams(tree.nodes[0], newCount);
+    processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
+
+    dispatch({type: CHANGE_STREAM_TREE_TARGET_COUNT, streams, streamTreeTargetCount: newCount});
+  }
+}
+
+
+export function toggleStreamTreeLabels(): ThunkFunction {
+  return function(dispatch, getState) {
+    dispatch({type: TOGGLE_STREAM_TREE_LABELS, value: !getState().controls.showStreamTreeLabels});
+  }
+}
+
+export function toggleStreamTreeUpdateLayout(): ThunkFunction {
+  return function(dispatch, getState) {
+    dispatch({type: TOGGLE_STREAM_TREE_UPDATE_LAYOUT, value: !getState().controls.streamTreeUpdateLayout});
   }
 }

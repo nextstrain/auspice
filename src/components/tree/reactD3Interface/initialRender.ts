@@ -41,6 +41,8 @@ export const renderTree = (
       tipLabels: true,
       showTipLabels: true,
       showStreamTrees: props.showStreamTrees,
+      showStreamTreeLabels: props.showStreamTreeLabels,
+      streamTreeUpdateLayout: props.streamTreeUpdateLayout,
     },
     callbacks: {
       onTipHover: callbacks.onTipHover.bind(that),

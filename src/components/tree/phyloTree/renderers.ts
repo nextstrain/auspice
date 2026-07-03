@@ -8,6 +8,7 @@ import { select, Selection } from "d3-selection";
 import { area } from "d3-shape";
 import { Focus, Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, StreamSummary, TreeState, FocusNodes} from "../../../reducers/tree/types";
+import { prepareStreamMorph, interpolatePoints, StreamMorphSnapshot, PreparedMorph } from "./streamMorph";
 
 export const render = function render(
   this: PhyloTreeType,
@@ -318,7 +319,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("stroke-width", (d) => params.showStreamTrees && d.n.tipCount > 0 ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
       .style("visibility", getBranchVisibility)
       .style("fill", "none")
       .style("pointer-events", "auto")
@@ -354,7 +355,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => params.showStreamTrees && d.n.tipCount > 0 ? params.branchStrokeWidth : (d['stroke-width'] || params.branchStrokeWidth))
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
     .style("pointer-events", "auto")
@@ -547,9 +548,14 @@ export interface LabelDatum {
   visibility: string;
 }
 
-export function drawStreams(this: PhyloTreeType): void {
+export function drawStreams(this: PhyloTreeType, transitionTime = 0, morphSnapshot?: StreamMorphSnapshot): void {
   /* stream order is reversed so that stream connectors are correctly layered behind their parent streams */
   const streamsToDraw = this.params.showStreamTrees ? Object.keys(this.streams).reverse() : [];
+
+  /* When a re-partition snapshot is present (and we're animating), plan an area-morph: each entering
+   * child ripple starts as its slice of the parent's rendered shape and tweens to its final shape. */
+  const morph: PreparedMorph | undefined = (morphSnapshot && transitionTime) ?
+    prepareStreamMorph(this, morphSnapshot) : undefined;
 
   /* initial set up - runs when streams are turned on / removed
      NOTE: we use 2 top-level groups here so that the labels are always drawn on top of any connectors / ribbons */
@@ -567,6 +573,11 @@ export function drawStreams(this: PhyloTreeType): void {
     return;
   }
 
+  const areaGenerator: (param: Ripple[0][]) => string = area<Ripple[0]>()
+    .x((d) => d.x)
+    .y0((d) => d.y0)
+    .y1((d) => d.y1);
+
   /** For each stream, construct a SVG group to house the stream, and within each group create
    * (sub)groups for the connector, ripples & labels, so the layer order is preserved when we update
    * individual elements.
@@ -580,22 +591,45 @@ export function drawStreams(this: PhyloTreeType): void {
           .attr('class', `streamGroup`);
         selection.append("g").attr("class", "connector");
         selection.append("g").attr("class", "ripples");
+        /* fade new stream groups in (exiting groups already fade out) so a coarse↔fine re-partition
+         * cross-dissolves instead of hard-swapping. transitionTime===0 → instant, still pop-free.
+         * A group whose ripples are area-morphing must NOT also fade (it would ghost). */
+        selection.filter((d) => !(morph && morph.morphingNewNames.has(String(d))))
+          .style('opacity', 0).transition().duration(transitionTime).style('opacity', 1);
         return selection
       },
       undefined, // no update method needed
       (exit) => {
+        if (morph) {
+          /* Split parents: their pixels are re-emitted as a morphing new group's t=0 → remove now. */
+          exit.filter((d) => morph.handedOffOldNames.has(String(d))).remove();
+          /* Merge children: morph each exiting ripple into its slice of the new parent (which fades in
+           * via the enter path), fading + removing the group over the same duration. So the children
+           * visibly converge into the parent rather than cross-dissolving. */
+          exit.filter((d) => morph.mergingOldNames.has(String(d))).each(function(name) {
+            const targets = morph.mergeExit.get(String(name));
+            if (targets) {
+              select(this).select('.ripples').selectAll<SVGPathElement, Ripple>('.ripple')
+                .transition().duration(transitionTime)
+                .attrTween("d", (d): ((t: number) => string) => {
+                  const target = targets.get(String(d.key));
+                  if (!target) return (): string => areaGenerator(d);
+                  return (t: number): string => areaGenerator(interpolatePoints(d, target, t));
+                });
+            }
+            select(this).transition().duration(transitionTime).style('opacity', 0).remove();
+          });
+          /* Everything else fades out as before. */
+          return exit.filter((d) => !morph.handedOffOldNames.has(String(d)) && !morph.mergingOldNames.has(String(d)))
+            .call((selection) => selection.transition().duration(transitionTime).style('opacity', 0).remove());
+        }
         return exit
-          .call((selection) => selection.transition('500')
+          .call((selection) => selection.transition().duration(transitionTime)
             .style('opacity', 0)
             .remove()
           )
       },
     );
-
-  const areaGenerator: (param: Ripple) => string = area<Ripple[0]>()
-    .x((d) => d.x)
-    .y0((d) => d.y0)
-    .y1((d) => d.y1);
 
   /**
    * Joiner lines connect the parent stream or parent branch to the start of this stream
@@ -612,7 +646,14 @@ export function drawStreams(this: PhyloTreeType): void {
 
     if (lineType==='backbone') {
       const xStreamStart = node.streamRipples.at(0).at(0).x; // first category, first pivot
-      const xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      let xStreamEnd = node.streamRipples.at(0).at(-1).x; // first category, last pivot
+      // End the backbone at the farthest-right *visible* tip rather than the full (unfiltered) extent,
+      // so filtering out high-divergence/late tips retracts the right end. The left end is left at the
+      // first pivot so it still extends back to connect with the parent lineage (evolutionary history).
+      const visibleMax = node.n.streamVisibleMax;
+      if (visibleMax !== undefined && Number.isFinite(visibleMax)) {
+        xStreamEnd = Math.min(xStreamEnd, this.xScale(visibleMax));
+      }
       return `M${xStreamStart},${y}H${xStreamEnd}`;
     }
 
@@ -640,6 +681,17 @@ export function drawStreams(this: PhyloTreeType): void {
     return `M${node.xBase},${y}H${x1}`;
   }
 
+  /* A stream's connector (joiner + backbone) is a single line, so colour it by the stream's dominant
+   * colour category — the category with the most member tips. For a single-colour stream that's just
+   * its colour; for a multi-colour stream it's the largest component (until we can blend). */
+  const dominantStreamColor = (node: PhyloNode): string => {
+    const cats = node.n.streamCategories;
+    if (!cats || !cats.length) return node.branchStroke;
+    let best = cats[0];
+    for (const c of cats) if (c.nodes.length > best.nodes.length) best = c;
+    return best.color;
+  };
+
   for (const name of streamsToDraw) {
     const node = this.nodes[this.streams[name].startNode];
     const callbacks = this.callbacks;
@@ -653,7 +705,7 @@ export function drawStreams(this: PhyloTreeType): void {
             .attr("class", `connectorPath`)
             .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid d3 rebinding `this`
             .attr("stroke-width", this.params.branchStrokeWidth)
-            .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+            .style("stroke", (d) => dominantStreamColor(d))
             .attr("fill", 'None')
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
@@ -671,9 +723,9 @@ export function drawStreams(this: PhyloTreeType): void {
         },
         (update) => {
           return update.call(
-            (selection) => selection.transition("500")
+            (selection) => selection.transition().duration(transitionTime)
               .attr("d", (d, i) => connectorPath(d, i===0?'joiner':'backbone')) // fat-arrow to avoid rebinding `this`
-              .style("stroke", (d, i) => i===0 ? d.branchStroke : this.params.branchStroke)
+              .style("stroke", (d) => dominantStreamColor(d))
               .attr("stroke-width", this.params.branchStrokeWidth)
           );
         },
@@ -682,6 +734,7 @@ export function drawStreams(this: PhyloTreeType): void {
         },
       );
 
+    const t0ForStream = morph?.t0ByStreamAndKey.get(name);
     this.groups.streams.select(`#${CSS.escape(`stream${name}`)}`).select(`.ripples`)
       .selectAll<SVGPathElement, Ripple>(`.ripple`)
       .data(node.streamRipples, (d) => String(d.key))
@@ -690,7 +743,7 @@ export function drawStreams(this: PhyloTreeType): void {
           return enter
             .append("path")
             .attr("class", `ripple`)
-            .attr("d", (d) => areaGenerator(d))
+            .attr("d", (d) => areaGenerator(t0ForStream?.get(String(d.key)) ?? d))
             .attr("fill", (_d, i:number) => node.n.streamCategories[i].color)
             .on("mouseover", (_d, i, paths) => {
               /* tsc can't detect the runtime rebinding of this (within `initialRender.ts`) such that `this=TreeComponent` */
@@ -705,10 +758,21 @@ export function drawStreams(this: PhyloTreeType): void {
             .style("cursor", "pointer")
             .style("pointer-events", "auto")
             .on("click", () => this.callbacks.onBranchClick(node))
+            .call((selection) => {
+              /* morph the entering child ripples from their parent-slice t=0 shape to the final shape */
+              if (!t0ForStream) return;
+              selection.filter((d) => t0ForStream.has(String(d.key)))
+                .transition().duration(transitionTime)
+                .attrTween("d", (d): ((t: number) => string) => {
+                  const t0 = t0ForStream.get(String(d.key));
+                  if (!t0) return (): string => areaGenerator(d);
+                  return (t: number): string => areaGenerator(interpolatePoints(t0, d, t));
+                });
+            })
         },
         (update) => {
           return update.call(
-            (selection) => selection.transition("500")
+            (selection) => selection.transition().duration(transitionTime)
               .attr("d", (d) => areaGenerator(d))
           );
         },
@@ -718,7 +782,7 @@ export function drawStreams(this: PhyloTreeType): void {
       );
   }
 
-  const labelData: LabelDatum[] = streamsToDraw
+  const labelData: LabelDatum[] = (this.params.showStreamTreeLabels ? streamsToDraw : [])
     .map((streamName): LabelDatum|null => {
       const phyloNode = this.nodes[this.streams[streamName].startNode];
       if (phyloNode.n.streamNodeCounts.visible===0) {

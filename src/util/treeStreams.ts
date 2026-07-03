@@ -2,7 +2,30 @@ import { ReduxNode, StreamDimensions, Visibility, Streams, sigma, weightToDispla
   colorBySymbol, streamLabelSymbol } from "../reducers/tree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
+import { timerStart, timerEnd } from "./perf";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
+
+/**
+ * Sentinel "branch label" signifying the automatic (tip-count based) stream partition
+ * rather than a dataset-defined branch label.
+ */
+export const AUTO_STREAM_LABEL = "__auto__";
+
+/** Default target number of streams for the automatic partition (the greedy split keeps splitting the
+ * largest clade until it reaches ~this many streams). Tunable "X" — larger → more, smaller streams.
+ * Parameterising by stream count gives a consistent on-screen density across trees of very different
+ * sizes, with no per-tree tuning. The user can change this at runtime via the FINE/MEDIUM/COARSE
+ * granularity control; this constant is the MEDIUM default. */
+export const AUTO_STREAM_TARGET_COUNT = 100;
+
+/** The three granularity presets offered by the FINE/MEDIUM/COARSE sidebar control. */
+export const AUTO_STREAM_TARGET_COUNTS = { fine: 150, medium: 100, coarse: 50 };
+
+/** Minimum visible tips a clade must exceed to be split further. Prevents over-splitting when the
+ * on-screen tip count is small (e.g. zoomed into a little clade): rather than degenerating into
+ * many ~single-tip streams (which just look like the raw tree), the partition yields fewer, chunkier
+ * streams. Effectively caps the stream count at ~onScreenTips / this value. */
+export const AUTO_STREAM_MIN_TIPS = 10;
 
 /**
 * Side effects:
@@ -80,6 +103,105 @@ export function labelStreamMembership(tree: ReduxNode, branchLabelKey): Streams 
 }
 
 
+/**
+ * Automatically partition the tree into ~`targetStreamCount` streams via a greedy top-down split,
+ * as an alternative to `labelStreamMembership` (which keys off a dataset-defined branch label).
+ * Starting from the root's children, we repeatedly split the largest clade (by *visible* `tipCount`)
+ * into its children until ~`targetStreamCount` clades HAVE visible tips; each resulting clade root is
+ * a stream start and its whole subtree becomes members. Splitting by on-screen (visible) tip count
+ * makes the partition track whatever is currently in view / passing filters — coarse when zoomed
+ * out, finer when zoomed/filtered in. The frontier still covers every non-empty clade
+ * (`fullTipCount > 0`), so 0-visible regions become coarse, invisible streams rather than a mass of
+ * thin branches. Nodes above the frontier (the "spine") render as normal branches via the existing
+ * `!d.n.inStream` filter. On an unfiltered full-tree load `tipCount === fullTipCount`, so this
+ * reduces to a plain count-based split. Same output contract as `labelStreamMembership`; auto streams
+ * never nest, so `parentStreamName` is always false and `streamChildren` stays empty.
+ */
+export function autoPartitionStreams(tree: ReduxNode, targetStreamCount: number): Streams {
+  timerStart("autoPartitionStreams");
+  const streams: Streams = {};
+  streams[streamLabelSymbol] = AUTO_STREAM_LABEL;
+
+  /* Clear previous stream MEMBERSHIP (streamName / inStream) across the whole subtree. The greedy
+   * "mark" pass below only visits stream subtrees, so without this the spine could retain a stale
+   * membership. We deliberately DO NOT delete the render data (streamPivots / streamCategories /
+   * streamDimensions / streamMaxHeight): on a dynamic re-partition, a node that is no longer a stream
+   * start may still have live d3 ripple hover/leave handler closures that read
+   * `node.streamCategories[categoryIndex]` — deleting it crashes them. The stale data is harmless
+   * (only stream starts present in the current `streams` map are rendered/read; the rest is ignored
+   * and overwritten by `processStreams` if the node becomes a stream again). */
+  const clearStack: ReduxNode[] = [tree];
+  while (clearStack.length) {
+    const node = clearStack.pop();
+    node.inStream = false;
+    delete node.streamName;
+    for (const child of node.children || []) clearStack.push(child);
+  }
+
+  /* Greedy split: repeatedly split the largest VISIBLE-bearing clade (by on-screen `tipCount`, with
+   * `fullTipCount` fallback for an unfiltered load) until ~targetStreamCount clades have visible
+   * tips. The frontier keeps every non-empty clade, so 0-visible regions stay covered by coarse
+   * (invisible) streams instead of exploding into thin branches. Frontier is ~targetStreamCount
+   * long, so a linear scan is cheap. */
+  const visTips = (n: ReduxNode): number => n.tipCount ?? n.fullTipCount;
+  const frontier: ReduxNode[] = (tree.children || []).filter((n) => n.fullTipCount > 0);
+  const visibleStreamCount = (): number => frontier.reduce((c, n) => c + (visTips(n) > 0 ? 1 : 0), 0);
+  while (visibleStreamCount() < targetStreamCount) {
+    let bestIdx = -1;
+    let bestCount = AUTO_STREAM_MIN_TIPS; // only split clades with MORE than the floor of visible tips (keeps streams chunky, avoids ~single-tip degenerates)
+    for (let i = 0; i < frontier.length; i++) {
+      const n = frontier[i];
+      if (n.hasChildren && visTips(n) > bestCount) {
+        bestCount = visTips(n);
+        bestIdx = i;
+      }
+    }
+    if (bestIdx === -1) break; // no splittable visible clade remains
+    const [node] = frontier.splice(bestIdx, 1);
+    for (const child of node.children || []) {
+      if (child.fullTipCount > 0) frontier.push(child);
+    }
+  }
+
+  /* Each frontier node is a stream start; mark its subtree (members = terminals). */
+  for (const startNode of frontier) {
+    const name = `auto_${startNode.arrayIdx}`;
+    streams[name] = {
+      name,
+      startNode: startNode.arrayIdx,
+      members: [], // terminals only
+      streamChildren: [], // auto streams never nest
+      parentStreamName: false,
+      domains: {
+        num_date: [Infinity, -Infinity],
+        div: [Infinity, -Infinity],
+      }
+    };
+    startNode.streamName = name;
+
+    const markStack: ReduxNode[] = [startNode];
+    while (markStack.length) {
+      const node = markStack.pop();
+      node.inStream = true;
+      if (!node.hasChildren) {
+        streams[name].members.push(node.arrayIdx);
+        const domains = streams[name].domains;
+        const div = getDivFromNode(node);
+        const num_date = getTraitFromNode(node, 'num_date');
+        if (div<domains.div[0]) {domains.div[0]=div}
+        if (div>domains.div[1]) {domains.div[1]=div}
+        if (num_date<domains.num_date[0]) {domains.num_date[0]=num_date}
+        if (num_date>domains.num_date[1]) {domains.num_date[1]=num_date}
+      }
+      for (const child of node.children || []) markStack.push(child);
+    }
+  }
+
+  timerEnd("autoPartitionStreams");
+  return streams;
+}
+
+
 export function processStreams(
   streams: Streams,
   nodes: ReduxNode[],
@@ -88,10 +210,13 @@ export function processStreams(
   colorScale,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
 ):void {
+  timerStart("processStreams");
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
+   * NOTE: `streamPivots` is stored on the stream's START NODE, not on the StreamSummary `s`, so the
+   * skip is keyed off `nodes[s.startNode]`. (Checking `s` never matched, so the block always ran.)
    */
-  if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(s, 'streamPivots'))) {
+  if (!skipPivots || !Object.values(streams).every((s) => Object.hasOwn(nodes[s.startNode], 'streamPivots'))) {
     // entire domain spanning all streams
     const domain = (Object.values(streams)).reduce((dd, stream) => {
       if (dd[0] > stream.domains[metric][0]) dd[0] = stream.domains[metric][0];
@@ -122,7 +247,7 @@ export function processStreams(
      * This is needed because the display order (for non-stream tips) is 1 unit = 1 tip. Since kernel PDF values can be huge
      * (or tiny, depending on STDEV) the kde-weight space can be very large and thus streams take up all the display order space
      * and normal tips are all squashed together.
-     * 
+     *
      * The scale factor is the PDF evaluated at x=0, i.e. the max height of an individual kernel in display order space will be
      * equivalent to what a single tip would have occupied. Because kernels aren't all stacked on top of each other we add a
      * fudge factor here (can be improved).
@@ -138,6 +263,11 @@ export function processStreams(
       })
 
   }
+
+  /* `visibility` is shared across every stream in this call, so derive "is everything visible" once
+   * rather than allocating a Set over the whole tree per stream. */
+  const visibilitySet = new Set(visibility);
+  const everythingVisible = visibilitySet.size===1 && visibilitySet.has(NODE_VISIBLE);
 
   for (const stream of Object.values(streams)) {
     const startNode = nodes[stream.startNode];
@@ -159,9 +289,10 @@ export function processStreams(
     let everythingIsVisibleAnyway = false;
     let streamNodeCountsTotal: number;
     let streamNodeCountsVisible: number;
+    let streamVisibleMax: number;
 
     if (!Object.hasOwn(startNode, "streamMaxHeight") || !skipPivots) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, true, streams[sigma]));
       startNode.streamMaxHeight = dimensions.length ? computeStreamMaxHeight(dimensions) : 0;
       /**
        * NOTE: the heights of these (i.e. in KDE weight space) can be huge if we have finely spaced pivots such that the PDFs are evaluated a large number
@@ -169,8 +300,7 @@ export function processStreams(
        * separated by 1 unit of display order space) means tips are right on top of each other if the display order space occupied by streams is very large.
        * (by large, I've seen examples of 10e6...)
        */
-      const visibilityValues = new Set(visibility);
-      if (visibilityValues.size===1 && visibilityValues.has(NODE_VISIBLE)) {
+      if (everythingVisible) {
         everythingIsVisibleAnyway = true;
       }
     }
@@ -179,12 +309,14 @@ export function processStreams(
      * Compute the dimensions of the stream, taking into account visibility
      */
     if (!everythingIsVisibleAnyway) {
-      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, visibility, streams[sigma]));
+      ({dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax} = computeStreamDimensions(nodesThisStream, startNode.streamPivots, metric, startNode.streamCategories, visibility, streams[sigma]));
     }
 
     startNode.streamDimensions = dimensions;
     startNode.streamNodeCounts = {total: streamNodeCountsTotal, visible: streamNodeCountsVisible};
+    startNode.streamVisibleMax = streamVisibleMax;
   }
+  timerEnd("processStreams");
 }
 
 
@@ -212,7 +344,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     const categories: ColorCategory[] = Object.entries(colorScale.legendBounds)
       .map(([name, bounds]) => [name, bounds[0], bounds[1], colorScale.scale(parseFloat(name)), []])
     const undefinedNodes: number[] = [];
-    
+
     for (const n of nodes) {
       const v = getTraitFromNode(n, colorBy);
       if (v===undefined) {
@@ -228,7 +360,7 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
     }
     const streamCategories = categories
       .filter((c) => c[4].length>0)
-      .map((c) => ({name: c[0], color: c[3], nodes: c[4]})); 
+      .map((c) => ({name: c[0], color: c[3], nodes: c[4]}));
 
     if (undefinedNodes.length) {
       streamCategories.push({name: undefined, color: colorScale.scale(undefined), nodes: undefinedNodes});
@@ -239,12 +371,19 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
 
   const getter: (n: ReduxNode) => [number, string|undefined] = colorScale.genotype ? (n): [number, string] => [n.arrayIdx, n.currentGt] : (n): [number, string|undefined] => [n.arrayIdx, getTraitFromNode(n, colorBy)];
   const nodesAndCategories: [number, string|undefined][] = nodes.map(getter);
-  const orderedCategories = Array.from(new Set(nodesAndCategories.map((el) => el[1])))
+  /* bucket node indexes by category in a single pass rather than re-filtering the full list per category */
+  const nodeIdxsByCategory = new Map<string|undefined, number[]>();
+  for (const [nodeIdx, catName] of nodesAndCategories) {
+    const bucket = nodeIdxsByCategory.get(catName);
+    if (bucket) bucket.push(nodeIdx);
+    else nodeIdxsByCategory.set(catName, [nodeIdx]);
+  }
+  const orderedCategories = Array.from(nodeIdxsByCategory.keys())
     .sort((a,b) => colorScale.legendValues.indexOf(a) - colorScale.legendValues.indexOf(b));
   return orderedCategories.map((name) => ({
     name,
     color: colorScale.scale(name),
-    nodes: nodesAndCategories.filter(([_, catName]) => catName===name).map(([nodeIdx,]) => nodeIdx)
+    nodes: nodeIdxsByCategory.get(name) ?? []
   }));
 }
 
@@ -259,32 +398,45 @@ function observedCategories(nodes: ReduxNode[], colorScale: any): ReduxNode['str
  * See stream-trees.md for more explanation
  */
 function computeStreamDimensions(nodes: ReduxNode[], pivots: number[], metric, categories: ReduxNode['streamCategories'], visibility: true|Visibility[], sigma:number):
-  {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number} {
+  {dimensions: StreamDimensions, streamNodeCountsTotal: number, streamNodeCountsVisible: number, streamVisibleMax: number} {
   let [streamNodeCountsTotal, streamNodeCountsVisible] = [0,0];
+  let streamVisibleMax = -Infinity; // farthest-right visible tip position (in `metric`)
 
   // per-stream weight (to increase weights of small streams)
   const w = Math.exp(-(nodes.length-4)/4)+1;
 
+  /* pivots are evenly spaced (a contiguous slice of the master grid), so a tip's gaussian only needs
+   * evaluating over the pivot window within ±3σ of its mean — beyond that the kernel is negligible
+   * (<0.3% of peak). This turns the inner loop from O(tips × allPivots) into O(tips × ~30 pivots). */
+  const cutoff = 3 * sigma;
+  const step = pivots.length > 1 ? pivots[1] - pivots[0] : 0;
+
   const dimensions = categories.map((categoryInfo) => {
     const mass = pivots.map(() => 0);
-    
-    const categoryNodes = nodes.filter((node) => categoryInfo.nodes.includes(node.arrayIdx))
+
+    const categoryIdxs = new Set(categoryInfo.nodes);
+    const categoryNodes = nodes.filter((node) => categoryIdxs.has(node.arrayIdx))
     streamNodeCountsTotal += categoryNodes.length;
     const visibleCategoryNodes = categoryNodes.filter((node) => visibility===true || visibility[node.arrayIdx]===NODE_VISIBLE);
     streamNodeCountsVisible += visibleCategoryNodes.length;
 
     for (const node of visibleCategoryNodes) {
       const mu = metric==='div' ? getDivFromNode(node) : getTraitFromNode(node, 'num_date');
+      if (mu > streamVisibleMax) streamVisibleMax = mu;
       const kde = pdf.factory(mu, sigma);
-      // We know that once \mu is 3*\sigma away from the pivot we don't really add any weight so could leverage this to
-      // speed things up (we do this already for the pivots in this stream, but could also do it for the individual nodes)
-      pivots.forEach((pivot, idx) => {
-        mass[idx]+= w * kde(pivot);
-      })
+      if (step > 0) {
+        const lo = Math.max(0, Math.ceil((mu - cutoff - pivots[0]) / step));
+        const hi = Math.min(pivots.length - 1, Math.floor((mu + cutoff - pivots[0]) / step));
+        for (let idx = lo; idx <= hi; idx++) {
+          mass[idx] += w * kde(pivots[idx]);
+        }
+      } else {
+        pivots.forEach((pivot, idx) => { mass[idx] += w * kde(pivot); });
+      }
     }
     return mass;
   })
-  return {dimensions, streamNodeCountsTotal, streamNodeCountsVisible};
+  return {dimensions, streamNodeCountsTotal, streamNodeCountsVisible, streamVisibleMax};
 }
 
 function computeStreamMaxHeight(dimensions: StreamDimensions): number {
@@ -299,17 +451,17 @@ function computeStreamMaxHeight(dimensions: StreamDimensions): number {
  * of stream names which can be rendered in order such that there are no crossings (i.e. stream connector lines
  * don't go "through" other streams). Using a toy example of stream R which has 2 child streams {A,B}
  * we want to render this as
- * 
+ *
  *                 ┌ AAAAAAAAAAAAAAAAAA
  *                 │         ┌ BBBBBBBBBBBBBB
  *                 │         │
  * ─────────── RRRRRRRRRRRRRRRRRRRRRRRRRR
- * 
+ *
  * Where we want A to be drawn above B (i.e. smaller display order) based on the numeric date of the branch leaving R.
  * This approach continues to further child streams (e.g. child streams of A).  We construct this via a tree
  * structure (where nodes represent streams) and return a list of nodes ordered by a post-order traversal,
  * i.e. [A,B,R]. These streams can then be assigned display orders in a simple incremental fashion.
- * 
+ *
  * For divergence trees we do the same but using divergence values. Note that this often results in a different
  * return value! E.g. B might branch off before A in divergence space.
  */
@@ -392,7 +544,7 @@ export function isNodeWithinAnotherStream(node: ReduxNode, branchLabelKey: strin
 
 /**
  * Given the dataset's pivot array, restrict this to a subset of pivots which are applicable for this stream.
- * 
+ *
  * While it's obvious that the pivots should span the stream's tips (i.e. the domain) it's a little more
  * ambiguous about how far to extend it either side. The more we extend it the more we get smooth ends to the
  * KDE however there are downsides.
@@ -413,17 +565,18 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
   if (jsonDefinedStreamLabels) {
     const labels = jsonDefinedStreamLabels.filter((l) => availableBranchLabels.includes(l));
     if (labels.length!==jsonDefinedStreamLabels.length) {
-      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " + 
+      console.warn("Some of the metadata-specified 'stream_labels' were not found on the tree and have been excluded: " +
         jsonDefinedStreamLabels.filter((l) => labels.includes(l)).join(", "));
     }
-    return labels;
+    // Offer the automatic (tip-count based) partition alongside any dataset-defined labels
+    return [...labels, AUTO_STREAM_LABEL];
   }
 
   // Use a hardcoded list to sort labels which are present so certain ones come first
   const preset = ['stream', 'streams', 'stream_label'];
 
   // we may want to do something here to exclude certain branch labels, e.g. ones which are repeated many times on the tree
-  return ([...availableBranchLabels])
+  const labels = ([...availableBranchLabels])
     .sort((a, b) => {
       const [ai, bi] = [preset.indexOf(a), preset.indexOf(b)];
       if (ai===-1 && bi!==-1) return 1;
@@ -431,5 +584,6 @@ export function availableStreamLabelKeys(availableBranchLabels: string[], jsonDe
       return ai -bi;
     })
     .filter((l) => l!=='aa' && l!=='none');
+  // Always offer the automatic (tip-count based) partition, even when the tree has no branch labels
+  return [...labels, AUTO_STREAM_LABEL];
 }
-

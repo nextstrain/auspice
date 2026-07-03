@@ -2,6 +2,7 @@ import { Selection } from "d3-selection";
 import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, Visibility, Streams, TreeState, FocusNodes } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
+import type { StreamMorphSnapshot } from "./streamMorph";
 import { TreeComponent } from "../tree";
 
 import * as confidence from "./confidence";
@@ -189,6 +190,8 @@ export interface Params {
   showGrid: boolean
   showTipLabels?: boolean
   showStreamTrees: boolean
+  showStreamTreeLabels?: boolean
+  streamTreeUpdateLayout?: boolean
   tickLabelFill: string
   tickLabelSize: number
   tipFill: string
@@ -226,6 +229,12 @@ export interface ChangeParams {
    * Streams are either toggled on/off or the partitioning (branch label) has changed
    */
   streamDefinitionChange?: true
+
+  /**
+   * Snapshot of the OLD streams + rendered shapes, captured before they're overwritten, so a
+   * re-partition can area-morph (split/merge) rather than cross-fade. Undefined on non-repartition.
+   */
+  streamMorphSnapshot?: StreamMorphSnapshot
 
   // change these things to provided value (unless undefined) //
   newDistance?: Distance
