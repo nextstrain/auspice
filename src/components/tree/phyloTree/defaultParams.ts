@@ -15,6 +15,7 @@ export const createDefaultParams = (): Params => ({
   showGrid: true,
   showStreamTrees: false,
   showStreamTreeLabels: false,
+  streamTreeUpdateLayout: false,
   fillSelected: "#A73",
   radiusSelected: 5,
   branchStroke: "#AAA",

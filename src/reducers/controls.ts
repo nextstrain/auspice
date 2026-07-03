@@ -192,6 +192,7 @@ export interface BasicControlsState {
   showTangle: boolean
   showStreamTrees: boolean
   showStreamTreeLabels: boolean
+  streamTreeUpdateLayout: boolean
   streamTreeBranchLabel: string | null
   streamTreeTargetCount: number
   availableStreamLabelKeys: string[]
@@ -291,6 +292,7 @@ export const getDefaultControlsState = (): ControlsState => {
     showTangle: false,
     showStreamTrees: false,
     showStreamTreeLabels: false,
+    streamTreeUpdateLayout: false,
     streamTreeBranchLabel: null,
     streamTreeTargetCount: AUTO_STREAM_TARGET_COUNT,
     availableStreamLabelKeys: [],
@@ -526,6 +528,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return {...state, showStreamTrees: action.showStreamTrees};
     case types.TOGGLE_STREAM_TREE_LABELS:
       return {...state, showStreamTreeLabels: action.value};
+    case types.TOGGLE_STREAM_TREE_UPDATE_LAYOUT:
+      return {...state, streamTreeUpdateLayout: action.value};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
       return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true};
     case types.CHANGE_STREAM_TREE_TARGET_COUNT:

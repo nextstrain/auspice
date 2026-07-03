@@ -97,8 +97,15 @@ export const changePhyloTreeViaPropsComparison = (
   phylotree.streams = newProps.tree.streams;
   phylotree.params.showStreamTrees = newProps.showStreamTrees;
   phylotree.params.showStreamTreeLabels = newProps.showStreamTreeLabels;
+  phylotree.params.streamTreeUpdateLayout = newProps.streamTreeUpdateLayout;
   if (oldProps.showStreamTrees !== newProps.showStreamTrees || oldProps.tree.streams !== newProps.tree.streams || oldProps.showStreamTreeLabels !== newProps.showStreamTreeLabels) {
     args.streamDefinitionChange = true;
+  }
+  /* Toggling the streamtree layout (render-in-place ↔ v3) re-lays out via `updateLayout` — the SMOOTH
+   * path (setDisplayOrder + mapToScreen + modifySVG) — NOT streamDefinitionChange, which would hard
+   * tear down the tree. The partition is unchanged, so ripples morph via the keyed update transition. */
+  if (oldProps.streamTreeUpdateLayout !== newProps.streamTreeUpdateLayout) {
+    args.updateLayout = true;
   }
 
   /* enable/disable focus */

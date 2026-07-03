@@ -2,7 +2,7 @@ import React from "react";
 import { useTranslation } from 'react-i18next';
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
-import { toggleStreamTree, changeStreamTreeBranchLabel, toggleStreamTreeLabels, changeStreamTreeTargetCount } from "../../actions/treeStreams";
+import { toggleStreamTree, changeStreamTreeBranchLabel, toggleStreamTreeLabels, changeStreamTreeTargetCount, toggleStreamTreeUpdateLayout } from "../../actions/treeStreams";
 import { AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNTS } from "../../util/treeStreams";
 import Toggle from "./toggle";
 import { RootState } from "../../store";
@@ -16,6 +16,7 @@ export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreeBranchLabel = useSelector((state: RootState) => state.controls.streamTreeBranchLabel);
   const streamTreeTargetCount = useSelector((state: RootState) => state.controls.streamTreeTargetCount);
   const showStreamTreeLabels = useSelector((state: RootState) => state.controls.showStreamTreeLabels);
+  const streamTreeUpdateLayout = useSelector((state: RootState) => state.controls.streamTreeUpdateLayout);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const focusOn = useSelector((state: RootState) => state.controls.focus);
   const rectangular = useSelector((state: RootState) => state.controls.layout === "rect");
@@ -102,6 +103,14 @@ export const ChooseStreamTrees = (): JSX.Element => {
               on={showStreamTreeLabels}
               callback={(): void => dispatch(toggleStreamTreeLabels())}
               label="Show stream labels"
+            />
+          </div>
+          <div style={{marginTop: 8}}>
+            <Toggle
+              display
+              on={streamTreeUpdateLayout}
+              callback={(): void => dispatch(toggleStreamTreeUpdateLayout())}
+              label={t("sidebar:Update layout")}
             />
           </div>
         </div>

@@ -3,7 +3,7 @@ import { max } from "d3-array";
 import {getTraitFromNode, getDivFromNode, getBranchMutations} from "../../../util/treeMiscHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { ReduxNode, Streams } from "../../../reducers/tree/types";
+import { ReduxNode, Streams, weightToDisplayOrderScaleFactor } from "../../../reducers/tree/types";
 import { Focus } from "../../../reducers/controls";
 import { Distance, PhyloNode } from "./types";
 import { ScaleContinuousNumeric } from "d3-scale";
@@ -46,18 +46,33 @@ export const applyToChildren = (
  * @sideeffect modifies node.displayOrder and node.displayOrderRange
  * Returns the current yCounter after assignment to the tree originating from `node`
  */
+/**
+ * The stream layout mode threaded through the traversal:
+ *  - `false`      → streams off (ordinary display order)
+ *  - `"inPlace"`  → current render-in-place (stream start sits at its member-tip band midpoint, so the
+ *                   tree is xy-concordant and doesn't move)
+ *  - `StreamInfo` → the original ("v3") layout (each stream gets a fresh KDE-sized band; toggled on via
+ *                   the "Update layout" control)
+ */
+type StreamMode = false | "inPlace" | StreamInfo;
+
 export const setDisplayOrderRecursively = (
   node: PhyloNode,
   incrementer: (node: PhyloNode) => number,
   yCounter: number,
-  streamsOn = false,
+  streamMode: StreamMode = false,
 ): number => {
   const yEntry = yCounter;
   const children = node.n.children;
 
   if (children && children.length) {
     for (let i = children.length - 1; i >= 0; i--) {
-      yCounter = setDisplayOrderRecursively(children[i].shell, incrementer, yCounter, streamsOn);
+      const child = children[i];
+      /* v3 mode (streamMode is a StreamInfo object): a stream child is laid out in its own band via
+       * traverseConnectedStreams rather than descended into. */
+      yCounter = (typeof streamMode === "object" && child.streamName) ?
+        traverseConnectedStreams(yCounter, child, streamMode) :
+        setDisplayOrderRecursively(child.shell, incrementer, yCounter, streamMode);
     }
   } else {
     // terminal node
@@ -68,7 +83,7 @@ export const setDisplayOrderRecursively = (
     node.displayOrderRange = [yCounter, yCounter];
     return yCounter;
   }
-  if (streamsOn && node.n.streamName) {
+  if (streamMode === "inPlace" && node.n.streamName) {
     /* Stream start: place it at the midpoint of the display-order band its member tips occupy (the
      * subtree spans yEntry..yCounter). Doing this *here* — rather than overriding after the fact —
      * means every spine ancestor derives its displayOrder/range from this in-place value, so the
@@ -83,6 +98,41 @@ export const setDisplayOrderRecursively = (
   }
   return yCounter;
 };
+
+interface StreamInfo {
+  streams: Streams,
+  startNodes: Record<string, ReduxNode>,
+}
+
+/**
+ * v3 layout: traverse a set of connected streams (originating from `streamStartNode`), allocating a
+ * fresh contiguous display-order band per stream (sized by the KDE, not by tip count) and blanking the
+ * member tips so they don't render. Returns the incremented `yCounter`.
+ */
+function traverseConnectedStreams(yCounter: number, streamStartNode: ReduxNode, streamInfo: StreamInfo): number {
+  if (!(streamStartNode.streamName in streamInfo.streams)) {
+    console.error(`BUG! - found (old?) stream name ${streamStartNode.streamName} on nodes but no longer in (new?) 'streams'`);
+    return yCounter;
+  }
+  _setDisplayOrderToUndefined(streamStartNode.shell);
+  for (const streamName of streamInfo.streams[streamStartNode.streamName].renderingOrder) {
+    yCounter = setDisplayOrdersForStream(yCounter, streamName, streamInfo);
+  }
+  return yCounter;
+}
+
+/**
+ * v3 layout: give one stream a band of `2 + streamMaxHeight * weightToDisplayOrderScaleFactor` display
+ * orders above `yCounter`, setting the start node's `displayOrder` (band midpoint) and `displayOrderRange`.
+ */
+function setDisplayOrdersForStream(yCounter: number, streamName: string, streamInfo: StreamInfo): number {
+  const spaceAround = 1; // 1 display order unit
+  const n = streamInfo.startNodes[streamName];
+  const totalStreamHeight = spaceAround * 2 + n.streamMaxHeight * streamInfo.streams[weightToDisplayOrderScaleFactor];
+  n.shell.displayOrder = yCounter + totalStreamHeight / 2;
+  n.shell.displayOrderRange = [yCounter, yCounter + totalStreamHeight];
+  return yCounter + totalStreamHeight;
+}
 
 /**
  * heuristic function to return the appropriate spacing between subtrees for a given tree
@@ -160,16 +210,26 @@ export const setDisplayOrder = ({
 
   let yCounter = 0;
   const streamsOn = !!(nodes[0].that.params.showStreamTrees && streams);
+  /* "Update layout" toggle: when on, use the original ("v3") layout where each stream gets its own
+   * KDE-sized band (the tree re-flows); when off, streams render in place (xy-concordant). */
+  const v3Layout = streamsOn && !!nodes[0].that.params.streamTreeUpdateLayout;
+  const streamInfo: StreamInfo | false = (v3Layout && streams) ? {
+    streams,
+    startNodes: Object.fromEntries(Object.entries(streams).map(([name, s]) => [name, nodes[s.startNode].n])),
+  } : false;
+  const streamMode: StreamMode = streamInfo ? streamInfo : (streamsOn ? "inPlace" : false);
 
   /* iterate through each subtree, and add padding between each. Nodes get their natural display
-   * order via the postorder traversal; the only exception is stream START nodes, which are placed
-   * at the midpoint of their member-tip band (see setDisplayOrderRecursively) so streams render in
-   * place and spine tees connect to them. */
+   * order via the postorder traversal; the only exception is stream START nodes — in-place mode
+   * places them at the midpoint of their member-tip band (see setDisplayOrderRecursively), while v3
+   * mode routes them through traverseConnectedStreams for their own KDE-sized band. */
   for (const subtree of nodes[0].n.children) {
     if (subtree.fullTipCount===0) { // don't use screen space for this subtree
       _setDisplayOrderToUndefined(nodes[subtree.arrayIdx])
+    } else if (streamInfo && subtree.streamName) {
+      yCounter = traverseConnectedStreams(yCounter, subtree, streamInfo) + spaceBetweenSubtrees;
     } else {
-      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter, streamsOn);
+      yCounter = setDisplayOrderRecursively(nodes[subtree.arrayIdx], incrementer, yCounter, streamMode);
       yCounter+=spaceBetweenSubtrees;
     }
   }
@@ -178,15 +238,14 @@ export const setDisplayOrder = ({
   nodes[0].displayOrderRange = [undefined, undefined];
 
   /**
-   * Streams render "in place": each stream start already sits at its member-tip band midpoint (set
-   * during the traversal above), so the surrounding tree doesn't move and disjoint clades can't
-   * overlap. setRippleDisplayOrders now lays out the ripples (per pivot) within that band.
+   * The traversal above set the stream-start display orders (member-tip band midpoint in-place, or a
+   * KDE-sized band in v3); setRippleDisplayOrders now lays out the ripples (per pivot) accordingly.
    */
   if (nodes[0].that.params.showStreamTrees) {
     if (!streams) {
       console.error("setDisplayOrder bug - streams toggled on but no stream data")
     } else {
-      setRippleDisplayOrders(nodes, streams)
+      setRippleDisplayOrders(nodes, streams, v3Layout)
     }
   }
 
@@ -359,29 +418,32 @@ function _setDisplayOrderToUndefined(node: PhyloNode):void {
  * NOTE: This function depends on the (stream start node's) `displayOrder` being up to date
  * (via `setDisplayOrder`)
  */
-export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams): void {
+export function setRippleDisplayOrders(nodes: PhyloNode[], streams: Streams, v3Layout = false): void {
   for (const stream of Object.values(streams)) {
     const startingNode = nodes[stream.startNode];
 
-    /* The stream renders within the display-order band spanned by its member tips; the start node's
-     * displayOrder was already set to that band's midpoint in setDisplayOrder. Compute the band here
-     * to scale the ripple to fit within it. */
-    let bandMin = Infinity, bandMax = -Infinity;
-    for (const memberIdx of stream.members) {
-      const d = nodes[memberIdx].displayOrder;
-      if (d < bandMin) bandMin = d;
-      if (d > bandMax) bandMax = d;
+    let scaleFactor: number;
+    if (v3Layout) {
+      /* v3 layout: use the GLOBAL weight→displayOrder scale, so each stream's height reflects its KDE
+       * mass; the start node already sits at the midpoint of its (KDE-sized) band. */
+      scaleFactor = streams[weightToDisplayOrderScaleFactor];
+    } else {
+      /* render-in-place: the stream renders within the display-order band spanned by its member tips;
+       * scale the KDE so the tallest pivot fills ~90% of that band so every stream fits regardless of
+       * size (the start node was set to the band midpoint in setDisplayOrder). */
+      let bandMin = Infinity, bandMax = -Infinity;
+      for (const memberIdx of stream.members) {
+        const d = nodes[memberIdx].displayOrder;
+        if (d < bandMin) bandMin = d;
+        if (d > bandMax) bandMax = d;
+      }
+      if (bandMax < bandMin) { // empty stream (no members) — nothing to draw
+        startingNode.rippleDisplayOrders = [];
+        continue;
+      }
+      const peak = startingNode.n.streamMaxHeight;
+      scaleFactor = peak > 0 ? ((bandMax - bandMin) * 0.9) / peak : 0;
     }
-    if (bandMax < bandMin) { // empty stream (no members) — nothing to draw
-      startingNode.rippleDisplayOrders = [];
-      continue;
-    }
-
-    /* Scale the KDE so the stream's tallest pivot fills ~90% of its band (leaving a small gap),
-     * with thinner pivots proportionally shorter (KDE shape preserved). Replaces the global
-     * weightToDisplayOrderScaleFactor so every stream fits within its own band regardless of size. */
-    const peak = startingNode.n.streamMaxHeight;
-    const scaleFactor = peak > 0 ? ((bandMax - bandMin) * 0.9) / peak : 0;
 
     /* Convert KDE weights to ribbons which start at display order zero */
     const rippleDisplayOrders = startingNode.n.streamDimensions

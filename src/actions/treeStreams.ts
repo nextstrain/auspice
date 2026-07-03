@@ -1,4 +1,4 @@
-import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, CHANGE_STREAM_TREE_BRANCH_LABEL, CHANGE_STREAM_TREE_TARGET_COUNT } from "./types";
+import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, TOGGLE_STREAM_TREE_UPDATE_LAYOUT, CHANGE_STREAM_TREE_BRANCH_LABEL, CHANGE_STREAM_TREE_TARGET_COUNT } from "./types";
 import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL } from "../util/treeStreams";
 import { ThunkFunction } from "../store";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
@@ -91,5 +91,11 @@ export function changeStreamTreeTargetCount(newCount: number): ThunkFunction {
 export function toggleStreamTreeLabels(): ThunkFunction {
   return function(dispatch, getState) {
     dispatch({type: TOGGLE_STREAM_TREE_LABELS, value: !getState().controls.showStreamTreeLabels});
+  }
+}
+
+export function toggleStreamTreeUpdateLayout(): ThunkFunction {
+  return function(dispatch, getState) {
+    dispatch({type: TOGGLE_STREAM_TREE_UPDATE_LAYOUT, value: !getState().controls.streamTreeUpdateLayout});
   }
 }
