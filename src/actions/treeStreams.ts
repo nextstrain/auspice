@@ -1,5 +1,5 @@
-import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, CHANGE_STREAM_TREE_BRANCH_LABEL } from "./types";
-import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
+import { TOGGLE_STREAM_TREE, TOGGLE_STREAM_TREE_LABELS, CHANGE_STREAM_TREE_BRANCH_LABEL, CHANGE_STREAM_TREE_TARGET_COUNT } from "./types";
+import { processStreams, labelStreamMembership, isNodeWithinAnotherStream, autoPartitionStreams, AUTO_STREAM_LABEL } from "../util/treeStreams";
 import { ThunkFunction } from "../store";
 import { getParentStream } from "../components/tree/phyloTree/helpers";
 import { updateVisibleTipsAndBranchThicknesses } from "./tree";
@@ -59,11 +59,31 @@ export function changeStreamTreeBranchLabel(newLabel): ThunkFunction {
     }
 
     const streams = isAuto ?
-      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TARGET_COUNT) :
+      autoPartitionStreams(tree.nodes[0], controls.streamTreeTargetCount) :
       labelStreamMembership(tree.nodes[0], newLabel);
     processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
 
     dispatch({type: CHANGE_STREAM_TREE_BRANCH_LABEL, streams, streamTreeBranchLabel: newLabel})
+  }
+}
+
+
+/**
+ * Change the auto-streamtree granularity (the target stream count, via the FINE/MEDIUM/COARSE
+ * control) and re-partition over the current view. Shipping a fresh `streams` map triggers
+ * `streamDefinitionChange`, so the coarse↔fine change flows through the split/merge area-morph.
+ * Only meaningful for auto streams; a no-op for label-defined streams.
+ */
+export function changeStreamTreeTargetCount(newCount: number): ThunkFunction {
+  return function(dispatch, getState) {
+    const {controls, tree} = getState();
+    if (controls.streamTreeBranchLabel !== AUTO_STREAM_LABEL) return;
+    if (!tree.nodes || !Object.keys(tree.streams).length) return;
+
+    const streams = autoPartitionStreams(tree.nodes[0], newCount);
+    processStreams(streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale);
+
+    dispatch({type: CHANGE_STREAM_TREE_TARGET_COUNT, streams, streamTreeTargetCount: newCount});
   }
 }
 

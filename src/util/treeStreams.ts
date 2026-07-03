@@ -11,11 +11,15 @@ import pdf from '@stdlib/stats-base-dists-normal-pdf';
  */
 export const AUTO_STREAM_LABEL = "__auto__";
 
-/** Target number of streams for the automatic partition (the greedy split keeps splitting the
+/** Default target number of streams for the automatic partition (the greedy split keeps splitting the
  * largest clade until it reaches ~this many streams). Tunable "X" — larger → more, smaller streams.
  * Parameterising by stream count gives a consistent on-screen density across trees of very different
- * sizes, with no per-tree tuning. */
+ * sizes, with no per-tree tuning. The user can change this at runtime via the FINE/MEDIUM/COARSE
+ * granularity control; this constant is the MEDIUM default. */
 export const AUTO_STREAM_TARGET_COUNT = 100;
+
+/** The three granularity presets offered by the FINE/MEDIUM/COARSE sidebar control. */
+export const AUTO_STREAM_TARGET_COUNTS = { fine: 150, medium: 100, coarse: 50 };
 
 /** Minimum visible tips a clade must exceed to be split further. Prevents over-splitting when the
  * on-screen tip count is small (e.g. zoomed into a little clade): rather than degenerating into

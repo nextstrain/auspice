@@ -23,7 +23,7 @@ import { collectAvailableTipLabelOptions } from "../components/controls/choose-t
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
 import { combineMeasurementsControlsAndQuery, encodeMeasurementColorBy, loadMeasurements } from "./measurements";
-import { processStreams, labelStreamMembership, availableStreamLabelKeys, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
+import { processStreams, labelStreamMembership, availableStreamLabelKeys, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNTS } from "../util/treeStreams";
 import { parseJsonMetaBlock, convertColoringsListToDict } from "../util/metadataJsonParsing";
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -219,6 +219,15 @@ const modifyStateViaURLQuery = (state, query) => {
     } else {
       console.error(`Invalid query-defined streamLabel '${query.streamLabel}'`)
       delete query.streamLabel;
+    }
+  }
+  if (query.streamTarget) {
+    const target = parseInt(query.streamTarget, 10);
+    if (Object.values(AUTO_STREAM_TARGET_COUNTS).includes(target)) {
+      state.streamTreeTargetCount = target;
+    } else {
+      console.error(`Invalid query-defined streamTarget '${query.streamTarget}'`)
+      delete query.streamTarget;
     }
   }
 
@@ -1026,7 +1035,7 @@ export const createStateFromQueryOrJSONs = ({
   if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
   if (controls.showStreamTrees) {
     tree.streams = controls.streamTreeBranchLabel === AUTO_STREAM_LABEL ?
-      autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TARGET_COUNT) :
+      autoPartitionStreams(tree.nodes[0], controls.streamTreeTargetCount) :
       labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
       processStreams(tree.streams, tree.nodes, tree.visibility, controls.distanceMeasure, controls.colorScale, {})

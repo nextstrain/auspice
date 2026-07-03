@@ -14,6 +14,7 @@ import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
 import { Distance } from "../components/tree/phyloTree/types";
 import { MeasurementsDisplay } from "./measurements/types";
+import { AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
 
 export interface ColorScale {
   colorBy: string
@@ -192,6 +193,7 @@ export interface BasicControlsState {
   showStreamTrees: boolean
   showStreamTreeLabels: boolean
   streamTreeBranchLabel: string | null
+  streamTreeTargetCount: number
   availableStreamLabelKeys: string[]
   showTransmissionLines: boolean
   showTreeToo: boolean
@@ -290,6 +292,7 @@ export const getDefaultControlsState = (): ControlsState => {
     showStreamTrees: false,
     showStreamTreeLabels: false,
     streamTreeBranchLabel: null,
+    streamTreeTargetCount: AUTO_STREAM_TARGET_COUNT,
     availableStreamLabelKeys: [],
     zoomMin: undefined,
     zoomMax: undefined,
@@ -525,6 +528,8 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return {...state, showStreamTreeLabels: action.value};
     case types.CHANGE_STREAM_TREE_BRANCH_LABEL:
       return {...state, streamTreeBranchLabel: action.streamTreeBranchLabel, showStreamTrees: true};
+    case types.CHANGE_STREAM_TREE_TARGET_COUNT:
+      return {...state, streamTreeTargetCount: action.streamTreeTargetCount};
     case types.TOGGLE_SIDEBAR:
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:

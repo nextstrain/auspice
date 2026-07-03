@@ -15,7 +15,7 @@ import { PhyloNode } from "../components/tree/phyloTree/types";
 import { Metadata } from "../reducers/metadata.types";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState, FocusNodes } from "../reducers/tree/types";
-import { processStreams, autoPartitionStreams, AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
+import { processStreams, autoPartitionStreams, AUTO_STREAM_LABEL } from "../util/treeStreams";
 import { ControlsState } from "../reducers/controls";
 import { NODE_VISIBLE } from "../util/globals";
 
@@ -80,7 +80,7 @@ export const applyInViewNodesToTree = (
 /**
  * Recompute the streamtrees for a visibility change. When AUTO streams are shown and the change is
  * discrete (not a drag/animation tick), re-partition so the currently on-screen tips are split into
- * ~AUTO_STREAM_TARGET_COUNT streams (dynamic coarse↔fine LOD), handing the fresh map back via
+ * ~`controls.streamTreeTargetCount` streams (dynamic coarse↔fine LOD), handing the fresh map back via
  * `dispatchObj.streams` (a new object → streamDefinitionChange → teardown+redraw at the new
  * granularity; safe because streams render in place). Otherwise recompute the existing streams in
  * place via the cheap skip-path, preserving object identity so nothing tears down (smooth drag).
@@ -94,7 +94,7 @@ function updateStreamsForVisibilityChange(
   if (!Object.keys(tree.streams).length) return;
   const repartition = discrete && controls.showStreamTrees && controls.streamTreeBranchLabel === AUTO_STREAM_LABEL;
   if (repartition) {
-    const streams = autoPartitionStreams(tree.nodes[0], AUTO_STREAM_TARGET_COUNT);
+    const streams = autoPartitionStreams(tree.nodes[0], controls.streamTreeTargetCount);
     processStreams(streams, tree.nodes, dispatchObj.visibility, controls.distanceMeasure, controls.colorScale);
     dispatchObj.streams = streams;
   } else {

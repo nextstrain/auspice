@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
+import { AUTO_STREAM_TARGET_COUNT } from "../util/treeStreams";
 import { numericToCalendar } from "../util/dateHelpers";
 import { urlQueryLabel } from "../util/treeVisibilityHelpers";
 import { shouldDisplayTemporalConfidence } from "../reducers/controls";
@@ -276,6 +277,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       } else { // toggling off
         query.streamLabel = displayDefault ? 'none' : undefined;
       }
+      break;
+    }
+    case types.CHANGE_STREAM_TREE_TARGET_COUNT: {
+      query.streamTarget = action.streamTreeTargetCount===AUTO_STREAM_TARGET_COUNT ? undefined : action.streamTreeTargetCount;
       break;
     }
     default:

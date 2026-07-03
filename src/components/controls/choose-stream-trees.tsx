@@ -2,18 +2,19 @@ import React from "react";
 import { useTranslation } from 'react-i18next';
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../hooks";
-import { toggleStreamTree, changeStreamTreeBranchLabel, toggleStreamTreeLabels } from "../../actions/treeStreams";
-import { AUTO_STREAM_LABEL } from "../../util/treeStreams";
+import { toggleStreamTree, changeStreamTreeBranchLabel, toggleStreamTreeLabels, changeStreamTreeTargetCount } from "../../actions/treeStreams";
+import { AUTO_STREAM_LABEL, AUTO_STREAM_TARGET_COUNTS } from "../../util/treeStreams";
 import Toggle from "./toggle";
 import { RootState } from "../../store";
 import { FaInfoCircle } from "react-icons/fa";
-import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styles";
+import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer, SidebarSubtitle, SidebarButton } from "./styles";
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
 
 export const ChooseStreamTrees = (): JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
   const streamTreeBranchLabel = useSelector((state: RootState) => state.controls.streamTreeBranchLabel);
+  const streamTreeTargetCount = useSelector((state: RootState) => state.controls.streamTreeTargetCount);
   const showStreamTreeLabels = useSelector((state: RootState) => state.controls.showStreamTreeLabels);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const focusOn = useSelector((state: RootState) => state.controls.focus);
@@ -70,6 +71,31 @@ export const ChooseStreamTrees = (): JSX.Element => {
               onChange={(value): void => dispatch(changeStreamTreeBranchLabel(value.value))}
             />
           </div>
+          { streamTreeBranchLabel === AUTO_STREAM_LABEL && (
+            <div style={{marginTop: 8}}>
+              <SidebarSubtitle>
+                {t("sidebar:Streamtree granularity")}
+              </SidebarSubtitle>
+              <SidebarButton
+                selected={streamTreeTargetCount === AUTO_STREAM_TARGET_COUNTS.fine}
+                onClick={(): void => dispatch(changeStreamTreeTargetCount(AUTO_STREAM_TARGET_COUNTS.fine))}
+              >
+                {t("sidebar:Fine")}
+              </SidebarButton>
+              <SidebarButton
+                selected={streamTreeTargetCount === AUTO_STREAM_TARGET_COUNTS.medium}
+                onClick={(): void => dispatch(changeStreamTreeTargetCount(AUTO_STREAM_TARGET_COUNTS.medium))}
+              >
+                {t("sidebar:Medium")}
+              </SidebarButton>
+              <SidebarButton
+                selected={streamTreeTargetCount === AUTO_STREAM_TARGET_COUNTS.coarse}
+                onClick={(): void => dispatch(changeStreamTreeTargetCount(AUTO_STREAM_TARGET_COUNTS.coarse))}
+              >
+                {t("sidebar:Coarse")}
+              </SidebarButton>
+            </div>
+          )}
           <div style={{marginTop: 8}}>
             <Toggle
               display
