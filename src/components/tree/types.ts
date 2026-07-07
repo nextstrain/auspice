@@ -3,6 +3,7 @@ import { ColorScale, Focus, Layout, PerformanceFlags, ScatterVariables, Selected
 import { TreeState, TreeTooState } from "../../reducers/tree/types";
 import { AppDispatch } from "../../store";
 import { Distance, PhyloNode, PhyloTreeType } from "./phyloTree/types";
+import { LegendPlacement } from "../../reducers/metadata.types";
 
 export interface TreeComponentOwnProps {
   dispatch: AppDispatch
@@ -29,6 +30,7 @@ export interface TreeComponentStateProps {
   focus: Focus
   genomeMap: unknown
   layout: Layout
+  legendPlacement: LegendPlacement
   narrativeMode: boolean
   panelsToDisplay: string[]
   performanceFlags: PerformanceFlags

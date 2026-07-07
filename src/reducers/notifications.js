@@ -13,6 +13,7 @@ const makeNotification = (action) => {
   return {
     message: action.message || "",
     details: action.details || "",
+    autoClose: action.autoClose,
     notificationType: action.notificationType,
     classes: ["notification", action.notificationType],
     id: action.id

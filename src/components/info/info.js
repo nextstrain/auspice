@@ -7,6 +7,9 @@ import Byline from "./byline";
 import Warning from "./warning";
 import {datasetSummary} from "./datasetSummary";
 import FiltersSummary from "./filtersSummary";
+import EditedBanner from "../datasetEditor/editedBanner";
+import EditButton from "../datasetEditor/editButton";
+import { enableDatasetEditor } from "../datasetEditor/datasetEditor";
 
 /**
  * The <Info> panel is shown above data viz panels and conveys static and dynamic
@@ -23,7 +26,8 @@ import FiltersSummary from "./filtersSummary";
     metadata: state.metadata,
     nodes: state.tree.nodes,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    visibility: state.tree.visibility
+    visibility: state.tree.visibility,
+    mobileDisplay: state.general.mobileDisplay
   };
 })
 class Info extends React.Component {
@@ -40,8 +44,11 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-
+          {enableDatasetEditor() && !this.props.mobileDisplay && this.props.metadata.edited &&
+            <EditedBanner />
+          }
           <div width={this.props.width} style={styles.title}>
+            {enableDatasetEditor() && !this.props.mobileDisplay && <EditButton />}
             {this.props.metadata.title || ""}
           </div>
 

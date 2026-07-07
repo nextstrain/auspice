@@ -152,7 +152,7 @@ function getNumUniqueAuthors(nodes, nodeVisibilities) {
   return authors.size;
 }
 
-function getFilePrefix() {
+export function getFilePrefix() {
   return "nextstrain_" +
     window.location.pathname
         .replace(/^\//, '')       // Remove leading slashes

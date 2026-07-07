@@ -6,16 +6,14 @@ import { ScaleType } from "./controls"
 
 export type Metadata = {
   loaded: true;
+  edited: boolean;
   title: string;
   updated: string;
   sharing: MetadataSharing;
   streamLabels?: string[];
   rootSequence?: RootSequence;
   rootSequenceSecondTree?: RootSequence;
-  maintainers?: Array<{
-    name: string;
-    url?: string;
-  }>;
+  maintainers?: NameAndUrl[];
   identicalGenomeMapAcrossBothTrees?: boolean;
   colorings?: Colorings;
   version?: string;
@@ -26,7 +24,7 @@ export type Metadata = {
   buildAvatar?: string;
   panels?: Panel[];
   filters?: string[];
-  dataProvenance?: { name: string; url: string; }[];
+  dataProvenance?: NameAndUrl[];
   displayDefaults?: {
     mapTriplicate?: boolean;
     geoResolution?: string;
@@ -43,6 +41,7 @@ export type Metadata = {
     panels?: Panel[];
   };
   geoResolutions?: Array<GeoResolutions>;
+  legendPlacements: LegendPlacements;
 }
 
 export type MetadataReduxState =
@@ -61,6 +60,19 @@ export const SIDEBAR_VALUES = ["open", "closed"] as const;
 export type Sidebar = typeof SIDEBAR_VALUES[number];
 
 export type Panel = typeof PANEL_VALUES[number];
+
+// TODO: Create PanelWithLegend from PANELS_WITH_LEGEND while also confirming as subset of Panel
+export const PANELS_WITH_LEGEND = ["tree", "map", "measurements"];
+export type PanelWithLegend = Extract<Panel, "tree" | "map" | "measurements">;
+
+export type LegendPlacements = {
+  [K in PanelWithLegend]?: LegendPlacement
+}
+
+export type LegendPlacement = {
+  vertical: "top" | "bottom";
+  horizontal: "left" | "right";
+}
 
 export type Colorings = {
   [key: string]: ColoringInfo
@@ -127,4 +139,9 @@ export interface LatLong {
 
 interface RootSequence {
   [cdsNameOrNuc: string]: string;
+}
+
+export interface NameAndUrl {
+  name: string;
+  url?: string;
 }

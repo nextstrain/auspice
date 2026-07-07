@@ -3,6 +3,10 @@
 * Added support for offline use through the `AUSPICE_ENABLE_SERVICE_WORKER` environment variable read at build-time. This is added primarily for auspice.us, but should work for any Auspice server where assets are served at the root path.
   ([#2062](https://github.com/nextstrain/auspice/pull/2062))
 
+* Added extension `enableDatasetEditor` to turn on the ability to edit a subset
+  of dataset features and colors, where changes are only saved locally.
+  ([#2046](https://github.com/nextstrain/auspice/pull/2046))
+
 ## version 2.72.0 - 2026/06/30
 
 

@@ -8,6 +8,10 @@ import { getBrighterColor, getColorByTitle } from "../../../util/colorHelpers";
 import { formatBounds } from "../../../util/colorScale";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { TOGGLE_LEGEND } from "../../../actions/types";
+import { SET_MODAL } from "../../../actions/types";
+import { warningNotification } from "../../../actions/notifications";
+import { isColorByGenotype } from "../../../util/getGenotype";
+import { enableDatasetEditor } from "../../datasetEditor/datasetEditor";
 
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
@@ -24,6 +28,7 @@ const COLUMN_WIDTH = 145;
 class Legend extends React.Component {
   constructor(props) {
     super(props);
+    this.handleLegendItemOnClick = this.handleLegendItemOnClick.bind(this);
   }
 
   showLegend() {
@@ -142,6 +147,22 @@ class Legend extends React.Component {
     return label;
   }
 
+  handleLegendItemOnClick(e) {
+    if (!enableDatasetEditor()) return;
+
+    if (e.shiftKey) {
+      // We do not support editing Genotype colors because we do not keep nuc/aa colors in Redux state.
+      if (isColorByGenotype(this.props.colorBy)) {
+        this.props.dispatch(warningNotification({
+          message: "Genotype color editing is not currently supported",
+          autoClose: true
+        }))
+      } else {
+        this.props.dispatch({ type: SET_MODAL, modal: "colorByEditor" });
+      }
+    }
+  }
+
   /*
    * draws rects and titles for each legend item
    * coordinate system from top,left of parent SVG
@@ -166,6 +187,7 @@ class Legend extends React.Component {
             index={i}
             tooltip={tooltipText(this.props.colorScale, d)}
             clipId={i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
+            handleOnClick={this.handleLegendItemOnClick}
           />
         );
       });
@@ -191,24 +213,26 @@ class Legend extends React.Component {
   getContainerStyles() {
     const styles = {
       position: "absolute",
-      top: 26,
       borderRadius: 4,
       zIndex: 1000,
       userSelect: "none"
     };
-    styles[this.props.right ? "right" : "left"] = 5;
+    // vertical = top or bottom, horizontal = left or right
+    const { vertical, horizontal } =  this.props.legendPlacement;
+    styles[vertical] = 26;
+    styles[horizontal] = 5;
     return styles;
   }
 
   getArrowOffset() {
-    if (this.props.right) {
+    if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - 20;
     }
     return this.getTitleWidth();
   }
 
   getTitleOffset() {
-    if (this.props.right) {
+    if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - this.getTitleWidth() - 15;
     }
     return 5;
@@ -245,10 +269,10 @@ function tooltipText(colorScale, value) {
   if (!colorScale.continuous) {
     return value
   }
-  
+
   const bounds = colorScale.legendBounds[value];
   const temporal = colorScale.colorBy==='num_date';
-  
+
   return `Bounds: ${formatBounds(bounds, temporal)}`;
 }
 

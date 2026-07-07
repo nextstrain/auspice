@@ -12,7 +12,8 @@ const LegendItem = ({
   rectFill,
   label,
   tooltip,
-  value
+  value,
+  handleOnClick,
 }) => (
   <g
     transform={transform}
@@ -22,6 +23,7 @@ const LegendItem = ({
     onMouseLeave={() => {
       dispatch(updateTipRadii());
     }}
+    onClick={(e) => handleOnClick(e)}
   >
     <rect
       style={{strokeWidth: 2}}
@@ -31,7 +33,7 @@ const LegendItem = ({
       stroke={rectStroke}
     >
       <title>{tooltip}</title>
-    </rect>  
+    </rect>
     <text
       x={legendRectSize + legendSpacing + 5}
       y={legendRectSize - legendSpacing}
