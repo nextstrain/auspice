@@ -2,7 +2,7 @@ import type { Config } from 'jest';
 
 const config: Config = {
   transformIgnorePatterns: [
-    "jest-runner",
+    "node_modules/(?!(d3-.*)/)",
   ],
 };
 
