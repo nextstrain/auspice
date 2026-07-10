@@ -1,7 +1,7 @@
 import { sqrt as scaleSqrt } from "d3-scale/src/pow";
 import scaleLinear from "d3-scale/src/linear";
 import { hasExtension, getExtension } from "../util/extensions";
-import mapboxStyle from "./mapbox-styles.json";
+import defaultMapStyleSheet from "./map-styles.json";
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
@@ -202,23 +202,16 @@ export const measurementIdSymbol = Symbol('measurementId');
  * The `style` is a MapLibre style document (a URL string or an inline object). Any access
  * token within it is templated as the placeholder `<ACCESS_TOKEN>`, which is substituted at
  * runtime (see `transformRequest` in src/components/map/map.js) with the provided
- * `accessToken`. This keeps the renderer provider-agnostic: switching tile providers only
- * requires swapping the style + token here, with no provider-specific logic in the map code.
- *
- * Our default uses a Mapbox-hosted style (inlined in mapbox-styles.json, with its proprietary
- * `mapbox://` references pre-rewritten by scripts/transform-mapbox-style-json.js). The default
- * access token is restricted to serve tiles for local installs and nextstrain-related projects
- * only. See https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html.
+ * `accessToken`.
  */
+
 export const getMapTilesSettings = () => {
   if (hasExtension("mapTiles")) {
     return getExtension("mapTiles");
   }
   return {
-    style: mapboxStyle,
-    accessToken: 'pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2tqcnM5bXIxMWV1eTJzazN2YXVrODVnaiJ9.7iPttR9a_W7zuYlUCfrz6A',
-    attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>',
-    mapboxWordmark: true
+    style: defaultMapStyleSheet,
+    attribution: '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   };
 };
 

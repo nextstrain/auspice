@@ -27,7 +27,7 @@ import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundary";
 import { getMapTilesSettings } from "../../util/globals";
 import Legend from "../tree/legend/legend";
-import "../../css/mapbox.css";
+import "../../css/mapbox.css"; // controls the rendering of the mapbox logo (optional; toggled on via customisations)
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -509,7 +509,7 @@ class Map extends React.Component {
       style: this.state.tilesSettings.style,
       // Provider-agnostic request rewriting. Any provider-proprietary URLs (e.g. Mapbox's
       // mapbox:// protocol) are expected to already be resolved within the style document;
-      // see scripts/transform-mapbox-style-json.js for how we do this for our Mapbox default.
+      // see scripts/transform-mapbox-style-json.js for an example.
       transformRequest: (url) => {
         // Upgrade insecure URLs (e.g. Mapbox's TileJSON references tile URLs over http://).
         let next = url.startsWith('http://') ? `https://${url.slice('http://'.length)}` : url;

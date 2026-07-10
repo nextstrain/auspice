@@ -39,9 +39,11 @@ External Requests
 Leaflet + MapLibre GL
 ~~~~~~~~~~~~~~~~~~~~~
 
-We use `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to display the map. MapLibre renders Mapbox Vector Tiles (MVT) client-side from a Mapbox style URL.
+We use `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to display the map. MapLibre renders Mapbox Vector Tiles (MVT) client-side from a Mapbox style URL. Map tiles, sprites and fonts are requested from `OpenFreeMap <https://tiles.openfreemap.org>`__ by default.
 
-If a map is displayed by Auspice, vector tiles are requested from api.mapbox.com. Panning and zooming of the map result in further requests for tiles. These are requested using our hardcoded access key, however this may be customised via the ``mapTiles`` extension (see :ref:`the client customisation API documentation <client-api-available-customisations>`).
+.. note::
+
+  Where map assets are sourced from may be modified at build time, see see :ref:`the client customisation API documentation <client-api-available-customisations>` for more.
 
 Web Analytics (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~
