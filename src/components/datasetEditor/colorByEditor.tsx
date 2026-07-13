@@ -33,7 +33,7 @@ export default function ColorByEditor({
     Mousetrap.bind('escape', () => {
       dismissModal();
     });
-    return () => {
+    return (): void => {
       Mousetrap.unbind('enter');
       Mousetrap.unbind('escape');
     };

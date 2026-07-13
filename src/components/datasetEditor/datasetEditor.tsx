@@ -49,7 +49,7 @@ export default function DatasetEditor({
     Mousetrap.bind('escape', () => {
       dismissModal();
     });
-    return () => {
+    return (): void => {
       Mousetrap.unbind('enter');
       Mousetrap.unbind('escape');
     };
