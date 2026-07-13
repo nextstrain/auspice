@@ -28,7 +28,6 @@ The following are definable as top-level keys of the JSON file. A useful referen
 -  ``browserTitle`` The browser title for the page. Defaults to "auspice" if not defined.
 -  ``finePrint`` String of Markdown to add to the "fine print" at the bottom of pages.
 -  ``plausibleDataDomain`` plausible.io analytics (see below)
--  ``googleAnalyticsKey`` You can specify a Google Analytics key to enable (some) analytics functionality. This is deprecated and will be removed from an upcoming release.
 -  ``serverAddress`` Specify the address / prefix which the auspice client uses for API requests.
 -  ``mapTiles`` Specify the address (and other information) for the tiles used to render the map.
 -  ``enableDatasetEditor`` Set to ``true`` to turn on the ability to edit datasets and colors in the app.
@@ -181,5 +180,3 @@ Tracking Analytics
 ~~~~~~~~~~~~~~~~~~
 
 Auspice has in-built support for `Plausible Analytics <https://plausible.io/docs>`__. To enable this you will need to provide the ``plausibleDataDomain`` in your extensions. The analytics are not included when running Auspice in development mode.
-
-Auspice has support for Google Analytics but this is deprecated and will be removed in a future release. Google Analytics run when the ``googleAnalyticsKey`` extension is set and only run in production mode.
