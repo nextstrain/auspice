@@ -1,6 +1,7 @@
 import { sqrt as scaleSqrt } from "d3-scale/src/pow";
 import scaleLinear from "d3-scale/src/linear";
 import { hasExtension, getExtension } from "../util/extensions";
+import defaultMapStyleSheet from "./map-styles.json";
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
@@ -196,21 +197,21 @@ export const genotypeSymbol = Symbol('genotype');
 export const measurementIdSymbol = Symbol('measurementId');
 
 /**
- * Address to fetch tiles from (including access key).
- * We currently set a default key to fetch these from a Mapbox API.
- * This API is set to allow tiles to be served for local installs and nextstrain-related projects only.
- * See https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html for more.
+ * Settings for the tiles used to render the map.
+ *
+ * The `style` is a MapLibre style document (a URL string or an inline object). Any access
+ * token within it is templated as the placeholder `<ACCESS_TOKEN>`, which is substituted at
+ * runtime (see `transformRequest` in src/components/map/map.js) with the provided
+ * `accessToken`.
  */
+
 export const getMapTilesSettings = () => {
   if (hasExtension("mapTiles")) {
     return getExtension("mapTiles");
   }
-  /* defaults */
-  const api = 'https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2tqcnM5bXIxMWV1eTJzazN2YXVrODVnaiJ9.7iPttR9a_W7zuYlUCfrz6A';
   return {
-    api,
-    attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>',
-    mapboxWordmark: true
+    style: defaultMapStyleSheet,
+    attribution: '<a href="https://openfreemap.org" target="_blank">OpenFreeMap</a> <a href="https://www.openmaptiles.org/" target="_blank">© OpenMapTiles</a> Data from <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>'
   };
 };
 
