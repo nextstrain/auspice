@@ -6,7 +6,7 @@
  * This only checks the build-time conditional logic; it does not build Auspice or
  * exercise the service worker in a browser.
  */
-const generateConfig = require("../webpack.config.js").default;
+const generateConfig = require("../webpack.config.cjs").default;
 
 const hasServiceWorkerPlugin = (config) =>
   config.plugins.some((plugin) => plugin.constructor.name === "GenerateSW");
