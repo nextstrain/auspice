@@ -8,7 +8,6 @@ import Tree from "../tree";
 import Footer from "../framework/footer";
 import FinePrint from "../framework/fine-print";
 import Modal from "../modal/Modal.jsx";
-import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped/filesDropped";
 import { TOGGLE_SIDEBAR, SET_MODAL } from "../../actions/types";
 import { numberOfGridPanels } from "../../actions/panelDisplay";
@@ -53,7 +52,6 @@ class Main extends React.Component {
     this.state = {
       showSpinner: !(this.props.metadataLoaded && this.props.treeLoaded)
     };
-    analyticsNewPage();
     this.toggleSidebar = this.toggleSidebar.bind(this);
     this.eventListenerForFilesDropped = (e) => {
       e.preventDefault();

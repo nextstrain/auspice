@@ -4,7 +4,6 @@ import styled, {withTheme} from 'styled-components';
 import { withTranslation } from "react-i18next";
 import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarButton } from "./styles";
 
 const ButtonText = styled.span`
@@ -31,7 +30,6 @@ class PanelLayouts extends React.Component {
         <SidebarButton
           selected={this.props.panelLayout === "full"}
           onClick={() => {
-            analyticsControlsEvent("change-layout-full");
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
@@ -42,7 +40,6 @@ class PanelLayouts extends React.Component {
         <SidebarButton
           selected={this.props.panelLayout === "grid"}
           onClick={() => {
-            analyticsControlsEvent("change-layout-grid");
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >

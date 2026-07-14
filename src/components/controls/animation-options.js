@@ -2,7 +2,6 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation } from 'react-i18next';
 import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LOOP } from "../../actions/types";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 
@@ -20,7 +19,6 @@ class AnimationOptions extends React.Component {
     return () => {
       const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
       if (!loopRunning) {
-        analyticsControlsEvent("change-animation-time");
         let duration;
 
         if (userSelectedDuration === "slow") {
@@ -87,7 +85,6 @@ class AnimationOptions extends React.Component {
           display
           on={this.props.mapAnimationCumulative}
           callback={() => {
-            analyticsControlsEvent("change-animation-cumulative");
             this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
           }}
           label={t("sidebar:Animate cumulative history")}

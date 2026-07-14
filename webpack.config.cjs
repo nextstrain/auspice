@@ -57,9 +57,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     const dir = path.resolve(__dirname, path.dirname(extensionPath));
     aliasesToResolve["@extensions"] = dir;
     extensionData = JSON.parse(fs.readFileSync(extensionPath, {encoding: 'utf8'}));
-    if (extensionData.googleAnalyticsKey) {
-      console.log(`DEPRECATION WARNING: your extensions define a Google Analytics key (${extensionData.googleAnalyticsKey}) but GA will be removed from a future release.`);
-    }
     // console.log("extensionData", extensionData);
   }
   const enableServiceWorker = !devMode && process.env.AUSPICE_ENABLE_SERVICE_WORKER === "true";
