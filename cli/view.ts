@@ -144,7 +144,7 @@ const run = async (args) => {
     utils.verbose(`Serving self-unregistering service worker`);
     serviceWorkerPath = path.join(__dirname, "server", "cleanupServiceWorker.js");
   }
-  app.get("/service-worker.js", (req, res) => {
+  app.get("/service-worker.js", (_req, res) => {
     res.sendFile(serviceWorkerPath, {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 
