@@ -4,7 +4,6 @@ import { withTranslation } from "react-i18next";
 
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle } from "./styles";
 import CustomSelect from "./customSelect";
 
@@ -22,7 +21,6 @@ class GeoResolution extends React.Component {
   }
 
   changeGeoResolution(resolution) {
-    analyticsControlsEvent("change-geo-resolution");
     this.props.dispatch({ type: CHANGE_GEO_RESOLUTION, data: resolution });
   }
 
