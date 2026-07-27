@@ -1619,7 +1619,7 @@ This also fixed potential issues related to loading datasets where the URL queri
 ## version 1.14.0 - 2018/02/27
 
 ### Features
-* Strain search (using [awesomplete](https://projects.verou.me/awesomplete/)).
+* Strain search (using [awesomplete](https://nudeui.github.io/awesomplete/)).
 This highlights the path to a single tip and increases the tip radius.
 Strain is stored in the URL query (`s=...`) and can be restored via URL.
 Selected strain also appears in the info panel (top of screen).
