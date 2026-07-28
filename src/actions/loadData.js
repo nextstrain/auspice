@@ -122,10 +122,8 @@ async function dispatchCleanStart(dispatch, main, second, query, narrativeBlocks
   const measurementsData = main.measurements ? (await main.measurements) : undefined;
   const secondTreeDataset = second ? (await second.main) : undefined;
   const pathnameShouldBe = second ? `${main.pathname}:${second.pathname}` : main.pathname;
-  dispatch({
-    type: types.CLEAN_START,
-    pathnameShouldBe: narrativeBlocks ? undefined : pathnameShouldBe,
-    ...createStateFromQueryOrJSONs({
+  
+  const state = createStateFromQueryOrJSONs({
       json,
       measurementsData,
       secondTreeDataset,
@@ -134,8 +132,49 @@ async function dispatchCleanStart(dispatch, main, second, query, narrativeBlocks
       mainTreeName: main.pathname,
       secondTreeName: second ? second.pathname : null,
       dispatch
-    })
+    });
+  
+  dispatch({
+    type: types.CLEAN_START,
+    pathnameShouldBe: narrativeBlocks ? undefined : pathnameShouldBe,
+    ...state,
+    // ...createStateFromQueryOrJSONs({
+    //   json,
+    //   measurementsData,
+    //   secondTreeDataset,
+    //   query,
+    //   narrativeBlocks,
+    //   mainTreeName: main.pathname,
+    //   secondTreeName: second ? second.pathname : null,
+    //   dispatch
+    // })
   });
+
+  /* where's the best place for this to go? 
+  Potentially build out createStateFromQueryOrJSONs to allow for
+  deferred calculations, potentially in web-workers. Make sure
+  to account for URL queries / display_defaults forcing these
+  to be run up-front rather than delayed (complicated out-of-sync...)
+  */
+  const [ratioKey, homoplasyCountKey, uniqueCountKey] = ['_homoplasy_ratio', '_homoplasy_count', '_unique_count'];
+  const newNodeAttrs = {};
+  const newColorings = {
+    [ratioKey]: { title: 'Homoplasy %', type: 'continuous'},
+    [homoplasyCountKey]: { title: 'Number of homoplasic mutations', type: 'continuous'},
+    [uniqueCountKey]: { title: 'Number of unique mutations', type: 'continuous'},
+  };
+  const observed = state.tree.observedMutations;
+  for (const node of state.tree.nodes) {
+    const nucMuts = node?.branch_attrs?.mutations?.nuc || [];
+    if (!nucMuts.length) continue;
+    const homoplasyCount = nucMuts.filter((m) => observed[`nuc:${m}`]>1).length
+    newNodeAttrs[node.name] = {
+      [ratioKey]: {value: Math.round(100*homoplasyCount/nucMuts.length, 1)},
+      [homoplasyCountKey]: {value: homoplasyCount},
+      [uniqueCountKey]: {value: nucMuts.length},
+    }
+  }
+  dispatch({type: "ADD_EXTRA_METADATA", newColorings, newNodeAttrs});
 }
 
 async function loadNarrative(dispatch, url, query) {
