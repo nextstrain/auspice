@@ -145,7 +145,7 @@ async function loadNarrative(dispatch, url, query) {
     blocks = await fetchAndParseNarrative(url);
   } catch (err) {
     console.error("Error obtaining narratives", err.message);
-    return dispatch(goTo404(`Couldn't load narrative for ${url}`));
+    return dispatch(goTo404(`Couldn't load narrative for ${url}`, err.status));
   }
 
   /* extract all dataset names defined in the narrative, and create `Dataset` objects for each */
@@ -197,7 +197,7 @@ function handleFetchErrors(err, dispatch, msg) {
     });
   } else {
     console.error(err, err.message);
-    dispatch(goTo404(msg));
+    dispatch(goTo404(msg, err.status));
   }
 }
 

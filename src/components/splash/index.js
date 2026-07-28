@@ -15,6 +15,7 @@ const SplashContent = hasExtension("splashComponent") ?
 
 @connect((state) => ({
   errorMessage: state.general.errorMessage,
+  errorStatus: state.general.errorStatus,
   browserDimensions: state.browserDimensions.browserDimensions,
   reduxPathname: state.general.pathname
 }))
@@ -22,7 +23,7 @@ class Splash extends React.Component {
   constructor(props) {
     super(props);
     /* state is set via the returned JSON from the server (aka charon) in the fetch in CDM */
-    this.state = {available: {}, errorMessage: undefined};
+    this.state = {available: {}, errorMessage: undefined, errorStatus: undefined};
   }
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getAvailable?prefix=${this.props.reduxPathname}`)
@@ -30,7 +31,7 @@ class Splash extends React.Component {
         this.setState({available: json});
       })
       .catch((err) => {
-        this.setState({errorMessage: "Error in getting available datasets"});
+        this.setState({errorMessage: "Error in getting available datasets", errorStatus: err.status});
         console.warn(err.message);
       });
   }
@@ -43,6 +44,7 @@ class Splash extends React.Component {
           browserDimensions={this.props.browserDimensions}
           dispatch={this.props.dispatch}
           errorMessage={this.props.errorMessage || this.state.errorMessage}
+          errorStatus={this.props.errorStatus || this.state.errorStatus}
           changePage={changePage}
         />
       </ErrorBoundary>
