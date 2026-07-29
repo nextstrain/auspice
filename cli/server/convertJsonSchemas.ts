@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as utils from "../utils.ts";
 
 /** In auspice v1, the `prettyString` function was used extensively to transform values
@@ -46,12 +47,12 @@ const prettyString = (x, {trim = 0, camelCase = true, removeComma = false, strip
     (I've never seen this intention in nextstrain.)
     */
     if (Number.isInteger(x)) {
-      return String(parseInt(x, 10));
+      return String(parseInt(String(x), 10));
     }
     const magnitude = Math.ceil(Math.log10(Math.abs(x) + 1e-10));
     if (magnitude > 3) {
       // for numbers over 100 (or under -100), we return the integer (i.e. no decimal places)
-      return String(parseInt(x, 10));
+      return String(parseInt(String(x), 10));
     }
     if (magnitude > 0) {
       // for numbers 1 and over (or -1 and below) we'll use 2dp, but strip any trailing zeros
@@ -84,9 +85,9 @@ const traverseTree = (node, cb) => {
 
 const setColorings = (v2, meta) => {
   v2.colorings = [];
-  const color_options = meta.color_options;
+  const color_options: Record<string, any> = meta.color_options;
   for (const [key, value] of Object.entries(color_options)) {
-    const coloring = {
+    const coloring: Record<string, any> = {
       key,
       title: prettyString(value.menuItem) || prettyString(value.legendTitle),
       type: value.type === "continuous" ? "continuous" : "categorical"
@@ -348,7 +349,7 @@ const setNodeBranchAttrs = (v2) => {
 
 
     /* amino acid / nucleotide mutations */
-    const mutations = {};
+    const mutations: Record<string, any> = {};
     if (node.aa_muts) {
       Object.keys(node.aa_muts).forEach((aa) => {
         if (node.aa_muts[aa].length) {
@@ -380,7 +381,7 @@ const setNodeBranchAttrs = (v2) => {
 
     /* transfer the colorings & geo resolutions */
     traitsToAssign.forEach((traitKey) => {
-      const data = {value: prettyString(node.attr[traitKey], {removeComma: true})};
+      const data: Record<string, any> = {value: prettyString(node.attr[traitKey], {removeComma: true})};
       if (node.attr[`${traitKey}_confidence`]) {
         data.confidence = {};
         Object.keys(node.attr[`${traitKey}_confidence`]).forEach((key) => {

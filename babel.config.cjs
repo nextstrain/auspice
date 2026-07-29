@@ -1,4 +1,9 @@
-const utils = require('./cli/utils.ts');
+const chalk = require('chalk');
+
+const verbose = (msg) => {
+  /* Same fn as in `cli/utils.ts` -- see DEV_DOCS */
+  if (global.AUSPICE_VERBOSE) console.log(chalk.greenBright(`[verbose]\t${msg}`));
+};
 
 /* What variables does this config depend on?
  * process.env.BABEL_EXTENSION_PATH -- a resolved path
@@ -7,7 +12,7 @@ const utils = require('./cli/utils.ts');
  */
 
 module.exports = function babelConfig(api) {
-  utils.verbose(`Generating Babel Config`);
+  verbose(`Generating Babel Config`);
   const presets = [
     [
       "@babel/preset-env",

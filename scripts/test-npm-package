@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+#
+# Packs Auspice and installs it into a throwaway project, so that the CLI actually
+# runs from within `node_modules`. (No other test uses this directory structure.)
+# This tests that the CLI actually runs from the transpiled JS code in `cli-build/`
+# and not the TS code in `cli/`. See DEV_DOCS for more.
+#
+# Usage: npm run test:package
+set -euo pipefail
+
+repo="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+tmp="$(mktemp -d)"
+consumer="$tmp/consumer"
+server_pid=""
+
+cleanup() {
+    [[ -n "$server_pid" ]] && kill "$server_pid" 2>/dev/null || true
+    rm -rf "$tmp"
+}
+trap cleanup EXIT
+
+step() { echo; echo "=== [TEST-NPM-PACKAGE] $* ==="; }
+
+step "Building the CLI (${repo})"
+npm --prefix "$repo" run build:cli
+
+step "Packing into a tarball"
+# --ignore-scripts skips `prepare`, i.e. the slow client (webpack) build, which
+# none of the assertions below need. It also skips `build:cli`, hence the step above.
+tarball="$(npm pack --ignore-scripts --silent --pack-destination "$tmp" --prefix "$repo" | tail -n1)"
+tarball="$tmp/$tarball"
+echo "Packed $tarball"
+
+step "Checking the tarball contents (files) match our expectation"
+contents="$(tar tzf "$tarball")"
+if ! grep -qx 'package/cli-build/index.js' <<<"$contents"; then
+    echo "ERROR: the tarball does not contain the transpiled CLI (cli-build/)" >&2
+    exit 1
+fi
+if grep -q '^package/cli/' <<<"$contents"; then
+    echo "ERROR: the tarball contains the TypeScript CLI sources (cli/); they must be" >&2
+    echo "       excluded via .npmignore, else cli-entry.js resolves to unloadable .ts files" >&2
+    grep '^package/cli/' <<<"$contents" >&2
+    exit 1
+fi
+
+step "Installing into a throwaway project (${consumer})"
+mkdir -p "$consumer"
+cd "$consumer"
+npm init --yes --silent >/dev/null
+npm install --silent --no-audit --no-fund --prefer-offline "$tarball"
+
+# `auspice view` insists on finding a client build, either in the CWD or in the
+# auspice source dir. We packed with --ignore-scripts so there is no real build;
+# these assertions only touch /charon/*, so a stub is enough.
+mkdir -p dist
+touch dist/index.html dist/auspice.main.bundle.0123456789abcdef.js
+
+step "auspice --help"
+npx auspice --help
+
+step "auspice convert --help"
+npx auspice convert --help
+
+step "import('auspice')"
+node --input-type=module -e '
+  import assert from "node:assert";
+  const auspice = await import("auspice");
+  assert(typeof auspice.convertFromV1 === "function", "convertFromV1 is not exported");
+  console.log("convertFromV1 ok");
+'
+
+# `auspice view --handlers` loads the handlers file from the user's own project
+# (i.e. from outside node_modules), so it may be TypeScript.
+for handlers in handlers.mjs handlers.mts; do
+    step "auspice view --handlers $handlers"
+    cp "$repo/test/fixtures/$handlers" "$consumer/"
+
+    port=4123
+    PORT="$port" npx auspice view --verbose --handlers "$handlers" &
+    server_pid=$!
+
+    url="http://localhost:$port/charon/getAvailable"
+    for _ in $(seq 30); do
+        curl -sf --max-time 1 "$url" >/dev/null 2>&1 && break
+        sleep 1
+    done
+
+    if ! curl -sf --max-time 5 "$url"; then
+        echo >&2
+        echo "ERROR: GET $url did not return 200 with --handlers $handlers" >&2
+        exit 1
+    fi
+    echo
+
+    kill "$server_pid"
+    wait "$server_pid" 2>/dev/null || true
+    server_pid=""
+done
+
+step "All packaged-CLI checks passed"

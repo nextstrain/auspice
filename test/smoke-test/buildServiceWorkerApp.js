@@ -4,10 +4,8 @@
  * (bypassing `auspice build`'s CLI/argparse layer, which we don't need here).
  *
  * This runs as a standalone `node` process (spawned by serviceWorker.test.js)
- * rather than in-process within the Playwright worker. webpack.config.cjs
- * require()s TypeScript files (e.g. cli/utils.ts), which rely on Node's native
- * type stripping; running them inside Playwright's module loader instead
- * conflicts with that and fails to load. A plain Node process avoids this.
+ * rather than in-process within the Playwright worker, which keeps webpack (and
+ * the CommonJS config it require()s) out of Playwright's module loader.
  *
  * webpack is loaded via a CommonJS require rather than an ESM `import` to keep
  * it (and its internally require()d JSON schema files) entirely in the CJS

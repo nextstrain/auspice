@@ -6,6 +6,8 @@
  * requests originating from a auspice client.
  */
 
-import { convertFromV1 } from "./cli/server/convertJsonSchemas.js";
+import { cliModule } from './cli-entry.js';
+
+const { convertFromV1 } = await import(cliModule('server/convertJsonSchemas'));
 
 export { convertFromV1 };
