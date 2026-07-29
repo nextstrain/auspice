@@ -85,7 +85,7 @@ The narrative file is sent to the client (unmodified, to be parsed client-side).
 Supplying custom handlers to the Auspice server
 -----------------------------------------------
 
-The provided Auspice servers -- i.e. ``auspice view`` and ``auspice develop`` both have a ``--handlers <JS>`` option which allows you to define your own handlers. The provided JavaScript file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
+The provided Auspice servers -- i.e. ``auspice view`` and ``auspice develop`` both have a ``--handlers <JS|TS>`` option which allows you to define your own handlers. The provided file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
 
 ============= ========= ====================
 function name arguments API endpoint
@@ -113,6 +113,22 @@ Here's a pseudocode example of an implementation for the ``getAvailable`` handle
        return res.status(500).type("text/plain").send(errorMessage);
      }
    };
+
+The handlers are loaded with a dynamic ``import()``, so the file should use ESM syntax in order to avoid subtle export-visibility problems.
+(Whether a ``.js`` file is treated as ESM or CommonJS is decided by the ``type`` field of the nearest ``package.json`` (defaulting to CJS if not set); use the ``.mjs`` extension to make it explicit.)
+
+.. _server-api-typescript-handlers:
+
+TypeScript handlers
+~~~~~~~~~~~~~~~~~~~
+
+A TypeScript handlers file works too -- Node strips the types on the fly. As above, use ``.mts`` if the nearest ``package.json`` doesn't set ``"type": "module"``.
+The following caveats apply, and follow from Node's `type stripping <https://nodejs.org/api/typescript.html#type-stripping>`__:
+
+-  **No type checking is performed.** The types are erased, not validated. Run ``tsc --noEmit`` yourself if you want them checked.
+-  **Erasable syntax only.** ``enum``, runtime ``namespace``, parameter properties and decorators are rejected with ``ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX``; use ``const enum``-free alternatives and plain assignments instead. Import aliases (``import Foo = require(...)``) are likewise unsupported.
+-  **No ``.tsx``.** JSX is not stripped.
+-  **Not from inside ``node_modules``.** Node refuses to strip types for any file resolved under a ``node_modules/`` directory (``ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING``). This applies to the handlers file itself and to any relative file it imports; published dependencies must be plain JavaScript.
 
 --------------
 

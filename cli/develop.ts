@@ -8,7 +8,7 @@ import webpackDevMiddleware from "webpack-dev-middleware";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import * as utils from "./utils.ts";
 import * as view from "./view.ts";
-import { version } from '../src/version.js';
+import { version } from './version.ts';
 import _chalk from 'chalk';
 /* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
 const chalk = _chalk as any as import('chalk').Chalk;

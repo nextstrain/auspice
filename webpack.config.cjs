@@ -3,16 +3,21 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
-const utils = require('./cli/utils.ts');
+const chalk = require('chalk');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const zlib = require("zlib");
 
+const verbose = (msg) => {
+  /* Same fn as in `cli/utils.ts` -- see DEV_DOCS */
+  if (global.AUSPICE_VERBOSE) console.log(chalk.greenBright(`[verbose]\t${msg}`));
+};
+
 /* Webpack config generator */
 
 const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
-  utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
+  verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
   // Format is either "libName" or "libName:libPath"
@@ -151,7 +156,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     customOutputPath ?
       path.resolve(customOutputPath, "dist") :
       path.resolve(__dirname, "dist");
-  utils.verbose(`Webpack writing output to: ${outputPath}`);
+  verbose(`Webpack writing output to: ${outputPath}`);
 
   /**
    * Here we put the libraries that are unlikely to change for a long time.
