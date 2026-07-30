@@ -36,7 +36,7 @@ const DESCRIPTIONS = {major: "major new release", feat: "feature release", minor
  * @param {string} args.bump one of BUMPS
  * @param {string} args.label one of LABELS
  * @param {string} args.branch branch being released from
- * @returns {{version: string, tag: string, isPrerelease: boolean, description: string}}
+ * @returns {{version: string, tag: string, distTag: string, description: string}}
  * @throws {Error} if the combination of arguments isn't a valid release
  */
 function computeReleaseVersion({currentVersion, bump, label, branch}) {
@@ -124,7 +124,7 @@ function computeReleaseVersion({currentVersion, bump, label, branch}) {
   return {
     version,
     tag: `v${version}`,
-    isPrerelease,
+    distTag: isPrerelease ? "next" : "latest",
     description: isPrerelease ?
       `${label} prerelease` :
       bump === "promote" ? `release (promoted from ${currentVersion})` : DESCRIPTIONS[bump]

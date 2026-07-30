@@ -39,7 +39,7 @@ jobs:
     outputs:
       version: ${{ steps.compute.outputs.version }}
       tag: ${{ steps.compute.outputs.tag }}
-      is-prerelease: ${{ steps.compute.outputs.is-prerelease }}
+      dist-tag: ${{ steps.compute.outputs.dist-tag }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -108,7 +108,7 @@ jobs:
           jq -r '
             "version=\(.version)",
             "tag=\(.tag)",
-            "is-prerelease=\(.isPrerelease)",
+            "dist-tag=\(.distTag)",
             "description=\(.description)"
           ' <<<"$release" >> "$GITHUB_OUTPUT"
         env:
@@ -171,7 +171,7 @@ jobs:
         env:
           VERSION: ${{ steps.compute.outputs.version }}
           DESCRIPTION: ${{ steps.compute.outputs.description }}
-          IS_PRERELEASE: ${{ steps.compute.outputs.is-prerelease }}
+          DIST_TAG: ${{ steps.compute.outputs.dist-tag }}
         run: |
           {
             echo "## Auspice $VERSION"
@@ -180,8 +180,7 @@ jobs:
             echo "| --- | --- |"
             echo "| branch | \`$GITHUB_REF_NAME\` |"
             echo "| description | $DESCRIPTION |"
-            echo "| prerelease | $IS_PRERELEASE |"
-            echo "| npm dist-tag | \`$([[ "$IS_PRERELEASE" == true ]] && echo next || echo latest)\` |"
+            echo "| npm dist-tag | \`$DIST_TAG\` |"
             echo "| dry run | ${{ inputs.dry-run }} |"
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -236,7 +235,7 @@ jobs:
       # `latest` at a prerelease and serve it to every plain `npm install auspice`.
       - run: npm publish --tag "$DIST_TAG" ${{ inputs.dry-run && '--dry-run' || '' }}
         env:
-          DIST_TAG: ${{ needs.prepare-and-tag.outputs.is-prerelease == 'true' && 'next' || 'latest' }}
+          DIST_TAG: ${{ needs.prepare-and-tag.outputs.dist-tag }}
 
   github-release:
     needs: [prepare-and-tag, publish-npm]

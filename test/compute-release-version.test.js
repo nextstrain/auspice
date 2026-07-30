@@ -119,7 +119,7 @@ describe("other computed fields", () => {
     expect(compute({bump: "feat"})).toEqual({
       version: "2.74.0",
       tag: "v2.74.0",
-      isPrerelease: false,
+      distTag: "latest",
       description: "feature release"
     });
   });
@@ -127,7 +127,7 @@ describe("other computed fields", () => {
     expect(compute({bump: "major", label: "alpha", branch: "v3"})).toEqual({
       version: "3.0.0-alpha.0",
       tag: "v3.0.0-alpha.0",
-      isPrerelease: true,
+      distTag: "next",
       description: "alpha prerelease"
     });
   });
@@ -135,7 +135,7 @@ describe("other computed fields", () => {
     expect(compute({bump: "promote", currentVersion: "3.0.0-alpha.2"})).toEqual({
       version: "3.0.0",
       tag: "v3.0.0",
-      isPrerelease: false,
+      distTag: "latest",
       description: "release (promoted from 3.0.0-alpha.2)"
     });
   });
