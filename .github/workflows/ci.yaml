@@ -97,28 +97,3 @@ jobs:
               echo "package-lock.json needs updating. Please run 'npm install --ignore-scripts' locally and commit the changes." >&2
               exit 1
           fi
-
-  publish:
-    if: ${{ github.ref == 'refs/heads/release' }}
-    needs: [build-and-smoke-test, unit-test, lint, type-check, check-lockfile]
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write  # Required for OIDC
-      contents: read
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          registry-url: https://registry.npmjs.org/
-      - run: node --version
-      - run: npm ci --loglevel verbose
-      - run: npm publish
-
-  rebuild-docker-image:
-    needs: [publish]
-    runs-on: ubuntu-latest
-    steps:
-    - run: gh workflow run ci.yml --repo nextstrain/docker-base
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_WORKFLOW_DISPATCH }}

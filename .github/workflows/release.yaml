@@ -1,0 +1,275 @@
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: >-
+          On master branch: major | feat | minor, or "promote" to ship the current prerelease as
+          stable (e.g. 3.0.0-alpha.2 -> 3.0.0).
+          Other branches: major | feat | minor to start a new prerelease series, or
+          "continue" to increment the existing one.
+        type: choice
+        options: [feat, major, minor, continue, promote]
+        default: feat
+      label:
+        description: Prerelease label. Must be "none" on master; required elsewhere.
+        type: choice
+        options: [none, alpha, beta, rc]
+        default: none
+      dry-run:
+        description: Compute and validate everything, push/publish nothing.
+        type: boolean
+        default: false
+
+name: release
+
+# The branch being released is the ref this workflow was dispatched against, i.e.
+# github.ref_name, and this file is read from that branch. There is deliberately no
+# "branch" input: the workflow and the code it releases are then always the same commit.
+# Consequence: release.yaml must exist on any branch you want to release from.
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  prepare-and-tag:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.compute.outputs.version }}
+      tag: ${{ steps.compute.outputs.tag }}
+      is-prerelease: ${{ steps.compute.outputs.is-prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Tags and origin/master are both needed below, by the existing-tag check and
+          # the drift warning respectively.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build. We only need
+      # node_modules here for semver.
+      - run: npm ci --loglevel verbose --ignore-scripts
+
+      - name: Check the dispatched ref is a releasable branch
+        run: |
+          if [[ "$GITHUB_REF_TYPE" != branch ]]; then
+              echo "This workflow releases a branch, but was dispatched against a $GITHUB_REF_TYPE ($GITHUB_REF_NAME)." >&2
+              exit 1
+          fi
+          if [[ "$GITHUB_REF_NAME" == release ]]; then
+              echo "The 'release' branch is an output of this workflow, not an input. Dispatch against master instead." >&2
+              exit 1
+          fi
+
+      - name: Check package.json and src/version.js agree
+        run: |
+          package_version="$(node -p 'require("./package.json").version')"
+          src_version="$(node -p 'require("./src/version.js").version')"
+          if [[ "$package_version" != "$src_version" ]]; then
+              echo "package.json version ($package_version) doesn't match src/version.js version ($src_version)." >&2
+              exit 1
+          fi
+          echo "Current version: $package_version"
+
+      - name: Check CI passed for this commit
+        # Explicit `shell: bash` for pipefail, so a failing `gh api` can't be mistaken for
+        # "no runs found" below.
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          # Note that pushes to branches other than master and release don't trigger ci,
+          # so there may legitimately be no runs to check (e.g. a long-lived v3 branch
+          # with no open PR). We only fail on a run we can see which didn't succeed.
+          conclusions="$(gh api --paginate "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$GITHUB_SHA" \
+                            --jq '.workflow_runs[] | select(.name == "ci") | .conclusion // "in-progress"' \
+                         | sort -u)"
+          if [[ -z "$conclusions" ]]; then
+              echo "::warning::No 'ci' workflow run found for $GITHUB_SHA; releasing without a green CI signal."
+          elif [[ "$conclusions" != success ]]; then
+              echo "The 'ci' workflow for $GITHUB_SHA concluded: $(echo "$conclusions" | paste -sd' ' -)." >&2
+              echo "Fix CI (or re-run it) before releasing." >&2
+              exit 1
+          else
+              echo "ci passed for $GITHUB_SHA"
+          fi
+
+      - name: Compute the new version
+        id: compute
+        run: |
+          release="$(node scripts/compute-release-version.js \
+                       --bump="$BUMP" --label="$LABEL" --branch="$GITHUB_REF_NAME" --json)"
+          echo "$release"
+          jq -r '
+            "version=\(.version)",
+            "tag=\(.tag)",
+            "is-prerelease=\(.isPrerelease)",
+            "description=\(.description)"
+          ' <<<"$release" >> "$GITHUB_OUTPUT"
+        env:
+          BUMP: ${{ inputs.bump }}
+          LABEL: ${{ inputs.label }}
+
+      - name: Check the new version isn't already taken
+        env:
+          TAG: ${{ steps.compute.outputs.tag }}
+          VERSION: ${{ steps.compute.outputs.version }}
+        run: |
+          if git rev-parse -q --verify "refs/tags/$TAG" > /dev/null; then
+              echo "Tag $TAG already exists." >&2
+              exit 1
+          fi
+          if [[ -n "$(npm view "auspice@$VERSION" version 2> /dev/null)" ]]; then
+              echo "auspice@$VERSION is already published to npm." >&2
+              exit 1
+          fi
+
+      - name: Warn if the release tooling has drifted from master
+        run: |
+          # release.yaml is read from the branch being released. We may make changes to the script
+          # from time-to-time, so flag this as a warning not as a fatal error.
+          for file in .github/workflows/release.yaml scripts/compute-release-version.js; do
+              if ! git diff --quiet origin/master -- "$file"; then
+                  echo "::warning file=$file::$file differs from origin/master; this release is using $GITHUB_REF_NAME's copy."
+                  echo "⚠️ \`$file\` differs from \`origin/master\`." >> "$GITHUB_STEP_SUMMARY"
+              fi
+          done
+
+      - name: Bump the version
+        env:
+          VERSION: ${{ steps.compute.outputs.version }}
+        run: |
+          # Updates package.json and package-lock.json; src/version.js is mirrored by hand.
+          current="$(node -p 'require("./package.json").version')"
+          npm version "$VERSION" --no-git-tag-version
+          perl -pi -e "s/version = \"\Q$current\E\";/version = \"$VERSION\";/" src/version.js
+          if [[ "$(node -p 'require("./src/version.js").version')" != "$VERSION" ]]; then
+              echo "Failed to rewrite the version in src/version.js." >&2
+              exit 1
+          fi
+          git diff --stat
+
+      - name: Add a CHANGELOG heading
+        if: ${{ github.ref_name == 'master' }}
+        env:
+          VERSION: ${{ steps.compute.outputs.version }}
+        run: |
+          # Prepend an h2 for this release while preserving the h1. Both the YYYY/MM/DD
+          # format and the lowercase word "version" are relied upon by
+          # scripts/extract-release-notes.js, which produces the GitHub release body.
+          # Prereleases don't touch the CHANGELOG at all.
+          today="$(date +'%Y/%m/%d')"
+          echo -e "# Changelog\n\n## version ${VERSION} - ${today}\n\n$(tail -n +2 CHANGELOG.md)" > CHANGELOG.md
+          git diff -- CHANGELOG.md
+
+      - name: Summarise
+        env:
+          VERSION: ${{ steps.compute.outputs.version }}
+          DESCRIPTION: ${{ steps.compute.outputs.description }}
+          IS_PRERELEASE: ${{ steps.compute.outputs.is-prerelease }}
+        run: |
+          {
+            echo "## Auspice $VERSION"
+            echo
+            echo "| | |"
+            echo "| --- | --- |"
+            echo "| branch | \`$GITHUB_REF_NAME\` |"
+            echo "| description | $DESCRIPTION |"
+            echo "| prerelease | $IS_PRERELEASE |"
+            echo "| npm dist-tag | \`$([[ "$IS_PRERELEASE" == true ]] && echo next || echo latest)\` |"
+            echo "| dry run | ${{ inputs.dry-run }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit, tag and push
+        if: ${{ !inputs.dry-run }}
+        env:
+          VERSION: ${{ steps.compute.outputs.version }}
+          TAG: ${{ steps.compute.outputs.tag }}
+          DESCRIPTION: ${{ steps.compute.outputs.description }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src/version.js CHANGELOG.md
+          git commit -m "version bump to $VERSION for release"
+          git tag -a "$TAG" -m "$DESCRIPTION"
+          git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"
+          git push origin "refs/tags/$TAG"
+
+      - name: Fast-forward the release branch
+        # nextstrain/docker-base installs Auspice from this branch rather than from npm,
+        # so it must stay a fast-forward of master. Prereleases never touch it.
+        if: ${{ !inputs.dry-run && github.ref_name == 'master' }}
+        run: git push origin HEAD:refs/heads/release
+
+  publish-npm:
+    needs: [prepare-and-tag]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write  # Required for OIDC
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Publish exactly what was tagged. Under a dry run there is no tag, so fall back
+          # to the dispatched ref (i.e. the branch) and apply the version bump locally.
+          ref: ${{ inputs.dry-run && github.ref || needs.prepare-and-tag.outputs.tag }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org/
+
+      - run: node --version
+
+      - if: ${{ inputs.dry-run }}
+        run: npm version "${{ needs.prepare-and-tag.outputs.version }}" --no-git-tag-version
+
+      # Don't use `--ignore-scripts` -- the "prepare" life cycle script builds what we publish
+      - run: npm ci --loglevel verbose
+
+      # --tag is always passed explicitly, because `npm publish` would otherwise point
+      # `latest` at a prerelease and serve it to every plain `npm install auspice`.
+      - run: npm publish --tag "$DIST_TAG" ${{ inputs.dry-run && '--dry-run' || '' }}
+        env:
+          DIST_TAG: ${{ needs.prepare-and-tag.outputs.is-prerelease == 'true' && 'next' || 'latest' }}
+
+  github-release:
+    needs: [prepare-and-tag, publish-npm]
+    # Prereleases get no GitHub release; the tag is enough. Their notes would have to be
+    # generated by GitHub, since prereleases don't touch the CHANGELOG.
+    if: ${{ !inputs.dry-run && github.ref_name == 'master' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.prepare-and-tag.outputs.tag }}
+
+      - name: Create the GitHub release
+        # Explicit `shell: bash` for pipefail, so a failure to extract the release notes
+        # doesn't quietly produce an empty release.
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.prepare-and-tag.outputs.version }}
+          TAG: ${{ needs.prepare-and-tag.outputs.tag }}
+        run: |
+          # Takes the topmost CHANGELOG section, i.e. the one prepended above.
+          node scripts/extract-release-notes.js \
+            | gh release create "$TAG" -t "Auspice $VERSION" --notes-file -
+
+  rebuild-docker-image:
+    needs: [github-release]
+    # docker-base builds from the release branch, which only master releases move.
+    if: ${{ !inputs.dry-run && github.ref_name == 'master' }}
+    runs-on: ubuntu-latest
+    steps:
+    - run: gh workflow run ci.yml --repo nextstrain/docker-base
+      env:
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN_NEXTSTRAIN_BOT_WORKFLOW_DISPATCH }}

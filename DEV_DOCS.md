@@ -228,20 +228,82 @@ If a translation of a particular string is not yet available, then auspice will 
 
 ## Releases & versioning
 
-Releasing Auspice requires a few manual steps as there are so many downstream targets which are each to be updated with the new version.
+Releases are made by the [release GitHub Action](https://github.com/nextstrain/auspice/actions/workflows/release.yaml), which bumps the version, tags it, publishes to npm and creates a GitHub release.
+The action will also trigger nextstrain/docker-base to update.
+Other downstream targets (e.g. nextstrain.org, auspice.us, bioconda, conda-base) require additional steps; see below.
+
+> The release workflow has a number of safeguards to prevent mistakes, see `test/compute-release-version.test.js` for full details.
+  These include asserting that a normal release only comes from the `master` branch, and a prerelease only comes from a non-`master` branch. 
+
+
+
+### Making a normal release
 
 1. Compare the git history against the previous release (e.g. [view master vs release branch on GitHub](https://github.com/nextstrain/auspice/compare/release...master)) and ensure all changes are reflected in `CHANGELOG.md`.
    If new entries are needed, commit these and push them to the remote (GitHub).
-1. Ensure you are on the master branch and up to date with the remote, have `node` and `npm` in your environment, and are logged into the GitHub CLI (`gh auth status`).
-1. Run the `./releaseNewVersion.sh` script.
-    This will prompt you for the version number increase and push changes to both the master and release branches.
-    * Auspice's [CI Action](https://github.com/nextstrain/auspice/actions/workflows/ci.yaml) will publish the new version to npm. 
-    It takes some time for the new version to appear in the npm registry.
+   Put them at the top of the file, directly below the `# Changelog` heading; the workflow will add the version heading above them.
+1. Go to the [release workflow](https://github.com/nextstrain/auspice/actions/workflows/release.yaml) and click "Run workflow". Then:
+    * Leave **"Use workflow from"** set to `master`. This selects the branch being released, and Auspice's normal releases always come from `master`.
+    * Set **bump** to `major` (e.g. 2.73.0 → 3.0.0), `feat` for a feature release (→ 2.74.0), or `minor` for a fix (→ 2.73.1).
+    * Leave **label** as `none` — a labelled release is a prerelease, which `master` doesn't make (see below).
+    * Optionally tick **dry run** first: everything is computed and validated, and the npm tarball is built, but nothing is pushed or published.
+1. The workflow then, in order:
+    * validates the request via `scripts/compute-release-version.js`
+    * bumps `package.json`, `package-lock.json` and `src/version.js`, prepends the `## version X.Y.Z - YYYY/MM/DD` heading to `CHANGELOG.md`, commits, and pushes to `master`;
+    * pushes the annotated git tag `vX.Y.Z`, and fast-forwards the `release` branch to match `master`;
+    * publishes to npm under the `latest` [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages)
+    * creates an entry on [github.com/nextstrain/auspice/releases](https://github.com/nextstrain/auspice/releases/) using the notes from the changelog section it just added;
+    * triggers a rebuild of `nextstrain/docker-base`.
+1. Check the results:
+    * It takes some time for the new version to appear in the npm registry.
     To check if it has been released run `npm view auspice versions --json | tail`; you may wish to wait for the email to the slack channel `#nextstrain-admin` but it's unclear if there is still a lag after the email arrives before it's available to `npm` APIs.
     None of the following numbered steps will work until the new version is available on npm. 
-    * The release script will automatically create an entry on [github.com/nextstrain/auspice/releases](https://github.com/nextstrain/auspice/releases/) containing information from the changelog.
     * Ensure the [docker-base CI action triggered by nextstrain-bot](https://github.com/nextstrain/docker-base/actions/workflows/ci.yml?query=branch%3Amaster+actor%3Anextstrain-bot) runs successfully.
-    (This action in nextstrain/docker-base is triggered by Auspice's CI action and installs Auspice from the release branch such that it's not dependant on availability in npm.)
+    (This action in nextstrain/docker-base is triggered by the release action and installs Auspice from the release branch such that it's not dependant on availability in npm.)
+
+Note that the version-bump commit does not itself get a CI run, because pushes made with the default `GITHUB_TOKEN` don't trigger other workflows.
+The workflow instead requires CI to have passed on the commit being released, i.e. the one before the version bump.
+
+### Making a prerelease
+
+Prereleases come from any branch **other than** `master` — in practice a long-lived development branch such as `v3`.
+They're published to npm under the `next` dist-tag, so `npm install auspice` continues to get the newest normal release and `npm install auspice@next` gets the prerelease.
+They don't touch `CHANGELOG.md` or the `release` branch, and don't rebuild docker-base.
+
+Dispatch the same workflow, but set **"Use workflow from"** to the branch you're releasing, and:
+
+* To **start** a series, set **bump** to `major`/`feat`/`minor` and **label** to `alpha`/`beta`/`rc`.
+  From 2.73.0, `major` + `alpha` gives `3.0.0-alpha.0`.
+* To **continue** a series, set **bump** to `continue` and keep the same **label**: `3.0.0-alpha.0` → `3.0.0-alpha.1` → …
+* To **move to a later label**, set **bump** to `continue` and change **label**: `3.0.0-alpha.1` + `beta` → `3.0.0-beta.0`.
+
+No entry is created on [GitHub's releases page](https://github.com/nextstrain/auspice/releases/), however the git tag `vX.Y.Z-label.n` is pushed as usual.
+
+> Note: `release.yaml` is read from the branch being released, not from `master`.
+> The workflow warns in its job summary when its own files differ from `master`'s.
+
+
+
+### If a release fails partway through
+
+The commit, tag and `release` branch are pushed *before* npm publish and the GitHub release.
+So a failure in `publish-npm` or later leaves the repo already updated. Usually the right move is to fix the cause and **re-run the failed jobs** from the Actions UI.
+
+To unwind instead:
+
+```sh
+git push --delete origin v$VERSION      # remove the git tag
+git revert $BUMP_COMMIT && git push origin master
+```
+
+An npm version which was published can't be unpublished — release a new version instead.
+If a bad version reached the `latest` dist-tag, move it back with `npm dist-tag add auspice@$GOOD_VERSION latest`.
+
+### Updating downstream targets
+
+These steps follow a normal release, and are still manual as there are so many downstream targets which are each to be updated with the new version.
+None of them apply to prereleases, which deliberately don't move the `latest` dist-tag.
+
 1. Updates to nextstrain sites which depend on Auspice:
     1. Nextstrain.org will check daily for a new version of Auspice and [automatically merge the resulting PR](https://github.com/nextstrain/nextstrain.org/blob/175171e0e1c1b331538729a1168598227d08698d/.github/workflows/dependabot-automation.yml), which results in [the canary site](https://next.nextstrain.org) being updated.
         * You can [trigger this check](https://github.com/nextstrain/nextstrain.org/blob/175171e0e1c1b331538729a1168598227d08698d/.github/dependabot.yml#L16-L17) as soon as the new version is available on npm if you wish.
