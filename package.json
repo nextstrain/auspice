@@ -14,20 +14,23 @@
   "bin": {
     "auspice": "./auspice.js"
   },
-  "exports": "./index.js",
+  "main": "index.js",
   "scripts": {
     "view": "node auspice.js view --verbose",
     "dev": "node auspice.js develop --verbose",
     "start": "npm run view",
     "server": "npm run view",
     "build": "node auspice.js build --verbose",
-    "prepare": "npm run build",
+    "build:cli": "rm -rf cli-build && tsc --project cli/tsconfig.build.json && cp cli/server/cleanupServiceWorker.js cli-build/server/",
+    "build:cli:watch": "tsc --watch --project cli/tsconfig.build.json",
+    "prepare": "npm run build:cli && npm run build",
     "lint": "eslint --max-warnings=0 .",
     "lint:fix": "eslint --fix .",
     "type-check": "tsc && tsc --project cli/tsconfig.json",
     "type-check:watch": "tsc --watch",
     "fetch-test-data": "./scripts/fetch-test-data",
     "test": "jest test/*.js test/*.ts",
+    "test:package": "./scripts/test-npm-package",
     "smoke-test": "NODE_ENV=test ENV=dev npx playwright test",
     "diff-lang": "./scripts/diff-lang.js"
   },

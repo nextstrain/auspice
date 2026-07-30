@@ -1,4 +1,8 @@
 ### App specific ###
+# The published package ships the transpiled `cli-build/` instead, because Node
+# refuses to strip types from files under `node_modules/`. `cli-entry.js` uses the
+# absence of `cli/` to decide which of the two to load.
+/cli/
 big_flu
 /data/
 /releases/
@@ -6,6 +10,11 @@ big_flu
 s3/
 /local_narratives/
 /narratives/
+/datasets/
+
+### test artefacts ###
+test/fetched-jsons/
+.playwright/
 
 ### OSX ###
 .DS_Store

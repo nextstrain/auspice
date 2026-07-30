@@ -42,6 +42,25 @@ jobs:
       - run: npx playwright install chromium
       - run: npm run smoke-test
 
+  # Packs & installs Auspice into a throwaway project so the CLI runs from within
+  # node_modules -- the condition no other job exercises. See DEV_DOCS.md.
+  packaged-cli-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [24, 26]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --version
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
+      # also skips life cycle scripts for dependencies. If the job fails here,
+      # try removing this flag.
+      - run: npm ci --loglevel verbose --ignore-scripts
+      - run: npm run test:package
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -100,7 +119,7 @@ jobs:
 
   publish:
     if: ${{ github.ref == 'refs/heads/release' }}
-    needs: [build-and-smoke-test, unit-test, lint, type-check, check-lockfile]
+    needs: [build-and-smoke-test, unit-test, packaged-cli-test, lint, type-check, check-lockfile]
     runs-on: ubuntu-latest
     permissions:
       id-token: write  # Required for OIDC

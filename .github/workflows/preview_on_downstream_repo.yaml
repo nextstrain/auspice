@@ -30,7 +30,7 @@ jobs:
     steps:
       - uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Checkout downstream repo
         uses: actions/checkout@v7
@@ -46,7 +46,10 @@ jobs:
         run: |
           npm config set ignore-scripts true
           npm ci
-          npm install nextstrain/auspice#${{ github.sha }}
+          # Auspice's `prepare` script transpiles its TypeScript CLI into `cli-build/`,
+          # which a git install has no other way of obtaining, so life cycle scripts must
+          # run for this install (the `npm ci` above keeps ignoring them for dependencies).
+          npm install nextstrain/auspice#${{ github.sha }} --ignore-scripts=false
           git add package.json package-lock.json
 
           git config user.name "${{ vars.GIT_USER_NAME_NEXTSTRAIN_BOT }}"

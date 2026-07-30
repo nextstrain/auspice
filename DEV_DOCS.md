@@ -67,6 +67,44 @@ The various moving parts involved are:
 * `@babel/preset-typescript` is used by babel-loader (via webpack) to parse `.ts(x)` files
 
 
+## The CLI is transpiled for publishing
+
+The CLI (`auspice ...`) is written in TypeScript under `cli/`, and when Auspice is installed from source then `auspice.js` loads `cli/index.ts` and Node (24+) strips the types on the fly.
+
+That doesn't work once the package is installed as Node refuses to strip types for any file under a `node_modules/` path (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`).
+We therefore transpile the `cli/*` TS code to `cli-build/*` JS files via `npm run build:cli`. 
+This happens at publish time (via [npm's prepare life-cycle script](https://docs.npmjs.com/cli/v8/using-npm/scripts#life-cycle-scripts)), so the published package ships `cli-build/`, a plain-JavaScript transpilation of `cli/`, and omits `cli/` entirely (via `.npmignore`).
+This has two consequences:
+ - Installing from git with `--ignore-scripts` skips `prepare` and leaves you with an unusable CLI
+ - `webpack.config.cjs` and `babel.config.cjs` must not import from `cli/`, as that directory won't exist
+
+Because `cli-build/` mirrors `cli/` 1:1 we can use relative filepaths such as `../webpack.config.cjs`, `../package.json`.
+The `.ts` import specifiers are rewritten to `.js` on the way out by TypeScript's  `rewriteRelativeImportExtensions`.
+The two entry points, `auspice.js` (the CLI) and `index.js` (what's available for other projects to import in JS/TS code) both go through `cli-entry.js`, which picks between the two directories: 
+
+  - `cli/` present ⇒ source checkout ⇒ run the `.ts`
+  - `cli/` absent ⇒ installed package ⇒ run `cli-build/`
+
+Note that type errors do not fail `build:cli` — `tsc` emits regardless. `npm run type-check` remains the gate, and it type-checks `cli/` via `cli/tsconfig.json`.
+
+
+### Running the transpiled CLI from a source install
+
+Set `AUSPICE_CLI=build` to run `cli-build/` from a source checkout, i.e. what consumers of the
+published package will run:
+
+```sh
+npm run build:cli   # or leave `npm run build:cli:watch` going
+AUSPICE_CLI=build node auspice.js view --verbose test/data
+```
+(`AUSPICE_CLI=source` forces the TypeScript sources)
+
+### Custom handler files can be TypeScript
+
+The `--handlers` file passed to `auspice view` / `auspice develop` lives in the user's own project, not under `node_modules`, so Node type-strips it normally and `.ts`/`.mts` handlers work.
+See [the server API docs](./docs/server/api.rst) for more details.
+
+
 ## Tests
 
 Auspice has various tests in place, although test coverage is sporadic.
@@ -96,6 +134,11 @@ General advice for writing tests:
 1. Fetch testing datasets with `npm run fetch-test-data`.
 2. Install the testing browser with `npx playwright install chromium`.
 3. Run `npm run smoke-test`.
+
+#### Packaged CLI test
+
+`npm run test:package` packs the package and installs it into a throwaway project, then runs the CLI from `node_modules`.
+This aims to catch breakage of the `cli-build/` approach (transpiled CLI code).
 
 
 #### For integration tests

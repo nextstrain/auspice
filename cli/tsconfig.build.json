@@ -1,0 +1,22 @@
+/*
+Emits the CLI as plain JavaScript into `../cli-build`, which is what the published
+package ships (Node refuses to strip types from files under `node_modules`).
+The layout of `cli-build/` mirrors `cli/` 1:1 so that the various `__dirname`-relative
+lookups (`../webpack.config.cjs`, `../package.json`, `server/cleanupServiceWorker.js`, …)
+resolve identically from either directory.
+
+Type errors are reported by `npm run type-check`, not here -- tsc emits regardless.
+*/
+
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "allowJs": false,
+    "rootDir": ".",
+    "outDir": "../cli-build",
+    "rewriteRelativeImportExtensions": true,  /* rewrites `./foo.ts` specifiers to `./foo.js` */
+    "sourceMap": true
+  },
+  "exclude": ["server/cleanupServiceWorker.js"]
+}

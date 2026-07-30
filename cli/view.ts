@@ -3,14 +3,14 @@
 
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
 import express from "express";
 import expressStaticGzip from "express-static-gzip";
 import compression from 'compression';
 import nakedRedirect from 'express-naked-redirect';
 import * as utils from "./utils.ts";
-import { version } from '../src/version.js';
+import { version } from './version.ts';
 import _chalk from 'chalk';
 const chalk = _chalk as any as import('chalk').Chalk;
 import { processPathArguments } from "./server/processPaths.ts";
@@ -60,7 +60,9 @@ const serveRelativeFilepaths = ({app, dir}) => {
 
 async function customRouteHandlers(app, handlersPath) {
   utils.verbose(`Loading handlers from ${handlersPath}`);
-  const customCode = await import(handlersPath);
+  /* `import()` of an absolute path fails on Windows (ERR_UNSUPPORTED_ESM_URL_SCHEME),
+   * so convert to a file:// URL. */
+  const customCode = await import(pathToFileURL(handlersPath).href);
   app.get("/charon/getAvailable", customCode.getAvailable);
   app.get("/charon/getDataset", customCode.getDataset);
   app.get("/charon/getNarrative", customCode.getNarrative);
