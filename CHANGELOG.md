@@ -1,7 +1,9 @@
 # Changelog
 
-## version 2.73.0 - 2026/07/07
 
+* Bugfix: narrative slide transitions for div-only trees could result in an empty-tree. ([#2091](https://github.com/nextstrain/auspice/pull/2091))
+
+## version 2.73.0 - 2026/07/07
 
 * Added support for offline use through the `AUSPICE_ENABLE_SERVICE_WORKER` environment variable read at build-time. This is added primarily for auspice.us, but should work for any Auspice server where assets are served at the root path.
   ([#2062](https://github.com/nextstrain/auspice/pull/2062))

@@ -273,7 +273,12 @@ const restoreQueryableStateToDefaults = (state) => {
   state.scatterVariables = {};
 
   state.showAllBranchLabels = false;
-  // console.log("state now", state);
+
+  // default distanceMeasure is always num_date, so make sure the dataset supports it!
+  if (state.branchLengthsToDisplay === "divOnly") {
+    state.distanceMeasure = "div"
+  }
+
   return state;
 };
 
