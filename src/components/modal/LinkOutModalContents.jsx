@@ -154,11 +154,9 @@ function MicrobeTraceLinkOut() {
   const displayName = 'microbetrace.cdc.gov';
   const {pathname, origin} = clientDetails();
   const {showTreeToo} = useSelector((state) => state.controls)
-  const {mainTreeNumTips, originalVersion} = useSelector((state) => state.metadata);
+  const {originalVersion} = useSelector((state) => state.metadata);
 
   // MicrobeTrace should work similarly to Taxonium (see above)
-  // but trees >500 tips are very slow to load (we don't prevent the display of such trees,
-  // however we do show a warning)
   let unsupportedMessage;
   if (showTreeToo) {
     unsupportedMessage = "tanglegrams aren't supported";
@@ -181,11 +179,6 @@ function MicrobeTraceLinkOut() {
       <ButtonText href={url()} target="_blank" rel="noreferrer noopener">{displayName}</ButtonText>
       <ButtonDescription>
         View this data in MicrobeTrace (<a href='https://github.com/CDCgov/MicrobeTrace/wiki' target="_blank" rel="noreferrer noopener">learn more</a>).
-        {mainTreeNumTips>500 && (
-          <span>
-            {` Note that trees with over 500 tips may have trouble loading (this one has ${mainTreeNumTips}).`}
-          </span>
-        )}
       </ButtonDescription>
     </ButtonContainer>
   )
