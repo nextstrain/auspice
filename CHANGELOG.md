@@ -1,5 +1,8 @@
 # Changelog
 
+## version 2.73.1 - 2026/08/05
+
+
 
 * Bugfix: narrative slide transitions for div-only trees could result in an empty-tree. ([#2091](https://github.com/nextstrain/auspice/pull/2091))
 
