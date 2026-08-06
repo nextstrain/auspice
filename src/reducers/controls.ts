@@ -199,6 +199,7 @@ export interface BasicControlsState {
   tipLabelKey: string | symbol
   zoomMax?: number
   zoomMin?: number
+  statespaceDeme: string | undefined
 }
 
 export interface MeasurementFilters {
@@ -303,6 +304,7 @@ export const getDefaultControlsState = (): ControlsState => {
     measurementsColorGrouping: undefined,
     measurementsFilters: {},
     performanceFlags: new Map(),
+    statespaceDeme: undefined,
   };
 };
 
@@ -453,7 +455,10 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, {
         geoResolution: action.data
       });
-
+    case types.CHANGE_STATESPACE_DEME:
+      return Object.assign({}, state, {
+        statespaceDeme: action.statespaceDeme
+      });
     case types.SELECT_NODE: {
       /**
        * We don't store a (reference to) the node itself as that breaks redux's immutability checking,

@@ -73,7 +73,7 @@ const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
  * @param {array} currentArcs only used if updating. Array of current arcs.
  * @returns {array} arcs for display
  */
-const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
+export const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
   const colorByIsGenotype = isColorByGenotype(colorBy);
   const legendValueToArcIdx = {};
   const undefinedArcIdx = legendValues.length; /* the arc which is grey to represent undefined values on tips */
