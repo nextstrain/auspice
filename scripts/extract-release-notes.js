@@ -1,6 +1,8 @@
 /* Simple script to extract latest release notes from CHANGELOG.md
  * Based on @ivan-aksamentov's https://github.com/nextstrain/nextclade/blob/613637e1305cf742e13dbe073976257365ca14dd/scripts/extract-release-notes.py
- * It is intended to be run as part of releaseNewVersion.sh
+ * It is intended to be run by .github/workflows/release.yaml, after that workflow has
+ * prepended the heading for the release being made. Reads ./CHANGELOG.md, so it must be
+ * run from the repo root.
  */
 
 const fs = require('fs');
