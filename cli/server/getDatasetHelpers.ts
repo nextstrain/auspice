@@ -10,7 +10,7 @@
 
 import * as utils from "../utils.ts";
 import queryString from "query-string";
-import { convertFromV1 } from "./convertJsonSchemas.js";
+import { convertFromV1 } from "./convertJsonSchemas.ts";
 import fs from "fs";
 
 export const handleError = (res, clientMsg, serverMsg="", code=500): void => {
