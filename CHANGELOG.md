@@ -1,8 +1,8 @@
 # Changelog
 
+* Remove warning about large trees when viewing the dataset on MicrobeTrace, since MicrobeTrace v2.2 includes improvements for loading larger trees ([#2087](https://github.com/nextstrain/auspice/pull/2087))
+
 ## version 2.73.1 - 2026/08/05
-
-
 
 * Bugfix: narrative slide transitions for div-only trees could result in an empty-tree. ([#2091](https://github.com/nextstrain/auspice/pull/2091))
 
