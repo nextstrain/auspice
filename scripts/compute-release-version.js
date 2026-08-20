@@ -12,8 +12,17 @@
  * produces prereleases, and neither can accidentally produce the other.
  */
 
-const path = require('path');
-const semver = require('semver');
+import fs from 'node:fs';
+import { pathToFileURL } from 'node:url';
+
+import semver from 'semver';
+
+/* The version currently in package.json, i.e. the one being bumped from. Read lazily so
+ * that importing this module (e.g. from the tests) has no side effects. */
+function currentVersionFromPackageJson() {
+  const packageJson = new URL('../package.json', import.meta.url);
+  return JSON.parse(fs.readFileSync(packageJson, {encoding: 'utf8'})).version;
+}
 
 const BUMPS = ["feat", "major", "minor", "continue", "promote"];
 const LABELS = ["none", "alpha", "beta", "rc"];
@@ -156,7 +165,7 @@ function main(argv) {
   }
 
   const release = computeReleaseVersion({
-    currentVersion: args.current || require(path.join(__dirname, '..', 'package.json')).version,
+    currentVersion: args.current || currentVersionFromPackageJson(),
     bump: args.bump,
     label: args.label,
     branch: args.branch
@@ -165,7 +174,9 @@ function main(argv) {
   console.log(args.json ? JSON.stringify(release) : release.version);
 }
 
-if (require.main === module) {
+/* The CJS `require.main === module` idiom: run main() only when this file is the entry
+ * point, not when it's imported (as test/compute-release-version.test.js does). */
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
     main(process.argv.slice(2));
   } catch (err) {
@@ -174,4 +185,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = {computeReleaseVersion, BUMPS, LABELS};
+export {computeReleaseVersion, BUMPS, LABELS};
