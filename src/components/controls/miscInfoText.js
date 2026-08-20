@@ -22,6 +22,15 @@ export const MapInfo = (
   </>
 );
 
+export const StatespaceInfo = (
+  <>
+    This panel displays attributes (states) across the tree and the relationships (transmissions) between them.
+    <br/>
+    States are collected across all tips and displayed as circles / pie-charts, where the color represents the currently selected color-by.
+    Transmissions are drawn if these states are also annotated on internal nodes.
+  </>
+);
+
 export const AnimationOptionsInfo = (
   <>
     Change various options relating to how the animation proceeds.

@@ -13,7 +13,7 @@ export const pathStringGenerator = line()
   .y((d) => { return d.y; })
   .curve(curveBasis);
 
-const extractLineSegmentForAnimationEffect = (
+export const extractLineSegmentForAnimationEffect = (
   numDateMin,
   numDateMax,
   originCoords,
