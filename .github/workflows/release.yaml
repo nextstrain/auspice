@@ -66,15 +66,12 @@ jobs:
               exit 1
           fi
 
-      - name: Check package.json and src/version.js agree
+      - name: Report the current version
         run: |
-          package_version="$(node -p 'require("./package.json").version')"
-          src_version="$(node -p 'require("./src/version.js").version')"
-          if [[ "$package_version" != "$src_version" ]]; then
-              echo "package.json version ($package_version) doesn't match src/version.js version ($src_version)." >&2
-              exit 1
-          fi
-          echo "Current version: $package_version"
+          # package.json is the single source of truth for the version: the client reads
+          # it via src/version.js (inlined by webpack at build time) and the CLI via
+          # cli/version.ts (read at runtime), so there is nothing to keep in sync here.
+          echo "Current version: $(node -p 'require("./package.json").version')"
 
       - name: Check CI passed for this commit
         # Explicit `shell: bash` for pipefail, so a failing `gh api` can't be mistaken for
@@ -144,14 +141,9 @@ jobs:
         env:
           VERSION: ${{ steps.compute.outputs.version }}
         run: |
-          # Updates package.json and package-lock.json; src/version.js is mirrored by hand.
-          current="$(node -p 'require("./package.json").version')"
+          # Updates package.json and package-lock.json, which is all that's needed:
+          # src/version.js and cli/version.ts both derive the version from package.json.
           npm version "$VERSION" --no-git-tag-version
-          perl -pi -e "s/version = \"\Q$current\E\";/version = \"$VERSION\";/" src/version.js
-          if [[ "$(node -p 'require("./src/version.js").version')" != "$VERSION" ]]; then
-              echo "Failed to rewrite the version in src/version.js." >&2
-              exit 1
-          fi
           git diff --stat
 
       - name: Add a CHANGELOG heading
@@ -193,7 +185,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json src/version.js CHANGELOG.md
+          git add package.json package-lock.json CHANGELOG.md
           git commit -m "version bump to $VERSION for release"
           git tag -a "$TAG" -m "$DESCRIPTION"
           git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"

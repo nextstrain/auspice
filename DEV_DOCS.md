@@ -288,7 +288,7 @@ Other downstream targets (e.g. nextstrain.org, auspice.us, bioconda, conda-base)
     * Optionally tick **dry run** first: everything is computed and validated, and the npm tarball is built, but nothing is pushed or published.
 1. The workflow then, in order:
     * validates the request via `scripts/compute-release-version.js`
-    * bumps `package.json`, `package-lock.json` and `src/version.js`, prepends the `## version X.Y.Z - YYYY/MM/DD` heading to `CHANGELOG.md`, commits, and pushes to `master`;
+    * bumps `package.json` and `package-lock.json` (the single source of truth for the version, which `src/version.js` and `cli/version.ts` both read), prepends the `## version X.Y.Z - YYYY/MM/DD` heading to `CHANGELOG.md`, commits, and pushes to `master`;
     * pushes the annotated git tag `vX.Y.Z`, and fast-forwards the `release` branch to match `master`;
     * publishes to npm under the `latest` [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages)
     * creates an entry on [github.com/nextstrain/auspice/releases](https://github.com/nextstrain/auspice/releases/) using the notes from the changelog section it just added;
