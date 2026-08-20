@@ -363,3 +363,31 @@ None of them apply to prereleases, which deliberately don't move the `latest` di
             ```
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
 1. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
+
+---
+
+## Maps
+
+Auspice renders phylogeographic data on an interactive world map. The map displays demes (coloured circles representing geographic locations) and transmission lines connecting them, overlaid on a tiled basemap.
+
+### Libraries
+
+- [Leaflet](https://leafletjs.com/) — provides the interactive map container, pan/zoom controls, event handling, and the coordinate system for overlays.
+- [MapLibre GL JS](https://maplibre.org/) — renders Vector Tiles (MVT/PBF format) client-side using WebGL. Vector tiles are smaller and sharper than raster tiles at all zoom levels.
+- [@maplibre/maplibre-gl-leaflet](https://github.com/maplibre/maplibre-gl-leaflet) — bridges MapLibre GL into Leaflet as a tile layer, allowing the existing Leaflet infrastructure (events, controls, D3 overlays) to remain unchanged.
+- [D3](https://d3js.org/) — renders demes and transmission lines as SVG overlays on top of the Leaflet map.
+
+### Maps and map tile server(s)
+
+**MapLibre GL JS** is used as the rendering engine in Auspice, using webworkers to render vector tiles into a canvas.
+We interact with this via `maplibre-gl-leaflet` so the canvas layer is within Leaflet as that is how we overlay our d3 elements on the map.
+
+A **MapLibre Style Spec JSON** describes layers, paint properties, and references (URLs) to vector tiles, sprites, glyphs etc. to fetch for map rendering.
+Auspice uses [a customised style JSON](https://github.com/nextstrain/auspice/blob/master/src/util/map-styles.json) originally based on [OpenMapTiles' positron theme](https://github.com/openmaptiles/positron-gl-style).
+The underlying resources (tiles, sprites etc) are currently fetched from OpenMapTiles, as defined in the styles JSON.
+You can use a built-time extension to use a different style sheet; see [test/example-customisations/openfreemap/](https://github.com/nextstrain/auspice/tree/master/test/example-customisations/openfreemap/).
+
+> Auspice v2 used **Mapbox** as our tile provider via a customised MapBox style sheet.
+  Auspice v3 can no longer use Mapbox stylesheets (as MapLibre doesn't understand the proprietary `mapbox://` protocol), however there is a helper script [transform-mapbox-style-json.js](https://github.com/nextstrain/auspice/blob/master/scripts/transform-mapbox-style-json.js) which transforms the JSON to rewrite each `mapbox://` URL to its HTTPS equivalent, thus producing a MapLibre-compatible style sheet which can be used as via build-time extensions.
+  For the time being, this map style is still available via [test/example-customisations/mapbox/](https://github.com/nextstrain/auspice/tree/master/test/example-customisations/mapbox/).
+  Our current (Auspice v3) stylesheet was chosen to match the aesthetics of the Mapbox stylesheet used in Auspice v2.
