@@ -7,7 +7,7 @@ export const fetchWithErrorHandling = async (path) => {
     if (res.status === 204) {
       throw new NoContentError();
     }
-    throw new FetchError(`${path} ${await res.text()} (${res.statusText})`);
+    throw new FetchError(`${path} ${await res.text()} (${res.statusText})`, res.status);
   }
   return res;
 };

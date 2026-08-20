@@ -16,7 +16,7 @@ const ColumnList = styled.ul`
   column-gap: 20px;
 `;
 
-const SplashContent = ({available, browserDimensions, errorMessage}) => {
+const SplashContent = ({available, browserDimensions, errorMessage, errorStatus}) => {
 
   const Header = () => (
     <>
@@ -53,7 +53,7 @@ const SplashContent = ({available, browserDimensions, errorMessage}) => {
     <CenterContent>
       <div>
         <p style={{color: "rgb(222, 60, 38)", fontWeight: 600, fontSize: "24px"}}>
-          {"😱 404, or an error has occured 😱"}
+          {errorStatus ? `😱 ${errorStatus}, or an error has occured 😱` : "😱 An error has occured 😱"}
         </p>
         <p style={{color: "rgb(222, 60, 38)", fontWeight: 400, fontSize: "18px"}}>
           {`Details: ${errorMessage}`}
