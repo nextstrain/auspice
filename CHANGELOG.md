@@ -44,6 +44,9 @@
   This functionality was deprecated in version 2.44.0.
   [#2082](https://github.com/nextstrain/auspice/pull/2082)
 
+* (Dev-only) Performance harnesses to profile function times and render-equivalence added.
+  [#2078](https://github.com/nextstrain/auspice/pull/2078)
+
 * (Dev-only) We no longer use Heroku for Auspice-specific review apps, instead leveraging nextstrain.org and auspice.us review apps for testing purposes. [#2067](https://github.com/nextstrain/auspice/pull/2067)
 
 * (Dev-only) Auspice is now released via [a Github Actions workflow](https://github.com/nextstrain/auspice/actions/workflows/release.yaml).
