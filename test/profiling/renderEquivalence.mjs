@@ -64,23 +64,23 @@ async function driveIncremental(page, path, loadTimeout) {
 // `set` into the running params and drives one incremental op.
 const SCENARIOS = [
   // ---- ebola: single operations ----
-  { id: "ebola-colorby-categorical", dataset: "ebola", base: { d: "tree", c: "country" }, steps: [{ set: { c: "division" } }] },
-  { id: "ebola-colorby-continuous", dataset: "ebola", base: { d: "tree", c: "country" }, steps: [{ set: { c: "num_date" } }] },
-  { id: "ebola-layout-radial", dataset: "ebola", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "radial" } }] },
-  { id: "ebola-layout-unrooted", dataset: "ebola", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "unrooted" } }] },
-  { id: "ebola-layout-clock", dataset: "ebola", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "clock" } }] },
-  { id: "ebola-layout-scatter", dataset: "ebola", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "scatter" } }] },
-  { id: "ebola-distance", dataset: "ebola", base: { d: "tree", m: "num_date" }, steps: [{ set: { m: "div" } }] },
-  { id: "ebola-datefilter", dataset: "ebola", base: { d: "tree" }, steps: [{ set: { dmin: "2014-08-01", dmax: "2015-03-01" } }] },
-  { id: "ebola-traitfilter", dataset: "ebola", base: { d: "tree" }, steps: [{ set: { f_country: "Sierra Leone" } }] },
-  { id: "ebola-zoom", dataset: "ebola", base: { d: "tree" }, steps: [{ set: { f_country: "Sierra Leone", treeZoom: "selected" } }] },
-  { id: "ebola-confidence", dataset: "ebola", base: { d: "tree", m: "num_date" }, steps: [{ set: { ci: true } }] },
+  { id: "ebola-colorby-categorical", dataset: "ebola-ebov-2013", base: { d: "tree", c: "country" }, steps: [{ set: { c: "division" } }] },
+  { id: "ebola-colorby-continuous", dataset: "ebola-ebov-2013", base: { d: "tree", c: "country" }, steps: [{ set: { c: "num_date" } }] },
+  { id: "ebola-layout-radial", dataset: "ebola-ebov-2013", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "radial" } }] },
+  { id: "ebola-layout-unrooted", dataset: "ebola-ebov-2013", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "unrooted" } }] },
+  { id: "ebola-layout-clock", dataset: "ebola-ebov-2013", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "clock" } }] },
+  { id: "ebola-layout-scatter", dataset: "ebola-ebov-2013", base: { d: "tree", l: "rect" }, steps: [{ set: { l: "scatter" } }] },
+  { id: "ebola-distance", dataset: "ebola-ebov-2013", base: { d: "tree", m: "num_date" }, steps: [{ set: { m: "div" } }] },
+  { id: "ebola-datefilter", dataset: "ebola-ebov-2013", base: { d: "tree" }, steps: [{ set: { dmin: "2014-08-01", dmax: "2015-03-01" } }] },
+  { id: "ebola-traitfilter", dataset: "ebola-ebov-2013", base: { d: "tree" }, steps: [{ set: { f_country: "Sierra Leone" } }] },
+  { id: "ebola-zoom", dataset: "ebola-ebov-2013", base: { d: "tree" }, steps: [{ set: { f_country: "Sierra Leone", treeZoom: "selected" } }] },
+  { id: "ebola-confidence", dataset: "ebola-ebov-2013", base: { d: "tree", m: "num_date" }, steps: [{ set: { ci: true } }] },
 
   // ---- ebola: combinations (sequenced incremental ops) ----
-  { id: "ebola-filter-then-colorby", dataset: "ebola", base: { d: "tree", c: "country" }, steps: [{ set: { f_country: "Sierra Leone" } }, { set: { c: "division" } }] },
-  { id: "ebola-colorby-then-zoom", dataset: "ebola", base: { d: "tree", c: "country" }, steps: [{ set: { c: "division" } }, { set: { f_country: "Sierra Leone", treeZoom: "selected" } }] },
-  { id: "ebola-date-then-layout", dataset: "ebola", base: { d: "tree" }, steps: [{ set: { dmin: "2014-08-01", dmax: "2015-03-01" } }, { set: { l: "radial" } }] },
-  { id: "ebola-filter-date-colorby", dataset: "ebola", base: { d: "tree", c: "country" }, steps: [{ set: { f_country: "Sierra Leone" } }, { set: { dmin: "2014-08-01", dmax: "2015-03-01" } }, { set: { c: "division" } }] },
+  { id: "ebola-filter-then-colorby", dataset: "ebola-ebov-2013", base: { d: "tree", c: "country" }, steps: [{ set: { f_country: "Sierra Leone" } }, { set: { c: "division" } }] },
+  { id: "ebola-colorby-then-zoom", dataset: "ebola-ebov-2013", base: { d: "tree", c: "country" }, steps: [{ set: { c: "division" } }, { set: { f_country: "Sierra Leone", treeZoom: "selected" } }] },
+  { id: "ebola-date-then-layout", dataset: "ebola-ebov-2013", base: { d: "tree" }, steps: [{ set: { dmin: "2014-08-01", dmax: "2015-03-01" } }, { set: { l: "radial" } }] },
+  { id: "ebola-filter-date-colorby", dataset: "ebola-ebov-2013", base: { d: "tree", c: "country" }, steps: [{ set: { f_country: "Sierra Leone" } }, { set: { dmin: "2014-08-01", dmax: "2015-03-01" } }, { set: { c: "division" } }] },
 
   // ---- zika: variety ----
   { id: "zika-colorby", dataset: "zika", base: { d: "tree", c: "country" }, steps: [{ set: { c: "region" } }] },

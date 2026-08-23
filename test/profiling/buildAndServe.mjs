@@ -83,7 +83,7 @@ export async function startServer() {
   console.log(`[serve] starting: auspice view data test/data test/fetched-jsons  (log: ${logPath})`);
   serverProc = spawn(
     "node",
-    ["auspice.js", "view", "data", "test/data", "test/fetched-jsons"],
+    ["auspice.js", "view", "test/data", "test/fetched-jsons"],
     { cwd: ROOT, stdio: ["ignore", out, out] }
   );
   serverProc.on("error", (e) => console.error("[serve] spawn error:", e));

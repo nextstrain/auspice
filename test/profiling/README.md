@@ -1,30 +1,18 @@
-# Auspice profiling harness
+# Auspice profiling
+
+There are two harnesses in `test/profiling/`:
+
+1. `npm run profile` which collects JS timing measurements across a number of example datasets & actions.
+  Its intention is to be run against different versions of the code to see any performance changes.
+2. `npm run render-equiv` is a render-equivalence suite to check that in-app actions produce the exact same SVG DOM as a from-scratch full render of the same end state.
+
+## Timing profiles
 
 A headless, reproducible harness that measures Auspice's built-in `src/util/perf.js`
 timers (`timerStart`/`timerEnd`) across representative datasets and produces a ranked
 baseline of where time is spent. **Measure-only** — it changes no application code.
 
-## Render-equivalence suite (`npm run render-equiv`)
-
-A regression suite (`renderEquivalence.mjs` + `domSnapshot.mjs`) that guards the
-incremental tree-update path. For each operation (colorBy, layout, distance, filter,
-zoom, confidence, …) and for sequences of operations, it drives the **incremental**
-update in-app — via `history.pushState` + a `popstate` event, which the app's own
-listener turns into an incremental `phylotree.change()` (zero source changes) — and
-asserts the settled SVG DOM is **identical** to a from-scratch **full render** of the
-same end state (a fresh page at the app's resulting URL). Any mismatch is a stale-DOM
-regression.
-
-```bash
-npm run render-equiv                 # reuse current dist/ build
-npm run render-equiv -- --build      # force a fresh build first
-npm run render-equiv -- --only ebola-zoom,ebola-filter-date-colorby
-```
-
-Run it after any change to the tree render/update code. It surfaced (and we then
-fixed) the branch stem-offset divergence in the selective-redraw optimization.
-
-## Quick start
+#### Quick start
 
 ```bash
 # 1. build (--includeTiming, production) + serve data/ + run all scenarios
@@ -48,7 +36,7 @@ Outputs land in `test/profiling/baselines/`:
   scenario × marker × span: median/p95/count/total + raw samples).
 - `report-<gitSha>.md` — ranked hotspot report (also printed to stdout).
 
-## How it works (and why)
+#### How it works
 
 - **Timers must be compiled in.** Normal builds strip `timerStart`/`timerEnd`
   (`babel.config.cjs`). `cli/build.ts --includeTiming` keeps them in a **production,
@@ -73,27 +61,23 @@ Outputs land in `test/profiling/baselines/`:
   `networkidle`, which is meaningless for a 35k-tip D3 render), with a
   `svg#MainTree circle.tip` DOM fallback.
 
-## Datasets
 
-Uses whatever is in the repo's `data/` dir. The stress target is
-`data/spike-sm.json` (~35k tips, all four panels + tip-frequencies sidecar), which
-exercises every instrumented span. `zika`/`ebola` give fast small/medium baselines.
 
-## Known gotchas
+## Render-equivalence suite
 
-- The 55MB spike load is slow; scenarios use generous (180s) timeouts.
-- `updateFrequencyData` is debounced (~500ms) — spike scenarios wait it out.
-- Animation and large loads emit many console lines; that's expected.
-- If a run reports no timers, the served `dist/` is stale/stripped — rerun with `--build`.
+A regression suite (`renderEquivalence.mjs` + `domSnapshot.mjs`) that guards the
+incremental tree-update path. For each operation (colorBy, layout, distance, filter,
+zoom, confidence, …) and for sequences of operations, it drives the **incremental**
+update in-app — via `history.pushState` + a `popstate` event, which the app's own
+listener turns into an incremental `phylotree.change()` (zero source changes) — and
+asserts the settled SVG DOM is **identical** to a from-scratch **full render** of the
+same end state (a fresh page at the app's resulting URL). Any mismatch is a stale-DOM
+regression.
 
-## Files
+```bash
+npm run render-equiv                 # reuse current dist/ build
+npm run render-equiv -- --build      # force a fresh build first
+npm run render-equiv -- --only ebola-zoom,ebola-filter-date-colorby
+```
 
-| File | Role |
-|---|---|
-| `runProfiling.mjs` | entrypoint / flags / orchestration / guard |
-| `buildAndServe.mjs` | `--includeTiming` build guard + `auspice view` server |
-| `scenarios.mjs` | declarative scenario matrix |
-| `driveScenario.mjs` | per-trial page driving + console capture |
-| `consoleTimers.mjs` | timer-line parser + marker-tagging collector |
-| `aggregate.mjs` | samples → median/p95/total per (scenario × marker × span) |
-| `report.mjs` | baseline JSON + ranked markdown (+ Δ vs baseline) |
+Run it after any change to the tree render/update code.

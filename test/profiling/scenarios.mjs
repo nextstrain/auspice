@@ -32,7 +32,7 @@ export const scenarios = [
   },
   {
     id: "ebola-load",
-    dataset: "/ebola",
+    dataset: "/ebola-ebov-2013",
     params: { d: "tree,map,entropy" },
     steps: [],
     repeat: 5,
