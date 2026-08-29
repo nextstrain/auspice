@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { PanelSectionContainer } from "./styles";
+import { PanelOptionsContainer, PanelSectionContainer } from "./styles";
 import { Title, Tooltip } from "./annotatedTitle";
 import { PanelHeader, PanelId } from "./panelHeader";
 import { RootState } from "../../store";
@@ -31,6 +31,16 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
     setOptionsAreVisible(panelIsVisible)
   }, [panelIsVisible])
 
+  const [contentHeight, setContentHeight] = React.useState(1000);
+  const optionsContainer = React.useRef<HTMLDivElement>(null);
+
+  // FIXME: useLayoutEffect?
+  React.useEffect(() => {
+    if (optionsContainer.current) {
+      setContentHeight(optionsContainer.current.scrollHeight); // FIXME: offsetHeight?
+    }
+  }, [options]);
+
   return (
     <PanelSectionContainer>
       <PanelHeader
@@ -42,7 +52,9 @@ export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props
         optionsAreVisible={optionsAreVisible}
         setOptionsAreVisible={setOptionsAreVisible}
       />
-      {optionsAreVisible && options}
+      <PanelOptionsContainer ref={optionsContainer} className={`${optionsAreVisible ? "open" : ""}`} contentHeight={contentHeight}>
+        {options}
+      </PanelOptionsContainer>
     </PanelSectionContainer>
   );
 };
