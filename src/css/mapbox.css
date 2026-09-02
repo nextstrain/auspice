@@ -15,3 +15,9 @@
   background-size: 65px 20px;
   cursor: pointer;
 }
+
+/* Leaflet 1.9 introduced a font-size change. The following causes the (computed) font-sizes
+ * to be ~identical to how things were before the upgrade */
+.leaflet-control-attribution {
+  font-size: 11px;
+}

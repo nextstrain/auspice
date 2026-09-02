@@ -1,7 +1,61 @@
 # Changelog
 
-## version 2.73.2 - 2026/08/19
 
+
+
+> Auspice v3 is our first major release in almost 7 years (despite 73 feature releases!) which reflects our focus on keeping the interface for consuming projects as stable as possible.
+  A decision to render the map using vector tiles necessitated a major version bump as custom Auspice builds which configure the map will need to change.
+  We took this chance to make some other major changes to the CLI interface and move the codebase to a more modern style.
+
+
+* The map is now rendered client-side using vector tiles, configured via a MapLibre Style Spec JSON, and with [OpenFreeMap](https://openfreemap.org/) as our tile provider.
+  This should result in quicker loading times and sharper looking maps.
+  Since we are using a different tile provider the map may look slightly different, although we have tried to mirror our previous aesthetics as much as possible.
+  This is a breaking change for projects which used a custom map when building Auspice; please see our [updated API docs](https://docs.nextstrain.org/projects/auspice/en/stable/customise-client/api.html) or `DEV_DOCS.md` for full instructions on how to customise this, and how to convert mapbox styles JSON to the MapLibre Style Spec JSON we now use.
+
+
+* How datasets and narratives are specified in `auspice view` and `auspice develop` has changed.
+  A list of directories containing dataset JSONs and/or narrative markdown files are now provided as positional arguments, e.g. `auspice view datasets/` or `auspice view dir1/ dir2/`.
+  If there are multiple matching files for a certain URL then the first directory supplied to the CLI with a matching file is used.
+  The previous syntax (`--datasetDir X --narrativeDir Y`) remains but is now deprecated.
+  [#1967](https://github.com/nextstrain/auspice/pull/1967)
+
+* Auspice no longer includes default datasets.
+  This means `auspice` must be pointed at your own datasets and (optionally) narratives.
+  For development we still have `npm run fetch-test-data` which fetches datestamped datasets for testing.
+  [#2067](https://github.com/nextstrain/auspice/pull/2067)
+
+* Node.js v24 is now the minimum officially supported [#2066](https://github.com/nextstrain/auspice/pull/2066)
+
+* The Auspice package is now declared as using ES Modules not CJS (`import` syntax, not `require`).
+  There should be no changes needed for most consuming packages.
+  [#2066](https://github.com/nextstrain/auspice/pull/2066)
+  * If you have custom JS/TS code for server handlers, i.e. you are using `auspice view --handlers <JS|TS>`, then the format of your custom code (CJS vs ESM) depends on a few factors.
+    Typically, the consuming project's `package.json` sets `"type": "module"` and your custom code should follow that, however you can use `.cjs` or `.mjs` to specify the syntax explicitly.
+    If you are using CJS then you must also ensure the `module.exports` are statically defined.
+  * There are no changes to how Auspice consumes custom code for the client (frontend) via `auspice build --extend`
+
+
+* The Auspice server code is now (almost entirely) in TypeScript.
+  Running Auspice from source works directly from TS files as Node.js v24 can strip types, however when Auspice is installed via `npm` (i.e. into `node_modules`) this isn't possible; we thus transpile the TS code into JS at npm publish time.
+  See `DEV_DOCS.md` for more details.
+  [#2066](https://github.com/nextstrain/auspice/pull/2066), [#2088](https://github.com/nextstrain/auspice/pull/2088)
+* The ability for custom Auspice builds (via build-time extensions) to use Google Analytics has been removed.
+  This functionality was deprecated in version 2.44.0.
+  [#2082](https://github.com/nextstrain/auspice/pull/2082)
+
+* (Dev-only) Performance harnesses to profile function times and render-equivalence added.
+  [#2078](https://github.com/nextstrain/auspice/pull/2078)
+
+* (Dev-only) We no longer use Heroku for Auspice-specific review apps, instead leveraging nextstrain.org and auspice.us review apps for testing purposes. [#2067](https://github.com/nextstrain/auspice/pull/2067)
+
+* (Dev-only) Auspice is now released via [a Github Actions workflow](https://github.com/nextstrain/auspice/actions/workflows/release.yaml).
+  Auspice 2.73.2 was the first version published using this.
+  The version string is now set only in `package.json`, with the CLI & frontend code both reading that value.
+  [#2089](https://github.com/nextstrain/auspice/pull/2089), [#2092](https://github.com/nextstrain/auspice/pull/2092)
+
+
+## version 2.73.2 - 2026/08/19
 
 * Remove warning about large trees when viewing the dataset on MicrobeTrace, since MicrobeTrace v2.2 includes improvements for loading larger trees ([#2087](https://github.com/nextstrain/auspice/pull/2087))
 

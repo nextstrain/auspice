@@ -36,14 +36,19 @@ The initial Auspice page (i.e. the one which displays a listing of available dat
 External Requests
 -----------------
 
-Leaflet
-~~~~~~~
+Leaflet + MapLibre GL
+~~~~~~~~~~~~~~~~~~~~~
 
-We use `Leaflet <https://leafletjs.com/>`__ to display the map tiles.
+We use `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to display the map. MapLibre renders Mapbox Vector Tiles (MVT) client-side from a Mapbox style URL. Map tiles, sprites and fonts are requested from `OpenFreeMap <https://tiles.openfreemap.org>`__ by default.
 
-If a map is displayed by Auspice the individual tiles are requested from api.mapbox.com. Panning and zooming of the map result in futher requests for tiles. These are requested using our hardcoded access key, however this may change to a build-time-customisation in the future.
+.. note::
+
+  Where map assets are sourced from may be modified at build time, see see :ref:`the client customisation API documentation <client-api-available-customisations>` for more.
 
 Web Analytics (Optional)
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Auspice has the potential to include either Plausible Analytics or Google Analytics in a limited fashion. See :ref:`the client customisation API documentation <client-api-available-customisations>` for how to set this. Note that these requests are only made if you set up build-time customisation of the client. (For nextstrain.org we use `Plausible analytics <https://github.com/nextstrain/nextstrain.org/blob/2685e6b363cf70808fa11ee38ac520dfb3a9cdc4/auspice-client/customisations/config.json#L14>`__.)
+By default Auspice has no telemetry / tracking.
+There is an opt-in customisation to use Plausible Analytics, see :ref:`the client customisation API documentation <client-api-available-customisations>` for how to set this when you build the Auspice client.
+
+Note: For nextstrain.org we do `customise the Auspice client to use Plausible Analytics <https://github.com/nextstrain/nextstrain.org/blob/2685e6b363cf70808fa11ee38ac520dfb3a9cdc4/auspice-client/customisations/config.json#L14>`__.)

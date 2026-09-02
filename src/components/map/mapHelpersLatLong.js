@@ -221,13 +221,13 @@ const maybeConstructTransmissionEvent = (
   try {
     latOrig = demeToLatLongs[nodeLocation].latitude;
     longOrig = demeToLatLongs[nodeLocation].longitude;
-  } catch (e) {
+  } catch (_err) {
     demesMissingLatLongs.add(nodeLocation);
   }
   try {
     latDest = demeToLatLongs[childLocation].latitude;
     longDest = demeToLatLongs[childLocation].longitude;
-  } catch (e) {
+  } catch (_err) {
     demesMissingLatLongs.add(childLocation);
   }
 
@@ -503,7 +503,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
           transmissionDataCopy[index].color = col;
           transmissionDataCopy[index].visible = vis;
         });
-      } catch (err) {
+      } catch (_err) {
         console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
       }
     });

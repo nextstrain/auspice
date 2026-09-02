@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22, 24]
+        node: [24, 26]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -30,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [20, 22, 24]
+        node: [24, 26]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -38,9 +38,28 @@ jobs:
           node-version: ${{ matrix.node }}
       # Build is implicit with the "prepare" life cycle script
       - run: npm ci --loglevel verbose
-      - run: npm run get-data
+      - run: npm run fetch-test-data
       - run: npx playwright install chromium
       - run: npm run smoke-test
+
+  # Packs & installs Auspice into a throwaway project so the CLI runs from within
+  # node_modules -- the condition no other job exercises. See DEV_DOCS.md.
+  packaged-cli-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [24, 26]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --version
+      # Note: --ignore-scripts skips an otherwise unnecessary Auspice build, but
+      # also skips life cycle scripts for dependencies. If the job fails here,
+      # try removing this flag.
+      - run: npm ci --loglevel verbose --ignore-scripts
+      - run: npm run test:package
 
   lint:
     runs-on: ubuntu-latest

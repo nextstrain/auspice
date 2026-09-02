@@ -71,27 +71,12 @@ A ``204`` reponse will cause Auspice to show its splash page listing the availab
 **URL query arguments:**
 
 -  ``prefix`` (required) - the pathname of the requesting page in Auspice. Use this to determine which narrative to return.
--  ``type`` (optional) - the format of the data returned (see below for more information). Current valid values are "json" and "md". If no type is specified the server will use "json" as a default (for backwards compatibility reasons). Requests to this API from the Auspice client are made with ``type=md``.
+-  ``type`` (required) - this must be ``type=md`` for historical reasons
 
 **Response (on success):**
 
-The response depends on the ``type`` specified in the query.
+The narrative file is sent to the client (unmodified, to be parsed client-side).
 
-If a markdown format is requested, then the narrative file is sent to the client unmodified to be parsed on the client.
-
-If a JSON is requested then the narrative file is parsed into JSON format by the server. For Auspice versions prior to v2.18 this was the only expected behavior. The transformation from markdown (i.e. the narrative file itself) to JSON is via the ``parseNarrativeFile()`` function (see below for how this is exported from Auspice for use in other servers). Here, roughly, is the code we use in the auspice server for this transformation:
-
-.. code:: js
-
-   const fileContents = fs.readFileSync(pathName, 'utf8');
-   if (type === "json") {
-     const blocks = parseNarrative(fileContents);
-     res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-   }
-
-.. note::
-
-   While the Auspice client (from v2.18 onwards) always requests the ``type=md``, it will attempt to parse the response as JSON if markdown parsing fails, in an effort to remain backwards compatible with servers which may be using an earlier API.
 
 --------------
 
@@ -100,7 +85,7 @@ If a JSON is requested then the narrative file is parsed into JSON format by the
 Supplying custom handlers to the Auspice server
 -----------------------------------------------
 
-The provided Auspice servers -- i.e. ``auspice view`` and ``auspice develop`` both have a ``--handlers <JS>`` option which allows you to define your own handlers. The provided JavaScript file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
+The provided Auspice servers -- i.e. ``auspice view`` and ``auspice develop`` both have a ``--handlers <JS|TS>`` option which allows you to define your own handlers. The provided file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
 
 ============= ========= ====================
 function name arguments API endpoint
@@ -129,6 +114,22 @@ Here's a pseudocode example of an implementation for the ``getAvailable`` handle
      }
    };
 
+The handlers are loaded with a dynamic ``import()``, so the file should use ESM syntax in order to avoid subtle export-visibility problems.
+(Whether a ``.js`` file is treated as ESM or CommonJS is decided by the ``type`` field of the nearest ``package.json`` (defaulting to CJS if not set); use the ``.mjs`` extension to make it explicit.)
+
+.. _server-api-typescript-handlers:
+
+TypeScript handlers
+~~~~~~~~~~~~~~~~~~~
+
+A TypeScript handlers file works too -- Node strips the types on the fly. As above, use ``.mts`` if the nearest ``package.json`` doesn't set ``"type": "module"``.
+The following caveats apply, and follow from Node's `type stripping <https://nodejs.org/api/typescript.html#type-stripping>`__:
+
+-  **No type checking is performed.** The types are erased, not validated. Run ``tsc --noEmit`` yourself if you want them checked.
+-  **Erasable syntax only.** ``enum``, runtime ``namespace``, parameter properties and decorators are rejected with ``ERR_UNSUPPORTED_TYPESCRIPT_SYNTAX``; use ``const enum``-free alternatives and plain assignments instead. Import aliases (``import Foo = require(...)``) are likewise unsupported.
+-  **No ``.tsx``.** JSX is not stripped.
+-  **Not from inside ``node_modules``.** Node refuses to strip types for any file resolved under a ``node_modules/`` directory (``ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING``). This applies to the handlers file itself and to any relative file it imports; published dependencies must be plain JavaScript.
+
 --------------
 
 .. _server-api-importing-code-from-auspice:
@@ -136,15 +137,8 @@ Here's a pseudocode example of an implementation for the ``getAvailable`` handle
 Importing code from Auspice
 ---------------------------
 
-The servers included in Auspice contain lots of useful code which you may want to use to either write your own handlers or entire servers. For instance, the code to convert v1 dataset JSONs to v2 JSONs (which the client requires) can be imported into your code so you don't have to reinvent the wheel!
-
-Currently
-
-.. code:: js
-
-   const auspice = require("auspice");
-
-returns an object with two properties:
+While Auspice is predominantly a frontend (client) app, it also contains some functionality that you may wish to use in a custom nodejs script/app.
+Currently there is one exported function, ``convertFromV1``.
 
 .. _server-api-convertfromv1:
 
@@ -155,6 +149,7 @@ returns an object with two properties:
 
 .. code:: js
 
+   import { convertFromV1 } from "auspice";
    const v2json = convertFromV1({tree, meta})
 
 where ``tree`` is the v1 tree JSON, and ``meta`` the v1 meta JSON.
@@ -162,26 +157,3 @@ where ``tree`` is the v1 tree JSON, and ``meta`` the v1 meta JSON.
 **Returns:**
 
 An object representing the v2 JSON `defined by this schema <https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json>`__.
-
-``parseNarrativeFile``
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. warning::
-
-   This function is deprecated as of vXXX. You can now send the untransformed contents of the narrative file (markdown) for client-side parsing. See :ref:`above <server-api-charon-getnarrative>` for more details.
-
-**Signature:**
-
-.. code:: js
-
-   const blocks = parseNarrativeFile(fileContents);
-
-where ``fileContents`` is a string representation of the narrative Markdown file.
-
-**Returns:**
-
-An array of objects, each entry representing a different narrative "block" or "page". Each object has properties
-
-* ``__html`` -- the HTML to render in the sidebar to form the narrative
-* ``dataset`` -- the dataset associated with this block
-* ``query`` -- the query associated with this block

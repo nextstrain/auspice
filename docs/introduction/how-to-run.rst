@@ -8,6 +8,10 @@ Auspice is run as a command line program -- ``auspice`` -- with various subcomma
 -  ``auspice develop --help``
 -  ``auspice convert --help``
 
+.. note::
+
+  If you just want to visualise your JSON datasets (or a newick tree) in Auspice, you can use the stand-alone web-app `auspice.us <https://auspice.us>`__ which allows drag-and-drop of files onto the browser.
+
 How to Get an Example Dataset Up and Running
 --------------------------------------------
 
@@ -22,7 +26,7 @@ And then run ``auspice`` via:
 
 .. code:: bash
 
-   auspice view --datasetDir datasets
+   auspice view datasets
 
 This will allow you to run Auspice locally (i.e. from your computer) and view the dataset which is behind `nextstrain.org/zika <https://nextstrain.org/zika>`__. :ref:`See below <introduction-obtaining-a-set-of-input-files>` for how to download all of the data available on `nextstrain.org <https://nextstrain.org>`__.
 
@@ -31,15 +35,9 @@ To analyse your own data, please see the tutorials on the `nextstrain docs <http
 ``auspice view``
 ----------------
 
-This is the main command we'll run Auspice with, as it makes Auspice available in a web browser for you. There are two common arguments used:
+This is the main command we'll run Auspice with, as it makes Auspice available in a web browser for you.
 
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| argument name       | data supplied            | description                                                                                             |
-+=====================+==========================+=========================================================================================================+
-| datasetDir          | PATH                     | Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers.            |
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
-| narrativeDir        | PATH                     | Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers. |
-+---------------------+--------------------------+---------------------------------------------------------------------------------------------------------+
+Provide one or more pats to search for datasets (JSON) or narratives (markdown) files in: ``auspice view PATH [PATH ...]`` (see above for how to obtain a dataset JSON to start with).
 
 For more complicated setups, where you define your own server handlers, see :ref:`supplying custom handlers to the Auspice server <server-api-supplying-custom-handlers>`.
 
@@ -95,9 +93,6 @@ Datasets JSONs include:
 * Frequency JSON (optional) - `example here <http://data.nextstrain.org/flu_seasonal_h3n2_ha_2y_tip-frequencies.json>`__
    * Generates the frequencies panel, e.g. on `nextstrain.org/flu <https://nextstrain.org/flu>`__.
 
-.. note::
-
-   We are working on ways to make datasets in Newick / Nexus formats available. You can see an early prototype of this at `auspice-us.herokuapp.com <https://auspice-us.herokuapp.com/>`__ where you can drop on Newick (and CSV) files. Using BEAST trees is possible, but you have to use Augur to convert them first.
 
 .. note::
 
@@ -123,12 +118,3 @@ Narratives
 For narratives, please see `Writing a Narrative <https://docs.nextstrain.org/en/latest/tutorials/narratives-how-to-write.html>`__ for a description of the file format.
 
 .. _introduction-obtaining-a-set-of-input-files:
-
-Obtaining a Set of Input Files
-------------------------------
-
-If you'd like to download the dataset JSONs which are behind the core-datasets shown on `nextstrain.org <https://nextstrain.org>`__, then you can run `this script <https://github.com/nextstrain/auspice/blob/master/scripts/get-data.sh>`__ which will create a ``./data`` directory for you.
-
-The nextstrain-maintained narratives are stored in the `nextstrain/narratives github repo <https://github.com/nextstrain/narratives>`__. You can obtain these by cloning that repo.
-
-You can then run ``auspice view --datasetDir data --narrativeDir <path-to-narratives>`` to visualise all of the `nextstrain.org <https://nextstrain.org>`__ datasets locally.

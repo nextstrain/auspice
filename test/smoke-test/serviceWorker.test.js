@@ -7,16 +7,18 @@
  * and drives it with Playwright.
  *
  * This is unrelated to the default build used by ../smoke-test/urls.test.js, so
- * it does not require `npm run get-data`.
+ * it does not require `npm run fetch-test-data`.
  */
-const {test, expect} = require('@playwright/test');
-const {spawn} = require('child_process');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const webpack = require('webpack');
+import {test, expect} from '@playwright/test';
+import {spawn} from 'child_process';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import {fileURLToPath} from 'url';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
+
 const PORT = process.env.SERVICE_WORKER_TEST_PORT || '4001';
 const BASE_URL = `http://localhost:${PORT}`;
 
@@ -59,38 +61,25 @@ test.afterAll(async () => {
 });
 
 /**
- * Builds Auspice into `outputDir/dist` with the service worker enabled, by
- * calling the webpack config generator directly (bypassing `auspice build`'s
- * CLI/argparse layer, which we don't need here).
+ * Builds Auspice into `outputDir/dist` with the service worker enabled by
+ * spawning ./buildServiceWorkerApp.js as its own `node` process. The build must
+ * not run in-process here: webpack.config.cjs require()s TypeScript files that
+ * rely on Node's native type stripping, which Playwright's module loader breaks.
+ * (We use a custom builder script in order to (a) control the output location
+ * and (b) take shortcuts to speed up the build time.)
  */
 function buildWithServiceWorkerEnabled(outputDir) {
-  const generateConfig = require(path.join(REPO_ROOT, 'webpack.config.js')).default;
-
-  // webpack.config.js reads from process.env to decide whether to include the service worker plugin.
-  // Temporarily set it here, then restore the original value to avoid global env side effects.
-  const originalEnv = process.env.AUSPICE_ENABLE_SERVICE_WORKER;
-  process.env.AUSPICE_ENABLE_SERVICE_WORKER = 'true';
-  let config;
-  try {
-    config = generateConfig({devMode: false, customOutputPath: outputDir});
-    // Disable minimization and compression to speed up the test build
-    config.optimization = {
-      ...config.optimization,
-      minimize: false,
-    };
-    config.plugins = config.plugins.filter(
-      (plugin) => plugin.constructor.name !== "CompressionPlugin"
-    );
-  } finally {
-    if (originalEnv === undefined) delete process.env.AUSPICE_ENABLE_SERVICE_WORKER;
-    else process.env.AUSPICE_ENABLE_SERVICE_WORKER = originalEnv;
-  }
+  const proc = spawn(
+    'node',
+    [path.join(__dirname, 'buildServiceWorkerApp.js'), outputDir],
+    {stdio: ['ignore', 'inherit', 'inherit']}
+  );
 
   return new Promise((resolve, reject) => {
-    webpack(config).run((err, stats) => {
-      if (err) return reject(err);
-      if (stats.hasErrors()) return reject(new Error(stats.toString({colors: false})));
-      resolve();
+    proc.on('error', reject);
+    proc.on('exit', (code) => {
+      if (code === 0) resolve();
+      else reject(new Error(`Service worker build exited with code ${code}`));
     });
   });
 }

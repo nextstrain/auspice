@@ -16,7 +16,7 @@ const DebugNarrative = lazy(() => import("./components/narrativeEditor/narrative
  * This triggers a window resize which in turn triggers a general
  * rerender. A bit ham-fisted but gets the job done for the time being
  * */
-if (module.hot) {
+if (import.meta.webpackHot) {
   setTimeout(() => window.dispatchEvent(new Event('resize')), 500);
 }
 

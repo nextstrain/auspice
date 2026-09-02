@@ -1,14 +1,20 @@
-const webpack = require("webpack");
-const path = require("path");
-const generateWebpackConfig = require("../webpack.config.js").default;
-const utils = require("./utils");
+import webpack from "webpack";
+import path from "path";
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import * as utils from "./utils.ts";
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const generateWebpackConfig = require("../webpack.config.cjs").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
 
-const addParser = (parser) => {
+const addParser = (parser): void => {
   const description = `Build the client source code bundle.
   For development, you may want to use "auspice develop" which recompiles code on the fly as changes are made.
   You may provide customisations (e.g. code, options) to this step to modify the functionality and appearance of auspice.
-  To serve the bundle you will need a server such as "auspice view". 
+  To serve the bundle you will need a server such as "auspice view".
   `;
 
   const subparser = parser.addParser('build', {addHelp: true, description});
@@ -24,7 +30,7 @@ const addParser = (parser) => {
   subparser.addArgument('--serverless', {action: "storeTrue", help: SUPPRESS});
 };
 
-const run = (args) => {
+const run = (args): void => {
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
@@ -64,14 +70,14 @@ const run = (args) => {
 /* Where should the built files be saved? (or sourced??)
  * This may grow more complex over time
  */
-function getCustomOutputPath(extensions) {
+function getCustomOutputPath(extensions): string | false {
   if (extensions && path.resolve(__dirname, "..") !== process.cwd()) {
     return process.cwd();
   }
   return false;
 }
 
-module.exports = {
+export {
   addParser,
   run
 };

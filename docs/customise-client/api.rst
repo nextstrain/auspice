@@ -28,7 +28,6 @@ The following are definable as top-level keys of the JSON file. A useful referen
 -  ``browserTitle`` The browser title for the page. Defaults to "auspice" if not defined.
 -  ``finePrint`` String of Markdown to add to the "fine print" at the bottom of pages.
 -  ``plausibleDataDomain`` plausible.io analytics (see below)
--  ``googleAnalyticsKey`` You can specify a Google Analytics key to enable (some) analytics functionality. This is deprecated and will be removed from an upcoming release.
 -  ``serverAddress`` Specify the address / prefix which the auspice client uses for API requests.
 -  ``mapTiles`` Specify the address (and other information) for the tiles used to render the map.
 -  ``enableDatasetEditor`` Set to ``true`` to turn on the ability to edit datasets and colors in the app.
@@ -161,19 +160,56 @@ By default, the client makes API requests (:doc:`as detailed here <requests>`) t
 Custom Map tiles
 ~~~~~~~~~~~~~~~~
 
-Auspice uses `Leaflet <https://leafletjs.com/>`__ to render the map, which requires access to a tile set in order to render the geography. By default, auspice uses `Mapbox <https://www.mapbox.com/>`__ for these tiles, and we make these available for local use of auspice. If you are distributing your own version of auspice (i.e. not running it locally) you must set an appropriate API address here so that the map can fetch suitable tiles.
+.. note::
+  Auspice v3 introduced a breaking change to this interface. This page reflects the v3 API.
+  Navigate to Auspice v2 docs for the raster-tile URL approach.
+
+Background
+**********
+  
+Auspice uses `Leaflet <https://leafletjs.com/>`__ with `MapLibre GL JS <https://maplibre.org/>`__ to render the map using vector tiles. By default, Auspice uses its own `map-styles.json <https://github.com/nextstrain/auspice/blob/master/src/util/map-styles.json>`__, a stylesheet originally based on `OpenMapTiles' positron theme <https://github.com/openmaptiles/positron-gl-style>`__.
+
+The renderer is provider-agnostic: it simply renders whatever `MapLibre style <https://maplibre.org/maplibre-style-spec/>`__ you give it, any provider that serves a MapLibre-compatible style (e.g. MapTiler, Stadia Maps, or a self-hosted style) should work.
+
+If you wish to use **Mapbox styles** then you will need to transform the stylesheet as MapLibre doesn't understand the proprietary ``mapbox://`` protocol. 
+We have a helper script `transform-mapbox-style-json.js <https://github.com/nextstrain/auspice/blob/master/scripts/transform-mapbox-style-json.js>`__ which will rewrite those references to their ``https://api.mapbox.com/...`` equivalents (and template the token as ``<ACCESS_TOKEN>``); see the `mapbox example customisation <https://github.com/nextstrain/auspice/tree/master/test/example-customisations/mapbox/>`__ for an example of this.
+
+.. note::
+
+  As tiles are fetched, Auspice rewrites any ``http://`` requests to ``https://``. This guards against mixed-content and CORS failures.
+
+Customisation structure
+***********************
 
 .. code:: json
 
    {
      "mapTiles": {
-       "api": "API address for Leaflet to fetch map tiles",
-       "attribution": "HTML-formatted attribution string to be displayed in bottom-right-hand corner of map",
+       "style": "A MapLibre style JSON (inlined)",
+       "accessToken": "(optional) access token for the tile provider",
+       "attribution": "HTML-formatted attribution string to be displayed in the bottom-right-hand corner of the map",
        "mapboxWordmark": "(optional) should the Mapbox logo be displayed in the bottom-left of the map? (boolean)"
      }
    }
 
-Please see `this discussion post <https://discussion.nextstrain.org/t/build-with-newest-nextstrain-ncov-has-api-requests-to-mapbox-403-forbidden/396/11?u=james>`__ for a hands-on guide to setting custom map tile info. For some examples of other tile sets you may use, see the `OpenStreetMap wiki <https://wiki.openstreetmap.org/wiki/Tile_servers>`__, and please remember to adhere to the licenses and terms of use for each tile server. The API address contains parameters as specified by the `Leaflet API <https://docs.mapbox.com/api/overview/>`__.
+If ``mapTiles`` is provided it fully replaces the default; specify every field you need (there is no merging with our defaults).
+
+``style``
+  Either a URL string that resolves to a `MapLibre style document <https://maplibre.org/maplibre-style-spec/>`__, or the style document inline as a JSON object. The document declares everything the map needs — sources (tiles), sprites, fonts (glyphs), and layers — so in most cases this is the only thing you need to provide.
+
+``accessToken``
+  Optional, and only relevant if your provider requires a key. Rather than embedding the key directly in the style, place the string ``<ACCESS_TOKEN>`` wherever the key value is required and supply the key here; it is substituted in at runtime. Because the placeholder is the *value* only, the surrounding query parameter comes from your provider's own URLs (``?access_token=<ACCESS_TOKEN>`` for Mapbox, ``?key=<ACCESS_TOKEN>`` for MapTiler, etc.), so the same mechanism works across providers. Providers that don't need a key can omit this field entirely.
+
+
+Examples
+********
+
+Examples of map customisations are available in the Auspice repo:
+
+1. `(Transformed) Mapbox styles <https://github.com/nextstrain/auspice/tree/master/test/example-customisations/mapbox/>`__
+
+2. `OpenFreeMap's positron theme <https://github.com/nextstrain/auspice/tree/master/test/example-customisations/openfreemap/>`__
+
 
 --------------
 
@@ -181,5 +217,3 @@ Tracking Analytics
 ~~~~~~~~~~~~~~~~~~
 
 Auspice has in-built support for `Plausible Analytics <https://plausible.io/docs>`__. To enable this you will need to provide the ``plausibleDataDomain`` in your extensions. The analytics are not included when running Auspice in development mode.
-
-Auspice has support for Google Analytics but this is deprecated and will be removed in a future release. Google Analytics run when the ``googleAnalyticsKey`` extension is set and only run in production mode.

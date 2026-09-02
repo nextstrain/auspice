@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import i18n from "i18next";
 
 import { controlsWidth } from "../../util/globals";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { CHANGE_LANGUAGE } from "../../actions/types";
 import CustomSelect from "./customSelect";
 
@@ -20,7 +19,7 @@ class Language extends React.Component {
         try {
           const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`);
           i18n.addResourceBundle(lang, ns, res.default);
-        } catch (err) {
+        } catch (_err) {
           console.error(`Language ${lang} not found!`);
         }
       }
@@ -54,7 +53,6 @@ class Language extends React.Component {
 
   async changeLanguage(language) {
     if (!language || language === this.props.language) return;
-    analyticsControlsEvent("change-language");
     await this.ensureLanguageResources(language);
     i18n.changeLanguage(language);
     this.props.dispatch({ type: CHANGE_LANGUAGE, data: language });

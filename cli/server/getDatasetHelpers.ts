@@ -8,34 +8,35 @@
 *
 */
 
+import * as utils from "../utils.ts";
+import queryString from "query-string";
+import { convertFromV1 } from "./convertJsonSchemas.ts";
+import fs from "fs";
 
-const utils = require("../utils");
-const queryString = require("query-string");
-const path = require("path");
-const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
-const fs = require("fs");
-
-const handleError = (res, clientMsg, serverMsg="", code=500) => {
+export const handleError = (res, clientMsg, serverMsg="", code=500): void => {
   utils.warn(`${clientMsg} -- ${serverMsg}`);
   return res.status(code).type("text/plain").send(clientMsg);
 };
 
-const splitPrefixIntoParts = (url) => url
+const splitPrefixIntoParts = (url): string[] => url
   .replace(/^\//, '')
   .replace(/\/$/, '')
   .split("/");
 
 
 /**
- * Basic interpretation of an auspice request
- * @returns {Object} keys: `dataType`, `parts`
+ * Parses the dataset URL query into an object with two keys 'parts' and 'dataType'
+ *
+ * @returns {Object}   ret
+ * @returns {string[]} ret.parts is the dataset name spit on '/' character
+ * @returns {string}   ret.dataType is the dataset type ('dataset', 'root-sequence' etc)
  */
-const interpretRequest = (req) => {
-  utils.log(`GET DATASET query received: ${req.url.split('?')[1]}`);
+export const interpretRequest = (req): {parts: string[], dataType?: string} => {
   const query = queryString.parse(req.url.split('?')[1]);
+  utils.log(`[GET DATASET] ${Object.entries(query).map(([k,v]) => `${k}: '${v}'`).join(', ')}`);
   if (!query.prefix) throw new Error("'prefix' not defined in request");
   const datanameParts = splitPrefixIntoParts(query.prefix);
-  const info = {parts: datanameParts};
+  const info: {parts: string[], dataType?: string} = {parts: datanameParts};
   /* query.type is used to indicate which sidecar file should be fetched,
   without it we fetch the "main" dataset JSON. See the `Dataset` constructor
   in `./src/actions/loadData.js` for which sidecars auspice may try to fetch */
@@ -46,66 +47,36 @@ const interpretRequest = (req) => {
   } else if (sidecars.includes(query.type)) {
     info.dataType = query.type;
   } else {
-    throw new Error(`Unknown file type '${query.type}' requested.`);
+    throw new Error(`Unknown dataset type '${query.type}' requested.`);
   }
   return info;
 };
 
 /**
- * Given a request, if the dataset does not exist then either
- * (a) redirect to an appropriate dataset if possible & return `true`
- * (b) throw.
- * If the dataset existed then return `false` as no redirect necessary.
+ * Given a request for which there is no perfect match, return a close match
+ * if one exists else return false
  */
-const redirectIfDatapathMatchFound = (res, info, availableDatasets) => {
+export const closestMatch = (requestedDatasetParts, availableDatasets): string | false => {
   let matchingDatasets = availableDatasets;
   let i;
-  const matchDatasetRequest = (d) => d.request.split("/")[i] === info.parts[i];
+  const matchDatasetRequest = (d): boolean => d.request.split("/")[i] === requestedDatasetParts[i];
   // Filter gradually by path fragment, starting from the root
-  for (i = 0; i < info.parts.length; i++) {
+  for (i = 0; i < requestedDatasetParts.length; i++) {
     const newMatchingDatasets = matchingDatasets.filter(matchDatasetRequest);
     if (!newMatchingDatasets.length) break;
     matchingDatasets = newMatchingDatasets;
   }
-  // If root fragment does cannot be matched, throw
-  if (!i) throw new Error(`${info.parts.join("/")} not in available datasets`);
+  // If root fragment cannot be matched return false (no closest match found)
+  if (!i) return false;
   // If best match is not equal to path requested, redirect
-  if (matchingDatasets[0].request !== info.parts.join("/")) {
-    res.redirect(`./getDataset?prefix=/${matchingDatasets[0].request}`);
-    return true;
+  if (matchingDatasets[0].request !== requestedDatasetParts.join("/")) {
+    return matchingDatasets[0].request;
   }
   return false;
 };
 
-/**
- * sets info.address.
- * if we need v1 datasets then `info.address` will be an object with `meta`
- * and `tree` keys. Otherwise `info.address` will be a string of the fetch
- * path.
- * @sideEffect sets `info.address` {Object | string}
- * @throws
- */
-const makeFetchAddresses = (info, datasetsPath, availableDatasets) => {
-  if (info.dataType !== "dataset") {
-    info.address = path.join(
-      datasetsPath,
-      `${info.parts.join("_")}_${info.dataType}.json`
-    );
-  } else {
-    const requestStr = info.parts.join("/"); // TO DO
-    const availableInfo = availableDatasets.filter((d) => d.request === requestStr)[0];
-    if (availableInfo.v2) {
-      info.address = path.join(datasetsPath, `${info.parts.join("_")}.json`);
-    } else {
-      info.address = {
-        meta: path.join(datasetsPath, `${info.parts.join("_")}_meta.json`),
-        tree: path.join(datasetsPath, `${info.parts.join("_")}_tree.json`)
-      };
-    }
-  }
-};
 
-const sendJson = async (res, info) => {
+export const sendJson = async (res, info): Promise<void> => {
   if (typeof info.address === "string") {
     /* In general, JSONs are designed such that no server modifications
     are needed by the server. This allows us to read as a stream and
@@ -140,7 +111,7 @@ const sendJson = async (res, info) => {
  * (c) differ from the `currentDatasetUrl` by only 1 part
  * Note: the "parts" of the URL are formed by splitting it on `"/"`
  */
-const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+export const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls): string[] => {
   const currentDatasetUrlArr = currentDatasetUrl.split('/');
 
   const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
@@ -169,13 +140,4 @@ const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls)
   });
 
   return availableTangleTreeOptions;
-};
-
-module.exports = {
-  interpretRequest,
-  redirectIfDatapathMatchFound,
-  makeFetchAddresses,
-  handleError,
-  sendJson,
-  findAvailableSecondTreeOptions
 };

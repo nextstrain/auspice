@@ -10,7 +10,6 @@ import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 /* A U S P I C E   I M P O R T S */
 import store from "./store";
-import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 import Root from "./root";
 /* I N T E R N A T I O N A L I Z A T I O N */
 import i18n from "i18next";
@@ -28,9 +27,6 @@ import 'typeface-lato';
 
 /* set up non-redux state storage for the animation - use this conservitavely! */
 if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
-
-/* google analytics */
-initialiseGoogleAnalyticsIfRequired();
 
 /* service worker */
 if (process.env.ENABLE_SERVICE_WORKER && 'serviceWorker' in navigator) {
@@ -72,4 +68,3 @@ const renderApp = () => {
 };
 
 renderApp();
-

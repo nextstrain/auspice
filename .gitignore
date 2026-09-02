@@ -1,5 +1,6 @@
 ### App specific ###
 /dist/
+/cli-build/
 big_flu
 /data/
 /releases/
@@ -7,6 +8,8 @@ big_flu
 s3/
 /local_narratives/
 /datasets/
+/test/profiling/baselines/
+!test/profiling/baselines/.gitkeep
 
 ### OSX ###
 .DS_Store

@@ -5,7 +5,7 @@
  * run from the repo root.
  */
 
-const fs = require('fs');
+import fs from 'fs';
 
 function main() {
   const releaseNotes = [];

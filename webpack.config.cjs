@@ -3,16 +3,21 @@ const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
-const utils = require('./cli/utils');
+const chalk = require('chalk');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
 const zlib = require("zlib");
 
+const verbose = (msg) => {
+  /* Same fn as in `cli/utils.ts` -- see DEV_DOCS */
+  if (global.AUSPICE_VERBOSE) console.log(chalk.greenBright(`[verbose]\t${msg}`));
+};
+
 /* Webpack config generator */
 
 const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
-  utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
+  verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
   // Format is either "libName" or "libName:libPath"
@@ -57,9 +62,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     const dir = path.resolve(__dirname, path.dirname(extensionPath));
     aliasesToResolve["@extensions"] = dir;
     extensionData = JSON.parse(fs.readFileSync(extensionPath, {encoding: 'utf8'}));
-    if (extensionData.googleAnalyticsKey) {
-      console.log(`DEPRECATION WARNING: your extensions define a Google Analytics key (${extensionData.googleAnalyticsKey}) but GA will be removed from a future release.`);
-    }
     // console.log("extensionData", extensionData);
   }
   const enableServiceWorker = !devMode && process.env.AUSPICE_ENABLE_SERVICE_WORKER === "true";
@@ -154,7 +156,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     customOutputPath ?
       path.resolve(customOutputPath, "dist") :
       path.resolve(__dirname, "dist");
-  utils.verbose(`Webpack writing output to: ${outputPath}`);
+  verbose(`Webpack writing output to: ${outputPath}`);
 
   /**
    * Here we put the libraries that are unlikely to change for a long time.
@@ -238,6 +240,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     resolve: {
       alias: aliasesToResolve,
       extensions: ['.ts', '.tsx', '...'],
+      fullySpecified: false,
       fallback: {
         buffer: require.resolve("buffer/"),
         fs: false
@@ -297,9 +300,15 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       rules: [
         {
           test: /\.(ts|js)x?$/,
+          type: "javascript/auto",
+          resolve: { fullySpecified: false }
+        },
+        {
+          test: /\.(ts|js)x?$/,
           loader: 'babel-loader',
           exclude: [
-            /node_modules\/(core-js|regenerator-runtime)/
+            /node_modules\/(core-js|regenerator-runtime)/,
+            /node_modules\/maplibre-gl/
           ],
           options: {
             cwd: path.resolve(__dirname)

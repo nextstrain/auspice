@@ -133,7 +133,7 @@ function _reduxControls(
 
   /* geographic resolutions */
   if (newMetadata.geographic?.length && !state.panelsAvailable.includes("map")) {
-    updates.panelsAvailable = [...state.panelsAvailable, "map"],
+    updates.panelsAvailable = [...state.panelsAvailable, "map"];
     updates.panelsToDisplay = [...updates.panelsAvailable];
     updates.canTogglePanelLayout = hasMultipleGridPanels(updates.panelsAvailable);
     updates.geoResolution = newMetadata.geographic[0].key;

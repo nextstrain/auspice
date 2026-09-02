@@ -67,6 +67,44 @@ The various moving parts involved are:
 * `@babel/preset-typescript` is used by babel-loader (via webpack) to parse `.ts(x)` files
 
 
+## The CLI is transpiled for publishing
+
+The CLI (`auspice ...`) is written in TypeScript under `cli/`, and when Auspice is installed from source then `auspice.js` loads `cli/index.ts` and Node (24+) strips the types on the fly.
+
+That doesn't work once the package is installed as Node refuses to strip types for any file under a `node_modules/` path (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`).
+We therefore transpile the `cli/*` TS code to `cli-build/*` JS files via `npm run build:cli`. 
+This happens at publish time (via [npm's prepare life-cycle script](https://docs.npmjs.com/cli/v8/using-npm/scripts#life-cycle-scripts)), so the published package ships `cli-build/`, a plain-JavaScript transpilation of `cli/`, and omits `cli/` entirely (via `.npmignore`).
+This has two consequences:
+ - Installing from git with `--ignore-scripts` skips `prepare` and leaves you with an unusable CLI
+ - `webpack.config.cjs` and `babel.config.cjs` must not import from `cli/`, as that directory won't exist
+
+Because `cli-build/` mirrors `cli/` 1:1 we can use relative filepaths such as `../webpack.config.cjs`, `../package.json`.
+The `.ts` import specifiers are rewritten to `.js` on the way out by TypeScript's  `rewriteRelativeImportExtensions`.
+The two entry points, `auspice.js` (the CLI) and `index.js` (what's available for other projects to import in JS/TS code) both go through `cli-entry.js`, which picks between the two directories: 
+
+  - `cli/` present ⇒ source checkout ⇒ run the `.ts`
+  - `cli/` absent ⇒ installed package ⇒ run `cli-build/`
+
+Note that type errors do not fail `build:cli` — `tsc` emits regardless. `npm run type-check` remains the gate, and it type-checks `cli/` via `cli/tsconfig.json`.
+
+
+### Running the transpiled CLI from a source install
+
+Set `AUSPICE_CLI=build` to run `cli-build/` from a source checkout, i.e. what consumers of the
+published package will run:
+
+```sh
+npm run build:cli   # or leave `npm run build:cli:watch` going
+AUSPICE_CLI=build node auspice.js view --verbose test/data
+```
+(`AUSPICE_CLI=source` forces the TypeScript sources)
+
+### Custom handler files can be TypeScript
+
+The `--handlers` file passed to `auspice view` / `auspice develop` lives in the user's own project, not under `node_modules`, so Node type-strips it normally and `.ts`/`.mts` handlers work.
+See [the server API docs](./docs/server/api.rst) for more details.
+
+
 ## Tests
 
 Auspice has various tests in place, although test coverage is sporadic.
@@ -93,9 +131,14 @@ General advice for writing tests:
 
 > Smoke tests are currently very limited but we may expand these in the future
 
-1. Fetch datasets with `npm run get-data`.
+1. Fetch testing datasets with `npm run fetch-test-data`.
 2. Install the testing browser with `npx playwright install chromium`.
 3. Run `npm run smoke-test`.
+
+#### Packaged CLI test
+
+`npm run test:package` packs the package and installs it into a throwaway project, then runs the CLI from `node_modules`.
+This aims to catch breakage of the `cli-build/` approach (transpiled CLI code).
 
 
 #### For integration tests
@@ -142,15 +185,9 @@ There are two options for removal:
 
     Instructions: find and remove the service worker and Workbox caches in browser developer tools. For Chromium-based browsers, this is typically under the "Application" tab > "Service workers" and "Cache storage".
 
-## Heroku review apps
-
-
-A Heroku pipeline for this repository is connected to GitHub under the nextstrain-bot user account. The Review Apps feature facilitates manual review of changes by automatically creating a test instance from the PR source branch and adding a link to it on the GitHub PR page. These apps are based on configuration in [app.json](./app.json).
-
-
 #### Test on downstream repositories
 
-Additionally, a GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
+A GitHub Actions workflow has been set up to generate PRs in downstream repositories that reflect the new changes in Auspice. To use it, add the label [preview on auspice.us](https://github.com/nextstrain/auspice/labels/preview%20on%20auspice.us) and/or [preview on nextstrain.org](https://github.com/nextstrain/auspice/labels/preview%20on%20nextstrain.org).
 
 ## git-lfs
 
@@ -251,7 +288,7 @@ Other downstream targets (e.g. nextstrain.org, auspice.us, bioconda, conda-base)
     * Optionally tick **dry run** first: everything is computed and validated, and the npm tarball is built, but nothing is pushed or published.
 1. The workflow then, in order:
     * validates the request via `scripts/compute-release-version.js`
-    * bumps `package.json`, `package-lock.json` and `src/version.js`, prepends the `## version X.Y.Z - YYYY/MM/DD` heading to `CHANGELOG.md`, commits, and pushes to `master`;
+    * bumps `package.json` and `package-lock.json` (the single source of truth for the version, which `src/version.js` and `cli/version.ts` both read), prepends the `## version X.Y.Z - YYYY/MM/DD` heading to `CHANGELOG.md`, commits, and pushes to `master`;
     * pushes the annotated git tag `vX.Y.Z`, and fast-forwards the `release` branch to match `master`;
     * publishes to npm under the `latest` [dist-tag](https://docs.npmjs.com/adding-dist-tags-to-packages)
     * creates an entry on [github.com/nextstrain/auspice/releases](https://github.com/nextstrain/auspice/releases/) using the notes from the changelog section it just added;
@@ -326,3 +363,31 @@ None of them apply to prereleases, which deliberately don't move the `latest` di
             ```
     3. Click through to create a Pull Request to the Bioconda GitHub repository.
 1. When the new version of Auspice is available on Bioconda, manually run the [conda-base CI workflow](https://github.com/nextstrain/conda-base/actions/workflows/ci.yaml) on the `main` branch.
+
+---
+
+## Maps
+
+Auspice renders phylogeographic data on an interactive world map. The map displays demes (coloured circles representing geographic locations) and transmission lines connecting them, overlaid on a tiled basemap.
+
+### Libraries
+
+- [Leaflet](https://leafletjs.com/) — provides the interactive map container, pan/zoom controls, event handling, and the coordinate system for overlays.
+- [MapLibre GL JS](https://maplibre.org/) — renders Vector Tiles (MVT/PBF format) client-side using WebGL. Vector tiles are smaller and sharper than raster tiles at all zoom levels.
+- [@maplibre/maplibre-gl-leaflet](https://github.com/maplibre/maplibre-gl-leaflet) — bridges MapLibre GL into Leaflet as a tile layer, allowing the existing Leaflet infrastructure (events, controls, D3 overlays) to remain unchanged.
+- [D3](https://d3js.org/) — renders demes and transmission lines as SVG overlays on top of the Leaflet map.
+
+### Maps and map tile server(s)
+
+**MapLibre GL JS** is used as the rendering engine in Auspice, using webworkers to render vector tiles into a canvas.
+We interact with this via `maplibre-gl-leaflet` so the canvas layer is within Leaflet as that is how we overlay our d3 elements on the map.
+
+A **MapLibre Style Spec JSON** describes layers, paint properties, and references (URLs) to vector tiles, sprites, glyphs etc. to fetch for map rendering.
+Auspice uses [a customised style JSON](https://github.com/nextstrain/auspice/blob/master/src/util/map-styles.json) originally based on [OpenMapTiles' positron theme](https://github.com/openmaptiles/positron-gl-style).
+The underlying resources (tiles, sprites etc) are currently fetched from OpenMapTiles, as defined in the styles JSON.
+You can use a built-time extension to use a different style sheet; see [test/example-customisations/openfreemap/](https://github.com/nextstrain/auspice/tree/master/test/example-customisations/openfreemap/).
+
+> Auspice v2 used **Mapbox** as our tile provider via a customised MapBox style sheet.
+  Auspice v3 can no longer use Mapbox stylesheets (as MapLibre doesn't understand the proprietary `mapbox://` protocol), however there is a helper script [transform-mapbox-style-json.js](https://github.com/nextstrain/auspice/blob/master/scripts/transform-mapbox-style-json.js) which transforms the JSON to rewrite each `mapbox://` URL to its HTTPS equivalent, thus producing a MapLibre-compatible style sheet which can be used as via build-time extensions.
+  For the time being, this map style is still available via [test/example-customisations/mapbox/](https://github.com/nextstrain/auspice/tree/master/test/example-customisations/mapbox/).
+  Our current (Auspice v3) stylesheet was chosen to match the aesthetics of the Mapbox stylesheet used in Auspice v2.

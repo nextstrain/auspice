@@ -1,10 +1,10 @@
 /* eslint no-console: off */
-const fs = require("fs");
-const convertFromV1 = require("./server/convertJsonSchemas").convertFromV1;
-const utils = require("./utils");
+import fs from "fs";
+import { convertFromV1 } from "./server/convertJsonSchemas.ts";
+import * as utils from "./utils.ts";
 
 
-const addParser = (parser) => {
+const addParser = (parser): void => {
   const description = `Convert auspice dataset JSON file(s) to the most up-to-date schema (currently v2).
   Note that in auspice v2.x, "auspice view" will convert v1 JSONs to v2 for you (using the same logic as this command).
   `;
@@ -20,7 +20,7 @@ const addParser = (parser) => {
  * this utility function will increase in scope over time
  * but currently it only converts v1 meta + tree jsons -> v2
  */
-const run = (args) => {
+const run = (args): void => {
   if (!args.v1) {
     utils.error("Currently v1 JSON inputs must be specified.");
   }
@@ -35,7 +35,7 @@ const run = (args) => {
   fs.writeFileSync(args.output, JSON.stringify(v2, null, args.minify_json ? 0 : 2));
 };
 
-module.exports = {
+export {
   addParser,
   run
 };

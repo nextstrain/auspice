@@ -1,17 +1,26 @@
 /* eslint no-console: off */
-/* eslint global-require: off */
+/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/consistent-type-assertions */
 
-const path = require("path");
-const fs = require("fs");
-const express = require("express");
-const expressStaticGzip = require("express-static-gzip");
-const compression = require('compression');
-const nakedRedirect = require('express-naked-redirect');
-const utils = require("./utils");
-const version = require('../src/version').version;
-const chalk = require('chalk');
+import path from "path";
+import fs from "fs";
+import { fileURLToPath, pathToFileURL } from 'url';
+import { createRequire } from 'module';
+import express from "express";
+import expressStaticGzip from "express-static-gzip";
+import compression from 'compression';
+import nakedRedirect from 'express-naked-redirect';
+import * as utils from "./utils.ts";
+import { version } from './version.ts';
+import _chalk from 'chalk';
+const chalk = _chalk as any as import('chalk').Chalk;
+import { processPathArguments } from "./server/processPaths.ts";
+import { setUpGetAvailableHandler } from "./server/getAvailable.ts";
+import { setUpGetDatasetHandler } from "./server/getDataset.ts";
+import { setUpGetNarrativeHandler } from "./server/getNarrative.ts";
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const SUPPRESS = require('argparse').Const.SUPPRESS;
-
 
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
@@ -22,12 +31,23 @@ const addParser = (parser) => {
   const subparser = parser.addParser('view', {addHelp: true, description});
   subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose logging messages."});
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
-  subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
-  subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  addDatasetNarrativePathArgs(subparser)
   subparser.addArgument('--customBuildOnly', {action: "storeTrue", help: "Error if a custom build is not found."});
   /* there are some options which we deliberately do not document via `--help`. */
   subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS}); /* related to the "static-site-generation" or "github-pages" */
 };
+
+function addDatasetNarrativePathArgs(parser) {
+  parser.addArgument('--datasetDir', {
+    metavar: "PATH",
+    help: "[DEPRECATED] Directory where datasets (JSONs) are sourced. This cannot be used with <path> positional arg(s) or custom handlers."
+  });
+  parser.addArgument('--narrativeDir', {
+    metavar: "PATH",
+    help: "[DEPRECATED] Directory where narratives (Markdown files) are sourced. This cannot be used with <path> positional arg(s) or custom handlers."
+  });
+  parser.addArgument('path', {action: "store", nargs: '*', help: "Directories where datasets and/or narratives are stored"});
+}
 
 const serveRelativeFilepaths = ({app, dir}) => {
   app.get("*.json", (req, res) => {
@@ -38,42 +58,31 @@ const serveRelativeFilepaths = ({app, dir}) => {
   return `JSON requests will be served relative to ${dir}.`;
 };
 
-const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
-  /* load server handlers, either from provided path or the defaults */
-  const handlers = {};
-  let datasetsPath, narrativesPath;
-  if (handlersArg) {
-    const handlersPath = path.resolve(handlersArg);
-    utils.verbose(`Loading handlers from ${handlersPath}`);
-    const inject = require(handlersPath);
-    handlers.getAvailable = inject.getAvailable;
-    handlers.getDataset = inject.getDataset;
-    handlers.getNarrative = inject.getNarrative;
-  } else {
-    datasetsPath = utils.resolveLocalDirectory(datasetDir, false);
-    narrativesPath = utils.resolveLocalDirectory(narrativeDir, true);
-    handlers.getAvailable = require("./server/getAvailable")
-      .setUpGetAvailableHandler({datasetsPath, narrativesPath});
-    handlers.getDataset = require("./server/getDataset")
-      .setUpGetDatasetHandler({datasetsPath});
-    handlers.getNarrative = require("./server/getNarrative")
-      .setUpGetNarrativeHandler({narrativesPath});
-  }
+async function customRouteHandlers(app, handlersPath) {
+  utils.verbose(`Loading handlers from ${handlersPath}`);
+  /* `import()` of an absolute path fails on Windows (ERR_UNSUPPORTED_ESM_URL_SCHEME),
+   * so convert to a file:// URL. */
+  const customCode = await import(pathToFileURL(handlersPath).href);
+  app.get("/charon/getAvailable", customCode.getAvailable);
+  app.get("/charon/getDataset", customCode.getDataset);
+  app.get("/charon/getNarrative", customCode.getNarrative);
+  return `Custom server handlers provided.`;
+}
 
-  /* apply handlers */
-  app.get("/charon/getAvailable", handlers.getAvailable);
-  app.get("/charon/getDataset", handlers.getDataset);
-  app.get("/charon/getNarrative", handlers.getNarrative);
-  app.get("/charon*", (req, res) => {
-    const errorMessage = "Query unhandled -- " + req.originalUrl;
-    utils.warn(errorMessage);
-    return res.status(500).type("text/plain").send(errorMessage);
-  });
-
-  return handlersArg ?
-    `Custom server handlers provided.` :
-    `Looking for datasets in ${datasetsPath}\nLooking for narratives in ${narrativesPath}`;
-};
+/**
+ * Adds route handlers for the three canonical charon routes to the *app*
+ */
+function defaultRouteHandlers({app, dataPaths}) {
+  app.get("/charon/getAvailable", setUpGetAvailableHandler(dataPaths));
+  app.get("/charon/getDataset", setUpGetDatasetHandler(dataPaths));
+  app.get("/charon/getNarrative", setUpGetNarrativeHandler(dataPaths));
+  const sep = "\n - "
+  return 'Looking for datasets & narratives in the following paths,\n' +
+    '(if there are multiple matches then the first one will be used)' + sep +
+    (Object.entries(dataPaths) as [string, Set<string>][])
+      .map(([p, dataTypes]) => `${p} (${Array.from(dataTypes).join(', ')})`)
+      .join(sep);
+}
 
 const getAuspiceBuild = (customBuildOnly) => {
   const cwd = path.resolve(process.cwd());
@@ -108,7 +117,9 @@ function hasAuspiceBuild(directory) {
   )
 }
 
-const run = (args) => {
+const run = async (args) => {
+  const dataPaths = processPathArguments(args)
+
   /* Basic server set up */
   const app = express();
   app.set('port', process.env.PORT || 4000);
@@ -119,7 +130,7 @@ const run = (args) => {
   const auspiceBuild = getAuspiceBuild(args.customBuildOnly);
   utils.verbose(`Serving favicon from  "${auspiceBuild.baseDir}"`);
   utils.verbose(`Serving index and built javascript from     "${auspiceBuild.distDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
+  app.get("/favicon.png", (_req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
   app.use("/dist", expressStaticGzip(auspiceBuild.distDir, {
     maxAge: '30d',
     enableBrotli: true,
@@ -135,19 +146,27 @@ const run = (args) => {
     utils.verbose(`Serving self-unregistering service worker`);
     serviceWorkerPath = path.join(__dirname, "server", "cleanupServiceWorker.js");
   }
-  app.get("/service-worker.js", (req, res) => {
+  app.get("/service-worker.js", (_req, res) => {
     res.sendFile(serviceWorkerPath, {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 
   let handlerMsg = "";
   if (args.gh_pages) {
     handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
+  } else if (args.handlers) {
+    handlerMsg = await customRouteHandlers(app, path.resolve(args.handlers));
   } else {
-    handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
+    handlerMsg = defaultRouteHandlers({app, dataPaths});
   }
+  /* Handle unhandled API (charon) routes */
+  app.get("/charon*", (req, res) => {
+    const errorMessage = "Query unhandled -- " + req.originalUrl;
+    utils.warn(errorMessage);
+    return res.status(500).type("text/plain").send(errorMessage);
+  });
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
-  app.get("*", (req, res) => {
+  app.get("*", (_req, res) => {
     res.sendFile(path.join(auspiceBuild.baseDir, "dist/index.html"), {headers: {"Cache-Control": "no-cache, no-store, must-revalidate"}});
   });
 
@@ -169,8 +188,8 @@ const run = (args) => {
       utils.error(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
 
       Example commands to fix:
-        ${chalk.yellow('HOST="localhost" auspice view')}
-        ${chalk.yellow('HOST="localhost" npm run view')}`);
+        ${chalk.yellow('HOST="localhost" auspice view <PATH>')}
+        ${chalk.yellow('HOST="localhost" npm run view -- <PATH>')}`);
     }
 
     utils.error(`Uncaught error in app.listen(). Code: ${error.code}`);
@@ -178,9 +197,12 @@ const run = (args) => {
 
 };
 
-module.exports = {
+export {
   addParser,
   run,
-  loadAndAddHandlers,
+  addDatasetNarrativePathArgs,
+  processPathArguments,
+  defaultRouteHandlers,
+  customRouteHandlers,
   serveRelativeFilepaths
 };

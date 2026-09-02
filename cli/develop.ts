@@ -1,17 +1,26 @@
 /* eslint no-console: off */
-const path = require("path");
-const express = require("express");
-const webpack = require("webpack");
-const webpackDevMiddleware = require("webpack-dev-middleware");
-const webpackHotMiddleware = require("webpack-hot-middleware");
-const utils = require("./utils");
-const { loadAndAddHandlers, serveRelativeFilepaths } = require("./view");
-const version = require('../src/version').version;
-const chalk = require('chalk');
-const generateWebpackConfig = require("../webpack.config.js").default;
+import path from "path";
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
+import express from "express";
+import webpack from "webpack";
+import webpackDevMiddleware from "webpack-dev-middleware";
+import webpackHotMiddleware from "webpack-hot-middleware";
+import * as utils from "./utils.ts";
+import * as view from "./view.ts";
+import { version } from './version.ts';
+import _chalk from 'chalk';
+/* eslint-disable-next-line @typescript-eslint/consistent-type-assertions */
+const chalk = _chalk as any as import('chalk').Chalk;
+import { processPathArguments } from "./server/processPaths.ts";
+
+const require = createRequire(import.meta.url);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+const generateWebpackConfig = require("../webpack.config.cjs").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
 
-const addParser = (parser) => {
+const addParser = (parser): void => {
   const description = `Launch auspice in development mode.
     This runs a local server and uses hot-reloading to allow automatic updating as you edit the code.
     NOTE: there is a speed penalty for this ability and this should never be used for production.
@@ -21,8 +30,7 @@ const addParser = (parser) => {
   subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose progress messages in the terminal."});
   subparser.addArgument('--extend', {action: "store", metavar: "JSON", help: "Client customisations to be applied. See documentation for more details. Note that hot reloading does not currently work for these customisations."});
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
-  subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
-  subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  view.addDatasetNarrativePathArgs(subparser)
   subparser.addArgument('--includeTiming', {action: "storeTrue", help: "Do not strip timing functions. With these included the browser console will print timing measurements for a number of functions."});
 
   /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
@@ -30,7 +38,9 @@ const addParser = (parser) => {
 };
 
 
-const run = (args) => {
+const run = async (args): Promise<void> => {
+  const dataPaths = processPathArguments(args)
+
   /* Basic server set up */
   const app = express();
   app.set('port', process.env.PORT || 4000);
@@ -38,7 +48,7 @@ const run = (args) => {
 
   const baseDir = path.resolve(__dirname, "..");
   utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
+  app.get("/favicon.png", (_req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
 
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
@@ -51,7 +61,7 @@ const run = (args) => {
   process.env.BABEL_EXTENSION_PATH = extensionPath;
 
   /* Redirects / to webpack-generated index */
-  app.use((req, res, next) => {
+  app.use((req, _res, next) => {
     if (!/^\/__webpack_hmr|^\/charon|\.[A-Za-z0-9]{1,5}$/.test(req.path)) {
       req.url = webpackConfig.output.publicPath;
     }
@@ -69,12 +79,20 @@ const run = (args) => {
 
   let handlerMsg = "";
   if (args.gh_pages) {
-    handlerMsg = serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
+    handlerMsg = view.serveRelativeFilepaths({app, dir: path.resolve(args.gh_pages)});
+  } else if (args.handlers) {
+    handlerMsg = await view.customRouteHandlers(app, path.resolve(args.handlers));
   } else {
-    handlerMsg = loadAndAddHandlers({app, handlersArg: args.handlers, datasetDir: args.datasetDir, narrativeDir: args.narrativeDir});
+    handlerMsg = view.defaultRouteHandlers({app, dataPaths});
   }
+  /* Handle unhandled API (charon) routes */
+  app.get("/charon*", (req, res) => {
+    const errorMessage = "Query unhandled -- " + req.originalUrl;
+    utils.warn(errorMessage);
+    return res.status(500).type("text/plain").send(errorMessage);
+  });
 
-  app.get("*", (req, res) => res.redirect("/"));
+  app.get("*", (_req, res) => res.redirect("/"));
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
@@ -95,8 +113,8 @@ const run = (args) => {
       utils.error(`Host ${app.get('host')} is not a valid address. The server could not be started. If you did not provide a HOST environment variable when starting the app you may have HOST already set in your system. You can either change that variable, or override HOST when starting the app.
 
       Example commands to fix:
-        ${chalk.yellow('HOST="localhost" auspice develop')}
-        ${chalk.yellow('HOST="localhost" npm run develop')}`);
+        ${chalk.yellow('HOST="localhost" auspice develop <PATH>')}
+        ${chalk.yellow('HOST="localhost" npm run develop -- <PATH>')}`);
     }
 
     utils.error(`Uncaught error in app.listen(). Code: ${error.code}`);
@@ -105,7 +123,7 @@ const run = (args) => {
 
 };
 
-module.exports = {
+export {
   addParser,
   run
 };
