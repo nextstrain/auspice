@@ -221,7 +221,11 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
   timerStart("drawTips");
   const params = this.params;
   if (!("tips" in this.groups)) {
-    this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
+    this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)")
+      /* constant tip presentation set once on the group and inherited, rather than written per-circle */
+      .style("pointer-events", "auto")
+      .style("cursor", "pointer")
+      .style("stroke-width", params.tipStrokeWidth); /* don't want branch thicknesses applied */
   }
 
   const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
@@ -240,12 +244,9 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
     .on("mouseover", this.callbacks.onTipHover)
     .on("mouseout", this.callbacks.onTipLeave)
     .on("click", this.callbacks.onTipClick)
-    .style("pointer-events", "auto")
     .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
     .style("fill", (d) => d.fill || params.tipFill)
-    .style("stroke", (d) => d.tipStroke || params.tipStroke)
-    .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
-    .style("cursor", "pointer");
+    .style("stroke", (d) => d.tipStroke || params.tipStroke);
 
   timerEnd("drawTips");
 };
@@ -304,7 +305,10 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
   Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
   if (!("branchTee" in this.groups)) {
-    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
+    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)")
+      /* constant tee presentation, inherited by the child paths */
+      .style("pointer-events", "auto")
+      .style("fill", "none");
   }
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
@@ -320,26 +324,18 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
       .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
       .style("visibility", getBranchVisibility)
-      .style("fill", "none")
-      .style("pointer-events", "auto")
       .on("mouseover", this.callbacks.onBranchHover)
       .on("mouseout", this.callbacks.onBranchLeave)
       .on("click", this.callbacks.onBranchClick);
   }
 
-  /* PART 2: draw the branch stems (i.e. the actual branches) */
-
-  /* PART 2a: Create linear gradient definitions which can be applied to branch stems for which
-  the start & end stroke colour is different */
-  if (!this.groups.branchGradientDefs) {
-    this.groups.branchGradientDefs = this.svg.append("defs");
-  }
-  this.groups.branchGradientDefs.selectAll("*").remove();
-  // TODO -- explore if duplicate <def> elements (e.g. same colours on each end) slow things down
-  this.updateColorBy();
-  /* PART 2b: Draw the stems */
+  /* PART 2: draw the branch stems (i.e. the actual branches).
+   * (SVG gradient strokes were disabled in 2020, so there is no gradient <defs> to build here.) */
   if (!("branchStem" in this.groups)) {
-    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
+    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)")
+      /* constant stem presentation, inherited by the child paths */
+      .style("pointer-events", "auto")
+      .style("stroke-linecap", "round");
   }
   this.groups.branchStem
     .selectAll('.branch')
@@ -349,15 +345,10 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
     .attr("class", "branch S")
     .attr("id", (d) => getDomId("branchS", d.n.name))
     .attr("d", (d) => d.branch[0])
-    .style("stroke", (d) => {
-      if (!d.branchStroke) return params.branchStroke;
-      return strokeForBranch(d, "S");
-    })
-    .style("stroke-linecap", "round")
+    .style("stroke", (d) => d.branchStroke || params.branchStroke)
     .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
     .style("visibility", getBranchVisibility)
     .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
-    .style("pointer-events", "auto")
     .on("mouseover", this.callbacks.onBranchHover)
     .on("mouseout", this.callbacks.onBranchLeave)
     .on("click", this.callbacks.onBranchClick);

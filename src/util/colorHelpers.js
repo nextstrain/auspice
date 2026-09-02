@@ -58,9 +58,7 @@ export const getTipColorAttribute = (node, colorScale) => {
 /* takes around 2ms on a 2000 tip tree */
 export const calcNodeColor = (tree, colorScale) => {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
-    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale));
-    // console.log(nodeColorAttr.map((n) => colorScale.scale(n)))
-    return nodeColorAttr.map((n) => colorScale.scale(n));
+    return tree.nodes.map((n) => colorScale.scale(getTipColorAttribute(n, colorScale)));
   }
   return null;
 };
