@@ -407,9 +407,7 @@ export const change = function change(
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
-  // recalculate gradients here?
   if (changeColorBy) {
-    this.updateColorBy();
     this.measurementsColorGrouping = newMeasurementsColorGrouping;
   }
   // recalculate existing regression if needed
@@ -430,8 +428,29 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
+  /* A visibility change (date filter / animation tick) does NOT move node
+   * positions (setDisplayOrder/setLayout are gated off for it, and mapToScreen's
+   * domain uses inView, which only zoom changes). So we trust the selective
+   * d.update set that updateNodesWithNewData() just computed from the visibility
+   * and stroke-width deltas, rather than blanket-flagging every node — this is
+   * what lets modifySVG touch only the changed band instead of all ~50k paths. */
+  if (svgHasChangedDimensions || changeNodeOrder) {
     this.nodes.forEach((d) => {d.update = true;});
+  }
+  /* A branch's stem start-point is offset by its stem-parent's stroke-width
+   * (mapToScreen: xBase - 0.5*(parentStrokeWidth - strokeWidth)). So when
+   * thicknesses change we must also redraw the CHILDREN of every thickness-changed
+   * branch: their own thickness (hence d.update) may be unchanged, yet their stem
+   * path start has moved. Without this, a filter/date change can leave a child stem
+   * a few px off from a full render. Collect first, then flag, to avoid cascading. */
+  if (changeBranchThickness) {
+    const stemChildren: PhyloNode[] = [];
+    this.nodes.forEach((d) => {
+      if (d.update && d.n.hasChildren) {
+        for (const child of d.n.children) stemChildren.push(child.shell);
+      }
+    });
+    stemChildren.forEach((c) => { if (c) c.update = true; });
   }
 
   /** PHYLOTREE METHODS
