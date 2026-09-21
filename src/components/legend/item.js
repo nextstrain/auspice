@@ -1,6 +1,6 @@
 import React from "react";
-import { updateTipRadii } from "../../../actions/tree";
-import { dataFont, darkGrey } from "../../../globalStyles";
+import { updateTipRadii } from "../../actions/tree";
+import { dataFont, darkGrey } from "../../globalStyles";
 
 const LegendItem = ({
   dispatch,

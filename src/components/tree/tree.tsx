@@ -3,7 +3,7 @@ import { withTranslation } from "react-i18next";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { SelectedNode } from "../../reducers/controls";
 import Card from "../framework/card";
-import Legend from "./legend/legend";
+import Legend from "../legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";

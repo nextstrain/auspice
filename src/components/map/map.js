@@ -26,7 +26,7 @@ import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundary";
 import { getMapTilesSettings } from "../../util/globals";
-import Legend from "../tree/legend/legend";
+import Legend from "../legend/legend";
 import "../../css/mapbox.css"; // controls the rendering of the mapbox logo (optional; toggled on via customisations)
 
 /* global L */
