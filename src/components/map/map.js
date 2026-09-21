@@ -14,7 +14,7 @@ import domtoimage from "dom-to-image";
 import { select } from "d3-selection";
 import 'd3-transition';
 import Card from "../framework/card";
-import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
+import { setupDemeRadius, drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import {
   createDemeAndTransmissionData,
   updateDemeAndTransmissionDataColAndVis,
@@ -212,7 +212,7 @@ class Map extends React.Component {
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
 
-      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+      const {demeData, transmissionData, demeIndices, transmissionIndices, maxDemeCount} = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
@@ -236,12 +236,14 @@ class Map extends React.Component {
       });
 
       // const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
+
+      const demeRadiusFn = setupDemeRadius(this.props.nodes)
+      
       const d3elems = drawDemesAndTransmissions(
         demeData,
+        demeRadiusFn,
         transmissionData,
         this.state.d3DOMNode,
-        this.state.map,
-        this.props.nodes,
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric,
         this.props.pieChart,
@@ -255,6 +257,8 @@ class Map extends React.Component {
         boundsSet: true,
         d3elems,
         demeData,
+        maxDemeCount,
+        demeRadiusFn,
         transmissionData,
         demeIndices,
         transmissionIndices
@@ -374,11 +378,14 @@ class Map extends React.Component {
     if (!(visibilityChange && haveData)) { return; }
 
     timerStart("updateDemesAndTransmissions");
+
+    const demeRadiusFn = setupDemeRadius(nextProps.nodes)
+    
     if (this.props.geoResolution !== nextProps.geoResolution) {
       /* This `if` statement added as part of https://github.com/nextstrain/auspice/issues/722
        * and should be a prime candidate for refactoring in https://github.com/nextstrain/auspice/issues/735
        */
-      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+      const {demeData, transmissionData, demeIndices, transmissionIndices, maxDemeCount} = createDemeAndTransmissionData(
         nextProps.nodes,
         nextProps.visibility,
         nextProps.geoResolution,
@@ -394,10 +401,9 @@ class Map extends React.Component {
       );
       const d3elems = drawDemesAndTransmissions(
         demeData,
+        demeRadiusFn,
         transmissionData,
         this.state.d3DOMNode,
-        this.state.map,
-        nextProps.nodes,
         nextProps.dateMinNumeric,
         nextProps.dateMaxNumeric,
         nextProps.pieChart,
@@ -407,16 +413,18 @@ class Map extends React.Component {
       this.setState({
         d3elems,
         demeData,
+        maxDemeCount,
         transmissionData,
         demeIndices,
         transmissionIndices
       });
     } else {
-      const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
+      const { newDemes, newTransmissions, maxDemeCount } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
         this.state.demeIndices,
         this.state.transmissionIndices,
+        this.state.maxDemeCount,
         nextProps.nodes,
         nextProps.visibility,
         nextProps.geoResolution,
@@ -426,16 +434,15 @@ class Map extends React.Component {
         nextProps.legendValues
       );
       updateVisibility(
-        /* updated in the function above */
+        /* values just updated in earlier function calls */
         newDemes,
+        demeRadiusFn,
         newTransmissions,
         /* we already have all this */
         this.state.d3elems,
-        this.state.map,
-        nextProps.nodes,
         nextProps.dateMinNumeric,
         nextProps.dateMaxNumeric,
-        nextProps.pieChart
+        nextProps.pieChart,
       );
 
       this.moveMapAccordingToData({
@@ -447,6 +454,8 @@ class Map extends React.Component {
 
       this.setState({
         demeData: newDemes,
+        maxDemeCount,
+        demeRadiusFn,
         transmissionData: newTransmissions
       });
     }

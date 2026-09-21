@@ -127,12 +127,17 @@ const createArcsFromDemes = (demeData) => {
   return individualArcs;
 };
 
+export function setupDemeRadius(nodes) {
+  const visibleTips = nodes[0].tipCount;
+  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
+  return (count) => Math.sqrt(count) * demeMultiplier;
+}
+
 export const drawDemesAndTransmissions = (
   demeData,
+  demeRadiusFn,
   transmissionData,
   g,
-  map,
-  nodes,
   numDateMin,
   numDateMax,
   pieChart, /* bool */
@@ -165,11 +170,7 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-linecap", "round")
     .attr("stroke", (d) => { return d.color; })
     .attr("stroke-width", 1);
-
-  const visibleTips = nodes[0].tipCount;
-  const demeMultiplier =
-    demeCountMultiplier /
-    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
+  
   let demes;
   // determine whether to draw pieChart or not (sensible for categorical data)
   if (pieChart) {
@@ -181,7 +182,7 @@ export const drawDemesAndTransmissions = (
     /* add `outerRadius` to all slices */
     // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
     individualArcs.forEach((a) => {
-      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+      a.outerRadius = demeRadiusFn(demeData[a.demeDataIdx].count);
     });
 
     demes = g.selectAll('demes') // add individual arcs ("slices") to this selection
@@ -204,7 +205,7 @@ export const drawDemesAndTransmissions = (
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
       .enter().append("circle")
-      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
+      .attr("r", (d) => demeRadiusFn(d.count))
       /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
       .style("fill-opacity", 0.65)
@@ -267,10 +268,9 @@ export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin,
 
 export const updateVisibility = (
   demeData,
+  demeRadiusFn,
   transmissionData,
   d3elems,
-  map,
-  nodes,
   numDateMin,
   numDateMax,
   pieChart
@@ -280,17 +280,13 @@ export const updateVisibility = (
     console.error("d3elems is not defined!");
     return;
   }
-  const visibleTips = nodes[0].tipCount;
-  const demeMultiplier =
-    demeCountMultiplier /
-    Math.sqrt(_max([Math.sqrt(visibleTips * nodes.length), demeCountMinimum]));
 
   if (pieChart) {
     const individualArcs = createArcsFromDemes(demeData);
     /* add `outerRadius` to all slices */
     // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
     individualArcs.forEach((a) => {
-      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+      a.outerRadius = demeRadiusFn(demeData[a.demeDataIdx].count);
     });
     d3elems.demes
       .data(individualArcs)
@@ -306,7 +302,7 @@ export const updateVisibility = (
       .ease(easeLinear)
       .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
       .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
+      .attr("r", (d) => demeRadiusFn(d.count));
   }
 
   /* update the path and stroke colour of transmission lines */
