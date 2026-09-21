@@ -172,6 +172,7 @@ export interface BasicControlsState {
   focus: Focus
   geoResolution: string
   layout: Layout
+  legendOpen?: boolean
   mapAnimationCumulative: boolean
   mapAnimationDurationInMilliseconds: number
   mapAnimationShouldLoop: boolean

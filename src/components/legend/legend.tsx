@@ -1,5 +1,5 @@
 import React from "react";
-import { connect } from "react-redux";
+import { connect, MapStateToProps } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../globalStyles";
@@ -12,26 +12,39 @@ import { SET_MODAL } from "../../actions/types";
 import { warningNotification } from "../../actions/notifications";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { enableDatasetEditor } from "../datasetEditor/datasetEditor";
+import type { ColorScale } from "../../reducers/controls";
+import type { Colorings, LegendPlacement } from "../../reducers/metadata.types";
+import type { RootState, AppDispatch } from "../../store";
 
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
 const COLUMN_WIDTH = 145;
 
-@connect((state) => {
-  return {
-    colorBy: state.controls.colorBy,
-    colorings: state.metadata.colorings,
-    colorScale: state.controls.colorScale,
-    legendOpen: state.controls.legendOpen
-  };
-})
-class Legend extends React.Component {
-  constructor(props) {
+/** StateProps are those supplied via react-redux's connect */
+interface StateProps {
+  colorBy: string;
+  colorings: Colorings;
+  colorScale: ColorScale;
+  legendOpen: boolean | undefined;
+}
+
+/** SuppliedProps are those supplied via the calling component */
+interface SuppliedProps {
+  width: number;
+  legendPlacement: LegendPlacement;
+}
+
+interface DispatchProps {
+  dispatch: AppDispatch;
+}
+
+class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps> {
+  constructor(props: StateProps & DispatchProps & SuppliedProps) {
     super(props);
     this.handleLegendItemOnClick = this.handleLegendItemOnClick.bind(this);
   }
 
-  showLegend() {
+  showLegend(): boolean {
     // redux state takes precedent
     if (this.props.legendOpen !== undefined) { return this.props.legendOpen; }
 
@@ -42,7 +55,7 @@ class Legend extends React.Component {
     return true;
   }
 
-  getSVGHeight() {
+  getSVGHeight(): number {
     if (!this.showLegend()) {
       return 18;
     }
@@ -52,14 +65,14 @@ class Legend extends React.Component {
       (ITEM_RECT_SIZE + LEGEND_SPACING) + LEGEND_SPACING + titlePadding || 100;
   }
 
-  getSVGWidth() {
+  getSVGWidth(): number {
     if (this.showLegend()) {
       return 290;
     }
     return this.getTitleWidth() + 20;
   }
 
-  getTransformationForLegendItem(maxNumPerColumn, itemIdx) {
+  getTransformationForLegendItem(maxNumPerColumn: number, itemIdx: number): string {
     const colIdx = Math.floor(itemIdx/maxNumPerColumn);
     const colPos = colIdx * COLUMN_WIDTH + 10;
     const rowIdx = (itemIdx % maxNumPerColumn); // hardcoded for 2 rows
@@ -67,14 +80,14 @@ class Legend extends React.Component {
     return `translate(${colPos},${rowPos})`;
   }
 
-  getTitleWidth() {
+  getTitleWidth(): number {
     // This is a hack because we can't use getBBox in React.
     // Lots of work to get measured width of DOM element.
     // Works fine, but will need adjusting if title font is changed.
     return 15 + 5.3 * getColorByTitle(this.props.colorings, this.props.colorBy).length;
   }
 
-  toggleLegend() {
+  toggleLegend(): void {
     this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
   }
 
@@ -82,7 +95,7 @@ class Legend extends React.Component {
    * draws legend title
    * coordinate system from top,left of parent SVG
    */
-  legendTitle() {
+  legendTitle(): JSX.Element {
     return (
       <g id="Title">
         <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
@@ -106,7 +119,7 @@ class Legend extends React.Component {
    * draws show/hide chevron
    * coordinate system from top,left of parent SVG
    */
-  legendChevron() {
+  legendChevron(): JSX.Element {
     const degrees = this.showLegend() ? -180 : 0;
 
     const offset = this.getArrowOffset();
@@ -128,7 +141,7 @@ class Legend extends React.Component {
     );
   }
 
-  styleLabelText(label) {
+  styleLabelText(label: any): any {
     if (this.props.colorScale.legendLabels && this.props.colorScale.legendLabels.has(label)) {
       return this.props.colorScale.legendLabels.get(label);
     }
@@ -147,7 +160,7 @@ class Legend extends React.Component {
     return label;
   }
 
-  handleLegendItemOnClick(e) {
+  handleLegendItemOnClick(e: React.MouseEvent): void {
     if (!enableDatasetEditor()) return;
 
     if (e.shiftKey) {
@@ -167,7 +180,7 @@ class Legend extends React.Component {
    * draws rects and titles for each legend item
    * coordinate system from top,left of parent SVG
    */
-  legendItems() {
+  legendItems(): JSX.Element {
     const values = this.props.colorScale.visibleLegendValues;
     const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
     const items = values
@@ -210,8 +223,8 @@ class Legend extends React.Component {
       </g>
     );
   }
-  getContainerStyles() {
-    const styles = {
+  getContainerStyles(): React.CSSProperties {
+    const styles: React.CSSProperties = {
       position: "absolute",
       borderRadius: 4,
       zIndex: 1000,
@@ -224,21 +237,21 @@ class Legend extends React.Component {
     return styles;
   }
 
-  getArrowOffset() {
+  getArrowOffset(): number {
     if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - 20;
     }
     return this.getTitleWidth();
   }
 
-  getTitleOffset() {
+  getTitleOffset(): number {
     if (this.props.legendPlacement.horizontal === "right") {
       return this.getSVGWidth() - this.getTitleWidth() - 15;
     }
     return 5;
   }
 
-  render() {
+  override render(): JSX.Element | null {
     // catch the case where we try to render before anything's ready
     if (!this.props.colorScale) return null;
     return (
@@ -265,7 +278,7 @@ class Legend extends React.Component {
 /**
  * Create the text to be shown as a tooltip on the legend entry
  */
-function tooltipText(colorScale, value) {
+function tooltipText(colorScale: ColorScale, value: any): any {
   if (!colorScale.continuous) {
     return value
   }
@@ -277,4 +290,13 @@ function tooltipText(colorScale, value) {
 }
 
 
-export default Legend;
+const mapStateToProps: MapStateToProps<StateProps, SuppliedProps, RootState> = (
+  state: RootState,
+): StateProps => ({
+  colorBy: state.controls.colorBy,
+  colorings: state.metadata.loaded ? state.metadata.colorings : undefined,
+  colorScale: state.controls.colorScale,
+  legendOpen: state.controls.legendOpen,
+});
+
+export default connect(mapStateToProps)(Legend);

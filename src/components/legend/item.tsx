@@ -2,6 +2,21 @@ import React from "react";
 import { updateTipRadii } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
 
+interface LegendItemProps {
+  dispatch: any;
+  transform: string;
+  clipId?: string;
+  legendRectSize: number;
+  legendSpacing: number;
+  rectStroke: string;
+  rectFill: string;
+  label: any;
+  tooltip: any;
+  value: any;
+  index?: number;
+  handleOnClick: (e: React.MouseEvent) => void;
+}
+
 const LegendItem = ({
   dispatch,
   transform,
@@ -14,7 +29,7 @@ const LegendItem = ({
   tooltip,
   value,
   handleOnClick,
-}) => (
+}: LegendItemProps): JSX.Element => (
   <g
     transform={transform}
     onMouseEnter={() => {
