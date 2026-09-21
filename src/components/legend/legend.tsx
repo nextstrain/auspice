@@ -2,6 +2,7 @@ import React from "react";
 import { connect, MapStateToProps } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
+import Demes from "./demes";
 import { headerFont, darkGrey } from "../../globalStyles";
 import { fastTransitionDuration, months } from "../../util/globals";
 import { getBrighterColor, getColorByTitle } from "../../util/colorHelpers";
@@ -30,7 +31,7 @@ const SWATCH_TOP_PADDING = LEGEND_SPACING;
  * swatches never grows taller than (roughly half of) the panel it sits in.
  */
 const MAX_SWATCH_HEIGHT_FRACTION_OF_PANEL = 0.667;
-const MAX_SWATCH_HEIGHT_PX = 500;
+const MAX_SWATCH_HEIGHT_PX = 500; 
 
 /** StateProps are those supplied via react-redux's connect */
 interface StateProps {
@@ -46,6 +47,8 @@ interface SuppliedProps {
   /** The available height (px) of the entire panel the legend is rendered within */
   height: number;
   legendPlacement: LegendPlacement;
+  maxDemeCount?: number;
+  demeRadiusFn?: (count: number) => number;
 }
 
 interface DispatchProps {
@@ -217,7 +220,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
    * coordinate system from top,left of parent SVG
    */
   legendItems(
-    { height, verticalOffset }: { height: number, verticalOffset: number }
+    { height }: { height: number }
   ): JSX.Element {
     const values = this.props.colorScale.visibleLegendValues;
     const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
@@ -254,12 +257,13 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
         <clipPath id="legendFirstColumnClip">
           <rect x="0" y="0" width={COLUMN_WIDTH-5} height={height} fill="rgb(150, 154, 223)"/>
         </clipPath>
-        <g id="Items" transform={`translate(0,${verticalOffset})`}>
+        <g id="Items">
           {items}
         </g>
       </g>
     );
   }
+
   getContainerStyles(): React.CSSProperties {
     const styles: React.CSSProperties = {
       position: "absolute",
@@ -302,6 +306,9 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     // displayed height and are reachable by scrolling.
     const swatchHeights = this.getSVGSwatchHeight(show);
 
+    const showDemes = show && this.props.maxDemeCount !== undefined && this.props.demeRadiusFn !== undefined;
+    const demesHeight = 150; // TODO XXX
+
     return (
       <div id="LegendContainer" style={this.getContainerStyles()}>
         {/* The title & chevron remain fixed above the (potentially scrollable) swatches */}
@@ -322,18 +329,25 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
           <div style={{maxHeight: swatchHeights.displayedHeight, overflowY: swatchHeights.scrollable ? "auto" : "hidden", overflowX: "hidden"}}>
             <svg width={width} height={swatchHeights.fullHeight} style={{ display: "block" }}>
               <Background width={width} height={swatchHeights.fullHeight} />
-              {this.legendItems({ height: swatchHeights.fullHeight, verticalOffset: SWATCH_TOP_PADDING})}
+              {this.legendItems({ height: swatchHeights.fullHeight})}
             </svg>
           </div>
         }
 
-        
+        {/* map deme circles */}
+        {showDemes && <Demes
+          availableHeight={demesHeight}
+          availableWidth={width}
+          maxDemeCount={this.props.maxDemeCount}
+          demeRadiusFn={this.props.demeRadiusFn}
+        />}
+
       </div>
     );
   }
 }
 
-function Background({ width, height }: { width: number, height: number }): JSX.Element {
+export function Background({ width, height }: { width: number, height: number }): JSX.Element {
   return (
     <rect width={width} height={height} fill="rgba(255,255,255,.85)"/>
   )

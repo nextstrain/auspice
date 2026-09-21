@@ -666,7 +666,13 @@ class Map extends React.Component {
     return (
       <Card center infocard={this.props.showOnlyPanels} title={transmissionsExist ? t("Transmissions") : t("Geography")}>
         {this.props.legend && <ErrorBoundary>
-          <Legend legendPlacement={this.props.metadata.legendPlacements.map} width={this.props.width} height={this.props.height} />
+          <Legend
+            legendPlacement={this.props.metadata.legendPlacements.map}
+            width={this.props.width}
+            height={this.props.height}
+            maxDemeCount={this.state.maxDemeCount}
+            demeRadiusFn={this.state.demeRadiusFn}
+          />
         </ErrorBoundary>}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
