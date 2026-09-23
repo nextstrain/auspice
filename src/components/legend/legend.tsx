@@ -19,6 +19,18 @@ import type { RootState, AppDispatch } from "../../store";
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
 const COLUMN_WIDTH = 145;
+/** vertical space (px) occupied by a single row of swatches */
+const SWATCH_ROW_HEIGHT = ITEM_RECT_SIZE + LEGEND_SPACING;
+/** padding (px) above the first row of swatches within the swatch SVG */
+const SWATCH_TOP_PADDING = LEGEND_SPACING;
+
+/**
+ * The swatches are rendered within a scrollable container whose height is
+ * capped at the smaller of these two values so that a legend with many
+ * swatches never grows taller than (roughly half of) the panel it sits in.
+ */
+const MAX_SWATCH_HEIGHT_FRACTION_OF_PANEL = 0.667;
+const MAX_SWATCH_HEIGHT_PX = 500;
 
 /** StateProps are those supplied via react-redux's connect */
 interface StateProps {
@@ -31,6 +43,8 @@ interface StateProps {
 /** SuppliedProps are those supplied via the calling component */
 interface SuppliedProps {
   width: number;
+  /** The available height (px) of the entire panel the legend is rendered within */
+  height: number;
   legendPlacement: LegendPlacement;
 }
 
@@ -56,15 +70,35 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
   }
 
   /**
-   * NOTE: There's a well known bug / problem where we have so many swatches that
-   * the calculated legend height is greater than the panel height. This should be
-   * solved by reducing the number of swatches and showing some "..." UI
+   * Compute the swatch heights (px). `fullHeight` is the height required to
+   * render every swatch. When this exceeds the space we want to use
+   * then we use a smaller `displayHeight` and make the swatches scrollable.
    */
-  getSVGSwatchHeight(): number {
+  getSVGSwatchHeight(show: boolean): { fullHeight: number, displayedHeight: number, scrollable: boolean } {
+    if (!show) {
+      return { fullHeight: 0, displayedHeight: 0, scrollable: false };
+    }
+    
     const nItems = this.props.colorScale.visibleLegendValues.length;
-    const titlePadding = 20;
-    return Math.ceil(nItems / 2) *
-      (ITEM_RECT_SIZE + LEGEND_SPACING) + LEGEND_SPACING + titlePadding || 100;
+    const nRows = Math.ceil(nItems / 2); // hardcoded to 2 columns
+    const fullHeight = SWATCH_TOP_PADDING + nRows * SWATCH_ROW_HEIGHT + LEGEND_SPACING || 100;
+    
+    const maxDisplayHeight = Math.min(
+      this.props.height * MAX_SWATCH_HEIGHT_FRACTION_OF_PANEL,
+      MAX_SWATCH_HEIGHT_PX
+    );
+    
+    if (fullHeight <= maxDisplayHeight) {
+      return { fullHeight, displayedHeight: fullHeight, scrollable: false };
+    }
+
+    /** Adjust the displayedHeight so that it doesn't cut off swatches in the middle.
+     * This leaves the top-border of the remaining swatches in view as a UI hint that
+     * there are more available *
+     */
+    const rowsToShow = Math.max(1, Math.floor((maxDisplayHeight - SWATCH_TOP_PADDING) / SWATCH_ROW_HEIGHT));
+    const displayedHeight = SWATCH_TOP_PADDING + rowsToShow * SWATCH_ROW_HEIGHT;
+    return { fullHeight, displayedHeight, scrollable: true };
   }
 
   getSVGWidth(): number {
@@ -78,7 +112,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     const colIdx = Math.floor(itemIdx/maxNumPerColumn);
     const colPos = colIdx * COLUMN_WIDTH + 10;
     const rowIdx = (itemIdx % maxNumPerColumn); // hardcoded for 2 rows
-    const rowPos = rowIdx * (ITEM_RECT_SIZE + LEGEND_SPACING);
+    const rowPos = rowIdx * SWATCH_ROW_HEIGHT;
     return `translate(${colPos},${rowPos})`;
   }
 
@@ -230,6 +264,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     const styles: React.CSSProperties = {
       position: "absolute",
       borderRadius: 4,
+      overflow: "hidden", // keeps the rounded corners over the (square) child SVGs
       zIndex: 1000,
       userSelect: "none"
     };
@@ -260,27 +295,40 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
 
     const show = this.showLegend();
     const titleHeight = show ? 20 : 18; // closed title is 18px vs open title 20px
-    const swatchHeight = show ? this.getSVGSwatchHeight() : 0;
     const width = this.getSVGWidth();
-    
+
+    // The full height needed to draw every swatch, and the (potentially smaller)
+    // height we actually display. When `scrollable`, the swatches overflow the
+    // displayed height and are reachable by scrolling.
+    const swatchHeights = this.getSVGSwatchHeight(show);
+
     return (
-      <svg
-        id="TreeLegendContainer"
-        width={width}
-        height={titleHeight + swatchHeight}
-        style={this.getContainerStyles()}
-      >
-        <Background width={width} height={titleHeight + swatchHeight} />
-        <g
-          id="TitleAndChevron"
-          onClick={() => this.toggleLegend()}
-          style={{cursor: "pointer", textAlign: "right" }}
-        >
-          {this.legendTitle()}
-          {this.legendChevron()}
-        </g>
-        {show && this.legendItems({ height: swatchHeight, verticalOffset: titleHeight})}
-      </svg>
+      <div id="LegendContainer" style={this.getContainerStyles()}>
+        {/* The title & chevron remain fixed above the (potentially scrollable) swatches */}
+        <svg width={width} height={titleHeight} style={{display: "block"}}>
+          <Background width={width} height={titleHeight} />
+          <g
+            id="TitleAndChevron"
+            onClick={() => this.toggleLegend()}
+            style={{cursor: "pointer", textAlign: "right" }}
+          >
+            {this.legendTitle()}
+            {this.legendChevron()}
+          </g>
+        </svg>
+
+        {/* color-by swatches */}
+        {show &&
+          <div style={{maxHeight: swatchHeights.displayedHeight, overflowY: swatchHeights.scrollable ? "auto" : "hidden", overflowX: "hidden"}}>
+            <svg width={width} height={swatchHeights.fullHeight} style={{ display: "block" }}>
+              <Background width={width} height={swatchHeights.fullHeight} />
+              {this.legendItems({ height: swatchHeights.fullHeight, verticalOffset: SWATCH_TOP_PADDING})}
+            </svg>
+          </div>
+        }
+
+        
+      </div>
     );
   }
 }

@@ -367,7 +367,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
     <>
       {showLegend &&
         <ErrorBoundary>
-          <Legend legendPlacement={legendPlacement} width={width}/>
+          <Legend legendPlacement={legendPlacement} width={width} height={height}/>
         </ErrorBoundary>
       }
       <div id={svgContainerDOMId} ref={svgContainerRef} style={getSVGContainerStyle()}>
