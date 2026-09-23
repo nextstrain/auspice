@@ -55,10 +55,12 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     return true;
   }
 
-  getSVGHeight(): number {
-    if (!this.showLegend()) {
-      return 18;
-    }
+  /**
+   * NOTE: There's a well known bug / problem where we have so many swatches that
+   * the calculated legend height is greater than the panel height. This should be
+   * solved by reducing the number of swatches and showing some "..." UI
+   */
+  getSVGSwatchHeight(): number {
     const nItems = this.props.colorScale.visibleLegendValues.length;
     const titlePadding = 20;
     return Math.ceil(nItems / 2) *
@@ -180,7 +182,9 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
    * draws rects and titles for each legend item
    * coordinate system from top,left of parent SVG
    */
-  legendItems(): JSX.Element {
+  legendItems(
+    { height, verticalOffset }: { height: number, verticalOffset: number }
+  ): JSX.Element {
     const values = this.props.colorScale.visibleLegendValues;
     const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
     const items = values
@@ -212,12 +216,11 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     //   transition: `${fastTransitionDuration}ms ease-in-out`
     //   }}>
     return (
-      <g id="ItemsContainer">
-        <rect width={this.getSVGWidth()} height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
+      <g id="ItemsContainer" height={height}>
         <clipPath id="legendFirstColumnClip">
-          <rect x="0" y="0" width={COLUMN_WIDTH-5} height={this.getSVGHeight()} fill="rgb(150, 154, 223)"/>
+          <rect x="0" y="0" width={COLUMN_WIDTH-5} height={height} fill="rgb(150, 154, 223)"/>
         </clipPath>
-        <g id="Items" transform="translate(0,20)">
+        <g id="Items" transform={`translate(0,${verticalOffset})`}>
           {items}
         </g>
       </g>
@@ -250,18 +253,24 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     }
     return 5;
   }
-
+  
   override render(): JSX.Element | null {
     // catch the case where we try to render before anything's ready
     if (!this.props.colorScale) return null;
+
+    const show = this.showLegend();
+    const titleHeight = show ? 20 : 18; // closed title is 18px vs open title 20px
+    const swatchHeight = show ? this.getSVGSwatchHeight() : 0;
+    const width = this.getSVGWidth();
+    
     return (
       <svg
         id="TreeLegendContainer"
-        width={this.getSVGWidth()}
-        height={this.getSVGHeight()}
+        width={width}
+        height={titleHeight + swatchHeight}
         style={this.getContainerStyles()}
       >
-        {this.legendItems()}
+        <Background width={width} height={titleHeight + swatchHeight} />
         <g
           id="TitleAndChevron"
           onClick={() => this.toggleLegend()}
@@ -270,9 +279,16 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
           {this.legendTitle()}
           {this.legendChevron()}
         </g>
+        {show && this.legendItems({ height: swatchHeight, verticalOffset: titleHeight})}
       </svg>
     );
   }
+}
+
+function Background({ width, height }: { width: number, height: number }): JSX.Element {
+  return (
+    <rect width={width} height={height} fill="rgba(255,255,255,.85)"/>
+  )
 }
 
 /**
