@@ -102,10 +102,6 @@ class Main extends React.Component {
     return this.inGrid() && evenNumberOfGridPanels;
   }
 
-  shouldShowMapLegend() {
-    return !this.shouldMapBeInGrid();
-  }
-
   render() {
     if (this.state.showSpinner) {
       return (<FullPageSpinner />);
@@ -219,7 +215,7 @@ class Main extends React.Component {
                   height={this.shouldMapBeInGrid() ? grid.height : full.height}
                   key={keyName+"_map"}
                   justGotNewDatasetRenderNewMap={false}
-                  legend={this.shouldShowMapLegend()}
+                  legend={{ swatches: !this.shouldMapBeInGrid(), demes: true }}
                 />
               </PanelErrorBoundary>
             </Suspense> :

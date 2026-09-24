@@ -43,6 +43,13 @@ interface StateProps {
   colorings: Colorings;
   colorScale: ColorScale;
   legendOpen: boolean | undefined;
+  panelLayout: string;
+  geoResolution: string,
+}
+
+interface Sections {
+  swatches: boolean;
+  demes: boolean;
 }
 
 /** SuppliedProps are those supplied via the calling component */
@@ -53,6 +60,7 @@ interface SuppliedProps {
   legendPlacement: LegendPlacement;
   maxDemeCount?: number;
   demeRadiusFn?: (count: number) => number;
+  sections?: Sections;
 }
 
 interface DispatchProps {
@@ -75,6 +83,18 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     }
     return true;
   }
+
+  showSection(name: string): boolean {
+    // not all callers yet pass this prop
+    const defaults: Sections = { swatches: true, demes: false };    
+    const show = (this.props.sections || defaults)[name];
+    if (name === 'demes' && show && (this.props.maxDemeCount === undefined || this.props.demeRadiusFn === undefined)) {
+      console.error(`<Legend> cannot show demes because the supplied props aren't valid`);
+      return false;
+    }
+    return show;
+  }
+  
 
   /**
    * Compute the swatch heights (px). `fullHeight` is the height required to
@@ -223,16 +243,26 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     // catch the case where we try to render before anything's ready
     if (!this.props.colorScale) return null;
     const show = this.showLegend();
+    const sectionSwatches = this.showSection('swatches');
+    const sectionDemes = this.showSection('demes');
+    if (!sectionSwatches && !sectionDemes) {
+      console.error("<Legend> contains no sections to display");
+      return null;
+    }
     const alignRight = this.props.legendPlacement.horizontal === "right";
 
     // The full height needed to draw every swatch, and the (potentially smaller)
     // height we actually display. When `scrollable`, the swatches overflow the
     // displayed height and are reachable by scrolling.
     const swatchHeights = this.getSVGSwatchHeight(show);
-
-    const showDemes = show && this.props.maxDemeCount !== undefined && this.props.demeRadiusFn !== undefined;
     const demesHeight = 150; // TODO XXX
-
+    const demesTitle = `${this.props.geoResolution} tip count`;
+    
+    // main title is always displayed, even when closed
+    const mainTitle = sectionSwatches ?
+      getColorByTitle(this.props.colorings, this.props.colorBy) :
+      demesTitle;
+    
     return (
       <div id="LegendContainer" style={this.getContainerStyles()}>
         {/* The title & chevron remain fixed above the (potentially scrollable) swatches */}
@@ -249,12 +279,12 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
             cursor: "pointer",
           }}
         >
-          <Title text={getColorByTitle(this.props.colorings, this.props.colorBy)} />
+          <Title text={mainTitle} />
           <Chevron open={show} />
         </div>
 
         {/* color-by swatches */}
-        {show &&
+        {show && sectionSwatches &&
           <div style={{maxHeight: swatchHeights.displayedHeight, overflowY: swatchHeights.scrollable ? "auto" : "hidden", overflowX: "hidden"}}>
             <svg width={LEGEND_WIDTH} height={swatchHeights.fullHeight} style={{ display: "block" }}>
               <Background width={LEGEND_WIDTH} height={swatchHeights.fullHeight} />
@@ -263,8 +293,8 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
           </div>
         }
 
-        {/* map deme circles */}
-        {showDemes && <>
+        {/* map deme circles - if not showing swatches then title's already rendered */}
+        {show && sectionDemes && sectionSwatches &&
           <div
             style={{
               display: "flex",
@@ -273,15 +303,17 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
               backgroundColor: BACKGROUND_FILL,
             }}
           >
-            <Title text="Deme (circle) tip count" />
+            <Title text={demesTitle} />
           </div>
+        }
+        {show && sectionDemes && 
           <Demes
             availableHeight={demesHeight}
             availableWidth={LEGEND_WIDTH}
             maxDemeCount={this.props.maxDemeCount}
             demeRadiusFn={this.props.demeRadiusFn}
           />
-        </>}
+        }
 
       </div>
     );
@@ -315,7 +347,9 @@ const mapStateToProps: MapStateToProps<StateProps, SuppliedProps, RootState> = (
   colorBy: state.controls.colorBy,
   colorings: state.metadata.loaded ? state.metadata.colorings : undefined,
   colorScale: state.controls.colorScale,
+  geoResolution: state.controls.geoResolution,
   legendOpen: state.controls.legendOpen,
+  panelLayout: state.controls.panelLayout,
 });
 
 export default connect(mapStateToProps)(Legend);

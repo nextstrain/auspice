@@ -670,6 +670,7 @@ class Map extends React.Component {
             legendPlacement={this.props.metadata.legendPlacements.map}
             width={this.props.width}
             height={this.props.height}
+            sections={{...this.props.legend}}
             maxDemeCount={this.state.maxDemeCount}
             demeRadiusFn={this.state.demeRadiusFn}
           />
