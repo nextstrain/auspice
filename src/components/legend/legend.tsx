@@ -13,7 +13,7 @@ import { SET_MODAL } from "../../actions/types";
 import { warningNotification } from "../../actions/notifications";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { enableDatasetEditor } from "../datasetEditor/datasetEditor";
-import type { ColorScale } from "../../reducers/controls";
+import type { ColorScale, HoveredDeme } from "../../reducers/controls";
 import type { Colorings, LegendPlacement } from "../../reducers/metadata.types";
 import type { RootState, AppDispatch } from "../../store";
 
@@ -44,7 +44,9 @@ interface StateProps {
   colorScale: ColorScale;
   legendOpen: boolean | undefined;
   panelLayout: string;
-  geoResolution: string,
+  geoResolution: string;
+  /** the map deme currently being hovered, or undefined when none */
+  hoveredDeme: HoveredDeme | undefined;
 }
 
 interface Sections {
@@ -312,6 +314,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
             availableWidth={LEGEND_WIDTH}
             maxDemeCount={this.props.maxDemeCount}
             demeRadiusFn={this.props.demeRadiusFn}
+            hoveredDeme={this.props.hoveredDeme}
           />
         }
 
@@ -350,6 +353,7 @@ const mapStateToProps: MapStateToProps<StateProps, SuppliedProps, RootState> = (
   geoResolution: state.controls.geoResolution,
   legendOpen: state.controls.legendOpen,
   panelLayout: state.controls.panelLayout,
+  hoveredDeme: state.controls.hoveredDeme,
 });
 
 export default connect(mapStateToProps)(Legend);

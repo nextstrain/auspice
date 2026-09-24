@@ -1,18 +1,23 @@
 import React from "react";
 import { ticks } from "d3-array";
-import { dataFont, darkGrey } from "../../globalStyles";
+import { dataFont, darkGrey, lightGrey } from "../../globalStyles";
 import { Background } from "./legend";
+import type { HoveredDeme } from "../../reducers/controls";
 
 /** Gap (px) between the circles and the start of the leader line / labels */
 const LABEL_GAP = 8;
 /** Keep labels for overflowing circles this far below the top clip edge */
 const TOP_PAD = 6;
+const BOTTOM_PAD = 8;
+const LEFT_PAD = 8;
 
 interface DemesProps {
   maxDemeCount: number;
   demeRadiusFn: (value: number) => number;
   availableWidth: number;
   availableHeight: number;
+  /** the map deme currently being hovered, or undefined when none */
+  hoveredDeme?: HoveredDeme;
 }
 
 /**
@@ -20,76 +25,58 @@ interface DemesProps {
  * (concentric) circles sharing a common bottom tangent, largest behind, each
  * annotated by a nice-number value via a leader line to labels on the right.
  *
+ * When a map deme is being hovered (`hoveredDeme`) we de-emphasise the
+ * reference circles (grey stroke, no labels) and draw a single black circle
+ * sized to the hovered deme, labelled with its tip count and name. A pie-chart
+ * deme is treated as a single circle representing the whole deme (see the map's
+ * hover handlers), not an individual arc.
+ *
  * Coordinate system is from the top,left of the containing <g>.
  */
-const Demes = ({ maxDemeCount, demeRadiusFn, availableWidth, availableHeight }: DemesProps): JSX.Element => {
+const Demes = ({ maxDemeCount, demeRadiusFn, availableWidth, availableHeight, hoveredDeme }: DemesProps): JSX.Element => {
   const values = _pickDemeValues(maxDemeCount, demeRadiusFn, availableWidth, availableHeight); // descending
-  console.log("<Demes>", maxDemeCount, values);
-  
-  const maxRadius = demeRadiusFn(values[0]);
-  const cx = maxRadius; // all circles share this centre-x
+
+  const hovering = hoveredDeme !== undefined && hoveredDeme.demeCount >= 1;
+  const hoveredRadius = hovering && hoveredDeme ? demeRadiusFn(hoveredDeme.demeCount) : 0;
+
+  /* The reference circles fix the geometry, but when hovering a large deme the
+     hovered circle may be bigger than any of them, so grow the box to fit it. */
+  const maxRadius = Math.max(demeRadiusFn(values[0]), hoveredRadius);
+  const cx = LEFT_PAD + maxRadius; // all circles share this centre-x
   const labelX = 2 * maxRadius + LABEL_GAP;
-  const height = maxRadius * 2 + LABEL_GAP;
+  const baseline = maxRadius * 2 + TOP_PAD;
+  const height = baseline + BOTTOM_PAD;
+  
+  const Circle = ({ r, fill, stroke }: { r: number, fill: string, stroke: string }): JSX.Element => (
+    <circle cx={cx} cy={baseline - r} r={r} fill={fill} stroke={stroke} />
+  );
 
   return (
     <svg width={availableWidth} height={height} style={{ display: "block" }}>
       <Background width={availableWidth} height={height} />
       <g id="LegendDemesContainer">
-        {/* Circles, drawn largest-first so smaller ones sit "in front". They're
-            clipped to the available height, so a circle taller than the space is
-            cut off at the top edge rather than drawing over the legend items. */}
+        {/* Reference circles, drawn largest-first so smaller ones sit "in front".
+            They're clipped to the available height, so a circle taller than the
+            space is cut off at the top edge rather than drawing over the legend
+            items. When hovering they're de-emphasised to grey. */}
         <clipPath id="demesClip">
-          <rect x={0} y={0} width={2 * maxRadius} height={height} />
+          <rect x={0} y={0} width={2 * maxRadius + LEFT_PAD} height={height} />
         </clipPath>
         <g clipPath="url(#demesClip)">
-          {values.map((value) => {
-            const radius = demeRadiusFn(value);
-            return (
-              <circle
-                key={value}
-                cx={cx}
-                cy={height - radius}
-                r={radius}
-                fill="none"
-                stroke={darkGrey}
-              />
-            );
-          })}
+          {values.map((value) =>
+            <Circle key={value} r={demeRadiusFn(value)} fill={"none"} stroke={hovering ? lightGrey : darkGrey} />
+          )}
+          {/* the hovered deme, drawn on top in black */}
+          {hovering && <Circle r={hoveredRadius} fill={darkGrey} stroke={darkGrey} />}
         </g>
-        {/* Leader lines + labels. For a circle that fits, the line leaves the top
-            of the circle; for one taller than the available height, it sits near
-            the top edge and points at the circle's edge at that height. Computing
-            the circle edge at labelY reduces to the top point (dx=0) when it fits. */}
-        {values.map((value) => {
-          const radius = demeRadiusFn(value);
-          const cy = height - radius;
-          const naturalTopY = cy - radius; // topmost point of the circle
-          const labelY = Math.max(naturalTopY, TOP_PAD);
-          const dy = labelY - cy;
-          const dx = Math.sqrt(Math.max(0, radius * radius - dy * dy));
-          const lineStartX = cx + dx; // circle's right edge at labelY
-          return (
-            <g key={value}>
-              <line
-                x1={lineStartX}
-                y1={labelY}
-                x2={labelX}
-                y2={labelY}
-                stroke={darkGrey}
-                strokeWidth={0.5}
-              />
-              <text
-                x={labelX + 2}
-                y={labelY}
-                textAnchor="start"
-                dominantBaseline="central"
-                style={{ fontSize: 12, fill: darkGrey, fontFamily: dataFont }}
-              >
-                {value}
-              </text>
-            </g>
-          );
-        })}
+        {hovering && hoveredDeme ?
+          /* When hovered, only show a single label */
+          <LineAndLabel cx={cx} baseline={baseline} radius={hoveredRadius} labelX={labelX} text={`${hoveredDeme.demeCount} ${hoveredDeme.demeName}`} bold /> :
+          /* otherwise show a label per circle */
+          values.map((value) =>
+            <LineAndLabel key={value} cx={cx} baseline={baseline} radius={demeRadiusFn(value)} labelX={labelX} text={value} bold={false} />
+          )
+        }
       </g>
     </svg>
   );
@@ -97,6 +84,35 @@ const Demes = ({ maxDemeCount, demeRadiusFn, availableWidth, availableHeight }: 
 
 export default Demes;
 
+
+/** Leader line + label pointing at a circle of the given radius/value. For a
+    circle that fits, the line touches the top of the circle; for one taller than
+    the available height, it touches the circle as high as possible */
+function LineAndLabel(
+  { cx, baseline, labelX, radius, bold, text }: { cx: number, baseline: number, labelX: number, radius: number, bold: boolean, text: string | number }
+): JSX.Element {
+  const cy = baseline - radius;
+  const naturalTopY = cy - radius; // topmost point of the circle
+  const labelY = Math.max(naturalTopY, TOP_PAD);
+  const dy = labelY - cy;
+  const dx = Math.sqrt(Math.max(0, radius * radius - dy * dy));
+  const lineStartX = cx + dx; // circle's right edge at labelY
+  const colour = bold ? '#000' : darkGrey;
+  return (
+    <g>
+      <line x1={lineStartX} y1={labelY} x2={labelX} y2={labelY} stroke={colour} strokeWidth={0.5} />
+      <text
+        x={labelX + 2}
+        y={labelY}
+        textAnchor="start"
+        dominantBaseline="central"
+        style={{ fontSize: 12, fill: colour, fontFamily: dataFont }}
+      >
+        {text}
+      </text>
+    </g>
+  );
+}
 
 /**
  * Pick a small set of nice-number values to display, spanning the data range
@@ -123,7 +139,7 @@ function _pickDemeValues(
   const largest = candidates[candidates.length - 1];
   const middle = candidates[Math.floor((candidates.length - 1) / 2)];
   const smallest = candidates[0];
-  
+
   const anchors = [1, 10, 50].filter((v) => v < smallest);
 
   return [...new Set([largest, middle, smallest, ...anchors])].sort((a, b) => b - a);

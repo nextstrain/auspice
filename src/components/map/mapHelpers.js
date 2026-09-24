@@ -5,6 +5,7 @@ import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 import { updateTipRadii } from "../../actions/tree";
+import { SET_HOVERED_DEME } from "../../actions/types";
 
 /* util */
 
@@ -199,8 +200,15 @@ export const drawDemesAndTransmissions = (
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       )
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]}));
+        /* a pie chart deme is treated as a single circle in the legend, sized by the whole deme's count */
+        dispatch({type: SET_HOVERED_DEME, hoveredDeme: {demeCount: demeData[d.demeDataIdx].count, demeName: demeData[d.demeDataIdx].name}});
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+        dispatch({type: SET_HOVERED_DEME, hoveredDeme: undefined});
+      });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -214,8 +222,14 @@ export const drawDemesAndTransmissions = (
       .style("stroke", (d) => { return d.color; })
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]}));
+        dispatch({type: SET_HOVERED_DEME, hoveredDeme: {demeCount: d.count, demeName: d.name}});
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+        dispatch({type: SET_HOVERED_DEME, hoveredDeme: undefined});
+      });
   }
 
   return {
