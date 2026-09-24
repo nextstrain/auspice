@@ -3,8 +3,8 @@ import { connect, MapStateToProps } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import Demes from "./demes";
-import { headerFont, darkGrey } from "../../globalStyles";
-import { fastTransitionDuration, months } from "../../util/globals";
+import { Title, Chevron } from "./title";
+import { months } from "../../util/globals";
 import { getBrighterColor, getColorByTitle } from "../../util/colorHelpers";
 import { formatBounds } from "../../util/colorScale";
 import { numericToCalendar } from "../../util/dateHelpers";
@@ -20,10 +20,14 @@ import type { RootState, AppDispatch } from "../../store";
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
 const COLUMN_WIDTH = 145;
+/** width (px) of the legend when open (fits two columns of swatches) */
+const LEGEND_WIDTH = 290;
 /** vertical space (px) occupied by a single row of swatches */
 const SWATCH_ROW_HEIGHT = ITEM_RECT_SIZE + LEGEND_SPACING;
 /** padding (px) above the first row of swatches within the swatch SVG */
 const SWATCH_TOP_PADDING = LEGEND_SPACING;
+
+export const BACKGROUND_FILL = 'rgba(255, 255, 255, .85)';
 
 /**
  * The swatches are rendered within a scrollable container whose height is
@@ -104,13 +108,6 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     return { fullHeight, displayedHeight, scrollable: true };
   }
 
-  getSVGWidth(): number {
-    if (this.showLegend()) {
-      return 290;
-    }
-    return this.getTitleWidth() + 20;
-  }
-
   getTransformationForLegendItem(maxNumPerColumn: number, itemIdx: number): string {
     const colIdx = Math.floor(itemIdx/maxNumPerColumn);
     const colPos = colIdx * COLUMN_WIDTH + 10;
@@ -119,65 +116,8 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     return `translate(${colPos},${rowPos})`;
   }
 
-  getTitleWidth(): number {
-    // This is a hack because we can't use getBBox in React.
-    // Lots of work to get measured width of DOM element.
-    // Works fine, but will need adjusting if title font is changed.
-    return 15 + 5.3 * getColorByTitle(this.props.colorings, this.props.colorBy).length;
-  }
-
   toggleLegend(): void {
     this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
-  }
-
-  /*
-   * draws legend title
-   * coordinate system from top,left of parent SVG
-   */
-  legendTitle(): JSX.Element {
-    return (
-      <g id="Title">
-        <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
-        <text
-          x={this.getTitleOffset()}
-          y={10}
-          style={{
-            fontSize: 12,
-            fill: darkGrey,
-            fontFamily: headerFont,
-            backgroundColor: "#fff"
-          }}
-        >
-          {getColorByTitle(this.props.colorings, this.props.colorBy)}
-        </text>
-      </g>
-    );
-  }
-
-  /*
-   * draws show/hide chevron
-   * coordinate system from top,left of parent SVG
-   */
-  legendChevron(): JSX.Element {
-    const degrees = this.showLegend() ? -180 : 0;
-
-    const offset = this.getArrowOffset();
-    return (
-      <g id="Chevron" transform={`translate(${offset},0)`}>
-        <svg width="12" height="12" viewBox="0 0 1792 1792">
-          <rect width="1792" height="1792" fill="rgba(255,255,255,.85)"/>
-          <path
-            fill={darkGrey}
-            style={{
-              transform: `rotate(${degrees}deg)`,
-              transformOrigin: "50% 50%",
-              transition: `${fastTransitionDuration}ms ease-in-out`
-            }}
-            d="M1683 808l-742 741q-19 19-45 19t-45-19l-742-741q-19-19-19-45.5t19-45.5l166-165q19-19 45-19t45 19l531 531 531-531q19-19 45-19t45 19l166 165q19 19 19 45.5t-19 45.5z"
-          />
-        </svg>
-      </g>
-    );
   }
 
   styleLabelText(label: any): any {
@@ -279,27 +219,11 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     return styles;
   }
 
-  getArrowOffset(): number {
-    if (this.props.legendPlacement.horizontal === "right") {
-      return this.getSVGWidth() - 20;
-    }
-    return this.getTitleWidth();
-  }
-
-  getTitleOffset(): number {
-    if (this.props.legendPlacement.horizontal === "right") {
-      return this.getSVGWidth() - this.getTitleWidth() - 15;
-    }
-    return 5;
-  }
-  
   override render(): JSX.Element | null {
     // catch the case where we try to render before anything's ready
     if (!this.props.colorScale) return null;
-
     const show = this.showLegend();
-    const titleHeight = show ? 20 : 18; // closed title is 18px vs open title 20px
-    const width = this.getSVGWidth();
+    const alignRight = this.props.legendPlacement.horizontal === "right";
 
     // The full height needed to draw every swatch, and the (potentially smaller)
     // height we actually display. When `scrollable`, the swatches overflow the
@@ -312,35 +236,52 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     return (
       <div id="LegendContainer" style={this.getContainerStyles()}>
         {/* The title & chevron remain fixed above the (potentially scrollable) swatches */}
-        <svg width={width} height={titleHeight} style={{display: "block"}}>
-          <Background width={width} height={titleHeight} />
-          <g
-            id="TitleAndChevron"
-            onClick={() => this.toggleLegend()}
-            style={{cursor: "pointer", textAlign: "right" }}
-          >
-            {this.legendTitle()}
-            {this.legendChevron()}
-          </g>
-        </svg>
+        <div
+          id="TitleAndChevron"
+          onClick={() => this.toggleLegend()}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            justifyContent: alignRight ? "flex-end" : "flex-start",
+            padding: "4px 10px",
+            backgroundColor: BACKGROUND_FILL,
+            cursor: "pointer",
+          }}
+        >
+          <Title text={getColorByTitle(this.props.colorings, this.props.colorBy)} />
+          <Chevron open={show} />
+        </div>
 
         {/* color-by swatches */}
         {show &&
           <div style={{maxHeight: swatchHeights.displayedHeight, overflowY: swatchHeights.scrollable ? "auto" : "hidden", overflowX: "hidden"}}>
-            <svg width={width} height={swatchHeights.fullHeight} style={{ display: "block" }}>
-              <Background width={width} height={swatchHeights.fullHeight} />
+            <svg width={LEGEND_WIDTH} height={swatchHeights.fullHeight} style={{ display: "block" }}>
+              <Background width={LEGEND_WIDTH} height={swatchHeights.fullHeight} />
               {this.legendItems({ height: swatchHeights.fullHeight})}
             </svg>
           </div>
         }
 
         {/* map deme circles */}
-        {showDemes && <Demes
-          availableHeight={demesHeight}
-          availableWidth={width}
-          maxDemeCount={this.props.maxDemeCount}
-          demeRadiusFn={this.props.demeRadiusFn}
-        />}
+        {showDemes && <>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: alignRight ? "flex-end" : "flex-start",
+              padding: "4px 10px",
+              backgroundColor: BACKGROUND_FILL,
+            }}
+          >
+            <Title text="Deme (circle) tip count" />
+          </div>
+          <Demes
+            availableHeight={demesHeight}
+            availableWidth={LEGEND_WIDTH}
+            maxDemeCount={this.props.maxDemeCount}
+            demeRadiusFn={this.props.demeRadiusFn}
+          />
+        </>}
 
       </div>
     );
@@ -349,7 +290,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
 
 export function Background({ width, height }: { width: number, height: number }): JSX.Element {
   return (
-    <rect width={width} height={height} fill="rgba(255,255,255,.85)"/>
+    <rect width={width} height={height} fill={BACKGROUND_FILL} />
   )
 }
 
