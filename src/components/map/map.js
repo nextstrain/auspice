@@ -665,11 +665,12 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center infocard={this.props.showOnlyPanels} title={transmissionsExist ? t("Transmissions") : t("Geography")}>
-        {this.props.legend && <ErrorBoundary>
+        {this.props.legend && this.state.demeRadiusFn && <ErrorBoundary>
           <Legend
             legendPlacement={this.props.metadata.legendPlacements.map}
             width={this.props.width}
             height={this.props.height}
+            sections={{...this.props.legend}}
             maxDemeCount={this.state.maxDemeCount}
             demeRadiusFn={this.state.demeRadiusFn}
           />

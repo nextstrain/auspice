@@ -15,7 +15,6 @@ interface DemesProps {
   availableHeight: number;
 }
 
-
 /**
  * Renders a proportional-symbol legend for the map demes: a set of nested
  * (concentric) circles sharing a common bottom tangent, largest behind, each
