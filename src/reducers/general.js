@@ -30,6 +30,7 @@ const general = (state = {
   defaults,
   displayComponent: getFirstPageToDisplay(),
   errorMessage: undefined,
+  errorStatus: undefined,
   pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
   language: query.lang ? query.lang : defaults.language,
   mobileDisplay: getInitialMobileState()
@@ -38,7 +39,8 @@ const general = (state = {
     case types.PAGE_CHANGE: {
       const stateUpdate = {
         displayComponent: action.displayComponent,
-        errorMessage: action.errorMessage
+        errorMessage: action.errorMessage,
+        errorStatus: action.errorStatus
       };
       if (action.path) {
         stateUpdate.pathname = action.path;

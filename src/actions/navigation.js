@@ -130,10 +130,11 @@ export const changePage = ({
 /* a 404 uses the same machinery as changePage, but it's not a thunk.
  * Note that a 404 maintains the "bad" URL -- see https://github.com/nextstrain/auspice/issues/700
  */
-export const goTo404 = (errorMessage) => ({
+export const goTo404 = (errorMessage, errorStatus) => ({
   type: PAGE_CHANGE,
   displayComponent: "splash",
   errorMessage,
+  errorStatus,
   pushState: true
 });
 
