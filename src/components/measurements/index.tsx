@@ -7,7 +7,7 @@ import { determineLegendMatch } from "../../util/tipRadiusHelpers";
 import ErrorBoundary from "../../util/errorBoundary";
 import Flex from "../framework/flex";
 import Card from "../framework/card";
-import Legend from "../tree/legend/legend";
+import Legend from "../legend/legend";
 import HoverPanel, { HoverData } from "./hoverPanel";
 import {
   createXScale,
@@ -367,7 +367,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
     <>
       {showLegend &&
         <ErrorBoundary>
-          <Legend legendPlacement={legendPlacement} width={width}/>
+          <Legend legendPlacement={legendPlacement} width={width} height={height}/>
         </ErrorBoundary>
       }
       <div id={svgContainerDOMId} ref={svgContainerRef} style={getSVGContainerStyle()}>

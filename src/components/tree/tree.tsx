@@ -3,7 +3,7 @@ import { withTranslation } from "react-i18next";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { SelectedNode } from "../../reducers/controls";
 import Card from "../framework/card";
-import Legend from "./legend/legend";
+import Legend from "../legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
 import HoverInfoPanel from "./infoPanels/hover";
 import NodeClickedPanel from "./infoPanels/click";
@@ -154,7 +154,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     return (
       <Card center infocard={this.props.showOnlyPanels} title={t("Phylogeny")} tallTitle={!!this.props.showTreeToo}>
         <ErrorBoundary>
-          <Legend legendPlacement={this.props.legendPlacement} width={this.props.width}/>
+          <Legend legendPlacement={this.props.legendPlacement} width={this.props.width} height={this.props.height}/>
         </ErrorBoundary>
         <HoverInfoPanel
           selectedNode={this.state.hoveredNode}

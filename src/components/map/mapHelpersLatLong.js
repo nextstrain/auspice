@@ -47,7 +47,9 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
 /**
  * Traverses the tips of the tree to create a dict of
- * location(deme) -> list of visible tips at that location
+ * location(deme) -> list of visible tips at that location.
+ * 
+ * Also returns the maximum observed (tip) count across all demes
  */
 const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
   const locationToVisibleNodes = {};
@@ -60,7 +62,10 @@ const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
       locationToVisibleNodes[location].push(n);
     }
   });
-  return locationToVisibleNodes;
+
+  const maxDemeCount = Object.values(locationToVisibleNodes).reduce((maxSoFar, nodes) => nodes.length > maxSoFar ? nodes.length : maxSoFar, 0);
+
+  return [locationToVisibleNodes, maxDemeCount];
 };
 
 /**
@@ -122,7 +127,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeData = []; /* deme array */
   const demeIndices = {}; /* map of name to indices in array */
 
-  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
+  const [locationToVisibleNodes, maxDemeCount] = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
   const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
@@ -186,7 +191,8 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
   return {
     demeData: demeData,
-    demeIndices: demeIndices
+    demeIndices: demeIndices,
+    maxDemeCount
   };
 };
 
@@ -412,7 +418,8 @@ export const createDemeAndTransmissionData = (
   */
   const {
     demeData,
-    demeIndices
+    demeIndices,
+    maxDemeCount
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy);
 
   let transmissionData = [];
@@ -445,6 +452,7 @@ export const createDemeAndTransmissionData = (
   return {
     demeData: demeData,
     transmissionData: transmissionData,
+    maxDemeCount,
     demeIndices: demeIndices,
     transmissionIndices: transmissionIndices,
     demesMissingLatLongs
@@ -460,7 +468,7 @@ UPDATE DEMES & TRANSMISSIONS
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
   const demeDataCopy = demeData.slice();
 
-  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
+  const [locationToVisibleNodes, maxDemeCount] = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
   for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
@@ -479,7 +487,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
     }
   }
 
-  return demeDataCopy;
+  return [demeDataCopy, maxDemeCount];
 };
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
@@ -516,14 +524,14 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
  * for demeData we have: count, color
  * for transmissionData we have: color, visible
  */
-export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
-  const newDemes = demeData ?
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, previousMaxDemeCount, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
+  const [newDemes, maxDemeCount] = demeData ?
     updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) :
-    demeData;
+    [demeData, previousMaxDemeCount];
   const newTransmissions = (transmissionData && transmissionData.length) ?
     updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) :
     transmissionData;
-  return {newDemes, newTransmissions};
+  return {newDemes, maxDemeCount, newTransmissions};
 };
 
 /* ********************
