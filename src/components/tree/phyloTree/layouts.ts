@@ -628,7 +628,7 @@ function jitter(
 }
 
 
-function getTipLabelPadding(
+export function getTipLabelPadding(
   params: Params,
   inViewTerminalNodes: PhyloNode[],
 ): number {
@@ -643,11 +643,8 @@ function getTipLabelPadding(
       fontSize = params.tipLabelFontSizeL3;
     }
 
-    inViewTerminalNodes.forEach((d) => {
-      if (padBy < d.n.name.length) {
-        padBy = 0.65 * d.n.name.length * fontSize;
-      }
-    });
+    const longestName = Math.max(0, ...inViewTerminalNodes.map((d) => d.n.name.length));
+    padBy = 0.65 * longestName * fontSize;
   }
   return padBy;
 }

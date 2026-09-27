@@ -1,5 +1,8 @@
 # Changelog
 
+
+* Bugfix: the space reserved for tip labels now fits the longest label in view. Previously it followed the first tip, which could cut off longer labels.
+
 ## version 3.0.0 - 2026/09/02
 
 
