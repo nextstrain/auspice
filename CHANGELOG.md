@@ -11,6 +11,9 @@
   A later mount on the same DOM, as in React StrictMode, no longer draws over the old drawing.
  [#2100](https://github.com/nextstrain/auspice/pull/2100)
 
+* Bugfix: a temporal axis narrower than the minimum grid spacing no longer freezes the browser.
+  This could happen in the tree and frequencies panels with small windows, the grid layout, or long tip labels.
+  [#2098](https://github.com/nextstrain/auspice/pull/2098/changes)
 
 ## version 3.0.0 - 2026/09/02
 
