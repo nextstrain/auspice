@@ -674,7 +674,6 @@ const Slider = createReactClass({
 
     return (
       <div
-        ref={'handle' + i}
         key={'handle' + i}
         className={className}
         style={{ ...styles.handle, ...style }}
@@ -725,7 +724,6 @@ const Slider = createReactClass({
     return (
       <div
         key={'bar' + i}
-        ref={'bar' + i}
         className={className}
         style={{ ...styles.bar, ...barStyle }}
       />
@@ -794,7 +792,6 @@ const Slider = createReactClass({
 
     return (
       <div
-        ref="slider"
         style={{ ...styles.base, ...orientation }}
         onMouseDown={this._onSliderMouseDown}
         onClick={this._onSliderClick}
