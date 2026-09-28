@@ -230,8 +230,8 @@ class Entropy extends React.Component {
   componentDidMount() {
     if (this.props.loaded) {
       this.setUp(this.props);
-      const observer = new IntersectionObserver(this.visibilityOnScreenChange.bind(this), {threshold: 0.0});
-      observer.observe(this.d3entropy)
+      this.observer = new IntersectionObserver(this.visibilityOnScreenChange.bind(this), {threshold: 0.0});
+      this.observer.observe(this.d3entropy)
     }
   }
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -336,6 +336,9 @@ class Entropy extends React.Component {
 
   componentWillUnmount() {
     // TODO:1050 undo all listeners within EntropyChart (ie this.state.chart)
+    /* stop observing and remove the drawing, so neither outlives the component */
+    if (this.observer) this.observer.disconnect();
+    if (this.d3entropy) select(this.d3entropy).selectAll("*").remove();
   }
 }
 
