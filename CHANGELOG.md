@@ -1,5 +1,8 @@
 # Changelog
 
+
+* Bugfix: the tree and entropy panels now remove their drawings when they unmount, and the entropy panel stops observing its visibility. A later mount on the same DOM, as in React StrictMode, no longer draws over the old drawing.
+
 ## version 3.0.0 - 2026/09/02
 
 
