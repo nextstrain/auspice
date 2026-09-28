@@ -107,7 +107,7 @@
     "react-redux": "^7.2.6",
     "react-select": "^5.10.2",
     "react-tooltip": "^4.2.10",
-    "react-transition-group": "^1.2.1",
+    "react-transition-group": "^4.4.5",
     "react-virtualized": "^9.22.6",
     "regenerator-runtime": "^0.13.5",
     "style-loader": "^0.13.2",
