@@ -19,9 +19,8 @@ import type { RootState, AppDispatch } from "../../store";
 
 const ITEM_RECT_SIZE = 15;
 const LEGEND_SPACING = 4;
+/** width (px) of a single column of swatches */
 const COLUMN_WIDTH = 145;
-/** width (px) of the legend when open (fits two columns of swatches) */
-const LEGEND_WIDTH = 290;
 /** vertical space (px) occupied by a single row of swatches */
 const SWATCH_ROW_HEIGHT = ITEM_RECT_SIZE + LEGEND_SPACING;
 /** padding (px) above the first row of swatches within the swatch SVG */
@@ -97,22 +96,39 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
   }
   
 
+  /** the height (px) we're willing to use to display the swatches */
+  maxSwatchDisplayHeight(): number {
+    return this.props.height * MAX_SWATCH_HEIGHT_FRACTION_OF_PANEL;
+  }
+
+  /**
+   * The number of columns of swatches to render (1 or 2). We use a single
+   * column when it would fit within the available height, or when there are
+   * no swatches to display at all; otherwise we use two columns.
+   */
+  getNumColumns(sectionSwatches: boolean): number {
+    if (!sectionSwatches) return 1;
+    const nItems = this.props.colorScale.visibleLegendValues.length;
+    const singleColumnHeight = SWATCH_TOP_PADDING + nItems * SWATCH_ROW_HEIGHT + LEGEND_SPACING;
+    return singleColumnHeight <= this.maxSwatchDisplayHeight() ? 1 : 2;
+  }
+
   /**
    * Compute the swatch heights (px). `fullHeight` is the height required to
    * render every swatch. When this exceeds the space we want to use
    * then we use a smaller `displayHeight` and make the swatches scrollable.
    */
-  getSVGSwatchHeight(show: boolean): { fullHeight: number, displayedHeight: number, scrollable: boolean } {
+  getSVGSwatchHeight(show: boolean, nColumns: number): { fullHeight: number, displayedHeight: number, scrollable: boolean } {
     if (!show) {
       return { fullHeight: 0, displayedHeight: 0, scrollable: false };
     }
-    
+
     const nItems = this.props.colorScale.visibleLegendValues.length;
-    const nRows = Math.ceil(nItems / 2); // hardcoded to 2 columns
+    const nRows = Math.ceil(nItems / nColumns);
     const fullHeight = SWATCH_TOP_PADDING + nRows * SWATCH_ROW_HEIGHT + LEGEND_SPACING || 100;
     
     const maxDisplayHeight = Math.min(
-      this.props.height * MAX_SWATCH_HEIGHT_FRACTION_OF_PANEL,
+      this.maxSwatchDisplayHeight(),
       MAX_SWATCH_HEIGHT_PX
     );
     
@@ -181,10 +197,10 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
    * coordinate system from top,left of parent SVG
    */
   legendItems(
-    { height }: { height: number }
+    { height, nColumns }: { height: number, nColumns: number }
   ): JSX.Element {
     const values = this.props.colorScale.visibleLegendValues;
-    const maxNumPerColumn = Math.ceil(values.length/2); // hardcoded to 2 columns
+    const maxNumPerColumn = Math.ceil(values.length/nColumns);
     const items = values
       .filter((d) => d !== undefined)
       .map((d, i) => {
@@ -201,7 +217,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
             label={this.styleLabelText(d)}
             index={i}
             tooltip={tooltipText(this.props.colorScale, d)}
-            clipId={i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
+            clipId={nColumns > 1 && i<maxNumPerColumn ? "legendFirstColumnClip" : undefined}
             handleOnClick={this.handleLegendItemOnClick}
           />
         );
@@ -252,10 +268,14 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     }
     const alignRight = this.props.legendPlacement.horizontal === "right";
 
+    // The legend renders either one or two columns of swatches, which sets its width.
+    const nColumns = this.getNumColumns(sectionSwatches);
+    const legendWidth = nColumns * COLUMN_WIDTH;
+
     // The full height needed to draw every swatch, and the (potentially smaller)
     // height we actually display. When `scrollable`, the swatches overflow the
     // displayed height and are reachable by scrolling.
-    const swatchHeights = this.getSVGSwatchHeight(show);
+    const swatchHeights = this.getSVGSwatchHeight(show, nColumns);
     const demesHeight = 100;
     const demesTitle = `${this.props.geoResolution} tip count`;
     
@@ -287,9 +307,9 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
         {/* color-by swatches */}
         {show && sectionSwatches &&
           <div style={{maxHeight: swatchHeights.displayedHeight, overflowY: swatchHeights.scrollable ? "auto" : "hidden", overflowX: "hidden"}}>
-            <svg width={LEGEND_WIDTH} height={swatchHeights.fullHeight} style={{ display: "block" }}>
-              <Background width={LEGEND_WIDTH} height={swatchHeights.fullHeight} />
-              {this.legendItems({ height: swatchHeights.fullHeight})}
+            <svg width={legendWidth} height={swatchHeights.fullHeight} style={{ display: "block" }}>
+              <Background width={legendWidth} height={swatchHeights.fullHeight} />
+              {this.legendItems({ height: swatchHeights.fullHeight, nColumns})}
             </svg>
           </div>
         }
@@ -310,7 +330,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
         {show && sectionDemes && 
           <Demes
             availableHeight={demesHeight}
-            availableWidth={LEGEND_WIDTH}
+            availableWidth={legendWidth}
             maxDemeCount={this.props.maxDemeCount}
             demeRadiusFn={this.props.demeRadiusFn}
           />
