@@ -140,12 +140,6 @@ interface Defaults {
   sidebarOpen?: boolean
 }
 
-/** The map deme currently being hovered, surfaced in the legend as a single circle */
-export interface HoveredDeme {
-  demeCount: number
-  demeName: string
-}
-
 export interface BasicControlsState {
   defaults: Defaults
 
@@ -179,7 +173,6 @@ export interface BasicControlsState {
   geoResolution: string
   layout: Layout
   legendOpen?: boolean
-  hoveredDeme?: HoveredDeme
   mapAnimationCumulative: boolean
   mapAnimationDurationInMilliseconds: number
   mapAnimationShouldLoop: boolean
@@ -533,8 +526,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
       return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
       return Object.assign({}, state, { legendOpen: action.value });
-    case types.SET_HOVERED_DEME:
-      return {...state, hoveredDeme: action.hoveredDeme};
     case types.UPDATE_METADATA: {
       return Object.assign({}, state, action.controls);
     }
