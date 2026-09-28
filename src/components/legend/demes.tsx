@@ -7,6 +7,9 @@ import { Background } from "./legend";
 const LABEL_GAP = 8;
 /** Keep labels for overflowing circles this far below the top clip edge */
 const TOP_PAD = 6;
+const BOTTOM_PAD = 8;
+const LEFT_PAD = 8;
+const LABEL_SPACE = 50;
 
 interface DemesProps {
   maxDemeCount: number;
@@ -22,12 +25,15 @@ interface DemesProps {
  *
  * Coordinate system is from the top,left of the containing <g>.
  */
-const Demes = ({ maxDemeCount, demeRadiusFn, availableWidth, availableHeight }: DemesProps): JSX.Element => {
-  const values = _pickDemeValues(maxDemeCount, demeRadiusFn, availableWidth, availableHeight); // descending
-  console.log("<Demes>", maxDemeCount, values);
-  
+const Demes = ({ maxDemeCount, demeRadiusFn, availableWidth, availableHeight, hoveredDeme }: DemesProps): JSX.Element => {
+  const maxAllowableRadius = Math.min(
+    (availableWidth - LABEL_SPACE) / 2,
+    (availableHeight - BOTTOM_PAD - TOP_PAD) / 2
+  );
+  const values = _pickDemeValues(maxDemeCount, demeRadiusFn, maxAllowableRadius); // descending
+
   const maxRadius = demeRadiusFn(values[0]);
-  const cx = maxRadius; // all circles share this centre-x
+  const cx = LEFT_PAD + maxRadius; // all circles share this centre-x
   const labelX = 2 * maxRadius + LABEL_GAP;
   const height = maxRadius * 2 + LABEL_GAP;
 
@@ -105,26 +111,50 @@ export default Demes;
 function _pickDemeValues(
   maxDemeCount: number,
   demeRadiusFn: (value: number) => number,
-  availableWidth: number,
-  availableHeight: number,
+  maxAllowableRadius: number,
 ): number[] {
-  const candidates = ticks(0, maxDemeCount * 1.33, 6)
-    .filter((v) => {
-      const r = demeRadiusFn(v);
-      return v >= 1 &&
-        r <= availableHeight &&    // diameter can overflow vertically, that's ok
-        r * 2 <= (availableWidth - 50) // diameter fits in horizontal space with room for labels
-    });
-  // Fallback: even the smallest nice tick overflows — just show the count.
-  if (candidates.length === 0) return [1, 10, 50];
 
+  const maxCount = _findMax(maxDemeCount, demeRadiusFn, maxAllowableRadius);
+
+  const candidates = ticks(0, maxCount, 3)
+    .filter((v) => v > 10); // values 10 and below added below
+
+  const anchors = [1, 5, 10];
+
+  if (candidates.length === 0) return anchors.sort((a, b) => b - a)
+  
   // Top of the scale (largest circle that fits) plus a middle tick to bridge
   // the gap down to the low-end anchors.
   const largest = candidates[candidates.length - 1];
   const middle = candidates[Math.floor((candidates.length - 1) / 2)];
   const smallest = candidates[0];
-  
-  const anchors = [1, 10, 50].filter((v) => v < smallest);
 
-  return [...new Set([largest, middle, smallest, ...anchors])].sort((a, b) => b - a);
+  return [...new Set([largest, middle, smallest, ...anchors.filter((v) => v < smallest)])]
+    .sort((a, b) => b - a);
+}
+
+/**
+ * Find the largest count whose radius fits in `maxR`. Returned values will
+ * always be multiples of 10.
+ */
+function _findMax(
+  count: number,
+  demeRadiusFn: (value: number) => number,
+  maxR: number,
+): number | undefined {
+  // Values are 10*i for i in [1, n]
+  const n = Math.floor(count / 10);
+  if (n < 1 || demeRadiusFn(10) >= maxR) return 10;
+
+  let lo = 1;         // 10*lo is known to fit
+  let hi = n + 1;     // 10*hi is assumed not to fit
+  while (hi - lo > 1) {
+    const mid = Math.floor((lo + hi) / 2);
+    if (demeRadiusFn(mid * 10) < maxR) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  return lo * 10;
 }

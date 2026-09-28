@@ -255,7 +255,7 @@ class Legend extends React.Component<StateProps & DispatchProps & SuppliedProps>
     // height we actually display. When `scrollable`, the swatches overflow the
     // displayed height and are reachable by scrolling.
     const swatchHeights = this.getSVGSwatchHeight(show);
-    const demesHeight = 150; // TODO XXX
+    const demesHeight = 90;
     const demesTitle = `${this.props.geoResolution} tip count`;
     
     // main title is always displayed, even when closed
