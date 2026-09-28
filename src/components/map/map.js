@@ -23,10 +23,12 @@ import {
 } from "./mapHelpersLatLong";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
-import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
+import { tabSingle, darkGrey, lightGrey, infoPanelStyles } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundary";
 import { getMapTilesSettings } from "../../util/globals";
 import Legend from "../legend/legend";
+import HoverPanel from "../hoverPanel/hoverPanel";
+import { InfoLine } from "../tree/infoPanels/hover";
 import "../../css/mapbox.css"; // controls the rendering of the mapbox logo (optional; toggled on via customisations)
 
 /* global L */
@@ -81,10 +83,25 @@ class Map extends React.Component {
       demeIndices: null,
       transmissionIndices: null,
       userHasInteractedWithMap: false,
-      tilesSettings: getMapTilesSettings()
+      tilesSettings: getMapTilesSettings(),
+      hoverData: null // data for the <HoverPanel>, or null when nothing hovered
     };
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
+    this.handleHover = this.handleHover.bind(this);
+  }
+
+  /**
+   * Called by the d3 deme mouseover/mouseout handlers to set (or clear, when
+   * passed null) the data driving the <HoverPanel>.
+   */
+  handleHover(hoverInfo) {
+    if (!hoverInfo) {
+      this.setState({hoverData: null});
+      return;
+    }
+    const {demeName, demeCount, arcName, arcCount, x, y} = hoverInfo;
+    this.setState({hoverData: {demeName, demeCount, arcName, arcCount, mouseX: x, mouseY: y}});
   }
 
   UNSAFE_componentWillMount() {
@@ -249,7 +266,7 @@ class Map extends React.Component {
         this.props.pieChart,
         this.props.geoResolution,
         this.props.dispatch,
-        this.props.showTransmissionLines,
+        this.handleHover,
       );
 
       // don't redraw on every rerender - need to separately handle virus change redraw
@@ -408,7 +425,8 @@ class Map extends React.Component {
         nextProps.dateMaxNumeric,
         nextProps.pieChart,
         nextProps.geoResolution,
-        nextProps.dispatch
+        nextProps.dispatch,
+        this.handleHover
       );
       this.setState({
         d3elems,
@@ -583,6 +601,17 @@ class Map extends React.Component {
               width: this.state.responsive.width
             }}
           />
+          {this.state.hoverData &&
+            <HoverPanel mouseX={this.state.hoverData.mouseX} mouseY={this.state.hoverData.mouseY} containerId="map">
+              <div style={infoPanelStyles.tooltipHeading}>
+                {this.state.hoverData.demeName}
+              </div>
+              <InfoLine name="Number of tips:" value={this.state.hoverData.demeCount}/>
+              {this.state.hoverData.arcName !== undefined &&
+                <InfoLine name={`${this.state.hoverData.arcName}:`} value={this.state.hoverData.arcCount}/>
+              }
+            </HoverPanel>
+          }
         </div>
       );
     }

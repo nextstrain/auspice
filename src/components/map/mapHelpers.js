@@ -1,10 +1,18 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
 import _max from "lodash/max";
+import { event as d3event } from "d3-selection";
 import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 import { updateTipRadii } from "../../actions/tree";
+
+/* deme (circle / pie-slice) opacities. The first two are the resting state; on
+   hover the hovered deme is emphasised and the rest dimmed. */
+const DEME_FILL_OPACITY = 0.65;
+const DEME_STROKE_OPACITY = 0.85;
+const DEME_EMPHASIS_OPACITY = 1;
+const DEME_DIMMED_OPACITY = 0.2;
 
 /* util */
 
@@ -142,7 +150,8 @@ export const drawDemesAndTransmissions = (
   numDateMax,
   pieChart, /* bool */
   geoResolution,
-  dispatch
+  dispatch,
+  handleHover /* (hoverInfo|null) => void; sets/clears the map's hover panel */
 ) => {
 
   // add transmission lines
@@ -191,16 +200,42 @@ export const drawDemesAndTransmissions = (
       .attr("d", (d) => arc()(d))
       /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
-      .style("fill-opacity", 0.65)
+      .style("fill-opacity", DEME_FILL_OPACITY)
       .style("fill", (d) => { return d.color; })
-      .style("stroke-opacity", 0.85)
+      .style("stroke-opacity", DEME_STROKE_OPACITY)
       .style("stroke", (d) => { return d.color; })
       .style("pointer-events", "all")
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       )
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]}));
+        /* dim other demes' arcs; within the hovered deme emphasise the hovered
+           arc and leave its sibling arcs at the resting opacity */
+        demes
+          .style("fill-opacity", (a) => {
+            if (a === d) return DEME_EMPHASIS_OPACITY;
+            return a.demeDataIdx === d.demeDataIdx ? DEME_FILL_OPACITY : DEME_DIMMED_OPACITY;
+          })
+          .style("stroke-opacity", (a) => {
+            if (a === d) return DEME_EMPHASIS_OPACITY;
+            return a.demeDataIdx === d.demeDataIdx ? DEME_STROKE_OPACITY : DEME_DIMMED_OPACITY;
+          });
+        /* `d` is the individual arc (slice) being hovered; the deme's total count sizes the legend circle */
+        handleHover({
+          demeName: demeData[d.demeDataIdx].name,
+          demeCount: demeData[d.demeDataIdx].count,
+          arcName: d.name,
+          arcCount: d._count,
+          x: d3event.clientX,
+          y: d3event.clientY
+        });
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+        demes.style("fill-opacity", DEME_FILL_OPACITY).style("stroke-opacity", DEME_STROKE_OPACITY);
+        handleHover(null);
+      });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -208,14 +243,25 @@ export const drawDemesAndTransmissions = (
       .attr("r", (d) => demeRadiusFn(d.count))
       /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
-      .style("fill-opacity", 0.65)
+      .style("fill-opacity", DEME_FILL_OPACITY)
       .style("fill", (d) => { return d.color; })
-      .style("stroke-opacity", 0.85)
+      .style("stroke-opacity", DEME_STROKE_OPACITY)
       .style("stroke", (d) => { return d.color; })
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]}));
+        /* emphasise the hovered circle by dimming the others */
+        demes
+          .style("fill-opacity", (c) => c === d ? DEME_EMPHASIS_OPACITY : DEME_DIMMED_OPACITY)
+          .style("stroke-opacity", (c) => c === d ? DEME_EMPHASIS_OPACITY : DEME_DIMMED_OPACITY);
+        handleHover({demeName: d.name, demeCount: d.count, x: d3event.clientX, y: d3event.clientY});
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+        demes.style("fill-opacity", DEME_FILL_OPACITY).style("stroke-opacity", DEME_STROKE_OPACITY);
+        handleHover(null);
+      });
   }
 
   return {
