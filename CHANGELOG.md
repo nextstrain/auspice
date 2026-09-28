@@ -1,5 +1,8 @@
 # Changelog
 
+
+* Bugfix: a temporal axis narrower than the minimum grid spacing no longer freezes the browser. This could happen in the tree and frequencies panels with small windows, the grid layout, or long tip labels.
+
 ## version 3.0.0 - 2026/09/02
 
 
