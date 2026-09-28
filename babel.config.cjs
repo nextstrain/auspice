@@ -33,18 +33,21 @@ module.exports = function babelConfig(api) {
     "@babel/plugin-syntax-dynamic-import",
     "lodash"
   ];
-  if (api.env("development")) {
-    plugins.push(["react-hot-loader/babel", { safetyNet: false }]);
-  }
   if (api.env('test')) {
     plugins.push("babel-plugin-transform-import-meta");
   }
   if (process.env.BABEL_INCLUDE_TIMING_FUNCTIONS === "false") {
     plugins.push(["strip-function-call", {strip: ["timerStart", "timerEnd"]}]);
   }
+  /* React Fast Refresh instruments our own components only. Libraries in
+  node_modules are not refreshed, so instrumenting them would only add work. */
+  const overrides = api.env("development") ?
+    [{exclude: /node_modules/, plugins: ["react-refresh/babel"]}] :
+    [];
   api.cache(true);
   return {
     presets,
-    plugins
+    plugins,
+    overrides
   };
 };

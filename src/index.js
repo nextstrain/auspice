@@ -4,7 +4,6 @@ import "core-js/stable";        // babel will rewrite this to match the polyfill
 import "regenerator-runtime";
 import "css.escape";
 /* L I B R A R I E S */
-import "react-hot-loader";
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
