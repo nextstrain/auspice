@@ -69,7 +69,7 @@ interface DispatchProps {
 type Props = StateProps & DispatchProps & WithTranslation;
 
 class ChooseDataset extends React.Component<Props> {
-  override render(): JSX.Element | null {
+  override render(): React.JSX.Element | null {
     if (!this.props.available?.datasets?.length) {
       /* typically this is the case if the available dataset fetch hasn't returned
       or it has returned an empty array of datasets */

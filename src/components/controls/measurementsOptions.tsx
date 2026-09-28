@@ -37,7 +37,7 @@ const collectionOptionsSelector = (
   });
 };
 
-const MeasurementsOptions = (): JSX.Element => {
+const MeasurementsOptions = (): React.JSX.Element => {
   const dispatch = useAppDispatch();
   const collection = useSelector((state: RootState) => state.measurements.collectionToDisplay);
   const collectionOptions = useSelector((state: RootState) => collectionOptionsSelector(state.measurements.collections), isEqual);

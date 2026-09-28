@@ -122,7 +122,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     width: number
     height: number
     mainTree: boolean
-  }): JSX.Element {
+  }): React.JSX.Element {
     return (
       <svg
         id="d3treeParent"
@@ -148,7 +148,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
     );
   }
 
-  override render(): JSX.Element {
+  override render(): React.JSX.Element {
     const { t } = this.props;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (

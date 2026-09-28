@@ -68,7 +68,7 @@ interface TreeStrainProperties {
  * equivalent to the previous value.
  */
 function useDeepCompareMemo<T>(value: T): T {
-  const ref: MutableRefObject<T> = useRef();
+  const ref: MutableRefObject<T> = useRef<T>(undefined);
   if (!isEqual(value, ref.current)) {
     ref.current = value;
   }
@@ -153,7 +153,7 @@ const filterMeasurements = (
   };
 };
 
-const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Element => {
+const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): React.JSX.Element => {
   const dispatch = useDispatch();
   // Use `lodash.isEqual` to deep compare object states to prevent unnecessary re-renderings of the component
   const { treeStrainVisibility, treeStrainColors } = useSelector((state: RootState) => treeStrainPropertySelector(state), isEqual);
@@ -392,7 +392,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): JSX.Eleme
   );
 };
 
-const Measurements = ({height, width, showLegend}): JSX.Element => {
+const Measurements = ({height, width, showLegend}): React.JSX.Element => {
   const measurementsLoaded = useSelector((state: RootState) => state.measurements.loaded);
   const measurementsError = useSelector((state: RootState) => state.measurements.error);
   const showOnlyPanels = useSelector((state: RootState) => state.controls.showOnlyPanels);

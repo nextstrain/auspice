@@ -20,6 +20,7 @@ interface Props {
   width: number;
   height: number;
   name: string;
+  children: React.ReactNode;
 }
 interface State {
   hasError: boolean;

@@ -10,7 +10,7 @@ import { SidebarSubtitleFlex, StyledTooltip, SidebarIconContainer } from "./styl
 import { controlsWidth } from "../../util/globals";
 import CustomSelect from "./customSelect";
 
-export const ChooseStreamTrees = (): JSX.Element => {
+export const ChooseStreamTrees = (): React.JSX.Element => {
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);
   const streamTreeBranchLabel = useSelector((state: RootState) => state.controls.streamTreeBranchLabel);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
@@ -77,7 +77,7 @@ export const ChooseStreamTrees = (): JSX.Element => {
 
 function Label(
   {t, toggleOn, unavailable}: {t, toggleOn: boolean, unavailable: string[]}
-): JSX.Element {
+): React.JSX.Element {
   return (
     <div style={{ display: "flex", alignItems: "center" }}>
       <span style={{ marginRight: "5px" }}>

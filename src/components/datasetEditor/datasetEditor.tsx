@@ -31,7 +31,7 @@ export default function DatasetEditor({
   dismissModal
 }: {
   dismissModal: () => void
-}): JSX.Element {
+}): React.JSX.Element {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const metadata = useSelector((state: RootState) => state.metadata);
@@ -192,7 +192,7 @@ function NameAndUrlInputs({
   name: string,
   data: NameAndUrlState[],
   setData: Dispatch<NameAndUrlState[]>
-}): JSX.Element {
+}): React.JSX.Element {
   const { t } = useTranslation();
   // Track id with ref to avoid using array idx for unique id
   const nextId = useRef(data.length);
@@ -314,7 +314,7 @@ function LegendPlacementInputs({
   defaultPlacements,
 }: {
   defaultPlacements: Metadata["legendPlacements"]
-}): JSX.Element {
+}): React.JSX.Element {
   const { t } = useTranslation();
   const legendPlacements = ["top left", "top right", "bottom left", "bottom right"];
   const panelDefaults = Object.fromEntries(

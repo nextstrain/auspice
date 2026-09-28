@@ -8,7 +8,7 @@ import { RootState } from "../../store";
 export type Title = string;
 
 /** Informational tooltip element to display on hover. */
-export type Tooltip = JSX.Element;
+export type Tooltip = React.JSX.Element;
 
 type Props = {
   title: Title
@@ -19,7 +19,7 @@ type Props = {
  * A title and tooltip to be shown in a control header.
  * The tooltip is not shown on mobile.
  */
-export const AnnotatedTitle = ({title, tooltip=undefined}: Props): JSX.Element => {
+export const AnnotatedTitle = ({title, tooltip=undefined}: Props): React.JSX.Element => {
   const mobile = useSelector((state: RootState) => state.general.mobileDisplay);
 
   return (
