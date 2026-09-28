@@ -686,19 +686,12 @@ const Slider = createReactClass({
 
   _renderHandles(offset) {
 
-    const length = offset.length;
-
-    const tempStyles = this.tempArray;
-    for (let i = 0; i < length; i++) {
-      tempStyles[i] = this._buildHandleStyle(offset[i], i);
+    const handles = [];
+    for (let i = 0; i < offset.length; i++) {
+      handles.push(this._renderHandle(this._buildHandleStyle(offset[i], i), i));
     }
 
-    const res = this.tempArray;
-    for (let i = 0; i < length; i++) {
-      res[i] = this._renderHandle(tempStyles[i], i);
-    }
-
-    return res;
+    return handles;
   },
 
   _buildBarStyle(min, max) {
