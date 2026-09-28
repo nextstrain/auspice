@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef } from "react";
+import React, { useLayoutEffect, useReducer, useRef } from "react";
 import { List } from "react-virtualized/dist/es/List";
 import { CellMeasurer, CellMeasurerCache } from "react-virtualized/dist/es/CellMeasurer";
 import { isEqual } from "lodash";
@@ -20,6 +20,7 @@ const VirtualizedMenuList = ({ children, maxHeight, focusedOption }) => {
       defaultHeight: DEFAULT_ROW_HEIGHT
     })
   );
+  const [, rerender] = useReducer((count) => count + 1, 0);
 
   /**
    * If the focused option is outside of the currently displayed options, we
@@ -73,21 +74,28 @@ const VirtualizedMenuList = ({ children, maxHeight, focusedOption }) => {
   );
 
   /**
-   * Because the individual row heights are measured and cached on render,
-   * this is just a best guess of the list height.
-   * There can be a delay in the list height changing if there is a rapid
-   * change of the children options.
+   * The list height is the sum of the measured row heights, up to maxHeight.
+   * Rows that have not been measured yet do not count.
    */
   const calcListHeight = () => {
     const currentRowHeights = Object.values(cache.current._rowHeightCache);
     const totalRowHeight = currentRowHeights.reduce((a, b) => a + b, 0);
     return totalRowHeight === 0 ? maxHeight : Math.min(maxHeight, totalRowHeight);
   };
+  const listHeight = calcListHeight();
+
+  /**
+   * The rows are measured after this component has rendered, so render again
+   * whenever the measured height differs from the height rendered with.
+   */
+  useLayoutEffect(() => {
+    if (calcListHeight() !== listHeight) rerender();
+  });
 
   return (
     <List
       ref={listRef}
-      height={calcListHeight()}
+      height={listHeight}
       deferredMeasurementCache={cache.current}
       rowHeight={cache.current.rowHeight}
       rowRenderer={rowRenderer}
