@@ -1,4 +1,4 @@
-import React, { CSSProperties, MutableRefObject, useCallback, useRef, useEffect, useMemo, useState } from "react";
+import React, { CSSProperties, useCallback, useRef, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { isEqual, orderBy } from "lodash";
 import { NODE_VISIBLE } from "../../util/globals";
@@ -68,7 +68,7 @@ interface TreeStrainProperties {
  * equivalent to the previous value.
  */
 function useDeepCompareMemo<T>(value: T): T {
-  const ref: MutableRefObject<T> = useRef<T>(undefined);
+  const ref = useRef<T>(undefined);
   if (!isEqual(value, ref.current)) {
     ref.current = value;
   }
@@ -179,9 +179,9 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): React.JSX
   const { title, x_axis_label, thresholds, fields, measurements, groupings } = collection;
 
   // Ref to access the D3 SVG
-  const svgContainerRef: MutableRefObject<HTMLDivElement> = useRef(null);
-  const d3Ref: MutableRefObject<SVGSVGElement> = useRef(null);
-  const d3XAxisRef: MutableRefObject<SVGSVGElement> = useRef(null);
+  const svgContainerRef = useRef<HTMLDivElement>(null);
+  const d3Ref = useRef<SVGSVGElement>(null);
+  const d3XAxisRef = useRef<SVGSVGElement>(null);
 
   // State for storing data for the HoverPanel
   const [hoverData, setHoverData] = useState<HoverData>(null);
@@ -269,7 +269,7 @@ const MeasurementsPlot = ({height, width, showLegend, setPanelTitle}): React.JSX
    * Uses the default color by if the color is a measurements color on first
    * load, i.e. the color is set by the URL param `c=m-<grouping>`
    */
-  const prevNonMeasurementColorBy: MutableRefObject<string> = useRef(isMeasurementColorBy(colorBy) ? defaultColorBy : colorBy);
+  const prevNonMeasurementColorBy = useRef<string>(isMeasurementColorBy(colorBy) ? defaultColorBy : colorBy);
   useEffect(() => {
     if (!isMeasurementColorBy(colorBy)) {
       prevNonMeasurementColorBy.current = colorBy;
