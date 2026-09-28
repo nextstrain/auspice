@@ -125,7 +125,7 @@ https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
 }
 
 /*
-https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstransitiongroup
+https://reactcommunity.org/react-transition-group/css-transition
 */
 .notification-enter {
   left: var(--width);
@@ -136,11 +136,11 @@ https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstran
   left: 0;
 }
 
-.notification-leave {
+.notification-exit {
   left: 0;
 }
 
-.notification-leave.notification-leave-active {
+.notification-exit.notification-exit-active {
   transition: 400ms ease-in;
   left: var(--width);
 }

@@ -17,7 +17,7 @@ const Button = styled.button`
   height: 1em;
 `;
 
-export default function EditButton(): JSX.Element {
+export default function EditButton(): React.JSX.Element {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const title="EditButton";

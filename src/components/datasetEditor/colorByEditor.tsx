@@ -16,7 +16,7 @@ export default function ColorByEditor({
   dismissModal
 }: {
   dismissModal: () => void
-}): JSX.Element {
+}): React.JSX.Element {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
   const colorScale: ColorScale = useSelector((state: RootState) => state.controls.colorScale);
@@ -102,7 +102,7 @@ function ColorInputs({
 }: {
   legendValues: LegendValues,
   scale: (value: any) => string
-}): JSX.Element {
+}): React.JSX.Element {
   // hardcoded to 2 columns to match legend display
   const maxNumPerColumn = Math.ceil(legendValues.length/2);
   const values = legendValues.slice(0, maxNumPerColumn);
@@ -114,7 +114,7 @@ function ColorInputs({
    * darker color and saved as a data attribute so that it can be saved as
    * the main color in the Redux state.
    */
-  function ColorInput(val: any): JSX.Element {
+  function ColorInput(val: any): React.JSX.Element {
     const [color, setColor] = useState(getBrighterColorHex(scale(val)));
     const borderColor = getDarkerColorHex(color);
     const id = `color-${val}`;

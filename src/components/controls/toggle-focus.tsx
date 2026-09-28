@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { ThunkFunction } from "../../store";
 
 
-export function ToggleFocus(): JSX.Element {
+export function ToggleFocus(): React.JSX.Element {
   const focus = useSelector((state: RootState) => state.controls.focus);
   const layout = useSelector((state: RootState) => state.controls.layout);
   const streamTreesToggledOn = useSelector((state: RootState) => state.controls.showStreamTrees);

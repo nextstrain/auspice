@@ -25,7 +25,7 @@ const Banner = styled.div`
 `;
 
 
-export default function EditedBanner(): JSX.Element {
+export default function EditedBanner(): React.JSX.Element {
   const { t } = useTranslation();
   const dispatch: AppDispatch = useDispatch();
 

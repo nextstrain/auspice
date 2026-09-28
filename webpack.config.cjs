@@ -7,6 +7,7 @@ const chalk = require('chalk');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const LodashModuleReplacementPlugin = require('lodash-webpack-plugin');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const zlib = require("zlib");
 
 const verbose = (msg) => {
@@ -19,12 +20,11 @@ const verbose = (msg) => {
 const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
   verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
-  // Pins all react stuff, and uses hot loader's dom (can be used safely in production)
+  // Pins all react stuff
   // Format is either "libName" or "libName:libPath"
   const coreDeps = [
     "react",
-    "react-hot-loader",
-    "react-dom:@hot-loader/react-dom",
+    "react-dom",
     "regenerator-runtime",
     "core-js",
     "styled-components"
@@ -105,6 +105,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const plugins = devMode ? [
     new LodashModuleReplacementPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new ReactRefreshWebpackPlugin({overlay: {sockIntegration: "whm"}}),
     pluginProcessEnvData,
     pluginHtml,
     cleanWebpackPlugin
@@ -169,7 +170,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const coreVendors = [
     "@babel/runtime",
     "style-loader",
-    "@hot-loader/react-dom",
+    "react-dom",
     "react(-(redux|select|helmet|i18next))?",
     "redux",
     "i18next",
@@ -311,7 +312,15 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
             /node_modules\/maplibre-gl/
           ],
           options: {
-            cwd: path.resolve(__dirname)
+            cwd: path.resolve(__dirname),
+            /* The React Fast Refresh transform only works together with the
+            runtime that ReactRefreshWebpackPlugin adds in devMode, so both are
+            enabled by devMode. It instruments our own components only.
+            Libraries in node_modules are not refreshed, so instrumenting them
+            would only add work. */
+            overrides: devMode ?
+              [{exclude: /node_modules/, plugins: ["react-refresh/babel"]}] :
+              []
           }
         },
         {

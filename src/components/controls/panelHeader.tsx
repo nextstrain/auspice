@@ -30,7 +30,7 @@ type Props = {
 /**
  * A header used by all panel controls, containing an interactive title.
  */
-export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions, optionsAreVisible, setOptionsAreVisible }: Props): JSX.Element => {
+export const PanelHeader = ({ panel, title, tooltip, panelIsVisible, hasOptions, optionsAreVisible, setOptionsAreVisible }: Props): React.JSX.Element => {
   const dispatch = useAppDispatch();
 
   function togglePanelVisibility(): void {

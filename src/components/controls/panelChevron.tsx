@@ -14,7 +14,7 @@ type Props = {
 /**
  * An interactive chevron to show/hide a panel's options.
  */
-export const PanelChevron = ({ show }: Props): JSX.Element => {
+export const PanelChevron = ({ show }: Props): React.JSX.Element => {
   const icon = show ? <FaChevronDown /> : <FaChevronRight />
 
   return (

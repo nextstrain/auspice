@@ -117,10 +117,8 @@ export const onTipLeave = function onTipLeave(this: TreeComponent, d: PhyloNode)
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  if (this.state.hoveredNode) {
-    phylotree.svg.select("#"+getDomId("tip", d.n.name))
-      .attr("r", (dd) => dd["r"]);
-  }
+  phylotree.svg.select("#"+getDomId("tip", d.n.name))
+    .attr("r", (dd) => dd["r"]);
   this.setState({hoveredNode: null});
 };
 

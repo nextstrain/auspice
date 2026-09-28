@@ -11,13 +11,13 @@ type Props = {
   tooltip?: Tooltip
 
   /** Element that contains panel-specific options. */
-  options?: JSX.Element
+  options?: React.JSX.Element
 }
 
 /**
  * A controls section for panel-specific customization.
  */
-export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props): JSX.Element => {
+export const PanelSection = ({ panel, title, tooltip, options=undefined }: Props): React.JSX.Element => {
 
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
 

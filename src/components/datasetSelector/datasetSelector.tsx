@@ -151,7 +151,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
   /**
    * Render a dropdown selector for a given "level" in the dataset hierarchy
    */
-  renderLevel = (currentValue: string, currentIdx: number): JSX.Element => {
+  renderLevel = (currentValue: string, currentIdx: number): React.JSX.Element => {
     const options = this.options(this.state.proposedDataset.parts.slice(0, currentIdx));
     const style = {paddingLeft: '0px', paddingTop: '10px'};
 
@@ -192,8 +192,8 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
    * If *matchAgainst* is provided, then parts of the provided dataset which don't match
    * are emphasized.
    */ 
-  renderDatasetName = (dataset: Dataset, matchAgainst?: Dataset): JSX.Element[] => {
-    const jsx: JSX.Element[] = dataset.parts.flatMap((word, idx) => {
+  renderDatasetName = (dataset: Dataset, matchAgainst?: Dataset): React.JSX.Element[] => {
+    const jsx: React.JSX.Element[] = dataset.parts.flatMap((word, idx) => {
       // highlight (red) if changed
       const style = matchAgainst && matchAgainst.parts[idx]!==word ? {color: 'orange'} : {}
       return [<Strong style={style} key={word}>{word}</Strong>, idx+1===dataset.parts.length ? null : <span key={word+"slash"}> / </span>]
@@ -215,7 +215,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
    * See the comment at the top of this file for discussino about snapshots &
    * Auspice
    */
-  renderSnapshot = (): JSX.Element => {
+  renderSnapshot = (): React.JSX.Element => {
     const style = {paddingLeft: '0px', paddingTop: '10px'};
     const containerStyle = {
       position: 'relative' as const,
@@ -289,7 +289,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
     );
   }
 
-  renderDatasetLoader(): JSX.Element {
+  renderDatasetLoader(): React.JSX.Element {
     return (
       <button
         style={{
@@ -315,7 +315,7 @@ class DatasetSelector extends React.Component<StateProps & {dispatch: AppDispatc
     );
   }
 
-  override render(): JSX.Element {
+  override render(): React.JSX.Element {
     return (
       <div onKeyDownCapture={this.handleKeyDown}>
         Select a new dataset by changing the hierarchical selectors below
@@ -357,7 +357,7 @@ const mapStateToProps: MapStateToProps<StateProps, Record<string, never>, RootSt
 export default withTranslation()(connect(mapStateToProps)(DatasetSelector));
 
 
-function Strong({style={}, children}): JSX.Element {
+function Strong({style={}, children}): React.JSX.Element {
   return <span style={{...style, fontWeight: 700}}>{children}</span>
 }
 

@@ -674,7 +674,6 @@ const Slider = createReactClass({
 
     return (
       <div
-        ref={'handle' + i}
         key={'handle' + i}
         className={className}
         style={{ ...styles.handle, ...style }}
@@ -686,19 +685,12 @@ const Slider = createReactClass({
 
   _renderHandles(offset) {
 
-    const length = offset.length;
-
-    const tempStyles = this.tempArray;
-    for (let i = 0; i < length; i++) {
-      tempStyles[i] = this._buildHandleStyle(offset[i], i);
+    const handles = [];
+    for (let i = 0; i < offset.length; i++) {
+      handles.push(this._renderHandle(this._buildHandleStyle(offset[i], i), i));
     }
 
-    const res = this.tempArray;
-    for (let i = 0; i < length; i++) {
-      res[i] = this._renderHandle(tempStyles[i], i);
-    }
-
-    return res;
+    return handles;
   },
 
   _buildBarStyle(min, max) {
@@ -732,7 +724,6 @@ const Slider = createReactClass({
     return (
       <div
         key={'bar' + i}
-        ref={'bar' + i}
         className={className}
         style={{ ...styles.bar, ...barStyle }}
       />
@@ -801,7 +792,6 @@ const Slider = createReactClass({
 
     return (
       <div
-        ref="slider"
         style={{ ...styles.base, ...orientation }}
         onMouseDown={this._onSliderMouseDown}
         onClick={this._onSliderClick}
