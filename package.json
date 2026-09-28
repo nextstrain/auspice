@@ -108,7 +108,7 @@
     "react-select": "^5.2.2",
     "react-tooltip": "^4.2.10",
     "react-transition-group": "^1.2.1",
-    "react-virtualized": "^9.22.3",
+    "react-virtualized": "^9.22.6",
     "regenerator-runtime": "^0.13.5",
     "style-loader": "^0.13.2",
     "styled-components": "^4.0.3",
