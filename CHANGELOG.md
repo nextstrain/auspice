@@ -1,5 +1,11 @@
 # Changelog
 
+* Auspice now uses React 19 (previously React 16).
+  Custom components supplied through the client customisation API, such as `navbarComponent` and `splashComponent`, are rendered by Auspice's React and therefore must not use APIs which React 19 removed: string refs, `ReactDOM.render`, `findDOMNode`, legacy context, and `defaultProps` on function components.
+  This is a breaking change for customisations which use any of these APIs.
+
+* `auspice develop` now uses React Fast Refresh instead of React Hot Loader.
+
 ## version 3.0.0 - 2026/09/02
 
 
