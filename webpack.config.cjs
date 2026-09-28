@@ -312,7 +312,15 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
             /node_modules\/maplibre-gl/
           ],
           options: {
-            cwd: path.resolve(__dirname)
+            cwd: path.resolve(__dirname),
+            /* The React Fast Refresh transform only works together with the
+            runtime that ReactRefreshWebpackPlugin adds in devMode, so both are
+            enabled by devMode. It instruments our own components only.
+            Libraries in node_modules are not refreshed, so instrumenting them
+            would only add work. */
+            overrides: devMode ?
+              [{exclude: /node_modules/, plugins: ["react-refresh/babel"]}] :
+              []
           }
         },
         {
