@@ -40,8 +40,8 @@ const generateIcon = (notificationType) => {
 };
 
 /**
- * Animates one notification. The ref lets CSSTransition reach the DOM node
- * without ReactDOM.findDOMNode, which React 19 removed.
+ * Animates one notification. CSSTransition reaches the notification's DOM
+ * node through the ref.
  */
 const NotificationTransition = ({children, ...transitionProps}) => {
   const nodeRef = useRef(null);
