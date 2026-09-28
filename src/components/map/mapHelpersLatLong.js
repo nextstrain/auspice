@@ -95,9 +95,9 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
     /* creating arcs */
     arcs = legendValues.map((v, i) => {
       legendValueToArcIdx[v] = i;
-      return {innerRadius: 0, _count: 0};
+      return {innerRadius: 0, _count: 0, name: v};
     });
-    arcs.push({innerRadius: 0, _count: 0}); // for the undefined arc
+    arcs.push({innerRadius: 0, _count: 0, name: "unknown"}); // for the undefined arc
   }
   /* traverse visible nodes (for this location) to get numbers for each arc (i.e. each slice in the pie) */
   visibleNodes.forEach((n) => {
