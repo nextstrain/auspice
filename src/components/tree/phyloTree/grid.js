@@ -119,7 +119,9 @@ const computeNumericGridPoints = (minVal, maxVal, layout, nMinorTicks, axis) => 
 const calculateTemporalGridSeperation = (timeRange, pxAvailable) => {
   const [majorStep, minorStep] = [{unit: "DAY", n: 1}, {unit: "DAY", n: 0}];
   const minPxBetweenMajorGrid = (pxAvailable < 1000 ? 130 : 180);
-  const timeBetweenMajorGrids = timeRange/(Math.floor(pxAvailable / minPxBetweenMajorGrid));
+  /* an axis narrower than the minimum separation still gets one major grid interval, otherwise the step between grids is infinite */
+  const nMajorGrids = Math.max(1, Math.floor(pxAvailable / minPxBetweenMajorGrid));
+  const timeBetweenMajorGrids = timeRange/nMajorGrids;
   const levels = {
     CENTURY: {t: 100, max: undefined},
     DECADE: {t: 10, max: 5}, // i.e. spacing of 50 years is ok, but 60 jumps up to 100y spacing
