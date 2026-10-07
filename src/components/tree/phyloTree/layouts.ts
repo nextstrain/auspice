@@ -7,7 +7,7 @@ import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
 import { ReduxNode, colorBySymbol } from "../../../reducers/tree/types";
-import { Distance, Params, PhyloNode, PhyloTreeType, Ripple } from "./types";
+import { Distance, Params, PhyloNode, PhyloTreeType, Ripple, TipLabelCallback } from "./types";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -349,7 +349,7 @@ export const mapToScreen = function mapToScreen(this: PhyloTreeType): void {
   /* set up space (padding) for axes etc, as we don't want the branches & tips to occupy the entire SVG! */
   this.margins = {
     left: (this.layout==="scatter" || this.layout==="clock") ? 40 : 5, // space for y-axis label
-    right: 5 + getTipLabelPadding(this.params, inViewTerminalNodes),
+    right: 5 + getTipLabelPadding(this.params, inViewTerminalNodes, this.callbacks.tipLabel),
     top: this.layout==="radial" ? 10 : 15, // avoid tips rendering behind legend
     bottom: 35 // space for x-axis labels
   };
@@ -628,9 +628,14 @@ function jitter(
 }
 
 
-function getTipLabelPadding(
+export function getTipLabelPadding(
   params: Params,
   inViewTerminalNodes: PhyloNode[],
+
+  /** produces the label text rendered for each tip (see `makeTipLabelFunc`), so
+   * that the margin is sized from the labels actually on screen rather than the
+   * strain names. Varies with `controls.tipLabelKey`. */
+  tipLabel: TipLabelCallback,
 ): number {
   let padBy = 0;
   if (inViewTerminalNodes.length < params.tipLabelBreakL1) {
@@ -643,11 +648,8 @@ function getTipLabelPadding(
       fontSize = params.tipLabelFontSizeL3;
     }
 
-    inViewTerminalNodes.forEach((d) => {
-      if (padBy < d.n.name.length) {
-        padBy = 0.65 * d.n.name.length * fontSize;
-      }
-    });
+    const longestLabel = Math.max(0, ...inViewTerminalNodes.map((d) => String(tipLabel(d) ?? "").length));
+    padBy = 0.65 * longestLabel * fontSize;
   }
   return padBy;
 }

@@ -38,6 +38,9 @@ export interface Regression {
 
 type NodeCallback = (d: PhyloNode) => void // See <https://github.com/nextstrain/auspice/issues/1900>
 
+/** Returns the text to render as a given node's tip label (see `makeTipLabelFunc`) */
+export type TipLabelCallback = (d: PhyloNode) => string | number | undefined
+
 export interface Callbacks {
   onBranchClick: NodeCallback
   onBranchHover: NodeCallback
@@ -45,9 +48,9 @@ export interface Callbacks {
   onTipClick: NodeCallback
   onTipHover: NodeCallback
   onTipLeave: NodeCallback
-  onStreamHover: (this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean) => void  
+  onStreamHover: (this: TreeComponent, node: PhyloNode, categoryIndex: number, paths: SVGPathElement[], isBranch: boolean) => void
   onStreamLeave: (this: TreeComponent, _node: PhyloNode, _categoryIndex: number, paths: SVGPathElement[], isBranch: boolean) => void
-  tipLabel: NodeCallback
+  tipLabel: TipLabelCallback
 }
 
 // ---------- PhyloNode ---------- //
