@@ -1,10 +1,13 @@
 # Changelog
 
+* The map legend now shows the number of (visible) tips for different deme (circle) sizes.
+[#2096](https://github.com/nextstrain/auspice/pull/2096)
+* Hovering over demes (circles or arcs) on the map panel shows a hover box with the deme's tip count and (where applicable) the number of tips in the hovered arc.
+[#2096](https://github.com/nextstrain/auspice/pull/2096)
+* Legends can now be single columns (when space allows), and overflowing legends are now scrollable.
+[#2096](https://github.com/nextstrain/auspice/pull/2096)
+
 ## version 3.0.0 - 2026/09/02
-
-
-
-
 
 > Auspice v3 is our first major release in almost 7 years (despite 73 feature releases!) which reflects our focus on keeping the interface for consuming projects as stable as possible.
   A decision to render the map using vector tiles necessitated a major version bump as custom Auspice builds which configure the map will need to change.
