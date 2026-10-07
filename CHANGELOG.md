@@ -7,6 +7,11 @@
 * Legends can now be single columns (when space allows), and overflowing legends are now scrollable.
 [#2096](https://github.com/nextstrain/auspice/pull/2096)
 
+* Bugfix: the tree and entropy panels now remove their drawings when they unmount, and the entropy panel stops observing its visibility.
+  A later mount on the same DOM, as in React StrictMode, no longer draws over the old drawing.
+ [#2100](https://github.com/nextstrain/auspice/pull/2100)
+
+
 ## version 3.0.0 - 2026/09/02
 
 > Auspice v3 is our first major release in almost 7 years (despite 73 feature releases!) which reflects our focus on keeping the interface for consuming projects as stable as possible.

@@ -1,4 +1,5 @@
 import React from "react";
+import { select } from "d3-selection";
 import { withTranslation } from "react-i18next";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { SelectedNode } from "../../reducers/controls";
@@ -74,6 +75,13 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
       }
       newState.geneSortFn = sortByGeneOrder(this.props.genomeMap);
       this.setState<never>(newState); /* this will trigger an unnecessary CDU :( */
+    }
+  }
+
+  override componentWillUnmount(): void {
+    /* remove the drawing, so a later mount on the same DOM starts from an empty SVG */
+    for (const ref of [this.domRefs.mainTree, this.domRefs.secondTree]) {
+      if (ref) select(ref).selectAll("*").remove();
     }
   }
 
