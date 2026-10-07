@@ -15,8 +15,8 @@
   This could happen in the tree and frequencies panels with small windows, the grid layout, or long tip labels.
   [#2098](https://github.com/nextstrain/auspice/pull/2098)
 
-* Bugfix: the space reserved for tip labels now fits the longest label in view.
-  Previously it followed the first tip, which could cut off longer labels.
+* Bugfix: the space reserved for tip labels now correctly fits the longest label in view.
+  This updates according to the chosen tip label key.
   [#2099](https://github.com/nextstrain/auspice/pull/2099)
 
 ## version 3.0.0 - 2026/09/02

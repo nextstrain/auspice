@@ -378,7 +378,7 @@ export const change = function change(
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || changeNodeOrder || changeVisibility || newTipLabelKey) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -398,7 +398,10 @@ export const change = function change(
     }
 
 
-  /* tip label key change -> update callback used */
+  /* tip label key change -> update callback used. The new key may produce
+  longer/shorter labels, so the right margin (sized by `getTipLabelPadding`) and
+  thus the whole layout must be recomputed -- see the `newTipLabelKey` branches
+  below, which reflow the tree just as a change in SVG dimensions would. */
   if (newTipLabelKey) {
     this.callbacks.tipLabel = makeTipLabelFunc(newTipLabelKey);
     elemsToUpdate.add('.tipLabel'); /* will trigger d3 commands as required */
@@ -430,7 +433,7 @@ export const change = function change(
       zoomIntoClade.n.parent.shell;
     applyToChildren(this.zoomNode, (d: PhyloNode) => {d.inView = true;});
   }
-  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility) {
+  if (svgHasChangedDimensions || changeNodeOrder || changeVisibility || newTipLabelKey) {
     this.nodes.forEach((d) => {d.update = true;});
   }
 
@@ -468,7 +471,8 @@ export const change = function change(
     svgHasChangedDimensions ||
     streamDefinitionChange ||
     changeVisibility ||
-    showConfidences
+    showConfidences ||
+    newTipLabelKey
   ) {
     this.mapToScreen();
   } else if (this.params.showStreamTrees && (changeColorBy || changeVisibility)) {
