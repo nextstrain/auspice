@@ -23,13 +23,18 @@ test("the tree clears both of its SVG groups on unmount", () => {
 
 test("the entropy panel clears its SVG and stops its observer on unmount", () => {
   const observer = { observe: jest.fn(), disconnect: jest.fn() };
+  const originalIntersectionObserver = global.IntersectionObserver;
   global.IntersectionObserver = jest.fn(() => observer);
-  const entropy = new Entropy({ loaded: true });
-  entropy.setUp = jest.fn();
-  entropy.d3entropy = svgGroupWithDrawing();
-  entropy.componentDidMount();
-  entropy.componentWillUnmount();
-  expect(observer.observe).toHaveBeenCalledWith(entropy.d3entropy);
-  expect(observer.disconnect).toHaveBeenCalled();
-  expect(entropy.d3entropy.childNodes).toHaveLength(0);
+  try {
+    const entropy = new Entropy({ loaded: true });
+    entropy.setUp = jest.fn();
+    entropy.d3entropy = svgGroupWithDrawing();
+    entropy.componentDidMount();
+    entropy.componentWillUnmount();
+    expect(observer.observe).toHaveBeenCalledWith(entropy.d3entropy);
+    expect(observer.disconnect).toHaveBeenCalled();
+    expect(entropy.d3entropy.childNodes).toHaveLength(0);
+  } finally {
+    global.IntersectionObserver = originalIntersectionObserver;
+  }
 });
