@@ -335,10 +335,9 @@ class Entropy extends React.Component {
   }
 
   componentWillUnmount() {
-    // TODO:1050 undo all listeners within EntropyChart (ie this.state.chart)
-    /* stop observing and remove the drawing, so neither outlives the component */
+    /* stop observing and tear the chart down, so neither outlives the component */
     if (this.observer) this.observer.disconnect();
-    if (this.d3entropy) select(this.d3entropy).selectAll("*").remove();
+    if (this.state.chart) this.state.chart.destroy();
   }
 }
 

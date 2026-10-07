@@ -1,8 +1,10 @@
 /**
  * @jest-environment jsdom
  */
+import Mousetrap from "mousetrap";
 import { TreeComponent } from "../src/components/tree/tree";
 import EntropyPanel from "../src/components/entropy";
+import EntropyChart from "../src/components/entropy/entropyD3";
 
 const Entropy = EntropyPanel.WrappedComponent.WrappedComponent;
 
@@ -21,7 +23,7 @@ test("the tree clears both of its SVG groups on unmount", () => {
   expect(secondTree.childNodes).toHaveLength(0);
 });
 
-test("the entropy panel clears its SVG and stops its observer on unmount", () => {
+test("the entropy panel destroys its chart and stops its observer on unmount", () => {
   const observer = { observe: jest.fn(), disconnect: jest.fn() };
   const originalIntersectionObserver = global.IntersectionObserver;
   global.IntersectionObserver = jest.fn(() => observer);
@@ -29,12 +31,26 @@ test("the entropy panel clears its SVG and stops its observer on unmount", () =>
     const entropy = new Entropy({ loaded: true });
     entropy.setUp = jest.fn();
     entropy.d3entropy = svgGroupWithDrawing();
+    const chart = { destroy: jest.fn() };
+    entropy.state = { ...entropy.state, chart };
     entropy.componentDidMount();
     entropy.componentWillUnmount();
     expect(observer.observe).toHaveBeenCalledWith(entropy.d3entropy);
     expect(observer.disconnect).toHaveBeenCalled();
-    expect(entropy.d3entropy.childNodes).toHaveLength(0);
+    expect(chart.destroy).toHaveBeenCalled();
   } finally {
     global.IntersectionObserver = originalIntersectionObserver;
+  }
+});
+
+test("EntropyChart.destroy removes the SVG elements", () => {
+  const svg = svgGroupWithDrawing();
+  const chart = new EntropyChart(svg, {}, {});
+  const unbind = jest.spyOn(Mousetrap, "unbind");
+  try {
+    chart.destroy();
+    expect(svg.childNodes).toHaveLength(0);
+  } finally {
+    unbind.mockRestore();
   }
 });

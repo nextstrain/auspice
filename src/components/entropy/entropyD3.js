@@ -14,6 +14,11 @@ import { nucleotide_gene } from "../../util/globals";
 import { getCdsByName, getNucCoordinatesFromAaPos, getCdsRangeLocalFromRangeGenome,
   nucleotideToAaPosition} from "../../util/entropy";
 
+/* Keyboard keys which, while held, enable mousewheel zooming (see
+ * _setUpMousewheelZooming). Bound globally via Mousetrap, so destroy() must
+ * unbind them when the chart goes away. */
+const zoomKeys = ["option", "shift"];
+
 /* EntropyChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChart.update
@@ -97,6 +102,19 @@ EntropyChart.prototype.update = function update({
     this._setZoomCoordinates(zoomMin, zoomMax, false);
     this._groups.navBrush.call(this.brush.move, () => this.zoomCoordinates.map(this.scales.xNav));
   }
+}
+
+/**
+ * Tear the chart down so nothing outlives the React component which owns it.
+ * The d3 event handlers on the bars, CDSs, axes and brush are bound to nodes
+ * inside the SVG, so emptying it releases them along with the nodes. The
+ * Mousetrap bindings (see _setUpMousewheelZooming) are global, so they must be
+ * unbound explicitly or they would keep firing against a detached SVG.
+ */
+EntropyChart.prototype.destroy = function destroy() {
+  // Mousetrap.unbind(zoomKeys, "keydown");
+  // Mousetrap.unbind(zoomKeys, "keyup");
+  this.svg.selectAll("*").remove();
 }
 
 /* "PRIVATE" PROTOTYPES */
@@ -853,6 +871,8 @@ EntropyChart.prototype._setUpZoomBrush = function _setUpZoomBrush() {
 
     this._setUpZoomBrushWrapping();
 
+    // TODO XXX - we currently don't set up mouse zooming
+    // when we do we need to also tear them down in the `destroy` prototype
     // this._setUpMousewheelZooming() // TODO XXX
 };
 
@@ -999,7 +1019,6 @@ EntropyChart.prototype._setUpMousewheelZooming = function _setUpMousewheelZoomin
     });
 
   /* the overlay should be dependent on whether you have certain keys pressed */
-  const zoomKeys = ["option", "shift"];
   Mousetrap.bind(zoomKeys, () => {
     /**
      * There is a small bug in the horizontal position of this overlay, or perhaps
