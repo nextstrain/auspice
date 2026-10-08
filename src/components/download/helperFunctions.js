@@ -9,6 +9,7 @@ import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
 import { createDatasetJson } from "../../util/constructDatasetJson";
+import { htmlToSvg } from "./domToSvg";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -537,19 +538,86 @@ const injectAsSVGStrings = (output, key, data) => {
   output.push("</svg>");
 };
 
+/**
+ * Build the footer text as SVG by rendering the (HTML) strings into a detached, off-screen
+ * block, letting the browser lay them out & wrap them to `width`, then reading that layout
+ * back as SVG via htmlToSvg(). The block is removed before we return. Coordinates in the
+ * returned markup are translated to (x, y).
+ * Returns {width, height, markup}.
+ */
+const footerToSvg = (textStrings, x, y, width) => {
+  const div = document.createElement("div");
+  div.style.cssText = `position:absolute; left:-99999px; top:0; width:${width}px; font-family:lato,sans-serif; font-size:14px; line-height:1.4; color:#000;`;
+  textStrings.forEach((s) => {
+    const p = document.createElement("p");
+    p.style.cssText = "margin:0 0 6px 0;";
+    p.innerHTML = s || "&nbsp;"; /* the strings are trusted HTML we constructed in SVG() */
+    div.appendChild(p);
+  });
+  document.body.appendChild(div);
+  try {
+    const {width: w, height: h, markup} = htmlToSvg(div);
+    return {width: w, height: h, markup: `<g transform="translate(${x},${y})">\n${markup}\n</g>`};
+  } finally {
+    document.body.removeChild(div);
+  }
+};
+
 /* define actual writer as a closure, because it may need to be triggered asynchronously */
 const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
   const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
+
+  /* Each panel (tree, map, measurements) can render its own legend, which is an HTML overlay
+  rather than a single SVG, so we read it back into SVG via htmlToSvg(). The legends share the
+  `LegendContainer` id, so we identify the right one by whichever overlaps the given panel's
+  origin element (the element whose top-left is 0,0 of that panel's SVG). We record the offset
+  relative to that origin and resolve it to an absolute position once the panel is laid out. */
+  const legends = [];
+  const usedLegendEls = new Set();
+  const captureLegend = (panel, originEl, label) => {
+    if (!originEl) {
+      console.warn(`[SVG export] ${label}: panel origin element not found; legend omitted`);
+      return;
+    }
+    const o = originEl.getBoundingClientRect();
+    /* pick the as-yet-unused legend with the largest overlap with this panel */
+    let best;
+    let bestArea = 0;
+    for (const el of document.querySelectorAll('[id="LegendContainer"]')) {
+      if (usedLegendEls.has(el)) continue;
+      const r = el.getBoundingClientRect();
+      const ix = Math.max(0, Math.min(o.right, r.right) - Math.max(o.left, r.left));
+      const iy = Math.max(0, Math.min(o.bottom, r.bottom) - Math.max(o.top, r.top));
+      if (ix * iy > bestArea) { bestArea = ix * iy; best = el; }
+    }
+    if (!best) {
+      console.warn(`[SVG export] ${label}: no legend overlaps this panel; legend omitted`);
+      return;
+    }
+    usedLegendEls.add(best);
+    try {
+      const r = best.getBoundingClientRect();
+      const {width, height, markup} = htmlToSvg(best);
+      legends.push({panel, offsetX: r.left - o.left, offsetY: r.top - o.top, width, height, inner: markup});
+    } catch (e) {
+      errors.push(`${label} legend`);
+      console.error(`${label} legend SVG save error:`, e);
+    }
+  };
+
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
-      panels.treeLegend = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("TreeLegendContainer")));
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
       console.error("Tree SVG save error:", e);
+    }
+    /* The tree's legend is positioned relative to d3treeParent (= 0,0 of the tree panel's SVG). */
+    if (panels.tree) {
+      captureLegend("tree", document.getElementById("d3treeParent"), "tree");
     }
     if (panels.tree && document.getElementById('SecondTree')) {
       try {
@@ -575,6 +643,10 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
       panels.measurements = undefined;
       errors.push("measurements");
       console.error("Measurements SVG save error:", e);
+    }
+    /* the measurements legend is positioned relative to the measurements SVG (its panel origin) */
+    if (panels.measurements) {
+      captureLegend("measurements", document.getElementById("d3MeasurementsSVG"), "measurements");
     }
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
@@ -604,26 +676,49 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
       height: parseFloat(map.mapDimensions.y),
       inner: map.mapSvg
     };
+    /* the map legend is positioned relative to the leaflet container (= 0,0 of the map panel) */
+    captureLegend("map", document.getElementById("map"), "map");
   }
 
   /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
   const output = [];
   /* logic for extracting the overall width etc */
   const overallDimensions = createBoundingDimensionsAndPositionPanels(panels, panelLayout, textStrings.length);
-  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${overallDimensions.height}">`);
+
+  /* Render the footer text to real SVG <text> (via a throwaway HTML block) rather than a
+  <foreignObject>, which browsers render but vector editors (Illustrator/Inkscape) don't.
+  We let the browser wrap the text to the available width, then read the lines back. */
+  const footer = footerToSvg(
+    textStrings,
+    overallDimensions.padding,
+    overallDimensions.textY,
+    overallDimensions.width - 2 * overallDimensions.padding
+  );
+  /* grow the canvas if the (wrapped) footer is taller than the space we reserved for it */
+  const totalHeight = Math.max(
+    overallDimensions.height,
+    overallDimensions.textY + footer.height + overallDimensions.padding
+  );
+
+  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${totalHeight}">`);
   for (const key in panels) {
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }
   }
-  /* add text to bottom of SVG in HTML format */
-  output.push(`<foreignObject x="${overallDimensions.padding}" y="${overallDimensions.height - overallDimensions.textHeight}" height="${overallDimensions.textHeight}" width="${overallDimensions.width - 2*overallDimensions.padding}">`);
-  textStrings.forEach((s) => {
-    output.push(`<p xmlns="http://www.w3.org/1999/xhtml" style="font-family:lato,sans-serif;">`);
-    output.push(s);
-    output.push("</p>");
+  /* draw legends on top of their panels, now that each panel has a final (x, y) */
+  legends.forEach((lg) => {
+    const panel = panels[lg.panel];
+    if (!panel) return;
+    injectAsSVGStrings(output, `${lg.panel}Legend`, {
+      x: panel.x + lg.offsetX,
+      y: panel.y + lg.offsetY,
+      width: lg.width,
+      height: lg.height,
+      inner: lg.inner
+    });
   });
-  output.push("</foreignObject>");
+  output.push(footer.markup);
 
   output.push("</svg>");
   // console.log(panels)
