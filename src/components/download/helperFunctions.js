@@ -9,7 +9,9 @@ import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
 import { createDatasetJson } from "../../util/constructDatasetJson";
+import { dataFont } from "../../globalStyles";
 import { htmlToSvg } from "./domToSvg";
+import { latoFontDefs } from "./embedFont";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -564,7 +566,7 @@ const footerToSvg = (textStrings, x, y, width) => {
 };
 
 /* define actual writer as a closure, because it may need to be triggered asynchronously */
-const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
+const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs, map) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
   const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
@@ -700,7 +702,14 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
     overallDimensions.textY + footer.height + overallDimensions.padding
   );
 
-  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${totalHeight}">`);
+  /* Set the app font & base weight as defaults on the root <svg> so they cascade to panel text
+  (entropy, tree, …) that inherits font-family / font-weight from a stylesheet rather than an
+  inline style — that cascade doesn't exist in a standalone SVG file, so otherwise such text
+  falls back to the renderer's defaults (commonly a serif face at a too-light weight). The base
+  weight 400 matches `html, p, div { font-weight: 400 }` in global.css. Text that sets its own
+  font-family / font-weight (legend, footer, via htmlToSvg) overrides these. */
+  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" font-family="${dataFont}" font-weight="400" width="${overallDimensions.width}" height="${totalHeight}">`);
+  if (fontDefs) output.push(fontDefs); /* embedded @font-face so viewers render Lato, not a fallback */
   for (const key in panels) {
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
@@ -738,7 +747,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
+export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
   /* make the text strings */
   const textStrings = [];
   textStrings.push(metadata.title);
@@ -759,11 +768,15 @@ export const SVG = (dispatch, t, metadata, nodes, visibility, filePrefix, panels
     textStrings.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
   });
 
+  /* embed the Lato font so the SVG renders identically outside the app (async: fetches the
+  already-cached font files & base64-encodes them) */
+  const fontDefs = await latoFontDefs();
+
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
-    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
+    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs));
   } else {
-    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
+    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs, undefined);
   }
 };
 
