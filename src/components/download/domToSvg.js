@@ -175,9 +175,42 @@ function emitText(textNode, parentCs, rootRect, out) {
   }
 }
 
+/** SVG presentation attributes whose value is a colour we may need to make editor-safe. */
+const COLOR_ATTRS = ["fill", "stroke"];
+
+/**
+ * Rewrite any `rgba()` colours on `root` and its descendants into a plain colour plus a matching
+ * `*-opacity`. Browsers accept `rgba()` in SVG `fill` / `stroke`, but SVG 1.1 editors (Inkscape,
+ * Illustrator) treat the whole value as invalid and fall back to the default fill — black — which
+ * is why inlined legend backgrounds came out black. We reuse the same parseColor() as everywhere
+ * else, and handle both the presentation attribute and an inline style.
+ */
+function makeColorsEditorSafe(root) {
+  const els = root.querySelectorAll ? [root, ...root.querySelectorAll("*")] : [root];
+  for (const el of els) {
+    for (const attr of COLOR_ATTRS) {
+      const fromAttr = el.getAttribute && el.getAttribute(attr);
+      if (fromAttr && fromAttr.includes("rgba(")) {
+        const p = parseColor(fromAttr);
+        el.setAttribute(attr, p ? p.color : "none");
+        if (p && p.opacity !== 1) el.setAttribute(`${attr}-opacity`, r2(p.opacity));
+      }
+      const fromStyle = el.style && el.style[attr];
+      if (fromStyle && fromStyle.includes("rgba(")) {
+        const p = parseColor(fromStyle);
+        el.style[attr] = p ? p.color : "none";
+        if (p && p.opacity !== 1) el.style[`${attr}Opacity`] = String(r2(p.opacity));
+      }
+    }
+  }
+}
+
 /** Inline a nested <svg> as-is (it's already vector), positioned at its on-screen spot. */
 function emitNestedSvg(el, rect, rootRect, out) {
   const clone = el.cloneNode(true);
+  /* Browsers accept rgba() colours in SVG attributes; vector editors don't, so normalise them
+     on the clone (e.g. the legend's translucent white background, else drawn black in Inkscape). */
+  makeColorsEditorSafe(clone);
   /* We position the nested <svg> ourselves from its on-screen rect, which already reflects any
      CSS transform on the element itself (e.g. Leaflet positions its overlay <svg> with a
      translate in layer-point space — often thousands of px — and maps the content back via a
