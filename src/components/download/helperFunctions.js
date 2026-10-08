@@ -410,28 +410,61 @@ export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colo
   }
 };
 
-const processXMLString = (input) => {
-  /* split into bounding tag, and inner paths / shapes etc */
-  const parts = input.match(/^(<.+?>)(.+)<\/.+?>$/);
-  if (!parts) return undefined;
+/**
+ * Describe an on-screen SVG element (a d3 panel's wrapper <g> or <svg>) as a panel object for
+ * assembly into the exported SVG: `{x, y, width, height, inner}`. `inner` is the element's
+ * serialised children — the wrapper tag itself is dropped, because injectAsSVGStrings re-wraps
+ * `inner` in a fresh <svg> positioned at the panel's computed (x, y).
+ *
+ * We read the geometry straight off the live DOM node rather than regex-parsing a serialised
+ * string. The old regex assumed a single bounding tag with width & height before any inner
+ * content, had no `s` flag (so a newline anywhere in the markup made `.` fail to match), and
+ * returned `undefined` on any mismatch — a recurring source of silently-missing panels. Here we
+ * take the declared width/height attributes (what the panel was laid out to) when present, and
+ * otherwise fall back to the rendered getBBox(). Returns undefined (with a loud log) only when
+ * the element is genuinely absent or has no determinable size.
+ */
+const svgElementToPanel = (el) => {
+  if (!el) {
+    console.warn(`[SVG export] svgElementToPanel: element not found; panel omitted`);
+    return undefined;
+  }
 
-  /* extract width & height from the initial <g> bounding group */
-  const dimensions = parts[1].match(/width.+?([0-9.]+).+height.+?([0-9.]+)/);
+  /* geometry: prefer the declared width/height attributes, else the rendered bounding box */
+  let width = parseFloat(el.getAttribute("width"));
+  let height = parseFloat(el.getAttribute("height"));
+  if (!(width > 0) || !(height > 0)) {
+    try {
+      const bbox = el.getBBox();
+      if (!(width > 0)) width = bbox.width;
+      if (!(height > 0)) height = bbox.height;
+    } catch (e) {
+      console.warn(`[SVG export] svgElementToPanel: getBBox() failed for <${el.tagName}>`, e);
+    }
+  }
+  if (!(width > 0) || !(height > 0)) {
+    console.warn(`[SVG export] svgElementToPanel: could not determine a positive size for <${el.tagName}> (got ${width}×${height}); panel omitted`);
+    return undefined;
+  }
 
-  if (!dimensions) return undefined;
-  /* the map uses transform3d & viewbox */
-  const viewbox = parts[1].match(/viewBox="([0-9-]+)\s([0-9-]+)\s([0-9-]+)\s([0-9-]+)"/);
-  return {
-    x: 0,
-    y: 0,
-    viewbox: viewbox ? viewbox.slice(1) : undefined,
-    width: parseFloat(dimensions[1]),
-    height: parseFloat(dimensions[2]),
-    inner: parts[2]
-  };
+  /* a transform on the wrapper would position its children, but we drop the wrapper; flag it
+     rather than silently shifting the panel */
+  const transform = el.getAttribute("transform");
+  if (transform) {
+    console.warn(`[SVG export] svgElementToPanel: <${el.tagName}> has transform="${transform}", which is dropped with its wrapper tag; the panel may be misaligned`);
+  }
+
+  /* inner = the element's children serialised individually, so the wrapper tag is excluded */
+  const serializer = new XMLSerializer();
+  let inner = "";
+  for (const child of el.childNodes) {
+    inner += serializer.serializeToString(child);
+  }
+
+  return {x: 0, y: 0, width, height, inner};
 };
 
-/* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
+/* take the panels (see svgElementToPanel for struct) and calculate the overall size of the SVG
 as well as the offsets (x, y) to position panels appropriately within this */
 const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLinesOfText) => {
   const padding = 50;
@@ -534,7 +567,6 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
 
 const injectAsSVGStrings = (output, key, data) => {
   const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
-  // if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
   output.push(svgTag);
   output.push(data.inner);
   output.push("</svg>");
@@ -611,7 +643,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
 
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
-      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
+      panels.tree = svgElementToPanel(document.getElementById("MainTree"));
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
@@ -623,9 +655,9 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
     }
     if (panels.tree && document.getElementById('SecondTree')) {
       try {
-        panels.secondTree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("SecondTree")));
+        panels.secondTree = svgElementToPanel(document.getElementById("SecondTree"));
         if (document.getElementById('Tangle')) {
-          panels.tangle = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("Tangle")));
+          panels.tangle = svgElementToPanel(document.getElementById("Tangle"));
         }
       } catch (e) {
         errors.push("second tree / tanglegram");
@@ -635,8 +667,8 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("measurements") !== -1) {
     try {
-      panels.measurements = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsSVG")));
-      panels.measurementsXAxis = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsXAxisSVG")));
+      panels.measurements = svgElementToPanel(document.getElementById("d3MeasurementsSVG"));
+      panels.measurementsXAxis = svgElementToPanel(document.getElementById("d3MeasurementsXAxisSVG"));
       // Get the actual width of SVG from the measurements container since the SVG just uses width=100%
       const measurementsContainer = document.getElementById("measurementsSVGContainer");
       panels.measurements.width = measurementsContainer.clientWidth;
@@ -653,7 +685,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
-      panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      panels.entropy = svgElementToPanel(document.getElementById("d3entropyParent"));
     } catch (e) {
       panels.entropy = undefined;
       errors.push("entropy");
@@ -662,7 +694,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("frequencies") !== -1) {
     try {
-      panels.frequencies = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3frequenciesSVG")));
+      panels.frequencies = svgElementToPanel(document.getElementById("d3frequenciesSVG"));
     } catch (e) {
       panels.frequencies = undefined;
       errors.push("frequencies");
@@ -673,7 +705,6 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
     panels.map = {
       x: 0,
       y: 0,
-      viewbox: undefined,
       width: parseFloat(map.mapDimensions.x),
       height: parseFloat(map.mapDimensions.y),
       inner: map.mapSvg
