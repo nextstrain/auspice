@@ -5,8 +5,9 @@ export class NoContentError extends Error {
 }
 
 export class FetchError extends Error {
-  constructor(...params) {
-    super(...params);
+  constructor(message, status) {
+    super(message);
+    this.status = status;
   }
 }
 
