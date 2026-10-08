@@ -178,11 +178,44 @@ function emitText(textNode, parentCs, rootRect, out) {
 /** Inline a nested <svg> as-is (it's already vector), positioned at its on-screen spot. */
 function emitNestedSvg(el, rect, rootRect, out) {
   const clone = el.cloneNode(true);
+  /* We position the nested <svg> ourselves from its on-screen rect, which already reflects any
+     CSS transform on the element itself (e.g. Leaflet positions its overlay <svg> with a
+     translate in layer-point space — often thousands of px — and maps the content back via a
+     viewBox). Leaving that transform on the clone would shift it a second time, off-canvas, so
+     strip the element's own transform; its descendants keep their transforms. */
+  if (clone.style) clone.style.transform = "";
+  clone.removeAttribute("transform");
   clone.setAttribute("x", r2(rect.left - rootRect.left));
   clone.setAttribute("y", r2(rect.top - rootRect.top));
   if (!clone.getAttribute("width")) clone.setAttribute("width", r2(rect.width));
   if (!clone.getAttribute("height")) clone.setAttribute("height", r2(rect.height));
   out.push(new XMLSerializer().serializeToString(clone));
+}
+
+/**
+ * Rasterise a `<canvas>` (e.g. a WebGL basemap) to a PNG data URI and emit it as an `<image>`.
+ * This is the one place the export is knowingly raster rather than vector — a canvas has no
+ * vector description to recover. Reading a WebGL canvas back requires it to have been created
+ * with `preserveDrawingBuffer: true`; without that, `toDataURL()` returns a blank image (it does
+ * not throw), which we can't reliably detect, so enabling that flag is the caller's job.
+ */
+function emitCanvas(el, rect, rootRect, out) {
+  let dataUrl;
+  try {
+    dataUrl = el.toDataURL("image/png");
+  } catch (e) {
+    console.warn(`${LOG} <canvas> could not be read back (is it tainted by cross-origin content?); skipping`, e);
+    return;
+  }
+  if (!dataUrl || dataUrl.length < 10) {
+    console.warn(`${LOG} <canvas> produced no image data; skipping`);
+    return;
+  }
+  console.warn(`${LOG} <canvas> rasterised to a PNG <image> (${el.width}×${el.height}px); this region of the export is raster, not vector`);
+  out.push(
+    `<image x="${r2(rect.left - rootRect.left)}" y="${r2(rect.top - rootRect.top)}" ` +
+    `width="${r2(rect.width)}" height="${r2(rect.height)}" xlink:href="${dataUrl}" />`
+  );
 }
 
 /** Emit an `<img>` as an SVG `<image>`. Only embedded (data:) sources are self-contained. */
@@ -202,7 +235,9 @@ function emitImage(el, rect, rootRect, out) {
 }
 
 /** Recursively transcribe `el` and its descendants into `out` (document/paint order). */
-function walk(el, rootRect, out) {
+function walk(el, rootRect, out, skip) {
+  if (skip && skip(el)) return;
+
   const cs = window.getComputedStyle(el);
   if (cs.display === "none") return;
 
@@ -220,7 +255,7 @@ function walk(el, rootRect, out) {
     return;
   }
   if (tag === "canvas") {
-    console.warn(`${LOG} <canvas> cannot be converted to vector here and is skipped (e.g. a WebGL map must be rasterised separately)`);
+    if (!hidden) emitCanvas(el, rect, rootRect, out);
     return;
   }
 
@@ -236,7 +271,7 @@ function walk(el, rootRect, out) {
     if (child.nodeType === Node.TEXT_NODE) {
       if (!hidden) emitText(child, cs, rootRect, out);
     } else if (child.nodeType === Node.ELEMENT_NODE) {
-      walk(child, rootRect, out);
+      walk(child, rootRect, out, skip);
     }
   }
 }
@@ -245,11 +280,14 @@ function walk(el, rootRect, out) {
  * Convert an on-screen HTML element (and its subtree) into SVG markup.
  *
  * @param {Element} root the element to convert (must be laid out / visible on screen)
+ * @param {object} [options]
+ * @param {(el: Element) => boolean} [options.skip] called for each element; return true to omit
+ *   it and its subtree (e.g. on-screen chrome like map zoom controls that shouldn't be exported)
  * @returns {{width:number, height:number, markup:string}} the block's size and a string
  *   of SVG elements whose coordinates are relative to the top-left of `root`. Wrap
  *   `markup` in an `<svg>`/`<g>` positioned wherever the block should appear.
  */
-export function htmlToSvg(root) {
+export function htmlToSvg(root, {skip} = {}) {
   if (!(root instanceof Element)) {
     console.error(`${LOG} htmlToSvg() called with a non-element; returning empty`, root);
     return {width: 0, height: 0, markup: ""};
@@ -259,6 +297,6 @@ export function htmlToSvg(root) {
     console.warn(`${LOG} root element has zero size (${r2(rootRect.width)}×${r2(rootRect.height)}); it may be hidden, so the output will be empty`, root);
   }
   const out = [];
-  walk(root, rootRect, out);
+  walk(root, rootRect, out, skip);
   return {width: rootRect.width, height: rootRect.height, markup: out.join("\n")};
 }

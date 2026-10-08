@@ -10,7 +10,6 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import '@maplibre/maplibre-gl-leaflet';
 import _min from "lodash/min";
 import _max from "lodash/max";
-import domtoimage from "dom-to-image";
 import { select } from "d3-selection";
 import 'd3-transition';
 import Card from "../framework/card";
@@ -21,7 +20,7 @@ import {
   updateTransmissionDataLatLong,
   updateDemeDataLatLong
 } from "./mapHelpersLatLong";
-// import { incommingMapPNG } from "../download/helperFunctions";
+import { htmlToSvg } from "../download/domToSvg";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, infoPanelStyles } from "../../globalStyles";
 import ErrorBoundary from "../../util/errorBoundary";
@@ -109,25 +108,34 @@ class Map extends React.Component {
       leaflet(); /* this sets up window.L */
     }
     if (!window.L.getMapSvg) {
-      /* Get the map tiles */
+      /* Convert the on-screen map into SVG markup for the "download SVG" feature. We read the
+       * live map container back via the shared htmlToSvg() converter rather than re-implementing
+       * its layout: the WebGL basemap <canvas> is rasterised to a PNG <image> (hence the
+       * preserveDrawingBuffer flag on the GL layer), and the d3 demes/transmissions overlay —
+       * already an <svg> — is inlined as native vector. Document order gives the right z-order
+       * (basemap tiles below, demes above). The zoom controls are on-screen chrome, so skip them. */
       window.L.getMapSvg = (loadendCallback) => {
-        const mapDimensions = this.state.map.getSize();
-        const panOffsets = this.state.map._getMapPanePos();
-        domtoimage.toSvg(this.state.map.getContainer(),
-          {
-            width: mapDimensions.x,
-            height: mapDimensions.y,
-            filter: (node) => {
-              return node.className !== "leaflet-control-container";
-            }
-          })
-          .then((image) => {
-            loadendCallback({
-              mapSvg: image.replace('data:image/svg+xml;charset=utf-8,', ''),
-              mapDimensions: mapDimensions,
-              panOffsets: panOffsets
-            });
+        const emit = () => {
+          const {width, height, markup} = htmlToSvg(this.state.map.getContainer(), {
+            skip: (el) => el.classList && el.classList.contains("leaflet-control-container")
           });
+          loadendCallback({mapSvg: markup, mapDimensions: {x: width, y: height}});
+        };
+        /* MapLibre renders lazily into the (preserved) WebGL buffer, so reading the basemap
+         * canvas back at an arbitrary moment can catch an incomplete, background-only frame
+         * (the grey map we used to get). Force a fresh paint and read inside the next render,
+         * with a timeout fallback so a download always completes. */
+        const glMap = this.glLayer && this.glLayer.getMaplibreMap();
+        if (glMap) {
+          let captured = false;
+          const capture = () => { if (captured) return; captured = true; emit(); };
+          glMap.once("render", capture);
+          glMap.triggerRepaint();
+          window.setTimeout(capture, 1000);
+        } else {
+          console.warn("[SVG export] MapLibre GL map unavailable; the basemap may be blank");
+          emit();
+        }
       };
     }
   }
@@ -533,6 +541,10 @@ class Map extends React.Component {
 
     const token = this.state.tilesSettings.accessToken;
     const glLayer = L.maplibreGL({
+      // Keep the WebGL drawing buffer readable so the "download SVG" feature can rasterise the
+      // basemap via canvas.toDataURL(); without this the read-back is blank. The map is
+      // essentially static, so the cost of forgoing the buffer-swap optimisation is negligible.
+      preserveDrawingBuffer: true,
       style: this.state.tilesSettings.style,
       // Provider-agnostic request rewriting. Any provider-proprietary URLs (e.g. Mapbox's
       // mapbox:// protocol) are expected to already be resolved within the style document;
@@ -576,6 +588,9 @@ class Map extends React.Component {
       });
       (new Wordmark({position: 'bottomleft'})).addTo(map);
     }
+
+    /* keep a handle on the GL layer so the SVG export can reach MapLibre's map/canvas */
+    this.glLayer = glLayer;
 
     /* Set up leaflet events */
     map.on("moveend", this.respondToLeafletEvent.bind(this));
