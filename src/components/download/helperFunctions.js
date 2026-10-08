@@ -566,9 +566,17 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
-  output.push(svgTag);
+  /* Clip each panel to its own box. A nested <svg> clips its overflow in browsers (via the UA
+  stylesheet's `overflow:hidden` default), but vector editors like Inkscape don't apply that, so
+  oversized content — most visibly the map's basemap <image> and demes overlay, which extend
+  beyond the panel — spills out. An explicit clipPath (plus overflow="hidden" as belt-and-braces)
+  clips it everywhere. The key is unique per panel, so the clipPath id is too. */
+  const clipId = `${key}Clip`;
+  output.push(`<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}" overflow="hidden">`);
+  output.push(`<clipPath id="${clipId}"><rect x="0" y="0" width="${data.width}" height="${data.height}" /></clipPath>`);
+  output.push(`<g clip-path="url(#${clipId})">`);
   output.push(data.inner);
+  output.push("</g>");
   output.push("</svg>");
 };
 
