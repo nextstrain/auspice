@@ -112,7 +112,7 @@ export const DownloadButtons = ({ relevantPublications }) => {
             state.tree.visibility,
             getFilePrefix(),
             state.controls.panelsToDisplay,
-            state.controls.panelLayout.panelLayout,
+            state.controls.panelLayout,
             relevantPublications
           )}
         />

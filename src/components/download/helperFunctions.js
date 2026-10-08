@@ -9,6 +9,9 @@ import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
 import { createDatasetJson } from "../../util/constructDatasetJson";
+import { dataFont } from "../../globalStyles";
+import { htmlToSvg } from "./domToSvg";
+import { latoFontDefs } from "./embedFont";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -407,28 +410,61 @@ export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colo
   }
 };
 
-const processXMLString = (input) => {
-  /* split into bounding tag, and inner paths / shapes etc */
-  const parts = input.match(/^(<.+?>)(.+)<\/.+?>$/);
-  if (!parts) return undefined;
+/**
+ * Describe an on-screen SVG element (a d3 panel's wrapper <g> or <svg>) as a panel object for
+ * assembly into the exported SVG: `{x, y, width, height, inner}`. `inner` is the element's
+ * serialised children — the wrapper tag itself is dropped, because injectAsSVGStrings re-wraps
+ * `inner` in a fresh <svg> positioned at the panel's computed (x, y).
+ *
+ * We read the geometry straight off the live DOM node rather than regex-parsing a serialised
+ * string. The old regex assumed a single bounding tag with width & height before any inner
+ * content, had no `s` flag (so a newline anywhere in the markup made `.` fail to match), and
+ * returned `undefined` on any mismatch — a recurring source of silently-missing panels. Here we
+ * take the declared width/height attributes (what the panel was laid out to) when present, and
+ * otherwise fall back to the rendered getBBox(). Returns undefined (with a loud log) only when
+ * the element is genuinely absent or has no determinable size.
+ */
+const svgElementToPanel = (el) => {
+  if (!el) {
+    console.warn(`[SVG export] svgElementToPanel: element not found; panel omitted`);
+    return undefined;
+  }
 
-  /* extract width & height from the initial <g> bounding group */
-  const dimensions = parts[1].match(/width.+?([0-9.]+).+height.+?([0-9.]+)/);
+  /* geometry: prefer the declared width/height attributes, else the rendered bounding box */
+  let width = parseFloat(el.getAttribute("width"));
+  let height = parseFloat(el.getAttribute("height"));
+  if (!(width > 0) || !(height > 0)) {
+    try {
+      const bbox = el.getBBox();
+      if (!(width > 0)) width = bbox.width;
+      if (!(height > 0)) height = bbox.height;
+    } catch (e) {
+      console.warn(`[SVG export] svgElementToPanel: getBBox() failed for <${el.tagName}>`, e);
+    }
+  }
+  if (!(width > 0) || !(height > 0)) {
+    console.warn(`[SVG export] svgElementToPanel: could not determine a positive size for <${el.tagName}> (got ${width}×${height}); panel omitted`);
+    return undefined;
+  }
 
-  if (!dimensions) return undefined;
-  /* the map uses transform3d & viewbox */
-  const viewbox = parts[1].match(/viewBox="([0-9-]+)\s([0-9-]+)\s([0-9-]+)\s([0-9-]+)"/);
-  return {
-    x: 0,
-    y: 0,
-    viewbox: viewbox ? viewbox.slice(1) : undefined,
-    width: parseFloat(dimensions[1]),
-    height: parseFloat(dimensions[2]),
-    inner: parts[2]
-  };
+  /* a transform on the wrapper would position its children, but we drop the wrapper; flag it
+     rather than silently shifting the panel */
+  const transform = el.getAttribute("transform");
+  if (transform) {
+    console.warn(`[SVG export] svgElementToPanel: <${el.tagName}> has transform="${transform}", which is dropped with its wrapper tag; the panel may be misaligned`);
+  }
+
+  /* inner = the element's children serialised individually, so the wrapper tag is excluded */
+  const serializer = new XMLSerializer();
+  let inner = "";
+  for (const child of el.childNodes) {
+    inner += serializer.serializeToString(child);
+  }
+
+  return {x: 0, y: 0, width, height, inner};
 };
 
-/* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
+/* take the panels (see svgElementToPanel for struct) and calculate the overall size of the SVG
 as well as the offsets (x, y) to position panels appropriately within this */
 const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLinesOfText) => {
   const padding = 50;
@@ -530,32 +566,106 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
-  // if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
-  output.push(svgTag);
+  /* Clip each panel to its own box. A nested <svg> clips its overflow in browsers (via the UA
+  stylesheet's `overflow:hidden` default), but vector editors like Inkscape don't apply that, so
+  oversized content — most visibly the map's basemap <image> and demes overlay, which extend
+  beyond the panel — spills out. An explicit clipPath (plus overflow="hidden" as belt-and-braces)
+  clips it everywhere. The key is unique per panel, so the clipPath id is too. */
+  const clipId = `${key}Clip`;
+  output.push(`<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}" overflow="hidden">`);
+  output.push(`<clipPath id="${clipId}"><rect x="0" y="0" width="${data.width}" height="${data.height}" /></clipPath>`);
+  output.push(`<g clip-path="url(#${clipId})">`);
   output.push(data.inner);
+  output.push("</g>");
   output.push("</svg>");
 };
 
+/**
+ * Build the footer text as SVG by rendering the (HTML) strings into a detached, off-screen
+ * block, letting the browser lay them out & wrap them to `width`, then reading that layout
+ * back as SVG via htmlToSvg(). The block is removed before we return. Coordinates in the
+ * returned markup are translated to (x, y).
+ * Returns {width, height, markup}.
+ */
+const footerToSvg = (textStrings, x, y, width) => {
+  const div = document.createElement("div");
+  div.style.cssText = `position:absolute; left:-99999px; top:0; width:${width}px; font-family:lato,sans-serif; font-size:14px; line-height:1.4; color:#000;`;
+  textStrings.forEach((s) => {
+    const p = document.createElement("p");
+    p.style.cssText = "margin:0 0 6px 0;";
+    p.innerHTML = s || "&nbsp;"; /* the strings are trusted HTML we constructed in SVG() */
+    div.appendChild(p);
+  });
+  document.body.appendChild(div);
+  try {
+    const {width: w, height: h, markup} = htmlToSvg(div);
+    return {width: w, height: h, markup: `<g transform="translate(${x},${y})">\n${markup}\n</g>`};
+  } finally {
+    document.body.removeChild(div);
+  }
+};
+
 /* define actual writer as a closure, because it may need to be triggered asynchronously */
-const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
+const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs, map) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
   const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
+
+  /* Each panel (tree, map, measurements) can render its own legend, which is an HTML overlay
+  rather than a single SVG, so we read it back into SVG via htmlToSvg(). The legends share the
+  `LegendContainer` id, so we identify the right one by whichever overlaps the given panel's
+  origin element (the element whose top-left is 0,0 of that panel's SVG). We record the offset
+  relative to that origin and resolve it to an absolute position once the panel is laid out. */
+  const legends = [];
+  const usedLegendEls = new Set();
+  const captureLegend = (panel, originEl, label) => {
+    if (!originEl) {
+      console.warn(`[SVG export] ${label}: panel origin element not found; legend omitted`);
+      return;
+    }
+    const o = originEl.getBoundingClientRect();
+    /* pick the as-yet-unused legend with the largest overlap with this panel */
+    let best;
+    let bestArea = 0;
+    for (const el of document.querySelectorAll('[id="LegendContainer"]')) {
+      if (usedLegendEls.has(el)) continue;
+      const r = el.getBoundingClientRect();
+      const ix = Math.max(0, Math.min(o.right, r.right) - Math.max(o.left, r.left));
+      const iy = Math.max(0, Math.min(o.bottom, r.bottom) - Math.max(o.top, r.top));
+      if (ix * iy > bestArea) { bestArea = ix * iy; best = el; }
+    }
+    if (!best) {
+      console.warn(`[SVG export] ${label}: no legend overlaps this panel; legend omitted`);
+      return;
+    }
+    usedLegendEls.add(best);
+    try {
+      const r = best.getBoundingClientRect();
+      const {width, height, markup} = htmlToSvg(best);
+      legends.push({panel, offsetX: r.left - o.left, offsetY: r.top - o.top, width, height, inner: markup});
+    } catch (e) {
+      errors.push(`${label} legend`);
+      console.error(`${label} legend SVG save error:`, e);
+    }
+  };
+
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
-      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
-      panels.treeLegend = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("TreeLegendContainer")));
+      panels.tree = svgElementToPanel(document.getElementById("MainTree"));
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
       console.error("Tree SVG save error:", e);
     }
+    /* The tree's legend is positioned relative to d3treeParent (= 0,0 of the tree panel's SVG). */
+    if (panels.tree) {
+      captureLegend("tree", document.getElementById("d3treeParent"), "tree");
+    }
     if (panels.tree && document.getElementById('SecondTree')) {
       try {
-        panels.secondTree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("SecondTree")));
+        panels.secondTree = svgElementToPanel(document.getElementById("SecondTree"));
         if (document.getElementById('Tangle')) {
-          panels.tangle = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("Tangle")));
+          panels.tangle = svgElementToPanel(document.getElementById("Tangle"));
         }
       } catch (e) {
         errors.push("second tree / tanglegram");
@@ -565,8 +675,8 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("measurements") !== -1) {
     try {
-      panels.measurements = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsSVG")));
-      panels.measurementsXAxis = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3MeasurementsXAxisSVG")));
+      panels.measurements = svgElementToPanel(document.getElementById("d3MeasurementsSVG"));
+      panels.measurementsXAxis = svgElementToPanel(document.getElementById("d3MeasurementsXAxisSVG"));
       // Get the actual width of SVG from the measurements container since the SVG just uses width=100%
       const measurementsContainer = document.getElementById("measurementsSVGContainer");
       panels.measurements.width = measurementsContainer.clientWidth;
@@ -576,10 +686,14 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
       errors.push("measurements");
       console.error("Measurements SVG save error:", e);
     }
+    /* the measurements legend is positioned relative to the measurements SVG (its panel origin) */
+    if (panels.measurements) {
+      captureLegend("measurements", document.getElementById("d3MeasurementsSVG"), "measurements");
+    }
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
-      panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      panels.entropy = svgElementToPanel(document.getElementById("d3entropyParent"));
     } catch (e) {
       panels.entropy = undefined;
       errors.push("entropy");
@@ -588,7 +702,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("frequencies") !== -1) {
     try {
-      panels.frequencies = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3frequenciesSVG")));
+      panels.frequencies = svgElementToPanel(document.getElementById("d3frequenciesSVG"));
     } catch (e) {
       panels.frequencies = undefined;
       errors.push("frequencies");
@@ -599,31 +713,60 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
     panels.map = {
       x: 0,
       y: 0,
-      viewbox: undefined,
       width: parseFloat(map.mapDimensions.x),
       height: parseFloat(map.mapDimensions.y),
       inner: map.mapSvg
     };
+    /* the map legend is positioned relative to the leaflet container (= 0,0 of the map panel) */
+    captureLegend("map", document.getElementById("map"), "map");
   }
 
   /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
   const output = [];
   /* logic for extracting the overall width etc */
   const overallDimensions = createBoundingDimensionsAndPositionPanels(panels, panelLayout, textStrings.length);
-  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${overallDimensions.height}">`);
+
+  /* Render the footer text to real SVG <text> (via a throwaway HTML block) rather than a
+  <foreignObject>, which browsers render but vector editors (Illustrator/Inkscape) don't.
+  We let the browser wrap the text to the available width, then read the lines back. */
+  const footer = footerToSvg(
+    textStrings,
+    overallDimensions.padding,
+    overallDimensions.textY,
+    overallDimensions.width - 2 * overallDimensions.padding
+  );
+  /* grow the canvas if the (wrapped) footer is taller than the space we reserved for it */
+  const totalHeight = Math.max(
+    overallDimensions.height,
+    overallDimensions.textY + footer.height + overallDimensions.padding
+  );
+
+  /* Set the app font & base weight as defaults on the root <svg> so they cascade to panel text
+  (entropy, tree, …) that inherits font-family / font-weight from a stylesheet rather than an
+  inline style — that cascade doesn't exist in a standalone SVG file, so otherwise such text
+  falls back to the renderer's defaults (commonly a serif face at a too-light weight). The base
+  weight 400 matches `html, p, div { font-weight: 400 }` in global.css. Text that sets its own
+  font-family / font-weight (legend, footer, via htmlToSvg) overrides these. */
+  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" font-family="${dataFont}" font-weight="400" width="${overallDimensions.width}" height="${totalHeight}">`);
+  if (fontDefs) output.push(fontDefs); /* embedded @font-face so viewers render Lato, not a fallback */
   for (const key in panels) {
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }
   }
-  /* add text to bottom of SVG in HTML format */
-  output.push(`<foreignObject x="${overallDimensions.padding}" y="${overallDimensions.height - overallDimensions.textHeight}" height="${overallDimensions.textHeight}" width="${overallDimensions.width - 2*overallDimensions.padding}">`);
-  textStrings.forEach((s) => {
-    output.push(`<p xmlns="http://www.w3.org/1999/xhtml" style="font-family:lato,sans-serif;">`);
-    output.push(s);
-    output.push("</p>");
+  /* draw legends on top of their panels, now that each panel has a final (x, y) */
+  legends.forEach((lg) => {
+    const panel = panels[lg.panel];
+    if (!panel) return;
+    injectAsSVGStrings(output, `${lg.panel}Legend`, {
+      x: panel.x + lg.offsetX,
+      y: panel.y + lg.offsetY,
+      width: lg.width,
+      height: lg.height,
+      inner: lg.inner
+    });
   });
-  output.push("</foreignObject>");
+  output.push(footer.markup);
 
   output.push("</svg>");
   // console.log(panels)
@@ -643,7 +786,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
+export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
   /* make the text strings */
   const textStrings = [];
   textStrings.push(metadata.title);
@@ -664,11 +807,15 @@ export const SVG = (dispatch, t, metadata, nodes, visibility, filePrefix, panels
     textStrings.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
   });
 
+  /* embed the Lato font so the SVG renders identically outside the app (async: fetches the
+  already-cached font files & base64-encodes them) */
+  const fontDefs = await latoFontDefs();
+
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
-    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
+    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs));
   } else {
-    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
+    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, fontDefs, undefined);
   }
 };
 
