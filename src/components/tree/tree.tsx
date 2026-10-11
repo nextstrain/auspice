@@ -166,6 +166,7 @@ export class TreeComponent extends React.Component<TreeComponentProps, TreeCompo
         </ErrorBoundary>
         <HoverInfoPanel
           selectedNode={this.state.hoveredNode}
+          distanceMeasure={this.props.distanceMeasure}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
