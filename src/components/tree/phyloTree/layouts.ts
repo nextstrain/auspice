@@ -3,6 +3,7 @@
 import { scaleLinear, ScalePoint, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
+import { checkDistanceMetric } from "../../../util/computeDistanceMetric";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
@@ -119,6 +120,15 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
         [d.y, d.py] = [numDate(d.y), numDate(d.py)]
       }
     }
+  }
+
+  /* TEMPORARY: verify the precomputed distance-metric value matches the scatter axis which
+  corresponds to the current distance measure. See util/computeDistanceMetric.ts */
+  if (this.scatterVariables.x === this.distance) {
+    checkDistanceMetric("scatterplotLayout.x", this.nodes.map((d) => ({node: d.n, observed: d.x})));
+  }
+  if (this.scatterVariables.y === this.distance) {
+    checkDistanceMetric("scatterplotLayout.y", this.nodes.map((d) => ({node: d.n, observed: d.y})));
   }
 
   if (this.vaccines) { /* overlay vaccine cross on tip */
@@ -289,6 +299,10 @@ export const setDistance = function setDistance(
       d.crossDepth = d.depth;
     });
   }
+
+  /* TEMPORARY: verify the precomputed distance-metric value matches `d.depth`. See util/computeDistanceMetric.ts */
+  checkDistanceMetric("setDistance", this.nodes.map((d) => ({node: d.n, observed: d.depth})));
+
   timerEnd("setDistance");
 };
 

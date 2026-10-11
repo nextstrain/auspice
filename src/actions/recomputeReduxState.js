@@ -19,6 +19,7 @@ import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
+import { setDistanceMetric } from "../util/computeDistanceMetric";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
@@ -1007,6 +1008,10 @@ export const createStateFromQueryOrJSONs = ({
 
   controls = checkAndCorrectErrorsInState(controls, metadata, entropy.genomeMap, query, tree, viewingNarrative); /* must run last */
 
+  /* precompute the distance-metric value onto each node */
+  setDistanceMetric(tree.nodes, controls.distanceMeasure);
+  if (treeToo && treeToo.nodes) setDistanceMetric(treeToo.nodes, controls.distanceMeasure);
+
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (json || controls.colorBy !== oldState.controls.colorBy || newMeasurementsColoringData) {
@@ -1137,6 +1142,9 @@ export const createTreeTooState = ({
   tree.nodeColorsVersion++;
 
   treeToo = updateSecondTree(tree, treeToo, controls, dispatch);
+
+  /* precompute the distance-metric value onto each node. See util/computeDistanceMetric.ts */
+  setDistanceMetric(treeToo.nodes, controls.distanceMeasure);
 
   return {tree, treeToo, controls, metadata};
 };

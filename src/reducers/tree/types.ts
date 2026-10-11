@@ -1,5 +1,6 @@
 import { NODE_NOT_VISIBLE, NODE_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY } from "../../util/globals";
 import { PhyloNode } from "../../components/tree/phyloTree/types";
+import { DISTANCE } from "../../util/computeDistanceMetric";
 
 /**
  * Maps mutation strings (in format gene:fromPosTo, e.g. 'nuc:A123T')
@@ -67,6 +68,9 @@ interface ReduxNodeBase {
 
   /** Is the node part of a (currently active) stream tree? */
   inStream?: boolean
+
+  /** The value of the currently-selected distance measure. See util/computeDistanceMetric.ts */
+  [DISTANCE]?: number
 }
 
 
