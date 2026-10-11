@@ -28,7 +28,7 @@ const calcMutationCounts = (nodes, visibility, selectedCds) => {
     const mutations = getNodeMutations(n);
     mutations?.[cdsName]?.forEach((m) => {
       const {from, to, pos} = parseMutation(m);
-      if (valid(from, to, isAA)) {
+      if (validMutation(from, to, isAA)) {
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
       }
@@ -65,7 +65,7 @@ const calcEntropy = (nodes, visibility, selectedCds) => {
       const pos = parseInt(mutation.slice(1, mutation.length - 1), 10);
       const A = mutation.slice(0, 1);
       const B = mutation.slice(mutation.length - 1, mutation.length);
-      if (!valid(A, B, isAA)) return;
+      if (!validMutation(A, B, isAA)) return;
       if (!anc_state[pos]) {
         anc_state[pos] = A;
       }
@@ -320,7 +320,7 @@ export function getNucCoordinatesFromAaPos(cds, aaPos) {
 }
 
 /** A, B are the from/to nuc/aa of an observed mutation  */
-function valid(A, B, isAA) {
+export function validMutation(A, B, isAA) {
   if (isAA) {
     return A !== 'X' && B !== 'X';
   }

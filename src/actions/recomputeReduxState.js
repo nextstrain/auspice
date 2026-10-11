@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep, isEqualWith } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDistanceMeasure, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness, getFilteredAndIdxOfFilteredRoot } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -19,7 +19,7 @@ import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
-import { setDistanceMetric } from "../util/computeDistanceMetric";
+import { setDistanceMetric, findAvailableDistanceMeasures } from "../util/computeDistanceMetric";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
@@ -395,7 +395,7 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   return state;
 };
 
-const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
+const modifyControlsStateViaTree = (state, tree, treeToo, metadata, genomeMap) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -485,6 +485,17 @@ const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
    */
   state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
+
+  state.availableDistanceMeasures = findAvailableDistanceMeasures(tree.nodes, genomeMap);
+  if (treeToo) {
+    const treeTooDistanceMeasures = new Set(findAvailableDistanceMeasures(treeToo.nodes, genomeMap));
+    state.availableDistanceMeasures = state.availableDistanceMeasures
+      .filter((measure) => treeTooDistanceMeasures.has(measure));
+  }
+  if (state.availableDistanceMeasures.length === 0) {
+    throw Error("Dataset JSON(s) have no valid branch measures (e.g. div, num_date)")
+  }
+
 
   /* if clade is available as a branch label, then set this as the "default". This
   is largely due to historical reasons. Note that it *can* and *will* be overridden
@@ -589,9 +600,15 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   state["colorByConfidence"] = doesColorByHaveConfidence(state, state["colorBy"]);
 
   /* distanceMeasure */
-  if (["div", "num_date"].indexOf(state["distanceMeasure"]) === -1) {
-    state["distanceMeasure"] = "num_date";
-    console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
+  if (!state.availableDistanceMeasures.includes(state.distanceMeasure)) {
+    const _old = state.distanceMeasure
+    state.distanceMeasure = state.availableDistanceMeasures[0];
+    if (state.distanceMeasure === defaultDistanceMeasure) {
+      delete query.m;
+    } else {
+      query.m = state.distanceMeasure;
+    }
+    console.error(`Requested distance measure '${_old}' is not valid. Switching to '${state.distanceMeasure}'`);
   }
 
   /* geoResolutions */
@@ -893,7 +910,7 @@ export const createStateFromQueryOrJSONs = ({
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata, entropy.genomeMap);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
@@ -1010,7 +1027,7 @@ export const createStateFromQueryOrJSONs = ({
 
   /* precompute the distance-metric value onto each node */
   setDistanceMetric(tree.nodes, controls.distanceMeasure);
-  if (treeToo && treeToo.nodes) setDistanceMetric(treeToo.nodes, controls.distanceMeasure);
+  if (treeToo && treeToo.nodes) setDistanceMetric(treeToo.nodes, controls.distanceMeasure, true);
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
@@ -1133,7 +1150,7 @@ export const createTreeTooState = ({
   let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl)
 
   /* recompute the controls state now that we have new data */
-  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata);
+  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata, oldState.entropy?.genomeMap);
   /* recalculate the color scale with updated tree data */
   controls.colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
   controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
@@ -1144,7 +1161,7 @@ export const createTreeTooState = ({
   treeToo = updateSecondTree(tree, treeToo, controls, dispatch);
 
   /* precompute the distance-metric value onto each node. See util/computeDistanceMetric.ts */
-  setDistanceMetric(treeToo.nodes, controls.distanceMeasure);
+  setDistanceMetric(treeToo.nodes, controls.distanceMeasure, true);
 
   return {tree, treeToo, controls, metadata};
 };

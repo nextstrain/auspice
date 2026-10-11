@@ -58,6 +58,7 @@ const ScatterSelectContainer = styled.div`
     scatterVariables: state.controls.scatterVariables,
     colorings: state.metadata.colorings,
     colorBy: state.controls.colorBy,
+    availableDistanceMeasures: state.controls.availableDistanceMeasures,
     showTreeToo: state.controls.showTreeToo,
     streamTreesToggledOn: state.controls.showStreamTrees,
     branchLengthsToDisplay: state.controls.branchLengthsToDisplay
@@ -69,7 +70,7 @@ class ChooseLayout extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
   renderScatterplotAxesSelector() {
-    const options = collectAvailableScatterVariables(this.props.colorings, this.props.colorBy);
+    const options = collectAvailableScatterVariables(this.props.colorings, this.props.colorBy, this.props.availableDistanceMeasures);
     const selectedX = options.filter((o) => o.value===this.props.scatterVariables.x)[0];
     const selectedY = options.filter((o) => o.value===this.props.scatterVariables.y)[0];
     const miscSelectProps = {options, isClearable: false, isSearchable: false, isMulti: false};
