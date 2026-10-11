@@ -5,7 +5,6 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode,
   getFullAuthorInfoFromNode, getTipChanges, getBranchMutations } from "../../../util/treeMiscHelpers";
-import { checkDistanceMetric } from "../../../util/computeDistanceMetric";
 import { isValueValid, strainSymbol, NODE_VISIBLE } from "../../../util/globals";
 import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { parseIntervalsOfNsOrGaps } from "./MutationTable";
@@ -41,14 +40,9 @@ export const InfoLine = ({name, value, padBelow=false}) => {
  * @param  {Object} props.node branch node currently highlighted
  * @param  {boolean} props.isTerminal
  */
-const BranchLength = ({node, t, isTerminal, distanceMeasure}) => {
+const BranchLength = ({node, t, isTerminal}) => {
   const elements = []; // elements to render
   const divergence = getDivFromNode(node);
-
-  /* TEMPORARY: verify the precomputed distance-metric value matches the value shown here for
-  the current distance measure. See util/computeDistanceMetric.ts */
-  const observed = distanceMeasure === "div" ? divergence : getTraitFromNode(node, "num_date");
-  checkDistanceMetric("BranchLength", [{node, observed}]);
 
   if (divergence) {
     elements.push(<InfoLine name={t("Divergence")+":"} value={formatDivergence(divergence)} key="div"/>);
@@ -482,7 +476,6 @@ function StreamConnectorInfo({node, lineType}) {
 
 const HoverInfoPanel = ({
   selectedNode,
-  distanceMeasure,
   colorBy,
   colorByConfidence,
   colorScale,
@@ -518,7 +511,7 @@ const HoverInfoPanel = ({
           {tipLabelKey!==strainSymbol && <InfoLine name="Node name:" value={node.name}/>}
           <VaccineInfo node={node} t={t}/>
           <TipMutations node={node} t={t}/>
-          <BranchLength node={node} t={t} isTerminal={true} distanceMeasure={distanceMeasure}/>
+          <BranchLength node={node} t={t} isTerminal={true}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
           <Comment>{t("Click on tip to display more info")}</Comment>
@@ -527,7 +520,7 @@ const HoverInfoPanel = ({
         <>
           <BranchDescendants node={node} t={t} tipLabelKey={tipLabelKey}/>
           <BranchMutations node={node} geneSortFn={geneSortFn} observedMutations={observedMutations} proteinOnly={proteinOnly} t={t}/>
-          <BranchLength node={node} t={t} isTerminal={false} distanceMeasure={distanceMeasure}/>
+          <BranchLength node={node} t={t} isTerminal={false}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>
             {idxOfInViewRootNode === node.arrayIdx ? t('Click to zoom out to parent clade') : t('Click to zoom into clade')}
