@@ -1,23 +1,34 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from "react-i18next";
+import { withTranslation, WithTranslation as WithTranslationProps } from "react-i18next";
 import { toggleTemporalConfidence, changeDistanceMeasure } from "../../actions/tree";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
+import { RootState, AppDispatch } from "../../store";
+
+const mapStateToProps = (state: RootState): {
+  distanceMeasure: RootState["controls"]["distanceMeasure"];
+  layout: RootState["controls"]["layout"];
+  showTreeToo: RootState["controls"]["showTreeToo"];
+  branchLengthsToDisplay: RootState["controls"]["branchLengthsToDisplay"];
+  streamTreesToggledOn: RootState["controls"]["showStreamTrees"];
+  temporalConfidence: RootState["controls"]["temporalConfidence"];
+} => ({
+  distanceMeasure: state.controls.distanceMeasure,
+  layout: state.controls.layout,
+  showTreeToo: state.controls.showTreeToo,
+  branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+  streamTreesToggledOn: state.controls.showStreamTrees,
+  temporalConfidence: state.controls.temporalConfidence,
+});
+
+type ChooseMetricProps = ReturnType<typeof mapStateToProps> & WithTranslationProps & {
+  dispatch: AppDispatch;
+};
 
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
-@connect((state) => {
-  return {
-    distanceMeasure: state.controls.distanceMeasure,
-    layout: state.controls.layout,
-    showTreeToo: state.controls.showTreeToo,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
-    streamTreesToggledOn: state.controls.showStreamTrees,
-    temporalConfidence: state.controls.temporalConfidence
-  };
-})
-class ChooseMetric extends React.Component {
-  render() {
+class ChooseMetric extends React.Component<ChooseMetricProps> {
+  override render(): JSX.Element | null {
     const { t } = this.props;
     if (this.props.branchLengthsToDisplay !== "divAndDate") return null;
     if (this.props.layout==="scatter" || this.props.layout==="clock") return null;
@@ -34,7 +45,7 @@ class ChooseMetric extends React.Component {
 
         <SidebarButton
           selected={this.props.distanceMeasure === "num_date"}
-          onClick={() => {
+          onClick={(): void => {
             this.props.dispatch(changeDistanceMeasure("num_date"));
           }}
         >
@@ -43,7 +54,7 @@ class ChooseMetric extends React.Component {
         <span style={{paddingRight: "12px"}}/>
         <SidebarButton
           selected={this.props.distanceMeasure === "div"}
-          onClick={() => {
+          onClick={(): void => {
             this.props.dispatch(changeDistanceMeasure("div"));
           }}
         >
@@ -57,7 +68,7 @@ class ChooseMetric extends React.Component {
                 display={this.props.temporalConfidence.display}
                 on={this.props.temporalConfidence.on}
                 disabled={temporalConfidenceDisabled}
-                callback={() => this.props.dispatch(toggleTemporalConfidence())}
+                callback={(): void => {this.props.dispatch(toggleTemporalConfidence())}}
                 label={temporalConfidenceLabel}
               />
             </div>
@@ -68,5 +79,5 @@ class ChooseMetric extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(ChooseMetric);
+const WithTranslation = withTranslation()(connect(mapStateToProps)(ChooseMetric));
 export default WithTranslation;
