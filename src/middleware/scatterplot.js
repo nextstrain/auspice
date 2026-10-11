@@ -45,7 +45,7 @@ export const keepScatterplotStateInSync = (store) => (next) => (action) => {
    */
   if (!genotypeLabel && (scatterVariables.x==="gt" || scatterVariables.y==="gt")) {
     changed=true;
-    const availableOptions = collectAvailableScatterVariables(metadata.colorings, action.colorBy);
+    const availableOptions = collectAvailableScatterVariables(metadata.colorings, action.colorBy, controls.availableDistanceMeasures);
     if (scatterVariables.y==="gt") {
       const {value, label} = getFirstMatchingScatterVariable(availableOptions, [action.colorBy], scatterVariables.x);
       scatterVariables.y = value;

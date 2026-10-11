@@ -12,7 +12,7 @@ import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
-import { Distance } from "../components/tree/phyloTree/types";
+import type { DistanceMeasure } from "../util/computeDistanceMetric";
 import { MeasurementsDisplay } from "./measurements/types";
 
 export interface ColorScale {
@@ -127,7 +127,7 @@ export interface TemporalConfidence {
 }
 
 interface Defaults {
-  distanceMeasure: Distance
+  distanceMeasure: DistanceMeasure
   layout: Layout
   focus: Focus
   geoResolution: string
@@ -165,7 +165,9 @@ export interface BasicControlsState {
   dateMaxNumeric: number
   dateMin: string
   dateMinNumeric: number
-  distanceMeasure: Distance
+  distanceMeasure: DistanceMeasure
+  availableDistanceMeasures: DistanceMeasure[]
+
   explodeAttr?: string
   filters: Record<string | symbol, Array<{ value: string, active: boolean }>>
   filtersInFooter: string[]
@@ -251,6 +253,7 @@ export const getDefaultControlsState = (): ControlsState => {
     layout: defaults.layout,
     scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
+    availableDistanceMeasures: [],
     focus: defaults.focus,
     dateMin,
     dateMinNumeric,

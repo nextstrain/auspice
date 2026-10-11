@@ -2,64 +2,83 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTranslation, WithTranslation as WithTranslationProps } from "react-i18next";
 import { toggleTemporalConfidence, changeDistanceMeasure } from "../../actions/tree";
-import { SidebarSubtitle, SidebarButton } from "./styles";
+import { SidebarSubtitle } from "./styles";
+import { controlsWidth } from "../../util/globals";
 import Toggle from "./toggle";
+import CustomSelect from "./customSelect";
 import { RootState, AppDispatch } from "../../store";
+import { MUTATION_COUNT_PREFIX, DistanceMeasure } from "../../util/computeDistanceMetric";
+import type { GenomeMap } from "../../util/entropyCreateStateFromJsons";
 
 const mapStateToProps = (state: RootState): {
   distanceMeasure: RootState["controls"]["distanceMeasure"];
   layout: RootState["controls"]["layout"];
   showTreeToo: RootState["controls"]["showTreeToo"];
-  branchLengthsToDisplay: RootState["controls"]["branchLengthsToDisplay"];
+  availableDistanceMeasures: RootState["controls"]["availableDistanceMeasures"];
   streamTreesToggledOn: RootState["controls"]["showStreamTrees"];
   temporalConfidence: RootState["controls"]["temporalConfidence"];
+  genomeMap: GenomeMap;
 } => ({
   distanceMeasure: state.controls.distanceMeasure,
   layout: state.controls.layout,
   showTreeToo: state.controls.showTreeToo,
-  branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+  availableDistanceMeasures: state.controls.availableDistanceMeasures,
   streamTreesToggledOn: state.controls.showStreamTrees,
   temporalConfidence: state.controls.temporalConfidence,
+  genomeMap: state.entropy?.genomeMap,
 });
 
 type ChooseMetricProps = ReturnType<typeof mapStateToProps> & WithTranslationProps & {
   dispatch: AppDispatch;
 };
 
+interface SelectOption {
+  value: DistanceMeasure;
+  label: string;
+}
+
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
 class ChooseMetric extends React.Component<ChooseMetricProps> {
+
+  options(): SelectOption[] {
+    const niceNames = {
+      div: this.props.t("sidebar:divergence"),
+      num_date: this.props.t("sidebar:time")
+    }
+    return this.props.availableDistanceMeasures.map((m) => {
+      return { value: m, label: niceNames[m] || m.replace(MUTATION_COUNT_PREFIX, 'Mutation counts: ') }
+    });
+  }
+
   override render(): JSX.Element | null {
     const { t } = this.props;
-    if (this.props.branchLengthsToDisplay !== "divAndDate") return null;
     if (this.props.layout==="scatter" || this.props.layout==="clock") return null;
-    /* this used to be added to the first SidebarSubtitle
-    const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {}; */
+
+    const options = this.options();
+    const selected = options.find(({ value }) => value === this.props.distanceMeasure) || null;
 
     const temporalConfidenceDisabled = this.props.streamTreesToggledOn;
     const temporalConfidenceLabel = temporalConfidenceDisabled ? t("sidebar:Confidence intervals disabled") : t("sidebar:Show confidence intervals")
+
     return (
       <div style={{marginBottom: 0}}>
         <SidebarSubtitle>
           {t("sidebar:Branch Length")}
         </SidebarSubtitle>
 
-        <SidebarButton
-          selected={this.props.distanceMeasure === "num_date"}
-          onClick={(): void => {
-            this.props.dispatch(changeDistanceMeasure("num_date"));
-          }}
-        >
-          {t("sidebar:time")}
-        </SidebarButton>
-        <span style={{paddingRight: "12px"}}/>
-        <SidebarButton
-          selected={this.props.distanceMeasure === "div"}
-          onClick={(): void => {
-            this.props.dispatch(changeDistanceMeasure("div"));
-          }}
-        >
-          {t("sidebar:divergence")}
-        </SidebarButton>
+        <div style={{width: controlsWidth, fontSize: 14, marginBottom: 8}}>
+          <CustomSelect
+            value={selected}
+            options={options}
+            isClearable={false}
+            isSearchable={false}
+            isMulti={false}
+            placeholder={t("sidebar:Mutations (nuc / CDS)")}
+            onChange={(option: SelectOption | null): void => {
+              if (option) this.props.dispatch(changeDistanceMeasure(option.value));
+            }}
+          />
+        </div>
 
         {this.props.showTreeToo ?
           null : (
@@ -74,6 +93,7 @@ class ChooseMetric extends React.Component<ChooseMetricProps> {
             </div>
           )
         }
+
       </div>
     );
   }

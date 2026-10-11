@@ -45,7 +45,6 @@ export const tipRadiusOnLegendMatch = 7;
 export const demeCountMultiplier = 150;
 export const demeCountMinimum = 500;
 export const transmissionThickness = 1;
-export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds

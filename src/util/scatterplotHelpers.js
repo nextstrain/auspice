@@ -1,7 +1,8 @@
 import { calcColorScale } from "./colorScale";
 import { makeGenotypeLabel, isColorByGenotype} from "./getGenotype";
+import { isMutationCountBranchLength, MUTATION_COUNT_PREFIX } from "./computeDistanceMetric";
 
-export function collectAvailableScatterVariables(colorings, colorBy) {
+export function collectAvailableScatterVariables(colorings, colorBy, availableDistanceMeasures=[]) {
   let options = Object.keys(colorings)
     .filter((key) => colorings[key].type!=="boolean")
     .map((key) => ({
@@ -18,8 +19,19 @@ export function collectAvailableScatterVariables(colorings, colorBy) {
   } else {
     options = options.filter((o) => o.value!=="gt");
   }
-  options.unshift({value: "displayOrder", label: "Node ordering in tree"});
-  options.unshift({value: "div", label: "Divergence"});
+
+  /* Add two hard-coded commonly used metrics (num_date arrives as a coloring) */
+  options.unshift({ value: "displayOrder", label: "Node ordering in tree" });
+  if (availableDistanceMeasures.includes('div')) {
+    options.unshift({ value: "div", label: "Divergence" });
+  }
+
+  /* Add branch distance measures which are cumulative mutation counts */
+  availableDistanceMeasures
+    .filter(isMutationCountBranchLength)
+    .forEach((measure) => {
+      options.push({ value: measure, label: measure.replace(MUTATION_COUNT_PREFIX, "Mutation counts: ") })
+    });
 
   return options;
 }
@@ -30,7 +42,7 @@ export function collectAvailableScatterVariables(colorings, colorBy) {
 export function validateScatterVariables(controls, metadata, tree, isClock) {
   const {distanceMeasure, colorBy } = controls;
   const existingScatterVariables = {...controls.scatterVariables};
-  const availableOptions = collectAvailableScatterVariables(metadata.colorings, controls.colorBy);
+  const availableOptions = collectAvailableScatterVariables(metadata.colorings, controls.colorBy, controls.availableDistanceMeasures);
   const scatterVariables = {};
   // default is to show branches, unless the existing state says otherwise
   scatterVariables.showBranches = Object.prototype.hasOwnProperty.call(existingScatterVariables, "showBranches") ?
@@ -98,8 +110,8 @@ export function getFirstMatchingScatterVariable(options, tryTheseFirst, notThisV
 export function addScatterAxisInfo(scatterVariables, axis, controls, tree, metadata) {
   const axisVar = scatterVariables[axis];
   const knownContinuousKeys = ["div", "num_date", "displayOrder"];
-  if (knownContinuousKeys.includes(axisVar) || metadata.colorings[axisVar].type==="continuous" ||
-    metadata.colorings[axisVar].type==="temporal")
+  if (knownContinuousKeys.includes(axisVar) || isMutationCountBranchLength(axisVar) ||
+    metadata.colorings[axisVar].type==="continuous" || metadata.colorings[axisVar].type==="temporal")
   {
     scatterVariables[`${axis}Continuous`] = true;
     scatterVariables[`${axis}Domain`] = undefined;
