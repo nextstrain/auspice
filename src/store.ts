@@ -27,8 +27,10 @@ const store = configureStore({
           ignoredPaths: [
             'tree.nodes',
             'tree.vaccines',
+            'tree.streams',
             'treeToo.nodes',
             'treeToo.vaccines',
+            'treeToo.streams',
           ],
         },
 
