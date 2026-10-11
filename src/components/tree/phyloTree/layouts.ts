@@ -3,7 +3,7 @@
 import { scaleLinear, ScalePoint, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
-import { checkDistanceMetric } from "../../../util/computeDistanceMetric";
+import { DISTANCE } from "../../../util/computeDistanceMetric";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
@@ -120,15 +120,6 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
         [d.y, d.py] = [numDate(d.y), numDate(d.py)]
       }
     }
-  }
-
-  /* TEMPORARY: verify the precomputed distance-metric value matches the scatter axis which
-  corresponds to the current distance measure. See util/computeDistanceMetric.ts */
-  if (this.scatterVariables.x === this.distance) {
-    checkDistanceMetric("scatterplotLayout.x", this.nodes.map((d) => ({node: d.n, observed: d.x})));
-  }
-  if (this.scatterVariables.y === this.distance) {
-    checkDistanceMetric("scatterplotLayout.y", this.nodes.map((d) => ({node: d.n, observed: d.y})));
   }
 
   if (this.vaccines) { /* overlay vaccine cross on tip */
@@ -279,29 +270,21 @@ export const setDistance = function setDistance(
 
   // todo - can the following loops be skipped for scatterplots?
 
-  // assign node and parent depth
-  if (this.distance === "div") {
-    this.nodes.forEach((d) => {
-      d.depth = getDivFromNode(d.n);
-      d.pDepth = getDivFromNode(stemParent(d.n));
-      d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
-    });
-  } else {
-    this.nodes.forEach((d) => {
-      d.depth = getTraitFromNode(d.n, "num_date");
-      d.pDepth = getTraitFromNode(stemParent(d.n), "num_date");
-      d.conf = getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth];
-    });
-  }
+  // assign node and parent depth from the precomputed distance-metric value, as well as
+  // confidence intervals (only num_date has these; other measures use a [depth, depth] placeholder)
+  this.nodes.forEach((d) => {
+    d.depth = d.n[DISTANCE];
+    d.pDepth = stemParent(d.n)[DISTANCE];
+    d.conf = this.distance === "num_date" ?
+      (getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth]) :
+      [d.depth, d.depth];
+  });
 
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
       d.crossDepth = d.depth;
     });
   }
-
-  /* TEMPORARY: verify the precomputed distance-metric value matches `d.depth`. See util/computeDistanceMetric.ts */
-  checkDistanceMetric("setDistance", this.nodes.map((d) => ({node: d.n, observed: d.depth})));
 
   timerEnd("setDistance");
 };
