@@ -45,6 +45,8 @@ interface Chromosome {
   metadata: ChromosomeMetadata
 }
 
+export type GenomeMap = Chromosome[]
+
 interface Gene {
   name: string
   cds: CDS[]
@@ -99,7 +101,7 @@ interface CdsSegment {
  * ¹ The exception being a single CDS which wraps around the origin, which we are able
  * to split into two segments here.
  */
-export const genomeMap = (annotations: UnknownJsonObject): Chromosome[] => {
+export const genomeMap = (annotations: UnknownJsonObject): GenomeMap => {
 
   const nucAnnotation = Object.entries(annotations)
     .filter(([name,]) => name==='nuc')
@@ -524,9 +526,9 @@ function _isCdsWrapping(
 
 /**
  * Inverse of genomeMap(): reconstructs the
- * `genome_annotations` JSON object from the Chromosome[] genomeMap structure.
+ * `genome_annotations` JSON object from the genomeMap structure.
  */
-export const genomeMapToGenomeAnnotations = (genomeMap: Chromosome[]): UnknownJsonObject => {
+export const genomeMapToGenomeAnnotations = (genomeMap: GenomeMap): UnknownJsonObject => {
   const chromosome = genomeMap[0];
   if (!chromosome) return {};
 

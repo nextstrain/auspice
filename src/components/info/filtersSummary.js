@@ -39,7 +39,6 @@ const closeBracketSmall = <span style={{fontSize: "1.8rem", fontWeight: 300, pad
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     measurementsFilters: state.controls.measurementsFilters,
     measurementsFields: state.measurements.collectionToDisplay?.fields
   };

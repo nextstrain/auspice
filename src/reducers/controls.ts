@@ -12,7 +12,7 @@ import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 import { hasMultipleGridPanels } from "../actions/panelDisplay";
-import { Distance } from "../components/tree/phyloTree/types";
+import type { DistanceMeasure } from "../util/computeDistanceMetric";
 import { MeasurementsDisplay } from "./measurements/types";
 
 export interface ColorScale {
@@ -127,7 +127,7 @@ export interface TemporalConfidence {
 }
 
 interface Defaults {
-  distanceMeasure: Distance
+  distanceMeasure: DistanceMeasure
   layout: Layout
   focus: Focus
   geoResolution: string
@@ -150,7 +150,6 @@ export interface BasicControlsState {
   analysisSlider: boolean
   animationPlayPauseButton: "Play" | "Pause"
   available?: AvailableAPIData
-  branchLengthsToDisplay: string
   canRenderBranchLabels: boolean
   canTogglePanelLayout: boolean
   colorBy: string
@@ -165,7 +164,9 @@ export interface BasicControlsState {
   dateMaxNumeric: number
   dateMin: string
   dateMinNumeric: number
-  distanceMeasure: Distance
+  distanceMeasure: DistanceMeasure
+  availableDistanceMeasures: DistanceMeasure[]
+
   explodeAttr?: string
   filters: Record<string | symbol, Array<{ value: string, active: boolean }>>
   filtersInFooter: string[]
@@ -251,6 +252,7 @@ export const getDefaultControlsState = (): ControlsState => {
     layout: defaults.layout,
     scatterVariables: {},
     distanceMeasure: defaults.distanceMeasure,
+    availableDistanceMeasures: [],
     focus: defaults.focus,
     dateMin,
     dateMinNumeric,
@@ -292,7 +294,6 @@ export const getDefaultControlsState = (): ControlsState => {
     availableStreamLabelKeys: [],
     zoomMin: undefined,
     zoomMax: undefined,
-    branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
     showOnlyPanels: false,
     showTransmissionLines: true,
@@ -362,7 +363,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.CHANGE_DISTANCE_MEASURE: {
       const updatesToState: Partial<ControlsState> = {
         distanceMeasure: action.data,
-        branchLengthsToDisplay: state.branchLengthsToDisplay
       };
       if (
         shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)

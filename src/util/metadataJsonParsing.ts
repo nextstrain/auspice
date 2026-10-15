@@ -1,10 +1,11 @@
 import type { Metadata, LegendContinuous, LegendNonContinuous } from "../reducers/metadata.types";
-import { PANEL_VALUES, DISTANCE_MEASURE_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES, PANELS_WITH_LEGEND, LegendPlacements } from "../reducers/metadata.types";
+import { PANEL_VALUES, LAYOUT_VALUES, SIDEBAR_VALUES, PANELS_WITH_LEGEND, LegendPlacements } from "../reducers/metadata.types";
 import { entropyCreateState } from "./entropyCreateStateFromJsons";
 import * as utils from "./typeUtils";
 import { ScaleType, SCALE_TYPE_VALUES, getDefaultControlsState } from "../reducers/controls";
 import type { RootState } from "../store";
 import { genomeMapToGenomeAnnotations } from "./entropyCreateStateFromJsons";
+import { isMutationCountBranchLength } from "./computeDistanceMetric";
 import { urlQueryLabel } from "./treeVisibilityHelpers";
 import { version } from "../version";
 
@@ -81,7 +82,9 @@ export function parseJsonMetaBlock(json: unknown): { metadata: Metadata, entropy
       ...(utils.isBoolean(dd.map_triplicate) && {mapTriplicate: dd.map_triplicate}),
       ...(utils.isString(dd.geo_resolution) && { geoResolution: dd.geo_resolution }),
       ...(utils.isString(dd.color_by) && { colorBy: dd.color_by }),
-      ...(utils.isOneOf(dd.distance_measure, DISTANCE_MEASURE_VALUES) && { distanceMeasure: dd.distance_measure }),
+      ...((utils.isOneOf(dd.distance_measure, ["num_date", "div"]) ||
+          (utils.isString(dd.distance_measure) && isMutationCountBranchLength(dd.distance_measure))) &&
+          { distanceMeasure: dd.distance_measure }),
       ...(utils.isOneOf(dd.layout, LAYOUT_VALUES) && { layout: dd.layout }),
       ...(utils.isString(dd.branch_label) && { selectedBranchLabel: dd.branch_label }),
       // 'label' is the branch label that tree starts zoomed to, expressed as <key>:<value>

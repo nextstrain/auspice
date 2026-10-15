@@ -1,4 +1,5 @@
 import { ScaleType } from "./controls"
+import type { DistanceMeasure } from "../util/computeDistanceMetric"
 
 /**
  * Type definitions related to the metadata redux structure
@@ -49,9 +50,6 @@ export type MetadataReduxState =
   | Metadata;
 
 export const PANEL_VALUES = ["tree", "map", "frequencies", "entropy", "measurements"] as const;
-
-export const DISTANCE_MEASURE_VALUES = ["num_date", "div"] as const;
-export type DistanceMeasure = typeof DISTANCE_MEASURE_VALUES[number];
 
 export const LAYOUT_VALUES = ["rect", "radial", "unrooted", "clock"] as const;
 export type Layout = typeof LAYOUT_VALUES[number];

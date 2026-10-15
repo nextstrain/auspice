@@ -25,7 +25,7 @@ import { enableDatasetEditor } from "../datasetEditor/datasetEditor";
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
     metadata: state.metadata,
     nodes: state.tree.nodes,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    availableDistanceMeasures: state.controls.availableDistanceMeasures,
     visibility: state.tree.visibility,
     mobileDisplay: state.general.mobileDisplay
   };
@@ -64,7 +64,13 @@ class Info extends React.Component {
             {animating ? t("Animation in progress") + ". " : null}
             {showExtended &&
               <>
-                {datasetSummary({...this.props, mainTreeNumTips: this.props.metadata.mainTreeNumTips})}
+                {datasetSummary({
+                  nodes: this.props.nodes,
+                  visibility: this.props.visibility,
+                  mainTreeNumTips: this.props.metadata.mainTreeNumTips,
+                  temporalTree: this.props.availableDistanceMeasures.includes('num_date'),
+                  t,
+                })}
                 <FiltersSummary/>
               </>
             }

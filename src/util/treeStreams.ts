@@ -2,6 +2,7 @@ import { ReduxNode, StreamDimensions, Visibility, Streams, sigma, weightToDispla
   colorBySymbol, streamLabelSymbol } from "../reducers/tree/types";
 import { getTraitFromNode, getDivFromNode } from "./treeMiscHelpers"
 import { NODE_VISIBLE } from "./globals";
+import type { Distance } from "../components/tree/phyloTree/types";
 import pdf from '@stdlib/stats-base-dists-normal-pdf';
 
 /**
@@ -84,10 +85,14 @@ export function processStreams(
   streams: Streams,
   nodes: ReduxNode[],
   visibility: Visibility[],
-  metric: "num_date"|"div",
+  distanceMeasure: Distance,
   colorScale,
   { skipPivots=false, skipCategories=false }: {skipPivots?: boolean, skipCategories?: boolean} = {},
 ):void {
+  /* Streams only understand the num_date / div axes (that's all their precomputed `domains`
+   * cover). Other distance measures (e.g. mutation counts) aren't supported here yet, so we
+   * fall back to divergence - the natural analog for a cumulative count axis. */
+  const metric: "num_date"|"div" = distanceMeasure === "num_date" ? "num_date" : "div";
   /**
    * Pivots often don't need to be recalculated. Sigma is also recalculated.
    */

@@ -37,13 +37,14 @@ function Controls(): JSX.Element {
   const panelsToDisplay = useSelector((state: RootState) => state.controls.panelsToDisplay);
   const showTreeToo = useSelector((state: RootState) => state.controls.showTreeToo);
   const canTogglePanelLayout = useSelector((state: RootState) => state.controls.canTogglePanelLayout);
-  const branchLengthsToDisplay = useSelector((state: RootState) => state.controls.branchLengthsToDisplay);
-
+  const availableDistanceMeasures = useSelector((state: RootState) => state.controls.availableDistanceMeasures);
+  const temporalTree = availableDistanceMeasures.includes('num_date');
+  
   return (
     <ControlsContainer>
       <ChooseDataset />
 
-      {branchLengthsToDisplay !== 'divOnly' &&
+      {temporalTree &&
         <>
           <ControlHeader title={t("sidebar:Date Range")} tooltip={DateRangeInfo}/>
           <DateRangeInputs />
@@ -119,7 +120,7 @@ function Controls(): JSX.Element {
         />
       }
 
-      {branchLengthsToDisplay !== "divOnly" &&
+      {temporalTree &&
         <span style={{ marginTop: "10px" }}>
           <ControlHeader title={t("sidebar:Animation Options")} tooltip={AnimationOptionsInfo}/>
           <AnimationOptions />

@@ -9,9 +9,10 @@ import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { createVisibleLegendValues, getLegendOrder } from "../util/colorScale";
 import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { setDistanceMetric } from "../util/computeDistanceMetric";
 import { warningNotification } from "./notifications";
 import { calcFullTipCounts, calcTipCounts } from "../util/treeCountingHelpers";
-import { PhyloNode } from "../components/tree/phyloTree/types";
+import { PhyloNode, Distance } from "../components/tree/phyloTree/types";
 import { Metadata } from "../reducers/metadata.types";
 import { ThunkFunction } from "../store";
 import { ReduxNode, TreeState, FocusNodes } from "../reducers/tree/types";
@@ -508,9 +509,12 @@ export const explodeTree = (
 
 
 
-export function changeDistanceMeasure(metric: "num_date"|"div"): ThunkFunction {
+export function changeDistanceMeasure(metric: Distance): ThunkFunction {
   return function(dispatch, getState) {
-    const {controls, tree} = getState();
+    const {controls, tree, treeToo} = getState();
+    /* recompute the distance-metric value onto each node */
+    setDistanceMetric(tree.nodes, metric, true);
+    if (treeToo && treeToo.nodes) setDistanceMetric(treeToo.nodes, metric, true);
     if (Object.keys(tree.streams).length) {
       processStreams(tree.streams, tree.nodes, tree.visibility,  metric, controls.colorScale, {skipCategories: true})
     }

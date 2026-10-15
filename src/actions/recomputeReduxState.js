@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import { cloneDeep, isEqualWith } from 'lodash';
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDistanceMeasure, defaultDateRange, nucleotide_gene, strainSymbol, genotypeSymbol } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { getIdxMatchingLabel, calculateVisiblityAndBranchThickness, getFilteredAndIdxOfFilteredRoot } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -18,7 +18,8 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../uti
 import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
+import { getTraitFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
+import { setDistanceMetric, findAvailableDistanceMeasures } from "../util/computeDistanceMetric";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
 import { strainSymbolUrlString } from "../middleware/changeURL";
@@ -62,7 +63,8 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.gmax) {
     state["zoomMax"] = parseInt(query.gmax, 10);
   }
-  if (query.m && state.branchLengthsToDisplay === "divAndDate") {
+  if (query.m) {
+    // verification in checkAndCorrectErrorsInState
     state["distanceMeasure"] = query.m;
   }
   if (query.c) {
@@ -102,7 +104,8 @@ const modifyStateViaURLQuery = (state, query) => {
       state["dateMin"] = query.dmin;
       state["dateMinNumeric"] = dateNum;
     } else {
-      console.error(`URL query "dmin=${query.dmin}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      const temporalTree = state.availableDistanceMeasures.includes('num_date');
+      console.error(`URL query "dmin=${query.dmin}" is invalid ${temporalTree ? '' : '(the tree is not a timetree)'}`);
       delete query.dmin;
     }
   }
@@ -117,7 +120,8 @@ const modifyStateViaURLQuery = (state, query) => {
         state["dateMaxNumeric"] = dateNum;
       }
     } else {
-      console.error(`URL query "dmax=${query.dmax}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      const temporalTree = state.availableDistanceMeasures.includes('num_date');
+      console.error(`URL query "dmax=${query.dmax}" is invalid ${temporalTree ? '' : '(the tree is not a timetree)'}`);
       delete query.dmax;
     }
   }
@@ -142,7 +146,7 @@ const modifyStateViaURLQuery = (state, query) => {
     if (params.length!==5) {
       console.error("Invalid 'animate' URL query (not enough fields)");
       delete query.animate;
-    } else if (state.branchLengthsToDisplay==='divOnly') {
+    } else if (!state.availableDistanceMeasures.includes('num_date')) {
       console.error("Invalid 'animate' URL query (tree is not a timetree)");
       delete query.animate;
     } else {
@@ -274,9 +278,12 @@ const restoreQueryableStateToDefaults = (state) => {
 
   state.showAllBranchLabels = false;
 
+  // Narrative transitions for div-only trees needed the following fix, since
   // default distanceMeasure is always num_date, so make sure the dataset supports it!
-  if (state.branchLengthsToDisplay === "divOnly") {
-    state.distanceMeasure = "div"
+  // <https://github.com/nextstrain/auspice/commit/88c8fd036ab049e6b786d3615610e61fad92cadb>
+  // However it seems now unnecessary and could be removed after some more testing
+  if (!state.availableDistanceMeasures.includes(state.distanceMeasure)) {
+    state.distanceMeasure = state.availableDistanceMeasures[0];
   }
 
   return state;
@@ -394,7 +401,7 @@ const modifyStateViaMetadata = (state, metadata, genomeMap) => {
   return state;
 };
 
-const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
+const modifyControlsStateViaTree = (state, tree, treeToo, metadata, genomeMap) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -472,18 +479,16 @@ const modifyControlsStateViaTree = (state, tree, treeToo, metadata) => {
     state.coloringsPresentOnTree.add("gt");
   }
 
-  /* does the tree have date information? if not, disable controls, modify view */
-  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
-  const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
-  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
-    numDateAtRoot ? "dateOnly" :
-      "divOnly";
+  state.availableDistanceMeasures = findAvailableDistanceMeasures(tree.nodes, genomeMap);
+  if (treeToo) {
+    const treeTooDistanceMeasures = new Set(findAvailableDistanceMeasures(treeToo.nodes, genomeMap));
+    state.availableDistanceMeasures = state.availableDistanceMeasures
+      .filter((measure) => treeTooDistanceMeasures.has(measure));
+  }
+  if (state.availableDistanceMeasures.length === 0) {
+    throw Error("Dataset JSON(s) have no valid branch measures (e.g. div, num_date)")
+  }
 
-  /* if branchLengthsToDisplay is "divOnly", force to display by divergence
-   * if branchLengthsToDisplay is "dateOnly", force to display by date
-   */
-  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
-    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   /* if clade is available as a branch label, then set this as the "default". This
   is largely due to historical reasons. Note that it *can* and *will* be overridden
@@ -588,9 +593,14 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   state["colorByConfidence"] = doesColorByHaveConfidence(state, state["colorBy"]);
 
   /* distanceMeasure */
-  if (["div", "num_date"].indexOf(state["distanceMeasure"]) === -1) {
-    state["distanceMeasure"] = "num_date";
-    console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
+  if (!state.availableDistanceMeasures.includes(state.distanceMeasure)) {
+    const _old = state.distanceMeasure
+    state.distanceMeasure = state.availableDistanceMeasures[0];
+    query.m = state.distanceMeasure;
+    console.error(`Requested distance measure '${_old}' is not valid. Switching to '${state.distanceMeasure}'`);
+  }
+  if (state.distanceMeasure === defaultDistanceMeasure) {
+    delete query.m;
   }
 
   /* geoResolutions */
@@ -729,11 +739,6 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   }
   /* Also remove any traitNames from the footer-displayed filters if they're not present on the tree */
   state.filtersInFooter = state.filtersInFooter.filter((traitName) => traitName in tree.totalStateCounts);
-
-  /* can we display branch length by div or num_date? */
-  if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
-    delete query.m;
-  }
 
   if (!(query.sidebar === "open" || query.sidebar === "closed")) {
     delete query.sidebar; // invalid value
@@ -892,7 +897,7 @@ export const createStateFromQueryOrJSONs = ({
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata, entropy.genomeMap);
     controls = modifyStateViaMetadata(controls, metadata, entropy.genomeMap);
   } else if (oldState) {
     /* creating deep copies avoids references to (nested) objects remaining the same which
@@ -1007,6 +1012,10 @@ export const createStateFromQueryOrJSONs = ({
 
   controls = checkAndCorrectErrorsInState(controls, metadata, entropy.genomeMap, query, tree, viewingNarrative); /* must run last */
 
+  /* precompute the distance-metric value onto each node */
+  setDistanceMetric(tree.nodes, controls.distanceMeasure);
+  if (treeToo && treeToo.nodes) setDistanceMetric(treeToo.nodes, controls.distanceMeasure, true);
+
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (json || controls.colorBy !== oldState.controls.colorBy || newMeasurementsColoringData) {
@@ -1029,6 +1038,13 @@ export const createStateFromQueryOrJSONs = ({
    * be feasible to implement if desired.
    */
   if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
+  /* stream trees currently only work with the scalar div / num_date branch measures; if we've
+   * ended up with streamtrees + an incompatible (e.g. cumulative mutation-count) measure then
+   * log an error and don't turn streamtrees on. */
+  if (controls.showStreamTrees && controls.distanceMeasure !== "div" && controls.distanceMeasure !== "num_date") {
+    console.error(`Stream trees are not available for the '${controls.distanceMeasure}' branch length measure; disabling stream trees.`);
+    controls.showStreamTrees = false;
+  }
   if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
@@ -1128,7 +1144,7 @@ export const createTreeTooState = ({
   let {treeToo, metadata} = instantiateSecondTree(json, oldState.metadata, oldState.entropy?.genomeMap, secondTreeUrl)
 
   /* recompute the controls state now that we have new data */
-  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata);
+  const controls = modifyControlsStateViaTree({...oldState.controls}, tree, treeToo, oldState.metadata, oldState.entropy?.genomeMap);
   /* recalculate the color scale with updated tree data */
   controls.colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
   controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
@@ -1137,6 +1153,9 @@ export const createTreeTooState = ({
   tree.nodeColorsVersion++;
 
   treeToo = updateSecondTree(tree, treeToo, controls, dispatch);
+
+  /* precompute the distance-metric value onto each node. See util/computeDistanceMetric.ts */
+  setDistanceMetric(treeToo.nodes, controls.distanceMeasure, true);
 
   return {tree, treeToo, controls, metadata};
 };

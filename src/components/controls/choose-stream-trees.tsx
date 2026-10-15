@@ -17,6 +17,7 @@ export const ChooseStreamTrees = (): JSX.Element => {
   const focusOn = useSelector((state: RootState) => state.controls.focus);
   const rectangular = useSelector((state: RootState) => state.controls.layout === "rect");
   const explodedTree = useSelector((state: RootState) => !!state.controls.explodeAttr);
+  const distanceMeasure = useSelector((state: RootState) => state.controls.distanceMeasure);
   const availableBranchLabels = useSelector((state: RootState) => state.controls.availableStreamLabelKeys);
   const dispatch = useAppDispatch();
   const { t } = useTranslation();
@@ -33,6 +34,8 @@ export const ChooseStreamTrees = (): JSX.Element => {
   if (focusOn) unavailable.push("'Focus on selected' is on");
   if (!rectangular) unavailable.push("Tree layout is not rectangular");
   if (explodedTree) unavailable.push("Viewing exploded tree");
+  /* stream trees currently only work with the scalar div / num_date branch measures */
+  if (distanceMeasure !== "div" && distanceMeasure !== "num_date") unavailable.push("Branch length is not divergence or time");
 
   const selectOptions = [
     ...availableBranchLabels.map((x) => ({value: x, label: x}))

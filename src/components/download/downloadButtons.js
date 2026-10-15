@@ -113,7 +113,8 @@ export const DownloadButtons = ({ relevantPublications }) => {
             getFilePrefix(),
             state.controls.panelsToDisplay,
             state.controls.panelLayout,
-            relevantPublications
+            relevantPublications,
+            state.controls.availableDistanceMeasures.includes('num_date'), // temporalTree
           )}
         />
       )}

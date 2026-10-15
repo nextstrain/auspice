@@ -233,6 +233,7 @@ ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
     the time & inView visible stuff
 */
 export const calcVisibility = (tree, controls, dates, inView, filtered) => {
+  const temporalTree = controls.availableDistanceMeasures.includes('num_date');
   if (tree.nodes) {
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
@@ -242,8 +243,8 @@ export const calcVisibility = (tree, controls, dates, inView, filtered) => {
         if (!nodeDate || !parentNodeDate) {
           return NODE_VISIBLE;
         }
-        /* if branchLengthsToDisplay is "divOnly", then ensure node displayed */
-        if (controls.branchLengthsToDisplay === "divOnly") {
+        /* all nodes are visible in non-temporal trees */
+        if (!temporalTree) {
           return NODE_VISIBLE;
         }
         /* is the actual node date (the "end" of the branch) in the time slice? */
