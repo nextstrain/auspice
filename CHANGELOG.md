@@ -1,5 +1,8 @@
 # Changelog
 
+## version 3.1.0 - 2026/10/15
+
+
 * The map legend now shows the number of (visible) tips for different deme (circle) sizes.
 [#2096](https://github.com/nextstrain/auspice/pull/2096)
 * Hovering over demes (circles or arcs) on the map panel shows a hover box with the deme's tip count and (where applicable) the number of tips in the hovered arc.
