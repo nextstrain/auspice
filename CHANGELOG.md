@@ -7,6 +7,11 @@
 * Legends can now be single columns (when space allows), and overflowing legends are now scrollable.
 [#2096](https://github.com/nextstrain/auspice/pull/2096)
 
+* SVG download (via "download data" in the footer) has had a major re-write fixing a number of bugs.
+  These include multiple bugs regarding missing map tiles, incorrect panel layout, missing legends, incorrect fonts.
+  Vector editing programs (Inkscape, Illustrator etc) should also handle these new SVGs better.
+  [#2103](https://github.com/nextstrain/auspice/pull/2103)
+
 * Bugfix: the tree and entropy panels now remove their drawings when they unmount, and the entropy panel stops observing its visibility.
   A later mount on the same DOM, as in React StrictMode, no longer draws over the old drawing.
  [#2100](https://github.com/nextstrain/auspice/pull/2100)
