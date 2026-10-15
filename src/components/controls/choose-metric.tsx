@@ -35,6 +35,12 @@ type ChooseMetricProps = ReturnType<typeof mapStateToProps> & WithTranslationPro
 interface SelectOption {
   value: DistanceMeasure;
   label: string;
+  isDisabled?: boolean;
+}
+
+/** Stream trees currently only work with the scalar div / num_date measures */
+function measureCompatibleWithStreamTrees(measure: DistanceMeasure): boolean {
+  return measure === "div" || measure === "num_date";
 }
 
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
@@ -46,7 +52,12 @@ class ChooseMetric extends React.Component<ChooseMetricProps> {
       num_date: this.props.t("sidebar:time")
     }
     return this.props.availableDistanceMeasures.map((m) => {
-      return { value: m, label: niceNames[m] || m.replace(MUTATION_COUNT_PREFIX, 'Mutation counts: ') }
+      return {
+        value: m,
+        label: niceNames[m] || m.replace(MUTATION_COUNT_PREFIX, 'Mutation counts: '),
+        /* while streamtrees are displayed we restrict selection to the scalar div / num_date measures */
+        isDisabled: this.props.streamTreesToggledOn && !measureCompatibleWithStreamTrees(m),
+      }
     });
   }
 
