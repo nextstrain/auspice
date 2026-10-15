@@ -1038,6 +1038,13 @@ export const createStateFromQueryOrJSONs = ({
    * be feasible to implement if desired.
    */
   if (controls.showStreamTrees && treeToo) controls.showStreamTrees = false;
+  /* stream trees currently only work with the scalar div / num_date branch measures; if we've
+   * ended up with streamtrees + an incompatible (e.g. cumulative mutation-count) measure then
+   * log an error and don't turn streamtrees on. */
+  if (controls.showStreamTrees && controls.distanceMeasure !== "div" && controls.distanceMeasure !== "num_date") {
+    console.error(`Stream trees are not available for the '${controls.distanceMeasure}' branch length measure; disabling stream trees.`);
+    controls.showStreamTrees = false;
+  }
   if (controls.showStreamTrees) {
     tree.streams = labelStreamMembership(tree.nodes[0], controls.streamTreeBranchLabel)
     if (Object.keys(tree.streams).length) {
