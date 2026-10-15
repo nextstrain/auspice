@@ -12,7 +12,7 @@ import { SidebarButton } from "./styles";
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
+    availableDistanceMeasures: state.controls.availableDistanceMeasures,
   };
 })
 class AnimationControls extends React.Component {
@@ -50,7 +50,7 @@ class AnimationControls extends React.Component {
   }
 
   render() {
-    if (this.props.branchLengthsToDisplay === "divOnly") {
+    if (!this.props.availableDistanceMeasures.includes('num_date')) {
       return null;
     }
     return (

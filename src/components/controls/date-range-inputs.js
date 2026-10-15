@@ -9,7 +9,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
 @connect((state) => {
   return {
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    availableDistanceMeasures: state.controls.availableDistanceMeasures,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     dateMinNumeric: state.controls.dateMinNumeric,
@@ -79,7 +79,7 @@ class DateRangeInputs extends React.Component {
     this.props.dispatch(changeDateFilter({newMax: value}));
   }
   render() {
-    if (this.props.branchLengthsToDisplay === "divOnly") {
+    if (!this.props.availableDistanceMeasures.includes('num_date')) {
       return null;
     }
     return (

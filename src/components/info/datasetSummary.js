@@ -34,13 +34,13 @@ export const styliseDateRange = (date) => {
 /**
  * @returns {string}
  */
-export const datasetSummary = ({nodes, visibility, mainTreeNumTips, branchLengthsToDisplay, t}) => {
+export const datasetSummary = ({nodes, visibility, mainTreeNumTips, temporalTree, t}) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
   let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
-  if (branchLengthsToDisplay !== "divOnly" && nSelectedSamples > 0) {
+  if (temporalTree && nSelectedSamples > 0) {
     summary += t(
       "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}",
       {

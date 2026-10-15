@@ -788,7 +788,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
+export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications, temporalTree) => {
   /* make the text strings */
   const textStrings = [];
   textStrings.push(metadata.title);
@@ -799,6 +799,7 @@ export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, 
     mainTreeNumTips: metadata.mainTreeNumTips,
     nodes,
     visibility,
+    temporalTree,
     t
   }));
   textStrings.push("");
