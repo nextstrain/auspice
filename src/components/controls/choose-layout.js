@@ -61,7 +61,6 @@ const ScatterSelectContainer = styled.div`
     availableDistanceMeasures: state.controls.availableDistanceMeasures,
     showTreeToo: state.controls.showTreeToo,
     streamTreesToggledOn: state.controls.showStreamTrees,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
 })
 class ChooseLayout extends React.Component {
@@ -131,6 +130,7 @@ class ChooseLayout extends React.Component {
   render() {
     const { t } = this.props;
     if (this.props.showTreeToo) return null;
+    const distanceMeasures = new Set(this.props.availableDistanceMeasures);
 
     const selected = this.props.layout;
     return (
@@ -176,7 +176,7 @@ class ChooseLayout extends React.Component {
         </RowContainer>
         { /* Show clock view only if both time and divergence are defined for the tree */ }
         {
-          this.props.branchLengthsToDisplay === "divAndDate" ?
+          distanceMeasures.has('div') && distanceMeasures.has('num_date') ?
             (
               <RowContainer>
                 <div style={this.props.streamTreesToggledOn ? { opacity: 0.5 } : {}}>

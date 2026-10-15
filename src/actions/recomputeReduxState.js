@@ -18,7 +18,7 @@ import { computeMatrixFromRawData, checkIfNormalizableFromRawData } from "../uti
 import { applyInViewNodesToTree, getFocusedNodes } from "../actions/tree";
 import { validateScatterVariables } from "../util/scatterplotHelpers";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodeGenotypeFilters, encodeGenotypeFilters, getCdsFromGenotype } from "../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
+import { getTraitFromNode, collectGenotypeStates, addNodeAttrs, removeNodeAttrs } from "../util/treeMiscHelpers";
 import { setDistanceMetric, findAvailableDistanceMeasures } from "../util/computeDistanceMetric";
 import { collectAvailableTipLabelOptions } from "../components/controls/choose-tip-label";
 import { hasMultipleGridPanels } from "./panelDisplay";
@@ -63,7 +63,8 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.gmax) {
     state["zoomMax"] = parseInt(query.gmax, 10);
   }
-  if (query.m && state.branchLengthsToDisplay === "divAndDate") {
+  if (query.m) {
+    // verification in checkAndCorrectErrorsInState
     state["distanceMeasure"] = query.m;
   }
   if (query.c) {
@@ -103,7 +104,8 @@ const modifyStateViaURLQuery = (state, query) => {
       state["dateMin"] = query.dmin;
       state["dateMinNumeric"] = dateNum;
     } else {
-      console.error(`URL query "dmin=${query.dmin}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      const temporalTree = state.availableDistanceMeasures.includes('num_date');
+      console.error(`URL query "dmin=${query.dmin}" is invalid ${temporalTree ? '' : '(the tree is not a timetree)'}`);
       delete query.dmin;
     }
   }
@@ -118,7 +120,8 @@ const modifyStateViaURLQuery = (state, query) => {
         state["dateMaxNumeric"] = dateNum;
       }
     } else {
-      console.error(`URL query "dmax=${query.dmax}" is invalid ${state.branchLengthsToDisplay==='divOnly'?'(the tree is not a timetree)':''}`);
+      const temporalTree = state.availableDistanceMeasures.includes('num_date');
+      console.error(`URL query "dmax=${query.dmax}" is invalid ${temporalTree ? '' : '(the tree is not a timetree)'}`);
       delete query.dmax;
     }
   }
@@ -143,7 +146,7 @@ const modifyStateViaURLQuery = (state, query) => {
     if (params.length!==5) {
       console.error("Invalid 'animate' URL query (not enough fields)");
       delete query.animate;
-    } else if (state.branchLengthsToDisplay==='divOnly') {
+    } else if (!state.availableDistanceMeasures.includes('num_date')) {
       console.error("Invalid 'animate' URL query (tree is not a timetree)");
       delete query.animate;
     } else {
@@ -275,9 +278,12 @@ const restoreQueryableStateToDefaults = (state) => {
 
   state.showAllBranchLabels = false;
 
+  // Narrative transitions for div-only trees needed the following fix, since
   // default distanceMeasure is always num_date, so make sure the dataset supports it!
-  if (state.branchLengthsToDisplay === "divOnly") {
-    state.distanceMeasure = "div"
+  // <https://github.com/nextstrain/auspice/commit/88c8fd036ab049e6b786d3615610e61fad92cadb>
+  // However it seems now unnecessary and could be removed after some more testing
+  if (!state.availableDistanceMeasures.includes(state.distanceMeasure)) {
+    state.distanceMeasure = state.availableDistanceMeasures[0];
   }
 
   return state;
@@ -473,19 +479,6 @@ const modifyControlsStateViaTree = (state, tree, treeToo, metadata, genomeMap) =
     state.coloringsPresentOnTree.add("gt");
   }
 
-  /* does the tree have date information? if not, disable controls, modify view */
-  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
-  const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
-  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
-    numDateAtRoot ? "dateOnly" :
-      "divOnly";
-
-  /* if branchLengthsToDisplay is "divOnly", force to display by divergence
-   * if branchLengthsToDisplay is "dateOnly", force to display by date
-   */
-  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
-    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
-
   state.availableDistanceMeasures = findAvailableDistanceMeasures(tree.nodes, genomeMap);
   if (treeToo) {
     const treeTooDistanceMeasures = new Set(findAvailableDistanceMeasures(treeToo.nodes, genomeMap));
@@ -603,12 +596,11 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   if (!state.availableDistanceMeasures.includes(state.distanceMeasure)) {
     const _old = state.distanceMeasure
     state.distanceMeasure = state.availableDistanceMeasures[0];
-    if (state.distanceMeasure === defaultDistanceMeasure) {
-      delete query.m;
-    } else {
-      query.m = state.distanceMeasure;
-    }
+    query.m = state.distanceMeasure;
     console.error(`Requested distance measure '${_old}' is not valid. Switching to '${state.distanceMeasure}'`);
+  }
+  if (state.distanceMeasure === defaultDistanceMeasure) {
+    delete query.m;
   }
 
   /* geoResolutions */
@@ -747,11 +739,6 @@ const checkAndCorrectErrorsInState = (state, metadata, genomeMap, query, tree, v
   }
   /* Also remove any traitNames from the footer-displayed filters if they're not present on the tree */
   state.filtersInFooter = state.filtersInFooter.filter((traitName) => traitName in tree.totalStateCounts);
-
-  /* can we display branch length by div or num_date? */
-  if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
-    delete query.m;
-  }
 
   if (!(query.sidebar === "open" || query.sidebar === "closed")) {
     delete query.sidebar; // invalid value

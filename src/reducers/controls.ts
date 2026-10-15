@@ -150,7 +150,6 @@ export interface BasicControlsState {
   analysisSlider: boolean
   animationPlayPauseButton: "Play" | "Pause"
   available?: AvailableAPIData
-  branchLengthsToDisplay: string
   canRenderBranchLabels: boolean
   canTogglePanelLayout: boolean
   colorBy: string
@@ -295,7 +294,6 @@ export const getDefaultControlsState = (): ControlsState => {
     availableStreamLabelKeys: [],
     zoomMin: undefined,
     zoomMax: undefined,
-    branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
     showOnlyPanels: false,
     showTransmissionLines: true,
@@ -365,7 +363,6 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
     case types.CHANGE_DISTANCE_MEASURE: {
       const updatesToState: Partial<ControlsState> = {
         distanceMeasure: action.data,
-        branchLengthsToDisplay: state.branchLengthsToDisplay
       };
       if (
         shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)
