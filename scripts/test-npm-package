@@ -72,7 +72,12 @@ node --input-type=module -e '
 
 # `auspice view --handlers` loads the handlers file from the user's own project
 # (i.e. from outside node_modules), so it may be TypeScript.
+has_native_ts_support="$(node -p 'const [maj, min] = process.versions.node.split(".").map(Number); maj > 22 || (maj === 22 && min >= 18) ? "yes" : "no"')"
 for handlers in handlers.mjs handlers.mts; do
+    if [[ "$handlers" == *.mts && "$has_native_ts_support" != "yes" ]]; then
+        step "Skipping auspice view --handlers $handlers (Node $(node -v) does not natively strip types from TS handlers; requires >=22.18)"
+        continue
+    fi
     step "auspice view --handlers $handlers"
     cp "$repo/test/fixtures/$handlers" "$consumer/"
 

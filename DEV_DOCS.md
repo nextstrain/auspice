@@ -23,7 +23,7 @@ Please see the [project boards](https://github.com/orgs/nextstrain/projects) for
 
 This is useful for debugging, modifying the source code, or using an unpublished feature branch.
 
-The following steps assume you are using an environment with a suitable nodejs version such as a conda environment. Check the `engines` section of Auspice's [package.json](https://github.com/nextstrain/auspice/blob/master/package.json) for the currently supported nodejs versions.
+The following steps assume you are using an environment with a suitable nodejs version such as a conda environment. Check the `engines` section of Auspice's [package.json](https://github.com/nextstrain/auspice/blob/master/package.json) for the currently supported nodejs versions. Note that version ≥22.18 is required to run from TypeScript source.
 
 ```sh
 git clone https://github.com/nextstrain/auspice.git
@@ -69,7 +69,7 @@ The various moving parts involved are:
 
 ## The CLI is transpiled for publishing
 
-The CLI (`auspice ...`) is written in TypeScript under `cli/`, and when Auspice is installed from source then `auspice.js` loads `cli/index.ts` and Node (24+) strips the types on the fly.
+The CLI (`auspice ...`) is written in TypeScript under `cli/`, and when Auspice is installed from source then `auspice.js` loads `cli/index.ts` and Node (22.18+) strips the types on the fly.
 
 That doesn't work once the package is installed as Node refuses to strip types for any file under a `node_modules/` path (`ERR_UNSUPPORTED_NODE_MODULES_TYPE_STRIPPING`).
 We therefore transpile the `cli/*` TS code to `cli-build/*` JS files via `npm run build:cli`. 
@@ -101,7 +101,7 @@ AUSPICE_CLI=build node auspice.js view --verbose test/data
 
 ### Custom handler files can be TypeScript
 
-The `--handlers` file passed to `auspice view` / `auspice develop` lives in the user's own project, not under `node_modules`, so Node type-strips it normally and `.ts`/`.mts` handlers work.
+The `--handlers` file passed to `auspice view` / `auspice develop` lives in the user's own project, not under `node_modules`, so Node type-strips it normally and `.ts`/`.mts` handlers work (requires Node.js >=22.18).
 See [the server API docs](./docs/server/api.rst) for more details.
 
 

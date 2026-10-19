@@ -18,5 +18,13 @@ const fromSource = override
   ? override === "source"
   : existsSync(fileURLToPath(new URL('./cli/', import.meta.url)));
 
+const [nodeMajor, nodeMinor] = process.versions.node.split('.').map(Number);
+if (fromSource && (nodeMajor < 22 || (nodeMajor === 22 && nodeMinor < 18))) {
+  throw new Error(
+    `Running Auspice from TypeScript source requires Node.js >=22.18 (current version is ${process.version}). ` +
+    `To run on this Node.js version, compile the CLI with "npm run build:cli" and set AUSPICE_CLI=build.`
+  );
+}
+
 export const cliModule = (name) =>
   new URL(fromSource ? `cli/${name}.ts` : `cli-build/${name}.js`, import.meta.url).href;
