@@ -3,12 +3,10 @@ import { useSelector } from "react-redux";
 import { FaInfoCircle } from "react-icons/fa";
 import Toggle from "./toggle";
 import { SidebarIconContainer, StyledTooltip } from "./styles";
-import { SET_FOCUS } from "../../actions/types";
-import { getFocusedNodes } from "../../actions/tree";
+import { setFocus } from "../../actions/tree";
 import { RootState } from "../../store";
 import { useAppDispatch } from "../../hooks";
 import { useTranslation } from "react-i18next";
-import { ThunkFunction } from "../../store";
 
 
 export function ToggleFocus(): JSX.Element {
@@ -56,21 +54,3 @@ export function ToggleFocus(): JSX.Element {
     />
   );
 }
-
-
-function setFocus(newToggleValue: null|"selected"): ThunkFunction {
-  return function(dispatch, getState) {
-    if (!newToggleValue) {
-      dispatch({type: SET_FOCUS, focus: newToggleValue})
-    }
-    const { tree, treeToo } = getState();
-    dispatch({
-      type: SET_FOCUS,
-      focus: newToggleValue,
-      focusNodes: getFocusedNodes(tree.nodes, tree.visibility),
-      focusNodesTreeToo: treeToo.nodes ? getFocusedNodes(treeToo.nodes, treeToo.visibility) : undefined,
-    });
-  }
-}
-
-
