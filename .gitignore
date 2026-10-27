@@ -1,6 +1,12 @@
 ### App specific ###
 /dist/
+/embed-dist/
 /cli-build/
+
+### embed example — generated/fetched artifacts (index.html + run.sh are tracked) ###
+/examples/embed/embed.js
+/examples/embed/embed.js.LICENSE.txt
+/examples/embed/ebola.json
 big_flu
 /data/
 /releases/

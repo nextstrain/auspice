@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auspice embed — proof of principle</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
+      color: #333;
+    }
+    header {
+      padding: 12px 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    header h1 { font-size: 18px; margin: 0 0 4px; }
+    header p { margin: 0; font-size: 13px; color: #666; }
+    .controls { padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .controls button {
+      font: inherit; font-size: 13px; padding: 5px 10px; cursor: pointer;
+      border: 1px solid #ccc; border-radius: 4px; background: #fafafa;
+    }
+    .controls button:hover { background: #eee; }
+    .viz {
+      /* The host owns sizing. The embed fills this box (resize() is driven below). */
+      width: 100%;
+      height: 70vh;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Auspice embedded via <code>render()</code></h1>
+    <p>A single self-contained ESM bundle (<code>embed.js</code>) renders the Ebola tree from pre-fetched JSON. No bundler, no import map.</p>
+  </header>
+
+  <div class="controls">
+    <button id="color-division">color by division</button>
+    <button id="color-country">color by country</button>
+    <button id="layout-clock">clock layout</button>
+    <button id="layout-rect">rectangular layout</button>
+    <button id="reset">reset</button>
+    <span style="flex: 1 1 auto"></span>
+    <button id="shrink">shrink</button>
+    <button id="grow">grow</button>
+    <button id="destroy">destroy</button>
+  </div>
+
+  <div id="viz" class="viz"></div>
+
+  <script type="module">
+    import { render } from "./embed.js";   // relative path, explicit extension
+
+    /* The caller fetches & parses all JSON itself and hands it in. */
+    const data = { main: await (await fetch("./ebola.json")).json() };
+
+    const container = document.getElementById("viz");
+
+    const viz = render(container, data, {
+      query: "c=country",
+      panels: ["tree"],
+      width: container.clientWidth,
+      height: container.clientHeight,
+    });
+
+    /* All interaction is driven entirely by this host page. */
+    document.getElementById("color-division").onclick  = () => viz.update("c=division");
+    document.getElementById("color-country").onclick = () => viz.update("c=country");
+    document.getElementById("layout-clock").onclick  = () => viz.update("c=country&l=clock");
+    document.getElementById("layout-rect").onclick   = () => viz.update("c=country&l=rect");
+    document.getElementById("reset").onclick         = () => viz.update("c=region");
+
+    document.getElementById("shrink").onclick = () => viz.resize(Math.round(container.clientWidth * 0.6));
+    document.getElementById("grow").onclick   = () => viz.resize(container.clientWidth);
+    document.getElementById("destroy").onclick = () => viz.destroy();
+
+    /* Expose for manual poking in the console. */
+    window.viz = viz;
+  </script>
+</body>
+</html>

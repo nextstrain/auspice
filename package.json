@@ -15,12 +15,19 @@
     "auspice": "./auspice.js"
   },
   "main": "index.js",
+  "exports": {
+    ".": "./index.js",
+    "./embed": "./embed-dist/embed.js",
+    "./package.json": "./package.json",
+    "./*": "./*"
+  },
   "scripts": {
     "view": "node auspice.js view --verbose",
     "dev": "node auspice.js develop --verbose",
     "start": "npm run view",
     "server": "npm run view",
     "build": "node auspice.js build --verbose",
+    "build:embed": "node scripts/build-embed.cjs",
     "build:cli": "rm -rf cli-build && tsc --project cli/tsconfig.build.json && cp cli/server/cleanupServiceWorker.js cli-build/server/",
     "build:cli:watch": "tsc --watch --project cli/tsconfig.build.json",
     "prepare": "npm run build:cli && npm run build",
