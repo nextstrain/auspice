@@ -67,6 +67,7 @@ Source code to Nextstrain is made available under the terms of the `GNU Affero G
    advanced-functionality/streamtrees
    advanced-functionality/editing-datasets
    advanced-functionality/misc
+   advanced-functionality/embed
 
 
 .. toctree::

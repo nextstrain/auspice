@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auspice embed — proof of principle</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Lato, "Helvetica Neue", Helvetica, sans-serif;
+      color: #333;
+    }
+    header {
+      padding: 12px 20px;
+      border-bottom: 1px solid #ddd;
+    }
+    header h1 { font-size: 18px; margin: 0 0 4px; }
+    header p { margin: 0; font-size: 13px; color: #666; }
+    .controls { padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .controls button {
+      font: inherit; font-size: 13px; padding: 5px 10px; cursor: pointer;
+      border: 1px solid #ccc; border-radius: 4px; background: #fafafa;
+    }
+    .controls button:hover { background: #eee; }
+    .viz {
+      /* The host owns the width; the embed owns its own height and grows this
+         box to fit (so no fixed height here — see render() / resize() below). */
+      width: 100%;
+      border-top: 1px solid #eee;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Auspice embedded via <code>render()</code></h1>
+    <p>A single self-contained ESM bundle (<code>auspice.js</code>) renders the Ebola tree from pre-fetched JSON. No bundler, no import map.</p>
+  </header>
+
+  <div class="controls">
+    <button id="color-division">color by division</button>
+    <button id="color-country">color by country</button>
+    <button id="layout-clock">clock layout</button>
+    <button id="layout-rect">rectangular layout</button>
+    <button id="reset">reset</button>
+    <span style="width: 12px"></span>
+    <button id="panels-tree">tree only</button>
+    <button id="panels-tree-map">tree + map</button>
+    <button id="panels-all">tree + map + entropy</button>
+    <span style="flex: 1 1 auto"></span>
+    <button id="shrink">shrink</button>
+    <button id="grow">grow</button>
+    <button id="destroy">destroy</button>
+  </div>
+
+  <div id="viz" class="viz"></div>
+
+  <script type="module">
+    import { render } from "./auspice.js";   // relative path, explicit extension
+
+    /* The caller fetches & parses all JSON itself and hands it in. */
+    const data = { main: await (await fetch("./ebola.json")).json() };
+
+    const container = document.getElementById("viz");
+
+    /* `render()` can show any combination of the tree, map and entropy panels.
+       The host chooses the set via the `panels` option; the embed lays them out
+       itself — entropy always spans full width below, and the tree + map sit
+       side-by-side when the container is wide enough, else stacked. Switching
+       the panel *set* is a fresh render(), so we destroy and re-mount; `update()`
+       (colour / layout, below) is the incremental path that preserves state. */
+    let viz;
+    const mount = (panels) => {
+      if (viz) viz.destroy();
+      viz = render(container, data, {
+        query: "c=country",
+        panels,
+        width: container.clientWidth,   // the embed derives its own height
+      });
+      window.viz = viz;   // expose for manual poking in the console
+    };
+    mount(["tree", "map", "entropy"]);
+
+    document.getElementById("panels-tree").onclick     = () => mount(["tree"]);
+    document.getElementById("panels-tree-map").onclick = () => mount(["tree", "map"]);
+    document.getElementById("panels-all").onclick      = () => mount(["tree", "map", "entropy"]);
+
+    /* `update()` takes a delta object: each field maps to an action, and anything
+       omitted is left untouched — so the layout buttons change only the layout,
+       preserving the current color-by. */
+    document.getElementById("color-division").onclick = () => viz.update({ colorBy: "division" });
+    document.getElementById("color-country").onclick  = () => viz.update({ colorBy: "country" });
+    document.getElementById("layout-clock").onclick   = () => viz.update({ layout: "clock" });
+    document.getElementById("layout-rect").onclick    = () => viz.update({ layout: "rect" });
+    document.getElementById("reset").onclick          = () => viz.update({ colorBy: "region" });
+
+    document.getElementById("shrink").onclick = () => viz.resize(Math.round(container.clientWidth * 0.6));
+    document.getElementById("grow").onclick   = () => viz.resize(container.clientWidth);
+    document.getElementById("destroy").onclick = () => viz.destroy();
+  </script>
+</body>
+</html>
