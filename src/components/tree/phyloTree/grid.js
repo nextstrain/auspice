@@ -423,7 +423,7 @@ export const addGrid = function addGrid() {
       yAxisLabel = distanceMeasureText(yAxisLabel, this.xScale);
     }
   } else if (layout === "rect") {
-    xAxisLabel = distanceMeasureText(this.distance, this.yScale);
+    xAxisLabel = distanceMeasureText(this.distance, this.xScale);
   }
   if (xAxisLabel) {
     this.groups.axisText
