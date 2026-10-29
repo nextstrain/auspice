@@ -3,6 +3,7 @@ import { Layout, PerformanceFlags, ScatterVariables } from "../../../reducers/co
 import { ReduxNode, Visibility, Streams, TreeState, FocusNodes } from "../../../reducers/tree/types";
 import { change, modifySVG, modifySVGInStages } from "./change";
 import { TreeComponent } from "../tree";
+import type { DistanceMeasure } from "../../../util/computeDistanceMetric";
 
 import * as confidence from "./confidence";
 import * as grid from "./grid";
@@ -13,7 +14,7 @@ import * as renderers from "./renderers";
 
 // ---------- Basics ---------- //
 
-export type Distance = "num_date" | "div"
+export type Distance = DistanceMeasure
 
 export type TreeElement =
   ".branch.S" |
@@ -231,7 +232,7 @@ export interface ChangeParams {
   streamDefinitionChange?: true
 
   // change these things to provided value (unless undefined) //
-  newDistance?: Distance
+  newDistance?: DistanceMeasure
   newLayout?: Layout
   updateLayout?: boolean // todo - this seems identical to `newLayout`
   newBranchLabellingKey?: string
@@ -262,7 +263,7 @@ export interface PhyloTreeType {
   clearSVG: typeof renderers.clearSVG
   confidencesInSVG: boolean
   dateRange: [number, number]
-  distance: Distance
+  distance: DistanceMeasure
   drawBranchLabels: typeof labels.drawBranchLabels
   drawBranches: typeof renderers.drawBranches
   drawConfidence: typeof confidence.drawConfidence

@@ -9,6 +9,7 @@ import { datasetSummary } from "../info/datasetSummary";
 import { isColorByGenotype } from "../../util/getGenotype";
 import { EmptyNewickTreeCreated } from "../../util/exceptions";
 import { createDatasetJson } from "../../util/constructDatasetJson";
+import { DISTANCE } from "../../util/computeDistanceMetric";
 import { dataFont } from "../../globalStyles";
 import { htmlToSvg } from "./domToSvg";
 import { latoFontDefs } from "./embedFont";
@@ -22,8 +23,9 @@ export const isPaperURLValid = (d) => {
 };
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
-const treeToNewick = (tree, temporal, internalNodeNames=false, nodeAnnotation=() => "") => {
-  const getXVal = temporal ? (n) => getTraitFromNode(n, "num_date") : getDivFromNode;
+const treeToNewick = (tree, internalNodeNames=false, nodeAnnotation=() => "") => {
+  /* Branch lengths are stored on each node under the DISTANCE symbol (see setDistanceMetric) */
+  const getXVal = (n) => n[DISTANCE];
 
   function recurse(node, parentX) {
     if (!node.shell.inView || tree.visibility[node.arrayIdx]!==NODE_VISIBLE) {
@@ -108,7 +110,7 @@ const treeToNexus = (tree, colorings, colorBy, temporal) => {
   return [
     '#nexus',
     'begin trees;',
-    "  tree one = "+treeToNewick(tree, temporal, true, makeNodeAnnotation()),
+    "  tree one = "+treeToNewick(tree, true, makeNodeAnnotation()),
     "end;"
   ].join("\n");
 };
@@ -397,7 +399,7 @@ function urlify(name) {
 export const exportTree = ({dispatch, filePrefix, tree, isNewick, temporal, colorings, colorBy}) => {
   try {
     const fName = `${filePrefix}_${temporal?'timetree':'tree'}.${isNewick?'nwk':'nexus'}`;
-    const treeString = isNewick ? treeToNewick(tree, temporal) : treeToNexus(tree, colorings, colorBy, temporal);
+    const treeString = isNewick ? treeToNewick(tree) : treeToNexus(tree, colorings, colorBy, temporal);
     write(fName, MIME.text, treeString);
     dispatch(infoNotification({message: `${temporal ? "TimeTree" : "Tree"} written to ${fName}`}));
   } catch (err) {
@@ -786,7 +788,7 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
 };
 
-export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications) => {
+export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, panelsInDOM, panelLayout, publications, temporalTree) => {
   /* make the text strings */
   const textStrings = [];
   textStrings.push(metadata.title);
@@ -797,6 +799,7 @@ export const SVG = async (dispatch, t, metadata, nodes, visibility, filePrefix, 
     mainTreeNumTips: metadata.mainTreeNumTips,
     nodes,
     visibility,
+    temporalTree,
     t
   }));
   textStrings.push("");

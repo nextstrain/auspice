@@ -3,6 +3,7 @@
 import { scaleLinear, ScalePoint, scalePoint } from "d3-scale";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
+import { DISTANCE, setDistanceMetric, isMutationCountBranchLength } from "../../../util/computeDistanceMetric";
 import { stemParent, nodeOrdering } from "./helpers";
 import { numDate } from "../../../util/colorHelpers";
 import { Layout, ScatterVariables } from "../../../reducers/controls";
@@ -86,6 +87,18 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
     nodeOrdering(this.nodes) :
     undefined;
 
+  /* Branch (distance) measures such as cumulative mutation counts can't be read from a node in
+   * isolation - they require a traversal. We compute a `name -> value` lookup per such axis
+   * (reusing it if both axes are the same measure) rather than mutating the active `DISTANCE`. */
+  const xMeasure = this.scatterVariables.x;
+  const yMeasure = this.scatterVariables.y;
+  const xLookup = isMutationCountBranchLength(xMeasure) ?
+    setDistanceMetric(this.nodes.map((d) => d.n), xMeasure, false) :
+    undefined;
+  const yLookup = isMutationCountBranchLength(yMeasure) ?
+    (yMeasure===xMeasure ? xLookup : setDistanceMetric(this.nodes.map((d) => d.n), yMeasure, false)) :
+    undefined;
+
   for (const d of this.nodes) {
     // set x and parent X values
     if (this.scatterVariables.x==="div") {
@@ -96,6 +109,9 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
       d.px = stemParent(d.n).currentGt;
     } else if (this.scatterVariables.x==="displayOrder") {
       [d.x, d.px] = getDisplayOrderPair(d);
+    } else if (xLookup) {
+      d.x = xLookup[d.n.name];
+      d.px = xLookup[stemParent(d.n).name];
     } else {
       d.x = getTraitFromNode(d.n, this.scatterVariables.x);
       d.px = getTraitFromNode(stemParent(d.n), this.scatterVariables.x);
@@ -112,6 +128,9 @@ export const scatterplotLayout = function scatterplotLayout(this: PhyloTreeType)
       d.py = stemParent(d.n).currentGt;
     } else if (this.scatterVariables.y==="displayOrder") {
       [d.y, d.py] = getDisplayOrderPair(d);
+    } else if (yLookup) {
+      d.y = yLookup[d.n.name];
+      d.py = yLookup[stemParent(d.n).name];
     } else {
       d.y = getTraitFromNode(d.n, this.scatterVariables.y);
       d.py = getTraitFromNode(stemParent(d.n), this.scatterVariables.y);
@@ -262,33 +281,25 @@ export const setDistance = function setDistance(
   if (distanceAttribute) {
     this.distance = distanceAttribute;
   }
-  if (!["div", "num_date"].includes(this.distance)) {
-    console.error("Tree distance measure not set or invalid. Using `div`.");
-    this.distance = "div"; // fallback to div
-  }
 
   // todo - can the following loops be skipped for scatterplots?
 
-  // assign node and parent depth
-  if (this.distance === "div") {
-    this.nodes.forEach((d) => {
-      d.depth = getDivFromNode(d.n);
-      d.pDepth = getDivFromNode(stemParent(d.n));
-      d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
-    });
-  } else {
-    this.nodes.forEach((d) => {
-      d.depth = getTraitFromNode(d.n, "num_date");
-      d.pDepth = getTraitFromNode(stemParent(d.n), "num_date");
-      d.conf = getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth];
-    });
-  }
+  // assign node and parent depth from the precomputed distance-metric value, as well as
+  // confidence intervals (only num_date has these; other measures use a [depth, depth] placeholder)
+  this.nodes.forEach((d) => {
+    d.depth = d.n[DISTANCE];
+    d.pDepth = stemParent(d.n)[DISTANCE];
+    d.conf = this.distance === "num_date" ?
+      (getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth]) :
+      [d.depth, d.depth];
+  });
 
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
       d.crossDepth = d.depth;
     });
   }
+
   timerEnd("setDistance");
 };
 

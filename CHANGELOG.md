@@ -1,7 +1,11 @@
 # Changelog
 
-## version 3.1.0 - 2026/10/15
+* Tree branch lengths can be changed to mutation counts via the new "branch lengths" dropdown.
+  Similar to the entropy panel, the mutation count branch lengths require the dataset to include `meta.genome_annotations`.
+  The mutation counts can also be used for the axes in the scatterplot view.
+  [#2104](https://github.com/nextstrain/auspice/pull/2104)
 
+## version 3.1.0 - 2026/10/15
 
 * The map legend now shows the number of (visible) tips for different deme (circle) sizes.
 [#2096](https://github.com/nextstrain/auspice/pull/2096)

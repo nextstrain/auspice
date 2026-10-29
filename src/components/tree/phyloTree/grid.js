@@ -6,6 +6,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
 import { animationInterpolationDuration } from "../../../util/globals";
 import { guessAreMutationsPerSite } from "./helpers";
 import { numericToDateObject, calendarToNumeric, getPreviousDate, getNextDate, dateToString, prettifyDate } from "../../../util/dateHelpers";
+import { isMutationCountBranchLength, MUTATION_COUNT_PREFIX } from "../../../util/computeDistanceMetric";
 
 export const hideGrid = function hideGrid() {
   if ("majorGrid" in this.groups) {
@@ -391,17 +392,38 @@ export const addGrid = function addGrid() {
   this.groups.axisText.selectAll("*").remove();
   this.svg.selectAll(".axisText").remove();
   let yAxisLabel, xAxisLabel; // not all views define axes labels. `undefined` => don't draw.
-  if (layout==="clock") {
+
+  /** Return the axis label for a given distance measure */
+  const distanceMeasureText = (measure, axisScale) => {
+    if (measure === 'num_date') return "Date"
+    if (measure === 'div') {
+      return guessAreMutationsPerSite(axisScale) ? "Divergence" : "Mutations";
+    }
+    if (isMutationCountBranchLength(measure)) {
+      const nucOrCds = measure.replace(MUTATION_COUNT_PREFIX, '')
+      return `(number of valid) ${nucOrCds} mutations`;
+    }
+    // P.S. When we move to TS, the above 3 conditions cover all possible
+    // DistanceMeasure values so we can't fall through to here
+    console.error(`distanceMeasureText: unexpected measure value '${measure}'`);
+    return '';
+  }
+
+
+  if (layout === "clock") {
     xAxisLabel = "Date";
-    yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
-  } else if (layout==="scatter") {
+    yAxisLabel = distanceMeasureText("div", this.yScale)
+  } else if (layout === "scatter") {
     xAxisLabel = this.scatterVariables.xLabel;
-    if (xAxisLabel==="div") xAxisLabel = guessAreMutationsPerSite(this.xScale) ? "Divergence" : "Mutations";
+    if (xAxisLabel === 'num_date' || xAxisLabel === 'div' || isMutationCountBranchLength(xAxisLabel)) {
+      xAxisLabel = distanceMeasureText(xAxisLabel, this.xScale);
+    }
     yAxisLabel = this.scatterVariables.yLabel;
-    if (yAxisLabel==="div") yAxisLabel = guessAreMutationsPerSite(this.yScale) ? "Divergence" : "Mutations";
-  } else if (layout==="rect") {
-    xAxisLabel = this.distance === "num_date" ? "Date" :
-      guessAreMutationsPerSite(this.xScale) ? "Divergence" : "Mutations";
+    if (yAxisLabel === 'num_date' || yAxisLabel === 'div' || isMutationCountBranchLength(yAxisLabel)) {
+      yAxisLabel = distanceMeasureText(yAxisLabel, this.xScale);
+    }
+  } else if (layout === "rect") {
+    xAxisLabel = distanceMeasureText(this.distance, this.xScale);
   }
   if (xAxisLabel) {
     this.groups.axisText

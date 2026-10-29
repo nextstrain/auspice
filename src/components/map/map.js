@@ -35,7 +35,6 @@ import "../../css/mapbox.css"; // controls the rendering of the mapbox logo (opt
 @connect((state) => {
   return {
     // datasetGuid: state.tree.datasetGuid,
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,

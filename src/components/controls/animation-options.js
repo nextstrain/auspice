@@ -7,7 +7,7 @@ import { SidebarSubtitle, SidebarButton } from "./styles";
 
 @connect((state) => {
   return {
-    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
+    availableDistanceMeasures: state.controls.availableDistanceMeasures,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
@@ -42,7 +42,9 @@ class AnimationOptions extends React.Component {
 
   render() {
     const { t } = this.props;
-    if (this.props.branchLengthsToDisplay === "divOnly") return null;
+    if (!this.props.availableDistanceMeasures.includes('num_date')) {
+      return null;
+    }
 
     return (
       <div id="mapAnimationControls">
