@@ -103,6 +103,12 @@ const flattenTree = (
   stack.push(root);
   while (stack.length !== 0) {
     const node = stack.pop();
+    const div: unknown = node.node_attrs?.div;
+    if (div !== undefined && !Number.isFinite(div)) {
+      const repr = typeof div === "number" ? String(div) : JSON.stringify(div);
+      const type = div === null ? "null" : typeof div;
+      throw new Error(`Node "${node.name}" has node_attrs.div ${repr} of type ${type}; expected a finite number or undefined`);
+    }
     array.push(node);
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
