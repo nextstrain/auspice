@@ -25,7 +25,7 @@ jobs:
   sync:
     name: Create or update downstream PR
     if: ${{ !inputs.cleanup }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - uses: actions/setup-node@v7
@@ -83,7 +83,7 @@ jobs:
   cleanup:
     name: Cleanup downstream PR
     if: inputs.cleanup
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout downstream repo

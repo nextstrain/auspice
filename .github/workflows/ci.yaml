@@ -9,7 +9,7 @@ name: ci
 
 jobs:
   unit-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         node: [24, 26]
@@ -27,7 +27,7 @@ jobs:
       - run: npm test
 
   build-and-smoke-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         node: [24, 26]
@@ -45,7 +45,7 @@ jobs:
   # Packs & installs Auspice into a throwaway project so the CLI runs from within
   # node_modules -- the condition no other job exercises. See DEV_DOCS.md.
   packaged-cli-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     strategy:
       matrix:
         node: [24, 26]
@@ -62,7 +62,7 @@ jobs:
       - run: npm run test:package
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -75,7 +75,7 @@ jobs:
       - run: npm run lint
 
   type-check:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -88,7 +88,7 @@ jobs:
       - run: npm run type-check
 
   bundlesize:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
@@ -99,7 +99,7 @@ jobs:
 
   # Ensure package-lock.json is synced with package.json.
   check-lockfile:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
