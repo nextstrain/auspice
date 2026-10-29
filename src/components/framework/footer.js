@@ -17,20 +17,20 @@ const FooterStyles = styled.div`
   padding-bottom: 0px;
   font-family: ${dataFont};
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   color: rgb(136, 136, 136);
   line-height: 1.4;
 
   p {
-    font-weight: 300;
+    font-weight: 400;
   }
 
   ol {
-    font-weight: 300;
+    font-weight: 400;
   }
 
   ul {
-    font-weight: 300;
+    font-weight: 400;
   }
 
   h1 {
@@ -92,6 +92,7 @@ const FooterStyles = styled.div`
   }
 
   // Inline code
+
   p code {
     padding: .2em .4em;
     margin: 0;
@@ -130,7 +131,7 @@ const FooterStyles = styled.div`
   }
 
   table {
-    font-weight: 300;
+    font-weight: 400;
     margin-bottom: 1rem;
 
     th,
