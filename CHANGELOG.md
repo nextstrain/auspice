@@ -1,5 +1,8 @@
 # Changelog
 
+## version 3.2.0 - 2026/10/29
+
+
 * Tree branch lengths can be changed to mutation counts via the new "branch lengths" dropdown.
   Similar to the entropy panel, the mutation count branch lengths require the dataset to include `meta.genome_annotations`.
   The mutation counts can also be used for the axes in the scatterplot view.
