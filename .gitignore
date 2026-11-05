@@ -1,6 +1,13 @@
 ### App specific ###
 /dist/
+/embed-dist/
 /cli-build/
+
+### embed example (index.html + run.sh are tracked) ###
+/examples/embed/*
+!/examples/embed/run.sh
+!/examples/embed/index.html
+
 big_flu
 /data/
 /releases/
