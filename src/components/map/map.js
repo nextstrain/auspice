@@ -67,10 +67,17 @@ class Map extends React.Component {
   static propTypes = {
     treeVersion: PropTypes.number.isRequired,
     treeLoaded: PropTypes.bool.isRequired,
-    colorScaleVersion: PropTypes.number.isRequired
+    colorScaleVersion: PropTypes.number.isRequired,
+    mapContainerId: PropTypes.string /* optional; defaults to "map" (see constructor) */
   }
   constructor(props) {
     super(props);
+    /* The DOM id of the Leaflet container. Leaflet (and the d3 overlay, the
+     * HoverPanel and the download-SVG helper) look this element up globally by
+     * id, so it must be unique when more than one map exists on the page (e.g.
+     * several embedded `render()` instances). The full app mounts a single map
+     * and relies on the literal "map" id, so that remains the default. */
+    this.mapContainerId = props.mapContainerId || "map";
     this.state = {
       map: null,
       d3DOMNode: null,
@@ -182,7 +189,7 @@ class Map extends React.Component {
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
-    if (this.props.metadata.loaded && !this.state.map && document.getElementById("map")) {
+    if (this.props.metadata.loaded && !this.state.map && document.getElementById(this.mapContainerId)) {
       this.createMap();
     }
   }
@@ -205,7 +212,7 @@ class Map extends React.Component {
       /* TODO: remove intermediate <g>s once the 1Password extension interference is resolved
        * <https://github.com/nextstrain/auspice/issues/1919>
        */
-      const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions").append("g").append("g").append("g").append("g");
+      const d3DOMNode = select(`#${this.mapContainerId} svg`).attr("id", "d3DemesTransmissions").append("g").append("g").append("g").append("g");
       this.setState({d3DOMNode});
     }
   }
@@ -524,7 +531,7 @@ class Map extends React.Component {
      * Note also that leaflet zoom levels (256px frame) may be off-by-one compared to the
      * tile providers zoom levels (512px frame).
      */
-    const map = L.map('map', {
+    const map = L.map(this.mapContainerId, {
       center: center,
       zoom: zoom,
       gestureHandling: true,
@@ -609,14 +616,14 @@ class Map extends React.Component {
         <div style={{position: "relative"}}>
           <div
             onClick={() => {this.setState({userHasInteractedWithMap: true});}}
-            id="map"
+            id={this.mapContainerId}
             style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
             }}
           />
           {this.state.hoverData &&
-            <HoverPanel mouseX={this.state.hoverData.mouseX} mouseY={this.state.hoverData.mouseY} containerId="map">
+            <HoverPanel mouseX={this.state.hoverData.mouseX} mouseY={this.state.hoverData.mouseY} containerId={this.mapContainerId}>
               <div style={infoPanelStyles.tooltipHeading}>
                 {this.state.hoverData.demeName}
               </div>
