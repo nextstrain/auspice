@@ -11,6 +11,13 @@ import * as confidence from "./confidence";
 import * as labels from "./labels";
 import * as regression from "./regression";
 
+/* Monotonic counter used to give every PhyloTree instance a globally-unique
+ * clip-path id. An SVG `clip-path="url(#…)"` reference resolves against the whole
+ * document (first matching id in document order), so a shared literal id breaks
+ * as soon as two trees coexist in one DOM — be that the LEFT/RIGHT tangle trees
+ * or multiple embedded Auspice instances on one page. */
+let instanceCount = 0;
+
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
 const PhyloTree = function PhyloTree(
   this: PhyloTreeType,
@@ -25,6 +32,10 @@ const PhyloTree = function PhyloTree(
   /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
   It also helps preserve the initial order of groups in the DOM as we are not creating new ones upon updates */
   this.id = id; /* super useful when one is trying to debug multiple trees! */
+  /* The clipping mask's DOM id. Unique per instance (not derived from `id`,
+   * which is only "LEFT"/"RIGHT" and so collides across Auspice instances) so
+   * that each tree clips to its own rect — see `setClipMask`. */
+  this.clipId = `treeClip-${instanceCount++}`;
   /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
    this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
    Furthermore, these objects are linked:
