@@ -34,7 +34,7 @@ export function ToggleFocus(): JSX.Element {
           </SidebarIconContainer>
           <StyledTooltip place="bottom" type="dark" effect="solid" id="toggle-focus">
             When focusing on selected nodes, nodes that do not match the
-            filter will occupy less vertical space on the tree. Only applicable to
+            filter will occupy less space on the tree. Only applicable to
             rectangular and radial layouts.
           </StyledTooltip>
         </>
