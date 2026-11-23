@@ -64,11 +64,3 @@ export const ExplodeTreeInfo = (
     It works best when the trait doesn&apos;t change value too frequently.
   </>
 );
-
-export const ToggleFocusInfo = (
-  <>
-    When focusing on selected nodes, nodes that do not match the
-    filter will occupy less vertical space on the tree. Only applicable to
-    rectangular and radial layouts.
-  </>
-);
