@@ -1,7 +1,9 @@
 # Changelog
 
-## version 3.2.0 - 2026/10/29
+* Amino Acid mutations to/from a gap character are now ignored for the purposes of entropy calculations and the branch-length counts introduced in version 3.2.0.
+  [#2114](https://github.com/nextstrain/auspice/pull/2114)
 
+## version 3.2.0 - 2026/10/29
 
 * Tree branch lengths can be changed to mutation counts via the new "branch lengths" dropdown.
   Similar to the entropy panel, the mutation count branch lengths require the dataset to include `meta.genome_annotations`.
