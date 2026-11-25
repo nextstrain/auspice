@@ -319,12 +319,16 @@ export function getNucCoordinatesFromAaPos(cds, aaPos) {
   return {frame, nucCoordinates};
 }
 
-/** A, B are the from/to nuc/aa of an observed mutation  */
+/**
+ * A -> B mutations are valid unless either state is a gap
+ * or unknown (N for nuc, X for AA).
+ * Note that we consider mutations to/from ambiguous nucleotides
+ * as valid, e.g. A100R would be a valid mutation
+ */
 export function validMutation(A, B, isAA) {
-  if (isAA) {
-    return A !== 'X' && B !== 'X';
-  }
-  return A !== "N" && A !== "-" && B !== "N" && B !== "-";
+  const unknown = isAA ? 'X' : 'N';
+  const gap = '-';
+  return A !== unknown && B !== unknown && A !== gap && B !== gap;
 }
 
 /**
