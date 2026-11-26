@@ -168,6 +168,18 @@ describe('Extract various values from node_attrs', () => {
 
 });
 
+test("node_attrs.div must be undefined or a finite number", () => {
+  const tree = (div) => ({name: "ROOT", children: [{name: "tipA", node_attrs: {div}}]});
+  expect(() => treeJsonToState(tree(undefined))).not.toThrow();
+  expect(() => treeJsonToState(tree(0.01))).not.toThrow();
+  expect(() => treeJsonToState(tree({value: 0.01})))
+    .toThrow(`Node "tipA" has node_attrs.div {"value":0.01} of type object; expected a finite number or undefined`);
+  expect(() => treeJsonToState(tree(null))).toThrow(`node_attrs.div null of type null;`);
+  expect(() => treeJsonToState(tree("0.01"))).toThrow(`node_attrs.div "0.01" of type string;`);
+  expect(() => treeJsonToState(tree(NaN))).toThrow(`node_attrs.div NaN of type number;`);
+  expect(() => treeJsonToState(tree(Infinity))).toThrow(`node_attrs.div Infinity of type number;`);
+});
+
 test("Parse intervals of gaps or Ns", () => {
   expect(parseIntervalsOfNsOrGaps(["T200N", "T100N", "C101N", "G102N"]))
     .toStrictEqual(
