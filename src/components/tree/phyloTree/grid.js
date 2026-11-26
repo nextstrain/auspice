@@ -23,7 +23,7 @@ export const hideGrid = function hideGrid() {
   }
 };
 
-const addSVGGroupsIfNeeded = (groups, svg) => {
+const addSVGGroupsIfNeeded = (groups, svg, clipId) => {
   if (!("temporalWindow" in groups)) {
     groups.temporalWindow = svg.append("g").attr("id", "temporalWindow");
 
@@ -34,10 +34,10 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
       .attr('class', 'temporalWindowEnd');
   }
   if (!("majorGrid" in groups)) {
-    groups.majorGrid = svg.append("g").attr("id", "majorGrid").attr("clip-path", "url(#treeClip)");
+    groups.majorGrid = svg.append("g").attr("id", "majorGrid").attr("clip-path", `url(#${clipId})`);
   }
   if (!("minorGrid" in groups)) {
-    groups.minorGrid = svg.append("g").attr("id", "minorGrid").attr("clip-path", "url(#treeClip)");
+    groups.minorGrid = svg.append("g").attr("id", "minorGrid").attr("clip-path", `url(#${clipId})`);
   }
   if (!("gridText" in groups)) {
     groups.gridText = svg.append("g").attr("id", "gridText");
@@ -222,7 +222,7 @@ export const computeTemporalGridPoints = (numDateMin, numDateMax, pxAvailable, a
  */
 export const addGrid = function addGrid() {
   const layout = this.layout;
-  addSVGGroupsIfNeeded(this.groups, this.svg);
+  addSVGGroupsIfNeeded(this.groups, this.svg, this.clipId);
   if (layout==="unrooted") return;
   timerStart("addGrid");
 

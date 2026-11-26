@@ -221,7 +221,7 @@ export const drawTips = function drawTips(this: PhyloTreeType): void {
   timerStart("drawTips");
   const params = this.params;
   if (!("tips" in this.groups)) {
-    this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", "url(#treeClip)");
+    this.groups.tips = this.svg.append("g").attr("id", "tips").attr("clip-path", `url(#${this.clipId})`);
   }
 
   const nodes = (this.params.showStreamTrees ? this.nodes.filter((d) => !d.n.inStream) : this.nodes)
@@ -304,7 +304,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
   Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
   if (!("branchTee" in this.groups)) {
-    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", "url(#treeClip)");
+    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee").attr("clip-path", `url(#${this.clipId})`);
   }
   if (this.layout === "clock" || this.layout === "scatter" || this.layout === "unrooted") {
     this.groups.branchTee.selectAll("*").remove();
@@ -339,7 +339,7 @@ export const drawBranches = function drawBranches(this: PhyloTreeType): void {
   this.updateColorBy();
   /* PART 2b: Draw the stems */
   if (!("branchStem" in this.groups)) {
-    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", "url(#treeClip)");
+    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem").attr("clip-path", `url(#${this.clipId})`);
   }
   this.groups.branchStem
     .selectAll('.branch')
@@ -382,7 +382,7 @@ export const drawRegression = function drawRegression(this: PhyloTreeType): void
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
 
   if (!("regression" in this.groups)) {
-    this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", "url(#treeClip)");
+    this.groups.regression = this.svg.append("g").attr("id", "regression").attr("clip-path", `url(#${this.clipId})`);
   }
 
   this.groups.regression
@@ -521,7 +521,7 @@ export const setClipMask = function setClipMask(this: PhyloTreeType): void {
   if (!this.groups.clipPath) {
     this.groups.clipPath = this.svg.append("g").attr("id", "clipGroup");
     this.groups.clipPath.append("clipPath")
-        .attr("id", "treeClip")
+        .attr("id", this.clipId)
       .append("rect")
         .attr("x", x0)
         .attr("y", y0)

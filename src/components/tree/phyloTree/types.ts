@@ -291,6 +291,8 @@ export interface PhyloTreeType {
   hideGrid: typeof grid.hideGrid
   hideTemporalSlice: typeof grid.hideTemporalSlice
   id: string
+  /** Globally-unique DOM id for this tree's clip-path (see `PhyloTree`). */
+  clipId: string
   layout: Layout
   mapToScreen: typeof layouts.mapToScreen
   mapStreamsToScreen: typeof layouts.mapStreamsToScreen

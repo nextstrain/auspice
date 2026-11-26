@@ -546,3 +546,23 @@ export function getFocusedNodes(nodes: ReduxNode[], visibility: any[]): FocusNod
 
   return {nodes: focusNodes, roots: focusRoots}
 }
+
+
+/**
+ * Set (or clear) the "focus on selected" state. Pass `"selected"` to focus on
+ * the currently-visible nodes, or `null` to clear focus.
+ */
+export function setFocus(newToggleValue: null|"selected"): ThunkFunction {
+  return function(dispatch, getState) {
+    if (!newToggleValue) {
+      dispatch({type: types.SET_FOCUS, focus: newToggleValue})
+    }
+    const { tree, treeToo } = getState();
+    dispatch({
+      type: types.SET_FOCUS,
+      focus: newToggleValue,
+      focusNodes: getFocusedNodes(tree.nodes, tree.visibility),
+      focusNodesTreeToo: treeToo.nodes ? getFocusedNodes(treeToo.nodes, treeToo.visibility) : undefined,
+    });
+  }
+}
