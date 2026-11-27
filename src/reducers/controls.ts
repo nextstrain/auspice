@@ -355,7 +355,7 @@ const Controls = (state: ControlsState = getDefaultControlsState(), action): Con
           display: shouldDisplayTemporalConfidence(
             state.temporalConfidence.exists,
             state.distanceMeasure,
-            action.data
+            action.layout
           ),
           on: false
         })
