@@ -10,7 +10,7 @@ import ReactTooltip from 'react-tooltip';
 const BaseContainer = styled.div`
   color: #5097BA;
   cursor: pointer;
-  font-weight: 300;
+  font-weight: 400;
   padding: 0px 2px 0px 2px;
 `;
 
@@ -45,7 +45,7 @@ const UnselectedFilterTextContainer = styled(BaseContainer)`
   margin: 1px 2px 1px 2px;
   padding: 0px 2px 0px 2px;
   &:hover {
-    text-decoration: underline; 
+    text-decoration: underline;
   }
 `;
 
